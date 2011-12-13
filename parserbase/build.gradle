@@ -1,0 +1,12 @@
+dependsOn(':prologlib')
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+dependencies {
+ compile project(path: ":prologlib", configuration: "archives") 
+}
+
+compileJava {
+ dependsOn ':prologlib:deploy'
+}

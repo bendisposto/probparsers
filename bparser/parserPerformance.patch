@@ -1,0 +1,13 @@
+--- /Users/bendisposto/code/probparsers/bparser/build/temp/de/be4/classicalb/core/parser/parser/Parser.java	2011-09-27 18:12:08.000000000 +0200
++++ /Users/bendisposto/Desktop/Parser.java	2011-09-27 18:23:37.000000000 +0200
+@@ -11366,8 +11366,8 @@ public class Parser implements IParser
+         pexpressionNode2 = (PExpression)nodeArrayList3.get(0);
+ 	if(listNode1 != null) //Macro:ParserTypedLinkedListAddAll
+ 	{
+-      listNode3.addAll(listNode1);
+-  	  //listNode3 = listNode1;
++      //listNode3.addAll(listNode1);
++  	  listNode3 = listNode1;
+ 	}
+ 	if(pexpressionNode2 != null)
+ 	{
