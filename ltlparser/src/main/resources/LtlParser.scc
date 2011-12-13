@@ -1,0 +1,168 @@
+Package de.be4.ltl.core.parser;
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+
+ Helpers 
+ 
+    small_letter =  ['a'..'z'];
+    capital_letter = ['A' .. 'Z'];
+    letter = small_letter | capital_letter;
+    digit = ['0' .. '9'] ;
+
+    underscore = '_'; 
+ 
+	line_break = [10 + 13];
+	layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+	white_space = line_break | layout_char+;
+	
+	l_cur = '{';
+	r_cur = '}';
+	l_paren = '(';
+	r_paren = ')';
+	l_bracket = '[';
+	r_bracket = ']';
+	
+	enabled_start = 'e(';
+
+/*******************************************************************
+ * States                                                          *
+ *******************************************************************/
+
+ States 
+  ltl, atomic, action;
+
+
+/*******************************************************************
+ * Tokens                                                          *
+ *******************************************************************/
+
+Tokens
+
+   {ltl} true = 'true';
+   {ltl} false = 'false';
+   {ltl} sink ='sink';
+   {ltl} deadlock ='deadlock';
+   {ltl} current = 'current';
+   {ltl} l_par = l_paren;
+   {ltl} r_par = r_paren;
+ 
+   {ltl -> action} l_sq = l_bracket;
+   {ltl -> action} enabled = enabled_start;		
+ 
+    {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
+    {atomic} atomic_proposition_end = r_cur;
+    {atomic} ap_char =  ([0 .. 0xffff]);
+    
+    {action} action_end = [r_paren + r_bracket];
+    {action} action_begin = [l_paren + l_bracket];
+    {action} tp_char =  ([0 .. 0xffff]);
+
+
+/* Boolean Operators */
+    {ltl} implies = '=>';
+    {ltl} and = '&';
+    {ltl} or = 'or';
+    {ltl} not = 'not';
+
+/* LTL temporal operators */
+    {ltl} until = 'U';
+    {ltl} weakuntil ='W';
+    {ltl} release = 'R';
+
+    {ltl} globally = 'G';
+    {ltl} finally = 'F';
+    {ltl} next = 'X';
+
+/* Past LTL temporal operators */
+    {ltl} since = 'S';
+    {ltl} trigger = 'T';
+
+    {ltl} historically = 'H';
+    {ltl} once = 'O';
+    {ltl} yesterday = 'Y';
+	
+ 	white_space = white_space;
+
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+
+	white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+
+
+ Productions 
+  ltl_formula  {-> ltl} = {implication} [left]:ltl_formula implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } | 
+                                        ltl_formula2                                    { -> ltl_formula2.ltl};
+  
+  ltl_formula2 {-> ltl} = {and} [left]:ltl_formula2 and [right]:ltl_formula3 { -> New ltl.and(left.ltl, right.ltl)} |
+                          {or}  [left]:ltl_formula2 or [right]:ltl_formula3  { -> New ltl.or(left.ltl, right.ltl)}  |
+                                ltl_formula3                                 { -> ltl_formula3.ltl};
+
+  ltl_formula3 {-> ltl} = {until}      [left]:ltl_formula3 until [right]:ltl_formula4     { -> New ltl.until(left.ltl, right.ltl)}|
+                          {weakuntil}  [left]:ltl_formula3 weakuntil [right]:ltl_formula4 { -> New ltl.weakuntil(left.ltl, right.ltl)}|
+                          {release}    [left]:ltl_formula3 release [right]:ltl_formula4   { -> New ltl.release(left.ltl, right.ltl)}|
+                          {since}      [left]:ltl_formula3 since [right]:ltl_formula4     { -> New ltl.since(left.ltl, right.ltl)}|
+                          {trigger}    [left]:ltl_formula3 trigger [right]:ltl_formula4   { -> New ltl.trigger(left.ltl, right.ltl)}| 
+                                       ltl_formula4                                       { -> ltl_formula4.ltl };
+
+  ltl_formula4 {-> ltl} = {not}          not ltl_formula4                                            { -> New ltl.not(ltl_formula4.ltl) } | 
+                          {par}          l_par ltl_formula r_par                                     { -> ltl_formula.ltl } | 
+                          {true}         true                                                        { -> New ltl.true()} | 
+                          {false}        false                                                       { -> New ltl.false()} |  
+                          {globally}      globally ltl_formula4                                        { -> New ltl.globally(ltl_formula4.ltl)} | 
+                          {finally}      finally ltl_formula4                                        { -> New ltl.finally(ltl_formula4.ltl)} |      
+                          {next}         next ltl_formula4                                           { -> New ltl.next(ltl_formula4.ltl)} |   
+                          {historically} historically ltl_formula4                                   { -> New ltl.historically(ltl_formula4.ltl)} |   
+                          {once}         once ltl_formula4                                           { -> New ltl.once(ltl_formula4.ltl)} |    
+                          {yesterday}    yesterday ltl_formula4                                      { -> New ltl.yesterday(ltl_formula4.ltl)} | 
+                          {enabled}      enabled                                                     { -> New ltl.enabled(enabled)} |     
+                          {action}       l_sq                                                        { -> New ltl.action(l_sq)} | 
+                          {sink}         sink                                                        { -> New ltl.sink()} | 
+                          {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
+                          {current}      current                                                     { -> New ltl.current()} |
+                          {unparsed}     atomic_proposition_begin                                    { -> New ltl.unparsed(atomic_proposition_begin) }  ;
+
+
+/*******************************************************************
+ * Abstract Syntax Tree                                            *
+ *******************************************************************/
+
+Abstract Syntax Tree
+
+  ltl =  
+  
+   {implies}      [left]:ltl [right]:ltl | 
+   {and}          [left]:ltl [right]:ltl | 
+   {or}           [left]:ltl [right]:ltl | 
+   {until}        [left]:ltl [right]:ltl | 
+   {weakuntil}    [left]:ltl [right]:ltl | 
+   {release}      [left]:ltl [right]:ltl | 
+   {since}        [left]:ltl [right]:ltl | 
+   {trigger}      [left]:ltl [right]:ltl | 
+   {not}          ltl | 
+   {globally}     ltl |     
+   {finally}      ltl |     
+   {next}         ltl |     
+   {historically} ltl |     
+   {once}         ltl |     
+   {yesterday}    ltl |  
+   {enabled}      [operation]:enabled |    
+   {action}       [operation]:l_sq |
+   {unparsed}     [predicate]:atomic_proposition_begin |
+   {sink}          |
+   {deadlock}      |
+   {current}       | 
+   {true}          |
+   {false}         ;
+  
+
+  

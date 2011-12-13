@@ -1,0 +1,24 @@
+dependsOn(':bparser')
+dependsOn(':prologlib')
+dependsOn(':parserbase')
+dependsOn(':ltlparser')
+dependsOn(':answerparser')
+dependsOn(':unicode')
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+dependencies {
+ compile project(path: ":bparser", configuration: "archives") 
+ compile project(path: ":prologlib", configuration: "archives") 
+ compile project(path: ":parserbase", configuration: "archives") 
+ compile project(path: ":ltlparser", configuration: "archives") 
+ compile project(path: ":answerparser", configuration: "archives") 
+ compile project(path: ":unicode", configuration: "archives")
+}
+
+compileJava {
+ dependsOn=[':bparser:deploy',':prologlib:deploy',':parserbase:deploy',':ltlparser:deploy',':answerparser:deploy',':unicode:deploy']
+}
+
+

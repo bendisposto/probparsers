@@ -1,0 +1,145 @@
+Package de.prob.core.sablecc;
+
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+ 
+Helpers
+
+/*
+ Formal Syntax as defined in 
+ http://www.sics.se/sicstus/docs/latest4/html/sicstus.html/ref_002dsyn_002dsyn_002dtok.html#ref_002dsyn_002dsyn_002dtok
+*/
+
+/* layout-char
+   These are character codes 0..32, 127..160, 8206..8207, and 8232..8233. This includes ASCII characters
+   such as <TAB>, <LFD>, and <SPC>, as well as all characters with Unicode property �Pattern_Whitespace� 
+   including the Unicode-specific <LINE SEPARATOR> (8232). 
+*/
+   // layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+layout_char = 10 | 13;
+
+/* small-letter
+   These are character codes 97..122, i.e. the letters `a' through `z', as well as the non-ASCII character
+   codes 170, 186, 223..246, and 248..255.
+*/
+     small_letter =  ['a'..'z'] | 17 | 186 | [223..246] | [248..255];
+
+/* capital-letter
+   These are character codes 65..90, i.e. the letters `A' through `Z', as well as the non-ASCII character 
+   codes 192..214, and 216..222
+*/
+     capital_letter = [['A' .. 'Z'] +[[192 .. 214]+[216 .. 222]]];
+     
+/* digit
+   These are character codes 48..57, i.e. the digits `0' through `9'. 
+*/
+     digit = ['0' .. '9'] ;
+
+/* symbol-char
+   These are character codes 35, 36, 38, 42, 43, 45..47, 58, 60..64, 92, 94, and 126, i.e. the characters:
+   + - * / \ ^ < > = ~ : . ? @ # $ &
+*/     
+    dot = '.';
+    symbol_char = '+' | '-' | '*' | '/' | '\' | '^' | '<' | '>' | '=' | '~' | ':' | dot | '?' | '@' | '#' | '$' |  '&';
+ 
+/* solo-char
+   These are character codes 33 and 59 i.e. the characters `!' and `;'
+*/ 
+
+    solo_char = 33 | 59;
+    
+/* punctuation-char
+   These are character codes 37, 40, 41, 44, 91, 93, and 123..125, i.e. the characters:
+   % ( ) , [ ] { | }   
+*/
+    l_par = '(';
+    r_par = ')';
+    l_sq = '[';
+    r_sq = ']';
+    comma = ',';
+    punctuation_char = '%' | l_par | r_par | l_sq | r_sq | '{' | '}' | '|' | comma;
+   
+/* quote-char
+   These are character codes 34, 39, and 96 i.e. the characters `"', `'', and ``'. 
+*/
+    quote = 39;
+    quote_char = 34 | quote | 96;
+    
+/* underline
+   This is character code 95 i.e. the character `_'.  
+*/
+    underline = '_';
+  
+
+    alpha =  capital_letter | small_letter | digit | underline;
+
+    word = small_letter alpha*; 
+    symbol = symbol_char+;
+    
+    
+    quoted_item = [[0 .. 0xffff]-39] | '\' 39;
+    
+    quoted_name = quote quoted_item* quote; 
+  
+    any_char = [0 .. 0xffff]; /* THIS IS ACTUALLY ANY UNICODE CHARACTER */
+ 
+ 
+ 
+
+
+/*******************************************************************
+ * States                                                  *
+ *******************************************************************/
+
+States
+ init, normal, exception;
+
+/*******************************************************************
+ * Tokens                                                  *
+ *******************************************************************/
+
+ 
+Tokens
+     {init,normal} white_space = layout_char*;
+
+// K E Y W O R D S
+
+     {init->normal} no = 'no';
+     {init->normal} yes = 'yes';
+     {init->exception} exception = 'exception';
+     
+// P R O L O G - S T U F F     
+     {normal} comma = comma;
+     {normal} l_par = l_par;
+     {normal} r_par = r_par;     
+     {normal} l_sq = l_sq;
+     {normal} r_sq = r_sq;
+     
+     {normal} number = digit* | '-' digit+;
+     {normal} name = word | '{' '}' | solo_char | l_sq r_sq | quoted_name | symbol ;
+     {normal} variable = underline alpha* | capital_letter alpha*;
+     
+// E X C E P T I O N S          
+     {exception} string = any_char*;
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+
+  white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+Productions
+
+result = {no} no | {yes} yes l_par term r_par | {exception} exception string;
+term = {number} number | {atom} name | {variable} variable | [functor]:name params;
+params = l_par term more_params r_par;
+more_params = {empty} | comma term more_params; 
+
+// end of grammar

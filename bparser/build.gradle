@@ -1,0 +1,85 @@
+// BParser
+
+dependsOn(':prologlib')
+dependsOn(':parserbase')
+
+sourceCompatibility = 1.5
+
+
+
+dependencies {
+    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.1')
+}
+
+
+dependencies {
+    compile project(path: ":prologlib", configuration: "archives") 
+    compile project(path: ":parserbase", configuration: "archives") 
+}
+
+sourceSets {
+    main {
+        java {
+          	srcDirs = ['build/temp','src/main/java']
+        }
+    }
+}
+
+
+		
+
+task genParserTasks {
+	def generated = []
+	inputs.dir new File('src/main/resources/grammars')
+	outputs.dir new File('build/temp','generated')
+    fileTree {
+	    from 'src/main/resources/grammars'
+	    include '**/*.scc'
+	}.each {
+       name -> 
+        def tn = name.getName().split("\\.")[0]
+        task "parser$tn"(type:JavaExec) { 
+		 doFirst{ file('build/temp').mkdirs() }
+		 main = 'org.sablecc.sablecc.SableCC'
+		// classpath =  sourceSets.main.compileClasspath
+		 classpath = configurations.sablecc
+		 maxHeapSize = '1024m'
+		 args = ['-d','build/temp',name] 
+		}
+	generated += "parser$tn"  
+	}
+	
+	doLast {
+		generated.each{
+			tasks.findByName(it).execute()
+		}
+	}
+}
+
+
+jar {
+ include '**/*.class'
+ exclude '**.*.scc' 
+ from 'build/temp'
+ include '**/*.dat'
+ include '**/*.properties'
+}
+
+task performancePatch << {
+	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java' )
+}
+
+compileJava { 
+ dependsOn = ['genParserTasks', 'performancePatch',':prologlib:deploy',':parserbase:deploy'] 
+ doFirst {
+	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
+	File f = file("src/main/resources/revision.properties")
+    f.delete()
+    f <<  buildconstants_class
+  }
+}
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+
+
+

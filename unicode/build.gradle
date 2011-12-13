@@ -1,0 +1,61 @@
+sourceSets {
+    main {
+        java {
+          	srcDirs = ['build/temp','src/main/java']
+        }
+    }
+}
+
+configurations {
+	sablecc
+}
+
+dependencies {
+    compile 'com.google.code.findbugs:jsr305:1.3.9'
+    testCompile 'junit:junit:4.8.2'
+    sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
+}
+
+
+task genParserTasks {
+	def generated = []
+	inputs.dir new File('src/main/resources')
+	outputs.dir new File('build/temp','generated')
+    fileTree {
+	    from 'src/main/resources'
+	    include '**/*.scc'
+	}.each {
+       name -> 
+        def tn = name.getName().split("\\.")[0]
+        task "parser$tn"(type:JavaExec) { 
+		 doFirst{ file('build/temp').mkdirs() }
+		 main = 'org.sablecc.sablecc.SableCC'
+		// classpath =  sourceSets.main.compileClasspath
+		 classpath = configurations.sablecc
+		 maxHeapSize = '1024m'
+		 args = ['-d','build/temp',name] 
+		}
+	generated += "parser$tn"  
+	}
+	
+	doLast {
+		generated.each{
+			tasks.findByName(it).execute()
+		}
+	}
+}
+
+
+jar {
+//	manifest {  attributes 'Main-Class': 'de.prob.unicode.UnicodeTranslator'}
+ include '**/*.class'
+ exclude '**.*.scc' 
+ from 'build/temp'
+ include '**/*.dat'
+}
+
+compileJava { 
+ dependsOn = ['genParserTasks'] 
+}
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
