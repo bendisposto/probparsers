@@ -451,21 +451,21 @@ public class BParser {
 	}
 
 	private boolean hashesStillValid(final File outputFile) {
-		File dir = outputFile.getParentFile();
-		Properties hashValues = readHashValues(outputFile, dir);
-		Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
-		for (Entry<Object, Object> entry : entrySet) {
-			String file = (String) entry.getKey();
-			String hash = (String) entry.getValue();
-			File f = new File(dir + File.separator + file);
-			try {
-				if (!(f.exists() || FileDigest.sha(f).equals(hash)))
-					return false;
-			} catch (Exception e) {
-				return false;
-			}
-		}
-		return true;
+//		File dir = outputFile.getParentFile();
+//		Properties hashValues = readHashValues(outputFile, dir);
+//		Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
+//		for (Entry<Object, Object> entry : entrySet) {
+//			String file = (String) entry.getKey();
+//			String hash = (String) entry.getValue();
+//			File f = new File(dir + File.separator + file);
+//			try {
+//				if (!(f.exists() || FileDigest.sha(f).equals(hash)))
+//					return false;
+//			} catch (Exception e) {
+//				return false;
+//			}
+//		}
+		return false;
 	}
 
 	private Properties readHashValues(final File target, final File dir) {
