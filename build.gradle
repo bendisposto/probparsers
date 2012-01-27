@@ -43,8 +43,7 @@ allprojects {
 
 subprojects {
  apply plugin: 'eclipse'
- apply from: rootDir.getAbsolutePath()+'/scripts/emma.gradle'
- apply from: rootDir.getAbsolutePath()+'/scripts/findbugs.gradle'
+ apply from: 'https://raw.github.com/gist/1527604/c0376aa40de59a0481cb33f17ebe5a26ee4f59d0/emma.gradle'
  group = 'de.prob'
  version = global_version;
 repositories {
