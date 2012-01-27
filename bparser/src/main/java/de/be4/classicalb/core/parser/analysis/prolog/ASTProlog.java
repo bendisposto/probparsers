@@ -40,6 +40,8 @@ import de.be4.classicalb.core.parser.node.AEventsModelClause;
 import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
+import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
+import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AFalseExpression;
@@ -98,8 +100,6 @@ import de.be4.classicalb.core.parser.node.AValuesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.AVariablesModelClause;
-import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
-import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
@@ -416,7 +416,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
 		open(node);
-		printIdentifier(node.getIdentifier());
+		pout.printAtom(node.getIdentifier().getText());
 		printAsList(node.getExpressions());
 		printAsList(node.getPredicates());
 		close(node);
@@ -425,7 +425,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
 		open(node);
-		printIdentifier(node.getIdentifier());
+		pout.printAtom(node.getIdentifier().getText());
 		printAsList(node.getExpressions());
 		printAsList(node.getPredicates());
 		close(node);
