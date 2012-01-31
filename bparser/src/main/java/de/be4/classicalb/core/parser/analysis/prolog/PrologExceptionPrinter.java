@@ -8,8 +8,11 @@ import java.io.OutputStream;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -44,12 +47,26 @@ public final class PrologExceptionPrinter {
 				printBPException(pto, (BParseException) cause, filename);
 			} else if (cause instanceof PreParseException) {
 				printPreParseException(pto, (PreParseException) cause, filename);
+			} else if (cause instanceof CheckException) {
+				printCheckException(pto, (CheckException) cause, filename);
 			} else {
 				printGeneralException(pto, cause, filename);
 			}
 		}
 		pto.fullstop();
 		pto.flush();
+	}
+
+	private static void printCheckException(final IPrologTermOutput pto,
+			final CheckException cause, final String filename) {
+		final Node[] nodes = cause.getNodes();
+		final SourcePosition pos;
+		if (nodes != null && nodes.length > 0) {
+			pos = nodes[0].getStartPos();
+		} else {
+			pos = null;
+		}
+		printParseException(pto, cause, filename, pos);
 	}
 
 	private static void printGeneralException(final IPrologTermOutput pto,
@@ -83,14 +100,21 @@ public final class PrologExceptionPrinter {
 
 	private static void printBPException(final IPrologTermOutput pto,
 			final BParseException e, final String filename) {
-		Token token = e.getToken();
+		final Token token = e.getToken();
+		final SourcePosition pos = token == null ? null : new SourcePosition(
+				token.getLine(), token.getPos());
+		printParseException(pto, e, filename, pos);
+	}
+
+	private static void printParseException(final IPrologTermOutput pto,
+			final Throwable e, final String filename, final SourcePosition pos) {
 		pto.openTerm("parse_exception");
-		if (token == null) {
+		if (pos == null) {
 			pto.printAtom("none");
 		} else {
 			pto.openTerm("pos");
-			pto.printNumber(token.getLine());
-			pto.printNumber(token.getPos());
+			pto.printNumber(pos.getLine());
+			pto.printNumber(pos.getPos());
 			pto.printAtom(filename);
 			pto.closeTerm();
 		}
