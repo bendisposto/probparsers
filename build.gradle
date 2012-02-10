@@ -12,6 +12,8 @@ buildscript {
 }
 
 
+
+
 def global_version = '2.1.2-SNAPSHOT'
 
 project.version = global_version;
@@ -101,3 +103,7 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
 }
 
 task deploy(dependsOn: [subprojects.deploy,globaljavadoc]) 
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-6'
+}
