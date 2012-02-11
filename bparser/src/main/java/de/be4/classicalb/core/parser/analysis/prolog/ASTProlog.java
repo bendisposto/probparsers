@@ -37,15 +37,15 @@ import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBContextParseUnit;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
-import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
-import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
-import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
+// todo : ask Jens import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
+// import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
-import de.be4.classicalb.core.parser.node.AFalseExpression;
-import de.be4.classicalb.core.parser.node.AFalsePredicate;
+import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
+import de.be4.classicalb.core.parser.node.AFalsityPredicate;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
@@ -63,7 +63,7 @@ import de.be4.classicalb.core.parser.node.AMachineClauseParseUnit;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
 import de.be4.classicalb.core.parser.node.AOpSubstitution;
-import de.be4.classicalb.core.parser.node.AOpWithReturnSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperation;
 import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AOppatternParseUnit;
@@ -86,15 +86,14 @@ import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetsContextClause;
 import de.be4.classicalb.core.parser.node.ASetsMachineClause;
-import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStructExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionParseUnit;
 import de.be4.classicalb.core.parser.node.ATheoremsContextClause;
 import de.be4.classicalb.core.parser.node.ATheoremsModelClause;
-import de.be4.classicalb.core.parser.node.ATrueExpression;
-import de.be4.classicalb.core.parser.node.ATruePredicate;
-import de.be4.classicalb.core.parser.node.AUniversalQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
+import de.be4.classicalb.core.parser.node.ATruthPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AValuesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
@@ -144,6 +143,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	private static Map<String, String> createRewritings() {
 		Map<String, String> rewritings = new HashMap<String, String>();
+		/*
 		rewritings.put("unequal", "not_equal");
 		rewritings.put("universal_quantification", "forall");
 		rewritings.put("existential_quantification", "exists");
@@ -155,9 +155,10 @@ public class ASTProlog extends DepthFirstAdapter {
 		rewritings.put("include_strictly", "subset_strict");
 		rewritings.put("not_include_strictly", "not_subset_strict");
 		rewritings.put("op_with_return", "operation_call");
-		rewritings.put("op", "operation_call");
 		rewritings.put("subtract", "minus");
-		rewritings.put("prover_comprehension_set", "comprehension_set");
+		*/
+		rewritings.put("prover_comprehension_set", "comprehension_set"); // todo : look at that special case
+		rewritings.put("op", "operation_call"); // todo : look at that special case
 		return Collections.unmodifiableMap(rewritings);
 	}
 
@@ -366,21 +367,10 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAAbstractMachineParseUnit(
 			final AAbstractMachineParseUnit node) {
 		open(node);
-		pout.printAtom(node.getType().getText());
+		node.getVariant().apply(this);
 		node.getHeader().apply(this);
 		printAsList(node.getMachineClauses());
 		close(node);
-	}
-
-	@Override
-	public void caseAStringExpression(final AStringExpression node) {
-		inAStringExpression(node);
-		if (node.getContent() != null) {
-			node.getContent().apply(this);
-		} else {
-			pout.printAtom("");
-		}
-		outAStringExpression(node);
 	}
 
 	@Override
@@ -413,6 +403,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 	
+    /* todo : ask Jens 
 	@Override
 	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
 		open(node);
@@ -421,6 +412,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getPredicates());
 		close(node);
 	}
+
 	
 	@Override
 	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
@@ -431,7 +423,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 	
-
+    */
 	// machine clauses
 
 	@Override
@@ -585,8 +577,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// predicate
 
 	@Override
-	public void caseAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void caseAForallPredicate(
+			final AForallPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getImplication().apply(this);
@@ -594,8 +586,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void caseAExistsPredicate(
+			final AExistsPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicate().apply(this);
@@ -857,8 +849,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOpWithReturnSubstitution(
-			final AOpWithReturnSubstitution node) {
+	public void caseAOperationCallSubstitution(
+			final AOperationCallSubstitution node) {
 		open(node);
 		pout.openTerm("identifier");
 		printPosition(node);
@@ -885,29 +877,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// true and false
 
 	@Override
-	public void caseATrueExpression(final ATrueExpression node) {
+	public void caseABooleanTrueExpression(final ABooleanTrueExpression node) {
 		pout.openTerm("boolean_true");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseAFalseExpression(final AFalseExpression node) {
-		pout.openTerm("boolean_false");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseATruePredicate(final ATruePredicate node) {
-		pout.openTerm("truth");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseAFalsePredicate(final AFalsePredicate node) {
-		pout.openTerm("falsity");
 		printPosition(node);
 		pout.closeTerm();
 	}

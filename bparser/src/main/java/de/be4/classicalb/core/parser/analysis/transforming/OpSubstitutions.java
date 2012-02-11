@@ -14,7 +14,7 @@ import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
-import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AFuncOpSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
@@ -27,7 +27,7 @@ import de.be4.classicalb.core.parser.node.AOpSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
-import de.be4.classicalb.core.parser.node.AUniversalQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
@@ -178,14 +178,14 @@ public class OpSubstitutions extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void inAExistsPredicate(
+			final AExistsPredicate node) {
 		enterScope(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void inAForallPredicate(
+			final AForallPredicate node) {
 		enterScope(node.getIdentifiers());
 	}
 
@@ -238,14 +238,14 @@ public class OpSubstitutions extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void outAExistsPredicate(
+			final AExistsPredicate node) {
 		leaveScope(node.getIdentifiers());
 	}
 
 	@Override
-	public void outAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void outAForallPredicate(
+			final AForallPredicate node) {
 		leaveScope(node.getIdentifiers());
 	}
 

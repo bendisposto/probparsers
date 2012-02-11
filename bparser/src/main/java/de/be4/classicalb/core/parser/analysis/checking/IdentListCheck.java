@@ -88,14 +88,14 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	}
 
 	@Override
-	public void inAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void inAExistsPredicate(
+			final AExistsPredicate node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void inAForallPredicate(
+			final AForallPredicate node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
@@ -196,8 +196,8 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		}
 
 		@Override
-		public void inAOpWithReturnSubstitution(
-				final AOpWithReturnSubstitution node) {
+		public void inAOperationCallSubstitution(
+				final AOperationCallSubstitution node) {
 			checkList(node.getResultIdentifiers());
 		}
 

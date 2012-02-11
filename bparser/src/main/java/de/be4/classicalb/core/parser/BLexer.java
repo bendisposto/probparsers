@@ -15,6 +15,7 @@ import de.be4.classicalb.core.parser.node.TCommentEnd;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
 
@@ -57,7 +58,13 @@ public class BLexer extends Lexer {
 			collectComment();
 		}
 
-		if (token != null) {
+                if (token instanceof TStringLiteral) {
+	                // google for howto-unescape-a-java-string-literal-in-java
+                        // quickfix: we do nothing just strip off the "
+                        final String literal = token.getText();
+                        token.setText(literal.substring(1,literal.length()-1));
+                }
+	        if (token != null) {
 			if (definitions != null) {
 				replaceDefTokens();
 			}

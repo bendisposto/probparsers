@@ -20,11 +20,11 @@ import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AEvent;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
-import de.be4.classicalb.core.parser.node.AFalsePredicate;
+import de.be4.classicalb.core.parser.node.AFalsityPredicate;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.APartitionPredicate;
-import de.be4.classicalb.core.parser.node.ATruePredicate;
+import de.be4.classicalb.core.parser.node.ATruthPredicate;
 import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEvent;
@@ -118,11 +118,19 @@ public class ASTPrologTest {
 
 	@Test
 	public void testMachine() throws BException {
+		String m = "MACHINE name"
+				+ "  OPERATIONS op=skip END";
+                String expected = "abstract_machine(1,machine_machine_variant(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo: warum taucht hier die 5 zweimal auf?
+		checkProlog(1, m, expected);
+	}
+
+	@Test
+	public void testMachine2() throws BException {
 		String m = "MACHINE mname(P)  SETS S; E={e1,e2}"
 				+ "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
 				+ "  INVARIANT x:NAT  INITIALISATION x:=5"
 				+ "  OPERATIONS op=skip; r,s <-- op2(a,b) = skip  END";
-		String expected = "abstract_machine($,'MACHINE',machine_header($,mname,[identifier($,'P')]),"
+       		String expected = "abstract_machine($,machine_machine_variant($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
 				+ "sees($,[identifier($,see),identifier($,'s.see2')]),"
@@ -132,6 +140,7 @@ public class ASTPrologTest {
 				+ "operations($,[operation($,identifier(%,op),[],[],skip($)),"
 				+ "operation($,identifier(%,op2),[identifier($,r),identifier($,s)],"
 				+ "[identifier($,a),identifier($,b)],skip($))])])";
+
 		checkProlog(1, m, expected);
 	}
 
@@ -143,12 +152,12 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testEmptyString() throws Exception {
-		final String ref = "MACHINE EmptyStringSimple \nCONSTANTS name \nPROPERTIES \n name = \"\" \nEND";
-		String expected = "abstract_machine(1,'MACHINE',machine_header(2,'EmptyStringSimple',[]),[constants(3,[identifier(4,name)]),properties(5,equal(6,identifier(7,name),string(8,'')))])";
-		checkProlog(1, ref, expected);
-
+	public void testEmptyString() throws BException {
+		checkExpression(
+				"\"test\"+\"\"",
+				"add(2,string(3,test),string(4,''))");
 	}
+
 
 	@Test
 	public void testPredicates() throws BException {
@@ -180,7 +189,7 @@ public class ASTPrologTest {
 				+ "  VARIABLES x  INVARIANT INV & lt(7)"
 				+ "  INITIALISATION x:=dbl(3)  OPERATIONS  op1 = ax(6)"
 				+ "  END";
-		String expected = "abstract_machine($,'MACHINE',machine_header($,'Defs',[]),"
+		String expected = "abstract_machine($,machine_machine_variant($),machine_header($,'Defs',[]),"
 				+ "[definitions($,[predicate_definition($,'INV',[],member($,identifier($,x),int_set($))),"
 				+ "predicate_definition($,lt,[identifier($,a)],less($,identifier($,x),integer($,7))),"
 				+ "expression_definition($,dbl,[identifier($,a)],mult_or_cart($,mult_or_cart($,integer($,2),identifier($,x)),identifier($,a))),"
@@ -214,8 +223,8 @@ public class ASTPrologTest {
 		checkPredicate("FALSE : BOOL", "member($,boolean_false($),bool_set($))");
 
 		final ADisjunctPredicate disjunction = new ADisjunctPredicate();
-		disjunction.setLeft(new ATruePredicate());
-		disjunction.setRight(new AFalsePredicate());
+		disjunction.setLeft(new ATruthPredicate());
+		disjunction.setRight(new AFalsityPredicate());
 
 		checkAST(0, "disjunct($,truth($),falsity($))", disjunction);
 	}
@@ -252,7 +261,7 @@ public class ASTPrologTest {
 		events.setEvent(Arrays.asList((PEvent) event));
 		event.setEventName(new TIdentifierLiteral("testevent"));
 		event.setVariables(Arrays.asList(createId("param")));
-		event.setGuards(Arrays.asList((PPredicate) new ATruePredicate()));
+		event.setGuards(Arrays.asList((PPredicate) new ATruthPredicate()));
 		PSubstitution subst1 = new AAssignSubstitution(
 				Arrays.asList(createId("x")), Arrays.asList(createId("param")));
 		event.setAssignments(Arrays.asList(subst1));
