@@ -1,11 +1,4 @@
 Package de.be4.classicalb.core.parser;
-/*
-Grammar used to generate the pure-Prolog B-Parser.
-This is a fork of the gramar used by Java.
-ToDo: merge the modifications in this file back to the grammar that is used for Java (and fix the Java stuff)
-
-*/
-
 
 /*******************************************************************
  * Helpers                                                         *
@@ -437,8 +430,8 @@ set_def_list {-> set*} =
 	{multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]} ; 
 
 set {-> set} =
-	{deferred} [identifier]:composed_identifier {-> New set.deferred([identifier.identifier_literal])} |
-	{enumerated} [identifier]:composed_identifier equal left_brace [elements]:expression_list right_brace {-> New set.enumerated([identifier.identifier_literal], [elements.expression])} ;
+	{deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
+	{enumerated} [identifier]:composed_identifier equal left_brace [elements]:expression_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} ;
 
 properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-> New machine_clause.properties(predicates.predicate)};
 
@@ -899,8 +892,8 @@ definition =
 	{file} [filename]:string_literal ;
 
 set =
-	{deferred} [identifier]:identifier_literal* |
-	{enumerated} [identifier]:identifier_literal* [elements]:expression* ;
+	{deferred_set} [identifier]:identifier_literal* |
+	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
 	
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 

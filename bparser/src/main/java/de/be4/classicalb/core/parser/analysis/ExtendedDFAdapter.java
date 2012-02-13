@@ -770,8 +770,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseADeferredSet(final ADeferredSet node) {
-		inADeferredSet(node);
+	public void caseADeferredSetSet(final ADeferredSetSet node) {
+		inADeferredSetSet(node);
 		{
 			final List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(
 					node.getIdentifier());
@@ -787,12 +787,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			}
 			endList(node);
 		}
-		outADeferredSet(node);
+		outADeferredSetSet(node);
 	}
 
 	@Override
-	public void caseAEnumeratedSet(final AEnumeratedSet node) {
-		inAEnumeratedSet(node);
+	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
+		inAEnumeratedSetSet(node);
 		{
 			final List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(
 					node.getIdentifier());
@@ -824,7 +824,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			}
 			endList(node);
 		}
-		outAEnumeratedSet(node);
+		outAEnumeratedSetSet(node);
 	}
 
 	@Override

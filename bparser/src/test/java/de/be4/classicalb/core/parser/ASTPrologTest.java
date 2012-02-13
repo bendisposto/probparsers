@@ -120,7 +120,7 @@ public class ASTPrologTest {
 	public void testMachine() throws BException {
 		String m = "MACHINE name"
 				+ "  OPERATIONS op=skip END";
-                String expected = "abstract_machine(1,machine_machine_variant(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo: warum taucht hier die 5 zweimal auf?
+                String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo: warum taucht hier die 5 zweimal auf?
 		checkProlog(1, m, expected);
 	}
 
@@ -130,7 +130,7 @@ public class ASTPrologTest {
 				+ "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
 				+ "  INVARIANT x:NAT  INITIALISATION x:=5"
 				+ "  OPERATIONS op=skip; r,s <-- op2(a,b) = skip  END";
-       		String expected = "abstract_machine($,machine_machine_variant($),machine_header($,mname,[identifier($,'P')]),"
+       		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
 				+ "sees($,[identifier($,see),identifier($,'s.see2')]),"
@@ -189,11 +189,11 @@ public class ASTPrologTest {
 				+ "  VARIABLES x  INVARIANT INV & lt(7)"
 				+ "  INITIALISATION x:=dbl(3)  OPERATIONS  op1 = ax(6)"
 				+ "  END";
-		String expected = "abstract_machine($,machine_machine_variant($),machine_header($,'Defs',[]),"
-				+ "[definitions($,[predicate_definition($,'INV',[],member($,identifier($,x),int_set($))),"
-				+ "predicate_definition($,lt,[identifier($,a)],less($,identifier($,x),integer($,7))),"
-				+ "expression_definition($,dbl,[identifier($,a)],mult_or_cart($,mult_or_cart($,integer($,2),identifier($,x)),identifier($,a))),"
-				+ "substitution_definition($,ax,[identifier($,a)],assign($,[identifier($,x)],[identifier($,a)]))]),"
+		String expected = "abstract_machine($,machine($),machine_header($,'Defs',[]),"
+				+ "[definitions($,[predicate($,'INV',[],member($,identifier($,x),int_set($))),"
+				+ "predicate($,lt,[identifier($,a)],less($,identifier($,x),integer($,7))),"
+				+ "expression($,dbl,[identifier($,a)],mult_or_cart($,mult_or_cart($,integer($,2),identifier($,x)),identifier($,a))),"
+				+ "substitution($,ax,[identifier($,a)],assign($,[identifier($,x)],[identifier($,a)]))]),"
 				+ "variables($,[identifier($,x)]),"
 				+ "invariant($,conjunct($,definition($,'INV',[]),definition($,lt,[integer($,7)]))),"
 				+ "initialisation($,assign($,[identifier($,x)],[definition($,dbl,[integer($,3)])])),"
