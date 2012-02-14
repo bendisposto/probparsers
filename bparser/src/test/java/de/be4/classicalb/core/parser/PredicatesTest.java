@@ -160,6 +160,13 @@ public class PredicatesTest {
 	@Test
 	public void testNonIdentifiersInQuantification() {
 		final String testMachine = "#PREDICATE ! a,5. (a=5 => a/=5 )";
+        getTreeAsString(testMachine);
+        // TODO: Check outcome
+	}
+
+	@Test
+	public void testSubstitutionInPredicate() {
+		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
