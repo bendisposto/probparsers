@@ -255,6 +255,7 @@ Tokens
 	
 	// keywords for special parsing modes 
 	{normal} kw_expression = '#EXPRESSION';
+	{normal} kw_proofobligation = '#PROOFOBLIGATION';
 	{normal} kw_predicate = '#PREDICATE';
 	{normal} kw_substitution = '#SUBSTITUTION';
 	{normal} kw_abstract_constants = '#ABSTRACT_CONSTANTS';
@@ -311,6 +312,7 @@ parse_unit {-> parse_unit} =
 	{predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
 	{expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
 	{substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
+	{proofobligation} kw_proofobligation  left_bracket [subst]:substitution_l1 right_bracket [pred]:predicate_top {-> New parse_unit.proofobligation(subst.substitution, pred.predicate)} |
 	{abstract_constants} kw_abstract_constants [clause]:abstract_constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
 	{abstract_variables} kw_abstract_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
 	{assertions} kw_assertions [clause]:assertions_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
@@ -828,6 +830,7 @@ parse_unit =
 	{predicate} predicate |
 	{expression} expression |
 	{substitution} substitution |
+	{proofobligation} substitution predicate |
 	{machine_clause} machine_clause |
 	{event_b_context} [name]:identifier_literal [context_clauses]:context_clause* |
 	{event_b_model} [name]:identifier_literal [model_clauses]:model_clause* |
