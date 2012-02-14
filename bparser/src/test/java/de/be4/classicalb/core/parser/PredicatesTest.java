@@ -160,13 +160,6 @@ public class PredicatesTest {
 	@Test
 	public void testNonIdentifiersInQuantification() {
 		final String testMachine = "#PREDICATE ! a,5. (a=5 => a/=5 )";
-        getTreeAsString(testMachine);
-        // TODO: Check outcome
-	}
-
-	@Test
-	public void testSubstitutionInPredicate() {
-		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
@@ -175,6 +168,13 @@ public class PredicatesTest {
 			assertEquals(1, cause.getNodes().length);
 			assertNotNull(cause.getNodes()[0]);
 		}
+	}
+
+	@Test
+	public void testSubstitutionInPredicate() throws BException {
+		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
+        final String astString = getTreeAsString(testMachine);
+        assertEquals("Start(APredicateParseUnit(AConjunctPredicate(AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10))))))", astString);
 	}
 
 	private String getPredicateAsString(final String expression)
