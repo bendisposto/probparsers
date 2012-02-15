@@ -17,34 +17,17 @@ sourceSets {
     }
 }
 
-task genParserTasks {
-	def generated = []
-	inputs.dir new File('src/main/resources')
-	outputs.dir new File('build/temp','generated')
-    fileTree {
-	    from 'src/main/resources'
-	    include '**/*.scc'
-	}.each {
-       name -> 
-        def tn = name.getName().split("\\.")[0]
-        task "parser$tn"(type:JavaExec) { 
-		 doFirst{ file('build/temp').mkdirs() }
-		 main = 'org.sablecc.sablecc.SableCC'
-		// classpath =  sourceSets.main.compileClasspath
-		 classpath = configurations.sablecc
-		 maxHeapSize = '1024m'
-		 args = ['-d','build/temp',name] 
-		}
-	generated += "parser$tn"  
-	}
-	
-	doLast {
-		generated.each{
-			tasks.findByName(it).execute()
-		}
-	}
+task genParser(type:JavaExec) {
+	doFirst{ file('build/temp').mkdirs() }
+	inputs.dir new File('src/main/resources/grammars')
+	outputs.dir new File('build/temp')
+//	doFirst{ file('build/temp').mkdirs() }
+	 main = 'org.sablecc.sablecc.SableCC'
+	// classpath =  sourceSets.main.compileClasspath
+	 classpath = configurations.sablecc
+	 maxHeapSize = '1024m'
+	 args = ['-d','build/temp','src/main/resources/prob.scc']
 }
-
 
 jar {
  include '**/*.class'
@@ -54,7 +37,7 @@ jar {
 }
 
 compileJava { 
- dependsOn = ['genParserTasks',':prologlib:deploy'] 
+ dependsOn = ['genParser',':prologlib:deploy'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

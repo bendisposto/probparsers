@@ -16,35 +16,17 @@ dependencies {
     sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
 }
 
-
-task genParserTasks {
-	def generated = []
-	inputs.dir new File('src/main/resources')
-	outputs.dir new File('build/temp','generated')
-    fileTree {
-	    from 'src/main/resources'
-	    include '**/*.scc'
-	}.each {
-       name -> 
-        def tn = name.getName().split("\\.")[0]
-        task "parser$tn"(type:JavaExec) { 
-		 doFirst{ file('build/temp').mkdirs() }
-		 main = 'org.sablecc.sablecc.SableCC'
-		// classpath =  sourceSets.main.compileClasspath
-		 classpath = configurations.sablecc
-		 maxHeapSize = '1024m'
-		 args = ['-d','build/temp',name] 
-		}
-	generated += "parser$tn"  
-	}
-	
-	doLast {
-		generated.each{
-			tasks.findByName(it).execute()
-		}
-	}
+task genParser(type:JavaExec) {
+	doFirst{ file('build/temp').mkdirs() }
+	inputs.dir new File('src/main/resources/grammars')
+	outputs.dir new File('build/temp')
+//	doFirst{ file('build/temp').mkdirs() }
+	 main = 'org.sablecc.sablecc.SableCC'
+	// classpath =  sourceSets.main.compileClasspath
+	 classpath = configurations.sablecc
+	 maxHeapSize = '1024m'
+	 args = ['-d','build/temp','src/main/resources/unicode.scc']
 }
-
 
 jar {
 //	manifest {  attributes 'Main-Class': 'de.prob.unicode.UnicodeTranslator'}
@@ -55,7 +37,7 @@ jar {
 }
 
 compileJava { 
- dependsOn = ['genParserTasks'] 
+ dependsOn = ['genParser'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

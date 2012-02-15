@@ -28,7 +28,7 @@ sourceSets {
 
 task genPreparser(type:JavaExec) {
 	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp')
+	outputs.dir new File('build/temp/de/be4/classicalb/core/preparser') // prevent rebuild because the second parser replaces patchfiles
 //	doFirst{ file('build/temp').mkdirs() }
 	 main = 'org.sablecc.sablecc.SableCC'
 	// classpath =  sourceSets.main.compileClasspath
