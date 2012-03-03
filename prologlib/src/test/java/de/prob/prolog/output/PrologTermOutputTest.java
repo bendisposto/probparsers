@@ -66,6 +66,12 @@ public class PrologTermOutputTest {
 	}
 
 	@Test
+	public void testEscape3() {
+		pout.printAtom(" ");
+		assertOutput("' '");
+	}
+
+	@Test
 	public void testLists() {
 		pout.openTerm("term");
 		pout.openList();
