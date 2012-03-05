@@ -26,36 +26,28 @@ sourceSets {
 }
 
 
-		
-
-task genParserTasks {
-	def generated = []
+task genPreparser(type:JavaExec) {
 	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp','generated')
-    fileTree {
-	    from 'src/main/resources/grammars'
-	    include '**/*.scc'
-	}.each {
-       name -> 
-        def tn = name.getName().split("\\.")[0]
-        task "parser$tn"(type:JavaExec) { 
-		 doFirst{ file('build/temp').mkdirs() }
-		 main = 'org.sablecc.sablecc.SableCC'
-		// classpath =  sourceSets.main.compileClasspath
-		 classpath = configurations.sablecc
-		 maxHeapSize = '1024m'
-		 args = ['-d','build/temp',name] 
-		}
-	generated += "parser$tn"  
-	}
-	
-	doLast {
-		generated.each{
-			tasks.findByName(it).execute()
-		}
-	}
+	outputs.dir new File('build/temp/de/be4/classicalb/core/preparser') // prevent rebuild because the second parser replaces patchfiles
+//	doFirst{ file('build/temp').mkdirs() }
+	 main = 'org.sablecc.sablecc.SableCC'
+	// classpath =  sourceSets.main.compileClasspath
+	 classpath = configurations.sablecc
+	 maxHeapSize = '1024m'
+	 args = ['-d','build/temp','src/main/resources/grammars/PreParser.scc']
 }
 
+task genBParser(type:JavaExec) {
+	dependsOn = ['genPreparser']
+	inputs.dir new File('src/main/resources/grammars')
+	outputs.dir new File('build/temp')
+//	doFirst{ file('build/temp').mkdirs() }
+	 main = 'org.sablecc.sablecc.SableCC'
+	// classpath =  sourceSets.main.compileClasspath
+	 classpath = configurations.sablecc
+	 maxHeapSize = '1024m'
+	 args = ['-d','build/temp','src/main/resources/grammars/BParser.scc']
+}
 
 jar {
  include '**/*.class'
@@ -70,7 +62,7 @@ task performancePatch << {
 }
 
 compileJava { 
- dependsOn = ['genParserTasks', 'performancePatch',':prologlib:deploy',':parserbase:deploy'] 
+ dependsOn = ['genPreparser','genBParser', 'performancePatch',':prologlib:deploy',':parserbase:deploy'] 
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")

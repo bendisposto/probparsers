@@ -11,7 +11,10 @@ buildscript {
  }
 }
 
-def global_version = '2.1.1'
+
+
+
+def global_version = '2.1.2'
 
 project.version = global_version;
 project.group = 'de.prob'
@@ -42,8 +45,7 @@ allprojects {
 
 subprojects {
  apply plugin: 'eclipse'
- apply from: rootDir.getAbsolutePath()+'/scripts/emma.gradle'
- apply from: rootDir.getAbsolutePath()+'/scripts/findbugs.gradle'
+ //apply from: 'https://raw.github.com/gist/1527604/c0376aa40de59a0481cb33f17ebe5a26ee4f59d0/emma.gradle'
  group = 'de.prob'
  version = global_version;
 repositories {
@@ -95,9 +97,13 @@ task globaljavadoc(type: Javadoc, dependsOn: subprojects.assemble) {
 task uberjar(type: Jar, dependsOn: subprojects.deploy) { 
     baseName = 'probcliparser' 
     subprojects.each { subproject -> 
-        from subproject.configurations.archives.allArtifactFiles.collect { zipTree(it) } 
+        from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) } 
     } 
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
 task deploy(dependsOn: [subprojects.deploy,globaljavadoc]) 
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-8'
+}

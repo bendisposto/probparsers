@@ -40,6 +40,8 @@ import de.be4.classicalb.core.parser.node.AEventsModelClause;
 import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
+import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
+import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AFalseExpression;
@@ -104,6 +106,7 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEventstatus;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TStringBody;
 import de.prob.prolog.output.IPrologTermOutput;
 
 /**
@@ -267,6 +270,13 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void defaultCase(final Node node) {
 		pout.printAtom(node.toString().trim());
 	}
+	
+	
+	@Override
+	public void caseTStringBody(TStringBody node) {
+		String text = node.getText();
+		pout.printAtom(text);
+	}
 
 	@Override
 	public void caseEOF(final EOF node) {
@@ -410,6 +420,25 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getParameters());
 		close(node);
 	}
+	
+	@Override
+	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
+		open(node);
+		pout.printAtom(node.getIdentifier().getText());
+		printAsList(node.getExpressions());
+		printAsList(node.getPredicates());
+		close(node);
+	}
+	
+	@Override
+	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
+		open(node);
+		pout.printAtom(node.getIdentifier().getText());
+		printAsList(node.getExpressions());
+		printAsList(node.getPredicates());
+		close(node);
+	}
+	
 
 	// machine clauses
 

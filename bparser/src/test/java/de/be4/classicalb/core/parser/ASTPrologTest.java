@@ -297,6 +297,14 @@ public class ASTPrologTest {
 				"integer($,922337203685477580756)");
 	}
 
+	@Test
+	public void testString() throws BException {
+		checkExpression("\" \"", "string($,' ')");
+		checkExpression("\"\"", "string($,'')");
+		checkExpression("\"a\"", "string($,a)");
+		checkExpression("\"A\"", "string($,'A')");
+	}
+
 	private PExpression createId(final String name) {
 		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(
 				name)));
