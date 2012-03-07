@@ -105,7 +105,7 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEventstatus;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TStringBody;
+import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
 
 /**
@@ -258,7 +258,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	
 	
 	@Override
-	public void caseTStringBody(TStringBody node) {
+	public void caseTStringLiteral(TStringLiteral node) {
 		String text = node.getText();
 		pout.printAtom(text);
 	}
