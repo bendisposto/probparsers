@@ -51,7 +51,7 @@ public class SubstitutionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AParallelSubstitution([ASkipSubstitution(),AAssignSubstitution([AIdentifierExpression([a])],[AIdentifierExpression([b])]),AOpSubstitution(AIdentifierExpression([x]),[])])))",
+			        "Start(ASubstitutionParseUnit(AParallelSubstitution([ASkipSubstitution(),AAssignSubstitution([AIdentifierExpression([a])],[AIdentifierExpression([b])]),AOpSubstitution(AIdentifierExpression([x]),[])])))",
 				result);
 	}
 
@@ -61,7 +61,7 @@ public class SubstitutionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
+			        "Start(ASubstitutionParseUnit(ASequenceSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
 				result);
 	}
 
@@ -71,7 +71,7 @@ public class SubstitutionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([AParallelSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[])]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
+			     "Start(ASubstitutionParseUnit(ASequenceSubstitution([AParallelSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[])]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
 				result);
 	}
 
@@ -81,7 +81,7 @@ public class SubstitutionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([AOpSubstitution(AIdentifierExpression([op1]),[]),AOpSubstitution(AIdentifierExpression([op2]),[AIdentifierExpression([x])])])))",
+			     "Start(ASubstitutionParseUnit(ASequenceSubstitution([AOpSubstitution(AIdentifierExpression([op1]),[]),AOpSubstitution(AIdentifierExpression([op2]),[AIdentifierExpression([x])])])))",
 				result);
 	}
 
@@ -91,7 +91,7 @@ public class SubstitutionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AOpSubstitution(AFunctionExpression(AIdentifierExpression([function]),[AIdentifierExpression([x])]),[AIdentifierExpression([y])])))",
+			        "Start(ASubstitutionParseUnit(AOpSubstitution(AFunctionExpression(AIdentifierExpression([function]),[AIdentifierExpression([x])]),[AIdentifierExpression([y])])))",
 				result);
 	}
 

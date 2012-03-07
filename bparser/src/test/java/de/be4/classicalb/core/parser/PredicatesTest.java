@@ -30,12 +30,12 @@ public class PredicatesTest {
 	}
 
 	@Test
-	public void testParallelBelongs() throws Exception {
+	public void testParallelMember() throws Exception {
 		final String testMachine = "#PREDICATE x : ID & y : ID";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(APredicateParseUnit(AConjunctPredicate(ABelongPredicate(AIdentifierExpression([x]),AIdentifierExpression([ID])),ABelongPredicate(AIdentifierExpression([y]),AIdentifierExpression([ID])))))",
+				"Start(APredicateParseUnit(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([x]),AIdentifierExpression([ID])),AMemberPredicate(AIdentifierExpression([y]),AIdentifierExpression([ID])))))",
 				result);
 	}
 
@@ -56,52 +56,43 @@ public class PredicatesTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(APredicateParseUnit(AConjunctPredicate(AConjunctPredicate(ABelongPredicate(AIdentifierExpression([hasread]),ARelationsExpression(AIdentifierExpression([READER]),AIdentifierExpression([BOOK]))),ABelongPredicate(AIdentifierExpression([reading]),APartialInjectionExpression(AIdentifierExpression([READER]),AIdentifierExpression([COPY])))),AEqualPredicate(AIntersectionExpression(ACompositionExpression(AIdentifierExpression([reading]),AIdentifierExpression([copyof])),AIdentifierExpression([hasread])),AEmptySetExpression()))))",
+				"Start(APredicateParseUnit(AConjunctPredicate(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([hasread]),ARelationsExpression(AIdentifierExpression([READER]),AIdentifierExpression([BOOK]))),AMemberPredicate(AIdentifierExpression([reading]),APartialInjectionExpression(AIdentifierExpression([READER]),AIdentifierExpression([COPY])))),AEqualPredicate(AIntersectionExpression(ACompositionExpression(AIdentifierExpression([reading]),AIdentifierExpression([copyof])),AIdentifierExpression([hasread])),AEmptySetExpression()))))",
 				result);
 	}
 
 	@Test
-	public void testUniversalQuantification() throws Exception {
+	public void testForall() throws Exception {
 		final String testMachine = "#PREDICATE ! a,b. (a=b => a/=b )";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AUniversalQuantificationPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AImplicationPredicate(AEqualPredicate(AIdentifierExpression([a]),AIdentifierExpression([b])),AUnequalPredicate(AIdentifierExpression([a]),AIdentifierExpression([b]))))))",
+				"Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AImplicationPredicate(AEqualPredicate(AIdentifierExpression([a]),AIdentifierExpression([b])),ANotEqualPredicate(AIdentifierExpression([a]),AIdentifierExpression([b]))))))",
 				result);
 	}
 
 	@Test
-	public void testUniversalQuantificationCouple1() throws Exception {
-		final String testMachine = "#PREDICATE ! (a,b). (a=b => a/=b )";
+	public void testForallCouple1() throws Exception {
+		final String testMachine = "#PREDICATE ! (a,b). (1=1 )";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AUniversalQuantificationPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AImplicationPredicate(AEqualPredicate(AIdentifierExpression([a]),AIdentifierExpression([b])),AUnequalPredicate(AIdentifierExpression([a]),AIdentifierExpression([b]))))))",
+			     "Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)))))",
 				result);
 	}
 
 	@Test
-	public void testUniversalQuantificationCouple2() throws Exception {
-		final String testMachine = "#PREDICATE !(row,minrow,col,col2,mincol,mincol2).\n    (row:INDEX & minrow:INDEX & col:INDEX & col2:INDEX & mincol:INDEX & mincol2:INDEX &\n      (col /=col2 or mincol /= mincol2) => \n        (Squares(row,col)(minrow,mincol) /= Squares(row,col2)(minrow,mincol2))\n   )";
-		final String result = getTreeAsString(testMachine);
-		assertEquals(
-				"Start(APredicateParseUnit(AUniversalQuantificationPredicate([AIdentifierExpression([row]),AIdentifierExpression([minrow]),AIdentifierExpression([col]),AIdentifierExpression([col2]),AIdentifierExpression([mincol]),AIdentifierExpression([mincol2])],AImplicationPredicate(AConjunctPredicate(AConjunctPredicate(AConjunctPredicate(AConjunctPredicate(AConjunctPredicate(AConjunctPredicate(ABelongPredicate(AIdentifierExpression([row]),AIdentifierExpression([INDEX])),ABelongPredicate(AIdentifierExpression([minrow]),AIdentifierExpression([INDEX]))),ABelongPredicate(AIdentifierExpression([col]),AIdentifierExpression([INDEX]))),ABelongPredicate(AIdentifierExpression([col2]),AIdentifierExpression([INDEX]))),ABelongPredicate(AIdentifierExpression([mincol]),AIdentifierExpression([INDEX]))),ABelongPredicate(AIdentifierExpression([mincol2]),AIdentifierExpression([INDEX]))),ADisjunctPredicate(AUnequalPredicate(AIdentifierExpression([col]),AIdentifierExpression([col2])),AUnequalPredicate(AIdentifierExpression([mincol]),AIdentifierExpression([mincol2])))),AUnequalPredicate(AFunctionExpression(AFunctionExpression(AIdentifierExpression([Squares]),[AIdentifierExpression([row]),AIdentifierExpression([col])]),[AIdentifierExpression([minrow]),AIdentifierExpression([mincol])]),AFunctionExpression(AFunctionExpression(AIdentifierExpression([Squares]),[AIdentifierExpression([row]),AIdentifierExpression([col2])]),[AIdentifierExpression([minrow]),AIdentifierExpression([mincol2])]))))))",
-				result);
-	}
-
-	@Test
-	public void testCoupleInExistentialQuantification1() throws Exception {
+	public void testCoupleInExists1() throws Exception {
 		final String testMachine = "#PREDICATE # ((b,c,d)). ( b > c)";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AExistentialQuantificationPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
+				"Start(APredicateParseUnit(AExistsPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
 				result);
 	}
 
 	@Test
-	public void testCoupleInUniversalQuantification1() throws Exception {
+	public void testCoupleInForall1() throws Exception {
 		final String testMachine = "#PREDICATE ! ((b,c,d)). ( b > c)";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AUniversalQuantificationPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
+				"Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
 				result);
 	}
 
@@ -128,7 +119,7 @@ public class PredicatesTest {
 		final String testMachine = "#PREDICATE (dom(ff ; (gg~)) <: dom(ff))";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AIncludePredicate(ADomainExpression(ACompositionExpression(AIdentifierExpression([ff]),AReverseExpression(AIdentifierExpression([gg])))),ADomainExpression(AIdentifierExpression([ff])))))",
+				"Start(APredicateParseUnit(ASubsetPredicate(ADomainExpression(ACompositionExpression(AIdentifierExpression([ff]),AReverseExpression(AIdentifierExpression([gg])))),ADomainExpression(AIdentifierExpression([ff])))))",
 				result);
 	}
 
@@ -153,7 +144,7 @@ public class PredicatesTest {
 
 		parser.getOptions().restrictProverExpressions = false;
 		final String actual = getPredicateAsString("bfalse");
-		final String expected = "AFalsePredicate()";
+		final String expected = "AFalsityPredicate()";
 		assertEquals(expected, actual);
 	}
 

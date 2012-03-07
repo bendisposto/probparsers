@@ -342,6 +342,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAUsesMachineClause(node);
 	}
 
+
 	@Override
 	public void caseAIncludesMachineClause(final AIncludesMachineClause node) {
 		inAIncludesMachineClause(node);
@@ -769,8 +770,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseADeferredSet(final ADeferredSet node) {
-		inADeferredSet(node);
+	public void caseADeferredSetSet(final ADeferredSetSet node) {
+		inADeferredSetSet(node);
 		{
 			final List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(
 					node.getIdentifier());
@@ -786,12 +787,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			}
 			endList(node);
 		}
-		outADeferredSet(node);
+		outADeferredSetSet(node);
 	}
 
 	@Override
-	public void caseAEnumeratedSet(final AEnumeratedSet node) {
-		inAEnumeratedSet(node);
+	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
+		inAEnumeratedSetSet(node);
 		{
 			final List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(
 					node.getIdentifier());
@@ -823,7 +824,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			}
 			endList(node);
 		}
-		outAEnumeratedSet(node);
+		outAEnumeratedSetSet(node);
 	}
 
 	@Override
@@ -970,9 +971,9 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
-		inAUniversalQuantificationPredicate(node);
+	public void caseAForallPredicate(
+			final AForallPredicate node) {
+		inAForallPredicate(node);
 		{
 			final List<PExpression> copy = new ArrayList<PExpression>(node
 					.getIdentifiers());
@@ -992,13 +993,13 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getImplication() != null) {
 			node.getImplication().apply(this);
 		}
-		outAUniversalQuantificationPredicate(node);
+		outAForallPredicate(node);
 	}
 
 	@Override
-	public void caseAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
-		inAExistentialQuantificationPredicate(node);
+	public void caseAExistsPredicate(
+			final AExistsPredicate node) {
+		inAExistsPredicate(node);
 		{
 			final List<PExpression> copy = new ArrayList<PExpression>(node
 					.getIdentifiers());
@@ -1018,7 +1019,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getPredicate() != null) {
 			node.getPredicate().apply(this);
 		}
-		outAExistentialQuantificationPredicate(node);
+		outAExistsPredicate(node);
 	}
 
 	@Override
@@ -1035,8 +1036,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAUnequalPredicate(final AUnequalPredicate node) {
-		inAUnequalPredicate(node);
+	public void caseANotEqualPredicate(final ANotEqualPredicate node) {
+		inANotEqualPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1044,12 +1045,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outAUnequalPredicate(node);
+		outANotEqualPredicate(node);
 	}
 
 	@Override
-	public void caseABelongPredicate(final ABelongPredicate node) {
-		inABelongPredicate(node);
+	public void caseAMemberPredicate(final AMemberPredicate node) {
+		inAMemberPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1057,12 +1058,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outABelongPredicate(node);
+		outAMemberPredicate(node);
 	}
 
 	@Override
-	public void caseANotBelongPredicate(final ANotBelongPredicate node) {
-		inANotBelongPredicate(node);
+	public void caseANotMemberPredicate(final ANotMemberPredicate node) {
+		inANotMemberPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1070,12 +1071,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outANotBelongPredicate(node);
+		outANotMemberPredicate(node);
 	}
 
 	@Override
-	public void caseAIncludePredicate(final AIncludePredicate node) {
-		inAIncludePredicate(node);
+	public void caseASubsetPredicate(final ASubsetPredicate node) {
+		inASubsetPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1083,13 +1084,13 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outAIncludePredicate(node);
+		outASubsetPredicate(node);
 	}
 
 	@Override
-	public void caseAIncludeStrictlyPredicate(
-			final AIncludeStrictlyPredicate node) {
-		inAIncludeStrictlyPredicate(node);
+	public void caseASubsetStrictPredicate(
+			final ASubsetStrictPredicate node) {
+		inASubsetStrictPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1097,12 +1098,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outAIncludeStrictlyPredicate(node);
+		outASubsetStrictPredicate(node);
 	}
 
 	@Override
-	public void caseANotIncludePredicate(final ANotIncludePredicate node) {
-		inANotIncludePredicate(node);
+	public void caseANotSubsetPredicate(final ANotSubsetPredicate node) {
+		inANotSubsetPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1110,13 +1111,13 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outANotIncludePredicate(node);
+		outANotSubsetPredicate(node);
 	}
 
 	@Override
-	public void caseANotIncludeStrictlyPredicate(
-			final ANotIncludeStrictlyPredicate node) {
-		inANotIncludeStrictlyPredicate(node);
+	public void caseANotSubsetStrictPredicate(
+			final ANotSubsetStrictPredicate node) {
+		inANotSubsetStrictPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
 		}
@@ -1124,7 +1125,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRight() != null) {
 			node.getRight().apply(this);
 		}
-		outANotIncludeStrictlyPredicate(node);
+		outANotSubsetStrictPredicate(node);
 	}
 
 	@Override
@@ -1258,15 +1259,15 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseATrueExpression(final ATrueExpression node) {
-		inATrueExpression(node);
-		outATrueExpression(node);
+	public void caseABooleanTrueExpression(final ABooleanTrueExpression node) {
+		inABooleanTrueExpression(node);
+		outABooleanTrueExpression(node);
 	}
 
 	@Override
-	public void caseAFalseExpression(final AFalseExpression node) {
-		inAFalseExpression(node);
-		outAFalseExpression(node);
+	public void caseABooleanFalseExpression(final ABooleanFalseExpression node) {
+		inABooleanFalseExpression(node);
+		outABooleanFalseExpression(node);
 	}
 
 	@Override
@@ -1394,12 +1395,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAUnaryExpression(final AUnaryExpression node) {
-		inAUnaryExpression(node);
+	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
+		inAUnaryMinusExpression(node);
 		if (node.getExpression() != null) {
 			node.getExpression().apply(this);
 		}
-		outAUnaryExpression(node);
+		outAUnaryMinusExpression(node);
 	}
 
 	@Override
@@ -1627,6 +1628,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAComprehensionSetExpression(node);
 	}
 
+    /* todo: check this special case */
 	@Override
 	public void caseAProverComprehensionSetExpression(
 			final AProverComprehensionSetExpression node) {
@@ -3228,6 +3230,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAFuncOpSubstitution(node);
 	}
 
+    /*    todo : investigate: why this special case */
 	@Override
 	public void caseAOpSubstitution(final AOpSubstitution node) {
 		inAOpSubstitution(node);
@@ -3253,10 +3256,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAOpSubstitution(node);
 	}
 
+
+
 	@Override
-	public void caseAOpWithReturnSubstitution(
-			final AOpWithReturnSubstitution node) {
-		inAOpWithReturnSubstitution(node);
+	public void caseAOperationCallSubstitution(
+			final AOperationCallSubstitution node) {
+		inAOperationCallSubstitution(node);
 		{
 			final List<PExpression> copy = new ArrayList<PExpression>(node
 					.getResultIdentifiers());
@@ -3304,7 +3309,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			}
 			endList(node);
 		}
-		outAOpWithReturnSubstitution(node);
+		outAOperationCallSubstitution(node);
 	}
 
 	@Override

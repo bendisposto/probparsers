@@ -31,21 +31,21 @@ import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
-import de.be4.classicalb.core.parser.node.AEnumeratedSet;
+import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AEvent;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBContextParseUnit;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
-import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
-import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
-import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
+//import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
+//import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
-import de.be4.classicalb.core.parser.node.AFalseExpression;
-import de.be4.classicalb.core.parser.node.AFalsePredicate;
+import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
+import de.be4.classicalb.core.parser.node.AFalsityPredicate;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
@@ -63,7 +63,7 @@ import de.be4.classicalb.core.parser.node.AMachineClauseParseUnit;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
 import de.be4.classicalb.core.parser.node.AOpSubstitution;
-import de.be4.classicalb.core.parser.node.AOpWithReturnSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperation;
 import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AOppatternParseUnit;
@@ -86,15 +86,14 @@ import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetsContextClause;
 import de.be4.classicalb.core.parser.node.ASetsMachineClause;
-import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStructExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionParseUnit;
 import de.be4.classicalb.core.parser.node.ATheoremsContextClause;
 import de.be4.classicalb.core.parser.node.ATheoremsModelClause;
-import de.be4.classicalb.core.parser.node.ATrueExpression;
-import de.be4.classicalb.core.parser.node.ATruePredicate;
-import de.be4.classicalb.core.parser.node.AUniversalQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
+import de.be4.classicalb.core.parser.node.ATruthPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AValuesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
@@ -115,14 +114,24 @@ import de.prob.prolog.output.IPrologTermOutput;
  * @author plagge
  */
 public class ASTProlog extends DepthFirstAdapter {
-	// If a node class ends with one of the following constants, remove that
-	// suffix to make Prolog functors more readable
-	private static final List<String> IGNORE_ENDS = new LinkedList<String>(
-			Arrays.asList("expression", "predicate", "machine_clause",
-					"substitution", "parse_unit", "model_clause",
-					"context_clause", "eventstatus", "argpattern"));
+        // The tables SUM_TYPE and SIMPLE_NAME are used to translate the Java class name to
+        // the Prolog functor name.
+        // These tables MUST be in sync with BParser.scc.
+        // SUM_TYPE must list all sum-types in BPaser.scc.
+        // The name of the sum-type is not part of the Prolog functor.
 
-	private static final Map<String, String> REWRITINGS = createRewritings();
+        // SIMPLE_NAME must list all AST Classes that are not part of a sum-type
+        // If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we throw an exception.
+	private static final List<String> SUM_TYPE = new LinkedList<String>(
+			Arrays.asList("expression", "predicate", "machine_clause",
+				      "substitution", "parse_unit", "model_clause",
+				      "context_clause", "eventstatus", "argpattern",
+                                      "set", "machine_variant", "definition"));
+
+ 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
+		        Arrays.asList("event", "machine_header",
+                                      "machine_reference","operation","rec_entry","values_entry",
+                                      "witness"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -141,30 +150,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		if (positionPrinter != null) {
 			positionPrinter.setPrologTermOutput(pout);
 		}
-	}
-
-	private static Map<String, String> createRewritings() {
-		Map<String, String> rewritings = new HashMap<String, String>();
-		rewritings.put("unequal", "not_equal");
-		rewritings.put("universal_quantification", "forall");
-		rewritings.put("existential_quantification", "exists");
-		rewritings.put("unary", "unary_minus");
-		rewritings.put("belong", "member");
-		rewritings.put("not_belong", "not_member");
-		rewritings.put("include", "subset");
-		rewritings.put("not_include", "not_subset");
-		rewritings.put("include_strictly", "subset_strict");
-		rewritings.put("not_include_strictly", "not_subset_strict");
-		rewritings.put("op_with_return", "operation_call");
-		rewritings.put("op", "operation_call");
-		rewritings.put("subtract", "minus");
-		rewritings.put("prover_comprehension_set", "comprehension_set");
-		return Collections.unmodifiableMap(rewritings);
-	}
-
-	private static String rewrite(final String atom) {
-		String result = atom == null ? null : REWRITINGS.get(atom);
-		return result == null ? atom : result;
 	}
 
 	@Override
@@ -285,31 +270,51 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	/**
 	 * 
-	 * @param node
-	 * @return
+	 * @param  AST node
+	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
 		String className = node.getClass().getSimpleName();
 		String formatted = simpleFormats.get(className);
 		if (formatted == null) {
-			if (className.startsWith("A")) {
-				className = className.substring(1);
-				formatted = formatCamel(className).substring(1);
-				int length = formatted.length();
-				for (String checkend : IGNORE_ENDS) {
-					if (formatted.endsWith(checkend)) {
-						formatted = formatted.substring(0,
-								length - checkend.length() - 1);
-						break;
-					}
-				}
-			} else {
-				formatted = className;
-			}
-			formatted = rewrite(formatted);
-			simpleFormats.put(className, formatted);
+		    formatted = toFunctorName(className);
+		    simpleFormats.put(className, formatted);
 		}
 		return formatted;
+	}
+
+	/**
+         * The translation from the names in the SableCC grammar to prolog functors must be systematic
+         * Otherwise it will not be possible to reuse the grammar for non-Java front-ends.
+         * Two magic cases here:
+         * "prover_comprehension_set" -> "comprehension_set"
+         * "op" ->  "operation_call"
+         * Todo: do remove magic special cases
+         * DO NOT add extra special cases here !!
+	 * @param Java class name
+	 * @return Prolog functor name
+	 */
+	private String toFunctorName(final String className) {
+                String camelName = formatCamel(className.substring(1)).substring(1);
+                if (className.startsWith("T")) {
+                    // A SableCC Token
+                    return camelName;
+		}
+
+		if (className.startsWith("A")) {
+		    if (ATOMIC_TYPE.contains(camelName)) return camelName;
+		    for (String checkend : SUM_TYPE)
+			if (camelName.endsWith(checkend)) {
+                            String shortName = camelName.substring(0,camelName.length()- checkend.length() -1 );
+                            // hard-coded renamings
+                            if (shortName.equals("prover_comprehension_set")) return "comprehension_set";
+                            if (shortName.equals("op")) return "operation_call";
+                            return shortName;
+			}
+                }
+		// There is no rule to translate the class name to a prolog functor.
+                // Probably the class name is missing in table SUM_TYPE or in table ATOMIC_TYPE.
+                throw new RuntimeException("cannot determine functor name");
 	}
 
 	/**
@@ -374,21 +379,10 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAAbstractMachineParseUnit(
 			final AAbstractMachineParseUnit node) {
 		open(node);
-		pout.printAtom(node.getType().getText());
+		node.getVariant().apply(this);
 		node.getHeader().apply(this);
 		printAsList(node.getMachineClauses());
 		close(node);
-	}
-
-	@Override
-	public void caseAStringExpression(final AStringExpression node) {
-		inAStringExpression(node);
-		if (node.getContent() != null) {
-			node.getContent().apply(this);
-		} else {
-			pout.printAtom("");
-		}
-		outAStringExpression(node);
 	}
 
 	@Override
@@ -421,6 +415,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 	
+    /* todo : ask Jens 
 	@Override
 	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
 		open(node);
@@ -429,6 +424,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getPredicates());
 		close(node);
 	}
+
 	
 	@Override
 	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
@@ -439,7 +435,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 	
-
+    */
 	// machine clauses
 
 	@Override
@@ -568,7 +564,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	// set
 
 	@Override
-	public void caseAEnumeratedSet(final AEnumeratedSet node) {
+	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
 		printAsList(node.getElements());
@@ -593,8 +589,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// predicate
 
 	@Override
-	public void caseAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void caseAForallPredicate(
+			final AForallPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getImplication().apply(this);
@@ -602,8 +598,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void caseAExistsPredicate(
+			final AExistsPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicate().apply(this);
@@ -865,8 +861,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOpWithReturnSubstitution(
-			final AOpWithReturnSubstitution node) {
+	public void caseAOperationCallSubstitution(
+			final AOperationCallSubstitution node) {
 		open(node);
 		pout.openTerm("identifier");
 		printPosition(node);
@@ -893,29 +889,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// true and false
 
 	@Override
-	public void caseATrueExpression(final ATrueExpression node) {
+	public void caseABooleanTrueExpression(final ABooleanTrueExpression node) {
 		pout.openTerm("boolean_true");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseAFalseExpression(final AFalseExpression node) {
-		pout.openTerm("boolean_false");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseATruePredicate(final ATruePredicate node) {
-		pout.openTerm("truth");
-		printPosition(node);
-		pout.closeTerm();
-	}
-
-	@Override
-	public void caseAFalsePredicate(final AFalsePredicate node) {
-		pout.openTerm("falsity");
 		printPosition(node);
 		pout.closeTerm();
 	}
