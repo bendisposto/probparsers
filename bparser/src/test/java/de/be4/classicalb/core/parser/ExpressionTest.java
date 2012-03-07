@@ -350,7 +350,7 @@ public class ExpressionTest {
 	}
 
 	@Test
-	public void testProverComprehensionSets() throws BException {
+	public void testProverComprehensionSets() throws Exception {
 		final String expression = "SET(i).(i>0)";
 
 		parser.getOptions().restrictProverExpressions = false;

@@ -5,20 +5,20 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ACoupleExpression;
-import de.be4.classicalb.core.parser.node.AExistentialQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.AUniversalQuantificationPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 
 /**
  * <p>
- * In some constructs (ExistentialQuantificationPredicate,
+ * In some constructs (ExistsPredicate,
  * UniversalQuantificationPredicate, ...) a list of identifiers is recognized as
  * a couple if the identifier list is surrounded by parenthesis. This results in
  * constructs having a list of children with one element, which is a couple,
@@ -29,13 +29,16 @@ import de.be4.classicalb.core.parser.node.PExpression;
  * level, so that the identifiers are children of the construct.
  * </p>
  * 
+ * <p>
+ * todo: refactor this fix the grammar and remove this complete module
+ * </p>
  * @author Fabian
  * 
  */
 public class Couples extends DepthFirstAdapter {
 	@Override
-	public void inAExistentialQuantificationPredicate(
-			final AExistentialQuantificationPredicate node) {
+	public void inAExistsPredicate(
+			final AExistsPredicate node) {
 
 		final LinkedList<PExpression> coupleReplacement = getCoupleReplacement(node
 				.getIdentifiers());
@@ -45,8 +48,8 @@ public class Couples extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAUniversalQuantificationPredicate(
-			final AUniversalQuantificationPredicate node) {
+	public void inAForallPredicate(
+			final AForallPredicate node) {
 
 		final LinkedList<PExpression> coupleReplacement = getCoupleReplacement(node
 				.getIdentifiers());

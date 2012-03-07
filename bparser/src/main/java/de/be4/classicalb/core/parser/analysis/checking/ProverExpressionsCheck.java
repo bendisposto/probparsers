@@ -6,8 +6,8 @@ package de.be4.classicalb.core.parser.analysis.checking;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AFalsePredicate;
 import de.be4.classicalb.core.parser.node.AProverComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.AFalsityPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
@@ -37,13 +37,14 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements
 	}
 
 	@Override
-	public void caseAFalsePredicate(AFalsePredicate node) {
+	public void caseAFalsityPredicate(AFalsityPredicate node) {
 		if (error == null) {
 			error = new CheckException(
 					"bfalse is not allowed in ordenary B files", node);
 		}
 	}
 
+    /* todo: ask Jens */
 	@Override
 	public void caseAProverComprehensionSetExpression(
 			AProverComprehensionSetExpression node) {
