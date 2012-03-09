@@ -23,7 +23,6 @@ public class BLexer extends Lexer {
 	private TComment comment = null;
 	private StringBuilder commentBuffer = null;
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
-	private Token lastToken = null;
 
 	private final DefinitionTypes definitions;
 
@@ -57,17 +56,14 @@ public class BLexer extends Lexer {
 		if (state.equals(State.COMMENT)) {
 			collectComment();
 		}
-		else {
-			lastToken = token;
-		}
 
-                if (token instanceof TStringLiteral) {
-	                // google for howto-unescape-a-java-string-literal-in-java
-                        // quickfix: we do nothing just strip off the "
-                        final String literal = token.getText();
-                        token.setText(literal.substring(1,literal.length()-1));
-                }
-	        if (token != null) {
+		if (token instanceof TStringLiteral) {
+			// google for howto-unescape-a-java-string-literal-in-java
+			// quickfix: we do nothing just strip off the "
+			final String literal = token.getText();
+			token.setText(literal.substring(1, literal.length() - 1));
+		}
+		if (token != null) {
 			if (definitions != null) {
 				replaceDefTokens();
 			}
@@ -94,16 +90,16 @@ public class BLexer extends Lexer {
 			if (type != null) {
 				switch (type) {
 				case Predicate:
-					final Token predToken = new TDefLiteralPredicate(token
-							.getText());
+					final Token predToken = new TDefLiteralPredicate(
+							token.getText());
 					predToken.setLine(token.getLine());
 					predToken.setPos(token.getPos());
 					token = predToken;
 					break;
 
 				case Substitution:
-					final Token substToken = new TDefLiteralSubstitution(token
-							.getText());
+					final Token substToken = new TDefLiteralSubstitution(
+							token.getText());
 					substToken.setLine(token.getLine());
 					substToken.setPos(token.getPos());
 					token = substToken;
@@ -126,15 +122,16 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void collectComment() throws LexerException {
+	private void collectComment() throws LexerException, IOException {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
 			// tokenList.add(token);
-			final int line = token.getLine()-1;
-			final int pos = token.getPos()-1;
+			final int line = token.getLine() - 1;
+			final int pos = token.getPos() - 1;
 			final String text = token.getText();
-			
-			throw new BLexerException(token, "Comment not closed", text.toString(), line, pos);
+
+			throw new BLexerException(token, "Comment not closed",
+					text.toString(), line, pos);
 		}
 
 		// starting a new comment
@@ -154,9 +151,14 @@ public class BLexer extends Lexer {
 				commentBuffer = null;
 				state = State.NORMAL;
 				if (text.startsWith("/*!")) {
-					String pragma = "";
-					if (text.endsWith("!*/")) pragma = text.substring(3, text.length()-3).trim(); else  pragma = text.substring(3, text.length()-2).trim();
-					pragmas.add(new Pragma(token.getLine(), token.getPos(), pragma, lastToken));
+					String pragmaText = "";
+					if (text.endsWith("!*/")) pragmaText = text.substring(3,
+							text.length() - 3).trim();
+					else
+						pragmaText = text.substring(3, text.length() - 2)
+								.trim();
+					pragmas.add(new Pragma(token.getStartPos(), token
+							.getEndPos(), pragmaText));
 				}
 			} else {
 				token = null;
@@ -167,7 +169,7 @@ public class BLexer extends Lexer {
 	public List<Pragma> getPragmas() {
 		return pragmas;
 	}
-	
+
 	public void setDebugOutput(final boolean debugOutput) {
 		this.debugOutput = debugOutput;
 	}

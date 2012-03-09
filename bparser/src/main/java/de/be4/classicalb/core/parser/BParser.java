@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
+import de.be4.classicalb.core.parser.analysis.checking.PragmaLocator;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
@@ -58,6 +60,7 @@ public class BParser {
 	private SourcePositions sourcePositions;
 	private final Definitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
+	private final List<Pragma> pragmas = new ArrayList<Pragma>();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 	private final String fileName;
@@ -292,6 +295,16 @@ public class BParser {
 			// perform some semantic checks which are not done in the parser
 			performSemanticChecks(rootNode);
 
+			// locate the pragmas
+			
+			List<Pragma> locateTasks = lexer.getPragmas();
+			for (Pragma pragma : locateTasks) {
+				Pragma located = PragmaLocator.locate(rootNode, pragma);
+				getPragmas().add(located);
+			}
+			
+			
+
 			return rootNode;
 		} catch (final LexerException e) {
 			/*
@@ -388,11 +401,10 @@ public class BParser {
 
 		try {
 
-//			Properties hashes = new Properties();
+			// Properties hashes = new Properties();
 
 			if (options.outputFile != null) {
-				if (hashesStillValid(options.outputFile))
-					return 0;
+				if (hashesStillValid(options.outputFile)) return 0;
 			}
 
 			final long start = System.currentTimeMillis();
@@ -448,35 +460,39 @@ public class BParser {
 	}
 
 	private boolean hashesStillValid(final File outputFile) {
-//		File dir = outputFile.getParentFile();
-//		Properties hashValues = readHashValues(outputFile, dir);
-//		Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
-//		for (Entry<Object, Object> entry : entrySet) {
-//			String file = (String) entry.getKey();
-//			String hash = (String) entry.getValue();
-//			File f = new File(dir + File.separator + file);
-//			try {
-//				if (!(f.exists() || FileDigest.sha(f).equals(hash)))
-//					return false;
-//			} catch (Exception e) {
-//				return false;
-//			}
-//		}
+		// File dir = outputFile.getParentFile();
+		// Properties hashValues = readHashValues(outputFile, dir);
+		// Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
+		// for (Entry<Object, Object> entry : entrySet) {
+		// String file = (String) entry.getKey();
+		// String hash = (String) entry.getValue();
+		// File f = new File(dir + File.separator + file);
+		// try {
+		// if (!(f.exists() || FileDigest.sha(f).equals(hash)))
+		// return false;
+		// } catch (Exception e) {
+		// return false;
+		// }
+		// }
 		return false;
 	}
 
-//	private Properties readHashValues(final File target, final File dir) {
-//		String name = target.getName();
-//		Properties p = new Properties();
-//		String hashfile = name + ".hashes";
-//		File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-//		if (!hf.exists())
-//			return p;
-//		try {
-//			p.load(new BufferedInputStream(new FileInputStream(hf)));
-//		} catch (Exception e) {
-//			// ignore
-//		}
-//		return p;
-//	}
+	public List<Pragma> getPragmas() {
+		return pragmas;
+	}
+
+	// private Properties readHashValues(final File target, final File dir) {
+	// String name = target.getName();
+	// Properties p = new Properties();
+	// String hashfile = name + ".hashes";
+	// File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
+	// if (!hf.exists())
+	// return p;
+	// try {
+	// p.load(new BufferedInputStream(new FileInputStream(hf)));
+	// } catch (Exception e) {
+	// // ignore
+	// }
+	// return p;
+	// }
 }
