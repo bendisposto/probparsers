@@ -14,9 +14,9 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.node.AExpressionDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.APredicateDefinition;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PPredicate;
 
 public class DefinitionFilesTest implements IFileContentProvider {
@@ -40,13 +40,13 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		parser.parse(testMachine, true, this);
 
 		final Definitions definitions = parser.getDefinitions();
-		final AExpressionDefinition def1 = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def1");
 		assertEquals("def1", def1.getName().getText());
 		assertEquals(0, def1.getParameters().size());
 		assertTrue(def1.getRhs() instanceof AIdentifierExpression);
 
-		final AExpressionDefinition def2 = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition def2 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def2");
 		assertEquals("def2", def2.getName().getText());
 		assertEquals(0, def2.getParameters().size());
@@ -65,7 +65,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		parser.parse(testMachine, false, this);
 
 		final Definitions definitions = parser.getDefinitions();
-		final AExpressionDefinition def1 = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def1");
 		assertEquals("def1", def1.getName().getText());
 		assertEquals(0, def1.getParameters().size());
@@ -75,7 +75,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 						.getIdentifier());
 		assertEquals("xx", ident);
 
-		final AExpressionDefinition def2 = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition def2 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def2");
 		assertEquals("def2", def2.getName().getText());
 		assertEquals(0, def2.getParameters().size());
@@ -85,7 +85,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		// definition in machine file should overwrite the one in def file
 		assertEquals("aa", ident);
 
-		final AExpressionDefinition def3 = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition def3 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def3");
 		assertEquals("def3", def3.getName().getText());
 		assertEquals(0, def3.getParameters().size());
@@ -134,13 +134,13 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		parser.parseFile(machine, false);
 
 		final Definitions definitions = parser.getDefinitions();
-		final APredicateDefinition def1 = (APredicateDefinition) definitions
+		final APredicateDefinitionDefinition def1 = (APredicateDefinitionDefinition) definitions
 				.getDefinition("GRD2");
 		assertEquals("GRD2", def1.getName().getText());
 		assertEquals(0, def1.getParameters().size());
 		assertTrue(def1.getRhs() instanceof PPredicate);
 
-		final APredicateDefinition def2 = (APredicateDefinition) definitions
+		final APredicateDefinitionDefinition def2 = (APredicateDefinitionDefinition) definitions
 				.getDefinition("GRD1");
 		assertEquals("GRD1", def2.getName().getText());
 		assertEquals(0, def2.getParameters().size());
