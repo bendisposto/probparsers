@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
@@ -24,6 +23,7 @@ public class BLexer extends Lexer {
 	private TComment comment = null;
 	private StringBuilder commentBuffer = null;
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
+	private Token lastToken = null;
 
 	private final DefinitionTypes definitions;
 
@@ -56,6 +56,9 @@ public class BLexer extends Lexer {
 
 		if (state.equals(State.COMMENT)) {
 			collectComment();
+		}
+		else {
+			lastToken = token;
 		}
 
                 if (token instanceof TStringLiteral) {
@@ -153,7 +156,7 @@ public class BLexer extends Lexer {
 				if (text.startsWith("/*!")) {
 					String pragma = "";
 					if (text.endsWith("!*/")) pragma = text.substring(3, text.length()-3).trim(); else  pragma = text.substring(3, text.length()-2).trim();
-					pragmas.add(new Pragma(token.getLine(), token.getPos(), pragma));
+					pragmas.add(new Pragma(token.getLine(), token.getPos(), pragma, lastToken));
 				}
 			} else {
 				token = null;
