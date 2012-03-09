@@ -296,14 +296,12 @@ public class BParser {
 			performSemanticChecks(rootNode);
 
 			// locate the pragmas
-			
+
 			List<Pragma> locateTasks = lexer.getPragmas();
 			for (Pragma pragma : locateTasks) {
 				Pragma located = PragmaLocator.locate(rootNode, pragma);
 				getPragmas().add(located);
 			}
-			
-			
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -401,11 +399,7 @@ public class BParser {
 
 		try {
 
-<<<<<<< HEAD
-//			Properties hashes = new Properties();
-=======
 			// Properties hashes = new Properties();
->>>>>>> feature/pragmatic
 
 			if (options.outputFile != null) {
 				if (hashesStillValid(options.outputFile)) return 0;
@@ -481,22 +475,6 @@ public class BParser {
 		return false;
 	}
 
-<<<<<<< HEAD
-//	private Properties readHashValues(final File target, final File dir) {
-//		String name = target.getName();
-//		Properties p = new Properties();
-//		String hashfile = name + ".hashes";
-//		File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-//		if (!hf.exists())
-//			return p;
-//		try {
-//			p.load(new BufferedInputStream(new FileInputStream(hf)));
-//		} catch (Exception e) {
-//			// ignore
-//		}
-//		return p;
-//	}
-=======
 	public List<Pragma> getPragmas() {
 		return pragmas;
 	}
@@ -515,5 +493,5 @@ public class BParser {
 	// }
 	// return p;
 	// }
->>>>>>> feature/pragmatic
+
 }
