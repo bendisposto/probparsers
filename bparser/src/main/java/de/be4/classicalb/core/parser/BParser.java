@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,8 +13,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.ASTDisplay;
@@ -223,7 +220,7 @@ public class BParser {
 	 *             were read from the input.</li>
 	 *             <li> {@link BParseException}: This exception is thrown in two
 	 *             situations. On the one hand if the parser throws a
-	 *             {@link ParseException} we convert it into a
+	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
 	 *             the parser has finished. We try to provide a token if a
@@ -391,7 +388,7 @@ public class BParser {
 
 		try {
 
-			Properties hashes = new Properties();
+//			Properties hashes = new Properties();
 
 			if (options.outputFile != null) {
 				if (hashesStillValid(options.outputFile))
@@ -468,18 +465,18 @@ public class BParser {
 		return false;
 	}
 
-	private Properties readHashValues(final File target, final File dir) {
-		String name = target.getName();
-		Properties p = new Properties();
-		String hashfile = name + ".hashes";
-		File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-		if (!hf.exists())
-			return p;
-		try {
-			p.load(new BufferedInputStream(new FileInputStream(hf)));
-		} catch (Exception e) {
-			// ignore
-		}
-		return p;
-	}
+//	private Properties readHashValues(final File target, final File dir) {
+//		String name = target.getName();
+//		Properties p = new Properties();
+//		String hashfile = name + ".hashes";
+//		File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
+//		if (!hf.exists())
+//			return p;
+//		try {
+//			p.load(new BufferedInputStream(new FileInputStream(hf)));
+//		} catch (Exception e) {
+//			// ignore
+//		}
+//		return p;
+//	}
 }
