@@ -20,29 +20,30 @@ public class PragmaLocator extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outStart(Start node) {
-		if (container == null) container = node;
-	}
-
-	@Override
 	public void inStart(Start node) {
 		nearest = node;
+		container = node;
 	}
 
 	@Override
 	public void defaultOut(Node node) {
+		if (node instanceof Start) return; // no source info available
 		SourcePosition endPos = node.getEndPos();
-		SourcePosition startPos = node.getStartPos();
-
 		if (endPos.compareTo(start) <= 0) predecessor = node;
-		if (startPos.compareTo(start) <= 0 && endPos.compareTo(end) >= 0)
-			container = node;
 	}
 
 	@Override
 	public void defaultIn(Node node) {
+		Node n = node;
+		SourcePosition startPos = node.getStartPos();
 		SourcePosition endPos = node.getEndPos();
+		SourcePosition s = start;
+		SourcePosition e = end;
+		int before = startPos.compareTo(start);
+		int after = endPos.compareTo(end);
+
 		if (endPos.compareTo(start) <= 0) nearest = node;
+		if (before <= 0 && after >= 0) container = node;
 	}
 
 	public static Pragma locate(Start ast, Pragma p) {

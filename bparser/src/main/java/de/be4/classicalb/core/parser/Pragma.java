@@ -33,8 +33,8 @@ public class Pragma {
 
 	@Override
 	public String toString() {
-		return content + " " + start + "-" + end + ". Right after '"+getNearest().getClass().getSimpleName()+"/"
-				+ getPredecessor().getClass().getSimpleName() + "' and inside'" + container.getClass().getSimpleName() + "'";
+		return "Pragma '"+content + "' " + start + "-" + end + ". Right after '"+getNearest().getClass().getSimpleName()+"/"
+				+ getPredecessor().getClass().getSimpleName() + "' and inside '" + getContainer().getClass().getSimpleName() + "'";
 	}
 
 	public SourcePosition getEnd() {
