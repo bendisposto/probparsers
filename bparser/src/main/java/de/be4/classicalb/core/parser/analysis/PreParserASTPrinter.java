@@ -71,7 +71,6 @@ public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 	 * As we visit each non-terminal node push on the indent we need for this
 	 * node. The next node we visit will always be the last child of this node.
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void defaultIn(final Node node) {
 		if (last) {

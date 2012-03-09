@@ -51,7 +51,6 @@ public class ASTDisplay extends DepthFirstAdapter {
 	/*
 	 * As we come across non terminals, push them onto the stack
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void defaultIn(final Node node) {
 		final DefaultMutableTreeNode thisNode = new DefaultMutableTreeNode(node
@@ -116,7 +115,6 @@ public class ASTDisplay extends DepthFirstAdapter {
 	 * that it is given, and for convenience return it. The extremal paths are
 	 * stored in the order in which they appear in pre-order in the tree model.
 	 */
-	@SuppressWarnings("unchecked")
 	public static Collection<TreePath> extremalPaths(final TreeModel data,
 			final TreePath path, final Collection<TreePath> result) {
 		result.clear();
@@ -130,7 +128,6 @@ public class ASTDisplay extends DepthFirstAdapter {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void extremalPathsImpl(final TreeModel data,
 			final TreePath path, final Collection<TreePath> result) {
 		final Object node = path.getLastPathComponent();
