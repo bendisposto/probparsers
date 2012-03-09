@@ -672,8 +672,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAPredicateDefinition(final APredicateDefinition node) {
-		inAPredicateDefinition(node);
+	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+		inAPredicateDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
@@ -697,12 +697,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outAPredicateDefinition(node);
+		outAPredicateDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseASubstitutionDefinition(final ASubstitutionDefinition node) {
-		inASubstitutionDefinition(node);
+	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+		inASubstitutionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
@@ -726,12 +726,12 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outASubstitutionDefinition(node);
+		outASubstitutionDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseAExpressionDefinition(final AExpressionDefinition node) {
-		inAExpressionDefinition(node);
+	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+		inAExpressionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
@@ -755,16 +755,16 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outAExpressionDefinition(node);
+		outAExpressionDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseAFileDefinition(final AFileDefinition node) {
-		inAFileDefinition(node);
+	public void caseAFileDefinitionDefinition(final AFileDefinitionDefinition node) {
+		inAFileDefinitionDefinition(node);
 		if (node.getFilename() != null) {
 			node.getFilename().apply(this);
 		}
-		outAFileDefinition(node);
+		outAFileDefinitionDefinition(node);
 	}
 
 	@Override

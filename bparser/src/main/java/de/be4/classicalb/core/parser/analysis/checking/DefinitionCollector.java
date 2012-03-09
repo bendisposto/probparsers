@@ -4,9 +4,9 @@ import de.be4.classicalb.core.parser.DefinitionTypes;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.Definitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.AExpressionDefinition;
-import de.be4.classicalb.core.parser.node.APredicateDefinition;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 
 /**
  * Collects the {@link APredicateDefinition}, {@link ASubstitutionDefinition}
@@ -27,21 +27,21 @@ public class DefinitionCollector extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAPredicateDefinition(final APredicateDefinition node) {
+	public void inAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
 	}
 
 	@Override
-	public void inASubstitutionDefinition(final ASubstitutionDefinition node) {
+	public void inASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
 	}
 
 	@Override
-	public void inAExpressionDefinition(final AExpressionDefinition node) {
+	public void inAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);

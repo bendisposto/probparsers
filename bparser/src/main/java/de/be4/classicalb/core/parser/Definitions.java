@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.node.AExpressionDefinition;
-import de.be4.classicalb.core.parser.node.APredicateDefinition;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 
@@ -32,12 +32,12 @@ public class Definitions {
 	public int getParameterCount(final String defName) {
 		final Node defNode = getDefinition(defName);
 
-		if (defNode instanceof APredicateDefinition)
-			return ((APredicateDefinition) defNode).getParameters().size();
-		else if (defNode instanceof ASubstitutionDefinition)
-			return ((ASubstitutionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof AExpressionDefinition)
-			return ((AExpressionDefinition) defNode).getParameters().size();
+		if (defNode instanceof APredicateDefinitionDefinition)
+			return ((APredicateDefinitionDefinition) defNode).getParameters().size();
+		else if (defNode instanceof ASubstitutionDefinitionDefinition)
+			return ((ASubstitutionDefinitionDefinition) defNode).getParameters().size();
+		else if (defNode instanceof AExpressionDefinitionDefinition)
+			return ((AExpressionDefinitionDefinition) defNode).getParameters().size();
 		else
 			return -1;
 	}
@@ -55,17 +55,17 @@ public class Definitions {
 		return definitions.keySet();
 	}
 
-	public void addDefinition(final APredicateDefinition defNode,
+	public void addDefinition(final APredicateDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
-	public void addDefinition(final ASubstitutionDefinition defNode,
+	public void addDefinition(final ASubstitutionDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
-	public void addDefinition(final AExpressionDefinition defNode,
+	public void addDefinition(final AExpressionDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}

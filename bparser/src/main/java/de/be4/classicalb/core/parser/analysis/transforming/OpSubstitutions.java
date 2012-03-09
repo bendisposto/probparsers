@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AFuncOpSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
@@ -26,7 +26,7 @@ import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AOpSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
@@ -317,7 +317,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 				if (type == Type.ExprOrSubst) {
 					// type is determined now => set to Expression
-					final AExpressionDefinition definition = (AExpressionDefinition) definitions
+					final AExpressionDefinitionDefinition definition = (AExpressionDefinitionDefinition) definitions
 							.removeDefinition(identifierString);
 					definitions.addDefinition(definition, Type.Expression);
 				}
@@ -439,7 +439,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 	private void setTypeSubstDef(final AFuncOpSubstitution node,
 			final String idString) {
-		final AExpressionDefinition removedDef = (AExpressionDefinition) definitions
+		final AExpressionDefinitionDefinition removedDef = (AExpressionDefinitionDefinition) definitions
 				.removeDefinition(idString);
 		final Node defRhs = removedDef.getRhs();
 		final PSubstitution rhsSubst;
@@ -461,7 +461,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		final TIdentifierLiteral oldDefId = removedDef.getName();
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(
 				oldDefId.getText(), oldDefId.getLine(), oldDefId.getPos());
-		final ASubstitutionDefinition substDef = new ASubstitutionDefinition(
+		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(
 				defId, new LinkedList<PExpression>(removedDef.getParameters()),
 				rhsSubst);
 
