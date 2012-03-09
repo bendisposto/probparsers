@@ -1,5 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.awt.List;
+import java.util.ArrayList;
+
 import de.be4.classicalb.core.parser.Pragma;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.Node;
@@ -8,28 +11,32 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class PragmaLocator extends DepthFirstAdapter {
 
-	private final SourcePosition end;
-	private final SourcePosition start;
-	private Node nearest;
-	private Node predecessor;
-	private Node container;
 
-	public PragmaLocator(SourcePosition start, SourcePosition end) {
-		this.start = start;
-		this.end = end;
+	private Node[] nearest;
+	private Node[] predecessor;
+	private Node[] container;
+	private  Pragma[] pragmas;
+
+	public PragmaLocator(Pragma[] p) {
+		this.pragmas = p;
 	}
 
 	@Override
 	public void inStart(Start node) {
-		nearest = node;
-		container = node;
+		for (int i = 0; i < pragmas.length; i++) {
+			nearest[i] = node;
+			container[i] = node;
+		}
 	}
 
 	@Override
 	public void defaultOut(Node node) {
 		if (node instanceof Start) return; // no source info available
 		SourcePosition endPos = node.getEndPos();
-		if (endPos.compareTo(start) <= 0) predecessor = node;
+		for (int i = 0; i < pragmas.length; i++) {
+			SourcePosition start = pragmas[i].getStart();
+			if (endPos.compareTo(start) <= 0) predecessor[i] = node;
+		}
 	}
 
 	@Override
@@ -37,19 +44,26 @@ public class PragmaLocator extends DepthFirstAdapter {
 		Node n = node;
 		SourcePosition startPos = node.getStartPos();
 		SourcePosition endPos = node.getEndPos();
-		SourcePosition s = start;
-		SourcePosition e = end;
-		int before = startPos.compareTo(start);
-		int after = endPos.compareTo(end);
-
-		if (endPos.compareTo(start) <= 0) nearest = node;
-		if (before <= 0 && after >= 0) container = node;
+		
+		for (int i = 0; i < pragmas.length; i++) {
+			SourcePosition start = pragmas[i].getStart();
+			SourcePosition end = pragmas[i].getEnd();
+			if (endPos.compareTo(start) <= 0) nearest[i] = node;
+			if (startPos.compareTo(start) <= 0 && endPos.compareTo(end) >= 0) container[i] = node;
+		}
 	}
 
-	public static Pragma locate(Start ast, Pragma p) {
-		PragmaLocator locator = new PragmaLocator(p.getStart(), p.getEnd());
+	public static ArrayList<Pragma> locate(Start ast, Pragma[] p) {
+		PragmaLocator locator = new PragmaLocator(p);
+		int size = p.length;
+		locator.nearest = new Node[size];
+		locator.container = new Node[size];
+		locator.predecessor = new Node[size];
 		ast.apply(locator);
-		return new Pragma(p, locator.nearest, locator.predecessor,
-				locator.container);
+		ArrayList<Pragma> list = new ArrayList<Pragma>();	
+		for (int i = 0; i < p.length; i++) {
+			list.add(new Pragma(locator.pragmas[i], locator.nearest[i], locator.predecessor[i],locator.container[i]));
+		}
+		return list;
 	}
 }

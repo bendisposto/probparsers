@@ -60,7 +60,7 @@ public class BParser {
 	private SourcePositions sourcePositions;
 	private final Definitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
-	private final List<Pragma> pragmas = new ArrayList<Pragma>();
+	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 	private final String fileName;
@@ -297,11 +297,9 @@ public class BParser {
 
 			// locate the pragmas
 
-			List<Pragma> locateTasks = lexer.getPragmas();
-			for (Pragma pragma : locateTasks) {
-				Pragma located = PragmaLocator.locate(rootNode, pragma);
-				getPragmas().add(located);
-			}
+			Pragma[] locateTasks = lexer.getPragmas().toArray(new Pragma[0]);
+
+			pragmas = PragmaLocator.locate(rootNode, locateTasks);
 
 			return rootNode;
 		} catch (final LexerException e) {
