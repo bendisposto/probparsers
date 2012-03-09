@@ -35,7 +35,6 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-		Token filt = this.token;
 		checkComment();
 
 		if (token != null) {
