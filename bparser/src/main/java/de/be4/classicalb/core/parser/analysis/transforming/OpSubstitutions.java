@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.be4.classicalb.core.parser.Definitions;
-import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.Definitions.Type;
+import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
@@ -16,6 +16,7 @@ import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AFuncOpSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
@@ -27,7 +28,6 @@ import de.be4.classicalb.core.parser.node.AOpSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
@@ -171,6 +171,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			// no def, no problem ;-)
 			final AOpSubstitution opSubst = new AOpSubstitution(idExpr,
 					parameters);
+			opSubst.setStartPos(idExpr.getStartPos());
+			opSubst.setEndPos(idExpr.getEndPos());
 			sourcePositions.replaceMapping(node, opSubst);
 			node.replaceBy(opSubst);
 			opSubst.apply(this);
@@ -448,10 +450,14 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
 					new LinkedList<PExpression>(rhsFunction.getParameters()));
+			rhsSubst.setStartPos(rhsFunction.getStartPos());
+			rhsSubst.setEndPos(rhsFunction.getEndPos());
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsIdent,
 					new LinkedList<PExpression>());
+			rhsSubst.setStartPos(rhsIdent.getStartPos());
+			rhsSubst.setEndPos(rhsIdent.getEndPos());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new BParseException(null, sourcePositions
