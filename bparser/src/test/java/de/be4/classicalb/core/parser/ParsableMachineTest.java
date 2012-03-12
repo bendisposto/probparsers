@@ -50,7 +50,7 @@ public class ParsableMachineTest extends AbstractParseMachineTest {
 	private static class PositionTester extends DepthFirstAdapter {
 		@Override
 		public void defaultIn(Node node) {
-			if (node instanceof Start) return;
+			if (node instanceof Start) return; // start does not have position infos
 			assertNotNull(node.getClass().getSimpleName() + " start was null",
 					node.getStartPos());
 			assertNotNull(node.getClass().getSimpleName() + " end was null",
