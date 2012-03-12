@@ -150,9 +150,9 @@ public class BLexer extends Lexer {
 				comment = null;
 				commentBuffer = null;
 				state = State.NORMAL;
-				if (text.startsWith("/*!")) {
+				if (text.startsWith("/*@")) {
 					String pragmaText = "";
-					if (text.endsWith("!*/")) pragmaText = text.substring(3,
+					if (text.endsWith("@*/")) pragmaText = text.substring(3,
 							text.length() - 3).trim();
 					else
 						pragmaText = text.substring(3, text.length() - 2)
