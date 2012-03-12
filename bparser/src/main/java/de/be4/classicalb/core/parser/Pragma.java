@@ -9,13 +9,16 @@ public class Pragma {
 	private final Node container;
 	private final SourcePosition start;
 	private final SourcePosition end;
-	private final Node nearest;
+	private final Node nearestLeft;
+	private final Node successor;
+	private final Node nearestRight;
 
-
-	public Pragma(Pragma p, Node nearest, Node predecessor, Node container) {
-		this.nearest = nearest;
+	public Pragma(Pragma p, Node nearestLeft, Node predecessor, Node container, Node successor, Node nearestRight) {
+		this.nearestLeft = nearestLeft;
 		this.predecessor = predecessor;
 		this.container = container;
+		this.successor = successor;
+		this.nearestRight = nearestRight;
 		this.start = p.start;
 		this.content = p.content;
 		this.end = p.end;
@@ -28,13 +31,25 @@ public class Pragma {
 		content = pragmaText;
 		container = null;
 		predecessor = null;
-		nearest = null;
+		nearestLeft = null;
+		nearestRight = null;
+		successor = null;
 	}
 
 	@Override
 	public String toString() {
-		return "Pragma '"+content + "' " + start + "-" + end + ". Right after '"+getNearest().getClass().getSimpleName()+"/"
-				+ getPredecessor().getClass().getSimpleName() + "' and inside '" + getContainer().getClass().getSimpleName() + "'";
+		return "Pragma '" + content + "' " + start + "-" + end
+				+ ". Right after '" + name(nearestLeft)
+				+ "/" + name(predecessor)
+				+ "', inside '" + name(container)
+				+ "' and before '"+ name(successor)
+				+ "/" + name(nearestRight)
+				+ "'" ;
+	}
+	
+	private String name(Node n) {
+		if (n == null) return "na";
+		return n.getClass().getSimpleName();
 	}
 
 	public SourcePosition getEnd() {
@@ -53,8 +68,16 @@ public class Pragma {
 		return predecessor;
 	}
 
-	public Node getNearest() {
-		return nearest;
+	public Node getNearestLeft() {
+		return nearestLeft;
+	}
+	
+	public Node getNearestRight() {
+		return nearestRight;
+	}
+	
+	public Node getSuccessor() {
+		return successor;
 	}
 
 }

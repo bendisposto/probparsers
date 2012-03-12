@@ -49,7 +49,8 @@ public class ReferencePragmaLocator extends DepthFirstAdapter {
 	public static Pragma locate(Start ast, Pragma p) {
 		ReferencePragmaLocator locator = new ReferencePragmaLocator(p.getStart(), p.getEnd());
 		ast.apply(locator);
-		return new Pragma(p, locator.nearest, locator.predecessor,
-				locator.container);
+//		return new Pragma(p, locator.nearest, locator.predecessor,
+//				locator.container);
+		return p;
 	}
 }
