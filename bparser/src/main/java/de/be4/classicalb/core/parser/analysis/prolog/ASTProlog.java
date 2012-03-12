@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +18,7 @@ import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.AAxiomsContextClause;
 import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
+import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
 import de.be4.classicalb.core.parser.node.ACaseOrSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
@@ -38,14 +38,10 @@ import de.be4.classicalb.core.parser.node.AEventBContextParseUnit;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
-//import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
-//import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
-import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
-import de.be4.classicalb.core.parser.node.AFalsityPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
@@ -63,13 +59,15 @@ import de.be4.classicalb.core.parser.node.AMachineClauseParseUnit;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
 import de.be4.classicalb.core.parser.node.AOpSubstitution;
-import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperation;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AOppatternParseUnit;
 import de.be4.classicalb.core.parser.node.AParallelSubstitution;
 import de.be4.classicalb.core.parser.node.APartitionPredicate;
-import de.be4.classicalb.core.parser.node.APredicateDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APromotesMachineClause;
@@ -87,13 +85,9 @@ import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetsContextClause;
 import de.be4.classicalb.core.parser.node.ASetsMachineClause;
 import de.be4.classicalb.core.parser.node.AStructExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionParseUnit;
 import de.be4.classicalb.core.parser.node.ATheoremsContextClause;
 import de.be4.classicalb.core.parser.node.ATheoremsModelClause;
-import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
-import de.be4.classicalb.core.parser.node.ATruthPredicate;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AValuesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
@@ -535,7 +529,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	// definition
 
 	@Override
-	public void caseAPredicateDefinition(final APredicateDefinition node) {
+	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -544,7 +538,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASubstitutionDefinition(final ASubstitutionDefinition node) {
+	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -553,7 +547,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExpressionDefinition(final AExpressionDefinition node) {
+	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());

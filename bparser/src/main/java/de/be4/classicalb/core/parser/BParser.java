@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,12 +9,11 @@ import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.ASTDisplay;
@@ -24,6 +22,7 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
+import de.be4.classicalb.core.parser.analysis.checking.PragmaLocator;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
@@ -61,6 +60,7 @@ public class BParser {
 	private SourcePositions sourcePositions;
 	private final Definitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
+	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 	private final String fileName;
@@ -223,7 +223,7 @@ public class BParser {
 	 *             were read from the input.</li>
 	 *             <li> {@link BParseException}: This exception is thrown in two
 	 *             situations. On the one hand if the parser throws a
-	 *             {@link ParseException} we convert it into a
+	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
 	 *             the parser has finished. We try to provide a token if a
@@ -294,6 +294,12 @@ public class BParser {
 
 			// perform some semantic checks which are not done in the parser
 			performSemanticChecks(rootNode);
+
+			// locate the pragmas
+
+			Pragma[] locateTasks = lexer.getPragmas().toArray(new Pragma[0]);
+
+			pragmas = PragmaLocator.locate(rootNode, locateTasks);
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -391,11 +397,10 @@ public class BParser {
 
 		try {
 
-			Properties hashes = new Properties();
+			// Properties hashes = new Properties();
 
 			if (options.outputFile != null) {
-				if (hashesStillValid(options.outputFile))
-					return 0;
+				if (hashesStillValid(options.outputFile)) return 0;
 			}
 
 			final long start = System.currentTimeMillis();
@@ -451,35 +456,40 @@ public class BParser {
 	}
 
 	private boolean hashesStillValid(final File outputFile) {
-//		File dir = outputFile.getParentFile();
-//		Properties hashValues = readHashValues(outputFile, dir);
-//		Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
-//		for (Entry<Object, Object> entry : entrySet) {
-//			String file = (String) entry.getKey();
-//			String hash = (String) entry.getValue();
-//			File f = new File(dir + File.separator + file);
-//			try {
-//				if (!(f.exists() || FileDigest.sha(f).equals(hash)))
-//					return false;
-//			} catch (Exception e) {
-//				return false;
-//			}
-//		}
+		// File dir = outputFile.getParentFile();
+		// Properties hashValues = readHashValues(outputFile, dir);
+		// Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
+		// for (Entry<Object, Object> entry : entrySet) {
+		// String file = (String) entry.getKey();
+		// String hash = (String) entry.getValue();
+		// File f = new File(dir + File.separator + file);
+		// try {
+		// if (!(f.exists() || FileDigest.sha(f).equals(hash)))
+		// return false;
+		// } catch (Exception e) {
+		// return false;
+		// }
+		// }
 		return false;
 	}
 
-	private Properties readHashValues(final File target, final File dir) {
-		String name = target.getName();
-		Properties p = new Properties();
-		String hashfile = name + ".hashes";
-		File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-		if (!hf.exists())
-			return p;
-		try {
-			p.load(new BufferedInputStream(new FileInputStream(hf)));
-		} catch (Exception e) {
-			// ignore
-		}
-		return p;
+	public List<Pragma> getPragmas() {
+		return pragmas;
 	}
+
+	// private Properties readHashValues(final File target, final File dir) {
+	// String name = target.getName();
+	// Properties p = new Properties();
+	// String hashfile = name + ".hashes";
+	// File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
+	// if (!hf.exists())
+	// return p;
+	// try {
+	// p.load(new BufferedInputStream(new FileInputStream(hf)));
+	// } catch (Exception e) {
+	// // ignore
+	// }
+	// return p;
+	// }
+
 }

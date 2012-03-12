@@ -386,10 +386,10 @@ definition_list {-> definition*} =
 	{multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
 
 definition {-> definition} =
-	{predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate(name, [parameters.expression], rhs.predicate)} | 
-	{substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l2 {-> New definition.substitution(name, [parameters.expression], rhs.substitution)} |
-	{expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression(name, [parameters.expression], rhs.expression)} |
-	{file} [filename]:string_literal {-> New definition.file(filename)};
+	{predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} | 
+	{substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l2 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
+	{expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
+	{file} [filename]:string_literal {-> New definition.file_definition(filename)};
 	
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
 
@@ -886,10 +886,10 @@ machine_clause =
 machine_reference = [machine_name]:identifier_literal* [parameters]:expression* ;
 
 definition =
-	{predicate} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate | 
-	{substitution} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
-	{expression} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
-	{file} [filename]:string_literal ;
+	{predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate | 
+	{substitution_definition} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
+	{expression_definition} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
+	{file_definition} [filename]:string_literal ;
 
 set =
 	{deferred_set} [identifier]:identifier_literal* |

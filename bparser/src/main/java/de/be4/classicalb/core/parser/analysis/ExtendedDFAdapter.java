@@ -43,7 +43,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	 * @param parent
 	 *            The parent {@link Node} of the list.
 	 */
-	public void beginList(@SuppressWarnings("unused") final Node parent) {
+	public void beginList(final Node parent) {
 		// Do nothing
 	}
 
@@ -53,8 +53,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	 * 
 	 * @param parent
 	 */
-	public void betweenListElements(
-			@SuppressWarnings("unused") final Node parent) {
+	public void betweenListElements(final Node parent) {
 		// Do nothing
 	}
 
@@ -64,7 +63,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	 * @param parent
 	 *            The parent {@link Node} of the list.
 	 */
-	public void endList(@SuppressWarnings("unused") final Node parent) {
+	public void endList( final Node parent) {
 		// Do nothing
 	}
 
@@ -85,7 +84,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	 * 
 	 * @param parent
 	 */
-	public void betweenChildren(@SuppressWarnings("unused") final Node parent) {
+	public void betweenChildren(final Node parent) {
 		// Do nothing
 	}
 
@@ -240,8 +239,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -262,8 +261,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final ADefinitionsMachineClause node) {
 		inADefinitionsMachineClause(node);
 		{
-			final List<PDefinition> copy = new ArrayList<PDefinition>(node
-					.getDefinitions());
+			final List<PDefinition> copy = new ArrayList<PDefinition>(
+					node.getDefinitions());
 			beginList(node);
 			for (final Iterator<PDefinition> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -283,8 +282,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseASeesMachineClause(final ASeesMachineClause node) {
 		inASeesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getMachineNames());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getMachineNames());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -304,8 +303,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAPromotesMachineClause(final APromotesMachineClause node) {
 		inAPromotesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getMachineNames());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getMachineNames());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -325,8 +324,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAUsesMachineClause(final AUsesMachineClause node) {
 		inAUsesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getMachineNames());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getMachineNames());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -341,7 +340,6 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		outAUsesMachineClause(node);
 	}
-
 
 	@Override
 	public void caseAIncludesMachineClause(final AIncludesMachineClause node) {
@@ -410,8 +408,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseASetsMachineClause(final ASetsMachineClause node) {
 		inASetsMachineClause(node);
 		{
-			final List<PSet> copy = new ArrayList<PSet>(node
-					.getSetDefinitions());
+			final List<PSet> copy = new ArrayList<PSet>(
+					node.getSetDefinitions());
 			beginList(node);
 			for (final Iterator<PSet> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -431,8 +429,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
 		inAVariablesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -453,8 +451,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AConcreteVariablesMachineClause node) {
 		inAConcreteVariablesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -475,8 +473,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AAbstractConstantsMachineClause node) {
 		inAAbstractConstantsMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -496,8 +494,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAConstantsMachineClause(final AConstantsMachineClause node) {
 		inAConstantsMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -555,8 +553,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAAssertionsMachineClause(final AAssertionsMachineClause node) {
 		inAAssertionsMachineClause(node);
 		{
-			final List<PPredicate> copy = new ArrayList<PPredicate>(node
-					.getPredicates());
+			final List<PPredicate> copy = new ArrayList<PPredicate>(
+					node.getPredicates());
 			beginList(node);
 			for (final Iterator<PPredicate> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -576,8 +574,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAValuesMachineClause(final AValuesMachineClause node) {
 		inAValuesMachineClause(node);
 		{
-			final List<PValuesEntry> copy = new ArrayList<PValuesEntry>(node
-					.getEntries());
+			final List<PValuesEntry> copy = new ArrayList<PValuesEntry>(
+					node.getEntries());
 			beginList(node);
 			for (final Iterator<PValuesEntry> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -598,8 +596,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final ALocalOperationsMachineClause node) {
 		inALocalOperationsMachineClause(node);
 		{
-			final List<POperation> copy = new ArrayList<POperation>(node
-					.getOperations());
+			final List<POperation> copy = new ArrayList<POperation>(
+					node.getOperations());
 			beginList(node);
 			for (final Iterator<POperation> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -619,8 +617,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
 		inAOperationsMachineClause(node);
 		{
-			final List<POperation> copy = new ArrayList<POperation>(node
-					.getOperations());
+			final List<POperation> copy = new ArrayList<POperation>(
+					node.getOperations());
 			beginList(node);
 			for (final Iterator<POperation> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -656,8 +654,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -674,15 +672,15 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAPredicateDefinition(final APredicateDefinition node) {
-		inAPredicateDefinition(node);
+	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+		inAPredicateDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -699,19 +697,19 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outAPredicateDefinition(node);
+		outAPredicateDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseASubstitutionDefinition(final ASubstitutionDefinition node) {
-		inASubstitutionDefinition(node);
+	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+		inASubstitutionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -728,19 +726,19 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outASubstitutionDefinition(node);
+		outASubstitutionDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseAExpressionDefinition(final AExpressionDefinition node) {
-		inAExpressionDefinition(node);
+	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+		inAExpressionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -757,16 +755,16 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		if (node.getRhs() != null) {
 			node.getRhs().apply(this);
 		}
-		outAExpressionDefinition(node);
+		outAExpressionDefinitionDefinition(node);
 	}
 
 	@Override
-	public void caseAFileDefinition(final AFileDefinition node) {
-		inAFileDefinition(node);
+	public void caseAFileDefinitionDefinition(final AFileDefinitionDefinition node) {
+		inAFileDefinitionDefinition(node);
 		if (node.getFilename() != null) {
 			node.getFilename().apply(this);
 		}
-		outAFileDefinition(node);
+		outAFileDefinitionDefinition(node);
 	}
 
 	@Override
@@ -810,8 +808,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getElements());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getElements());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -856,8 +854,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAOperation(final AOperation node) {
 		inAOperation(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getReturnValues());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getReturnValues());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -888,8 +886,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -971,12 +969,11 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAForallPredicate(
-			final AForallPredicate node) {
+	public void caseAForallPredicate(final AForallPredicate node) {
 		inAForallPredicate(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -997,12 +994,11 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExistsPredicate(
-			final AExistsPredicate node) {
+	public void caseAExistsPredicate(final AExistsPredicate node) {
 		inAExistsPredicate(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1088,8 +1084,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASubsetStrictPredicate(
-			final ASubsetStrictPredicate node) {
+	public void caseASubsetStrictPredicate(final ASubsetStrictPredicate node) {
 		inASubsetStrictPredicate(node);
 		if (node.getLeft() != null) {
 			node.getLeft().apply(this);
@@ -1188,8 +1183,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1526,8 +1521,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAGeneralSumExpression(final AGeneralSumExpression node) {
 		inAGeneralSumExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1556,8 +1551,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AGeneralProductExpression node) {
 		inAGeneralProductExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1585,8 +1580,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseACoupleExpression(final ACoupleExpression node) {
 		inACoupleExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getList());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getList());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1607,8 +1602,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AComprehensionSetExpression node) {
 		inAComprehensionSetExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1628,14 +1623,14 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAComprehensionSetExpression(node);
 	}
 
-    /* todo: check this special case */
+	/* todo: check this special case */
 	@Override
 	public void caseAProverComprehensionSetExpression(
 			final AProverComprehensionSetExpression node) {
 		inAProverComprehensionSetExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1695,8 +1690,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		inASetExtensionExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getExpressions());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getExpressions());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1789,8 +1784,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AQuantifiedUnionExpression node) {
 		inAQuantifiedUnionExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -1819,8 +1814,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final AQuantifiedIntersectionExpression node) {
 		inAQuantifiedIntersectionExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2231,8 +2226,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseALambdaExpression(final ALambdaExpression node) {
 		inALambdaExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2330,8 +2325,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final ASequenceExtensionExpression node) {
 		inASequenceExtensionExpression(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getExpression());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getExpression());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2483,8 +2478,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2508,8 +2503,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2727,8 +2722,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAStructExpression(final AStructExpression node) {
 		inAStructExpression(node);
 		{
-			final List<PRecEntry> copy = new ArrayList<PRecEntry>(node
-					.getEntries());
+			final List<PRecEntry> copy = new ArrayList<PRecEntry>(
+					node.getEntries());
 			beginList(node);
 			for (final Iterator<PRecEntry> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2748,8 +2743,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseARecExpression(final ARecExpression node) {
 		inARecExpression(node);
 		{
-			final List<PRecEntry> copy = new ArrayList<PRecEntry>(node
-					.getEntries());
+			final List<PRecEntry> copy = new ArrayList<PRecEntry>(
+					node.getEntries());
 			beginList(node);
 			for (final Iterator<PRecEntry> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2810,8 +2805,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAAssignSubstitution(final AAssignSubstitution node) {
 		inAAssignSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getLhsExpression());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getLhsExpression());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2826,8 +2821,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getRhsExpressions());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getRhsExpressions());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2874,8 +2869,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAChoiceSubstitution(final AChoiceSubstitution node) {
 		inAChoiceSubstitution(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2912,8 +2907,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getElsifSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getElsifSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -2958,8 +2953,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getWhenSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getWhenSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3000,8 +2995,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getEitherExpr());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getEitherExpr());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3020,8 +3015,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getOrSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getOrSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3045,8 +3040,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseACaseOrSubstitution(final ACaseOrSubstitution node) {
 		inACaseOrSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getExpressions());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getExpressions());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3070,8 +3065,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAAnySubstitution(final AAnySubstitution node) {
 		inAAnySubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3099,8 +3094,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseALetSubstitution(final ALetSubstitution node) {
 		inALetSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3129,8 +3124,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 			final ABecomesElementOfSubstitution node) {
 		inABecomesElementOfSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3154,8 +3149,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseABecomesSuchSubstitution(final ABecomesSuchSubstitution node) {
 		inABecomesSuchSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3179,8 +3174,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAVarSubstitution(final AVarSubstitution node) {
 		inAVarSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3204,8 +3199,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseASequenceSubstitution(final ASequenceSubstitution node) {
 		inASequenceSubstitution(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3230,7 +3225,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAFuncOpSubstitution(node);
 	}
 
-    /*    todo : investigate: why this special case */
+	/* todo : investigate: why this special case */
 	@Override
 	public void caseAOpSubstitution(final AOpSubstitution node) {
 		inAOpSubstitution(node);
@@ -3239,8 +3234,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3256,15 +3251,13 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAOpSubstitution(node);
 	}
 
-
-
 	@Override
 	public void caseAOperationCallSubstitution(
 			final AOperationCallSubstitution node) {
 		inAOperationCallSubstitution(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getResultIdentifiers());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getResultIdentifiers());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3295,8 +3288,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3337,8 +3330,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAParallelSubstitution(final AParallelSubstitution node) {
 		inAParallelSubstitution(node);
 		{
-			final List<PSubstitution> copy = new ArrayList<PSubstitution>(node
-					.getSubstitutions());
+			final List<PSubstitution> copy = new ArrayList<PSubstitution>(
+					node.getSubstitutions());
 			beginList(node);
 			for (final Iterator<PSubstitution> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -3362,8 +3355,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		betweenChildren(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node
-					.getParameters());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getParameters());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
