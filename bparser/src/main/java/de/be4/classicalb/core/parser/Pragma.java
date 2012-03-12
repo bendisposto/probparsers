@@ -20,7 +20,7 @@ public class Pragma {
 		this.successor = successor;
 		this.nearestRight = nearestRight;
 		this.start = p.start;
-		this.content = p.content;
+		this.content = p.getContent();
 		this.end = p.end;
 	}
 
@@ -38,7 +38,7 @@ public class Pragma {
 
 	@Override
 	public String toString() {
-		return "Pragma '" + content + "' " + start + "-" + end
+		return "Pragma '" + getContent() + "' " + start + "-" + end
 				+ ". Right after '" + name(nearestLeft)
 				+ "/" + name(predecessor)
 				+ "', inside '" + name(container)
@@ -78,6 +78,10 @@ public class Pragma {
 	
 	public Node getSuccessor() {
 		return successor;
+	}
+
+	public String getContent() {
+		return content;
 	}
 
 }

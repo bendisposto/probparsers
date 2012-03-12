@@ -19,6 +19,7 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.Pragma;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
@@ -81,17 +82,25 @@ public class RecursiveMachineLoader {
 				true, positions);
 	}
 
+	public void printAsProlog(final PrintWriter out,
+			final boolean useIndention, List<Pragma> pragmas) {
+		final IPrologTermOutput pout = new PrologTermOutput(out, useIndention);
+		printAsProlog(pout, pragmas);
+
+	}
+
 	public void printAsProlog(final PrintWriter out, final boolean useIndention) {
 		final IPrologTermOutput pout = new PrologTermOutput(out, useIndention);
-		printAsProlog(pout);
+		printAsProlog(pout, new ArrayList<Pragma>());
 	}
 
 	/**
 	 * Prints the machines loaded by {@link #loadAllMachines(Start)}.
 	 * 
 	 * @param pout
+	 * @param pragmas
 	 */
-	public void printAsProlog(final IPrologTermOutput pout) {
+	public void printAsProlog(final IPrologTermOutput pout, List<Pragma> pragmas) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
 				nodeIds);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
@@ -124,7 +133,32 @@ public class RecursiveMachineLoader {
 			pout.closeTerm();
 			pout.fullstop();
 		}
+
+		NodeIdAssignment ids = pprinter.nodeIds;
+		pout.openTerm("pragmas");
+		pout.openList();
+		for (Pragma pragma : pragmas) {
+			pout.openTerm("pragma");
+			Integer pred = ids.lookup(pragma.getPredecessor());
+			String predecessor = pred == null ? "start" : pred.toString();
+			pout.printAtomOrNumber(predecessor);
+			Integer cont = ids.lookup(pragma.getContainer());
+			String container = cont == null ? "start" : cont.toString();
+			pout.printAtomOrNumber(container);
+			Integer succ = ids.lookup(pragma.getSuccessor());
+			String successor = succ == null ? "eof" : succ.toString();
+			pout.printAtomOrNumber(successor);
+			pout.printAtom(pragma.getContent());
+			pout.closeTerm();
+		}
+		pout.closeList();
+		pout.closeTerm();
+		pout.fullstop();
 		pout.flush();
+	}
+
+	public void printAsProlog(final IPrologTermOutput pout) {
+		printAsProlog(pout, new ArrayList<Pragma>());
 	}
 
 	private void loadMachine(final Set<String> ancestors,
@@ -160,8 +194,7 @@ public class RecursiveMachineLoader {
 		for (int i = 0; i < SUFFICES.length; i++) {
 			final String suffix = SUFFICES[i];
 			final File file = new File(prefix + machineName + suffix);
-			if (file.exists())
-				return file;
+			if (file.exists()) return file;
 		}
 		throw new BException(null, "Machine file not found: " + machineName,
 				null);
@@ -213,7 +246,7 @@ public class RecursiveMachineLoader {
 		final Set<String> cycles = new TreeSet<String>(ancestors);
 		intersect(cycles, references);
 		if (!cycles.isEmpty())
-			// TODO[dp, 22.04.2008] Use sensible exception
+		// TODO[dp, 22.04.2008] Use sensible exception
 			throw new IllegalStateException("cycle detected");
 	}
 
