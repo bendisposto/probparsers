@@ -82,30 +82,30 @@ public class BParser {
 		final SourcePositions positions = withLineInfo ? parser
 				.getSourcePositions() : null;
 		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions());
-		rml.printAsProlog(new PrintWriter(out), idention);
+		rml.printAsProlog(new PrintWriter(out), idention, parser.getPragmas());
 	}
 
-	private static String getASTasFastProlog(final BParser parser,
-			final File bfile, final Start tree) throws BException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-				bfile.getParent());
-		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
-		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
-		rml.printAsProlog(structuredPrologOutput);
-		Collection<PrologTerm> sentences = structuredPrologOutput
-				.getSentences();
-		StructuredPrologOutput output = new StructuredPrologOutput();
-
-		output.openList();
-		for (PrologTerm term : sentences) {
-			output.printTerm(term);
-		}
-		output.closeList();
-		output.fullstop();
-
-		FastReadTransformer transformer = new FastReadTransformer(output);
-		return transformer.write();
-	}
+//	private static String getASTasFastProlog(final BParser parser,
+//			final File bfile, final Start tree) throws BException {
+//		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
+//				bfile.getParent());
+//		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+//		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
+//		rml.printAsProlog(structuredPrologOutput);
+//		Collection<PrologTerm> sentences = structuredPrologOutput
+//				.getSentences();
+//		StructuredPrologOutput output = new StructuredPrologOutput();
+//
+//		output.openList();
+//		for (PrologTerm term : sentences) {
+//			output.printTerm(term);
+//		}
+//		output.closeList();
+//		output.fullstop();
+//
+//		FastReadTransformer transformer = new FastReadTransformer(output);
+//		return transformer.write();
+//	}
 
 	/**
 	 * Parses the input file.
@@ -425,12 +425,12 @@ public class BParser {
 						options.addLineNumbers);
 			}
 			if (options.fastPrologOutput) {
-				try {
-					String fp = getASTasFastProlog(this, bfile, tree);
-					out.println(fp);
-				} catch (Throwable e) {
-					e.printStackTrace();
-				}
+//				try {
+//					String fp = getASTasFastProlog(this, bfile, tree);
+//					out.println(fp);
+//				} catch (Throwable e) {
+//					e.printStackTrace();
+//				}
 			}
 		} catch (final IOException e) {
 			if (options.prologOutput) {
