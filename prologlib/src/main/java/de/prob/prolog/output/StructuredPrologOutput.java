@@ -6,6 +6,7 @@ package de.prob.prolog.output;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Stack;
 
 import de.prob.prolog.term.CompoundPrologTerm;
@@ -120,7 +121,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	public Collection<PrologTerm> getSentences() {
+	public List<PrologTerm> getSentences() {
 		return new ArrayList<PrologTerm>(sentences);
 	}
 
