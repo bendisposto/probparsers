@@ -148,6 +148,15 @@ public class RecursiveMachineLoader {
 			Integer succ = ids.lookup(pragma.getSuccessor());
 			String successor = succ == null ? "eof" : succ.toString();
 			pout.printAtomOrNumber(successor);
+			
+			Integer nearL = ids.lookup(pragma.getNearestLeft());
+			String nearLeft = pred == null ? "start" : pred.toString();
+			pout.printAtomOrNumber(nearLeft);
+			
+			Integer nearR = ids.lookup(pragma.getNearestRight());
+			String nearRight = pred == null ? "eof" : pred.toString();
+			pout.printAtomOrNumber(nearRight);
+			
 			pout.printAtom(pragma.getContent());
 			pout.closeTerm();
 		}
