@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.PositionedNode;
 
 /**
  * Text display of the AST, with (optionally) color output.
@@ -103,8 +104,7 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 		output = indent
 				+ "- "
 				+ setColor(BOLD, FG_CYAN, BG_BLACK)
-				+ node.getClass().getName().substring(
-						node.getClass().getName().lastIndexOf('.') + 1)
+				+ node.getClass().getSimpleName() + ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos()
 				+ treeColor() + "\n" + output;
 
 		// replace any ` with a |
@@ -123,7 +123,7 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 
 		// prepend this line to the output
 		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK)
-				+ ((Token) node).getText() + treeColor() + "\n" + output;
+				+ ((Token) node).getText() + ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n" + output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';
