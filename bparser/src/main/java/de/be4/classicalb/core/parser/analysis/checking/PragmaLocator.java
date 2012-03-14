@@ -55,6 +55,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 	@Override
 	public void defaultIn(Node node) {
 		Node n = node;
+//		System.out.println(n.getClass().getSimpleName());
 		SourcePosition startPos = node.getStartPos();
 		SourcePosition endPos = node.getEndPos();
 		if (startPos != null && endPos != null) {
