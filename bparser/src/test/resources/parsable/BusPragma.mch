@@ -1,4 +1,4 @@
-/*@ vor_der_maschine */
+/*@ version 1.3.5 */
 MACHINE           Bus /*@ */
 
 VARIABLES         tickets, passengers
