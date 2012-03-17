@@ -3,7 +3,7 @@ MACHINE           Bus /*@ dada */
 
 VARIABLES         tickets, passengers
 
-INVARIANT         tickets : NAT & passengers : NAT & tickets <= passengers 
+INVARIANT         /*@ label only typing */ tickets : NAT &  passengers : NAT & /*@ label important */ tickets <= passengers 
 
 INITIALISATION    tickets, passengers := 0,0
 
