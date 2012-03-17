@@ -7,6 +7,9 @@ INVARIANT         /*@ label only typing */ tickets : NAT &  passengers : NAT & /
 
 INITIALISATION    tickets, passengers := 0,0
 
+
+/*@ ltl-assertion "we can always call inc" "GF [inc]" */
+
 OPERATIONS
 
 buy(mm) =

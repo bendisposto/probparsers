@@ -3,6 +3,10 @@ package de.be4.classicalb.core.parser.analysis.pragma.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.cli.PosixParser;
 
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -29,11 +33,28 @@ public class UnknownPragma implements Pragma {
 		this.container = container;
 		this.successor = successor;
 		this.nearestRight = nearestRight;
-		String[] words = raw.getText().trim().split(" ");
-
-		List<String> l = Arrays.asList(words);
+		
+		
+		// Snippet by Jan Goyvaerts, taken from 
+		// http://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
+		List<String> matchList = new ArrayList<String>();
+		Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+		Matcher regexMatcher = regex.matcher(raw.getText());
+		while (regexMatcher.find()) {
+		    if (regexMatcher.group(1) != null) {
+		        // Add double-quoted string without the quotes
+		        matchList.add(regexMatcher.group(1));
+		    } else if (regexMatcher.group(2) != null) {
+		        // Add single-quoted string without the quotes
+		        matchList.add(regexMatcher.group(2));
+		    } else {
+		        // Add unquoted word
+		        matchList.add(regexMatcher.group());
+		    }
+		} 
+		
 		ArrayList<String> a = new ArrayList<String>();
-		for (String string : l) {
+		for (String string : matchList) {
 			if (!string.trim().isEmpty()) a.add(string);
 		}
 
