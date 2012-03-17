@@ -1,5 +1,5 @@
 /*@ vor_der_maschine */
-MACHINE           Bus /*@ dada */
+MACHINE           Bus /*@ */
 
 VARIABLES         tickets, passengers
 
