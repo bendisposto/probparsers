@@ -133,16 +133,18 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			parameters = new LinkedList<PExpression>();
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, sourcePositions
-					.getSourcecodeRange(node), "Expecting operation");
+			throw new BParseException(null,
+					sourcePositions.getSourcecodeRange(node),
+					"Expecting operation");
 		}
 
 		if (type != Type.NoDefinition) {
 			if (type == Type.Substitution || type == Type.ExprOrSubst) {
 				// create DefinitionSubstitution
 				final ADefinitionSubstitution defSubst = new ADefinitionSubstitution(
-						new TDefLiteralSubstitution(idToken.getText(), idToken
-								.getLine(), idToken.getPos()), parameters);
+						new TDefLiteralSubstitution(idToken.getText(),
+								idToken.getLine(), idToken.getPos()),
+						parameters);
 
 				if (type == Type.ExprOrSubst) {
 					// type is determined now => set to Substitution
@@ -150,7 +152,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				}
 
 				// transfer position information
-				if (node instanceof PositionedNode){
+				if (node instanceof PositionedNode) {
 					final PositionedNode posNode = (PositionedNode) node;
 					final PositionedNode newPosNode = (PositionedNode) defSubst;
 					newPosNode.setStartPos(posNode.getStartPos());
@@ -162,8 +164,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				defSubst.apply(this);
 			} else {
 				// finding some other type here is an error!
-				throw new BParseException(null, sourcePositions
-						.getSourcecodeRange(node),
+				throw new BParseException(null,
+						sourcePositions.getSourcecodeRange(node),
 						"Expecting substitution here but found definition with type '"
 								+ type + "'");
 			}
@@ -180,14 +182,12 @@ public class OpSubstitutions extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAExistsPredicate(
-			final AExistsPredicate node) {
+	public void inAExistsPredicate(final AExistsPredicate node) {
 		enterScope(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAForallPredicate(
-			final AForallPredicate node) {
+	public void inAForallPredicate(final AForallPredicate node) {
 		enterScope(node.getIdentifiers());
 	}
 
@@ -240,14 +240,12 @@ public class OpSubstitutions extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outAExistsPredicate(
-			final AExistsPredicate node) {
+	public void outAExistsPredicate(final AExistsPredicate node) {
 		leaveScope(node.getIdentifiers());
 	}
 
 	@Override
-	public void outAForallPredicate(
-			final AForallPredicate node) {
+	public void outAForallPredicate(final AForallPredicate node) {
 		leaveScope(node.getIdentifiers());
 	}
 
@@ -325,8 +323,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				}
 			} else {
 				// finding some other type here is an error!
-				throw new BParseException(null, sourcePositions
-						.getSourcecodeRange(node),
+				throw new BParseException(null,
+						sourcePositions.getSourcecodeRange(node),
 						"Expecting expression here but found definition with type '"
 								+ type + "'");
 			}
@@ -339,11 +337,15 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			node.getIdentifier().apply(this);
 		}
 
-		if (node.getIdentifier() instanceof ADefinitionExpression) {
+		if (node.getIdentifier() instanceof ADefinitionExpression && ((ADefinitionExpression) node
+				.getIdentifier()).getParameters().isEmpty()) {
 			final LinkedList<PExpression> paramList = new LinkedList<PExpression>(
 					node.getParameters());
-			final TIdentifierLiteral identifier = ((ADefinitionExpression) node
-					.getIdentifier()).getDefLiteral();
+
+
+
+				final TIdentifierLiteral identifier = ((ADefinitionExpression) node
+						.getIdentifier()).getDefLiteral();
 
 			if (paramList.size() <= definitions.getParameterCount(identifier
 					.getText())) {
@@ -380,15 +382,15 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 	private ADefinitionExpression replaceWithDefExpression(final Node node,
 			TIdentifierLiteral identifier, final List<PExpression> paramList) {
-		
+
 		final ADefinitionExpression newNode = new ADefinitionExpression();
 		newNode.setDefLiteral(identifier);
 
 		if (paramList != null) {
 			newNode.setParameters(paramList);
 		}
-		
-		if (node instanceof PositionedNode){
+
+		if (node instanceof PositionedNode) {
 			final PositionedNode posNode = (PositionedNode) node;
 			final PositionedNode newPosNode = (PositionedNode) newNode;
 			newPosNode.setStartPos(posNode.getStartPos());
@@ -409,8 +411,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 								.getIdentifier());
 
 				if (scopedVariables.containsKey(identifierString)) {
-					scopedVariables.put(identifierString, scopedVariables
-							.get(identifierString) + 1);
+					scopedVariables.put(identifierString,
+							scopedVariables.get(identifierString) + 1);
 				} else {
 					scopedVariables.put(identifierString, 1);
 				}
@@ -460,8 +462,9 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			rhsSubst.setEndPos(rhsIdent.getEndPos());
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, sourcePositions
-					.getSourcecodeRange(node), "Expecting operation");
+			throw new BParseException(null,
+					sourcePositions.getSourcecodeRange(node),
+					"Expecting operation");
 		}
 
 		final TIdentifierLiteral oldDefId = removedDef.getName();
