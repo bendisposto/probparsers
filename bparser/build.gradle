@@ -57,12 +57,13 @@ jar {
  include '**/*.properties'
 }
 
-task performancePatch << {
+task patches << {
 	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java' )
+	ant.patch(patchfile: 'parserSlurp.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java' )
 }
 
 compileJava { 
- dependsOn = ['genPreparser','genBParser', 'performancePatch',':prologlib:deploy',':parserbase:deploy'] 
+ dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy'] 
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")

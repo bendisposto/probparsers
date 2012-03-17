@@ -1,0 +1,8 @@
+6850c6850
+<         checkResult(elementToCheck);
+---
+>         checkResult(elementToCheck,true);
+10888c10888
+<         checkResult(elementToCheck);
+---
+>         checkResult(elementToCheck, true);

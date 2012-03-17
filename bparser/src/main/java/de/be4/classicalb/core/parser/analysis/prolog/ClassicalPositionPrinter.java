@@ -15,7 +15,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	private IPrologTermOutput pout;
 
 	// to look up the identifier of each node
-	private final NodeIdAssignment nodeIds;
+	public final NodeIdAssignment nodeIds;
 
 	private SourcePositions positions;
 
