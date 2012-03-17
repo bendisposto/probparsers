@@ -1,9 +1,9 @@
-/*@ vor_der_maschine */
-MACHINE           Bus /*@ dada */
+
+MACHINE           Bus
 
 VARIABLES         tickets, passengers
 
-INVARIANT         tickets : NAT & passengers : NAT & tickets <= passengers 
+INVARIANT         tickets : NAT & /*@ label thm1 */passengers : NAT & tickets <= passengers 
 
 INITIALISATION    tickets, passengers := 0,0
 
@@ -23,5 +23,4 @@ dble =
   BEGIN
    tickets, passengers /*@ symbolic */ := 2*tickets, 2*passengers
   END
-/*@ pragma_am_ende */
 END

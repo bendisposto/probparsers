@@ -19,8 +19,8 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
-import de.be4.classicalb.core.parser.Pragma;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
@@ -138,27 +138,7 @@ public class RecursiveMachineLoader {
 		pout.openTerm("pragmas");
 		pout.openList();
 		for (Pragma pragma : pragmas) {
-			pout.openTerm("pragma");
-			Integer pred = ids.lookup(pragma.getPredecessor());
-			String predecessor = pred == null ? "start" : pred.toString();
-			pout.printAtomOrNumber(predecessor);
-			Integer cont = ids.lookup(pragma.getContainer());
-			String container = cont == null ? "start" : cont.toString();
-			pout.printAtomOrNumber(container);
-			Integer succ = ids.lookup(pragma.getSuccessor());
-			String successor = succ == null ? "eof" : succ.toString();
-			pout.printAtomOrNumber(successor);
-			
-			Integer nearL = ids.lookup(pragma.getNearestLeft());
-			String nearLeft = pred == null ? "start" : pred.toString();
-			pout.printAtomOrNumber(nearLeft);
-			
-			Integer nearR = ids.lookup(pragma.getNearestRight());
-			String nearRight = pred == null ? "eof" : pred.toString();
-			pout.printAtomOrNumber(nearRight);
-			
-			pout.printAtom(pragma.getContent());
-			pout.closeTerm();
+			pragma.printProlog(pout, ids);			
 		}
 		pout.closeList();
 		pout.closeTerm();

@@ -7,6 +7,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 
@@ -34,7 +35,7 @@ public class PragmaTest {
 		// System.out.println(input);
 		List<Pragma> pragmas = p.getPragmas();
 		for (Pragma pragma : pragmas) {
-			System.out.println(pragma);
+			System.out.println(pragma.toString());
 		}
 		Assert.assertEquals(number, pragmas.size());
 	}

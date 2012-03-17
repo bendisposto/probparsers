@@ -5,6 +5,7 @@ import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -22,7 +23,7 @@ public class BLexer extends Lexer {
 
 	private TComment comment = null;
 	private StringBuilder commentBuffer = null;
-	private List<Pragma> pragmas = new ArrayList<Pragma>();
+	private List<RawPragma> pragmas = new ArrayList<RawPragma>();
 
 	private final DefinitionTypes definitions;
 
@@ -157,7 +158,7 @@ public class BLexer extends Lexer {
 					else
 						pragmaText = text.substring(3, text.length() - 2)
 								.trim();
-					pragmas.add(new Pragma(token.getStartPos(), token
+					pragmas.add(new RawPragma(token.getStartPos(), token
 							.getEndPos(), pragmaText));
 				}
 			} else {
@@ -166,7 +167,7 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	public List<Pragma> getPragmas() {
+	public List<RawPragma> getPragmas() {
 		return pragmas;
 	}
 

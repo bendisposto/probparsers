@@ -10,7 +10,6 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +21,13 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.PragmaLocator;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
+import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
+import de.be4.classicalb.core.parser.analysis.pragma.PragmaLocator;
+import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
+import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.Couples;
@@ -44,8 +46,6 @@ import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
-import de.prob.prolog.output.StructuredPrologOutput;
-import de.prob.prolog.term.PrologTerm;
 
 public class BParser {
 
@@ -297,7 +297,7 @@ public class BParser {
 
 			// locate the pragmas
 
-			Pragma[] locateTasks = lexer.getPragmas().toArray(new Pragma[0]);
+			RawPragma[] locateTasks = lexer.getPragmas().toArray(new RawPragma[0]);
 
 			pragmas = PragmaLocator.locate(rootNode, locateTasks);
 
