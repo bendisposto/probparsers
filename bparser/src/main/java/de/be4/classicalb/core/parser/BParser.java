@@ -27,7 +27,6 @@ import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaLocator;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
-import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.Couples;

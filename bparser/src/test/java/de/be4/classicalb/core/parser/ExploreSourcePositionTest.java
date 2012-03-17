@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
-import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 

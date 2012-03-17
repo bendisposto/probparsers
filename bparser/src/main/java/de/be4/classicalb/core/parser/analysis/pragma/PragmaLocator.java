@@ -15,6 +15,10 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+/**
+ * @author bendisposto
+ * 
+ */
 public class PragmaLocator extends DepthFirstAdapter {
 
 	private static Map<String, Classifier> classifiers = new HashMap<String, Classifier>();
@@ -24,10 +28,9 @@ public class PragmaLocator extends DepthFirstAdapter {
 		classifiers.put(name, new Classifier(seekFor, argParsers));
 	}
 
+	/* if no argument parser is given or a parser is null we will use identity */
 	static {
-		addClassifier("label", PPredicate.class); // if no argument parser is
-													// given or a parser is null
-													// we will use identity
+		addClassifier("label", PPredicate.class);
 	}
 
 	private Node[] nearestLeft;
@@ -73,8 +76,6 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	@Override
 	public void defaultIn(Node node) {
-		Node n = node;
-		// System.out.println(n.getClass().getSimpleName());
 		SourcePosition startPos = node.getStartPos();
 		SourcePosition endPos = node.getEndPos();
 		if (startPos != null && endPos != null) {
@@ -120,9 +121,10 @@ public class PragmaLocator extends DepthFirstAdapter {
 		List<String> parsedArgs = new ArrayList<String>();
 		List<String> pragmaArguments = p.getPragmaArguments();
 		for (int i = 0; i < pragmaArguments.size(); i++) {
-			parsedArgs.add(classifier.getParser(i).parse(pragmaArguments.get(i)));
+			parsedArgs.add(classifier.getParser(i)
+					.parse(pragmaArguments.get(i)));
 		}
 		Node attachment = classifier.seek(p.getNearestRight());
-		return new ClassifiedPragma(name,attachment, parsedArgs);
+		return new ClassifiedPragma(name, attachment, parsedArgs);
 	}
 }
