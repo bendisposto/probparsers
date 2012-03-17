@@ -24,7 +24,7 @@ public class Classifier {
 	}
 
 	public Node seek(Node start) {
-		if (seek.isInstance(start)) return start;
+		if (start == null || seek.isInstance(start)) return start;
 		return seek(start.parent());
 	}
 }
