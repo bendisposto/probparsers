@@ -134,15 +134,17 @@ public class RecursiveMachineLoader {
 			pout.fullstop();
 		}
 
-		NodeIdAssignment ids = pprinter.nodeIds;
-		pout.openTerm("pragmas");
-		pout.openList();
-		for (Pragma pragma : pragmas) {
-			pragma.printProlog(pout, ids);			
+		if (pragmas.size() > 0) {
+			NodeIdAssignment ids = pprinter.nodeIds;
+			pout.openTerm("pragmas");
+			pout.openList();
+			for (Pragma pragma : pragmas) {
+				pragma.printProlog(pout, ids);
+			}
+			pout.closeList();
+			pout.closeTerm();
+			pout.fullstop();
 		}
-		pout.closeList();
-		pout.closeTerm();
-		pout.fullstop();
 		pout.flush();
 	}
 
