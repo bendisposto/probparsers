@@ -119,8 +119,13 @@ public class UnknownPragma implements Pragma {
 		Integer nearR = ids.lookup(getNearestRight());
 		String nearRight = nearR == null ? "eof" : nearR.toString();
 		pto.printAtomOrNumber(nearRight);
+		pto.openList();
+		pto.printAtom(getPragmaName());
+		for (String arg : getPragmaArguments()) {
+			pto.printAtom(arg);
+		}
+		pto.closeList();
 
-		pto.printAtom(getText());
 		pto.closeTerm();
 	}
 
