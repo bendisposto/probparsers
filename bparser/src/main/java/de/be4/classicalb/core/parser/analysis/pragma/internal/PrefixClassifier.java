@@ -6,14 +6,14 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
-public  class Classifier implements IClassifier {
+public  class PrefixClassifier implements IClassifier {
 
 	protected PragmaParser[] parsers;
 	protected final String[] input;
 	private final Class<? extends Node> clazz;
 
 	
-	public Classifier(String input, Class<? extends Node> clazz) {
+	public PrefixClassifier(String input, Class<? extends Node> clazz) {
 		this.clazz = clazz;
 		this.input = input.split(System.getProperty("line.separator"));
 	}

@@ -8,7 +8,7 @@ import java.util.Map;
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.ClassifiedPragma;
-import de.be4.classicalb.core.parser.analysis.pragma.internal.Classifier;
+import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -28,8 +28,8 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	private PragmaLocator(RawPragma[] p, String input) {
 		this.pragmas = p;
-		classifiers.put("label", new Classifier(input, PPredicate.class));
-		classifiers.put("symbolic", new Classifier(input, PExpression.class));
+		classifiers.put("label", new PrefixClassifier(input, PPredicate.class));
+		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
 	}
 
 	private Node[] nearestLeft;
