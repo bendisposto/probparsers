@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
