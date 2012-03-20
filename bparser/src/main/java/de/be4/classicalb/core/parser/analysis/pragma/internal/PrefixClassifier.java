@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
 import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
+import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
@@ -35,14 +36,20 @@ public  class PrefixClassifier implements IClassifier {
 	}
 	
 	private Node seek(Class<? extends Node> seek,Node start) {
-		if (start == null || seek.isInstance(start)) return start;
+		if (start == null || start instanceof Start || start instanceof EOF || seek.isInstance(start)) return start;
 		return seek(seek, start.parent());
 	}
 
+	
+	
+	
 	public Node seek(UnknownPragma p, Start ast) {
+		Node nearestRight = p.getNearestRight();
 		int li = p.getEnd().getLine() - 1;
 		int ci = p.getEnd().getPos();
 
+		if (li >= input.length || ci >= input[li].length()) return nearestRight;
+		
 		char c = input[li].charAt(ci);
 		while (li < input.length && Character.isWhitespace(c)) {
 			if (ci < input[li].length()) ci++;
@@ -53,7 +60,6 @@ public  class PrefixClassifier implements IClassifier {
 			c = input[li].charAt(ci);
 		}
 
-		Node nearestRight = p.getNearestRight();
 		if (c == '(') {
 			ParamFinder paremFinder = new ParamFinder(new SourcePosition(
 					li + 1, ci), getClazz());
