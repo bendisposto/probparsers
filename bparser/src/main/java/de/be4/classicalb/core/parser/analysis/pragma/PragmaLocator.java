@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.ClassifiedPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixClassifier;
