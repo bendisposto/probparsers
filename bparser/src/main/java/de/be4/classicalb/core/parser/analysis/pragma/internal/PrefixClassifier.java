@@ -9,6 +9,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public  class PrefixClassifier implements IClassifier {
 
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	protected PragmaParser[] parsers;
 	protected final int[] inputSizes;
 	private final Class<? extends Node> clazz;
@@ -18,10 +19,12 @@ public  class PrefixClassifier implements IClassifier {
 	public PrefixClassifier(String input, Class<? extends Node> clazz) {
 		this.input = input;
 		this.clazz = clazz;
-		String[] split = input.split(System.getProperty("line.separator"));
+		String[] split = input.split(LINE_SEPARATOR);
 		inputSizes = new int[split.length];
-		for (int i = 0; i < split.length; i++) {
-			inputSizes[i] = split[i].length()+1;
+		inputSizes[0] = 0;
+		for (int i = 1; i < split.length; i++) {
+			inputSizes[i] = inputSizes[i-1]+split[i-1].length()+LINE_SEPARATOR.length();
+//			System.out.println(inputSizes[i]);
 		}
 	}
 
@@ -51,14 +54,13 @@ public  class PrefixClassifier implements IClassifier {
 	
 	public Node seek(UnknownPragma p, Start ast) {
 		Node nearestRight = p.getNearestRight();
+		
+		if (nearestRight instanceof EOF) return nearestRight;
+		
 		int li = p.getEnd().getLine();
 		int ci = p.getEnd().getPos();
 
-		int pos = 0;
-		for (int i = 0; i < li; i++) {
-			pos += inputSizes[i];
-		}
-		pos += ci;
+		int pos = inputSizes[li-1] + ci-1;
 
 		char c = input.charAt(pos);
 		while (li < input.length() && Character.isWhitespace(c)) {
@@ -67,7 +69,7 @@ public  class PrefixClassifier implements IClassifier {
 
 		if (c == '(') {
 			ParamFinder paremFinder = new ParamFinder(new SourcePosition(
-					li + 1, ci), getClazz());
+					li, ci), getClazz());
 			ast.apply(paremFinder);
 			return paremFinder.getNode();
 		} 
