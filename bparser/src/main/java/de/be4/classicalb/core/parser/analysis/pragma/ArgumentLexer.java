@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.be4.classicalb.core.pragma.lexer.Lexer;
@@ -17,8 +18,11 @@ public class ArgumentLexer {
 	private final Lexer lexer;
 
 	public ArgumentLexer(String input) {
-		lexer = new Lexer(new PushbackReader(new StringReader(input),
-				input.length()));
+		if (input.isEmpty())
+			throw new IllegalArgumentException("input must not be empty");
+		StringReader stringReader = new StringReader(input);
+		PushbackReader in = new PushbackReader(stringReader, input.length());
+		lexer = new Lexer(in);
 	}
 
 	private List<String> split() {
@@ -41,6 +45,7 @@ public class ArgumentLexer {
 	}
 
 	public static List<String> split(String input) {
+		if (input.isEmpty()) return Collections.emptyList();
 		ArgumentLexer lexer = new ArgumentLexer(input);
 		return lexer.split();
 	}
