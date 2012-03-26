@@ -10,13 +10,19 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 public  class PrefixClassifier implements IClassifier {
 
 	protected PragmaParser[] parsers;
-	protected final String[] input;
+	protected final int[] inputSizes;
 	private final Class<? extends Node> clazz;
+	private final String input;
 
 	
 	public PrefixClassifier(String input, Class<? extends Node> clazz) {
+		this.input = input;
 		this.clazz = clazz;
-		this.input = input.split(System.getProperty("line.separator"));
+		String[] split = input.split(System.getProperty("line.separator"));
+		inputSizes = new int[split.length];
+		for (int i = 0; i < split.length; i++) {
+			inputSizes[i] = split[i].length()+1;
+		}
 	}
 
 	public PragmaParser getParser(int i) {
@@ -45,19 +51,18 @@ public  class PrefixClassifier implements IClassifier {
 	
 	public Node seek(UnknownPragma p, Start ast) {
 		Node nearestRight = p.getNearestRight();
-		int li = p.getEnd().getLine() - 1;
+		int li = p.getEnd().getLine();
 		int ci = p.getEnd().getPos();
 
-		if (li >= input.length || ci >= input[li].length()) return nearestRight;
-		
-		char c = input[li].charAt(ci);
-		while (li < input.length && Character.isWhitespace(c)) {
-			if (ci < input[li].length()) ci++;
-			else {
-				ci = 0;
-				li++;
-			}
-			c = input[li].charAt(ci);
+		int pos = 0;
+		for (int i = 0; i < li; i++) {
+			pos += inputSizes[i];
+		}
+		pos += ci;
+
+		char c = input.charAt(pos);
+		while (li < input.length() && Character.isWhitespace(c)) {
+			c = input.charAt(pos++); // find first non-whitespace character
 		}
 
 		if (c == '(') {
