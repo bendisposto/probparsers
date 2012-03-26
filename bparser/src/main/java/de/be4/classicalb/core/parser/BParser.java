@@ -298,7 +298,7 @@ public class BParser {
 
 			RawPragma[] locateTasks = lexer.getPragmas().toArray(new RawPragma[0]);
 
-			pragmas = PragmaLocator.locate(rootNode, locateTasks);
+			pragmas = PragmaLocator.locate(rootNode, locateTasks, input);
 
 			return rootNode;
 		} catch (final LexerException e) {

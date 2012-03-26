@@ -58,6 +58,9 @@ public class RecursiveMachineLoader {
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
 
+	
+	
+	
 	public RecursiveMachineLoader(final String directory) {
 		this.directory = directory;
 		final File dirFile = directory == null ? null : new File(directory);
@@ -102,7 +105,7 @@ public class RecursiveMachineLoader {
 	 */
 	public void printAsProlog(final IPrologTermOutput pout, List<Pragma> pragmas) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
-				nodeIds);
+				getNodeIdMapping());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		// parser version
@@ -199,7 +202,7 @@ public class RecursiveMachineLoader {
 
 		final int fileNumber = files.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
-			nodeIds.assignIdentifiers(fileNumber, current);
+			getNodeIdMapping().assignIdentifiers(fileNumber, current);
 		} else
 			throw new IllegalStateException("machine file is not registered");
 
@@ -254,6 +257,10 @@ public class RecursiveMachineLoader {
 			final Definitions definitions) {
 		final DefInjector defInjector = new DefInjector(definitions);
 		tree.apply(defInjector);
+	}
+
+	public NodeIdAssignment getNodeIdMapping() {
+		return nodeIds;
 	}
 
 	private static class DefInjector extends DepthFirstAdapter {

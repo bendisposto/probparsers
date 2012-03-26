@@ -1,0 +1,15 @@
+Package de.be4.classicalb.core.pragma;
+
+Helpers
+   	quote2 = '"';
+    quote1 = 39;
+   	all_chars = [0 .. 0xffff];
+	all_chars_without_quote1 = [all_chars - quote1];
+	all_chars_without_quote2 = [all_chars - quote2];
+	layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+	wordchar = [all_chars - layout_char];
+  
+Tokens
+ argument = wordchar* | quote1 all_chars_without_quote1* quote1 | quote2 all_chars_without_quote2* quote2;
+ white_space = layout_char+;
+ 

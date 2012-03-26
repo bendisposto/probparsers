@@ -7,11 +7,14 @@ INVARIANT         /*@ label only typing */ tickets : NAT &  passengers : NAT & /
 
 INITIALISATION    tickets, passengers := 0,0
 
+
+/*@ ltl-assertion "we can always call inc" "GF [inc]" */
+
 OPERATIONS
 
 buy(mm) =
-  PRE mm : NAT & tickets + mm <= passengers
-  THEN tickets := tickets + mm
+  PRE mm : NAT & /*@ symbolic */ (tickets + mm) <= passengers
+  THEN tickets := /*@ symbolic */ tickets + mm
   END;
 
 board(nn) =
@@ -21,7 +24,7 @@ board(nn) =
 
 dble =
   BEGIN
-   tickets, passengers /*@ symbolic */ := 2*tickets, 2*passengers
+   tickets, passengers  := 2*tickets, 2*passengers
   END
 /*@ pragma_am_ende */
 END

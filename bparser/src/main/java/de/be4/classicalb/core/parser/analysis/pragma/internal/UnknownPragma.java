@@ -1,9 +1,11 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import de.be4.classicalb.core.parser.analysis.pragma.ArgumentLexer;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.node.Node;
@@ -29,12 +31,14 @@ public class UnknownPragma implements Pragma {
 		this.container = container;
 		this.successor = successor;
 		this.nearestRight = nearestRight;
-		String[] words = raw.getText().trim().split(" ");
 
-		List<String> l = Arrays.asList(words);
+		String text = raw.getText();
+		List<String> matchList = ArgumentLexer.split(text);
+
 		ArrayList<String> a = new ArrayList<String>();
-		for (String string : l) {
-			if (!string.trim().isEmpty()) a.add(string);
+		for (String string : matchList) {
+			String stripped = strip(string);
+			if (!stripped.isEmpty()) a.add(stripped);
 		}
 
 		if (a.isEmpty()) {
@@ -44,6 +48,14 @@ public class UnknownPragma implements Pragma {
 			this.name = a.remove(0);
 			arguments.addAll(a);
 		}
+	}
+
+	private String strip(String string) {
+		if (string.startsWith("'") && string.endsWith("'"))
+			return string.substring(1, string.length() - 1).trim();
+		if (string.startsWith("\"") && string.endsWith("\""))
+			return string.substring(1, string.length() - 1).trim();
+		return string.trim();
 	}
 
 	public String getPragmaName() {
