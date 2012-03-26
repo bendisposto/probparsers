@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.be4.classicalb.core.parser.analysis.pragma.ArgumentLexer;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.node.Node;
@@ -30,29 +31,14 @@ public class UnknownPragma implements Pragma {
 		this.container = container;
 		this.successor = successor;
 		this.nearestRight = nearestRight;
-		
-		
-		// Snippet by Jan Goyvaerts, taken from 
-		// http://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
-		List<String> matchList = new ArrayList<String>();
-		Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-		Matcher regexMatcher = regex.matcher(raw.getText());
-		while (regexMatcher.find()) {
-		    if (regexMatcher.group(1) != null) {
-		        // Add double-quoted string without the quotes
-		        matchList.add(regexMatcher.group(1));
-		    } else if (regexMatcher.group(2) != null) {
-		        // Add single-quoted string without the quotes
-		        matchList.add(regexMatcher.group(2));
-		    } else {
-		        // Add unquoted word
-		        matchList.add(regexMatcher.group());
-		    }
-		} 
-		
+
+		String text = raw.getText();
+		List<String> matchList = ArgumentLexer.split(text);
+
 		ArrayList<String> a = new ArrayList<String>();
 		for (String string : matchList) {
-			if (!string.trim().isEmpty()) a.add(string);
+			String stripped = strip(string);
+			if (!stripped.isEmpty()) a.add(stripped);
 		}
 
 		if (a.isEmpty()) {
@@ -62,6 +48,14 @@ public class UnknownPragma implements Pragma {
 			this.name = a.remove(0);
 			arguments.addAll(a);
 		}
+	}
+
+	private String strip(String string) {
+		if (string.startsWith("'") && string.endsWith("'"))
+			return string.substring(1, string.length() - 1).trim();
+		if (string.startsWith("\"") && string.endsWith("\""))
+			return string.substring(1, string.length() - 1).trim();
+		return string.trim();
 	}
 
 	public String getPragmaName() {
