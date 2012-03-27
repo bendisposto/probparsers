@@ -22,12 +22,13 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * 
  */
 public class PragmaLocator extends DepthFirstAdapter {
+	
 
 	private Map<String, IClassifier> classifiers = new HashMap<String, IClassifier>();
 
 	private PragmaLocator(RawPragma[] p, String input) {
 		this.pragmas = p;
-		classifiers.put("label", new PrefixClassifier(input, PPredicate.class));
+		classifiers.put("label", new PrefixClassifier(input,  PPredicate.class));
 		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
 		classifiers.put("unit", new PrefixClassifier(input, PExpression.class));
 		classifiers.put("conversion", new PrefixClassifier(input, PExpression.class));
@@ -108,7 +109,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 			;
 			list.add(locator.classify(unknownPragma, ast));
 		}
-		return list;
+		return  list;
 	}
 
 	private Pragma classify(UnknownPragma p, Start ast) {
@@ -122,6 +123,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 					.parse(pragmaArguments.get(i)));
 		}
 		Node attachment = classifier.seek(p, ast);
-		return new ClassifiedPragma(name, attachment, parsedArgs);
+		List<String> warnings = classifier.getWarnings();
+		return new ClassifiedPragma(name, attachment, parsedArgs, warnings);
 	}
 }
