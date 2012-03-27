@@ -29,6 +29,8 @@ public class PragmaLocator extends DepthFirstAdapter {
 		this.pragmas = p;
 		classifiers.put("label", new PrefixClassifier(input, PPredicate.class));
 		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
+		classifiers.put("unit", new PrefixClassifier(input, PExpression.class));
+		classifiers.put("conversion", new PrefixClassifier(input, PExpression.class));
 	}
 
 	private Node[] nearestLeft;
