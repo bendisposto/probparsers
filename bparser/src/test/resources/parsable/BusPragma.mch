@@ -1,7 +1,7 @@
 /*@ version 1.3.5 */
 MACHINE           Bus /*@ */
 
-VARIABLES         tickets, passengers
+VARIABLES         /*@ unit m */tickets, passengers
 
 INVARIANT         /*@ label only typing */ tickets : NAT &  passengers : NAT & /*@ label important */ tickets <= passengers 
 
@@ -13,7 +13,7 @@ INITIALISATION    tickets, passengers := 0,0
 OPERATIONS
 
 buy(mm) =
-  PRE mm : NAT & /*@ symbolic */ (tickets + mm) <= passengers
+  PRE mm : NAT & /*@ symbolic */ /*@ conversion m to cm */ (tickets + mm) <= passengers
   THEN tickets := /*@ symbolic */ tickets + mm
   END;
 
