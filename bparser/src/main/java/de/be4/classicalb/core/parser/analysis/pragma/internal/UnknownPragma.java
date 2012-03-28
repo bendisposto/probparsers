@@ -137,6 +137,8 @@ public class UnknownPragma implements Pragma {
 			pto.printAtom(arg);
 		}
 		pto.closeList();
+		pto.openList(); // no warnings
+		pto.closeList();
 
 		pto.closeTerm();
 	}

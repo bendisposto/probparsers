@@ -12,11 +12,13 @@ public class ClassifiedPragma implements Pragma {
 	private final String name;
 	private final Node attachedTo;
 	private final List<String> arguments;
+	private final List<String> warnings;
 
-	public ClassifiedPragma(String name, Node attachedTo, List<String> arguments) {
+	public ClassifiedPragma(String name, Node attachedTo, List<String> arguments, List<String> warnings) {
 		this.name = name;
 		this.attachedTo = attachedTo;
 		this.arguments = arguments;
+		this.warnings = warnings;
 	}
 
 	public void printProlog(IPrologTermOutput pto, NodeIdAssignment ids) {
@@ -24,6 +26,10 @@ public class ClassifiedPragma implements Pragma {
 		String node = id == null ? "none" : String.valueOf(id);
 		pto.openTerm(name).printAtomOrNumber(node).openList();
 		for (String argument : arguments) {
+			pto.printAtom(argument);
+		}
+		pto.closeList().openList();
+		for (String argument : warnings) {
 			pto.printAtom(argument);
 		}
 		pto.closeList().closeTerm();

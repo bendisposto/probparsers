@@ -14,7 +14,7 @@ OPERATIONS
 
 buy(mm) =
   PRE mm : NAT & /*@ symbolic */ /*@ conversion m to cm */ (tickets + mm) <= passengers
-  THEN tickets := /*@ symbolic */ tickets + mm
+  THEN tickets /*@ symbolic */  := tickets + mm
   END;
 
 board(nn) =
