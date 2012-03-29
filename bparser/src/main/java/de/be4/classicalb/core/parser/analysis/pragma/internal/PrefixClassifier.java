@@ -6,6 +6,9 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
+import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
@@ -19,7 +22,7 @@ public class PrefixClassifier implements IClassifier {
 	protected final int[] inputSizes;
 	private final Class<? extends Node> clazz;
 	private final String input;
-	private  List<String> warnings;
+	private List<String> warnings;
 
 	public PrefixClassifier(String input, Class<? extends Node> clazz) {
 		this.input = input;
@@ -56,6 +59,10 @@ public class PrefixClassifier implements IClassifier {
 		return seek(seek, start.parent());
 	}
 
+	private boolean validExpIdentifier(char c) {
+		return (Character.isJavaIdentifierPart(c));
+	}
+
 	public Node seek(UnknownPragma p, Start ast) {
 		this.warnings = new ArrayList<String>();
 		Node nearestRight = p.getNearestRight();
@@ -78,7 +85,11 @@ public class PrefixClassifier implements IClassifier {
 			c = input.charAt(pos); // find first non-whitespace character
 			if (pos < input.length() - 1) next = input.substring(pos, pos + 2);
 			pos++;
-			if (next.equals("*/")) {skip = false; pos++; c = input.charAt(pos++); }
+			if (next.equals("*/")) {
+				skip = false;
+				pos++;
+				c = input.charAt(pos++);
+			}
 			if (next.equals("/*")) skip = true;
 		}
 
@@ -89,7 +100,21 @@ public class PrefixClassifier implements IClassifier {
 			return paremFinder.getNode();
 		}
 
-		if (!Character.isJavaIdentifierPart(c)) {
+		if (c == '%') {
+			SpecialTypeFinder lambdaFinder = new SpecialTypeFinder(nearestRight,ALambdaExpression.class);
+			return lambdaFinder.find();
+		}
+		
+		if (c == '!') {
+			SpecialTypeFinder universalFinder = new SpecialTypeFinder(nearestRight,AForallPredicate.class);
+			return universalFinder.find();
+		}
+		if (c == '%') {
+			SpecialTypeFinder existentialFinder = new SpecialTypeFinder(nearestRight,AExistsPredicate.class);
+			return existentialFinder.find();
+		}
+
+		if (!validExpIdentifier(c)) {
 			warnings.add("maybe_illplaced");
 		}
 
@@ -102,7 +127,5 @@ public class PrefixClassifier implements IClassifier {
 	public List<String> getWarnings() {
 		return Collections.unmodifiableList(warnings);
 	}
-	
-	
 
 }

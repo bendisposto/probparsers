@@ -3,7 +3,9 @@ MACHINE           Bus /*@ */
 
 VARIABLES         /*@ unit m */tickets, passengers
 
-INVARIANT         /*@ label only typing */ tickets : NAT &  passengers : NAT & /*@ label important */ tickets <= passengers 
+INVARIANT          !x.(x : NAT => x:INT) &
+                   f2 = /*@ symbolic */ %x.(x:NATURAL1 & x mod 2 = 0|x/2) &
+                  /*@ label only typing */ tickets : NAT &  passengers : NAT & /*@ label important */ tickets <= passengers & op = foo(5)
 
 INITIALISATION    tickets, passengers := 0,0
 
@@ -25,6 +27,9 @@ board(nn) =
 dble =
   BEGIN
    tickets, passengers  := 2*tickets, 2*passengers
-  END
+  END;
+  
+ r <-- foo(x) = BEGIN r := 6 END
+  
 /*@ pragma_am_ende */
 END
