@@ -2,8 +2,6 @@ package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.pragma.ArgumentLexer;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
