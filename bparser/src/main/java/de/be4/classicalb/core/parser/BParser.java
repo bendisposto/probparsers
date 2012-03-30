@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -10,6 +11,7 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,31 +82,37 @@ public class BParser {
 				bfile.getParent());
 		final SourcePositions positions = withLineInfo ? parser
 				.getSourcePositions() : null;
-		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions());
-		rml.printAsProlog(new PrintWriter(out), idention, parser.getPragmas());
+
+		List<Pragma> pragmas = new ArrayList<Pragma>();
+		pragmas.addAll(parser.getPragmas());
+
+		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
+				pragmas);
+		rml.printAsProlog(new PrintWriter(out), idention);
 	}
 
-//	private static String getASTasFastProlog(final BParser parser,
-//			final File bfile, final Start tree) throws BException {
-//		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-//				bfile.getParent());
-//		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
-//		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
-//		rml.printAsProlog(structuredPrologOutput);
-//		Collection<PrologTerm> sentences = structuredPrologOutput
-//				.getSentences();
-//		StructuredPrologOutput output = new StructuredPrologOutput();
-//
-//		output.openList();
-//		for (PrologTerm term : sentences) {
-//			output.printTerm(term);
-//		}
-//		output.closeList();
-//		output.fullstop();
-//
-//		FastReadTransformer transformer = new FastReadTransformer(output);
-//		return transformer.write();
-//	}
+	// private static String getASTasFastProlog(final BParser parser,
+	// final File bfile, final Start tree) throws BException {
+	// final RecursiveMachineLoader rml = new RecursiveMachineLoader(
+	// bfile.getParent());
+	// rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+	// StructuredPrologOutput structuredPrologOutput = new
+	// StructuredPrologOutput();
+	// rml.printAsProlog(structuredPrologOutput);
+	// Collection<PrologTerm> sentences = structuredPrologOutput
+	// .getSentences();
+	// StructuredPrologOutput output = new StructuredPrologOutput();
+	//
+	// output.openList();
+	// for (PrologTerm term : sentences) {
+	// output.printTerm(term);
+	// }
+	// output.closeList();
+	// output.fullstop();
+	//
+	// FastReadTransformer transformer = new FastReadTransformer(output);
+	// return transformer.write();
+	// }
 
 	/**
 	 * Parses the input file.
@@ -135,6 +143,12 @@ public class BParser {
 	public Start parseFile(final File machine, final boolean verbose,
 			final IFileContentProvider contentProvider) throws IOException,
 			BException {
+		String content = readFile(machine);
+		return parse(content, verbose, contentProvider);
+	}
+
+	public final String readFile(final File machine)
+			throws FileNotFoundException, IOException {
 		final InputStreamReader inputStreamReader = new InputStreamReader(
 				new FileInputStream(machine));
 
@@ -144,8 +158,8 @@ public class BParser {
 		while ((read = inputStreamReader.read(buffer)) >= 0) {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
-
-		return parse(builder.toString(), verbose, contentProvider);
+		String content = builder.toString();
+		return content;
 	}
 
 	/**
@@ -296,7 +310,7 @@ public class BParser {
 
 			// locate the pragmas
 
-			RawPragma[] locateTasks = lexer.getPragmas().toArray(new RawPragma[0]);
+			List<RawPragma> locateTasks = lexer.getPragmas();
 
 			pragmas = PragmaLocator.locate(rootNode, locateTasks, input);
 
@@ -424,12 +438,12 @@ public class BParser {
 						options.addLineNumbers);
 			}
 			if (options.fastPrologOutput) {
-//				try {
-//					String fp = getASTasFastProlog(this, bfile, tree);
-//					out.println(fp);
-//				} catch (Throwable e) {
-//					e.printStackTrace();
-//				}
+				// try {
+				// String fp = getASTasFastProlog(this, bfile, tree);
+				// out.println(fp);
+				// } catch (Throwable e) {
+				// e.printStackTrace();
+				// }
 			}
 		} catch (final IOException e) {
 			if (options.prologOutput) {

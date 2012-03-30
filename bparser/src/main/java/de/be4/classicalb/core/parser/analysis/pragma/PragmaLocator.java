@@ -26,7 +26,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	private Map<String, IClassifier> classifiers = new HashMap<String, IClassifier>();
 
-	private PragmaLocator(RawPragma[] p, String input) {
+	private PragmaLocator(List<RawPragma> p, String input) {
 		this.pragmas = p;
 		classifiers.put("label", new PrefixClassifier(input,  PPredicate.class));
 		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
@@ -39,11 +39,11 @@ public class PragmaLocator extends DepthFirstAdapter {
 	private Node[] predecessor;
 	private Node[] successor;
 	private Node[] container;
-	private final RawPragma[] pragmas;
+	private final List<RawPragma> pragmas;
 
 	@Override
 	public void inStart(Start node) {
-		for (int i = 0; i < pragmas.length; i++) {
+		for (int i = 0; i < pragmas.size(); i++) {
 			nearestLeft[i] = node;
 			container[i] = node;
 		}
@@ -51,7 +51,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	@Override
 	public void caseEOF(EOF node) {
-		for (int i = 0; i < pragmas.length; i++) {
+		for (int i = 0; i < pragmas.size(); i++) {
 			if (nearestRight[i] == null) nearestRight[i] = node;
 			if (successor[i] == null) successor[i] = node;
 		}
@@ -62,9 +62,9 @@ public class PragmaLocator extends DepthFirstAdapter {
 		SourcePosition endPos = node.getEndPos();
 		SourcePosition startPos = node.getStartPos();
 		if (endPos == null) return; // no source info available
-		for (int i = 0; i < pragmas.length; i++) {
-			SourcePosition start = pragmas[i].getStart();
-			SourcePosition end = pragmas[i].getEnd();
+		for (int i = 0; i < pragmas.size(); i++) {
+			SourcePosition start = pragmas.get(i).getStart();
+			SourcePosition end = pragmas.get(i).getEnd();
 			if (endPos.compareTo(start) <= 0) predecessor[i] = node;
 			if (nearestRight[i] == null && end.compareTo(startPos) <= 0)
 				nearestRight[i] = node;
@@ -76,9 +76,9 @@ public class PragmaLocator extends DepthFirstAdapter {
 		SourcePosition startPos = node.getStartPos();
 		SourcePosition endPos = node.getEndPos();
 		if (startPos != null && endPos != null) {
-			for (int i = 0; i < pragmas.length; i++) {
-				SourcePosition start = pragmas[i].getStart();
-				SourcePosition end = pragmas[i].getEnd();
+			for (int i = 0; i < pragmas.size(); i++) {
+				SourcePosition start = pragmas.get(i).getStart();
+				SourcePosition end = pragmas.get(i).getEnd();
 				if (endPos.compareTo(start) <= 0) nearestLeft[i] = node;
 				if (startPos.compareTo(start) <= 0
 						&& endPos.compareTo(end) >= 0) container[i] = node;
@@ -88,10 +88,10 @@ public class PragmaLocator extends DepthFirstAdapter {
 		}
 	}
 
-	public static ArrayList<Pragma> locate(Start ast, RawPragma[] p,
+	public static ArrayList<Pragma> locate(Start ast, List<RawPragma> p,
 			String input) {
 		PragmaLocator locator = new PragmaLocator(p, input);
-		int size = p.length;
+		int size = p.size();
 		locator.nearestLeft = new Node[size];
 		locator.container = new Node[size];
 		locator.predecessor = new Node[size];
@@ -100,8 +100,8 @@ public class PragmaLocator extends DepthFirstAdapter {
 		ast.apply(locator);
 
 		ArrayList<Pragma> list = new ArrayList<Pragma>();
-		for (int i = 0; i < p.length; i++) {
-			RawPragma pma = locator.pragmas[i];
+		for (int i = 0; i < p.size(); i++) {
+			RawPragma pma = locator.pragmas.get(i);
 			UnknownPragma unknownPragma = new UnknownPragma(pma,
 					locator.nearestLeft[i], locator.predecessor[i],
 					locator.container[i], locator.successor[i],
@@ -124,6 +124,6 @@ public class PragmaLocator extends DepthFirstAdapter {
 		}
 		Node attachment = classifier.seek(p, ast);
 		List<String> warnings = classifier.getWarnings();
-		return new ClassifiedPragma(name, attachment, parsedArgs, warnings);
+		return new ClassifiedPragma(name, attachment, parsedArgs, warnings, p.getStart(), p.getEnd());
 	}
 }
