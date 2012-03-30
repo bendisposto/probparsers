@@ -30,7 +30,10 @@ public class ClassifiedPragma implements Pragma {
 		int fileNumber = ids.lookupFileNumber(attachedTo);
 		Integer id = ids.lookup(attachedTo);
 		String node = id == null ? "none" : String.valueOf(id);
-		pto.openTerm(name).printAtomOrNumber(node).openList();
+		pto.openTerm("pragma");
+		pto.printAtomOrNumber(node);
+		pto.printAtom(name);
+		pto.openList();
 		for (String argument : arguments) {
 			pto.printAtom(argument);
 		}
