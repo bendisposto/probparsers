@@ -139,6 +139,7 @@ public class RecursiveMachineLoader {
 			List<Pragma> pragmas = allPragmas;
 			for (Pragma pragma : pragmas) {
 				pragma.printProlog(pout, ids);
+				pout.fullstop();
 			}
 			
 //			Set<Entry<String, List<Pragma>>> filePragmas = pragmas.entrySet();
@@ -147,7 +148,6 @@ public class RecursiveMachineLoader {
 //				p.printProlog(pout, ids, ps.getKey());
 //			}
 //			}
-			pout.fullstop();
 		}
 		pout.flush();
 	}
