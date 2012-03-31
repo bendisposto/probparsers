@@ -1,0 +1,2 @@
+DEFINITIONS
+   gotohell ==  /*@ goto hell */ (x + 3);

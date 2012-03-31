@@ -1,6 +1,10 @@
 /*@ version 1.3.5 */
 MACHINE           Bus /*@ */
 
+DEFINITIONS
+        FFF == /*@ murder */ (4 + 6);
+        "BusPragmaDef.def"
+
 VARIABLES         /*@ unit m */tickets, passengers
 
 INVARIANT          !x.(x : NAT => x:INT) &

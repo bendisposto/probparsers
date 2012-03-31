@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +112,27 @@ public class UnknownPragma implements Pragma {
 	}
 
 	public void printProlog(IPrologTermOutput pto, NodeIdAssignment ids) {
-		pto.openTerm("pragma");
+		pto.openTerm("global_pragma");
+		pto.printAtom(getPragmaName());
+		
+		pto.openList();
+		for (String arg : getPragmaArguments()) {
+			pto.printAtom(arg);
+		}
+		pto.closeList();
+		pto.openList(); // no warnings
+		pto.closeList();
+
+		
+		int filenr = ids.lookupFileNumber(container);
+		pto.printNumber(filenr);
+		pto.printNumber(raw.getStart().getLine());
+		pto.printNumber(raw.getStart().getPos());
+		pto.printNumber(raw.getEnd().getLine());
+		pto.printNumber(raw.getEnd().getPos());
+
+
+		pto.openList(); 		
 		Integer pred = ids.lookup(getPredecessor());
 		String predecessor = pred == null ? "start" : pred.toString();
 		pto.printAtomOrNumber(predecessor);
@@ -129,13 +150,6 @@ public class UnknownPragma implements Pragma {
 		Integer nearR = ids.lookup(getNearestRight());
 		String nearRight = nearR == null ? "eof" : nearR.toString();
 		pto.printAtomOrNumber(nearRight);
-		pto.openList();
-		pto.printAtom(getPragmaName());
-		for (String arg : getPragmaArguments()) {
-			pto.printAtom(arg);
-		}
-		pto.closeList();
-		pto.openList(); // no warnings
 		pto.closeList();
 
 		pto.closeTerm();

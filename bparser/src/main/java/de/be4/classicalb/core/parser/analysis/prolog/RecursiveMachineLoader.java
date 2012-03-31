@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -57,10 +58,8 @@ public class RecursiveMachineLoader {
 	private final List<File> files = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
+	private List<Pragma> allPragmas;
 
-	
-	
-	
 	public RecursiveMachineLoader(final String directory) {
 		this.directory = directory;
 		final File dirFile = directory == null ? null : new File(directory);
@@ -73,11 +72,13 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param main
 	 *            The main machine
+	 * @param list
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
-			final SourcePositions positions, final Definitions definitions)
-			throws BException {
+			final SourcePositions positions, final Definitions definitions,
+			List<Pragma> pragmas) throws BException {
+		allPragmas = pragmas;
 		injectDefinitions(main, definitions);
 		registerDefinitionFileUsage(definitions);
 		files.add(startfile);
@@ -85,16 +86,11 @@ public class RecursiveMachineLoader {
 				true, positions);
 	}
 
-	public void printAsProlog(final PrintWriter out,
-			final boolean useIndention, List<Pragma> pragmas) {
-		final IPrologTermOutput pout = new PrologTermOutput(out, useIndention);
-		printAsProlog(pout, pragmas);
 
-	}
 
 	public void printAsProlog(final PrintWriter out, final boolean useIndention) {
 		final IPrologTermOutput pout = new PrologTermOutput(out, useIndention);
-		printAsProlog(pout, new ArrayList<Pragma>());
+		printAsProlog(pout);
 	}
 
 	/**
@@ -103,7 +99,7 @@ public class RecursiveMachineLoader {
 	 * @param pout
 	 * @param pragmas
 	 */
-	public void printAsProlog(final IPrologTermOutput pout, List<Pragma> pragmas) {
+	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
 				getNodeIdMapping());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
@@ -137,31 +133,32 @@ public class RecursiveMachineLoader {
 			pout.fullstop();
 		}
 
-		if (pragmas.size() > 0) {
+		if (allPragmas.size() > 0) {
 			NodeIdAssignment ids = pprinter.nodeIds;
-			pout.openTerm("pragmas");
-			pout.openList();
+			
+			List<Pragma> pragmas = allPragmas;
 			for (Pragma pragma : pragmas) {
 				pragma.printProlog(pout, ids);
+				pout.fullstop();
 			}
-			pout.closeList();
-			pout.closeTerm();
-			pout.fullstop();
+			
+
 		}
 		pout.flush();
 	}
 
-	public void printAsProlog(final IPrologTermOutput pout) {
-		printAsProlog(pout, new ArrayList<Pragma>());
-	}
 
 	private void loadMachine(final Set<String> ancestors,
-			final String machineName) throws BException, IOException {
+			final String machineName) throws BException,
+			IOException {
 		final File machineFile = lookupFile(machineName);
 		final BParser parser = new BParser(machineFile.getName());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
 		files.add(machineFile);
+		
+		allPragmas.addAll(parser.getPragmas());		
+		
 		registerDefinitionFileUsage(parser.getDefinitions());
 		injectDefinitions(tree, parser.getDefinitions());
 		recursivlyLoadMachine(machineFile, tree, ancestors, false,
@@ -196,7 +193,8 @@ public class RecursiveMachineLoader {
 
 	private void recursivlyLoadMachine(final File machineFile,
 			final Start current, Set<String> ancestors, final boolean isMain,
-			final SourcePositions sourcePositions) throws BException {
+			final SourcePositions sourcePositions)
+			throws BException {
 		// make a copy of the referencing machines
 		ancestors = new TreeSet<String>(ancestors);
 
@@ -217,7 +215,6 @@ public class RecursiveMachineLoader {
 		}
 
 		positions.put(name, sourcePositions);
-
 		checkForCycles(ancestors, references);
 
 		for (final String refMachine : references) {
