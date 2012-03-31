@@ -14,7 +14,7 @@ buildscript {
 
 
 
-def global_version = '2.4.0'
+def global_version = '2.4.1-SNAPSHOT'
 
 project.version = global_version;
 project.group = 'de.prob'
