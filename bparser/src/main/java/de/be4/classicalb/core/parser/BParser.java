@@ -257,7 +257,7 @@ public class BParser {
 		final Reader reader = new StringReader(input);
 
 		try {
-			// PreParsing
+			// PreParsing 
 			final DefinitionTypes defTypes = preParsing(debugOutput, reader,
 					contentProvider);
 
@@ -312,7 +312,7 @@ public class BParser {
 
 			List<RawPragma> locateTasks = lexer.getPragmas();
 
-			pragmas = PragmaLocator.locate(rootNode, locateTasks, input);
+			pragmas.addAll( PragmaLocator.locate(rootNode, locateTasks, input));
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -355,7 +355,7 @@ public class BParser {
 		 * them to the internal definitions
 		 */
 		definitions.addAll(preParser.getDefFileDefinitions());
-
+pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}

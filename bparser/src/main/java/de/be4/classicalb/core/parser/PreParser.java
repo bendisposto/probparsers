@@ -5,6 +5,7 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefintionPreCollector;
+import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
@@ -29,6 +31,7 @@ public class PreParser {
 	private DefinitionTypes types;
 
 	private final Definitions defFileDefinitions = new Definitions();
+	private final List<Pragma> pragmas = new ArrayList<Pragma>();
 	private final IFileContentProvider contentProvider;
 	private final Set<String> doneDefFiles;
 	private final String modelFileName;
@@ -98,6 +101,7 @@ public class PreParser {
 					final BParser parser = new BParser(fileName);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
+					pragmas.addAll(parser.getPragmas());
 					newDoneList.remove(fileName);
 
 					definitions = parser.getDefinitions();
@@ -163,8 +167,7 @@ public class PreParser {
 		Collections.sort(list, new Comparator<Token>() {
 			public int compare(final Token o1, final Token o2) {
 				if (o1.getLine() == o2.getLine()) {
-					if (o1.getPos() == o2.getPos())
-						return 0;
+					if (o1.getPos() == o2.getPos()) return 0;
 					else
 						return o1.getPos() - o2.getPos();
 				} else
@@ -181,8 +184,7 @@ public class PreParser {
 			return Definitions.Type.Predicate;
 
 		if (tryParsing(BParser.EXPRESSION_PREFIX, definitionRhs))
-			if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs))
-				return Definitions.Type.ExprOrSubst;
+			if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs)) return Definitions.Type.ExprOrSubst;
 			else
 				return Definitions.Type.Expression;
 
@@ -216,5 +218,9 @@ public class PreParser {
 
 	public Definitions getDefFileDefinitions() {
 		return defFileDefinitions;
+	}
+
+	public List<? extends Pragma> getPragmas() {
+		return pragmas;
 	}
 }
