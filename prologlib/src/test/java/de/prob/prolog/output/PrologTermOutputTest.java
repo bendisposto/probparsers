@@ -35,7 +35,8 @@ public class PrologTermOutputTest {
 		pout.printAtom("atom2");
 		pout.closeTerm();
 		pout.fullstop();
-		assertOutput("func(atom,inner(4500,22),atom2).\n");
+		pout.flush();
+		assertEquals("func(atom,inner(4500,22),atom2).", swriter.toString().trim());
 	}
 
 	@Test
