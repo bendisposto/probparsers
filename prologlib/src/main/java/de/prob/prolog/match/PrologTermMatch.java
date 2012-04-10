@@ -97,17 +97,14 @@ public class PrologTermMatch extends PrologMatch {
 	@Override
 	protected boolean isMatch(PrologTerm term, Map<String, PrologTerm> hits) {
 		boolean match = false;
-		if (term instanceof CompoundPrologTerm) {
-			CompoundPrologTerm cterm = (CompoundPrologTerm) term;
-			if ((arity < 0 || cterm.getArity() == arity)
-					&& (functor == null || functor.equals(cterm.getFunctor()))) {
-				match = args == null || allArgsMatch(cterm, hits);
+			if ((arity < 0 || term.getArity() == arity)
+					&& (functor == null || functor.equals(term.getFunctor()))) {
+				match = args == null || allArgsMatch(term, hits);
 			}
-		}
 		return match;
 	}
 
-	private boolean allArgsMatch(CompoundPrologTerm term,
+	private boolean allArgsMatch(PrologTerm term,
 			Map<String, PrologTerm> hits) {
 		for (int i = 1; i <= arity; i++) {
 			PrologMatch argMatch = args[i];

@@ -22,20 +22,9 @@ import de.prob.prolog.output.IPrologTermOutput;
 public final class CompoundPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = 4825557199378803498L;
 
-	private final String functor;
-	private final PrologTerm[] arguments;
-
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {
-		super();
-		if (functor == null)
-			throw new IllegalArgumentException("Functor must not be null");
-		this.functor = functor;
-		if (arguments == null || arguments.length == 0) {
-			this.arguments = null;
-		} else {
-			this.arguments = arguments;
-		}
+		super(functor,arguments);
 	}
 
 	public CompoundPrologTerm(final String atom) {
@@ -63,34 +52,13 @@ public final class CompoundPrologTerm extends PrologTerm {
 		pto.closeTerm();
 	}
 
-	public String getFunctor() {
-		return functor;
-	}
-
-	public int getArity() {
-		return arguments == null ? 0 : arguments.length;
-	}
-
-	/**
-	 * Gets an argument by its index. Note, that numbering starts with 1
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public PrologTerm getArgument(final int index) {
-		if (arguments == null)
-			throw new IndexOutOfBoundsException("Atom has no arguments");
-		else
-			return arguments[index - 1];
-	}
-
 	@Override
 	public boolean equals(final Object other) {
 		boolean isEqual;
 		if (this == other) {
 			isEqual = true;
-		} else if (other != null && other instanceof CompoundPrologTerm) {
-			CompoundPrologTerm cother = (CompoundPrologTerm) other;
+		} else if (other != null && other instanceof PrologTerm) {
+			PrologTerm cother = (PrologTerm) other;
 			isEqual = functor.equals(cother.functor)
 					&& Arrays.equals(arguments, cother.arguments);
 		} else {

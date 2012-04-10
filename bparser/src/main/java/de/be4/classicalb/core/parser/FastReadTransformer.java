@@ -41,8 +41,7 @@ public class FastReadTransformer {
 			write(intTerm);
 		}
 		if (term instanceof CompoundPrologTerm) {
-			CompoundPrologTerm compound = (CompoundPrologTerm) term;
-			write(compound);
+			write(term);
 		}
 		if (term instanceof VariablePrologTerm) {
 			write((VariablePrologTerm) term);
@@ -85,7 +84,7 @@ public class FastReadTransformer {
 		return varnums.get(name);
 	}
 
-	private void write(CompoundPrologTerm cp) {
+	private void write(PrologTerm cp) {
 		if (cp.isAtom()) {
 			sb.append("A");
 			sb.append(cp.getFunctor());
