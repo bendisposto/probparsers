@@ -36,7 +36,7 @@ public final class ListPrologTerm extends PrologTerm implements
 	private final int end;
 
 	public ListPrologTerm(final PrologTerm... elements) {
-		super(".");
+		super(".",elements);
 		if (elements == null)
 			throw new IllegalStateException(
 					"elements of Prolog list must not be null");
