@@ -1,0 +1,147 @@
+Package de.be4.ltl.core.ctlparser;
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+
+ Helpers 
+ 
+    small_letter =  ['a'..'z'];
+    capital_letter = ['A' .. 'Z'];
+    letter = small_letter | capital_letter;
+    digit = ['0' .. '9'] ;
+
+    underscore = '_'; 
+ 
+	line_break = [10 + 13];
+	layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+	white_space = line_break | layout_char+;
+	
+	l_cur = '{';
+	r_cur = '}';
+	l_paren = '(';
+	r_paren = ')';
+	l_bracket = '[';
+	r_bracket = ']';
+	
+	enabled_start = 'e(';
+
+/*******************************************************************
+ * States                                                          *
+ *******************************************************************/
+
+ States 
+  ctl, atomic, action;
+
+
+/*******************************************************************
+ * Tokens                                                          *
+ *******************************************************************/
+
+Tokens
+
+   {ctl} true = 'true';
+   {ctl} false = 'false';
+   {ctl} sink ='sink';
+   {ctl} deadlock ='deadlock';
+   {ctl} current = 'current';
+   {ctl} l_par = l_paren;
+   {ctl} r_par = r_paren;
+ 
+   {ctl -> action} l_sq = l_bracket;
+   {ctl -> action} enabled = enabled_start;		
+ 
+   {ctl -> atomic, atomic} atomic_proposition_begin = l_cur;
+   {atomic} atomic_proposition_end = r_cur;
+   {atomic} ap_char =  ([0 .. 0xffff]);
+    
+   {action} action_end = [r_paren + r_bracket];
+   {action} action_begin = [l_paren + l_bracket];
+   {action} tp_char =  ([0 .. 0xffff]);
+
+
+/* Boolean Operators */
+    {ctl} implies = '=>';
+    {ctl} and = '&';
+    {ctl} or = 'or';
+    {ctl} not = 'not';
+
+/* CTL temporal operators */
+    {ctl} exists = 'E';
+    {ctl} forall = 'A';
+    
+/* CTL temporal operators */
+    {ctl} until = 'U';
+    {ctl} globally = 'G';
+    {ctl} finally = 'F';
+    {ctl} next = 'X';
+
+ 	white_space = white_space;
+
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+
+	white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+
+
+ Productions 
+  ctl_formula  {-> ctl} = {implication} [left]:ctl_formula implies [right]:ctl_formula2 { -> New ctl.implies(left.ctl, right.ctl) } | 
+                                        ctl_formula2                                    { -> ctl_formula2.ctl};
+  
+  ctl_formula2 {-> ctl} = {and} [left]:ctl_formula2 and [right]:ctl_formula3 { -> New ctl.and(left.ctl, right.ctl)} |
+                          {or}  [left]:ctl_formula2 or [right]:ctl_formula3  { -> New ctl.or(left.ctl, right.ctl)}  |
+                                ctl_formula3                                 { -> ctl_formula3.ctl};
+
+  ctl_formula3 {-> ctl} = {eu}  exists [left]:ctl_formula3 until [right]:ctl_formula4     { -> New ctl.eu(left.ctl, right.ctl)}|
+                                       ctl_formula4                                       { -> ctl_formula4.ctl };
+
+  ctl_formula4 {-> ctl} = {not}          not ctl_formula4                               { -> New ctl.not(ctl_formula4.ctl) } | 
+                          {par}          l_par ctl_formula r_par                        { -> ctl_formula.ctl } | 
+                          {true}         true                                           { -> New ctl.true() } | 
+                          {false}        false                                          { -> New ctl.false() } |  
+                          {ena}          exists next l_sq [cont]:ctl_formula4           { -> New ctl.ena(l_sq, cont.ctl) } | 
+                          {en}           exists next [cont]:ctl_formula4                { -> New ctl.en(cont.ctl) } | 
+                          {an}           forall next [cont]:ctl_formula4                { -> New ctl.an(cont.ctl) } | 
+                          {ef}           exists finally [cont]:ctl_formula4             { -> New ctl.ef(cont.ctl) } | 
+                          {ag}           forall globally [cont]:ctl_formula4            { -> New ctl.ag(cont.ctl) } | 
+                          {unparsed}     atomic_proposition_begin                       { -> New ctl.unparsed(atomic_proposition_begin) } |
+                          {enabled}      enabled                                        { -> New ctl.enabled(enabled) } |     
+                          {sink}         sink                                           { -> New ctl.sink() } | 
+                          {deadlock}     deadlock                                       { -> New ctl.deadlock() } | 
+                          {current}      current                                        { -> New ctl.current() };
+                          
+
+/*******************************************************************
+ * Abstract Syntax Tree                                            *
+ *******************************************************************/
+
+Abstract Syntax Tree
+
+  ctl =  
+  
+   {implies}      [left]:ctl [right]:ctl | 
+   {and}          [left]:ctl [right]:ctl | 
+   {or}           [left]:ctl [right]:ctl |
+   {eu}           [left]:ctl [right]:ctl | 
+   {not}          ctl |
+   {ena}          [operation]:l_sq [cont]:ctl |
+   {en}           ctl |
+   {an}           ctl |
+   {ef}           ctl |
+   {ag}           ctl |
+   {unparsed}     [predicate]:atomic_proposition_begin |
+   {enabled}      [operation]:enabled |
+   {sink}          |
+   {deadlock}      |
+   {current}       | 
+   {true}          |
+   {false}         ;
+ 

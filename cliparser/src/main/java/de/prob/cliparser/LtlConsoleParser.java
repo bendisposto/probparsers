@@ -13,8 +13,10 @@ import java.io.OutputStream;
 import java.io.Reader;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
+import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
+import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.parserbase.UnparsedParserBase;
@@ -33,12 +35,14 @@ public class LtlConsoleParser {
 	private static final String CLI_LANG = "-lang";
 	private static final String CLI_OUT = "-out";
 	private static final String CLI_HELP = "-h";
+	private static final String CLI_CTL = "-ctl";
 
 	public static void main(final String[] args) {
 		ConsoleOptions options = new ConsoleOptions();
 		options.addOption(CLI_LANG,
 				"set language for atomic propositions, etc. (e.g. none, B)", 1);
 		options.addOption(CLI_OUT, "set output file, use stdout if omitted", 1);
+		options.addOption(CLI_CTL, "use CTL instead of LTL");
 		options.setIntro("usage: LtlConsoleParser [options] <LTL file>\n\n"
 				+ "If the file is omitted, stdin is used\n"
 				+ "Available options are:");
@@ -83,7 +87,8 @@ public class LtlConsoleParser {
 
 		if (input != null) {
 			final String[] formulas = input.split("###");
-			final LtlParser parser = new LtlParser(extParser);
+			final TemporalLogicParser<?> parser = createParser(extParser,
+					options.isOptionSet(CLI_CTL));
 			pto.openList();
 			for (final String formula : formulas) {
 				try {
@@ -91,8 +96,8 @@ public class LtlConsoleParser {
 							null);
 					pto.openTerm("ltl").printTerm(term).closeTerm();
 				} catch (LtlParseException e) {
-					pto.openTerm("syntax_error").printAtom(
-							e.getLocalizedMessage()).closeTerm();
+					pto.openTerm("syntax_error")
+							.printAtom(e.getLocalizedMessage()).closeTerm();
 				}
 			}
 			pto.closeList();
@@ -108,6 +113,12 @@ public class LtlConsoleParser {
 				// ignore
 			}
 		}
+	}
+
+	private static TemporalLogicParser<?> createParser(
+			final ProBParserBase extParser, final boolean isCtlSelected) {
+		return isCtlSelected ? new CtlParser(extParser) : new LtlParser(
+				extParser);
 	}
 
 	private static String readFormula(final String inputFile)

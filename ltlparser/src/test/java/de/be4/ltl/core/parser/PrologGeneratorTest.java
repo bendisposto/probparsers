@@ -17,10 +17,8 @@ import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 
 public class PrologGeneratorTest {
-	private static final PrologTerm TERM_TRUE = new CompoundPrologTerm(
-			"true");
-	private static final PrologTerm TERM_FALSE = new CompoundPrologTerm(
-			"false");
+	private static final PrologTerm TERM_TRUE = new CompoundPrologTerm("true");
+	private static final PrologTerm TERM_FALSE = new CompoundPrologTerm("false");
 
 	@Test
 	public void testTrue() throws Exception {
