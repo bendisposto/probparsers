@@ -35,13 +35,19 @@ public class LtlConsoleParser {
 	private static final String CLI_LANG = "-lang";
 	private static final String CLI_OUT = "-out";
 	private static final String CLI_HELP = "-h";
+	private static final String CLI_LTL = "-ltl";
 	private static final String CLI_CTL = "-ctl";
+
+	private enum Mode {
+		LTL, CTL
+	};
 
 	public static void main(final String[] args) {
 		ConsoleOptions options = new ConsoleOptions();
 		options.addOption(CLI_LANG,
 				"set language for atomic propositions, etc. (e.g. none, B)", 1);
 		options.addOption(CLI_OUT, "set output file, use stdout if omitted", 1);
+		options.addOption(CLI_LTL, "use LTL (default)");
 		options.addOption(CLI_CTL, "use CTL instead of LTL");
 		options.setIntro("usage: LtlConsoleParser [options] <LTL file>\n\n"
 				+ "If the file is omitted, stdin is used\n"
@@ -55,6 +61,13 @@ public class LtlConsoleParser {
 			System.exit(-1);
 			return;
 		}
+
+		if (options.isOptionSet(CLI_LTL) && options.isOptionSet(CLI_CTL)) {
+			System.err.println("Incopatible options -ltl and -ctl given.");
+			System.exit(-1);
+			return;
+		}
+		final Mode mode = options.isOptionSet(CLI_CTL) ? Mode.CTL : Mode.LTL;
 
 		final OutputStream out;
 		if (options.isOptionSet(CLI_OUT)) {
@@ -87,8 +100,7 @@ public class LtlConsoleParser {
 
 		if (input != null) {
 			final String[] formulas = input.split("###");
-			final TemporalLogicParser<?> parser = createParser(extParser,
-					options.isOptionSet(CLI_CTL));
+			final TemporalLogicParser<?> parser = createParser(extParser, mode);
 			pto.openList();
 			for (final String formula : formulas) {
 				try {
@@ -116,9 +128,19 @@ public class LtlConsoleParser {
 	}
 
 	private static TemporalLogicParser<?> createParser(
-			final ProBParserBase extParser, final boolean isCtlSelected) {
-		return isCtlSelected ? new CtlParser(extParser) : new LtlParser(
-				extParser);
+			final ProBParserBase extParser, final Mode mode) {
+		final TemporalLogicParser<?> parser;
+		switch (mode) {
+		case LTL:
+			parser = new LtlParser(extParser);
+			break;
+		case CTL:
+			parser = new CtlParser(extParser);
+			break;
+		default:
+			throw new IllegalStateException("unexpected mode: " + mode);
+		}
+		return parser;
 	}
 
 	private static String readFormula(final String inputFile)
