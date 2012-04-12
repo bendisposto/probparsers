@@ -8,18 +8,18 @@ package de.be4.ltl.core.parser.internal;
 
 import java.io.PushbackReader;
 
-import de.be4.ltl.core.parser.lexer.Lexer;
-import de.be4.ltl.core.parser.node.TActionBegin;
-import de.be4.ltl.core.parser.node.TActionEnd;
-import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
-import de.be4.ltl.core.parser.node.TAtomicPropositionEnd;
-import de.be4.ltl.core.parser.node.Token;
+import de.be4.ltl.core.ctlparser.lexer.Lexer;
+import de.be4.ltl.core.ctlparser.node.TActionBegin;
+import de.be4.ltl.core.ctlparser.node.TActionEnd;
+import de.be4.ltl.core.ctlparser.node.TAtomicPropositionBegin;
+import de.be4.ltl.core.ctlparser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.ctlparser.node.Token;
 
-public class LtlLexer extends Lexer {
+public class CtlLexer extends Lexer {
 
-	private LtlLexerHelper helper = new LtlLexerHelper();
+	private CtlLexerHelper helper = new CtlLexerHelper();
 
-	public LtlLexer(final PushbackReader in) {
+	public CtlLexer(final PushbackReader in) {
 		super(in);
 	}
 
@@ -29,10 +29,10 @@ public class LtlLexer extends Lexer {
 		state = helper.getState();
 	}
 
-	public static class LtlLexerHelper extends LexerHelper<Token, State> {
+	public static class CtlLexerHelper extends LexerHelper<Token, State> {
 
-		public LtlLexerHelper() {
-			super(State.LTL);
+		public CtlLexerHelper() {
+			super(State.CTL);
 		}
 
 		protected boolean isOpening(final Token token) {

@@ -158,15 +158,15 @@ public class ListPrologTermTest {
 	
 
 	private String getAsString(ListPrologTerm l, int pos) {
-		return ((CompoundPrologTerm) l.get(pos)).getFunctor();
+		return l.get(pos).getFunctor();
 	}
 
 	private String getAsString(PrologTerm p) {
-		return ((CompoundPrologTerm) p).getFunctor();
+		return p.getFunctor();
 	}
 
-	private CompoundPrologTerm[] createFixture(int size) {
-		CompoundPrologTerm[] res = new CompoundPrologTerm[size];
+	private PrologTerm[] createFixture(int size) {
+		PrologTerm[] res = new PrologTerm[size];
 		for (int i = 0; i < res.length; i++) {
 			res[i] = new CompoundPrologTerm("" + i);
 		}

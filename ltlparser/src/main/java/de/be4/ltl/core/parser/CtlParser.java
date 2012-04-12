@@ -10,19 +10,19 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 
-import de.be4.ltl.core.parser.internal.LtlLexer;
-import de.be4.ltl.core.parser.internal.PrologGenerator;
+import de.be4.ltl.core.ctlparser.lexer.Lexer;
+import de.be4.ltl.core.ctlparser.lexer.LexerException;
+import de.be4.ltl.core.ctlparser.node.Start;
+import de.be4.ltl.core.ctlparser.parser.Parser;
+import de.be4.ltl.core.ctlparser.parser.ParserException;
+import de.be4.ltl.core.parser.internal.CtlLexer;
+import de.be4.ltl.core.parser.internal.PrologCtlGenerator;
 import de.be4.ltl.core.parser.internal.UniversalToken;
-import de.be4.ltl.core.parser.lexer.Lexer;
-import de.be4.ltl.core.parser.lexer.LexerException;
-import de.be4.ltl.core.parser.node.Start;
-import de.be4.ltl.core.parser.parser.Parser;
-import de.be4.ltl.core.parser.parser.ParserException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.StructuredPrologOutput;
 
-public class LtlParser extends TemporalLogicParser<Start> {
-	public LtlParser(final ProBParserBase specParser) {
+public class CtlParser extends TemporalLogicParser<Start> {
+	public CtlParser(final ProBParserBase specParser) {
 		super(specParser);
 	}
 
@@ -30,7 +30,7 @@ public class LtlParser extends TemporalLogicParser<Start> {
 			throws LtlParseException, IOException {
 		StringReader reader = new StringReader(formula);
 		PushbackReader r = new PushbackReader(reader);
-		Lexer l = new LtlLexer(r);
+		Lexer l = new CtlLexer(r);
 		Parser p = new Parser(l);
 		Start ast = null;
 		try {
@@ -48,7 +48,7 @@ public class LtlParser extends TemporalLogicParser<Start> {
 	@Override
 	protected void applyPrologGenerator(StructuredPrologOutput pto,
 			String stateID, ProBParserBase specParser, Start ast) {
-		final PrologGenerator prologGenerator = new PrologGenerator(pto,
+		final PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto,
 				stateID, specParser);
 		ast.apply(prologGenerator);
 	}

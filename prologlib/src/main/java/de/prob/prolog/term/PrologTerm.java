@@ -24,7 +24,22 @@ import de.prob.prolog.output.PrologTermOutput;
  * @author plagge
  */
 public abstract class PrologTerm implements Serializable {
+
 	private static final long serialVersionUID = 7974875342517963149L;
+
+	protected final String functor;
+	protected final PrologTerm[] arguments;
+
+	public PrologTerm(final String functor, final PrologTerm... arguments) {
+		if (functor == null)
+			throw new IllegalArgumentException("Functor must not be null");
+		this.functor = functor;
+		if (arguments == null || arguments.length == 0) {
+			this.arguments = null;
+		} else {
+			this.arguments = arguments;
+		}
+	}
 
 	public boolean isTerm() {
 		return false;
@@ -61,9 +76,29 @@ public abstract class PrologTerm implements Serializable {
 		return sWriter.toString();
 	}
 
+	public String getFunctor() {
+		return functor;
+	}
+
+	public int getArity() {
+		return arguments == null ? 0 : arguments.length;
+	}
+
+	/**
+	 * Gets an argument by its index. Note, that numbering starts with 1
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public PrologTerm getArgument(final int index) {
+		if (arguments == null) throw new IndexOutOfBoundsException(
+				"Atom has no arguments");
+		else
+			return arguments[index - 1];
+	}
+
 	public static String atomicString(final PrologTerm term) {
-		if (term.isAtom())
-			return ((CompoundPrologTerm) term).getFunctor();
+		if (term.isAtom()) return term.getFunctor();
 		else
 			throw new IllegalArgumentException(
 					"Expected an atomic prolog term, but was "

@@ -6,25 +6,25 @@
 
 package de.be4.ltl.core.parser.internal;
 
-import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
-import de.be4.ltl.core.parser.node.AActionLtl;
-import de.be4.ltl.core.parser.node.ACurrentLtl;
-import de.be4.ltl.core.parser.node.ADeadlockLtl;
-import de.be4.ltl.core.parser.node.AEnabledLtl;
-import de.be4.ltl.core.parser.node.ASinkLtl;
-import de.be4.ltl.core.parser.node.AUnparsedLtl;
-import de.be4.ltl.core.parser.node.Node;
-import de.be4.ltl.core.parser.node.Start;
-import de.be4.ltl.core.parser.node.Token;
+import de.be4.ltl.core.ctlparser.analysis.DepthFirstAdapter;
+import de.be4.ltl.core.ctlparser.node.ACurrentCtl;
+import de.be4.ltl.core.ctlparser.node.ADeadlockCtl;
+import de.be4.ltl.core.ctlparser.node.AEnaCtl;
+import de.be4.ltl.core.ctlparser.node.AEnabledCtl;
+import de.be4.ltl.core.ctlparser.node.ASinkCtl;
+import de.be4.ltl.core.ctlparser.node.AUnparsedCtl;
+import de.be4.ltl.core.ctlparser.node.Node;
+import de.be4.ltl.core.ctlparser.node.Start;
+import de.be4.ltl.core.ctlparser.node.Token;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 
-public class PrologGenerator extends DepthFirstAdapter {
+public class PrologCtlGenerator extends DepthFirstAdapter {
 
 	private final IPrologTermOutput p;
 	private final PrologGeneratorHelper helper;
 
-	public PrologGenerator(final IPrologTermOutput pto,
+	public PrologCtlGenerator(final IPrologTermOutput pto,
 			final String currentStateID, final ProBParserBase specParser) {
 		this.p = pto;
 		this.helper = new PrologGeneratorHelper(pto, currentStateID, specParser);
@@ -41,37 +41,38 @@ public class PrologGenerator extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAUnparsedLtl(final AUnparsedLtl node) {
+	public void caseAUnparsedCtl(AUnparsedCtl node) {
 		final Token token = node.getPredicate();
 		helper.caseUnparsed(UniversalToken.createToken(token));
 	}
 
 	@Override
-	public void caseAActionLtl(final AActionLtl node) {
+	public void caseAEnaCtl(AEnaCtl node) {
 		final Token token = node.getOperation();
-		p.openTerm("action");
+		p.openTerm("ena");
 		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		node.getCont().apply(this);
 		p.closeTerm();
 	}
 
 	@Override
-	public void caseAEnabledLtl(final AEnabledLtl node) {
+	public void caseAEnabledCtl(final AEnabledCtl node) {
 		final Token token = node.getOperation();
 		helper.enabled(UniversalToken.createToken(token));
 	}
 
 	@Override
-	public void caseASinkLtl(final ASinkLtl node) {
+	public void caseASinkCtl(final ASinkCtl node) {
 		helper.sink();
 	}
 
 	@Override
-	public void caseADeadlockLtl(final ADeadlockLtl node) {
+	public void caseADeadlockCtl(final ADeadlockCtl node) {
 		helper.deadlock();
 	}
 
 	@Override
-	public void caseACurrentLtl(final ACurrentLtl node) {
+	public void caseACurrentCtl(final ACurrentCtl node) {
 		helper.current();
 	}
 
@@ -84,4 +85,5 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void outStart(final Start node) {
 		// Do not call default out Method
 	}
+
 }

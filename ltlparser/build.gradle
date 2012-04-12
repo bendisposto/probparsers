@@ -32,6 +32,16 @@ task genParser(type:JavaExec) {
 	 args = ['-d','build/temp','src/main/resources/LtlParser.scc']
 }
 
+task genCtlParser(type:JavaExec) {
+	doFirst{ file('build/temp').mkdirs() }
+	inputs.dir new File('src/main/resources/grammars')
+	outputs.dir new File('build/temp')
+	 main = 'org.sablecc.sablecc.SableCC'
+	 classpath = configurations.sablecc
+	 maxHeapSize = '1024m'
+	 args = ['-d','build/temp','src/main/resources/CtlParser.scc']
+}
+
 jar {
  include '**/*.class'
  exclude '**.*.scc' 
@@ -40,7 +50,7 @@ jar {
 }
 
 compileJava { 
- dependsOn = ['genParser',':prologlib:deploy',':parserbase:deploy'] 
+ dependsOn = ['genParser','genCtlParser',':prologlib:deploy',':parserbase:deploy'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

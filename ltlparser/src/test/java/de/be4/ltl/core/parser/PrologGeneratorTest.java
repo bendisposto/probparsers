@@ -17,10 +17,8 @@ import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 
 public class PrologGeneratorTest {
-	private static final CompoundPrologTerm TERM_TRUE = new CompoundPrologTerm(
-			"true");
-	private static final CompoundPrologTerm TERM_FALSE = new CompoundPrologTerm(
-			"false");
+	private static final PrologTerm TERM_TRUE = new CompoundPrologTerm("true");
+	private static final PrologTerm TERM_FALSE = new CompoundPrologTerm("false");
 
 	@Test
 	public void testTrue() throws Exception {
@@ -41,14 +39,14 @@ public class PrologGeneratorTest {
 
 	@Test
 	public void testSink() throws Exception {
-		CompoundPrologTerm sink = new CompoundPrologTerm("sink");
+		PrologTerm sink = new CompoundPrologTerm("sink");
 		final PrologTerm expected = new CompoundPrologTerm("ap", sink);
 		check("sink", expected);
 	}
 
 	@Test
 	public void testDeadlock() throws Exception {
-		CompoundPrologTerm deadlock = new CompoundPrologTerm("deadlock");
+		PrologTerm deadlock = new CompoundPrologTerm("deadlock");
 		check("deadlock", new CompoundPrologTerm("ap", deadlock));
 	}
 
