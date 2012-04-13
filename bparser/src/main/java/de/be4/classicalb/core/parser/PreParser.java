@@ -18,6 +18,13 @@ import de.be4.classicalb.core.parser.analysis.checking.DefintionPreCollector;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.node.ADefinitionExpression;
+import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
+import de.be4.classicalb.core.parser.node.AFunctionExpression;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AImplicationPredicate;
+import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -167,7 +174,8 @@ public class PreParser {
 		Collections.sort(list, new Comparator<Token>() {
 			public int compare(final Token o1, final Token o2) {
 				if (o1.getLine() == o2.getLine()) {
-					if (o1.getPos() == o2.getPos()) return 0;
+					if (o1.getPos() == o2.getPos())
+						return 0;
 					else
 						return o1.getPos() - o2.getPos();
 				} else
@@ -180,21 +188,31 @@ public class PreParser {
 	private Definitions.Type determineType(final Token rhsToken) {
 		final String definitionRhs = rhsToken.getText().trim();
 
-		if (tryParsing(BParser.PREDICATE_PREFIX, definitionRhs))
+		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
+				BParser.EXPRESSION_PREFIX, definitionRhs);
+		if (expr != null) {
+			AExpressionParseUnit unit = (AExpressionParseUnit) expr
+					.getPParseUnit();
+			PExpression expression = unit.getExpression();
+			if ((expression instanceof AIdentifierExpression)
+					|| (expression instanceof AFunctionExpression)
+					|| (expression instanceof ADefinitionExpression))
+				return Definitions.Type.ExprOrSubst;
+			else return Definitions.Type.Expression;
+
+		}
+
+		if (tryParsing(BParser.PREDICATE_PREFIX, definitionRhs) != null)
 			return Definitions.Type.Predicate;
 
-		if (tryParsing(BParser.EXPRESSION_PREFIX, definitionRhs))
-			if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs)) return Definitions.Type.ExprOrSubst;
-			else
-				return Definitions.Type.Expression;
-
-		if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs))
+		if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) != null)
 			return Definitions.Type.Substitution;
 
 		return null;
 	}
 
-	private boolean tryParsing(final String prefix, final String definitionRhs) {
+	private de.be4.classicalb.core.parser.node.Start tryParsing(
+			final String prefix, final String definitionRhs) {
 
 		final Reader reader = new StringReader(prefix + " " + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types);
@@ -203,8 +221,7 @@ public class PreParser {
 				lexer);
 
 		try {
-			parser.parse();
-			return true;
+			return parser.parse();
 		} catch (final de.be4.classicalb.core.parser.parser.ParserException e) {
 			// IGNORE
 		} catch (final de.be4.classicalb.core.parser.lexer.LexerException e) {
@@ -213,7 +230,7 @@ public class PreParser {
 			// IGNORE
 		}
 
-		return false;
+		return null;
 	}
 
 	public Definitions getDefFileDefinitions() {

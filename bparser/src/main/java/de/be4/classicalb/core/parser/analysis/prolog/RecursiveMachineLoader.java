@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -19,6 +18,7 @@ import java.util.TreeSet;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.Definitions;
+import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
@@ -60,10 +60,9 @@ public class RecursiveMachineLoader {
 	private final IFileContentProvider contentProvider;
 	private List<Pragma> allPragmas;
 
-	public RecursiveMachineLoader(final String directory) {
+	public RecursiveMachineLoader(final String directory, IDefinitionFileProvider contentProvider2) {
 		this.directory = directory;
-		final File dirFile = directory == null ? null : new File(directory);
-		contentProvider = new CachingDefinitionFileProvider(dirFile);
+		contentProvider = contentProvider2;
 	}
 
 	/**
@@ -209,6 +208,11 @@ public class RecursiveMachineLoader {
 		final SortedSet<String> references = refMachines
 				.getReferencedMachines();
 		imported.put(name, current);
+		
+		
+		
+		
+		
 		ancestors.add(name);
 		if (isMain) {
 			main = name;
@@ -218,7 +222,7 @@ public class RecursiveMachineLoader {
 		checkForCycles(ancestors, references);
 
 		for (final String refMachine : references) {
-			if (!imported.containsKey(refMachine)) {
+				if (!imported.containsKey(refMachine) ) {
 				try {
 					loadMachine(ancestors, refMachine);
 				} catch (final BException e) {

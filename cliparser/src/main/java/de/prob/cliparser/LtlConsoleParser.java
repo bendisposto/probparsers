@@ -55,6 +55,12 @@ public class LtlConsoleParser {
 		options.addOption(CLI_HELP, "print this message");
 
 		options.parseOptions(args);
+
+		if (options.isOptionSet(CLI_HELP)) {
+			options.printUsage(System.out);
+			return;
+		}
+
 		String[] params = options.getRemainingOptions();
 		if (params.length > 1) {
 			options.printUsage(System.out);
@@ -69,19 +75,8 @@ public class LtlConsoleParser {
 		}
 		final Mode mode = options.isOptionSet(CLI_CTL) ? Mode.CTL : Mode.LTL;
 
-		final OutputStream out;
-		if (options.isOptionSet(CLI_OUT)) {
-			final String filename = options.getOptions(CLI_OUT)[0];
-			try {
-				out = new FileOutputStream(filename);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace(System.err);
-				System.exit(-1);
-				return;
-			}
-		} else {
-			out = System.out;
-		}
+		// please note: createOutputStream might call System.exit()
+		final OutputStream out = createOutputStream(options);
 
 		final String lang = options.isOptionSet(CLI_LANG) ? options
 				.getOptions(CLI_LANG)[0] : null;
@@ -89,14 +84,7 @@ public class LtlConsoleParser {
 
 		final IPrologTermOutput pto = new PrologTermOutput(out, false);
 
-		final String inputFile = params.length == 1 ? params[0] : null;
-		String input = null;
-		try {
-			input = readFormula(inputFile);
-		} catch (IOException e) {
-			pto.openTerm("io_error").printAtom(e.getLocalizedMessage())
-					.closeTerm();
-		}
+		final String input = createInputStream(params, pto);
 
 		if (input != null) {
 			final String[] formulas = input.split("###");
@@ -125,6 +113,36 @@ public class LtlConsoleParser {
 				// ignore
 			}
 		}
+	}
+
+	private static String createInputStream(String[] params,
+			final IPrologTermOutput pto) {
+		final String inputFile = params.length == 1 ? params[0] : null;
+		String input = null;
+		try {
+			input = readFormula(inputFile);
+		} catch (IOException e) {
+			pto.openTerm("io_error").printAtom(e.getLocalizedMessage())
+					.closeTerm();
+		}
+		return input;
+	}
+
+	private static OutputStream createOutputStream(ConsoleOptions options) {
+		final OutputStream out;
+		if (options.isOptionSet(CLI_OUT)) {
+			final String filename = options.getOptions(CLI_OUT)[0];
+			try {
+				out = new FileOutputStream(filename);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace(System.err);
+				System.exit(-1);
+				return null;
+			}
+		} else {
+			out = System.out;
+		}
+		return out;
 	}
 
 	private static TemporalLogicParser<?> createParser(

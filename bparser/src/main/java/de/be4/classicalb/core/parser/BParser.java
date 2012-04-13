@@ -11,7 +11,6 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +64,7 @@ public class BParser {
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 	private final String fileName;
+	private IDefinitionFileProvider contentProvider;
 
 	public BParser() {
 		this(null);
@@ -73,22 +73,28 @@ public class BParser {
 	public BParser(final String fileName) {
 		this.fileName = fileName;
 	}
+	
+	public IDefinitionFileProvider getContentProvider() {
+		return contentProvider;
+	}
 
+
+	
 	public static void printASTasProlog(final PrintStream out,
 			final BParser parser, final File bfile, final Start tree,
-			final boolean idention, final boolean withLineInfo)
-			throws BException {
+			final boolean idention, final boolean withLineInfo, IDefinitionFileProvider contentProvider)
+					throws BException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-				bfile.getParent());
+				bfile.getParent(), contentProvider);
 		final SourcePositions positions = withLineInfo ? parser
 				.getSourcePositions() : null;
-
-		List<Pragma> pragmas = new ArrayList<Pragma>();
-		pragmas.addAll(parser.getPragmas());
-
-		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
-				pragmas);
-		rml.printAsProlog(new PrintWriter(out), idention);
+				
+				List<Pragma> pragmas = new ArrayList<Pragma>();
+				pragmas.addAll(parser.getPragmas());
+				
+				rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
+						pragmas);
+				rml.printAsProlog(new PrintWriter(out), idention);
 	}
 
 	// private static String getASTasFastProlog(final BParser parser,
@@ -126,8 +132,9 @@ public class BParser {
 	 */
 	public Start parseFile(final File machine, final boolean verbose)
 			throws IOException, BException {
-		return parseFile(machine, verbose, new CachingDefinitionFileProvider(
-				machine));
+		contentProvider = new CachingDefinitionFileProvider(
+						machine);
+		return parseFile(machine, verbose, contentProvider);
 	}
 
 	/**
@@ -355,7 +362,7 @@ public class BParser {
 		 * them to the internal definitions
 		 */
 		definitions.addAll(preParser.getDefFileDefinitions());
-pragmas.addAll(preParser.getPragmas());
+        pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}
@@ -435,7 +442,7 @@ pragmas.addAll(preParser.getPragmas());
 
 			if (options.prologOutput) {
 				printASTasProlog(out, this, bfile, tree, options.useIndention,
-						options.addLineNumbers);
+						options.addLineNumbers, contentProvider);
 			}
 			if (options.fastPrologOutput) {
 				// try {
