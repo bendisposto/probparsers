@@ -51,7 +51,7 @@ public class BatchParser {
 
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree, false,
-					true);
+					true, parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename
