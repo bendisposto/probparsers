@@ -1,5 +1,7 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
+import java.util.List;
+
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
@@ -9,11 +11,11 @@ class ParamFinder extends DepthFirstAdapter {
 
 	private Node n;
 	private final SourcePosition start;
-	private final Class<? extends Node> clazz;
+	private final List<Class<? extends Node>> classes;
 
-	public ParamFinder(SourcePosition sourcePosition, Class<? extends Node> clazz) {
+	public ParamFinder(SourcePosition sourcePosition, List<Class<? extends Node>> classes) {
 		this.start = sourcePosition;
-		this.clazz = clazz;
+		this.classes = classes;
 	}
 
 	@Override
@@ -22,10 +24,15 @@ class ParamFinder extends DepthFirstAdapter {
 
 	@Override
 	public void defaultIn(Node node) {
-		if (clazz.isInstance(node)) {
-			SourcePosition startPos = node.getStartPos();
-			if (n == null && start.compareTo(startPos) <= 0) n = node;
+		
+		for (Class<? extends Node> clazz : classes) {
+			if (clazz.isInstance(node)) {
+				SourcePosition startPos = node.getStartPos();
+				if (n == null && start.compareTo(startPos) <= 0) n = node;
+				break;
+			}
 		}
+		
 	}
 
 	public Node getNode() {

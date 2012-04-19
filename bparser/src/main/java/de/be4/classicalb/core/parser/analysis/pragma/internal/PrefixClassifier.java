@@ -1,11 +1,13 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
+import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
@@ -20,13 +22,13 @@ public class PrefixClassifier implements IClassifier {
 			.getProperty("line.separator");
 	protected PragmaParser[] parsers;
 	protected final int[] inputSizes;
-	private final Class<? extends Node> clazz;
 	private final String input;
 	private List<String> warnings;
+	private final List<Class<? extends Node>> classes;
 
-	public PrefixClassifier(String input, Class<? extends Node> clazz) {
+	public PrefixClassifier(String input, Class<? extends Node>... classes) {
 		this.input = input;
-		this.clazz = clazz;
+		this.classes = Arrays.asList(classes); 
 		String[] split = input.split(LINE_SEPARATOR);
 		inputSizes = new int[split.length];
 		inputSizes[0] = 0;
@@ -49,14 +51,12 @@ public class PrefixClassifier implements IClassifier {
 		return parsers[i];
 	}
 
-	protected Class<? extends Node> getClazz() {
-		return clazz;
-	}
 
-	private Node seek(Class<? extends Node> seek, Node start) {
+
+	private Node seek(Node start) {
 		if (start == null || start instanceof Start || start instanceof EOF
-				|| seek.isInstance(start)) return start;
-		return seek(seek, start.parent());
+				|| checkInstance(start)) return start;
+		return seek(start.parent());
 	}
 
 	private boolean validExpIdentifier(char c) {
@@ -95,7 +95,7 @@ public class PrefixClassifier implements IClassifier {
 
 		if (c == '(') {
 			ParamFinder paremFinder = new ParamFinder(
-					new SourcePosition(li, ci), getClazz());
+					new SourcePosition(li, ci), classes);
 			ast.apply(paremFinder);
 			return paremFinder.getNode();
 		}
@@ -113,18 +113,29 @@ public class PrefixClassifier implements IClassifier {
 			SpecialTypeFinder existentialFinder = new SpecialTypeFinder(nearestRight,AExistsPredicate.class);
 			return existentialFinder.find();
 		}
+		
 
 		if (!validExpIdentifier(c)) {
 			warnings.add("maybe_illplaced");
 		}
 
-		if (!getClazz().isInstance(nearestRight)) {
-			return seek(getClazz(), nearestRight);
+		if (!checkInstance(nearestRight)) {
+			return seek(nearestRight);
 		}
+		
 		return nearestRight;
 	}
 
+	private boolean checkInstance(Node n) {
+		for (Class<? extends Node> c : classes) {
+			if (c.isInstance(n)) return true;
+		}
+		return false;
+	}
+	
+	
 	public List<String> getWarnings() {
+		if (warnings == null) return Collections.emptyList();
 		return Collections.unmodifiableList(warnings);
 	}
 
