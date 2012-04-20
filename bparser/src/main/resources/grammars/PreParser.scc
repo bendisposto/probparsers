@@ -106,7 +106,7 @@ Tokens
 	{definitions} comma = ',';
 
 	{definitions -> definitions_rhs} begin_def_body = '==';
-	{definitions_rhs} rhs_body = word_chars;
+	{definitions_rhs} rhs_body = word_chars | double_quotation all_chars_without_quote* double_quotation;
 	{definitions_rhs} begin_nesting =
 		'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
 		'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
