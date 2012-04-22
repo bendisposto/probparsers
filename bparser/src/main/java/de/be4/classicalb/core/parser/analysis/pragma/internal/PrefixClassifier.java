@@ -7,12 +7,16 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
+import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ADeferredSetSet;
 import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
+import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.PSet;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
@@ -28,7 +32,7 @@ public class PrefixClassifier implements IClassifier {
 
 	public PrefixClassifier(String input, Class<? extends Node>... classes) {
 		this.input = input;
-		this.classes = Arrays.asList(classes); 
+		this.classes = Arrays.asList(classes);
 		String[] split = input.split(LINE_SEPARATOR);
 		inputSizes = new int[split.length];
 		inputSizes[0] = 0;
@@ -51,11 +55,10 @@ public class PrefixClassifier implements IClassifier {
 		return parsers[i];
 	}
 
-
-
 	private Node seek(Node start) {
 		if (start == null || start instanceof Start || start instanceof EOF
-				|| checkInstance(start)) return start;
+				|| checkInstance(start))
+			return start;
 		return seek(start.parent());
 	}
 
@@ -67,7 +70,8 @@ public class PrefixClassifier implements IClassifier {
 		this.warnings = new ArrayList<String>();
 		Node nearestRight = p.getNearestRight();
 
-		if (nearestRight instanceof EOF) return nearestRight;
+		if (nearestRight instanceof EOF)
+			return nearestRight;
 
 		int li = p.getEnd().getLine();
 		int ci = p.getEnd().getPos();
@@ -77,20 +81,24 @@ public class PrefixClassifier implements IClassifier {
 		char c = input.charAt(pos);
 		String next = "";
 		boolean skip = false;
-		if (pos < input.length() - 1) next = input.substring(pos, pos + 2);
-		if (next.equals("/*")) skip = true;
+		if (pos < input.length() - 1)
+			next = input.substring(pos, pos + 2);
+		if (next.equals("/*"))
+			skip = true;
 
 		while (skip || (li < input.length() && Character.isWhitespace(c))) {
 			next = "";
 			c = input.charAt(pos); // find first non-whitespace character
-			if (pos < input.length() - 1) next = input.substring(pos, pos + 2);
+			if (pos < input.length() - 1)
+				next = input.substring(pos, pos + 2);
 			pos++;
 			if (next.equals("*/")) {
 				skip = false;
 				pos++;
 				c = input.charAt(pos++);
 			}
-			if (next.equals("/*")) skip = true;
+			if (next.equals("/*"))
+				skip = true;
 		}
 
 		if (c == '(') {
@@ -101,19 +109,29 @@ public class PrefixClassifier implements IClassifier {
 		}
 
 		if (c == '%') {
-			SpecialTypeFinder lambdaFinder = new SpecialTypeFinder(nearestRight,ALambdaExpression.class);
+			SpecialTypeFinder lambdaFinder = new SpecialTypeFinder(
+					nearestRight, ALambdaExpression.class);
 			return lambdaFinder.find();
 		}
-		
+
 		if (c == '!') {
-			SpecialTypeFinder universalFinder = new SpecialTypeFinder(nearestRight,AForallPredicate.class);
+			SpecialTypeFinder universalFinder = new SpecialTypeFinder(
+					nearestRight, AForallPredicate.class);
 			return universalFinder.find();
 		}
 		if (c == '%') {
-			SpecialTypeFinder existentialFinder = new SpecialTypeFinder(nearestRight,AExistsPredicate.class);
+			SpecialTypeFinder existentialFinder = new SpecialTypeFinder(
+					nearestRight, AExistsPredicate.class);
 			return existentialFinder.find();
 		}
-		
+
+		if (c == '{') {
+			SpecialTypeFinder setFinder = new SpecialTypeFinder(nearestRight,
+					AEnumeratedSetSet.class, ADeferredSetSet.class,
+					ASetExtensionExpression.class,
+					AComprehensionSetExpression.class);
+			return setFinder.find();
+		}
 
 		if (!validExpIdentifier(c)) {
 			warnings.add("maybe_illplaced");
@@ -122,20 +140,21 @@ public class PrefixClassifier implements IClassifier {
 		if (!checkInstance(nearestRight)) {
 			return seek(nearestRight);
 		}
-		
+
 		return nearestRight;
 	}
 
 	private boolean checkInstance(Node n) {
 		for (Class<? extends Node> c : classes) {
-			if (c.isInstance(n)) return true;
+			if (c.isInstance(n))
+				return true;
 		}
 		return false;
 	}
-	
-	
+
 	public List<String> getWarnings() {
-		if (warnings == null) return Collections.emptyList();
+		if (warnings == null)
+			return Collections.emptyList();
 		return Collections.unmodifiableList(warnings);
 	}
 
