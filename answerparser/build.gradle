@@ -3,9 +3,15 @@
 dependsOn(':prologlib')
 
 
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 
 dependencies {
-    sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
+//	sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5-SNAPSHOT', changing: true)
+  
+	sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
     compile project(path: ":prologlib", configuration: "archives") 
 }
 
