@@ -150,6 +150,7 @@ public class RecursiveMachineLoader {
 			final String machineName) throws BException,
 			IOException {
 		final File machineFile = lookupFile(machineName);
+		if (files.contains(machineFile)) return;
 		final BParser parser = new BParser(machineFile.getName());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
@@ -193,6 +194,8 @@ public class RecursiveMachineLoader {
 			final Start current, Set<String> ancestors, final boolean isMain,
 			final SourcePositions sourcePositions)
 			throws BException {
+		
+		
 		// make a copy of the referencing machines
 		ancestors = new TreeSet<String>(ancestors);
 
