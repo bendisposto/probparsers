@@ -2,7 +2,10 @@
 
 ## Building
 Run the 'deploy' target with gradle. If you don't have gradle installed, you can use the provided wrapper 
-   ./gradlew deploy
+   ./gradlew uberjar
+
+If the build fails with "Could not open task artifact state cache", delete the file 
+.gradle/<VERSION>/taskArtifacts/cache.properties.lock
 
 The artifacts are copied to the build folder 
 
