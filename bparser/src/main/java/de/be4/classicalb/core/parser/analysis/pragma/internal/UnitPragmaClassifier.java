@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
-import java.util.ArrayList;
-
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PSet;

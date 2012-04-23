@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.pragma.internal;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 

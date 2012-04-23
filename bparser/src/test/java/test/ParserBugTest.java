@@ -18,6 +18,7 @@ public class ParserBugTest {
 		BParser parser = new BParser();
 		Start ast = parser.parse(s, true);
 		ast.apply(new ASTPrinter());
+		assertTrue(true);
 	}
 
 }

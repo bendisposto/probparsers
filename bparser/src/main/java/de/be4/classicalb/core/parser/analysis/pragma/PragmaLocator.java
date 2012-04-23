@@ -11,12 +11,10 @@ import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnitPragmaClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
-import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
-import de.be4.classicalb.core.parser.node.PSet;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
@@ -29,6 +27,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	private Map<String, IClassifier> classifiers = new HashMap<String, IClassifier>();
 
+	@SuppressWarnings("unchecked")
 	private PragmaLocator(List<RawPragma> p, String input) {
 		this.pragmas = p;
 		classifiers.put("label", new PrefixClassifier(input,  PPredicate.class));

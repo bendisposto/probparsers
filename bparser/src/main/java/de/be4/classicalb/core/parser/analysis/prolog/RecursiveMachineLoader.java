@@ -16,7 +16,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IFileContentProvider;
