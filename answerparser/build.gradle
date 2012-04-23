@@ -23,6 +23,8 @@ sourceSets {
     }
 }
 
+
+
 task genParser(type:JavaExec) {
 	doFirst{ file('build/temp').mkdirs() }
 	inputs.dir new File('src/main/resources/grammars')
@@ -35,7 +37,7 @@ task genParser(type:JavaExec) {
 	 args = ['-d','build/temp','src/main/resources/prob.scc']
 }
 
-jar {
+jar {	
  include '**/*.class'
  exclude '**.*.scc' 
  from 'build/temp'
@@ -44,6 +46,9 @@ jar {
 
 compileJava { 
  dependsOn = ['genParser',':prologlib:deploy'] 
+ doLast {
+	 ant.patch(patchfile: 'warnings.patch', originalfile: 'build/temp/de/prob/core/sablecc/parser/Parser.java', failonerror:'true'  )
+ }
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
