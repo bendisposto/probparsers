@@ -71,8 +71,8 @@ jar {
 }
 
 task patches << {
-	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java' )
-	ant.patch(patchfile: 'parserSlurp.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java' )
+	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true' )
+	ant.patch(patchfile: 'parserSlurp.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true'  )
 }
 
 compileJava { 
