@@ -5,10 +5,12 @@ dependsOn(':parserbase')
 
 sourceCompatibility = 1.5
 
-
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
 dependencies {
-    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.2-SNAPSHOT')
+    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5-SNAPSHOT', changing: true)
 }
 
 
