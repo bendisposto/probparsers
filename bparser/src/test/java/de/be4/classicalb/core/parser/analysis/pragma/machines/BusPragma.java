@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.pragma.machines;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.prolog.output.PrologTermStringOutput;
 
-public class PragmaMachines {
+public class BusPragma {
 
 	private static final String PATH = "src/test/resources/pragmas/";
 	private PrologTermStringOutput out;
@@ -40,7 +38,12 @@ public class PragmaMachines {
 
 		assertEquals(14, parser.getPragmas().size());
 
-		assertTrue(parser.getPragmas().get(0) instanceof UnknownPragma);
+		parser.getPragmas().get(0).printProlog(out, ids);
+		assertEquals(
+				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
+				out.toString());
+
+		out = new PrologTermStringOutput();
 		parser.getPragmas().get(0).printProlog(out, ids);
 		assertEquals(
 				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
