@@ -38,11 +38,6 @@ public class BusPragma {
 
 		assertEquals(14, parser.getPragmas().size());
 
-		parser.getPragmas().get(0).printProlog(out, ids);
-		assertEquals(
-				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
-				out.toString());
-
 		// TODO: Are all these globals correct?
 		String[] results = {
 				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
