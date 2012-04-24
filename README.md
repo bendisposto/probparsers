@@ -22,7 +22,7 @@ The artifacts are copied to the build folder
 
 ## Contributors
 The libraries contain contributions from (in alphabetical order)
-Jens Bendisposto, Marc Büngener, Fabian Fritz, Michael Leuschel; Daniel Plagge
+Jens Bendisposto, Marc Büngener, Fabian Fritz, Sebastian Krings, Michael Leuschel, Daniel Plagge
 
 ## Licence 
 
