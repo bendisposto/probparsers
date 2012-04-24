@@ -5,7 +5,7 @@ Run the 'deploy' target with gradle. If you don't have gradle installed, you can
    ./gradlew uberjar
 
 If the build fails with "Could not open task artifact state cache", delete the file 
-.gradle/<VERSION>/taskArtifacts/cache.properties.lock
+.gradle/VERSION/taskArtifacts/cache.properties.lock
 
 The artifacts are copied to the build folder 
 
@@ -14,8 +14,9 @@ The artifacts are copied to the build folder
 - bparser - parser for classical B (more information in http://www.stups.uni-duesseldorf.de/w/An_Object_Oriented_Parser_For_B_Specifications)
 - prologlib - library to construct and manipulate well-formed prolog terms 
 - parserbase - library for uniform access to the formal language parsers (e.g. to embed a language into ltl) 
-- ltlparser - parser for LTL formulas - the parser delegates formulas in { } to a formalism specific parser (e.g. to the classical B parser) 
-- answerparser - parser to read answers from the ProB prolog core (deprecated!)
+- ltlparser - parser for LTL formulas - the parser delegates formulas in { } to a formalism specific parser (e.g. to the classical B parser).
+              Also contains a parser for CTL
+- answerparser - parser to read answers from the ProB prolog core 
 - unicode - lexer that transforms Event-B expressions and predicates from ASCII to Unicode syntax and vice3 versa (note: this is not extensible!)
 - cliparser - glue code for embedding the parser in the prolog core (deprecated!)
 
