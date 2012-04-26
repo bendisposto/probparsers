@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.ClassifiedPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
+import de.be4.classicalb.core.parser.analysis.pragma.internal.UnitPragmaClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
@@ -26,11 +27,12 @@ public class PragmaLocator extends DepthFirstAdapter {
 
 	private Map<String, IClassifier> classifiers = new HashMap<String, IClassifier>();
 
+	@SuppressWarnings("unchecked")
 	private PragmaLocator(List<RawPragma> p, String input) {
 		this.pragmas = p;
 		classifiers.put("label", new PrefixClassifier(input,  PPredicate.class));
 		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
-		classifiers.put("unit", new PrefixClassifier(input, PExpression.class));
+		classifiers.put("unit", new UnitPragmaClassifier(input));
 		classifiers.put("conversion", new PrefixClassifier(input, PExpression.class));
 	}
 

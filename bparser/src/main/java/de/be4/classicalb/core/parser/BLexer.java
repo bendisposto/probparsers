@@ -21,6 +21,8 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class BLexer extends Lexer {
 
+	private static final String PRAGMA_END = "@*/";
+	private static final String PRAGMA_START = "/*@";
 	private TComment comment = null;
 	private StringBuilder commentBuffer = null;
 	private List<RawPragma> pragmas = new ArrayList<RawPragma>();
@@ -151,9 +153,10 @@ public class BLexer extends Lexer {
 				comment = null;
 				commentBuffer = null;
 				state = State.NORMAL;
-				if (text.startsWith("/*@")) {
+
+				if (text.startsWith(PRAGMA_START)) {
 					String pragmaText = "";
-					if (text.endsWith("@*/")) pragmaText = text.substring(3,
+					if (text.endsWith(PRAGMA_END)) pragmaText = text.substring(3,
 							text.length() - 3).trim();
 					else
 						pragmaText = text.substring(3, text.length() - 2)

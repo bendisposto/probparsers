@@ -6,6 +6,12 @@ sourceSets {
     }
 }
 
+
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+
 configurations {
 	sablecc
 }
@@ -13,7 +19,7 @@ configurations {
 dependencies {
     compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
-    sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
+    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5', changing: true)
 }
 
 task genParser(type:JavaExec) {

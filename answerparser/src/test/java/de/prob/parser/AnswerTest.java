@@ -2,13 +2,9 @@ package de.prob.parser;
 
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
-
 import org.junit.Test;
 
 import de.prob.core.sablecc.node.Start;
-
-import junit.framework.TestCase;
 
 
 public class AnswerTest  {

@@ -3,9 +3,15 @@
 dependsOn(':prologlib')
 
 
+configurations.all {
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 
 dependencies {
-    sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
+	sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5', changing: true)
+  
+//	sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
     compile project(path: ":prologlib", configuration: "archives") 
 }
 
@@ -16,6 +22,8 @@ sourceSets {
         }
     }
 }
+
+
 
 task genParser(type:JavaExec) {
 	doFirst{ file('build/temp').mkdirs() }
@@ -29,7 +37,7 @@ task genParser(type:JavaExec) {
 	 args = ['-d','build/temp','src/main/resources/prob.scc']
 }
 
-jar {
+jar {	
  include '**/*.class'
  exclude '**.*.scc' 
  from 'build/temp'
@@ -38,6 +46,9 @@ jar {
 
 compileJava { 
  dependsOn = ['genParser',':prologlib:deploy'] 
+ doLast {
+	 ant.patch(patchfile: 'warnings.patch', originalfile: 'build/temp/de/prob/core/sablecc/parser/Parser.java', failonerror:'true'  )
+ }
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

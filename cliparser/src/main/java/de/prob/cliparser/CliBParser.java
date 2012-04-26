@@ -81,6 +81,7 @@ public class CliBParser {
 			final BParser parser = new BParser(bfile.getName());
 			returnValue = parser.fullParsing(bfile, behaviour, out);
 		} catch (Exception e) {
+			e.printStackTrace();
 			returnValue = -4;
 		} finally {
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
