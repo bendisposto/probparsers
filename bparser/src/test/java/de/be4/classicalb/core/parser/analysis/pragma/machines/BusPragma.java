@@ -38,7 +38,6 @@ public class BusPragma {
 
 		assertEquals(14, parser.getPragmas().size());
 
-		// TODO: Are all these globals correct?
 		String[] results = {
 				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
 				"global_pragma(version,['1.3.5'],[],-1,1,1,1,21,[start,0,1,0,2])",
