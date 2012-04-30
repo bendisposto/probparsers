@@ -80,4 +80,24 @@ public class AssertionAndSymbolicPragma {
 		}
 
 	}
+
+	@Test
+	public void testSymbolicInsideDEF() throws IOException, BException {
+		machine = new File(PATH + "SymbolicInsideDEF.mch");
+
+		final BParser parser = new BParser(machine.getName());
+		Start start = parser.parseFile(machine, false);
+		start.apply(ids);
+
+		assertEquals(1, parser.getPragmas().size());
+
+		String[] results = { "pragma(6,symbolic,[],[],-1,3,12,3,27)" };
+
+		for (int i = 0; i < parser.getPragmas().size(); i++) {
+			out = new PrologTermStringOutput();
+			parser.getPragmas().get(i).printProlog(out, ids);
+			assertEquals(results[i], out.toString());
+		}
+
+	}
 }

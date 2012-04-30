@@ -14,7 +14,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.prolog.output.PrologTermStringOutput;
 
-public class BusPragma {
+public class PragmaMachine {
 
 	private static final String PATH = "src/test/resources/pragmas/";
 	private PrologTermStringOutput out;
@@ -30,29 +30,22 @@ public class BusPragma {
 
 	@Test
 	public void testBusPragma() throws IOException, BException {
-		machine = new File(PATH + "BusPragma.mch");
+		machine = new File(PATH + "PragmaMachine.mch");
 
 		final BParser parser = new BParser(machine.getName());
 		Start start = parser.parseFile(machine, false);
 		start.apply(ids);
 
-		assertEquals(14, parser.getPragmas().size());
+		assertEquals(8, parser.getPragmas().size());
 
-		String[] results = {
-				"global_pragma(goto,[hell],[],-1,2,17,2,33,[start,start,eof,start,eof])",
-				"global_pragma(version,['1.3.5'],[],-1,1,1,1,21,[start,0,1,0,2])",
-				"global_pragma(empty,[],[],-1,2,23,2,29,[3,1,4,3,7])",
-				"global_pragma(murder,[],[],-1,5,16,5,29,[3,5,6,3,7])",
-				"pragma(11,unit,[m],[],-1,8,19,8,32)",
-				"pragma(30,symbolic,[],[],-1,11,25,11,40)",
-				"pragma(44,label,[only,typing],[],-1,12,19,12,43)",
-				"pragma(50,label,[important],[],-1,12,80,12,102)",
-				"global_pragma('ltl-assertion',['we can always call inc','GF [inc]'],[],-1,17,1,17,57,[58,1,64,63,66])",
-				"pragma(73,symbolic,[],[],-1,22,18,22,33)",
-				"pragma(73,conversion,[m,to,cm],[],-1,22,34,22,59)",
-				"pragma(80,symbolic,[],[maybe_illplaced],-1,23,16,23,31)",
-				"global_pragma('non-negative',[],[],-1,28,33,28,52,[91,90,92,91,92])",
-				"global_pragma(pragma_am_ende,[],[],-1,38,1,38,22,[64,1,eof,110,eof])" };
+		String[] results = { "pragma(13,symbolic,[],[],-1,7,9,7,23)",
+				"pragma(21,label,[axm2],[],-1,8,3,8,20)",
+				"global_pragma(rec_let,[],[],-1,9,2,9,16,[10,9,26,25,27])",
+				"pragma(26,label,[axm3],[],-1,9,17,9,34)",
+				"pragma(53,label,[axm4],[],-1,10,3,10,20)",
+				"pragma(61,label,[thm1],[],-1,13,4,13,21)",
+				"pragma(64,label,[thm2],[],-1,14,3,14,20)",
+				"pragma(70,label,[inv1],[],-1,18,11,18,27)" };
 
 		for (int i = 0; i < parser.getPragmas().size(); i++) {
 			out = new PrologTermStringOutput();
