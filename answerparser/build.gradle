@@ -1,6 +1,6 @@
 // ProB Answer Parser 
 
-dependsOn(':prologlib')
+//dependsOn(':prologlib')
 
 
 configurations.all {

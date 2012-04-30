@@ -1,7 +1,7 @@
 // BParser
 
-dependsOn(':prologlib')
-dependsOn(':parserbase')
+//dependsOn(':prologlib')
+//dependsOn(':parserbase')
 
 sourceCompatibility = 1.5
 

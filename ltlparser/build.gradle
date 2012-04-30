@@ -1,7 +1,7 @@
 // LTL Parser 
 
-dependsOn(':prologlib')
-dependsOn(':parserbase')
+//dependsOn(':prologlib')
+//dependsOn(':parserbase')
 
 
 configurations.all {
