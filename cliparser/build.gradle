@@ -1,9 +1,9 @@
-dependsOn(':bparser')
-dependsOn(':prologlib')
-dependsOn(':parserbase')
-dependsOn(':ltlparser')
-dependsOn(':answerparser')
-dependsOn(':unicode')
+//dependsOn(':bparser')
+//dependsOn(':prologlib')
+//dependsOn(':parserbase')
+//dependsOn(':ltlparser')
+//dependsOn(':answerparser')
+//dependsOn(':unicode')
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
