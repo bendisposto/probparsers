@@ -29,7 +29,7 @@ public class PragmaMachine {
 	}
 
 	@Test
-	public void testBusPragma() throws IOException, BException {
+	public void testPragmaMachine() throws IOException, BException {
 		machine = new File(PATH + "PragmaMachine.mch");
 
 		final BParser parser = new BParser(machine.getName());
