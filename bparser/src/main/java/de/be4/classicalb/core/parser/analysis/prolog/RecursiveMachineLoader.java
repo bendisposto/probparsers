@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -53,7 +52,7 @@ public class RecursiveMachineLoader {
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
 	private boolean verbose;
-	private final Map<String, Start> imported = new TreeMap<String, Start>();
+	private final Map<String, Start> parsedMachines = new HashMap<String, Start>();
 	private final List<File> files = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
@@ -122,7 +121,7 @@ public class RecursiveMachineLoader {
 		pout.closeList();
 		pout.closeTerm();
 		pout.fullstop();
-		for (final Map.Entry<String, Start> entry : imported.entrySet()) {
+		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
 			pout.openTerm("machine");
 			final SourcePositions src = positions.get(entry.getKey());
 			pprinter.setSourcePositions(src);
@@ -209,7 +208,7 @@ public class RecursiveMachineLoader {
 		final String name = refMachines.getName();
 		final SortedSet<String> references = refMachines
 				.getReferencedMachines();
-		imported.put(name, current);
+		getParsedMachines().put(name, current);
 		
 		
 		
@@ -224,7 +223,7 @@ public class RecursiveMachineLoader {
 		checkForCycles(ancestors, references);
 
 		for (final String refMachine : references) {
-				if (!imported.containsKey(refMachine) ) {
+				if (!getParsedMachines().containsKey(refMachine) ) {
 				try {
 					loadMachine(ancestors, refMachine);
 				} catch (final BException e) {
