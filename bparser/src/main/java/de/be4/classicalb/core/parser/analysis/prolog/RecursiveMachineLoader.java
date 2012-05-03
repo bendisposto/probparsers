@@ -265,6 +265,10 @@ public class RecursiveMachineLoader {
 		return nodeIds;
 	}
 
+	public Map<String, Start> getParsedMachines() {
+		return parsedMachines;
+	}
+
 	private static class DefInjector extends DepthFirstAdapter {
 		private final Definitions definitions;
 
