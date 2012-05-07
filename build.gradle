@@ -35,8 +35,8 @@ allprojects {
       }
 	  def build_dir = file("build")
       if (build_dir.exists()) delClos(build_dir)
-      def gradle_cache = file(".gradle")
-      if (gradle_cache.exists()) delClos(gradle_cache)
+//      def gradle_cache = file(".gradle")
+//      if (gradle_cache.exists()) delClos(gradle_cache)
       def bin_dir = file("bin")
       if (bin_dir.exists()) delClos(bin_dir)
     }
