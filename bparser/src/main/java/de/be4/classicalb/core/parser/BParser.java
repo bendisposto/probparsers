@@ -52,6 +52,7 @@ public class BParser {
 	private static final int APPROXIMATE_TOKEN_LENGTH = 2;
 	public static final String EXPRESSION_PREFIX = "#EXPRESSION";
 	public static final String PREDICATE_PREFIX = "#PREDICATE";
+	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
 	public static final String CSP_PATTERN_PREFIX = "#CSPPATTERN";
