@@ -254,6 +254,7 @@ Tokens
 	// keywords for special parsing modes 
 	{normal} kw_expression = '#EXPRESSION';
 	{normal} kw_predicate = '#PREDICATE';
+	{normal} kw_formula = '#FORMULA';
 	{normal} kw_substitution = '#SUBSTITUTION';
 	{normal} kw_abstract_constants = '#ABSTRACT_CONSTANTS';
 	{normal} kw_abstract_variables = '#ABSTRACT_VARIABLES';
@@ -308,6 +309,8 @@ parse_unit {-> parse_unit} =
 	{definition_file} [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
 	{predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
 	{expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
+	{predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
+	{exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
 	{substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
 	{abstract_constants} kw_abstract_constants [clause]:abstract_constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
 	{abstract_variables} kw_abstract_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
@@ -502,7 +505,7 @@ predicate_atomic {-> predicate} =
     /* The following predicates have a priority in the AtelierB manual.
        But we (in contrast to AtelierB) distinguish between predicates and expression and
        can put the predicates of the form EXPR*EXPR -> PRED here.
-       Thus sewer parenthesis can be used */
+       Thus fewer parenthesis can be used */
     /* Original priority: 60 */
 	{equal} [left]:expression_top equal [right]:expression_top {-> New predicate.equal(left.expression, right.expression)} |
 	{member} [left]:expression_top element_of [right]:expression_top {-> New predicate.member(left.expression, right.expression)} |

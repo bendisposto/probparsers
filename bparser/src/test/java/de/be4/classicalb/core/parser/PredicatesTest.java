@@ -39,6 +39,8 @@ public class PredicatesTest {
 				result);
 	}
 
+
+
 	@Test
 	public void testParallelBelongs2() {
 		final String testMachine = "#PREDICATE x,y : ID";
@@ -74,7 +76,7 @@ public class PredicatesTest {
 		final String testMachine = "#PREDICATE ! (a,b). (1=1 )";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-			     "Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)))))",
+				"Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([a]),AIdentifierExpression([b])],AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)))))",
 				result);
 	}
 
@@ -131,6 +133,14 @@ public class PredicatesTest {
 				"Start(APredicateParseUnit(AImplicationPredicate(AEquivalencePredicate(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(2)),AEqualPredicate(AIntegerExpression(3),AIntegerExpression(4))),AEqualPredicate(AIntegerExpression(5),AIntegerExpression(6)))))",
 				result);
 	}
+	@Test
+	public void testEqualVsImplicationFormula() throws Exception {
+		final String testMachine = "#FORMULA 1=2 <=> 3=4 => 5=6";
+		final String result = getTreeAsString(testMachine);
+		assertEquals(
+				"Start(APredicateParseUnit(AImplicationPredicate(AEquivalencePredicate(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(2)),AEqualPredicate(AIntegerExpression(3),AIntegerExpression(4))),AEqualPredicate(AIntegerExpression(5),AIntegerExpression(6)))))",
+				result);
+	}
 
 	@Test
 	public void testBFalse() throws BException {
@@ -151,6 +161,18 @@ public class PredicatesTest {
 	@Test
 	public void testNonIdentifiersInQuantification() {
 		final String testMachine = "#PREDICATE ! a,5. (a=5 => a/=5 )";
+		try {
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (final BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			assertEquals(1, cause.getNodes().length);
+			assertNotNull(cause.getNodes()[0]);
+		}
+	}
+	@Test
+	public void testNonIdentifiersInQuantificationFormula() {
+		final String testMachine = "#FORMULA ! a,5. (a=5 => a/=5 )";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
