@@ -5,13 +5,7 @@
 
 sourceCompatibility = 1.5
 
-configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
 
-dependencies {
-    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5', changing: true)
-}
 
 
 dependencies {
@@ -64,11 +58,13 @@ task genBParser(type:JavaExec) {
 
 jar {
  include '**/*.class'
+ include '**/*.java'
  exclude '**.*.scc' 
  from 'build/temp'
  include '**/*.dat'
  include '**/*.properties'
 }
+
 
 task patches << {
 	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true' )
