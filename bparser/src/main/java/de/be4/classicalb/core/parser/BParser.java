@@ -74,28 +74,26 @@ public class BParser {
 	public BParser(final String fileName) {
 		this.fileName = fileName;
 	}
-	
+
 	public IDefinitionFileProvider getContentProvider() {
 		return contentProvider;
 	}
 
-
-	
 	public static void printASTasProlog(final PrintStream out,
 			final BParser parser, final File bfile, final Start tree,
-			final boolean idention, final boolean withLineInfo, IDefinitionFileProvider contentProvider)
-					throws BException {
+			final boolean idention, final boolean withLineInfo,
+			IDefinitionFileProvider contentProvider) throws BException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
 				bfile.getParent(), contentProvider);
 		final SourcePositions positions = withLineInfo ? parser
 				.getSourcePositions() : null;
-				
-				List<Pragma> pragmas = new ArrayList<Pragma>();
-				pragmas.addAll(parser.getPragmas());
-				
-				rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
-						pragmas);
-				rml.printAsProlog(new PrintWriter(out), idention);
+
+		List<Pragma> pragmas = new ArrayList<Pragma>();
+		pragmas.addAll(parser.getPragmas());
+
+		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
+				pragmas);
+		rml.printAsProlog(new PrintWriter(out), idention);
 	}
 
 	// private static String getASTasFastProlog(final BParser parser,
@@ -133,8 +131,7 @@ public class BParser {
 	 */
 	public Start parseFile(final File machine, final boolean verbose)
 			throws IOException, BException {
-		contentProvider = new CachingDefinitionFileProvider(
-						machine);
+		contentProvider = new CachingDefinitionFileProvider(machine);
 		return parseFile(machine, verbose, contentProvider);
 	}
 
@@ -265,7 +262,7 @@ public class BParser {
 		final Reader reader = new StringReader(input);
 
 		try {
-			// PreParsing 
+			// PreParsing
 			final DefinitionTypes defTypes = preParsing(debugOutput, reader,
 					contentProvider);
 
@@ -320,7 +317,7 @@ public class BParser {
 
 			List<RawPragma> locateTasks = lexer.getPragmas();
 
-			pragmas.addAll( PragmaLocator.locate(rootNode, locateTasks, input));
+			pragmas.addAll(PragmaLocator.locate(rootNode, locateTasks, input));
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -335,8 +332,9 @@ public class BParser {
 			final SourcecodeRange range = sourcePositions == null ? null
 					: sourcePositions.getSourcecodeRange(token);
 			final String msg = e.getLocalizedMessage();
+			final String realMsg = e.getRealMsg();
 			throw new BException(fileName, new BParseException(token, range,
-					msg));
+					msg, realMsg));
 		} catch (final BParseException e) {
 			throw new BException(fileName, e);
 		} catch (final IOException e) {
@@ -363,7 +361,7 @@ public class BParser {
 		 * them to the internal definitions
 		 */
 		definitions.addAll(preParser.getDefFileDefinitions());
-        pragmas.addAll(preParser.getPragmas());
+		pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}
@@ -421,7 +419,8 @@ public class BParser {
 			// Properties hashes = new Properties();
 
 			if (options.outputFile != null) {
-				if (hashesStillValid(options.outputFile)) return 0;
+				if (hashesStillValid(options.outputFile))
+					return 0;
 			}
 
 			final long start = System.currentTimeMillis();
