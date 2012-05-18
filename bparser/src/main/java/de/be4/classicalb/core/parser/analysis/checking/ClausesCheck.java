@@ -88,6 +88,16 @@ public class ClausesCheck implements SemanticCheck {
 		checkImplementationClauses(rootNode);
 		checkConstantsClause();
 		checkVariablesClauses();
+		if (collector.hasScalarParameter()) {
+			checkConstraintExistance(rootNode);
+		}
+	}
+
+	private void checkConstraintExistance(Start rootNode) throws CheckException {
+		if (!clauses.containsKey(NAME_CONSTRAINTS))
+			throw new CheckException(
+					"Specification has formal scalar parameter and no CONSTRAINTS clause.",
+					rootNode);
 	}
 
 	/**
@@ -168,8 +178,8 @@ public class ClausesCheck implements SemanticCheck {
 				message.append("INITIALISATION");
 			}
 
-			throw new CheckException(message.toString(), nodes
-					.toArray(new Node[nodes.size()]));
+			throw new CheckException(message.toString(),
+					nodes.toArray(new Node[nodes.size()]));
 		}
 	}
 
@@ -189,8 +199,8 @@ public class ClausesCheck implements SemanticCheck {
 				nodes.addAll(clauses.get(NAME_ABSTRACT_CONSTANTS));
 			}
 
-			throw new CheckException("Clause(s) missing: PROPERTIES", nodes
-					.toArray(new Node[nodes.size()]));
+			throw new CheckException("Clause(s) missing: PROPERTIES",
+					nodes.toArray(new Node[nodes.size()]));
 		}
 	}
 

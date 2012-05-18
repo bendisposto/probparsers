@@ -9,12 +9,20 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 
 public class ClausesCollector extends DepthFirstAdapter {
 
 	private final Map<String, Set<Node>> availableClauses = new HashMap<String, Set<Node>>();
+	private boolean scalarParameter = false;
+	boolean collectParams = false;
+
+	public boolean hasScalarParameter() {
+		return scalarParameter;
+	}
 
 	@Override
 	public void inAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
@@ -39,7 +47,36 @@ public class ClausesCollector extends DepthFirstAdapter {
 		}
 	}
 
+	@Override
+	public void inAMachineHeader(AMachineHeader node) {
+		super.inAMachineHeader(node);
+		collectParams = true;
+	}
+
+	@Override
+	public void outAMachineHeader(AMachineHeader node) {
+		super.outAMachineHeader(node);
+		collectParams = false;
+	}
+
+	@Override
+	public void inAIdentifierExpression(AIdentifierExpression node) {
+		super.inAIdentifierExpression(node);
+		scalarParameter = scalarParameter
+				|| (collectParams && allLowerCase(node.getIdentifier()
+						.getLast().getText()));
+	}
+
+	private boolean allLowerCase(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (Character.isUpperCase(s.charAt(i)))
+				return false;
+		}
+		return true;
+	}
+
 	public Map<String, Set<Node>> getAvailableClauses() {
 		return availableClauses;
 	}
+
 }
