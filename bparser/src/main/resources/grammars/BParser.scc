@@ -264,6 +264,7 @@ Tokens
 	{normal} kw_constants = '#CONSTANTS';
 	{normal} kw_constraints = '#CONSTRAINTS';
 	{normal} kw_definitions = '#DEFINITIONS';
+	{normal} kw_definition = '#DEFINITION';
 	{normal} kw_extends = '#EXTENDS';
 	{normal} kw_imports = '#IMPORTS';
 	{normal} kw_includes = '#INCLUDES';
@@ -281,8 +282,10 @@ Tokens
 	{normal} kw_oppattern = '#OPPATTERN';
 
 	{normal} identifier_literal = letter (letter | digit | underscore)*;
-	{normal} def_literal_substitution = letter (letter | digit | underscore)*;
-	{normal} def_literal_predicate = letter (letter | digit | underscore)*;
+	{normal} def_literal_substitution = '#literal_substitution' letter*;
+	{normal} def_literal_predicate = '#literal_predicate' letter*;
+	{normal} predicate_identifier = '#predicate_identifier' letter*;
+	{normal} truth_predicate = '#truth_predicate';
 	{normal} integer_literal = digit+;
 	
 	{normal} underscore = underscore;
@@ -334,7 +337,8 @@ parse_unit {-> parse_unit} =
 	{uses} kw_uses [clause]:uses_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
 	{values} kw_values [clause]:values_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
 	{variables} kw_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-	{oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit};
+	{oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
+	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
 machine {-> parse_unit} =
 	{abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
@@ -525,11 +529,14 @@ predicate_atomic {-> predicate} =
 	
 	/* Now we continue with the real atomic predicates: */
 	{bfalse} bfalse {-> New predicate.falsity()} |
+	{truth_predicate} truth_predicate {-> New predicate.truth()} |
 	{bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
 	{negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
 	{forall} for_any [identifiers]:expression_list dot_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)} | // check in typechecker: predicate must be an implication predicate 
 	{exists} exists [identifiers]:expression_list dot_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
-	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} ;
+	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
+	{identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
+	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} ;
 
 
 /* Expressions */
@@ -838,7 +845,8 @@ parse_unit =
 	{machine_clause} machine_clause |
 	{event_b_context} [name]:identifier_literal [context_clauses]:context_clause* |
 	{event_b_model} [name]:identifier_literal [model_clauses]:model_clause* |
-	{oppattern} [name]:identifier_literal* [parameters]:argpattern*;
+	{oppattern} [name]:identifier_literal* [parameters]:argpattern* |
+        {parse_unit_definition} definition;
 
 argpattern = {undef} | {def} expression;
 /* csppattern = argtype argpattern; */
@@ -909,7 +917,7 @@ eventstatus = {ordinary} | {anticipated} | {convergent};
 
 /* Predicates */
 predicate =
-    {substitution} [substitution]:substitution [predicate]:predicate |
+        {substitution} [substitution]:substitution [predicate]:predicate |
 	{conjunct} [left]:predicate [right]:predicate |
 	{negation} [predicate]:predicate |
 	{disjunct} [left]:predicate [right]:predicate |
@@ -933,7 +941,9 @@ predicate =
 	{falsity} |
 	{finite} [set]:expression |
 	{partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
-	{definition} [def_literal]:def_literal_predicate [parameters]:expression* ;
+	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
+        {predicate_identifier} [identifier]:predicate_identifier |
+        {predicate_function} [identifier]:predicate_identifier [parameters]:expression*;
 
 
 /* Expressions */
