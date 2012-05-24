@@ -8,6 +8,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AProverComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AFalsityPredicate;
+import de.be4.classicalb.core.parser.node.ASubstitutionPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
@@ -50,6 +51,14 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements
 			AProverComprehensionSetExpression node) {
 		if (error == null) {
 			error = new CheckException("SET not allowed in ordenary B files",
+					node);
+		}
+	}
+	
+	@Override
+	public void caseASubstitutionPredicate(ASubstitutionPredicate node) {
+		if (error == null) {
+			error = new CheckException("Substitution in Predicates are not supported in ordinary B files",
 					node);
 		}
 	}
