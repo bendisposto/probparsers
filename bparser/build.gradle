@@ -6,8 +6,6 @@
 sourceCompatibility = 1.5
 
 
-
-
 dependencies {
     compile project(path: ":prologlib", configuration: "archives") 
     compile project(path: ":parserbase", configuration: "archives") 
@@ -69,6 +67,7 @@ jar {
 task patches << {
 	ant.patch(patchfile: 'parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true' )
 	ant.patch(patchfile: 'parserSlurp.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true'  )
+	ant.patch(patchfile: 'deprecationpromotes.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/node/APromotesMachineClause.java', failonerror:'true'  )
 }
 
 compileJava { 

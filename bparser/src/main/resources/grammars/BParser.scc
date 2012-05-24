@@ -867,6 +867,9 @@ model_clause =
 machine_clause =
 	{definitions} [definitions]:definition* |
 	{sees} [machine_names]:expression* |
+	
+	 /* promotes contains operation names, not machine names. 
+	    See http://jira.cobra.cs.uni-duesseldorf.de/browse/PARSERLIB-4  */
 	{promotes} [machine_names]:expression* |
 	{uses} [machine_names]:expression* |
 	{includes} [machine_references]:machine_reference* |
