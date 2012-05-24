@@ -108,24 +108,25 @@ import de.prob.prolog.output.IPrologTermOutput;
  * @author plagge
  */
 public class ASTProlog extends DepthFirstAdapter {
-        // The tables SUM_TYPE and SIMPLE_NAME are used to translate the Java class name to
-        // the Prolog functor name.
-        // These tables MUST be in sync with BParser.scc.
-        // SUM_TYPE must list all sum-types in BPaser.scc.
-        // The name of the sum-type is not part of the Prolog functor.
+	// The tables SUM_TYPE and SIMPLE_NAME are used to translate the Java class
+	// name to
+	// the Prolog functor name.
+	// These tables MUST be in sync with BParser.scc.
+	// SUM_TYPE must list all sum-types in BPaser.scc.
+	// The name of the sum-type is not part of the Prolog functor.
 
-        // SIMPLE_NAME must list all AST Classes that are not part of a sum-type
-        // If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we throw an exception.
+	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
+	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
+	// throw an exception.
 	private static final List<String> SUM_TYPE = new LinkedList<String>(
 			Arrays.asList("expression", "predicate", "machine_clause",
-				      "substitution", "parse_unit", "model_clause",
-				      "context_clause", "eventstatus", "argpattern",
-                                      "set", "machine_variant", "definition"));
+					"substitution", "parse_unit", "model_clause",
+					"context_clause", "eventstatus", "argpattern", "set",
+					"machine_variant", "definition"));
 
- 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
-		        Arrays.asList("event", "machine_header",
-                                      "machine_reference","operation","rec_entry","values_entry",
-                                      "witness"));
+	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
+			Arrays.asList("event", "machine_header", "machine_reference",
+					"operation", "rec_entry", "values_entry", "witness"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -249,8 +250,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void defaultCase(final Node node) {
 		pout.printAtom(node.toString().trim());
 	}
-	
-	
+
 	@Override
 	public void caseTStringLiteral(TStringLiteral node) {
 		String text = node.getText();
@@ -264,51 +264,57 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	/**
 	 * 
-	 * @param  AST node
+	 * @param AST
+	 *            node
 	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
 		String className = node.getClass().getSimpleName();
 		String formatted = simpleFormats.get(className);
 		if (formatted == null) {
-		    formatted = toFunctorName(className);
-		    simpleFormats.put(className, formatted);
+			formatted = toFunctorName(className);
+			simpleFormats.put(className, formatted);
 		}
 		return formatted;
 	}
 
 	/**
-         * The translation from the names in the SableCC grammar to prolog functors must be systematic
-         * Otherwise it will not be possible to reuse the grammar for non-Java front-ends.
-         * Two magic cases here:
-         * "prover_comprehension_set" -> "comprehension_set"
-         * "op" ->  "operation_call"
-         * Todo: do remove magic special cases
-         * DO NOT add extra special cases here !!
-	 * @param Java class name
+	 * The translation from the names in the SableCC grammar to prolog functors
+	 * must be systematic Otherwise it will not be possible to reuse the grammar
+	 * for non-Java front-ends. Two magic cases here: "prover_comprehension_set"
+	 * -> "comprehension_set" "op" -> "operation_call" Todo: do remove magic
+	 * special cases DO NOT add extra special cases here !!
+	 * 
+	 * @param Java
+	 *            class name
 	 * @return Prolog functor name
 	 */
 	private String toFunctorName(final String className) {
-                String camelName = formatCamel(className.substring(1)).substring(1);
-                if (className.startsWith("T")) {
-                    // A SableCC Token
-                    return camelName;
+		String camelName = formatCamel(className.substring(1)).substring(1);
+		if (className.startsWith("T")) {
+			// A SableCC Token
+			return camelName;
 		}
 
 		if (className.startsWith("A")) {
-		    if (ATOMIC_TYPE.contains(camelName)) return camelName;
-		    for (String checkend : SUM_TYPE)
-			if (camelName.endsWith(checkend)) {
-                            String shortName = camelName.substring(0,camelName.length()- checkend.length() -1 );
-                            // hard-coded renamings
-                            if (shortName.equals("prover_comprehension_set")) return "comprehension_set";
-                            if (shortName.equals("op")) return "operation_call";
-                            return shortName;
-			}
-                }
+			if (ATOMIC_TYPE.contains(camelName))
+				return camelName;
+			for (String checkend : SUM_TYPE)
+				if (camelName.endsWith(checkend)) {
+					String shortName = camelName.substring(0,
+							camelName.length() - checkend.length() - 1);
+					// hard-coded renamings
+					if (shortName.equals("prover_comprehension_set"))
+						return "comprehension_set";
+					if (shortName.equals("op"))
+						return "operation_call";
+					return shortName;
+				}
+		}
 		// There is no rule to translate the class name to a prolog functor.
-                // Probably the class name is missing in table SUM_TYPE or in table ATOMIC_TYPE.
-                throw new RuntimeException("cannot determine functor name");
+		// Probably the class name is missing in table SUM_TYPE or in table
+		// ATOMIC_TYPE.
+		throw new RuntimeException("cannot determine functor name");
 	}
 
 	/**
@@ -408,28 +414,23 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getParameters());
 		close(node);
 	}
-	
-    /* todo : ask Jens 
-	@Override
-	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
-		open(node);
-		pout.printAtom(node.getIdentifier().getText());
-		printAsList(node.getExpressions());
-		printAsList(node.getPredicates());
-		close(node);
-	}
 
-	
-	@Override
-	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
-		open(node);
-		pout.printAtom(node.getIdentifier().getText());
-		printAsList(node.getExpressions());
-		printAsList(node.getPredicates());
-		close(node);
-	}
-	
-    */
+	/*
+	 * todo : ask Jens
+	 * 
+	 * @Override public void caseAExtendedExprExpression(final
+	 * AExtendedExprExpression node) { open(node);
+	 * pout.printAtom(node.getIdentifier().getText());
+	 * printAsList(node.getExpressions()); printAsList(node.getPredicates());
+	 * close(node); }
+	 * 
+	 * 
+	 * @Override public void caseAExtendedPredPredicate(final
+	 * AExtendedPredPredicate node) { open(node);
+	 * pout.printAtom(node.getIdentifier().getText());
+	 * printAsList(node.getExpressions()); printAsList(node.getPredicates());
+	 * close(node); }
+	 */
 	// machine clauses
 
 	@Override
@@ -445,7 +446,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseAPromotesMachineClause(final APromotesMachineClause node) {
-		printOCAsList(node, node.getMachineNames());
+		printOCAsList(node, node.getOperationNames());
 	}
 
 	@Override
@@ -529,7 +530,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// definition
 
 	@Override
-	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+	public void caseAPredicateDefinitionDefinition(
+			final APredicateDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -538,7 +540,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+	public void caseASubstitutionDefinitionDefinition(
+			final ASubstitutionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -547,7 +550,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+	public void caseAExpressionDefinitionDefinition(
+			final AExpressionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -583,8 +587,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	// predicate
 
 	@Override
-	public void caseAForallPredicate(
-			final AForallPredicate node) {
+	public void caseAForallPredicate(final AForallPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getImplication().apply(this);
@@ -592,8 +595,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExistsPredicate(
-			final AExistsPredicate node) {
+	public void caseAExistsPredicate(final AExistsPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicate().apply(this);

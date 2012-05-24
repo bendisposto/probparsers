@@ -63,7 +63,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	 * @param parent
 	 *            The parent {@link Node} of the list.
 	 */
-	public void endList( final Node parent) {
+	public void endList(final Node parent) {
 		// Do nothing
 	}
 
@@ -304,7 +304,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		inAPromotesMachineClause(node);
 		{
 			final List<PExpression> copy = new ArrayList<PExpression>(
-					node.getMachineNames());
+					node.getOperationNames());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator
 					.hasNext();) {
@@ -672,7 +672,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+	public void caseAPredicateDefinitionDefinition(
+			final APredicateDefinitionDefinition node) {
 		inAPredicateDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
@@ -701,7 +702,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+	public void caseASubstitutionDefinitionDefinition(
+			final ASubstitutionDefinitionDefinition node) {
 		inASubstitutionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
@@ -730,7 +732,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+	public void caseAExpressionDefinitionDefinition(
+			final AExpressionDefinitionDefinition node) {
 		inAExpressionDefinitionDefinition(node);
 		if (node.getName() != null) {
 			node.getName().apply(this);
@@ -759,7 +762,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAFileDefinitionDefinition(final AFileDefinitionDefinition node) {
+	public void caseAFileDefinitionDefinition(
+			final AFileDefinitionDefinition node) {
 		inAFileDefinitionDefinition(node);
 		if (node.getFilename() != null) {
 			node.getFilename().apply(this);
