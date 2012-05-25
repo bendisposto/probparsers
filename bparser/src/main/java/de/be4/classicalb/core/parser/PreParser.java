@@ -189,13 +189,13 @@ public class PreParser {
 
 		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
 				BParser.FORMULA_PREFIX, definitionRhs);
-		if (expr == null) {
-			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
-					: Definitions.Type.Substitution;
-		} else {
+		
+		if (expr != null) {
+			// Predicate?
 			PParseUnit parseunit = expr.getPParseUnit();
 			if (parseunit instanceof APredicateParseUnit)
 				return Definitions.Type.Predicate;
+			// Expression or Expression/Substituion (e.g. f(x))? 
 			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
 			PExpression expression = unit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
@@ -204,34 +204,12 @@ public class PreParser {
 				return Definitions.Type.ExprOrSubst;
 			else
 				return Definitions.Type.Expression;
+		} else {
+			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
+					: Definitions.Type.Substitution;
 		}
 	}
 
-	// private Definitions.Type determineType(final Token rhsToken) {
-	// final String definitionRhs = rhsToken.getText().trim();
-	//
-	// de.be4.classicalb.core.parser.node.Start expr = tryParsing(
-	// BParser.EXPRESSION_PREFIX, definitionRhs);
-	// if (expr != null) {
-	// AExpressionParseUnit unit = (AExpressionParseUnit) expr
-	// .getPParseUnit();
-	// PExpression expression = unit.getExpression();
-	// if ((expression instanceof AIdentifierExpression)
-	// || (expression instanceof AFunctionExpression)
-	// || (expression instanceof ADefinitionExpression))
-	// return Definitions.Type.ExprOrSubst;
-	// else return Definitions.Type.Expression;
-	//
-	// }
-	//
-	// if (tryParsing(BParser.PREDICATE_PREFIX, definitionRhs) != null)
-	// return Definitions.Type.Predicate;
-	//
-	// if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) != null)
-	// return Definitions.Type.Substitution;
-	//
-	// return null;
-	// }
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs) {
