@@ -35,7 +35,8 @@ jar {
  exclude '**.*.scc' 
  from 'build/temp'
  include '**/*.dat'
- from sourceSets.main.allJava
+ from sourceSets.main.toString()
+ include '**/*.java'
 }
 
 compileJava { 
