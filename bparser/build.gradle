@@ -61,6 +61,7 @@ jar {
  from 'build/temp'
  include '**/*.dat'
  include '**/*.properties'
+ from sourceSets.main.allJava
 }
 
 
