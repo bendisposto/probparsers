@@ -6,8 +6,7 @@
 
 package de.prob.parser;
 
-
-public class ResultParserException extends Exception {
+public class ResultParserException extends RuntimeException {
 
 	private static final long serialVersionUID = -4980160896135162797L;
 
