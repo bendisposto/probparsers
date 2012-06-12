@@ -43,6 +43,11 @@ allprojects {
       if (bin_dir.exists()) delClos(bin_dir)
     }
   }
+
+  jar {
+	from sourceSets.main.allJava
+  }
+
 }
 
 subprojects {
