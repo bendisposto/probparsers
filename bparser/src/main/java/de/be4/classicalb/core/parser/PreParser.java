@@ -21,7 +21,9 @@ import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -186,27 +188,28 @@ public class PreParser {
 		final String definitionRhs = rhsToken.getText().trim();
 
 		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
-				BParser.EXPRESSION_PREFIX, definitionRhs);
+				BParser.FORMULA_PREFIX, definitionRhs);
+		
 		if (expr != null) {
-			AExpressionParseUnit unit = (AExpressionParseUnit) expr
-					.getPParseUnit();
+			// Predicate?
+			PParseUnit parseunit = expr.getPParseUnit();
+			if (parseunit instanceof APredicateParseUnit)
+				return Definitions.Type.Predicate;
+			// Expression or Expression/Substituion (e.g. f(x))? 
+			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
 			PExpression expression = unit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
 					|| (expression instanceof AFunctionExpression)
 					|| (expression instanceof ADefinitionExpression))
 				return Definitions.Type.ExprOrSubst;
-			else return Definitions.Type.Expression;
-
+			else
+				return Definitions.Type.Expression;
+		} else {
+			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
+					: Definitions.Type.Substitution;
 		}
-
-		if (tryParsing(BParser.PREDICATE_PREFIX, definitionRhs) != null)
-			return Definitions.Type.Predicate;
-
-		if (tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) != null)
-			return Definitions.Type.Substitution;
-
-		return null;
 	}
+
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs) {

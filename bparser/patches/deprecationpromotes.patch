@@ -1,0 +1,23 @@
+--- /Users/bendisposto/Desktop/APromotesMachineClause.java	2012-05-24 07:31:08.000000000 +0100
++++ ../build/temp/de/be4/classicalb/core/parser/node/APromotesMachineClause.java	2012-05-24 07:34:33.000000000 +0100
+@@ -35,9 +35,19 @@
+         ((Analysis) sw).caseAPromotesMachineClause(this);
+     }
+ 
++    public LinkedList<PExpression> getOperationNames()
++    {
++    	return this._machineNames_;
++    }
++    
++    /**
++     * @deprecated Use getOperationNames() instead. 
++     * @return a List of operation names
++     */
++    @Deprecated
+     public LinkedList<PExpression> getMachineNames()
+     {
+-        return this._machineNames_;
++        return getOperationNames();
+     }
+ 
+     public void setMachineNames(List<PExpression> list)

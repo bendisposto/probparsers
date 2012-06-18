@@ -1,17 +1,11 @@
 // ProB Answer Parser 
 
-dependsOn(':prologlib')
+//dependsOn(':prologlib')
 
-
-configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
 
 
 dependencies {
-	sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.5', changing: true)
-  
-//	sablecc(group: 'sablecc', name: 'sablecc', version: '3.2')
+
     compile project(path: ":prologlib", configuration: "archives") 
 }
 
@@ -42,6 +36,8 @@ jar {
  exclude '**.*.scc' 
  from 'build/temp'
  include '**/*.dat'
+ from sourceSets.main.toString()
+ include '**/*.java'
 }
 
 compileJava { 

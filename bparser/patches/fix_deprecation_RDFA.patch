@@ -1,0 +1,11 @@
+--- /Users/bendisposto/Desktop/ReversedDepthFirstAdapter.java	2012-05-24 07:17:15.000000000 +0100
++++ ../build/temp/de/be4/classicalb/core/parser/analysis/ReversedDepthFirstAdapter.java	2012-05-24 07:28:46.000000000 +0100
+@@ -813,7 +813,7 @@
+     {
+         inAPromotesMachineClause(node);
+         {
+-            List<PExpression> copy = new ArrayList<PExpression>(node.getMachineNames());
++            List<PExpression> copy = new ArrayList<PExpression>(node.getOperationNames());
+             Collections.reverse(copy);
+             for(PExpression e : copy)
+             {

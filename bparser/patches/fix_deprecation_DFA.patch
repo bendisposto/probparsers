@@ -1,0 +1,17 @@
+--- /Users/bendisposto/Desktop/DepthFirstAdapter.java	2012-05-24 07:23:58.000000000 +0100
++++ ../build/temp/de/be4/classicalb/core/parser/analysis/DepthFirstAdapter.java	2012-05-24 07:27:36.000000000 +0100
+@@ -787,12 +787,12 @@
+         defaultOut(node);
+     }
+ 
+-    @Override
++	@Override
+     public void caseAPromotesMachineClause(APromotesMachineClause node)
+     {
+         inAPromotesMachineClause(node);
+         {
+-            List<PExpression> copy = new ArrayList<PExpression>(node.getMachineNames());
++            List<PExpression> copy = new ArrayList<PExpression>(node.getOperationNames());
+             for(PExpression e : copy)
+             {
+                 e.apply(this);
