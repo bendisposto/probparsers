@@ -106,6 +106,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	private static boolean escapeIsNeeded(final String input) {
+		if (input == null) {
+			return false; // null is a valid atom
+		}
 		final int length = input.length();
 		if (length > 0
 				&& Arrays.binarySearch(VALID_ATOM_CHARS, input.charAt(0)) >= 0

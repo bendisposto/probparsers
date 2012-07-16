@@ -214,7 +214,7 @@ public class RecursiveMachineLoader {
 		
 		
 		
-		ancestors.add(name);
+		if (name != null) ancestors.add(name);
 		if (isMain) {
 			main = name;
 		}
@@ -249,7 +249,7 @@ public class RecursiveMachineLoader {
 	private void intersect(final Set<String> a, final Set<String> b) {
 		for (final Iterator<String> it = a.iterator(); it.hasNext();) {
 			final String elem = it.next();
-			if (!b.contains(elem)) {
+			if (elem != null && !b.contains(elem)) {
 				it.remove();
 			}
 		}
