@@ -947,7 +947,7 @@ predicate =
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
         {predicate_identifier} [identifier]:predicate_identifier |
         {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
-		{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */s
+		{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
 
 
 
