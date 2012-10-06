@@ -440,10 +440,19 @@ public class BParser {
 				tree.apply(new ASTDisplay());
 			}
 
+			final long start2 = System.currentTimeMillis();
+
 			if (options.prologOutput) {
 				printASTasProlog(out, this, bfile, tree, options.useIndention,
 						options.addLineNumbers, contentProvider);
 			}
+			final long end2 = System.currentTimeMillis();
+
+			if (options.printTime) {
+				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
+			}
+			
+			
 			if (options.fastPrologOutput) {
 				// try {
 				// String fp = getASTasFastProlog(this, bfile, tree);

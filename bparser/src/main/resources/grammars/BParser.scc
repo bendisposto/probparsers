@@ -946,7 +946,9 @@ predicate =
 	{partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
         {predicate_identifier} [identifier]:predicate_identifier |
-        {predicate_function} [identifier]:predicate_identifier [parameters]:expression*;
+        {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
+		{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
+
 
 
 /* Expressions */
@@ -1083,8 +1085,8 @@ expression =
 	{infix} [expression]:expression |
 	{struct} [entries]:rec_entry* |
 	{rec} [entries]:rec_entry* |
-	{record_field} [record]:expression [identifier]:expression;
-
+	{record_field} [record]:expression [identifier]:expression |
+	 {extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only expression - theory plugin */
 rec_entry = [identifier]:expression [value]:expression;
 
 
