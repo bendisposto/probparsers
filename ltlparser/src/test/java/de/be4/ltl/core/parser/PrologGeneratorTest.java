@@ -202,6 +202,12 @@ public class PrologGeneratorTest {
 		check("not({xxx} => GF {blubb})", expected);
 	}
 
+	@Test(expected = LtlParseException.class)
+	public void ticket_parserlib_11() throws Exception {
+		String buggy = "G {taken= {} ";
+		parse(buggy);
+	}
+
 	public void testPredSyntaxError() throws Exception {
 		try {
 			parse("{X}");

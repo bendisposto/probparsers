@@ -3,6 +3,8 @@
  */
 package de.be4.ltl.core.parser.internal;
 
+import de.be4.ltl.core.parser.node.EOF;
+
 
 /**
  * @author plagge
@@ -29,7 +31,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 		this.lastState = initialState;
 	}
 
-	public TOKEN filter(STATE newState, TOKEN token) {
+	public TOKEN filter(STATE newState, TOKEN token)  {
 		state = newState;
 		if (isInAction(state)) {
 			if (externalFormula == null) {
@@ -45,6 +47,9 @@ abstract class LexerHelper<TOKEN, STATE> {
 				} else if (isClosing(token)) {
 					count--;
 				}
+			  if (token instanceof EOF && count != 0) {
+				  return token;
+			  }
 				if (count != 0) {
 					token = null;
 				} else {
