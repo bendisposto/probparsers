@@ -6,10 +6,16 @@ package de.be4.ltl.core.parser;
  * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
  * */
 
+import java.io.PushbackReader;
+import java.io.StringReader;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
+import de.be4.ltl.core.ctlparser.lexer.Lexer;
+import de.be4.ltl.core.ctlparser.parser.Parser;
+import de.be4.ltl.core.ctlparser.parser.ParserException;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -206,6 +212,12 @@ public class PrologGeneratorTest {
 	public void ticket_parserlib_11() throws Exception {
 		String buggy = "G {taken= {} ";
 		parse(buggy);
+		
+	}
+	
+	@Test(expected = ParserException.class)
+	public void ticket_parserlib_11_ctl() throws Exception {
+		new Parser(new Lexer(new PushbackReader(new StringReader("AG {taken= {}")))).parse();
 	}
 
 	public void testPredSyntaxError() throws Exception {
