@@ -9,6 +9,7 @@ package de.be4.ltl.core.parser.internal;
 import java.io.PushbackReader;
 
 import de.be4.ltl.core.parser.lexer.Lexer;
+import de.be4.ltl.core.parser.node.EOF;
 import de.be4.ltl.core.parser.node.TActionBegin;
 import de.be4.ltl.core.parser.node.TActionEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
@@ -58,6 +59,11 @@ public class LtlLexer extends Lexer {
 		@Override
 		protected void writeToken(Token token, String text) {
 			token.setText(text);
+		}
+
+		@Override
+		protected boolean correctBalancedParenthesis(int count, Token token) {
+			return !(token instanceof EOF || count == 0) ;
 		}
 
 	}

@@ -219,6 +219,10 @@ public class PrologGeneratorTest {
 	public void ticket_parserlib_11_ctl() throws Exception {
 		new Parser(new Lexer(new PushbackReader(new StringReader("AG {taken= {}")))).parse();
 	}
+	
+	
+
+	
 
 	public void testPredSyntaxError() throws Exception {
 		try {
