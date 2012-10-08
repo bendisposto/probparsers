@@ -3,7 +3,6 @@
  */
 package de.be4.ltl.core.parser.internal;
 
-import de.be4.ltl.core.parser.node.EOF;
 
 
 /**
@@ -27,6 +26,8 @@ abstract class LexerHelper<TOKEN, STATE> {
 
 	abstract protected boolean isClosing(final TOKEN token);
 
+	abstract protected boolean correctBalancedParenthesis(int count, TOKEN token);
+	
 	public LexerHelper(final STATE initialState) {
 		this.lastState = initialState;
 	}
@@ -47,7 +48,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 				} else if (isClosing(token)) {
 					count--;
 				}
-			  if (token instanceof EOF && count != 0) {
+			  if (!correctBalancedParenthesis(count, token)) {
 				  return token;
 			  }
 				if (count != 0) {
