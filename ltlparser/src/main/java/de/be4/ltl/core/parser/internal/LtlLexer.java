@@ -63,7 +63,7 @@ public class LtlLexer extends Lexer {
 
 		@Override
 		protected boolean correctBalancedParenthesis(int count, Token token) {
-			return !(token instanceof EOF || count == 0) ;
+			return !(token instanceof EOF) || count == 0;
 		}
 
 	}
