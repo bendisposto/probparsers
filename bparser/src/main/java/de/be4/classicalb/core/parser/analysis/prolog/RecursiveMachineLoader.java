@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
+
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
@@ -149,7 +151,7 @@ public class RecursiveMachineLoader {
 			final String machineName) throws BException,
 			IOException {
 		final File machineFile = lookupFile(machineName);
-		if (files.contains(machineFile)) return;
+		if (this.getParsedMachines().containsKey(machineName)) return;
 		final BParser parser = new BParser(machineFile.getName());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
