@@ -21,8 +21,6 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class PrefixClassifier implements IClassifier {
 
-	private static final String LINE_SEPARATOR = System
-			.getProperty("line.separator");
 	protected PragmaParser[] parsers;
 	protected final int[] inputSizes;
 	private final String input;
@@ -32,12 +30,11 @@ public class PrefixClassifier implements IClassifier {
 	public PrefixClassifier(String input, Class<? extends Node>... classes) {
 		this.input = input;
 		this.classes = Arrays.asList(classes);
-		String[] split = input.split(LINE_SEPARATOR);
+		String[] split = input.split("(?<=\n)");
 		inputSizes = new int[split.length];
 		inputSizes[0] = 0;
 		for (int i = 1; i < split.length; i++) {
-			inputSizes[i] = inputSizes[i - 1] + split[i - 1].length()
-					+ LINE_SEPARATOR.length();
+			inputSizes[i] = inputSizes[i - 1] + split[i - 1].length();
 			// System.out.println(inputSizes[i]);
 		}
 	}

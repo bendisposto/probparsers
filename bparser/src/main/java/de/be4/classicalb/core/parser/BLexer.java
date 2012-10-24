@@ -156,8 +156,9 @@ public class BLexer extends Lexer {
 
 				if (text.startsWith(PRAGMA_START)) {
 					String pragmaText = "";
-					if (text.endsWith(PRAGMA_END)) pragmaText = text.substring(3,
-							text.length() - 3).trim();
+					if (text.endsWith(PRAGMA_END))
+						pragmaText = text.substring(3, text.length() - 3)
+								.trim();
 					else
 						pragmaText = text.substring(3, text.length() - 2)
 								.trim();
