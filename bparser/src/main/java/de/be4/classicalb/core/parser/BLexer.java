@@ -161,6 +161,9 @@ public class BLexer extends Lexer {
 					else
 						pragmaText = text.substring(3, text.length() - 2)
 								.trim();
+					System.out.print(pragmaText+" ");
+					System.out.print(token.getStartPos()+" ");
+					System.out.println(token.getEndPos());
 					pragmas.add(new RawPragma(token.getStartPos(), token
 							.getEndPos(), pragmaText));
 				}
