@@ -164,7 +164,7 @@ public class BParser {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
 		String content = builder.toString();
-		return content; //.replaceAll("\r\n","\n");
+		return content.replaceAll("\r\n","\n");
 	}
 
 	/**

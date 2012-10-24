@@ -60,7 +60,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
 
-		return builder.toString();
+		return builder.toString().replaceAll("\r\n", "\n");
 	}
 
 }
