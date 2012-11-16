@@ -38,7 +38,10 @@ import de.be4.classicalb.core.parser.node.AEventBContextParseUnit;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
+import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
+import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
@@ -65,9 +68,7 @@ import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AOppatternParseUnit;
 import de.be4.classicalb.core.parser.node.AParallelSubstitution;
 import de.be4.classicalb.core.parser.node.APartitionPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APromotesMachineClause;
@@ -85,6 +86,7 @@ import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetsContextClause;
 import de.be4.classicalb.core.parser.node.ASetsMachineClause;
 import de.be4.classicalb.core.parser.node.AStructExpression;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionParseUnit;
 import de.be4.classicalb.core.parser.node.ATheoremsContextClause;
 import de.be4.classicalb.core.parser.node.ATheoremsModelClause;
@@ -415,22 +417,24 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
-	/*
-	 * todo : ask Jens
-	 * 
-	 * @Override public void caseAExtendedExprExpression(final
-	 * AExtendedExprExpression node) { open(node);
-	 * pout.printAtom(node.getIdentifier().getText());
-	 * printAsList(node.getExpressions()); printAsList(node.getPredicates());
-	 * close(node); }
-	 * 
-	 * 
-	 * @Override public void caseAExtendedPredPredicate(final
-	 * AExtendedPredPredicate node) { open(node);
-	 * pout.printAtom(node.getIdentifier().getText());
-	 * printAsList(node.getExpressions()); printAsList(node.getPredicates());
-	 * close(node); }
-	 */
+	@Override
+	public void caseAExtendedExprExpression(final AExtendedExprExpression node) {
+		open(node);
+		pout.printAtom(node.getIdentifier().getText());
+		printAsList(node.getExpressions());
+		printAsList(node.getPredicates());
+		close(node);
+	}
+
+	@Override
+	public void caseAExtendedPredPredicate(final AExtendedPredPredicate node) {
+		open(node);
+		pout.printAtom(node.getIdentifier().getText());
+		printAsList(node.getExpressions());
+		printAsList(node.getPredicates());
+		close(node);
+	}
+
 	// machine clauses
 
 	@Override
