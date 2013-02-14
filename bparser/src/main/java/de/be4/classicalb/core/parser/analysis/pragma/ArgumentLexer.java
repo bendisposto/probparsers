@@ -45,7 +45,7 @@ public class ArgumentLexer {
 	}
 
 	public static List<String> split(String input) {
-		if (input.isEmpty()) return Collections.emptyList();
+		if (input.length() == 0) return Collections.emptyList();
 		ArgumentLexer lexer = new ArgumentLexer(input);
 		return lexer.split();
 	}
