@@ -36,7 +36,7 @@ public class UnknownPragma implements Pragma {
 		ArrayList<String> a = new ArrayList<String>();
 		for (String string : matchList) {
 			String stripped = strip(string);
-			if (!stripped.isEmpty()) a.add(stripped);
+			if (!(stripped.length() == 0)) a.add(stripped);
 		}
 
 		if (a.isEmpty()) {

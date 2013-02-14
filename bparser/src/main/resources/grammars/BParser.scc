@@ -1086,7 +1086,7 @@ expression =
 	{struct} [entries]:rec_entry* |
 	{rec} [entries]:rec_entry* |
 	{record_field} [record]:expression [identifier]:expression |
-	 {extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only expression - theory plugin */
+	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only expression - theory plugin */
 rec_entry = [identifier]:expression [value]:expression;
 
 

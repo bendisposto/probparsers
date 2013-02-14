@@ -18,7 +18,7 @@ public class ArgumentLexer {
 	private final Lexer lexer;
 
 	public ArgumentLexer(String input) {
-		if (input.isEmpty())
+		if (input.length() == 0)
 			throw new IllegalArgumentException("input must not be empty");
 		StringReader stringReader = new StringReader(input);
 		PushbackReader in = new PushbackReader(stringReader, input.length());
