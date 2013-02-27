@@ -36,12 +36,16 @@ public class LabelBrackets {
 		Start start = parser.parseFile(machine, false);
 		start.apply(ids);
 
-		assertEquals(4, parser.getPragmas().size());
+		assertEquals(8, parser.getPragmas().size());
 
-		String[] results = { "pragma(15,label,['(1)'],[],-1,6,2,6,20)",
-				"pragma(20,label,['(2)'],[],-1,7,2,7,17)",
-				"pragma(24,label,['(3)'],[],-1,8,2,8,17)",
-				"pragma(29,label,['(4)'],[],-1,9,2,9,17)" };
+		String[] results = { "pragma(19,label,['(1)'],[],-1,6,2,6,20)",
+				"pragma(24,label,['(2)'],[],-1,7,2,7,17)",
+				"pragma(28,label,['(3)'],[],-1,8,2,8,17)",
+				"pragma(33,label,['(4)'],[],-1,9,2,9,17)",
+				"pragma(39,label,['(5)'],[],-1,10,2,10,17)",
+				"pragma(44,label,['(6)'],[],-1,11,2,11,17)",
+				"pragma(49,label,['(7)'],[],-1,12,2,12,17)",
+				"pragma(59,label,['(8)'],[],-1,13,2,13,17)" };
 
 		for (int i = 0; i < parser.getPragmas().size(); i++) {
 			out = new PrologTermStringOutput();

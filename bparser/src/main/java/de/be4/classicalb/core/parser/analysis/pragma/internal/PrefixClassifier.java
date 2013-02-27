@@ -9,11 +9,13 @@ import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADeferredSetSet;
+import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
 import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
+import de.be4.classicalb.core.parser.node.ASequenceExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
@@ -130,6 +132,13 @@ public class PrefixClassifier implements IClassifier {
 					AComprehensionSetExpression.class,
 					AEmptySetExpression.class);
 			return setFinder.find();
+		}
+
+		if (c == '[') {
+			SpecialTypeFinder sequenceFinder = new SpecialTypeFinder(
+					nearestRight, ASequenceExtensionExpression.class,
+					AEmptySequenceExpression.class);
+			return sequenceFinder.find();
 		}
 
 		if (!validExpIdentifier(c)) {
