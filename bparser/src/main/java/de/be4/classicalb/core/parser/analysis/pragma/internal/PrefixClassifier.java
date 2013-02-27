@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.analysis.pragma.IClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.PragmaParser;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADeferredSetSet;
+import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
@@ -126,7 +127,8 @@ public class PrefixClassifier implements IClassifier {
 			SpecialTypeFinder setFinder = new SpecialTypeFinder(nearestRight,
 					AEnumeratedSetSet.class, ADeferredSetSet.class,
 					ASetExtensionExpression.class,
-					AComprehensionSetExpression.class);
+					AComprehensionSetExpression.class,
+					AEmptySetExpression.class);
 			return setFinder.find();
 		}
 
