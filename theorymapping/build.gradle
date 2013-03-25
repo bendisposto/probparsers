@@ -1,9 +1,5 @@
 // ProB Theory Mapping Parser 
 
-dependencies {
-    compile project(configuration: "archives") 
-}
-
 sourceSets {
     main {
         java {
