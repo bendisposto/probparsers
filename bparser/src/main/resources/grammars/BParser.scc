@@ -860,6 +860,7 @@ context_clause =
  {extends} [extends]:identifier_literal* |
  {sets} set* | 
  {constants} [identifiers]:expression* |
+ {abstract_constants} [identifiers]:expression* |
  {axioms} [predicates]:predicate* |
  {theorems} [predicates]:predicate* ;
    

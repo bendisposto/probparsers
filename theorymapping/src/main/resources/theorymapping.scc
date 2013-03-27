@@ -1,0 +1,58 @@
+Package de.prob.core.theorymapping;
+
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+ 
+Helpers
+
+    space = ' ' | '\t' | 10 | 13;  
+
+    cbr_open  = '{';
+    cbr_close = '}';
+    
+    all = [0x0000..0x9999];
+    
+    quote = '"';
+    nonquote = [all - quote];
+    internal_spec_char = [all - cbr_close];
+    
+    digit = ['0'..'9'];
+    alpha = [['a'..'z'] + ['A'..'Z']];
+    alphanum = [digit + alpha];
+
+/*******************************************************************
+ * Tokens                                                  *
+ *******************************************************************/
+
+ 
+Tokens
+     white_space = space*;
+
+     keyword_op = 'operator';
+     keyword_internal = 'internal';
+     opname = quote nonquote+ quote;
+     symbol_open = cbr_open;
+     symbol_close = cbr_close; 
+     internal_spec = alphanum*;
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+
+  white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+Productions
+
+result       = {empty} 
+             | operatordecl result;
+operatordecl = keyword_op opname decltype symbol_open internal_spec symbol_close;
+decltype     = {internal} keyword_internal;
+
+// end of grammar

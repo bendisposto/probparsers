@@ -10,6 +10,7 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.node.AAbstractConstantsContextClause;
 import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
@@ -1006,6 +1007,12 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseAConstantsContextClause(final AConstantsContextClause node) {
+		printOCAsList(node, node.getIdentifiers());
+	}
+
+	@Override
+	public void caseAAbstractConstantsContextClause(
+			final AAbstractConstantsContextClause node) {
 		printOCAsList(node, node.getIdentifiers());
 	}
 

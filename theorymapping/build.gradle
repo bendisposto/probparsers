@@ -1,0 +1,37 @@
+// ProB Theory Mapping Parser 
+
+sourceSets {
+    main {
+        java {
+          	srcDirs = ['build/temp','src/main/java']
+        }
+    }
+}
+
+
+
+task genParser(type:JavaExec) {
+    doFirst{ file('build/temp').mkdirs() }
+    inputs.dir new File('src/main/resources/grammars')
+    outputs.dir new File('build/temp')
+    main = 'org.sablecc.sablecc.SableCC'
+    classpath = configurations.sablecc
+    maxHeapSize = '1024m'
+    args = ['-d','build/temp','src/main/resources/theorymapping.scc']
+}
+
+
+jar {	
+ include '**/*.class'
+ exclude '**.*.scc' 
+ from 'build/temp'
+ include '**/*.dat'
+ from sourceSets.main.toString()
+ include '**/*.java'
+}
+
+compileJava { 
+ dependsOn = ['genParser'] 
+}
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
