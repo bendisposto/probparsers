@@ -14,14 +14,16 @@ import de.prob.core.theorymapping.parser.ParserException;
 import de.prob.tmparser.internal.MappingVisitor;
 
 public class TheoryMappingParser {
-	static Collection<OperatorMapping> parseTheoryMapping(String theoryName,
-			String filename) throws TheoryMappingException, IOException {
+	static public Collection<OperatorMapping> parseTheoryMapping(
+			String theoryName, String filename) throws TheoryMappingException,
+			IOException {
 		final Reader input = new FileReader(filename);
 		return parseTheoryMapping(theoryName, input);
 	}
 
-	static Collection<OperatorMapping> parseTheoryMapping(String theoryName,
-			Reader input) throws TheoryMappingException, IOException {
+	static public Collection<OperatorMapping> parseTheoryMapping(
+			String theoryName, Reader input) throws TheoryMappingException,
+			IOException {
 		Start ast;
 		try {
 			ast = parse(input);
