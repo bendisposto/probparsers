@@ -142,10 +142,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("INTER"), "\u22c2");
 	}
 
-	/*
-	 * FIXME java.lang.AssertionError - why? \u002c = , \u003b = ; see
-	 * ToAsciiTest.ForwardComposition(), ToAsciiTest.SequentialSubstitution()
-	 */
 	@Test
 	public void TFcomp() {
 		String actual = UnicodeTranslator.toUnicode(";");
@@ -392,6 +388,7 @@ public class ToUnicodeTest {
 	 * de.prob.unicode.lexer.LexerException: [1,1] Unknown token: [ '[' not
 	 * permitted
 	 */
+	@Test
 	@Ignore
 	public void Substitution() {
 		assertEquals(UnicodeTranslator.toUnicode("[G] P"), "[G] P");
@@ -422,34 +419,22 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("{}"), "\u2205");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,4] Unknown token: |
-	 */
 	@Test
 	public void SetComprehension() {
 		assertEquals(UnicodeTranslator.toUnicode("{z | P}"), "{z \u2223 P}");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,8] Unknown token: |
-	 */
 	@Test
 	public void SetComprehension2() {
 		assertEquals(UnicodeTranslator.toUnicode("{z . P | F}"),
 				"{z \u00b7 P \u2223 F}");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,4] Unknown token: |
-	 */
 	@Test
 	public void SetComprehension3() {
 		assertEquals(UnicodeTranslator.toUnicode("{F | P}"), "{F \u2223 P}");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,4] Unknown token: |
-	 */
 	@Test
 	public void SetComprehension4() {
 		assertEquals(UnicodeTranslator.toUnicode("{x | P}"), "{x \u2223 P}");
@@ -470,9 +455,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("S-T"), "S\u2212T");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,14] Unknown token: |
-	 */
 	@Test
 	public void Difference2() {
 		String expected = "S \u2216 T";
@@ -501,11 +483,9 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("POW(S)"), "\u2119(S)");
 	}
 
-	// XXX NonEmptySubsets not provided? What's the unicode character? \u2119
-	// and \u2081
 	@Test
 	public void NonEmptySubsets() {
-		assertEquals(UnicodeTranslator.toUnicode("POW1(S)"), "POW1(S)");
+		assertEquals(UnicodeTranslator.toUnicode("POW1(S)"), "\u21191(S)");
 	}
 
 	// XXX FiniteSets not provided? What's the unicode character?
@@ -543,9 +523,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("UNION(U)"), "\u22c3(U)");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,14] Unknown token: |
-	 */
 	@Test
 	public void GeneralizedUnion2() {
 		assertEquals(UnicodeTranslator.toUnicode("UNION (z).(P | E)"),
@@ -557,9 +534,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("union(U)"), "union(U)");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,11] Unknown token: |
-	 */
 	@Test
 	public void QuantifiedUnion() {
 		assertEquals(UnicodeTranslator.toUnicode("UNION z.P | S"),
@@ -571,9 +545,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("INTER(U)"), "\u22c2(U)");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,14] Unknown token: |
-	 */
 	@Test
 	public void GeneralizedIntersection2() {
 		assertEquals(UnicodeTranslator.toUnicode("INTER (z).(P | E)"),
@@ -615,11 +586,9 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("NAT"), "\u2115");
 	}
 
-	// XXX PositiveNaturalNumbers not provided? What's the unicode character?
-	// \u2115 and \u2081
 	@Test
 	public void PositiveNaturalNumbers() {
-		assertEquals(UnicodeTranslator.toUnicode("NAT1"), "NAT1");
+		assertEquals(UnicodeTranslator.toUnicode("NAT1"), "\u21151");
 	}
 
 	@Test
@@ -663,9 +632,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("m .. n"), "m \u2025 n");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,13] Unknown token: |
-	 */
 	@Test
 	public void SetSummation() {
 		// SIGMA not provided (\u2211)
@@ -673,9 +639,6 @@ public class ToUnicodeTest {
 				"SIGMA(z)\u00b7(P \u2223 E)");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,10] Unknown token: |
-	 */
 	@Test
 	public void SetProduct() {
 		// PI not provided (\u220F)
@@ -854,17 +817,11 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("S >-> T"), "S \u21a3 T");
 	}
 
-	/*
-	 * XXX PartialSurjections not provided? why does this test fail?
-	 */
 	@Test
 	public void PartialSurjections() {
 		assertEquals(UnicodeTranslator.toUnicode("S +>> T"), "S \u2900 T");
 	}
 
-	/*
-	 * XXX TotalSurjections not provided? why does this test fail?
-	 */
 	@Test
 	public void TotalSurjections() {
 		assertEquals(UnicodeTranslator.toUnicode("S ->> T"), "S \u21a0 T");
@@ -875,9 +832,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("S >->> T"), "S \u2916 T");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,6] Unknown token: |E
-	 */
 	@Test
 	public void LambdaAbstraction() {
 		assertEquals(UnicodeTranslator.toUnicode("%z.(P|E)"),
@@ -897,10 +851,10 @@ public class ToUnicodeTest {
 	@Test
 	public void FiniteSequences() {
 		assertEquals(UnicodeTranslator.toUnicode("seq S"), "seq S");
+		assertEquals(UnicodeTranslator.toUnicode("seq(S)"), "seq(S)");
+
 	}
 
-	// XXX FiniteNonEmptySequences not provided? What's the unicode character?
-	// unknown and \u2081
 	@Test
 	public void FiniteNonEmptySequences() {
 		assertEquals(UnicodeTranslator.toUnicode("seq1(S)"), "seq1(S)");
@@ -989,17 +943,11 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("skip"), "skip");
 	}
 
-	/*
-	 * XXX SimpleSubstitution not provided? why does this test fail?
-	 */
 	@Test
 	public void SimpleSubstitution() {
 		assertEquals(UnicodeTranslator.toUnicode("x := E"), "x \u2254 E");
 	}
 
-	/*
-	 * XXX BooleanSubstitution not provided? why does this test fail?
-	 */
 	@Test
 	public void BooleanSubstitution() {
 		assertEquals(UnicodeTranslator.toUnicode("x := bool(P)"),
@@ -1011,10 +959,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("x :: S"), "x :\u2208 S");
 	}
 
-	/*
-	 * XXX ChoiceByPredicate not provided? why does this test fail? makes
-	 * "x ? P"
-	 */
 	@Test
 	public void ChoiceByPredicate() {
 		String expected = "x \u2208 P";
@@ -1029,9 +973,6 @@ public class ToUnicodeTest {
 		assertEquals(expected, actual);
 	}
 
-	/*
-	 * XXX FunctionalOverride not provided? why does this test fail?
-	 */
 	@Test
 	public void FunctionalOverride() {
 		assertEquals(UnicodeTranslator.toUnicode("f(x) := E"), "f(x) \u2254 E");
@@ -1053,9 +994,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("G ; H"), "G ; H");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,3] Unknown token: |
-	 */
 	@Test
 	public void Precondition() {
 		assertEquals(UnicodeTranslator.toUnicode("P | G"), "P \u2223 G");
@@ -4010,13 +3948,11 @@ public class ToUnicodeTest {
 				"_union123abc");
 	}
 
-	// @Test
-	// public void Keyword()
-	// {
-	// // check, if the keywords have to be translated or not
-	// assertEquals(UnicodeTranslator.toUnicode("ANY"),"ANY");
-	// assertFalse(UnicodeTranslator.toUnicode("ANY"),"ANY");
-	// }
+	@Test
+	public void Keyword() {
+
+		assertEquals(UnicodeTranslator.toUnicode("ANY"), "ANY");
+	}
 
 	@Test
 	public void ANYLetter() {
@@ -5554,9 +5490,6 @@ public class ToUnicodeTest {
 
 	/*--------------------------------------------------------------*/
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,4] Unknown token: _
-	 */
 	@Test
 	public void Var_123() {
 		assertEquals(UnicodeTranslator.toUnicode("var_123"), "var_123");
@@ -5898,17 +5831,5 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("_union_"), "_union_");
 		assertEquals(UnicodeTranslator.toUnicode("UNION_"), "UNION_");
 		assertEquals(UnicodeTranslator.toUnicode("union_"), "union_");
-	}
-
-	@Test
-	public void NoSpaceAndAmpersand() {
-		assertEquals("active \u2227 waiting",
-				UnicodeTranslator.toUnicode("active & waiting"));
-		assertEquals("active \u2227waiting",
-				UnicodeTranslator.toUnicode("active &waiting"));
-		assertEquals("active\u2227 waiting",
-				UnicodeTranslator.toUnicode("active& waiting"));
-		assertEquals("active\u2227waiting",
-				UnicodeTranslator.toUnicode("active&waiting"));
 	}
 }
