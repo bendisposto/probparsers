@@ -1,6 +1,5 @@
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.prob.unicode.UnicodeTranslator;
@@ -279,10 +278,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("POW"), "\u2119");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,1] Unknown token: | Escape
-	 * sequence needed?
-	 */
 	@Test
 	public void TMid() {
 		assertEquals(UnicodeTranslator.toUnicode("|"), "\u2223");
@@ -384,12 +379,7 @@ public class ToUnicodeTest {
 				"(\u2203z\u00b7P \u2227 Q)");
 	}
 
-	/*
-	 * de.prob.unicode.lexer.LexerException: [1,1] Unknown token: [ '[' not
-	 * permitted
-	 */
 	@Test
-	@Ignore
 	public void Substitution() {
 		assertEquals(UnicodeTranslator.toUnicode("[G] P"), "[G] P");
 	}
@@ -721,11 +711,7 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("r~"), "r\u223c");
 	}
 
-	/*
-	 * de.prob.unicode.lexer.LexerException: [1,2] Unknown token: [ '[' not
-	 * permitted
-	 */
-	@Ignore
+	@Test
 	public void relationalImage() {
 		assertEquals(UnicodeTranslator.toUnicode("r[S]"), "r[S]");
 	}
@@ -886,20 +872,12 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("rev(s)"), "rev(s)");
 	}
 
-	/*
-	 * de.prob.unicode.lexer.LexerException: [1,4] Unknown token: |\ Take not
-	 * provided.
-	 */
-	@Ignore
+	@Test
 	public void Take() {
 		assertEquals(UnicodeTranslator.toUnicode("s /|\\ n"), "s /|\\ n");
 	}
 
-	/*
-	 * de.prob.unicode.lexer.LexerException: [1,4] Unknown token: |\ Drop not
-	 * provided.
-	 */
-	@Ignore
+	@Test
 	public void Drop() {
 		assertEquals(UnicodeTranslator.toUnicode("s \\|/ n"), "s \\|/ n");
 	}
@@ -929,11 +907,7 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("conc(ss)"), "conc(ss)");
 	}
 
-	/*
-	 * de.prob.unicode.lexer.LexerException: [1,1] Unknown token: [ '[' not
-	 * permitted
-	 */
-	@Ignore
+	@Test
 	public void Substitution2() {
 		assertEquals(UnicodeTranslator.toUnicode("[G]P"), "[G]P");
 	}
@@ -1091,11 +1065,6 @@ public class ToUnicodeTest {
 
 	/*--------------------------------------------------------------*/
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,4] Unknown token: _
-	 * Identifiers consists of letters, digits, underscores
-	 */
-
 	@Test
 	public void Letter() {
 		assertEquals(UnicodeTranslator.toUnicode("abc"), "abc");
@@ -1189,9 +1158,6 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("abcunion"), "abcunion");
 	}
 
-	/*
-	 * XXX de.prob.unicode.lexer.LexerException: [1,1] Unknown token: _
-	 */
 	@Test
 	public void LetterDigitUnderscore() {
 		assertEquals(UnicodeTranslator.toUnicode("abc123_"), "abc123_");
