@@ -43,6 +43,7 @@ public class UnicodeTranslator {
 		m.put("TSetminus", new Translation("\\", "\u2216"));
 		m.put("TDotdot", new Translation("..", "\u2025"));
 		m.put("TNat", new Translation("NAT", "\u2115"));
+		m.put("TNat1", new Translation("NAT1", "\u21151"));
 		m.put("TEmptyset", new Translation("{}", "\u2205"));
 		m.put("TBcmsuch", new Translation(":|", ":\u2223"));
 		m.put("TBfalse", new Translation("false", "\u22a5"));
@@ -89,6 +90,7 @@ public class UnicodeTranslator {
 		m.put("TExpn", new Translation("^", "\u005e"));
 		m.put("TLor", new Translation("or", "\u2228"));
 		m.put("TPow", new Translation("POW", "\u2119"));
+		m.put("TPow1", new Translation("POW1", "\u21191"));
 		m.put("TMid", new Translation("|", "\u2223"));
 		m.put("TNeq", new Translation("/=", "\u2260"));
 		m.put("TRel", new Translation("<->", "\u2194"));
@@ -127,7 +129,7 @@ public class UnicodeTranslator {
 	private static String translate(String input, String target) {
 		StringBuilder sb = new StringBuilder(input.length());
 		StringReader reader = new StringReader(input);
-		PushbackReader r = new PushbackReader(reader,input.length());
+		PushbackReader r = new PushbackReader(reader, input.length());
 		Lexer l = new Lexer(r);
 
 		Token t;
