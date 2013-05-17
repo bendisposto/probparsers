@@ -65,6 +65,6 @@ Tokens
 	div = '/' | '\div'| 0x00f7;
 	mult = '*' | 0x2217;
 	minus = '-' | 0x2212;
-	any_char = ([[0x0000 .. 0xffff] - whitespace ])* | whitespace;
+	any_char = ([[0x0000 .. 0xffff] - whitespace ]) | whitespace;
 	            
  
