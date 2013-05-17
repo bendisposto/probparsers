@@ -101,6 +101,9 @@ public class UnicodeTranslator {
 		m.put("TMult", new Translation("*", "\u2217"));
 		m.put("TMinus", new Translation("-", "\u2212"));
 		m.put("TComma", new Translation(",", ","));
+
+		m.put("TTake", new Translation("/|\\", "/|\\"));
+		m.put("TDrop", new Translation("\\|/", "\\|/"));
 	}
 
 	public static void main(String[] args) throws LexerException, IOException {
