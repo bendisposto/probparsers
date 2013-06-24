@@ -110,8 +110,10 @@ Ignored Tokens
                           {ena}          exists next l_sq [cont]:ctl_formula4           { -> New ctl.ena(l_sq, cont.ctl) } | 
                           {en}           exists next [cont]:ctl_formula4                { -> New ctl.en(cont.ctl) } | 
                           {an}           forall next [cont]:ctl_formula4                { -> New ctl.an(cont.ctl) } | 
+                          {eg}           exists globally [cont]:ctl_formula4             { -> New ctl.eg(cont.ctl) } |
                           {ef}           exists finally [cont]:ctl_formula4             { -> New ctl.ef(cont.ctl) } | 
                           {ag}           forall globally [cont]:ctl_formula4            { -> New ctl.ag(cont.ctl) } | 
+                          {af}           forall finally [cont]:ctl_formula4            { -> New ctl.af(cont.ctl) } |
                           {unparsed}     atomic_proposition_begin                       { -> New ctl.unparsed(atomic_proposition_begin) } |
                           {enabled}      enabled                                        { -> New ctl.enabled(enabled) } |     
                           {sink}         sink                                           { -> New ctl.sink() } | 
@@ -135,8 +137,10 @@ Abstract Syntax Tree
    {ena}          [operation]:l_sq [cont]:ctl |
    {en}           ctl |
    {an}           ctl |
+   {eg}           ctl |
    {ef}           ctl |
    {ag}           ctl |
+   {af}           ctl |
    {unparsed}     [predicate]:atomic_proposition_begin |
    {enabled}      [operation]:enabled |
    {sink}          |
