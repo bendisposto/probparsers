@@ -11,6 +11,7 @@ import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
 import de.be4.ltl.core.parser.node.AEnabledLtl;
+import de.be4.ltl.core.parser.node.AAvailableLtl;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
 import de.be4.ltl.core.parser.node.Node;
@@ -58,6 +59,12 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void caseAEnabledLtl(final AEnabledLtl node) {
 		final Token token = node.getOperation();
 		helper.enabled(UniversalToken.createToken(token));
+	}
+
+	@Override
+	public void caseAAvailableLtl(final AAvailableLtl node) {
+		final Token token = node.getOperation();
+		helper.available(UniversalToken.createToken(token));
 	}
 
 	@Override

@@ -102,6 +102,15 @@ public class PrologGeneratorTest {
 	}
 
 	@Test
+	public void testAvailable() throws Exception {
+		final PrologTerm transPred = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
+		final PrologTerm available = new CompoundPrologTerm("available", wrapped);
+		final PrologTerm expected = new CompoundPrologTerm("ap", available);
+		check("Av(bla)", expected);
+	}
+	
+	@Test
 	public void testPredicate() throws Exception {
 		final PrologTerm pred = new CompoundPrologTerm("blubb");
 		final PrologTerm wrapped = new CompoundPrologTerm("dpred", pred);

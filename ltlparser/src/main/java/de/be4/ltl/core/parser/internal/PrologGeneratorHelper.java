@@ -59,6 +59,14 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void available(final UniversalToken token) {
+		pto.openTerm("ap");
+		pto.openTerm("available");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+	
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
 			specParser.parseTransitionPredicate(pto, token.getText(), true);
