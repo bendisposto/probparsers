@@ -25,6 +25,7 @@ Package de.be4.ltl.core.parser;
 	r_bracket = ']';
 	
 	enabled_start = 'e(';
+    available_start = 'Av(';
 
 /*******************************************************************
  * States                                                          *
@@ -49,7 +50,8 @@ Tokens
    {ltl} r_par = r_paren;
  
    {ltl -> action} l_sq = l_bracket;
-   {ltl -> action} enabled = enabled_start;		
+   {ltl -> action} enabled = enabled_start;
+   {ltl -> action} available = available_start;
  
     {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
     {atomic} atomic_proposition_end = r_cur;
@@ -84,9 +86,6 @@ Tokens
     {ltl} yesterday = 'Y';
 	
  	white_space = white_space;
-
-/* LTL temporal operators (Lowe's CSP temporal operators) */
-    {ltl} available = 'Av';
 
 /*******************************************************************
  * Ignored Tokens                                                  *
