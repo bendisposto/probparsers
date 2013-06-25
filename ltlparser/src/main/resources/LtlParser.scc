@@ -25,6 +25,7 @@ Package de.be4.ltl.core.parser;
 	r_bracket = ']';
 	
 	enabled_start = 'e(';
+    available_start = 'Av(';
 
 /*******************************************************************
  * States                                                          *
@@ -49,7 +50,8 @@ Tokens
    {ltl} r_par = r_paren;
  
    {ltl -> action} l_sq = l_bracket;
-   {ltl -> action} enabled = enabled_start;		
+   {ltl -> action} enabled = enabled_start;
+   {ltl -> action} available = available_start;
  
     {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
     {atomic} atomic_proposition_end = r_cur;
@@ -85,7 +87,6 @@ Tokens
 	
  	white_space = white_space;
 
-
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
@@ -100,7 +101,7 @@ Ignored Tokens
 
 
  Productions 
-  ltl_formula  {-> ltl} = {implication} [left]:ltl_formula implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } | 
+  ltl_formula  {-> ltl} = {implication} [left]:ltl_formula implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } |
                                         ltl_formula2                                    { -> ltl_formula2.ltl};
   
   ltl_formula2 {-> ltl} = {and} [left]:ltl_formula2 and [right]:ltl_formula3 { -> New ltl.and(left.ltl, right.ltl)} |
@@ -124,7 +125,8 @@ Ignored Tokens
                           {historically} historically ltl_formula4                                   { -> New ltl.historically(ltl_formula4.ltl)} |   
                           {once}         once ltl_formula4                                           { -> New ltl.once(ltl_formula4.ltl)} |    
                           {yesterday}    yesterday ltl_formula4                                      { -> New ltl.yesterday(ltl_formula4.ltl)} | 
-                          {enabled}      enabled                                                     { -> New ltl.enabled(enabled)} |     
+                          {enabled}      enabled                                                     { -> New ltl.enabled(enabled)} | 
+                          {available}    available                                                   { -> New ltl.available(available)} |
                           {action}       l_sq                                                        { -> New ltl.action(l_sq)} | 
                           {sink}         sink                                                        { -> New ltl.sink()} | 
                           {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
@@ -155,7 +157,8 @@ Abstract Syntax Tree
    {historically} ltl |     
    {once}         ltl |     
    {yesterday}    ltl |  
-   {enabled}      [operation]:enabled |    
+   {enabled}      [operation]:enabled | 
+   {available}    [operation]:available | 
    {action}       [operation]:l_sq |
    {unparsed}     [predicate]:atomic_proposition_begin |
    {sink}          |
