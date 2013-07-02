@@ -10,7 +10,7 @@ Package de.be4.ltl.core.parser;
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
     digit = ['0' .. '9'] ;
-
+    
     underscore = '_'; 
  
 	line_break = [10 + 13];
@@ -27,6 +27,8 @@ Package de.be4.ltl.core.parser;
 	enabled_start = 'e(';
     available_start = 'Av(';
 
+    dot = '.';
+    
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
@@ -41,25 +43,30 @@ Package de.be4.ltl.core.parser;
 
 Tokens
 
-   {ltl} true = 'true';
-   {ltl} false = 'false';
-   {ltl} sink ='sink';
-   {ltl} deadlock ='deadlock';
-   {ltl} current = 'current';
-   {ltl} l_par = l_paren;
-   {ltl} r_par = r_paren;
+    {ltl} true = 'true';
+    {ltl} false = 'false';
+    {ltl} sink ='sink';
+    {ltl} deadlock ='deadlock';
+    {ltl} current = 'current';
+    {ltl} l_par = l_paren;
+    {ltl} r_par = r_paren;
  
-   {ltl -> action} l_sq = l_bracket;
-   {ltl -> action} enabled = enabled_start;
-   {ltl -> action} available = available_start;
+    {ltl -> action} l_sq = l_bracket;
+    {ltl -> action} enabled = enabled_start;
+    {ltl -> action} available = available_start;
  
     {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
+
     {atomic} atomic_proposition_end = r_cur;
     {atomic} ap_char =  ([0 .. 0xffff]);
     
     {action} action_end = [r_paren + r_bracket];
     {action} action_begin = [l_paren + l_bracket];
     {action} tp_char =  ([0 .. 0xffff]);
+
+    {ltl} exists_quantor = '#';
+    {ltl} forall_quantor = '!';
+	{ltl} quantified_identifier = letter (letter | digit | underscore)* white_space* dot;
 
 
 /* Boolean Operators */
@@ -131,6 +138,10 @@ Ignored Tokens
                           {sink}         sink                                                        { -> New ltl.sink()} | 
                           {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
                           {current}      current                                                     { -> New ltl.current()} |
+                          // #id.(unparsed => ltl_formula)
+                          {exists}       exists_quantor quantified_identifier l_par atomic_proposition_begin implies ltl_formula r_par { -> New ltl.exists(quantified_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          // !id.(unparsed => ltl_formula)
+                          {forall}       forall_quantor quantified_identifier l_par atomic_proposition_begin implies ltl_formula r_par { -> New ltl.forall(quantified_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
                           {unparsed}     atomic_proposition_begin                                    { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
 
@@ -165,7 +176,9 @@ Abstract Syntax Tree
    {deadlock}      |
    {current}       | 
    {true}          |
-   {false}         ;
+   {false}         |
+   {exists}       quantified_identifier [predicate]:atomic_proposition_begin ltl |
+   {forall}       quantified_identifier [predicate]:atomic_proposition_begin ltl;
   
 
   
