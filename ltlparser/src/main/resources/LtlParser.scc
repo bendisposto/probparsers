@@ -34,7 +34,7 @@ Package de.be4.ltl.core.parser;
  *******************************************************************/
 
  States 
-  ltl, atomic, action;
+  ltl, atomic, action, identifier;
 
 
 /*******************************************************************
@@ -66,7 +66,7 @@ Tokens
 
     {ltl} exists_quantor = '#';
     {ltl} forall_quantor = '!';
-	{ltl} quantified_identifier = letter (letter | digit | underscore)* white_space* dot;
+	{identifier} quantified_identifier = letter (letter | digit | underscore)* white_space* dot;
 
 
 /* Boolean Operators */
