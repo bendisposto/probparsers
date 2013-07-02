@@ -217,6 +217,67 @@ public class PrologGeneratorTest {
 		check("not({xxx} => GF {blubb})", expected);
 	}
 
+	@Test
+	public void testForExistsImplication() throws Exception {
+		//final PrologTerm id = new CompoundPrologTerm("x");
+
+		// ap(dpred("x:PID"))
+		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+
+		// G [x]
+		final PrologTerm transPred = new CompoundPrologTerm("x");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred);
+		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
+		final PrologTerm glob = new CompoundPrologTerm("globally", action);
+
+		final PrologTerm expected = new CompoundPrologTerm("exists", glob);
+
+		check("#x. ( {x:PID} => G [x])", expected);
+	}
+
+	@Test
+	public void testForExistsImplicationNested() throws Exception {
+		//final PrologTerm id = new CompoundPrologTerm("x");
+
+		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+
+		final PrologTerm transPredx = new CompoundPrologTerm("x");
+		final PrologTerm wrappedx = new CompoundPrologTerm("dtrans", transPredx);
+		final PrologTerm actionx = new CompoundPrologTerm("action", wrappedx);
+
+		final PrologTerm transPredy = new CompoundPrologTerm("y");
+		final PrologTerm wrappedy = new CompoundPrologTerm("dtrans", transPredy);
+		final PrologTerm actiony = new CompoundPrologTerm("action", wrappedy);
+
+		final PrologTerm orPred = new CompoundPrologTerm("or", actionx, actiony);
+		
+		final PrologTerm glob = new CompoundPrologTerm("globally", orPred);
+
+		final PrologTerm forall = new CompoundPrologTerm("forall", glob);
+		final PrologTerm expected = new CompoundPrologTerm("exists", forall);
+
+		check("#x. ( {x:PID} => !y. ({y:PID} => G ([x] or [y])))", expected);
+	}
+
+	
+	@Test
+	public void testForAllImplication() throws Exception {
+		//final PrologTerm id = new CompoundPrologTerm("x");
+
+		// ap(dpred("x:PID"))
+		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+
+		// G [x]
+		final PrologTerm transPred = new CompoundPrologTerm("x");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred);
+		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
+		final PrologTerm glob = new CompoundPrologTerm("globally", action);
+
+		final PrologTerm expected = new CompoundPrologTerm("forall", glob);
+
+		check("!x. ( {x:PID} => G [x])", expected);
+	}
+
 	@Test(expected = LtlParseException.class)
 	public void ticket_parserlib_11() throws Exception {
 		String buggy = "G {taken= {} ";

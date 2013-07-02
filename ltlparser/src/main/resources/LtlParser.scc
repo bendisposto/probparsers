@@ -27,6 +27,8 @@ Package de.be4.ltl.core.parser;
 	enabled_start = 'e(';
     available_start = 'Av(';
 
+    exists_quantor = '#';
+    forall_quantor = '!';
     dot = '.';
     
 /*******************************************************************
@@ -34,7 +36,7 @@ Package de.be4.ltl.core.parser;
  *******************************************************************/
 
  States 
-  ltl, atomic, action, identifier;
+  ltl, atomic, action;
 
 
 /*******************************************************************
@@ -64,10 +66,8 @@ Tokens
     {action} action_begin = [l_paren + l_bracket];
     {action} tp_char =  ([0 .. 0xffff]);
 
-    {ltl} exists_quantor = '#';
-    {ltl} forall_quantor = '!';
-	{identifier} quantified_identifier = letter (letter | digit | underscore)* white_space* dot;
-
+	{ltl} exists_identifier = exists_quantor letter (letter | digit | underscore)* white_space* dot;
+	{ltl} forall_identifier = forall_quantor letter (letter | digit | underscore)* white_space* dot;
 
 /* Boolean Operators */
     {ltl} implies = '=>';
@@ -139,9 +139,13 @@ Ignored Tokens
                           {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
                           {current}      current                                                     { -> New ltl.current()} |
                           // #id.(unparsed => ltl_formula)
-                          {exists}       exists_quantor quantified_identifier l_par atomic_proposition_begin implies ltl_formula r_par { -> New ltl.exists(quantified_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          {exists}       exists_identifier 
+                                                l_par atomic_proposition_begin implies ltl_formula r_par
+                                    { -> New ltl.exists(exists_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
                           // !id.(unparsed => ltl_formula)
-                          {forall}       forall_quantor quantified_identifier l_par atomic_proposition_begin implies ltl_formula r_par { -> New ltl.forall(quantified_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          {forall}       forall_identifier 
+                                                l_par atomic_proposition_begin implies ltl_formula r_par 
+                                    { -> New ltl.forall(forall_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
                           {unparsed}     atomic_proposition_begin                                    { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
 
@@ -177,8 +181,8 @@ Abstract Syntax Tree
    {current}       | 
    {true}          |
    {false}         |
-   {exists}       quantified_identifier [predicate]:atomic_proposition_begin ltl |
-   {forall}       quantified_identifier [predicate]:atomic_proposition_begin ltl;
+   {exists}       exists_identifier [predicate]:atomic_proposition_begin ltl |
+   {forall}       forall_identifier [predicate]:atomic_proposition_begin ltl;
   
 
   
