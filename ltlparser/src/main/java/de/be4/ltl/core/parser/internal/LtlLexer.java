@@ -21,7 +21,7 @@ import de.be4.ltl.core.parser.node.Token;
 public class LtlLexer extends Lexer {
 
 	private LtlLexerHelper helper = new LtlLexerHelper();
-	
+
 	private TExistsIdentifier exists_identifier;
 	private TForallIdentifier forall_identifier;
 	
@@ -33,18 +33,10 @@ public class LtlLexer extends Lexer {
 	protected void filter() {
 		if (token instanceof TExistsIdentifier) {
 			exists_identifier = (TExistsIdentifier) token;
-			String str = token.getText();
-			String identifier = str.substring(1, str.length()-1);
-			exists_identifier.setText(identifier);
-			token = exists_identifier;
-			exists_identifier = null;
+			token = helper.getIdentifier(token,exists_identifier);
 		} else if (token instanceof TForallIdentifier) {
-			forall_identifier = (TForallIdentifier) token; 
-			String str = token.getText();
-			String identifier = str.substring(1, str.length()-1);
-			forall_identifier.setText(identifier);
-			token = forall_identifier;
-			forall_identifier = null;
+			forall_identifier = (TForallIdentifier) token;
+			token = helper.getIdentifier(token,forall_identifier);
 		} else {
 		    token = helper.filter(state, token);
 		    state = helper.getState();

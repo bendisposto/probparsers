@@ -3,6 +3,8 @@
  */
 package de.be4.ltl.core.parser.internal;
 
+import de.be4.ltl.core.parser.node.Token;
+
 
 
 /**
@@ -67,6 +69,15 @@ abstract class LexerHelper<TOKEN, STATE> {
 		return token;
 	}
 
+	public TOKEN getIdentifier(TOKEN token, TOKEN ident) {
+		String str = ((Token) token).getText();
+		String identifier = str.substring(1, str.length()-1);
+		((Token) ident).setText(identifier);
+		token = ident;
+		ident = null;
+		return token;
+	}
+	
 	public STATE getState() {
 		return state;
 	}
