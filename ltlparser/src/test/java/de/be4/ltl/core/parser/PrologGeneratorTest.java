@@ -275,7 +275,7 @@ public class PrologGeneratorTest {
 
 		final PrologTerm expected = new CompoundPrologTerm("forall", glob);
 
-		check("!x. ( {x:PID} => G [x])", expected);
+		check("!xyz. ( {x:PID} => G [x])", expected);
 	}
 
 	@Test(expected = LtlParseException.class)

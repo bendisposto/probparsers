@@ -14,20 +14,42 @@ import de.be4.ltl.core.parser.node.TActionBegin;
 import de.be4.ltl.core.parser.node.TActionEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
 import de.be4.ltl.core.parser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.parser.node.TExistsIdentifier;
+import de.be4.ltl.core.parser.node.TForallIdentifier;
 import de.be4.ltl.core.parser.node.Token;
 
 public class LtlLexer extends Lexer {
 
 	private LtlLexerHelper helper = new LtlLexerHelper();
-
+	
+	private TExistsIdentifier exists_identifier;
+	private TForallIdentifier forall_identifier;
+	
 	public LtlLexer(final PushbackReader in) {
 		super(in);
 	}
 
 	@Override
 	protected void filter() {
-		token = helper.filter(state, token);
-		state = helper.getState();
+		if (token instanceof TExistsIdentifier) {
+			exists_identifier = (TExistsIdentifier) token;
+			String str = token.getText();
+			String identifier = str.substring(1, str.length()-1);
+			exists_identifier.setText(identifier);
+			token = exists_identifier;
+			exists_identifier = null;
+		} else if (token instanceof TForallIdentifier) {
+			forall_identifier = (TForallIdentifier) token; 
+			String str = token.getText();
+			String identifier = str.substring(1, str.length()-1);
+			forall_identifier.setText(identifier);
+			token = forall_identifier;
+			forall_identifier = null;
+		} else {
+		    token = helper.filter(state, token);
+		    state = helper.getState();
+		}
+		
 	}
 
 	public static class LtlLexerHelper extends LexerHelper<Token, State> {
