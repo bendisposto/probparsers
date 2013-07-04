@@ -6,6 +6,8 @@ package de.be4.ltl.core.parser.internal;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.node.AExistsLtl;
+import de.be4.ltl.core.parser.node.AForallLtl;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -106,6 +108,36 @@ final class PrologGeneratorHelper {
 		final LtlParseException ex = new LtlParseException(token,
 				orig.getMessage());
 		return new LtlAdapterException(ex);
+	}
+
+	public void existsTerm(AExistsLtl node, PrologGenerator gen) {
+		
+        pto.openTerm("exists");
+		String identifier = node.getExistsIdentifier().getText();
+		pto.printAtom(identifier);
+		
+		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
+		this.caseUnparsed(token);
+
+		node.getLtl().apply(gen);
+
+        pto.closeTerm();
+		
+	}
+
+	public void forallTerm(AForallLtl node, PrologGenerator gen) {
+		
+        pto.openTerm("forall");
+		String identifier = node.getForallIdentifier().getText();
+		pto.printAtom(identifier);
+		
+		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
+		this.caseUnparsed(token);
+
+		node.getLtl().apply(gen);
+
+        pto.closeTerm();
+		
 	}
 
 }

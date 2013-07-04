@@ -219,10 +219,12 @@ public class PrologGeneratorTest {
 
 	@Test
 	public void testForExistsImplication() throws Exception {
-		//final PrologTerm id = new CompoundPrologTerm("x");
+		final PrologTerm id = new CompoundPrologTerm("x");
 
-		// ap(dpred("x:PID"))
-		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+		// ap(dpred(blubb))
+		final PrologTerm pred = new CompoundPrologTerm("blubb");
+		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
+		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
 
 		// G [x]
 		final PrologTerm transPred = new CompoundPrologTerm("x");
@@ -230,16 +232,21 @@ public class PrologGeneratorTest {
 		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
 		final PrologTerm glob = new CompoundPrologTerm("globally", action);
 
-		final PrologTerm expected = new CompoundPrologTerm("exists", glob);
+		final PrologTerm expected = new CompoundPrologTerm("exists", id, ap, glob);
 
-		check("#x. ( {x:PID} => G [x])", expected);
+		check("#x. ( {blubb} => G [x])", expected);
 	}
 
 	@Test
 	public void testForExistsImplicationNested() throws Exception {
-		//final PrologTerm id = new CompoundPrologTerm("x");
+		
+		final PrologTerm id_outer = new CompoundPrologTerm("x___1");
+		final PrologTerm id_inner = new CompoundPrologTerm("y");
 
-		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+		// ap(dpred(blubb))
+		final PrologTerm pred = new CompoundPrologTerm("blubb");
+		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
+		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
 
 		final PrologTerm transPredx = new CompoundPrologTerm("x");
 		final PrologTerm wrappedx = new CompoundPrologTerm("dtrans", transPredx);
@@ -253,19 +260,22 @@ public class PrologGeneratorTest {
 		
 		final PrologTerm glob = new CompoundPrologTerm("globally", orPred);
 
-		final PrologTerm forall = new CompoundPrologTerm("forall", glob);
-		final PrologTerm expected = new CompoundPrologTerm("exists", forall);
+		final PrologTerm forall = new CompoundPrologTerm("forall", id_inner, ap, glob);
+		final PrologTerm expected = new CompoundPrologTerm("exists", id_outer, ap, forall);
 
-		check("#x. ( {x:PID} => !y. ({y:PID} => G ([x] or [y])))", expected);
+		check("# x___1 . ( {blubb} => !y. ({blubb} => G ([x] or [y])))", expected);
 	}
 
 	
 	@Test
 	public void testForAllImplication() throws Exception {
-		//final PrologTerm id = new CompoundPrologTerm("x");
+		
+		final PrologTerm id = new CompoundPrologTerm("xyz");
 
-		// ap(dpred("x:PID"))
-		//final PrologTerm pred = new CompoundPrologTerm("x:PID");
+		// ap(dpred(blupp))
+		final PrologTerm pred = new CompoundPrologTerm("blubb");
+		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
+		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
 
 		// G [x]
 		final PrologTerm transPred = new CompoundPrologTerm("x");
@@ -273,9 +283,9 @@ public class PrologGeneratorTest {
 		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
 		final PrologTerm glob = new CompoundPrologTerm("globally", action);
 
-		final PrologTerm expected = new CompoundPrologTerm("forall", glob);
+		final PrologTerm expected = new CompoundPrologTerm("forall", id, ap, glob);
 
-		check("!xyz. ( {x:PID} => G [x])", expected);
+		check("!xyz. ( {blubb} => G [x])", expected);
 	}
 
 	@Test(expected = LtlParseException.class)

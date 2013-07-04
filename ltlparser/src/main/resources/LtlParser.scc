@@ -66,8 +66,8 @@ Tokens
     {action} action_begin = [l_paren + l_bracket];
     {action} tp_char =  ([0 .. 0xffff]);
 
-	{ltl} exists_identifier = exists_quantor letter (letter | digit | underscore)* white_space* dot;
-	{ltl} forall_identifier = forall_quantor letter (letter | digit | underscore)* white_space* dot;
+	{ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+	{ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 
 /* Boolean Operators */
     {ltl} implies = '=>';

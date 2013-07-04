@@ -71,7 +71,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 
 	public TOKEN getIdentifier(TOKEN token, TOKEN ident) {
 		String str = ((Token) token).getText();
-		String identifier = str.substring(1, str.length()-1);
+		String identifier = str.substring(1, str.length()-1).trim();
 		((Token) ident).setText(identifier);
 		token = ident;
 		ident = null;
