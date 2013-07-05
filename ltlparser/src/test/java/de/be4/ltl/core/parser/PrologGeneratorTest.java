@@ -234,7 +234,7 @@ public class PrologGeneratorTest {
 
 		final PrologTerm expected = new CompoundPrologTerm("exists", id, ap, glob);
 
-		check("#x. ( {blubb} => G [x])", expected);
+		check("#x. ( {blubb} & G [x])", expected);
 	}
 
 	@Test
@@ -263,7 +263,7 @@ public class PrologGeneratorTest {
 		final PrologTerm forall = new CompoundPrologTerm("forall", id_inner, ap, glob);
 		final PrologTerm expected = new CompoundPrologTerm("exists", id_outer, ap, forall);
 
-		check("# x___1 . ( {blubb} => !y. ({blubb} => G ([x] or [y])))", expected);
+		check("# x___1 . ( {blubb} & !y. ({blubb} => G ([x] or [y])))", expected);
 	}
 
 	
@@ -295,6 +295,13 @@ public class PrologGeneratorTest {
 		
 	}
 	
+	@Test(expected = LtlParseException.class)
+	public void ticket_parserlib_exists() throws Exception {
+		String buggy = "#x. ( {blubb} => G [x])";
+		parse(buggy);
+		
+	}
+
 	@Test(expected = ParserException.class)
 	public void ticket_parserlib_11_ctl() throws Exception {
 		new Parser(new Lexer(new PushbackReader(new StringReader("AG {taken= {}")))).parse();

@@ -140,7 +140,7 @@ Ignored Tokens
                           {current}      current                                                     { -> New ltl.current()} |
                           // #id.(unparsed => ltl_formula)
                           {exists}       exists_identifier 
-                                                l_par atomic_proposition_begin implies ltl_formula r_par
+                                                l_par atomic_proposition_begin and ltl_formula r_par
                                     { -> New ltl.exists(exists_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
                           // !id.(unparsed => ltl_formula)
                           {forall}       forall_identifier 
