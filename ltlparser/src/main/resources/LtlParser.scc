@@ -26,7 +26,10 @@ Package de.be4.ltl.core.parser;
 	
 	enabled_start = 'e(';
     available_start = 'Av(';
-
+    
+    strong_fair_start = 'SF(';
+    weak_fair_start = 'WF(';
+    
     exists_quantor = '#';
     forall_quantor = '!';
     dot = '.';
@@ -75,6 +78,10 @@ Tokens
     {ltl} or = 'or';
     {ltl} not = 'not';
 
+/* Fairness LTL operators */
+    {ltl -> action} strong_fair = strong_fair_start;
+    {ltl -> action} weak_fair = weak_fair_start;
+
 /* LTL temporal operators */
     {ltl} until = 'U';
     {ltl} weakuntil ='W';
@@ -91,7 +98,7 @@ Tokens
     {ltl} historically = 'H';
     {ltl} once = 'O';
     {ltl} yesterday = 'Y';
-	
+		
  	white_space = white_space;
 
 /*******************************************************************
@@ -107,7 +114,7 @@ Ignored Tokens
  *******************************************************************/
 
 
- Productions 
+ Productions
   ltl_formula  {-> ltl} = {implication} [left]:ltl_formula implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } |
                                         ltl_formula2                                    { -> ltl_formula2.ltl};
   
@@ -134,6 +141,8 @@ Ignored Tokens
                           {yesterday}    yesterday ltl_formula4                                      { -> New ltl.yesterday(ltl_formula4.ltl)} | 
                           {enabled}      enabled                                                     { -> New ltl.enabled(enabled)} | 
                           {available}    available                                                   { -> New ltl.available(available)} |
+                          {weak_fair}    weak_fair                                                   { -> New ltl.weak_fair(weak_fair)} |
+                          {strong_fair}  strong_fair                                                 { -> New ltl.strong_fair(strong_fair)} |
                           {action}       l_sq                                                        { -> New ltl.action(l_sq)} | 
                           {sink}         sink                                                        { -> New ltl.sink()} | 
                           {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
@@ -174,6 +183,8 @@ Abstract Syntax Tree
    {yesterday}    ltl |  
    {enabled}      [operation]:enabled | 
    {available}    [operation]:available | 
+   {weak_fair}    [operation]:weak_fair | 
+   {strong_fair}  [operation]:strong_fair |    
    {action}       [operation]:l_sq |
    {unparsed}     [predicate]:atomic_proposition_begin |
    {sink}          |

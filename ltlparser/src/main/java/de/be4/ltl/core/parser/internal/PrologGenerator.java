@@ -15,7 +15,9 @@ import de.be4.ltl.core.parser.node.AAvailableLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
 import de.be4.ltl.core.parser.node.ASinkLtl;
+import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
+import de.be4.ltl.core.parser.node.AWeakFairLtl;
 import de.be4.ltl.core.parser.node.Node;
 import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.node.Token;
@@ -67,6 +69,18 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void caseAAvailableLtl(final AAvailableLtl node) {
 		final Token token = node.getOperation();
 		helper.available(UniversalToken.createToken(token));
+	}
+
+	@Override
+	public void caseAStrongFairLtl(final AStrongFairLtl node) {
+		final Token token = node.getOperation();
+		helper.strong_fair(UniversalToken.createToken(token));
+	}
+
+	@Override
+	public void caseAWeakFairLtl(final AWeakFairLtl node) {
+		final Token token = node.getOperation();
+		helper.weak_fair(UniversalToken.createToken(token));
 	}
 
 	@Override

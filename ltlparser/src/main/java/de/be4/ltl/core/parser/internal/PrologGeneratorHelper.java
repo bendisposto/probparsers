@@ -69,6 +69,22 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 	
+	public void strong_fair(UniversalToken token) {
+		pto.openTerm("ap");
+		pto.openTerm("strong_fair");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();		
+	}
+
+	public void weak_fair(UniversalToken token) {
+		pto.openTerm("ap");
+		pto.openTerm("weak_fair");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
 			specParser.parseTransitionPredicate(pto, token.getText(), true);
