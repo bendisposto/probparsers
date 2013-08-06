@@ -28,6 +28,11 @@ public final class IntegerPrologTerm extends PrologTerm {
 	public IntegerPrologTerm(final long value) {
 		this(BigInteger.valueOf(value));
 	}
+	
+	public IntegerPrologTerm(final byte[] arr) {
+		super(new BigInteger(arr).toString());
+		this.value = new BigInteger(arr);
+	}
 
 	@Override
 	public boolean isNumber() {
