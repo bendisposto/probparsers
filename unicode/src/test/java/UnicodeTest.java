@@ -49,4 +49,14 @@ public class UnicodeTest {
 		assertEquals("active\u2227waiting",
 				UnicodeTranslator.toUnicode("active&waiting"));
 	}
+
+	@Test
+	public void PROBCORE413() {
+		String unicodeNoSpaces = "\u2200r\u2982ROUTES\u00B7r\u2208ROUTES\u21D2(\u2200S\u2982\u2119(BLOCKS)\u00B7S\u2286BLOCKS\u2227S\u2286(nxt(r))[S]\u21D2S=(\u2205 \u2982 \u2119(BLOCKS)))";
+		String unicodeWithSpaces = "\u2200r \u2982 ROUTES\u00B7r\u2208ROUTES\u21D2(\u2200S \u2982 \u2119(BLOCKS)\u00B7S\u2286BLOCKS\u2227S\u2286(nxt(r))[S]\u21D2S=(\u2205 \u2982 \u2119(BLOCKS)))";
+		String ascii = "!r oftype ROUTES.r:ROUTES=>(!S oftype POW(BLOCKS).S<:BLOCKS&S<:(nxt(r))[S]=>S=({} oftype POW(BLOCKS)))";
+		UnicodeTranslator.toUnicode(ascii);
+		assertEquals(ascii, UnicodeTranslator.toAscii(unicodeNoSpaces));
+		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
+	}
 }

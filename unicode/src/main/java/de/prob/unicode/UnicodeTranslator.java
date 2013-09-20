@@ -10,6 +10,7 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
+import de.prob.unicode.node.TOftype;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
@@ -142,11 +143,30 @@ public class UnicodeTranslator {
 				if (t instanceof TAnyChar) {
 					sb.append(t.getText());
 				} else {
+					String translated = "";
 					Translation translation = m.get(key);
 					if ("unicode".equals(target))
-						sb.append(translation.getUnicode());
+						translated = translation.getUnicode();
 					if ("ascii".equals(target))
-						sb.append(translation.getAscii());
+						translated = translation.getAscii();
+
+					/*
+					 * Sometimes, Rodin generates oftype operators without
+					 * trailing spaces However, we need to distinguish between
+					 * for example roftypeS (identifier) and r oftype S This
+					 * part of the code checks, if we already have a whitespace
+					 * before the oftype. If not, we add a trailing and a
+					 * leading whitespace to the translation.
+					 */
+					if (t instanceof TOftype && "ascii".equals(target)
+							&& sb.length() > 0
+							&& sb.charAt(sb.length() - 1) != ' ') {
+						sb.append(' ');
+						sb.append(translated);
+						sb.append(' ');
+					} else {
+						sb.append(translated);
+					}
 				}
 			}
 		} catch (LexerException e) {
