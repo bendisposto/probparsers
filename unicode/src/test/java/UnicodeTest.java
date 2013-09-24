@@ -9,9 +9,9 @@ public class UnicodeTest {
 	@Test
 	public void badAssTestsToAscii() {
 		assertEquals("nafor", UnicodeTranslator.toAscii("nafor"));
-		assertEquals("x:   NAT", UnicodeTranslator.toAscii("x\u2208   \u2115"));
+		assertEquals("x: NAT", UnicodeTranslator.toAscii("x\u2208   \u2115"));
 		assertEquals("x:NAT", UnicodeTranslator.toAscii("x\u2208\u2115"));
-		assertEquals("x  :NAT", UnicodeTranslator.toAscii("x  \u2208\u2115"));
+		assertEquals("x :NAT", UnicodeTranslator.toAscii("x  \u2208\u2115"));
 		assertEquals("INTERNAT", UnicodeTranslator.toAscii("INTERNAT"));
 		assertEquals("cur_floor := groundf",
 				UnicodeTranslator.toAscii("cur_floor \u2254 groundf"));
@@ -57,6 +57,14 @@ public class UnicodeTest {
 		String ascii = "!r oftype ROUTES.r:ROUTES=>(!S oftype POW(BLOCKS).S<:BLOCKS&S<:(nxt(r))[S]=>S=({} oftype POW(BLOCKS)))";
 		UnicodeTranslator.toUnicode(ascii);
 		assertEquals(ascii, UnicodeTranslator.toAscii(unicodeNoSpaces));
+		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
+	}
+
+	@Test
+	public void PARSERLIB22() {
+		String unicode = "⊤∨¬mss_button=ato∨ato_availability=TRUE";
+		String unicodeWithSpaces = "⊤ ∨ ¬ mss_button=ato ∨ ato_availability=TRUE";
+		String ascii = UnicodeTranslator.toAscii(unicode);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
 }

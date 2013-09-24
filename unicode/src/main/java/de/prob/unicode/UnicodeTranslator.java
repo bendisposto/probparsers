@@ -10,7 +10,7 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
-import de.prob.unicode.node.TOftype;
+import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
@@ -19,13 +19,17 @@ public class UnicodeTranslator {
 		private final String unicode;
 		private final String ascii;
 
-		public Translation(String ascii, String unicode) {
+		public Translation(final String ascii, final String unicode) {
 			this.ascii = ascii;
 			this.unicode = unicode;
 		}
 
-		public String getAscii() {
-			return ascii;
+		public String getAscii(final boolean letterBefore) {
+			// If the operator begins with a letter, and the last character
+			// before is also a letter, there needs to be a space to separate
+			// them
+			return (Character.isLetter(ascii.charAt(0)) && letterBefore ? " "
+					: "") + ascii;
 		}
 
 		public String getUnicode() {
@@ -105,9 +109,11 @@ public class UnicodeTranslator {
 
 		m.put("TTake", new Translation("/|\\", "/|\\"));
 		m.put("TDrop", new Translation("\\|/", "\\|/"));
+		m.put("TWhitespace", new Translation(" ", " "));
 	}
 
-	public static void main(String[] args) throws LexerException, IOException {
+	public static void main(final String[] args) throws LexerException,
+			IOException {
 		String input = args[0];
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());
@@ -122,15 +128,15 @@ public class UnicodeTranslator {
 		System.out.println(UnicodeTranslator.toUnicode(input));
 	}
 
-	public static String toAscii(String s) {
+	public static String toAscii(final String s) {
 		return translate(s, "ascii");
 	}
 
-	public static String toUnicode(String s) {
+	public static String toUnicode(final String s) {
 		return translate(s, "unicode");
 	}
 
-	private static String translate(String input, String target) {
+	private static String translate(final String input, final String target) {
 		StringBuilder sb = new StringBuilder(input.length());
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());
@@ -140,33 +146,30 @@ public class UnicodeTranslator {
 		try {
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
 				String key = t.getClass().getSimpleName();
-				if (t instanceof TAnyChar) {
+				if (t instanceof TSeparator) {
+					sb.append(t.getText());
+				} else if (t instanceof TAnyChar) {
+					boolean before = sb.length() > 0
+							&& Character.isLetter(sb.charAt(sb.length() - 1));
+					if (before && "ascii".equals(target)) {
+						sb.append(' ');
+					}
 					sb.append(t.getText());
 				} else {
 					String translated = "";
 					Translation translation = m.get(key);
-					if ("unicode".equals(target))
+					if ("unicode".equals(target)) {
 						translated = translation.getUnicode();
-					if ("ascii".equals(target))
-						translated = translation.getAscii();
-
-					/*
-					 * Sometimes, Rodin generates oftype operators without
-					 * trailing spaces However, we need to distinguish between
-					 * for example roftypeS (identifier) and r oftype S This
-					 * part of the code checks, if we already have a whitespace
-					 * before the oftype. If not, we add a trailing and a
-					 * leading whitespace to the translation.
-					 */
-					if (t instanceof TOftype && "ascii".equals(target)
-							&& sb.length() > 0
-							&& sb.charAt(sb.length() - 1) != ' ') {
-						sb.append(' ');
-						sb.append(translated);
-						sb.append(' ');
-					} else {
-						sb.append(translated);
 					}
+					if ("ascii".equals(target)) {
+						boolean before = sb.length() > 0
+								&& Character
+										.isLetter(sb.charAt(sb.length() - 1));
+						translated = translation.getAscii(before);
+					}
+
+					sb.append(translated);
+
 				}
 			}
 		} catch (LexerException e) {
