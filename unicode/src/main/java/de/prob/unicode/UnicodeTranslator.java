@@ -24,11 +24,11 @@ public class UnicodeTranslator {
 			this.unicode = unicode;
 		}
 
-		public String getAscii(final boolean letterBefore) {
+		public String getAscii(final boolean needsSpace) {
 			// If the operator begins with a letter, and the last character
 			// before is also a letter, there needs to be a space to separate
 			// them
-			return (Character.isLetter(ascii.charAt(0)) && letterBefore ? " "
+			return (Character.isLetter(ascii.charAt(0)) && needsSpace ? " "
 					: "") + ascii;
 		}
 
@@ -163,8 +163,9 @@ public class UnicodeTranslator {
 					}
 					if ("ascii".equals(target)) {
 						boolean before = sb.length() > 0
-								&& Character
-										.isLetter(sb.charAt(sb.length() - 1));
+								&& (Character
+										.isLetter(sb.charAt(sb.length() - 1)) || '\'' == sb
+										.charAt(sb.length() - 1));
 						translated = translation.getAscii(before);
 					}
 

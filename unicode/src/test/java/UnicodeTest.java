@@ -67,4 +67,13 @@ public class UnicodeTest {
 		String ascii = UnicodeTranslator.toAscii(unicode);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
+
+	@Test
+	public void PARSERLIB23() {
+		// The problem is when identifier is a prime
+		String unicode = "current_mode=mss_button'∨stationary=TRUE";
+		String unicodeWithSpaces = "current_mode=mss_button' ∨ stationary=TRUE";
+		String ascii = UnicodeTranslator.toAscii(unicode);
+		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
+	}
 }
