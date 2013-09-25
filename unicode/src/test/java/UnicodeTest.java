@@ -62,19 +62,19 @@ public class UnicodeTest {
 
 	@Test
 	public void PARSERLIB22() {
-		String unicode = "⊤∨¬mss_button=ato∨ato_availability=TRUE";
-		String unicodeWithSpaces = "⊤ ∨ ¬ mss_button=ato ∨ ato_availability=TRUE";
+		String unicode = "\u22a4\u2228\u00acmss_button=ato\u2228ato_availability=TRUE";
+		String unicodeWithSpaces = "\u22a4 \u2228 \u00ac mss_button=ato \u2228 ato_availability=TRUE";
 		String ascii = UnicodeTranslator.toAscii(unicode);
-		assertEquals(ascii,
-				"true or not mss_button=ato or ato_availability=TRUE");
+		assertEquals("true or not mss_button=ato or ato_availability=TRUE",
+				ascii);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
 
 	@Test
 	public void PARSERLIB23() {
 		// The problem is when identifier is a prime
-		String unicode = "current_mode=mss_button'∨stationary=TRUE";
-		String unicodeWithSpaces = "current_mode=mss_button' ∨ stationary=TRUE";
+		String unicode = "current_mode=mss_button'\u2228stationary=TRUE";
+		String unicodeWithSpaces = "current_mode=mss_button' \u2228 stationary=TRUE";
 		String ascii = UnicodeTranslator.toAscii(unicode);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
