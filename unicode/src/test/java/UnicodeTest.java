@@ -78,4 +78,13 @@ public class UnicodeTest {
 		String ascii = UnicodeTranslator.toAscii(unicode);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
+
+	@Test
+	public void testLovelyOrAndNumberProblem() {
+		// Problem with number before or
+		String unicode = "x=1\u2228y=2";
+		String unicodeWithSpaces = "x=1 \u2228 y=2";
+		String ascii = UnicodeTranslator.toAscii(unicode);
+		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
+	}
 }

@@ -142,8 +142,9 @@ public class UnicodeTranslator {
 		PushbackReader r = new PushbackReader(reader, input.length());
 		Lexer l = new Lexer(r);
 
-		Token t;
+		Token t, last;
 		try {
+			last = null;
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
 				String key = t.getClass().getSimpleName();
 				if (t instanceof TSeparator) {
@@ -162,16 +163,15 @@ public class UnicodeTranslator {
 						translated = translation.getUnicode();
 					}
 					if ("ascii".equals(target)) {
-						boolean before = sb.length() > 0
+						boolean before = (last != null && last instanceof TAnyChar)
+								|| sb.length() > 0
 								&& (Character
-										.isLetter(sb.charAt(sb.length() - 1)) || '\'' == sb
-										.charAt(sb.length() - 1));
+										.isLetter(sb.charAt(sb.length() - 1)));
 						translated = translation.getAscii(before);
 					}
-
 					sb.append(translated);
-
 				}
+				last = t;
 			}
 		} catch (LexerException e) {
 			e.printStackTrace();
