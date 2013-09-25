@@ -65,6 +65,8 @@ public class UnicodeTest {
 		String unicode = "⊤∨¬mss_button=ato∨ato_availability=TRUE";
 		String unicodeWithSpaces = "⊤ ∨ ¬ mss_button=ato ∨ ato_availability=TRUE";
 		String ascii = UnicodeTranslator.toAscii(unicode);
+		assertEquals(ascii,
+				"true or not mss_button=ato or ato_availability=TRUE");
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
 
