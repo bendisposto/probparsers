@@ -87,4 +87,22 @@ public class UnicodeTest {
 		String ascii = UnicodeTranslator.toAscii(unicode);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
+
+	@Test
+	public void testNAT1NoSpace() {
+		String ascii = "NAT1";
+		String unicode = "\u21151";
+
+		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
+		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
+	}
+
+	@Test
+	public void testPOW1NoSpace() {
+		String ascii = "POW1";
+		String unicode = "\u21191";
+
+		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
+		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
+	}
 }

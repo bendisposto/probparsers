@@ -11,8 +11,8 @@ Tokens
 	subseteq = '<:' | '\subseteq' | 0x2286;
 	setminus = '\' | '\setminus' | 0x2216;
 	dotdot = '..' | '\0xpto' | 0x2025;
+	nat1 = 'NAT1' | '\nat1'| 0x2115 0x0031;
 	nat = 'NAT' | '\nat'| 0x2115;
-	nat1 = 'NAT1' | '\nat1'| 0x21151;
 	emptyset = '{}' | '\emptyset'| 0x2205;
 	bcmsuch = ':|' | '\bcmsuch'| ':'0x2223;
 	bfalse = 'false' | '\bfalse'| 0x22a5;
@@ -58,8 +58,8 @@ Tokens
 	tbij = '>->>' | '\tbij'| 0x2916;
 	expn = '\expn'| 0x005e;
 	lor = 'or' | '\lor'| 0x2228;
+	pow1 = 'POW1' | '\pow1'| 0x2119 0x0031;
 	pow = 'POW' | '\pow'| 0x2119;
-	pow1 = 'POW1' | '\pow1'| 0x21191;
 	mid = '\mid' | '|' | 0x2223;
 	neq = '/=' | '\neq'| 0x2260;
 	rel = '<->' |'\rel'| 0x2194;
