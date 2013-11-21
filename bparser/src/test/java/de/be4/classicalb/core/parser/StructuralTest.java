@@ -49,6 +49,13 @@ public class StructuralTest {
 	}
 
 	@Test
+	public void testShebang() throws Exception {
+		final String testMachine = "#! /Users/leuschel/git_root/prob_prolog/probcli \n MACHINE SheBang \n END";
+		final String result = getTreeAsString(testMachine);
+		assertNotNull(result);
+	}
+
+	@Test
 	public void testWhiteSpaces() throws Exception {
 		final String testMachine = "MACHINE \tSimplyStructure END";
 		final String result = getTreeAsString(testMachine);
