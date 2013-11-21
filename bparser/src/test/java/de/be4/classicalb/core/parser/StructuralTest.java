@@ -55,6 +55,13 @@ public class StructuralTest {
 		assertNotNull(result);
 	}
 
+	@Test(expected = BException.class)
+	public void testWrongPositionedShebang() throws Exception {
+		final String testMachine = "\n#! /Users/leuschel/git_root/prob_prolog/probcli \n MACHINE SheBang \n END";
+		final String result = getTreeAsString(testMachine);
+		assertNotNull(result);
+	}
+
 	@Test
 	public void testWhiteSpaces() throws Exception {
 		final String testMachine = "MACHINE \tSimplyStructure END";
