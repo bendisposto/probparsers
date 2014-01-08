@@ -302,6 +302,24 @@ public class PrologGeneratorTest {
 	}
 
 	@Test
+	public void testWeakFair_multiple() throws Exception {
+		
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		final PrologTerm wf1 = new CompoundPrologTerm("weak_fair", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", wf1);
+		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		final PrologTerm wf2 = new CompoundPrologTerm("weak_fair", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", wf2);
+		final PrologTerm orPred = new CompoundPrologTerm("or", ap1, ap2);
+		final PrologTerm expected = new CompoundPrologTerm("implies",
+				orPred, TERM_TRUE);
+		
+		check("WF(bla) or WF(blubb) => true", expected);
+	}
+
+	@Test
 	public void testStrongFair() throws Exception {
 		
 		final PrologTerm transPred = new CompoundPrologTerm("bla");
@@ -312,6 +330,24 @@ public class PrologGeneratorTest {
 		final PrologTerm expected = new CompoundPrologTerm("implies",
 				ap, TERM_TRUE);
 		check("SF(bla) => true", expected);
+	}
+
+	@Test
+	public void testStrongFair_multiple() throws Exception {
+		
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
+		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		final PrologTerm sf2 = new CompoundPrologTerm("strong_fair", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
+		final PrologTerm andPred = new CompoundPrologTerm("and", ap1, ap2);
+		final PrologTerm expected = new CompoundPrologTerm("implies",
+				andPred, TERM_TRUE);
+		
+		check("SF(bla) & SF(blubb) => true", expected);
 	}
 
 	@Test(expected = LtlParseException.class)
