@@ -8,6 +8,7 @@ import java.util.Locale;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -154,6 +155,36 @@ final class PrologGeneratorHelper {
 
         pto.closeTerm();
 		
+	}
+
+	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+		
+		pto.openTerm("and");
+		
+		pto.openTerm("strongassumptions");
+		left_node.apply(gen);
+		pto.closeTerm();
+				
+		pto.openTerm("weakassumptions");
+		right_node.apply(gen);
+		pto.closeTerm();
+		
+		pto.closeTerm();
+	}
+
+	public void and_fair2(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+		
+		pto.openTerm("and");
+		
+		pto.openTerm("weakassumptions");
+		left_node.apply(gen);
+		pto.closeTerm();
+				
+		pto.openTerm("strongassumptions");
+		right_node.apply(gen);
+		pto.closeTerm();
+		
+		pto.closeTerm();
 	}
 
 }

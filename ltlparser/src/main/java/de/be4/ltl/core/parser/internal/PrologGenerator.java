@@ -8,6 +8,7 @@ package de.be4.ltl.core.parser.internal;
 
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
+import de.be4.ltl.core.parser.node.AAndFair1Ltl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
 import de.be4.ltl.core.parser.node.AEnabledLtl;
@@ -19,6 +20,7 @@ import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
 import de.be4.ltl.core.parser.node.Node;
+import de.be4.ltl.core.parser.node.PLtl;
 import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.node.Token;
 import de.prob.parserbase.ProBParserBase;
@@ -44,7 +46,7 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void defaultIn(final Node node) {
 		helper.defaultIn(node.getClass());
 	}
-
+	
 	@Override
 	public void caseAUnparsedLtl(final AUnparsedLtl node) {
 		final Token token = node.getPredicate();
@@ -83,6 +85,13 @@ public class PrologGenerator extends DepthFirstAdapter {
 		helper.weak_fair(UniversalToken.createToken(token));
 	}
 
+	@Override
+	public void caseAAndFair1Ltl(final AAndFair1Ltl node) {
+		final PLtl left_node = node.getLeft();
+		final PLtl right_node = node.getRight();
+		helper.and_fair1(left_node,right_node,this);
+	}
+	
 	@Override
 	public void caseASinkLtl(final ASinkLtl node) {
 		helper.sink();

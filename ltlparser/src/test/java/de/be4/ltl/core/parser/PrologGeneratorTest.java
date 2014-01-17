@@ -12,6 +12,7 @@ import java.io.StringReader;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.junit.runner.Computer;
 
 import de.be4.ltl.core.ctlparser.lexer.Lexer;
 import de.be4.ltl.core.ctlparser.parser.Parser;
@@ -295,9 +296,10 @@ public class PrologGeneratorTest {
 		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
 		final PrologTerm wf = new CompoundPrologTerm("weak_fair", wrapped);
 		final PrologTerm ap = new CompoundPrologTerm("ap", wf);
-
-		final PrologTerm expected = new CompoundPrologTerm("implies",
-				ap, TERM_TRUE);
+		final PrologTerm weak_assumption = new CompoundPrologTerm("weakassumptions", ap);
+		
+		final PrologTerm expected = new CompoundPrologTerm("fairnessimplication",
+				weak_assumption, TERM_TRUE);
 		check("WF(bla) => true", expected);
 	}
 
@@ -313,8 +315,9 @@ public class PrologGeneratorTest {
 		final PrologTerm wf2 = new CompoundPrologTerm("weak_fair", wrapped2);
 		final PrologTerm ap2 = new CompoundPrologTerm("ap", wf2);
 		final PrologTerm orPred = new CompoundPrologTerm("or", ap1, ap2);
-		final PrologTerm expected = new CompoundPrologTerm("implies",
-				orPred, TERM_TRUE);
+		final PrologTerm weak_assumption = new CompoundPrologTerm("weakassumptions",orPred);
+		final PrologTerm expected = new CompoundPrologTerm("fairnessimplication",
+				weak_assumption, TERM_TRUE);
 		
 		check("WF(bla) or WF(blubb) => true", expected);
 	}
@@ -322,14 +325,23 @@ public class PrologGeneratorTest {
 	@Test
 	public void testStrongFair() throws Exception {
 		
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm sf = new CompoundPrologTerm("strong_fair", wrapped);
-		final PrologTerm ap = new CompoundPrologTerm("ap", sf);
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
+		final PrologTerm strong_assumptions = new CompoundPrologTerm("strongassumptions", ap1);
 
-		final PrologTerm expected = new CompoundPrologTerm("implies",
-				ap, TERM_TRUE);
-		check("SF(bla) => true", expected);
+		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		final PrologTerm sf2 = new CompoundPrologTerm("weak_fair", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
+		final PrologTerm weak_assumptions = new CompoundPrologTerm("weakassumptions", ap2);
+
+		final PrologTerm andPred = new CompoundPrologTerm("and", strong_assumptions, weak_assumptions);
+		
+		final PrologTerm expected = new CompoundPrologTerm("fairnessimplication",
+				andPred, TERM_TRUE);
+		check("(SF(bla)) & (WF(blubb)) => true", expected);
 	}
 
 	@Test
@@ -344,10 +356,19 @@ public class PrologGeneratorTest {
 		final PrologTerm sf2 = new CompoundPrologTerm("strong_fair", wrapped2);
 		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
 		final PrologTerm andPred = new CompoundPrologTerm("and", ap1, ap2);
-		final PrologTerm expected = new CompoundPrologTerm("implies",
-				andPred, TERM_TRUE);
+		final PrologTerm strong_assumption = new CompoundPrologTerm("strongassumptions",andPred);
 		
-		check("SF(bla) & SF(blubb) => true", expected);
+		final PrologTerm expected = new CompoundPrologTerm("fairnessimplication",
+				strong_assumption, TERM_TRUE);
+		
+		check("( (SF(bla) & SF(blubb)) => (true))", expected);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_fairness_assumptions() throws Exception {
+		String buggy = "SF(bla) & F{blubb} => true";
+		parse(buggy);
+		
 	}
 
 	@Test(expected = LtlParseException.class)
@@ -369,10 +390,6 @@ public class PrologGeneratorTest {
 		new Parser(new Lexer(new PushbackReader(new StringReader("AG {taken= {}")))).parse();
 	}
 	
-	
-
-	
-
 	public void testPredSyntaxError() throws Exception {
 		try {
 			parse("{X}");
