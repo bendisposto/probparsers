@@ -60,6 +60,11 @@ public class BLexer extends Lexer {
 			collectComment();
 		}
 
+		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
+			throw new LexerException(
+					"#! only allowed in first line of the file");
+		}
+
 		if (token instanceof TStringLiteral) {
 			// google for howto-unescape-a-java-string-literal-in-java
 			// quickfix: we do nothing just strip off the "

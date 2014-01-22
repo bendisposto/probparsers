@@ -6,6 +6,9 @@ package de.be4.ltl.core.parser.internal;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.node.AExistsLtl;
+import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -67,6 +70,22 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 	
+	public void strong_fair(UniversalToken token) {
+		pto.openTerm("ap");
+		pto.openTerm("strong_fair");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();		
+	}
+
+	public void weak_fair(UniversalToken token) {
+		pto.openTerm("ap");
+		pto.openTerm("weak_fair");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
 			specParser.parseTransitionPredicate(pto, token.getText(), true);
@@ -106,6 +125,66 @@ final class PrologGeneratorHelper {
 		final LtlParseException ex = new LtlParseException(token,
 				orig.getMessage());
 		return new LtlAdapterException(ex);
+	}
+
+	public void existsTerm(AExistsLtl node, PrologGenerator gen) {
+		
+        pto.openTerm("exists");
+		String identifier = node.getExistsIdentifier().getText();
+		pto.printAtom(identifier);
+		
+		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
+		this.caseUnparsed(token);
+
+		node.getLtl().apply(gen);
+
+        pto.closeTerm();
+		
+	}
+
+	public void forallTerm(AForallLtl node, PrologGenerator gen) {
+		
+        pto.openTerm("forall");
+		String identifier = node.getForallIdentifier().getText();
+		pto.printAtom(identifier);
+		
+		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
+		this.caseUnparsed(token);
+
+		node.getLtl().apply(gen);
+
+        pto.closeTerm();
+		
+	}
+
+	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+		
+		pto.openTerm("and");
+		
+		pto.openTerm("strongassumptions");
+		left_node.apply(gen);
+		pto.closeTerm();
+				
+		pto.openTerm("weakassumptions");
+		right_node.apply(gen);
+		pto.closeTerm();
+		
+		pto.closeTerm();
+	}
+
+	public void and_fair2(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+		
+		pto.openTerm("and");
+		
+		pto.openTerm("weakassumptions");
+		left_node.apply(gen);
+		pto.closeTerm();
+				
+		pto.openTerm("strongassumptions");
+		right_node.apply(gen);
+		pto.closeTerm();
+		
+		pto.closeTerm();
 	}
 
 }

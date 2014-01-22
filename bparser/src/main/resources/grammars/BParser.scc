@@ -32,6 +32,7 @@ Helpers
 States
 
 	normal,
+	shebang,
 	comment;
 
 
@@ -40,6 +41,9 @@ States
  *******************************************************************/
 
 Tokens
+	{normal -> shebang, shebang} shebang = '#!'; 
+	{shebang -> normal} shebang_end = line_break;
+	{shebang} shebang_char = all_chars;
 
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
@@ -297,7 +301,7 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-
+shebang, shebang_char, shebang_end,
 	white_space,
 	comment, comment_body, comment_end;
 
