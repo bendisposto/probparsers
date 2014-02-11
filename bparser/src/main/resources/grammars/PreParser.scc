@@ -38,6 +38,7 @@ Helpers
 	end = 'END';
 	implementation = 'IMPLEMENTATION';
 	imports = 'IMPORTS';
+	extends = 'EXTENDS';
 	includes = 'INCLUDES';
 	initialisation = 'INITIALISATION' | 'INITIALIZATION';
 	invariant = 'INVARIANT';
@@ -84,7 +85,7 @@ Tokens
 		abstract_constants | abstract_variables | assertions | concrete_constants |
 		concrete_variables | constants | constraints | implementation |
 		imports | includes | initialisation | invariant | local_operations |
-		machine | operations | promotes | properties | refines | refinement |
+		machine | operations | promotes | properties | refines | refinement | extends |
 		sees | sets | uses | values | variables ;
 
 	{normal, definitions -> normal} end_machine = end ;
