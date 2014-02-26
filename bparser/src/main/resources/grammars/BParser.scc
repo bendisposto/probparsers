@@ -16,7 +16,9 @@ Helpers
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
+    
     digit = ['0' .. '9'] ;
+    hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;
 
 	all_chars = [0 .. 0xffff];
 	all_chars_without_quote = [all_chars - double_quotation];
@@ -291,6 +293,7 @@ Tokens
 	{normal} predicate_identifier = '#predicate_identifier' letter*;
 	{normal} truth_predicate = '#truth_predicate';
 	{normal} integer_literal = digit+;
+	{normal} hex_literal = '0x' hexdigit+;
 	
 	{normal} underscore = underscore;
 	
@@ -555,7 +558,7 @@ expression_in_par {-> expression} =
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression}; 
 
 /*expression_p20 {-> expression} =
-	{parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschränkt?!?
+	{parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschraenkt?!?
 	{next_level} [expr]:expression_x20 {-> expr.expression} ;
 expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */ 
 	

@@ -19,7 +19,6 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
-
 public class StructuralTest {
 
 	@Test
@@ -36,8 +35,8 @@ public class StructuralTest {
 		final AMachineHeader header = (AMachineHeader) machine.getHeader();
 		assertEquals("Machine name not as expected", "SimplyStructure", header
 				.getName().get(0).getText());
-		assertNotNull("Machine header parameter list is null", header
-				.getParameters());
+		assertNotNull("Machine header parameter list is null",
+				header.getParameters());
 		assertTrue("More machine header parameters than expected", header
 				.getParameters().size() == 0);
 
@@ -274,5 +273,14 @@ public class StructuralTest {
 		// System.out.println(string);
 		// System.out.println();
 		return string;
+	}
+
+	@Test
+	public void testHexLiterals() throws Exception {
+		final String testMachine = "#EXPRESSION 0x12";
+		final String result = getTreeAsString(testMachine);
+
+		assertEquals("Start(AExpressionParseUnit(AIntegerExpression(18)))",
+				result);
 	}
 }
