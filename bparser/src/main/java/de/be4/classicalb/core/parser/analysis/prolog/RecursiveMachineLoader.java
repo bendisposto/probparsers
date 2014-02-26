@@ -48,7 +48,7 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch" };
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys" };
 	private final String directory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
