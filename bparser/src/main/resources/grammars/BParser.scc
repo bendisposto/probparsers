@@ -893,6 +893,7 @@ machine_clause =
 	{extends} [machine_references]:machine_reference* |
 	{imports} [machine_references]:machine_reference* |
 	{sets} [set_definitions]:set* |
+	{freetypes} [freetypes]:freetype* |
 	{variables} [identifiers]:expression* |
 	{concrete_variables} [identifiers]:expression* |
 	{abstract_constants} [identifiers]:expression* |
@@ -917,6 +918,9 @@ definition =
 set =
 	{deferred_set} [identifier]:identifier_literal* |
 	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
+
+freetype = [name]:identifier_literal [constructors]:freetype_constructor+ ;
+freetype_constructor = [name]:identifier_literal [argument]:expression? ;
 	
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
