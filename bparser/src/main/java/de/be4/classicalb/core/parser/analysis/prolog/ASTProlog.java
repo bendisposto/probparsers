@@ -27,11 +27,13 @@ import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AConcreteVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.AConstantsContextClause;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
+import de.be4.classicalb.core.parser.node.AConstructorFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.ACoupleExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AElementFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AEvent;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
@@ -47,7 +49,6 @@ import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AFreetype;
-import de.be4.classicalb.core.parser.node.AFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.AFreetypesMachineClause;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
@@ -103,7 +104,6 @@ import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEventstatus;
-import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
@@ -129,12 +129,12 @@ public class ASTProlog extends DepthFirstAdapter {
 			Arrays.asList("expression", "predicate", "machine_clause",
 					"substitution", "parse_unit", "model_clause",
 					"context_clause", "eventstatus", "argpattern", "set",
-					"machine_variant", "definition"));
+					"machine_variant", "definition", "freetype_constructor"));
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
-			Arrays.asList("event", "freetype", "freetype_constructor",
-					"machine_header", "machine_reference", "operation",
-					"rec_entry", "values_entry", "witness"));
+			Arrays.asList("event", "freetype", "machine_header",
+					"machine_reference", "operation", "rec_entry",
+					"values_entry", "witness"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -1053,15 +1053,18 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAFreetypeConstructor(AFreetypeConstructor node) {
+	public void caseAConstructorFreetypeConstructor(
+			AConstructorFreetypeConstructor node) {
 		open(node);
 		pout.printAtom(node.getName().getText());
-		final PExpression argument = node.getArgument();
-		if (argument != null) {
-			argument.apply(this);
-		} else {
-			pout.printAtom("none");
-		}
+		node.getArgument().apply(this);
+		close(node);
+	}
+
+	@Override
+	public void caseAElementFreetypeConstructor(AElementFreetypeConstructor node) {
+		open(node);
+		pout.printAtom(node.getName().getText());
 		close(node);
 	}
 }

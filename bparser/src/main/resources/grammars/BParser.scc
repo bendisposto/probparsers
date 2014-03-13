@@ -256,6 +256,8 @@ Tokens
 	{normal} total_relation = '<<->' | 0xe100;
 	{normal} surjection_relation = '<->>' | 0xe101;
 	{normal} total_surjection_relation = '<<->>' | 0xe102;
+	{normal} kw_freetypes = 'FREETYPES';
+	{normal} freetype_def = '::=';
 
 	// keywords for special parsing modes 
 	{normal} kw_expression = '#EXPRESSION';
@@ -391,7 +393,8 @@ machine_clause {-> machine_clause} =
 	{local_operations} [clause]:local_operations_clause {-> clause.machine_clause} |
 	{operations} [clause]:operations_clause {-> clause.machine_clause} |
 	{values} [clause]:values_clause {-> clause.machine_clause} |
-	{invariant} [clause]:invariant_clause {-> clause.machine_clause} ;
+	{invariant} [clause]:invariant_clause {-> clause.machine_clause} | 
+	{freetypes} [clause]:freetypes_clause {-> clause.machine_clause};
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
 
@@ -482,6 +485,19 @@ operation {-> operation} = [return_values]:operation_return_values? [op_name]:co
 operation_return_values {-> expression*} =
 	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
 
+freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_list {-> New machine_clause.freetypes([freetype_list.freetype])};
+freetype_list {-> freetype*} =
+	{single} [freetype]:freetype {-> [freetype.freetype]} |
+	{multi} [rest]:freetype_list semicolon [freetype]:freetype {-> [rest.freetype, freetype.freetype]} ;
+freetype {-> freetype} = [name]:identifier_literal freetype_def [cons_list]:freetypecons_list
+	{-> New freetype(name, [cons_list.freetype_constructor])};
+freetypecons_list {-> freetype_constructor*} =
+	{single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
+	{multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]} ;
+
+freetypecons {-> freetype_constructor} = 
+    {element}     [name]:identifier_literal {-> New freetype_constructor.element(name)} |
+    {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name,argument.expression)};
 
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
@@ -920,7 +936,9 @@ set =
 	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
 
 freetype = [name]:identifier_literal [constructors]:freetype_constructor+ ;
-freetype_constructor = [name]:identifier_literal [argument]:expression? ;
+freetype_constructor = 
+	{constructor} [name]:identifier_literal [argument]:expression |
+	{element} [name]:identifier_literal;
 	
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
