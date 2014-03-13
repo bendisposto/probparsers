@@ -46,6 +46,9 @@ import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
 import de.be4.classicalb.core.parser.node.AExtendsContextClause;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
+import de.be4.classicalb.core.parser.node.AFreetype;
+import de.be4.classicalb.core.parser.node.AFreetypeConstructor;
+import de.be4.classicalb.core.parser.node.AFreetypesMachineClause;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
@@ -100,6 +103,7 @@ import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEventstatus;
+import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
@@ -128,8 +132,9 @@ public class ASTProlog extends DepthFirstAdapter {
 					"machine_variant", "definition"));
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
-			Arrays.asList("event", "machine_header", "machine_reference",
-					"operation", "rec_entry", "values_entry", "witness"));
+			Arrays.asList("event", "freetype", "freetype_constructor",
+					"machine_header", "machine_reference", "operation",
+					"rec_entry", "values_entry", "witness"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -1034,4 +1039,29 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
+	@Override
+	public void caseAFreetypesMachineClause(AFreetypesMachineClause node) {
+		printOCAsList(node, node.getFreetypes());
+	}
+
+	@Override
+	public void caseAFreetype(AFreetype node) {
+		open(node);
+		pout.printAtom(node.getName().getText());
+		printAsList(node.getConstructors());
+		close(node);
+	}
+
+	@Override
+	public void caseAFreetypeConstructor(AFreetypeConstructor node) {
+		open(node);
+		pout.printAtom(node.getName().getText());
+		final PExpression argument = node.getArgument();
+		if (argument != null) {
+			argument.apply(this);
+		} else {
+			pout.printAtom("none");
+		}
+		close(node);
+	}
 }
