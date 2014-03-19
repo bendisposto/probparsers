@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ABoolSetExpression;
@@ -58,7 +60,7 @@ public class CreateFreetypeTest {
 			.<PExpression> emptyList();
 
 	@Test
-	public void testFreetype() {
+	public void testManualFreetypeCreation() {
 		final PrologTermStringOutput pto = new PrologTermStringOutput();
 		printProlog(pto);
 		final String result = pto.toString();
@@ -197,4 +199,10 @@ public class CreateFreetypeTest {
 		return Arrays.asList(new TIdentifierLiteral(name));
 	}
 
+	@Test
+	public void testFreetypeSyntax() throws IOException, BException {
+		final BParser parser = new BParser("FreetypeIntList");
+		final File file = new File("src/test/resources/FreetypeIntList.mch");
+		parser.parseFile(file, false);
+	}
 }

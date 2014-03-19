@@ -257,7 +257,6 @@ Tokens
 	{normal} surjection_relation = '<->>' | 0xe101;
 	{normal} total_surjection_relation = '<<->>' | 0xe102;
 	{normal} kw_freetypes = 'FREETYPES';
-	{normal} freetype_def = '::=';
 
 	// keywords for special parsing modes 
 	{normal} kw_expression = '#EXPRESSION';
@@ -489,7 +488,7 @@ freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_lis
 freetype_list {-> freetype*} =
 	{single} [freetype]:freetype {-> [freetype.freetype]} |
 	{multi} [rest]:freetype_list semicolon [freetype]:freetype {-> [rest.freetype, freetype.freetype]} ;
-freetype {-> freetype} = [name]:identifier_literal freetype_def [cons_list]:freetypecons_list
+freetype {-> freetype} = [name]:identifier_literal equal [cons_list]:freetypecons_list
 	{-> New freetype(name, [cons_list.freetype_constructor])};
 freetypecons_list {-> freetype_constructor*} =
 	{single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
