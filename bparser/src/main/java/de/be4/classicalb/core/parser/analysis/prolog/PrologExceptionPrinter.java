@@ -28,7 +28,7 @@ import de.prob.prolog.output.PrologTermOutput;
 public final class PrologExceptionPrinter {
 	static public void printException(final OutputStream out,
 			final IOException e, final String filename) {
-		IPrologTermOutput pto = new PrologTermOutput(System.err);
+		IPrologTermOutput pto = new PrologTermOutput(out);
 		pto.openTerm("io_exception");
 		printMsg(pto, e, filename);
 		pto.closeTerm();
@@ -37,7 +37,7 @@ public final class PrologExceptionPrinter {
 	}
 
 	static public void printException(final OutputStream out, final BException e) {
-		IPrologTermOutput pto = new PrologTermOutput(System.err);
+		IPrologTermOutput pto = new PrologTermOutput(out);
 		Throwable cause = e.getCause();
 		String filename = e.getFilename();
 		if (cause == null) {
