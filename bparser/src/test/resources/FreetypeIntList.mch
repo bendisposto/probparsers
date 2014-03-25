@@ -1,12 +1,12 @@
 MACHINE FreetypeIntList
 FREETYPES
-  IntList = inil, icons(INTEGER*IntList)
+  IntList ::= inil, icons(INTEGER*IntList)
 VARIABLES
   x
 INVARIANT
   x : IntList
 INITIALISATION
-  x := nil
+  x := inil
 OPERATIONS
   add(i) = PRE i:INTEGER THEN
     x := icons(i,x)
