@@ -1,6 +1,6 @@
 MACHINE FreetypeIntList
 FREETYPES
-  IntList ::= inil, icons(INTEGER*IntList)
+  IntList = inil, icons(INTEGER*IntList)
 VARIABLES
   x
 INVARIANT
