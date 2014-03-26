@@ -10,7 +10,7 @@ Package de.be4.ltl.core.parser;
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
     digit = ['0' .. '9'] ;
-
+    
     underscore = '_'; 
  
 	line_break = [10 + 13];
@@ -26,7 +26,14 @@ Package de.be4.ltl.core.parser;
 	
 	enabled_start = 'e(';
     available_start = 'Av(';
-
+    
+    strong_fair_start = 'SF(';
+    weak_fair_start = 'WF(';
+    
+    exists_quantor = '#';
+    forall_quantor = '!';
+    dot = '.';
+    
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
@@ -41,19 +48,20 @@ Package de.be4.ltl.core.parser;
 
 Tokens
 
-   {ltl} true = 'true';
-   {ltl} false = 'false';
-   {ltl} sink ='sink';
-   {ltl} deadlock ='deadlock';
-   {ltl} current = 'current';
-   {ltl} l_par = l_paren;
-   {ltl} r_par = r_paren;
+    {ltl} true = 'true';
+    {ltl} false = 'false';
+    {ltl} sink ='sink';
+    {ltl} deadlock ='deadlock';
+    {ltl} current = 'current';
+    {ltl} l_par = l_paren;
+    {ltl} r_par = r_paren;
  
-   {ltl -> action} l_sq = l_bracket;
-   {ltl -> action} enabled = enabled_start;
-   {ltl -> action} available = available_start;
+    {ltl -> action} l_sq = l_bracket;
+    {ltl -> action} enabled = enabled_start;
+    {ltl -> action} available = available_start;
  
     {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
+
     {atomic} atomic_proposition_end = r_cur;
     {atomic} ap_char =  ([0 .. 0xffff]);
     
@@ -61,12 +69,18 @@ Tokens
     {action} action_begin = [l_paren + l_bracket];
     {action} tp_char =  ([0 .. 0xffff]);
 
-
+	{ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+	{ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+	
 /* Boolean Operators */
     {ltl} implies = '=>';
     {ltl} and = '&';
     {ltl} or = 'or';
     {ltl} not = 'not';
+
+/* Fairness LTL operators */
+    {ltl -> action} strong_fair = strong_fair_start;
+    {ltl -> action} weak_fair = weak_fair_start;
 
 /* LTL temporal operators */
     {ltl} until = 'U';
@@ -84,7 +98,7 @@ Tokens
     {ltl} historically = 'H';
     {ltl} once = 'O';
     {ltl} yesterday = 'Y';
-	
+		
  	white_space = white_space;
 
 /*******************************************************************
@@ -100,9 +114,13 @@ Ignored Tokens
  *******************************************************************/
 
 
- Productions 
-  ltl_formula  {-> ltl} = {implication} [left]:ltl_formula implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } |
-                                        ltl_formula2                                    { -> ltl_formula2.ltl};
+ Productions
+  
+  ltl_formula  {-> ltl} = {fairness_implication} [left]:ltl_fairness  implies [right]:ltl_formula1 { -> New ltl.fairness_implication(left.ltl, right.ltl) } |
+                                         ltl_formula1                                      { -> ltl_formula1.ltl};
+
+  ltl_formula1  {-> ltl} = {implication} [left]:ltl_formula1  implies [right]:ltl_formula2 { -> New ltl.implies(left.ltl, right.ltl) } |
+                                         ltl_formula2                                      { -> ltl_formula2.ltl};
   
   ltl_formula2 {-> ltl} = {and} [left]:ltl_formula2 and [right]:ltl_formula3 { -> New ltl.and(left.ltl, right.ltl)} |
                           {or}  [left]:ltl_formula2 or [right]:ltl_formula3  { -> New ltl.or(left.ltl, right.ltl)}  |
@@ -115,24 +133,52 @@ Ignored Tokens
                           {trigger}    [left]:ltl_formula3 trigger [right]:ltl_formula4   { -> New ltl.trigger(left.ltl, right.ltl)}| 
                                        ltl_formula4                                       { -> ltl_formula4.ltl };
 
-  ltl_formula4 {-> ltl} = {not}          not ltl_formula4                                            { -> New ltl.not(ltl_formula4.ltl) } | 
-                          {par}          l_par ltl_formula r_par                                     { -> ltl_formula.ltl } | 
-                          {true}         true                                                        { -> New ltl.true()} | 
-                          {false}        false                                                       { -> New ltl.false()} |  
-                          {globally}      globally ltl_formula4                                        { -> New ltl.globally(ltl_formula4.ltl)} | 
-                          {finally}      finally ltl_formula4                                        { -> New ltl.finally(ltl_formula4.ltl)} |      
-                          {next}         next ltl_formula4                                           { -> New ltl.next(ltl_formula4.ltl)} |   
-                          {historically} historically ltl_formula4                                   { -> New ltl.historically(ltl_formula4.ltl)} |   
-                          {once}         once ltl_formula4                                           { -> New ltl.once(ltl_formula4.ltl)} |    
-                          {yesterday}    yesterday ltl_formula4                                      { -> New ltl.yesterday(ltl_formula4.ltl)} | 
-                          {enabled}      enabled                                                     { -> New ltl.enabled(enabled)} | 
-                          {available}    available                                                   { -> New ltl.available(available)} |
-                          {action}       l_sq                                                        { -> New ltl.action(l_sq)} | 
-                          {sink}         sink                                                        { -> New ltl.sink()} | 
-                          {deadlock}     deadlock                                                    { -> New ltl.deadlock()} | 
-                          {current}      current                                                     { -> New ltl.current()} |
-                          {unparsed}     atomic_proposition_begin                                    { -> New ltl.unparsed(atomic_proposition_begin) }  ;
+  ltl_formula4 {-> ltl} = {not}          not ltl_formula4                                             { -> New ltl.not(ltl_formula4.ltl) } | 
+                          {par}          l_par ltl_formula r_par                                      { -> ltl_formula.ltl } | 
+                          {true}         true                                                         { -> New ltl.true()} | 
+                          {false}        false                                                        { -> New ltl.false()} |  
+                          {globally}     globally ltl_formula4                                        { -> New ltl.globally(ltl_formula4.ltl)} | 
+                          {finally}      finally ltl_formula4                                         { -> New ltl.finally(ltl_formula4.ltl)} |      
+                          {next}         next ltl_formula4                                            { -> New ltl.next(ltl_formula4.ltl)} |   
+                          {historically} historically ltl_formula4                                    { -> New ltl.historically(ltl_formula4.ltl)} |   
+                          {once}         once ltl_formula4                                            { -> New ltl.once(ltl_formula4.ltl)} |    
+                          {yesterday}    yesterday ltl_formula4                                       { -> New ltl.yesterday(ltl_formula4.ltl)} | 
+                          {enabled}      enabled                                                      { -> New ltl.enabled(enabled)} | 
+                          {available}    available                                                    { -> New ltl.available(available)} |
+                          {action}       l_sq                                                         { -> New ltl.action(l_sq)} | 
+                          {sink}         sink                                                         { -> New ltl.sink()} | 
+                          {deadlock}     deadlock                                                     { -> New ltl.deadlock()} | 
+                          {current}      current                                                      { -> New ltl.current()} |
+                          // #id.(unparsed => ltl_formula)
+                          {exists}       exists_identifier 
+                                                l_par atomic_proposition_begin and ltl_formula r_par
+                                    { -> New ltl.exists(exists_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          // !id.(unparsed => ltl_formula)
+                          {forall}       forall_identifier 
+                                                l_par atomic_proposition_begin implies ltl_formula r_par 
+                                    { -> New ltl.forall(forall_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          {unparsed}     atomic_proposition_begin                                     { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
+
+// LTL Fairness Assumption Productions
+  ltl_fairness {-> ltl} = {and_fair1} [left]:ltl_strong_fairness and  [right]:ltl_weak_fairness { -> New ltl.and_fair1(left.ltl,right.ltl)} |
+  						  {and_fair2} [left]:ltl_weak_fairness   and  [right]:ltl_strong_fairness { -> New ltl.and_fair2(left.ltl,right.ltl)} |
+						  {strong_assumptions} ltl_strong_fairness { -> New ltl.strong_assumptions(ltl_strong_fairness.ltl)} |
+						  {weak_assumptions}   ltl_weak_fairness   { -> New ltl.weak_assumptions(ltl_weak_fairness.ltl)};
+						  
+  ltl_strong_fairness {-> ltl} = {and} [left]:ltl_strong_fairness and [right]:ltl_strong_arg { -> New ltl.and(left.ltl, right.ltl)} |
+                          		 {or}  [left]:ltl_strong_fairness or  [right]:ltl_strong_arg { -> New ltl.or(left.ltl, right.ltl)} |
+                                 	   ltl_strong_arg                                  { -> ltl_strong_arg.ltl };
+
+  ltl_strong_arg {-> ltl} = {strong_fair} strong_fair { -> New ltl.strong_fair(strong_fair)} |
+  	  					    {par} l_par ltl_strong_fairness r_par { -> ltl_strong_fairness.ltl};
+
+  ltl_weak_fairness {-> ltl} = {and} [left]:ltl_weak_fairness and [right]:ltl_weak_arg { -> New ltl.and(left.ltl, right.ltl)} |
+                          	   {or}  [left]:ltl_weak_fairness or  [right]:ltl_weak_arg { -> New ltl.or(left.ltl, right.ltl)} |
+                                 	   ltl_weak_arg                                    { -> ltl_weak_arg.ltl };
+
+  ltl_weak_arg {-> ltl} = {weak_fair} weak_fair { -> New ltl.weak_fair(weak_fair)} |
+  						  {par} l_par ltl_weak_fairness r_par { -> ltl_weak_fairness.ltl};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
@@ -159,13 +205,19 @@ Abstract Syntax Tree
    {yesterday}    ltl |  
    {enabled}      [operation]:enabled | 
    {available}    [operation]:available | 
+   {weak_fair}    [operation]:weak_fair | 
+   {strong_fair}  [operation]:strong_fair |    
    {action}       [operation]:l_sq |
    {unparsed}     [predicate]:atomic_proposition_begin |
    {sink}          |
    {deadlock}      |
    {current}       | 
    {true}          |
-   {false}         ;
-  
-
-  
+   {false}         |
+   {exists}       exists_identifier [predicate]:atomic_proposition_begin ltl |
+   {forall}       forall_identifier [predicate]:atomic_proposition_begin ltl |
+   {fairness_implication} [left]:ltl [right]:ltl |
+   {strong_assumptions} ltl |
+   {weak_assumptions}   ltl|
+   {and_fair1}    [left]:ltl [right]:ltl | 
+   {and_fair2}    [left]:ltl [right]:ltl;

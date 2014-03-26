@@ -1,0 +1,23 @@
+SYSTEM
+    main
+    
+SEES
+    used
+
+VARIABLES
+    s
+
+INVARIANT
+	s : NAT
+
+INITIALISATION
+    s := 1
+
+EVENTS
+    inc = 
+    ANY y WHERE
+        y : N
+    THEN
+       s := s + y
+   END
+END

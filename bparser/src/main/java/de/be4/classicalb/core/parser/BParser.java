@@ -164,7 +164,7 @@ public class BParser {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
 		String content = builder.toString();
-		return content.replaceAll("\r\n","\n");
+		return content.replaceAll("\r\n", "\n");
 	}
 
 	/**
@@ -412,7 +412,7 @@ public class BParser {
 	}
 
 	public int fullParsing(final File bfile, final ParsingBehaviour options,
-			final PrintStream out) {
+			final PrintStream out, final PrintStream err) {
 
 		try {
 
@@ -451,8 +451,7 @@ public class BParser {
 			if (options.printTime) {
 				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
 			}
-			
-			
+
 			if (options.fastPrologOutput) {
 				// try {
 				// String fp = getASTasFastProlog(this, bfile, tree);
@@ -463,20 +462,19 @@ public class BParser {
 			}
 		} catch (final IOException e) {
 			if (options.prologOutput) {
-				PrologExceptionPrinter.printException(System.err, e,
-						bfile.getName());
+				PrologExceptionPrinter.printException(err, e, bfile.getName());
 			} else {
-				System.err.println();
-				System.err.println("Error reading input file: "
+				err.println();
+				err.println("Error reading input file: "
 						+ e.getLocalizedMessage());
 			}
 			return -2;
 		} catch (final BException e) {
 			if (options.prologOutput) {
-				PrologExceptionPrinter.printException(System.err, e);
+				PrologExceptionPrinter.printException(err, e);
 			} else {
-				System.err.println();
-				System.err.println("Error parsing input file: "
+				err.println();
+				err.println("Error parsing input file: "
 						+ e.getLocalizedMessage());
 			}
 			return -3;

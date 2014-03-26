@@ -24,7 +24,7 @@ layout_char = 10 | 13;
    These are character codes 97..122, i.e. the letters `a' through `z', as well as the non-ASCII character
    codes 170, 186, 223..246, and 248..255.
 */
-     small_letter =  ['a'..'z'] | 17 | 186 | [223..246] | [248..255];
+     small_letter =  ['a'..'z'] | 170 | 186 | [223..246] | [248..255];
 
 /* capital-letter
    These are character codes 65..90, i.e. the letters `A' through `Z', as well as the non-ASCII character 
@@ -72,14 +72,19 @@ layout_char = 10 | 13;
 */
     underline = '_';
   
-
     alpha =  capital_letter | small_letter | digit | underline;
 
     word = small_letter alpha*; 
     symbol = symbol_char+;
     
+
+    hex = [[['A' .. 'F'] + ['0' .. '9']] + ['a' .. 'f']];
+    octal = ['0' .. '7'];
+    escape_sequences = '\b' | '\t' | '\n' | '\v' | '\f' | '\r' | '\e' | '\d' | '\a' |
+                       '\x' hex+ '\' | '\' octal+ | '\' 10 | '\\' | '\' quote_char ;
+
     
-    quoted_item = [[0 .. 0xffff]-39] | '\' 39;
+    quoted_item = escape_sequences | [[[0 .. 0xffff]-39] - 92];
     
     quoted_name = quote quoted_item* quote; 
   

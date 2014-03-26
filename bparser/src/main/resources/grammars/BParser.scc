@@ -16,7 +16,9 @@ Helpers
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
+    
     digit = ['0' .. '9'] ;
+    hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;
 
 	all_chars = [0 .. 0xffff];
 	all_chars_without_quote = [all_chars - double_quotation];
@@ -32,6 +34,7 @@ Helpers
 States
 
 	normal,
+	shebang,
 	comment;
 
 
@@ -40,6 +43,9 @@ States
  *******************************************************************/
 
 Tokens
+	{normal -> shebang, shebang} shebang = '#!'; 
+	{shebang -> normal} shebang_end = line_break;
+	{shebang} shebang_char = all_chars;
 
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
@@ -250,6 +256,7 @@ Tokens
 	{normal} total_relation = '<<->' | 0xe100;
 	{normal} surjection_relation = '<->>' | 0xe101;
 	{normal} total_surjection_relation = '<<->>' | 0xe102;
+	{normal} kw_freetypes = 'FREETYPES';
 
 	// keywords for special parsing modes 
 	{normal} kw_expression = '#EXPRESSION';
@@ -287,6 +294,7 @@ Tokens
 	{normal} predicate_identifier = '#predicate_identifier' letter*;
 	{normal} truth_predicate = '#truth_predicate';
 	{normal} integer_literal = digit+;
+	{normal} hex_literal = '0x' hexdigit+;
 	
 	{normal} underscore = underscore;
 	
@@ -297,7 +305,7 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-
+shebang, shebang_char, shebang_end,
 	white_space,
 	comment, comment_body, comment_end;
 
@@ -384,7 +392,8 @@ machine_clause {-> machine_clause} =
 	{local_operations} [clause]:local_operations_clause {-> clause.machine_clause} |
 	{operations} [clause]:operations_clause {-> clause.machine_clause} |
 	{values} [clause]:values_clause {-> clause.machine_clause} |
-	{invariant} [clause]:invariant_clause {-> clause.machine_clause} ;
+	{invariant} [clause]:invariant_clause {-> clause.machine_clause} | 
+	{freetypes} [clause]:freetypes_clause {-> clause.machine_clause};
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
 
@@ -475,6 +484,19 @@ operation {-> operation} = [return_values]:operation_return_values? [op_name]:co
 operation_return_values {-> expression*} =
 	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
 
+freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_list {-> New machine_clause.freetypes([freetype_list.freetype])};
+freetype_list {-> freetype*} =
+	{single} [freetype]:freetype {-> [freetype.freetype]} |
+	{multi} [rest]:freetype_list semicolon [freetype]:freetype {-> [rest.freetype, freetype.freetype]} ;
+freetype {-> freetype} = [name]:identifier_literal equal [cons_list]:freetypecons_list
+	{-> New freetype(name, [cons_list.freetype_constructor])};
+freetypecons_list {-> freetype_constructor*} =
+	{single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
+	{multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]} ;
+
+freetypecons {-> freetype_constructor} = 
+    {element}     [name]:identifier_literal {-> New freetype_constructor.element(name)} |
+    {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name,argument.expression)};
 
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
@@ -551,7 +573,7 @@ expression_in_par {-> expression} =
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression}; 
 
 /*expression_p20 {-> expression} =
-	{parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschränkt?!?
+	{parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschraenkt?!?
 	{next_level} [expr]:expression_x20 {-> expr.expression} ;
 expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */ 
 	
@@ -886,6 +908,7 @@ machine_clause =
 	{extends} [machine_references]:machine_reference* |
 	{imports} [machine_references]:machine_reference* |
 	{sets} [set_definitions]:set* |
+	{freetypes} [freetypes]:freetype* |
 	{variables} [identifiers]:expression* |
 	{concrete_variables} [identifiers]:expression* |
 	{abstract_constants} [identifiers]:expression* |
@@ -910,6 +933,11 @@ definition =
 set =
 	{deferred_set} [identifier]:identifier_literal* |
 	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
+
+freetype = [name]:identifier_literal [constructors]:freetype_constructor+ ;
+freetype_constructor = 
+	{constructor} [name]:identifier_literal [argument]:expression |
+	{element} [name]:identifier_literal;
 	
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
@@ -1087,7 +1115,8 @@ expression =
 	{struct} [entries]:rec_entry* |
 	{rec} [entries]:rec_entry* |
 	{record_field} [record]:expression [identifier]:expression |
-	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only expression - theory plugin */
+	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
+	{typeof} [expression]:expression [type]:expression; /* Has no concrete syntax, is only generated by the translation process */
 rec_entry = [identifier]:expression [value]:expression;
 
 

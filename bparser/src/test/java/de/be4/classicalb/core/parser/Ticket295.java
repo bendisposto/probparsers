@@ -1,21 +1,16 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.parser.Parser;
-import de.be4.classicalb.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.IToken;
 
 public class Ticket295 {
@@ -25,7 +20,7 @@ public class Ticket295 {
 	@Ignore
 	public void test() throws Exception {
 
-	//	String input = "#FORMULA #x. /* comment */ (x>1000 & x<2**10)";
+		// String input = "#FORMULA #x. /* comment */ (x>1000 & x<2**10)";
 		String input = "#FORMULA #x. /*buh */ (  x>1000 & x<2**10)";
 
 		DefinitionTypes defTypes = new DefinitionTypes();

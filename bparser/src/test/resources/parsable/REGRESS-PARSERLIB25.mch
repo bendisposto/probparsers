@@ -1,0 +1,1 @@
+MACHINE Hierarchical_ParserIssue DEFINITIONS P(x) == (x>10); EXTENDS Core END

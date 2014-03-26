@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -47,18 +48,19 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch" };
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys" };
 	private final String directory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
 	private boolean verbose;
-	private final Map<String, Start> parsedMachines = new HashMap<String, Start>();
+	private final Map<String, Start> parsedMachines = new TreeMap<String, Start>();
 	private final List<File> files = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
 	private List<Pragma> allPragmas;
 
-	public RecursiveMachineLoader(final String directory, IDefinitionFileProvider contentProvider2) {
+	public RecursiveMachineLoader(final String directory,
+			final IDefinitionFileProvider contentProvider2) {
 		this.directory = directory;
 		contentProvider = contentProvider2;
 	}
@@ -74,7 +76,7 @@ public class RecursiveMachineLoader {
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
 			final SourcePositions positions, final Definitions definitions,
-			List<Pragma> pragmas) throws BException {
+			final List<Pragma> pragmas) throws BException {
 		allPragmas = pragmas;
 		injectDefinitions(main, definitions);
 		registerDefinitionFileUsage(definitions);
@@ -82,8 +84,6 @@ public class RecursiveMachineLoader {
 		recursivlyLoadMachine(startfile, main, Collections.<String> emptySet(),
 				true, positions);
 	}
-
-
 
 	public void printAsProlog(final PrintWriter out, final boolean useIndention) {
 		final IPrologTermOutput pout = new PrologTermOutput(out, useIndention);
@@ -121,7 +121,8 @@ public class RecursiveMachineLoader {
 		pout.closeList();
 		pout.closeTerm();
 		pout.fullstop();
-		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
+		for (final Map.Entry<String, Start> entry : getParsedMachines()
+				.entrySet()) {
 			pout.openTerm("machine");
 			final SourcePositions src = positions.get(entry.getKey());
 			pprinter.setSourcePositions(src);
@@ -132,31 +133,30 @@ public class RecursiveMachineLoader {
 
 		if (allPragmas.size() > 0) {
 			NodeIdAssignment ids = pprinter.nodeIds;
-			
+
 			List<Pragma> pragmas = allPragmas;
 			for (Pragma pragma : pragmas) {
 				pragma.printProlog(pout, ids);
 				pout.fullstop();
 			}
-			
 
 		}
 		pout.flush();
 	}
 
-
 	private void loadMachine(final Set<String> ancestors,
-			final String machineName) throws BException,
-			IOException {
+			final String machineName) throws BException, IOException {
 		final File machineFile = lookupFile(machineName);
-		if (files.contains(machineFile)) return;
+		if (files.contains(machineFile)) {
+			return;
+		}
 		final BParser parser = new BParser(machineFile.getName());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
 		files.add(machineFile);
-		
-		allPragmas.addAll(parser.getPragmas());		
-		
+
+		allPragmas.addAll(parser.getPragmas());
+
 		registerDefinitionFileUsage(parser.getDefinitions());
 		injectDefinitions(tree, parser.getDefinitions());
 		recursivlyLoadMachine(machineFile, tree, ancestors, false,
@@ -180,10 +180,11 @@ public class RecursiveMachineLoader {
 	private File lookupFile(final String machineName) throws BException {
 		final String prefix = directory == null ? "" : directory
 				+ File.separator;
-		for (int i = 0; i < SUFFICES.length; i++) {
-			final String suffix = SUFFICES[i];
+		for (final String suffix : SUFFICES) {
 			final File file = new File(prefix + machineName + suffix);
-			if (file.exists()) return file;
+			if (file.exists()) {
+				return file;
+			}
 		}
 		throw new BException(null, "Machine file not found: " + machineName,
 				null);
@@ -191,30 +192,27 @@ public class RecursiveMachineLoader {
 
 	private void recursivlyLoadMachine(final File machineFile,
 			final Start current, Set<String> ancestors, final boolean isMain,
-			final SourcePositions sourcePositions)
-			throws BException {
-		
-		
+			final SourcePositions sourcePositions) throws BException {
+
 		// make a copy of the referencing machines
 		ancestors = new TreeSet<String>(ancestors);
 
 		final int fileNumber = files.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
 			getNodeIdMapping().assignIdentifiers(fileNumber, current);
-		} else
+		} else {
 			throw new IllegalStateException("machine file is not registered");
+		}
 
 		final ReferencedMachines refMachines = new ReferencedMachines(current);
 		final String name = refMachines.getName();
 		final SortedSet<String> references = refMachines
 				.getReferencedMachines();
 		getParsedMachines().put(name, current);
-		
-		
-		
-		
-		
-		if (name != null) ancestors.add(name);
+
+		if (name != null) {
+			ancestors.add(name);
+		}
 		if (isMain) {
 			main = name;
 		}
@@ -223,7 +221,7 @@ public class RecursiveMachineLoader {
 		checkForCycles(ancestors, references);
 
 		for (final String refMachine : references) {
-				if (!getParsedMachines().containsKey(refMachine) ) {
+			if (!getParsedMachines().containsKey(refMachine)) {
 				try {
 					loadMachine(ancestors, refMachine);
 				} catch (final BException e) {
@@ -241,9 +239,10 @@ public class RecursiveMachineLoader {
 			final Set<String> references) {
 		final Set<String> cycles = new TreeSet<String>(ancestors);
 		intersect(cycles, references);
-		if (!cycles.isEmpty())
-		// TODO[dp, 22.04.2008] Use sensible exception
+		if (!cycles.isEmpty()) {
+			// TODO[dp, 22.04.2008] Use sensible exception
 			throw new IllegalStateException("cycle detected");
+		}
 	}
 
 	private void intersect(final Set<String> a, final Set<String> b) {

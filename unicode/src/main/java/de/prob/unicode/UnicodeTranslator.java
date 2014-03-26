@@ -10,6 +10,7 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
+import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
@@ -18,13 +19,17 @@ public class UnicodeTranslator {
 		private final String unicode;
 		private final String ascii;
 
-		public Translation(String ascii, String unicode) {
+		public Translation(final String ascii, final String unicode) {
 			this.ascii = ascii;
 			this.unicode = unicode;
 		}
 
-		public String getAscii() {
-			return ascii;
+		public String getAscii(final boolean needsSpace) {
+			// If the operator begins with a letter, and the last character
+			// before is also a letter, there needs to be a space to separate
+			// them
+			return (Character.isLetter(ascii.charAt(0)) && needsSpace ? " "
+					: "") + ascii;
 		}
 
 		public String getUnicode() {
@@ -104,9 +109,11 @@ public class UnicodeTranslator {
 
 		m.put("TTake", new Translation("/|\\", "/|\\"));
 		m.put("TDrop", new Translation("\\|/", "\\|/"));
+		m.put("TWhitespace", new Translation(" ", " "));
 	}
 
-	public static void main(String[] args) throws LexerException, IOException {
+	public static void main(final String[] args) throws LexerException,
+			IOException {
 		String input = args[0];
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());
@@ -121,33 +128,50 @@ public class UnicodeTranslator {
 		System.out.println(UnicodeTranslator.toUnicode(input));
 	}
 
-	public static String toAscii(String s) {
+	public static String toAscii(final String s) {
 		return translate(s, "ascii");
 	}
 
-	public static String toUnicode(String s) {
+	public static String toUnicode(final String s) {
 		return translate(s, "unicode");
 	}
 
-	private static String translate(String input, String target) {
+	private static String translate(final String input, final String target) {
 		StringBuilder sb = new StringBuilder(input.length());
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());
 		Lexer l = new Lexer(r);
 
-		Token t;
+		Token t, last;
 		try {
+			last = null;
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
 				String key = t.getClass().getSimpleName();
-				if (t instanceof TAnyChar) {
+				if (t instanceof TSeparator) {
+					sb.append(t.getText());
+				} else if (t instanceof TAnyChar) {
+					boolean before = sb.length() > 0
+							&& Character.isLetter(sb.charAt(sb.length() - 1));
+					if (before && "ascii".equals(target)) {
+						sb.append(' ');
+					}
 					sb.append(t.getText());
 				} else {
+					String translated = "";
 					Translation translation = m.get(key);
-					if ("unicode".equals(target))
-						sb.append(translation.getUnicode());
-					if ("ascii".equals(target))
-						sb.append(translation.getAscii());
+					if ("unicode".equals(target)) {
+						translated = translation.getUnicode();
+					}
+					if ("ascii".equals(target)) {
+						boolean before = (last != null && last instanceof TAnyChar)
+								|| sb.length() > 0
+								&& (Character
+										.isLetter(sb.charAt(sb.length() - 1)));
+						translated = translation.getAscii(before);
+					}
+					sb.append(translated);
 				}
+				last = t;
 			}
 		} catch (LexerException e) {
 			e.printStackTrace();

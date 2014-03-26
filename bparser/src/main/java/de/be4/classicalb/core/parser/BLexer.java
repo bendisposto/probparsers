@@ -14,7 +14,9 @@ import de.be4.classicalb.core.parser.node.TComment;
 import de.be4.classicalb.core.parser.node.TCommentEnd;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
+import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
@@ -60,11 +62,21 @@ public class BLexer extends Lexer {
 			collectComment();
 		}
 
+		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
+			throw new LexerException(
+					"#! only allowed in first line of the file");
+		}
+
 		if (token instanceof TStringLiteral) {
 			// google for howto-unescape-a-java-string-literal-in-java
 			// quickfix: we do nothing just strip off the "
 			final String literal = token.getText();
 			token.setText(literal.substring(1, literal.length() - 1));
+		}
+		if (token instanceof THexLiteral) {
+			final String literal = token.getText().substring(2);
+			int value = Integer.valueOf(literal, 16);
+			token = new TIntegerLiteral(Integer.toString(value));
 		}
 		if (token != null) {
 			if (definitions != null) {
