@@ -11,7 +11,11 @@ import java.io.PrintStream;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
+import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.node.Start;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 public class CliBParser {
 
@@ -104,7 +108,20 @@ public class CliBParser {
 					}
 				}
 				if ("formula".equals(line)) {
+					String theFormula = "#FORMULA " + in.readLine();
+					try {
+						Start start = BParser.parse(theFormula);
+						PrologTermStringOutput strOutput = new PrologTermStringOutput();
+						ASTProlog printer = new ASTProlog(strOutput, null);
+						start.apply(printer);
+						strOutput.fullstop();
 
+						// A Friendly Reminder: strOutput includes a newline!
+						System.out.print(strOutput.toString());
+					} catch (BException e) {
+						System.out.println("EXCEPTION "
+								+ e.getLocalizedMessage().replace("\n", " "));
+					}
 				}
 
 			} while (!"halt".equals(line));
