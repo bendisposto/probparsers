@@ -116,7 +116,8 @@ public class CliBParser {
 						start.apply(printer);
 						strOutput.fullstop();
 
-						System.out.println(strOutput.toString());
+						// A Friendly Reminder: strOutput includes a newline!
+						System.out.print(strOutput.toString());
 					} catch (BException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
