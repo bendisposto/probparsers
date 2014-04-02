@@ -104,7 +104,9 @@ public class CliBParser {
 					if (returnValue == 0) {
 						System.out.println("exit(" + returnValue + ").");
 					} else {
-						System.out.println(baos.toString());
+						String output = baos.toString().replace("\n", " ")
+								.trim();
+						System.out.println(output);
 					}
 				}
 				if ("formula".equals(line)) {
