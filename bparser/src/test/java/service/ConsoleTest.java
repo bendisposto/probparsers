@@ -21,8 +21,8 @@ public class ConsoleTest {
 		strOutput.fullstop();
 
 		// A Friendly Reminder: strOutput includes a newline!
-		assertEquals(strOutput.toString(),
-				"add(none,integer(none,1),integer(none,1)).\n");
+		String output = strOutput.toString().trim();
+		assertEquals(output, "add(none,integer(none,1),integer(none,1)).");
 	}
 
 }
