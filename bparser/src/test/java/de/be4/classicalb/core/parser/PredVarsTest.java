@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 
@@ -15,7 +16,7 @@ public class PredVarsTest {
 
 	@Test
 	public void testAandB() throws Exception {
-		final String testMachine = "#PREDICATE A & B";
+		final String testMachine = "#FORMULA A & B";
 		String res = "#PREDICATE (A=TRUE) & (B=TRUE)";
 		final String result1 = getTreeAsString(testMachine);
 		final String result2 = getTreeAsStringOrg(res);
@@ -26,7 +27,7 @@ public class PredVarsTest {
 
 	@Test
 	public void testSemiAandB() throws Exception {
-		final String testMachine = "#PREDICATE A<3 & B";
+		final String testMachine = "#FORMULA A<3 & B";
 		String res = "#PREDICATE (A<3) & (B=TRUE)";
 		final String result1 = getTreeAsString(testMachine);
 		final String result2 = getTreeAsStringOrg(res);
@@ -37,7 +38,7 @@ public class PredVarsTest {
 
 	@Test
 	public void testPred() throws Exception {
-		final String testMachine = "#PREDICATE A<3 & B>9";
+		final String testMachine = "#FORMULA A<3 & B>9";
 		String res = "#PREDICATE (A<3) & (B>9)";
 		final String result1 = getTreeAsString(testMachine);
 		final String result2 = getTreeAsStringOrg(res);
@@ -45,10 +46,10 @@ public class PredVarsTest {
 		assertNotNull(result2);
 		assertEquals(result1, result2);
 	}
-	
+
 	@Test
 	public void testImpl() throws Exception {
-		final String testMachine = "#PREDICATE A & (B>9 => C) & D";
+		final String testMachine = "#FORMULA A & (B>9 => C) & D";
 		String res = "#PREDICATE (A=TRUE) & (B>9 => C=TRUE) & (D=TRUE)";
 		final String result1 = getTreeAsString(testMachine);
 		final String result2 = getTreeAsStringOrg(res);
