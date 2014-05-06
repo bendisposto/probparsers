@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,9 @@ import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -179,6 +182,48 @@ public class BParser {
 	public static Start parse(final String input) throws BException {
 		BParser parser = new BParser("String Input");
 		return parser.parse(input, false, new NoContentProvider());
+	}
+
+	public static Start eparse(String theFormula) throws BException,
+			LexerException, IOException {
+		Start ast = null;
+		boolean ok = false;
+
+		List<TIdentifierLiteral> ids = new ArrayList<TIdentifierLiteral>();
+
+		BLexer bLexer = new BLexer(new PushbackReader(new StringReader(
+				theFormula)));
+		Token t;
+		do {
+			t = bLexer.next();
+			if (t instanceof TIdentifierLiteral) {
+				ids.add((TIdentifierLiteral) t);
+			}
+		} while (!(t instanceof EOF));
+
+		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids));
+		try {
+			ast = p.parse();
+			ok = true;
+		} catch (Exception e) {
+//			e.printStackTrace();
+		}
+
+		BigInteger b = new BigInteger("2");
+		b = b.pow(ids.size());
+		b = b.subtract(BigInteger.ONE);
+
+		while (!ok && b.compareTo(BigInteger.ZERO) > 0) {
+			p = new Parser(new EBLexer(theFormula, b, ids));
+			try {
+				ast = p.parse();
+				ok = true;
+			} catch (Exception e) {
+				b = b.subtract(BigInteger.ONE);
+			}
+		}
+
+		return ast;
 	}
 
 	/**

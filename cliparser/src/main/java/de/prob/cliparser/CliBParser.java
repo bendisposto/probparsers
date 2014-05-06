@@ -125,6 +125,22 @@ public class CliBParser {
 								+ e.getLocalizedMessage().replace("\n", " "));
 					}
 				}
+				if ("extendedformula".equals(line)) {
+					String theFormula = "#FORMULA " + in.readLine();
+					try {
+						Start start = BParser.eparse(theFormula);
+						PrologTermStringOutput strOutput = new PrologTermStringOutput();
+						ASTProlog printer = new ASTProlog(strOutput, null);
+						start.apply(printer);
+						strOutput.fullstop();
+
+						// A Friendly Reminder: strOutput includes a newline!
+						System.out.print(strOutput.toString());
+					} catch (Exception e) {
+						System.out.println("EXCEPTION "
+								+ e.getLocalizedMessage().replace("\n", " "));
+					}
+				}
 
 			} while (!"halt".equals(line));
 		} else {
