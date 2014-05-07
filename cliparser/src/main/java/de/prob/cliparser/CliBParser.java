@@ -156,6 +156,13 @@ public class CliBParser {
 
 			// A Friendly Reminder: strOutput includes a newline!
 			System.out.print(strOutput.toString());
+		} catch (NullPointerException e) {
+			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
+			// NullPointerException returns NULL itself, thus triggering another
+			// NullPointerException in the catch statement. Therefore we need a
+			// second catch statement with a special case for the
+			// NullPointerException instead of catching a general Exception
+			System.out.println("EXCEPTION NullPointerException");
 		} catch (Exception e) {
 			System.out.println("EXCEPTION "
 					+ e.getLocalizedMessage().replace("\n", " "));
@@ -172,6 +179,13 @@ public class CliBParser {
 
 			// A Friendly Reminder: strOutput includes a newline!
 			System.out.print(strOutput.toString());
+		} catch (NullPointerException e) {
+			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
+			// NullPointerException returns NULL itself, thus triggering another
+			// NullPointerException in the catch statement. Therefore we need a
+			// second catch statement with a special case for the
+			// NullPointerException instead of catching a general Exception
+			System.out.println("EXCEPTION NullPointerException");
 		} catch (BException e) {
 			System.out.println("EXCEPTION "
 					+ e.getLocalizedMessage().replace("\n", " "));
