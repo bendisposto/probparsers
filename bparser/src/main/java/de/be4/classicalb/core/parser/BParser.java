@@ -189,7 +189,7 @@ public class BParser {
 		Start ast = null;
 		boolean ok = false;
 
-		List<TIdentifierLiteral> ids = new ArrayList<TIdentifierLiteral>();
+		List<String> ids = new ArrayList<String>();
 
 		BLexer bLexer = new BLexer(new PushbackReader(new StringReader(
 				theFormula)));
@@ -197,7 +197,9 @@ public class BParser {
 		do {
 			t = bLexer.next();
 			if (t instanceof TIdentifierLiteral) {
-				ids.add((TIdentifierLiteral) t);
+				if (!ids.contains(t.getText())) {
+					ids.add(t.getText());
+				}
 			}
 		} while (!(t instanceof EOF));
 
@@ -206,7 +208,7 @@ public class BParser {
 			ast = p.parse();
 			ok = true;
 		} catch (Exception e) {
-//			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		BigInteger b = new BigInteger("2");

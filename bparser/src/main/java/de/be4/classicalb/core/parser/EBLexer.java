@@ -22,18 +22,17 @@ public class EBLexer extends BLexer {
 	// True means Expression
 	private Map<String, Boolean> v = null;
 
-	public EBLexer(String theFormula, BigInteger b, List<TIdentifierLiteral> ids) {
+	public EBLexer(String theFormula, BigInteger b, List<String> ids) {
 		super(new PushbackReader(new StringReader(theFormula)));
 		v = constructMap(b, ids);
 	}
 
-	private Map<String, Boolean> constructMap(BigInteger b,
-			List<TIdentifierLiteral> ids) {
+	private Map<String, Boolean> constructMap(BigInteger b, List<String> ids) {
 		Map<String, Boolean> res = new HashMap<String, Boolean>();
 		for (int i = 0; i < ids.size(); i++) {
-			TIdentifierLiteral id = ids.get(i);
+			String id = ids.get(i);
 			if (!res.containsKey(id)) {
-				res.put(id.getText(), b.testBit(i));
+				res.put(id, b.testBit(i));
 			}
 		}
 		return res;
@@ -48,26 +47,26 @@ public class EBLexer extends BLexer {
 			List<IToken> toks = getTokenList();
 			int l = token.getLine();
 			int p = token.getPos();
-			
+
 			TLeftPar t1 = new TLeftPar(l, p);
 			ts.add(t1);
 			toks.add(t1);
-			
+
 			ts.add(token);
 			toks.add(token);
-			
-			TEqual t2 = new TEqual(l,p);
+
+			TEqual t2 = new TEqual(l, p);
 			ts.add(t2);
 			toks.add(t2);
-			
-			TTrue t3 = new TTrue("TRUE",l,p);
+
+			TTrue t3 = new TTrue("TRUE", l, p);
 			ts.add(t3);
 			toks.add(t3);
-			
-			TRightPar t4 = new TRightPar(l,p);
+
+			TRightPar t4 = new TRightPar(l, p);
 			ts.add(t4);
 			toks.add(t4);
-			
+
 			token = null;
 		}
 
