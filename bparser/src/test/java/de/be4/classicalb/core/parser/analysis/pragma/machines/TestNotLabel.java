@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -39,7 +40,7 @@ public class TestNotLabel {
 
 		assertEquals(1, parser.getPragmas().size());
 
-		String[] results = { "pragma(13,label,['NOT'],[],-1,9,1,9,16)" };
+		String[] results = { "pragma(12,label,['NOT'],[],-1,9,1,9,16)" };
 
 		for (int i = 0; i < parser.getPragmas().size(); i++) {
 			out = new PrologTermStringOutput();
@@ -62,6 +63,9 @@ public class TestNotLabel {
 
 		String[] results = { "pragma(12,label,['NOT1'],[],-1,9,1,9,17)",
 				"pragma(16,label,['NOT2'],[],-1,10,1,10,17)" };
+
+		BParser.printASTasProlog(System.out, parser, machine, start, true,
+				true, null);
 
 		for (int i = 0; i < parser.getPragmas().size(); i++) {
 			out = new PrologTermStringOutput();

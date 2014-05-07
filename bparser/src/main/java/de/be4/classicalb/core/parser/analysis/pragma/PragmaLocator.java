@@ -8,6 +8,7 @@ import java.util.Map;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.ClassifiedPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixClassifier;
+import de.be4.classicalb.core.parser.analysis.pragma.internal.PrefixPragmas;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnitPragmaClassifier;
 import de.be4.classicalb.core.parser.analysis.pragma.internal.UnknownPragma;
@@ -23,18 +24,19 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * 
  */
 public class PragmaLocator extends DepthFirstAdapter {
-	
 
 	private Map<String, IClassifier> classifiers = new HashMap<String, IClassifier>();
 
 	@SuppressWarnings("unchecked")
 	private PragmaLocator(List<RawPragma> p, String input) {
 		this.pragmas = p;
-		classifiers.put("label", new PrefixClassifier(input,  PPredicate.class));
-		classifiers.put("symbolic", new PrefixClassifier(input, PExpression.class));
+		classifiers.put("label", new PrefixClassifier(input, PPredicate.class));
+		classifiers.put("symbolic", new PrefixClassifier(input,
+				PExpression.class));
 		classifiers.put("unit", new UnitPragmaClassifier(input));
 		classifiers.put("inferred_unit", new UnitPragmaClassifier(input));
-		classifiers.put("conversion", new PrefixClassifier(input, PExpression.class));
+		classifiers.put("conversion", new PrefixClassifier(input,
+				PExpression.class));
 	}
 
 	private Node[] nearestLeft;
@@ -55,8 +57,10 @@ public class PragmaLocator extends DepthFirstAdapter {
 	@Override
 	public void caseEOF(EOF node) {
 		for (int i = 0; i < pragmas.size(); i++) {
-			if (nearestRight[i] == null) nearestRight[i] = node;
-			if (successor[i] == null) successor[i] = node;
+			if (nearestRight[i] == null)
+				nearestRight[i] = node;
+			if (successor[i] == null)
+				successor[i] = node;
 		}
 	}
 
@@ -64,12 +68,17 @@ public class PragmaLocator extends DepthFirstAdapter {
 	public void defaultOut(Node node) {
 		SourcePosition endPos = node.getEndPos();
 		SourcePosition startPos = node.getStartPos();
-		if (endPos == null) return; // no source info available
+		if (endPos == null)
+			return; // no source info available
 		for (int i = 0; i < pragmas.size(); i++) {
 			SourcePosition start = pragmas.get(i).getStart();
 			SourcePosition end = pragmas.get(i).getEnd();
-			if (endPos.compareTo(start) <= 0) predecessor[i] = node;
-			if (nearestRight[i] == null && end.compareTo(startPos) <= 0)
+			if (endPos.compareTo(start) <= 0)
+				predecessor[i] = node;
+			if ((end.compareTo(startPos) <= 0)
+					&& (nearestRight[i] == null || (PrefixPragmas
+							.isPrefixOperator(node) && nearestRight[i]
+							.getStartPos().compareTo(start) > 0)))
 				nearestRight[i] = node;
 		}
 	}
@@ -82,9 +91,11 @@ public class PragmaLocator extends DepthFirstAdapter {
 			for (int i = 0; i < pragmas.size(); i++) {
 				SourcePosition start = pragmas.get(i).getStart();
 				SourcePosition end = pragmas.get(i).getEnd();
-				if (endPos.compareTo(start) <= 0) nearestLeft[i] = node;
+				if (endPos.compareTo(start) <= 0)
+					nearestLeft[i] = node;
 				if (startPos.compareTo(start) <= 0
-						&& endPos.compareTo(end) >= 0) container[i] = node;
+						&& endPos.compareTo(end) >= 0)
+					container[i] = node;
 				if (successor[i] == null && end.compareTo(startPos) <= 0)
 					successor[i] = node;
 			}
@@ -112,13 +123,14 @@ public class PragmaLocator extends DepthFirstAdapter {
 			;
 			list.add(locator.classify(unknownPragma, ast));
 		}
-		return  list;
+		return list;
 	}
 
 	private Pragma classify(UnknownPragma p, Start ast) {
 		String name = p.getPragmaName();
 		IClassifier classifier = classifiers.get(name);
-		if (classifier == null) return p;
+		if (classifier == null)
+			return p;
 		List<String> parsedArgs = new ArrayList<String>();
 		List<String> pragmaArguments = p.getPragmaArguments();
 		for (int i = 0; i < pragmaArguments.size(); i++) {
@@ -127,6 +139,7 @@ public class PragmaLocator extends DepthFirstAdapter {
 		}
 		Node attachment = classifier.seek(p, ast);
 		List<String> warnings = classifier.getWarnings();
-		return new ClassifiedPragma(name, attachment, parsedArgs, warnings, p.getStart(), p.getEnd());
+		return new ClassifiedPragma(name, attachment, parsedArgs, warnings,
+				p.getStart(), p.getEnd());
 	}
 }
