@@ -41,8 +41,8 @@ public class EBLexer extends BLexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
 		super.filter();
-		Boolean boolean1 = v.get(token.getText());
-		if (token instanceof TIdentifierLiteral && boolean1 != null && boolean1) {
+		if (token != null && token instanceof TIdentifierLiteral
+				&& v.get(token.getText())) {
 			Queue<IToken> ts = getNextList();
 			List<IToken> toks = getTokenList();
 			int l = token.getLine();
