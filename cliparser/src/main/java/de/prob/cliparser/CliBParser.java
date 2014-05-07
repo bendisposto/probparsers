@@ -111,35 +111,23 @@ public class CliBParser {
 				}
 				if ("formula".equals(line)) {
 					String theFormula = "#FORMULA " + in.readLine();
-					try {
-						Start start = BParser.parse(theFormula);
-						PrologTermStringOutput strOutput = new PrologTermStringOutput();
-						ASTProlog printer = new ASTProlog(strOutput, null);
-						start.apply(printer);
-						strOutput.fullstop();
-
-						// A Friendly Reminder: strOutput includes a newline!
-						System.out.print(strOutput.toString());
-					} catch (BException e) {
-						System.out.println("EXCEPTION "
-								+ e.getLocalizedMessage().replace("\n", " "));
-					}
+					parseFormula(theFormula);
 				}
-				if ("extendedformula".equals(line)) {
-					String theFormula = "#FORMULA " + in.readLine();
-					try {
-						Start start = BParser.eparse(theFormula);
-						PrologTermStringOutput strOutput = new PrologTermStringOutput();
-						ASTProlog printer = new ASTProlog(strOutput, null);
-						start.apply(printer);
-						strOutput.fullstop();
-
-						// A Friendly Reminder: strOutput includes a newline!
-						System.out.print(strOutput.toString());
-					} catch (Exception e) {
-						System.out.println("EXCEPTION "
-								+ e.getLocalizedMessage().replace("\n", " "));
-					}
+				if ("expression".equals(line)) {
+					String theFormula = "#EXPRESSION " + in.readLine();
+					parseFormula(theFormula);
+				}
+				if ("predicate".equals(line)) {
+					String theFormula = "#PREDICATE " + in.readLine();
+					parseFormula(theFormula);
+				}
+				if ("extendedexpression".equals(line)) {
+					String theFormula = "#EXPRESSION " + in.readLine();
+					parseExtendedFormula(theFormula);
+				}
+				if ("extendedpredicate".equals(line)) {
+					String theFormula = "#PREDICATE " + in.readLine();
+					parseExtendedFormula(theFormula);
 				}
 
 			} while (!"halt".equals(line));
@@ -155,6 +143,38 @@ public class CliBParser {
 						bfile);
 			}
 			System.exit(returnValue);
+		}
+	}
+
+	private static void parseExtendedFormula(String theFormula) {
+		try {
+			Start start = BParser.eparse(theFormula);
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			ASTProlog printer = new ASTProlog(strOutput, null);
+			start.apply(printer);
+			strOutput.fullstop();
+
+			// A Friendly Reminder: strOutput includes a newline!
+			System.out.print(strOutput.toString());
+		} catch (Exception e) {
+			System.out.println("EXCEPTION "
+					+ e.getLocalizedMessage().replace("\n", " "));
+		}
+	}
+
+	private static void parseFormula(String theFormula) {
+		try {
+			Start start = BParser.parse(theFormula);
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			ASTProlog printer = new ASTProlog(strOutput, null);
+			start.apply(printer);
+			strOutput.fullstop();
+
+			// A Friendly Reminder: strOutput includes a newline!
+			System.out.print(strOutput.toString());
+		} catch (BException e) {
+			System.out.println("EXCEPTION "
+					+ e.getLocalizedMessage().replace("\n", " "));
 		}
 	}
 
