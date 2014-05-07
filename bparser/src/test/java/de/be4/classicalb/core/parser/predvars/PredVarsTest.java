@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.predvars;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
