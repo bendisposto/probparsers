@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -84,53 +85,7 @@ public class CliBParser {
 		behaviour.fastPrologOutput = options.isOptionSet(CLI_SWITCH_FASTPROLOG);
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					System.in));
-			String line = "";
-			do {
-				line = in.readLine();
-
-				if ("machine".equals(line)) {
-					String filename = in.readLine();
-					String outFile = in.readLine();
-					out = new PrintStream(outFile);
-					final File bfile = new File(filename);
-
-					int returnValue;
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					PrintStream ps = new PrintStream(baos);
-					returnValue = doFileParsing(behaviour, out, ps, true, bfile);
-
-					if (returnValue == 0) {
-						System.out.println("exit(" + returnValue + ").");
-					} else {
-						String output = baos.toString().replace("\n", " ")
-								.trim();
-						System.out.println(output);
-					}
-				}
-				if ("formula".equals(line)) {
-					String theFormula = "#FORMULA " + in.readLine();
-					parseFormula(theFormula);
-				}
-				if ("expression".equals(line)) {
-					String theFormula = "#EXPRESSION " + in.readLine();
-					parseFormula(theFormula);
-				}
-				if ("predicate".equals(line)) {
-					String theFormula = "#PREDICATE " + in.readLine();
-					parseFormula(theFormula);
-				}
-				if ("extendedexpression".equals(line)) {
-					String theFormula = "#EXPRESSION " + in.readLine();
-					parseExtendedFormula(theFormula);
-				}
-				if ("extendedpredicate".equals(line)) {
-					String theFormula = "#PREDICATE " + in.readLine();
-					parseExtendedFormula(theFormula);
-				}
-
-			} while (!"halt".equals(line));
+			runPRepl(behaviour);
 		} else {
 			String filename = args[args.length - 1];
 			final File bfile = new File(filename);
@@ -146,9 +101,74 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseExtendedFormula(String theFormula) {
+	private static void runPRepl(final ParsingBehaviour behaviour)
+			throws IOException, FileNotFoundException {
+		PrintStream out;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		String line = "";
+		Definitions context = null;
+		do {
+			line = in.readLine();
+
+			if ("machine".equals(line)) {
+				String filename = in.readLine();
+				String outFile = in.readLine();
+				out = new PrintStream(outFile);
+				final File bfile = new File(filename);
+
+				int returnValue;
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(baos);
+				try {
+					final BParser parser = new BParser(bfile.getName());
+					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
+					context = parser.getDefinitions();
+				} catch (Exception e) {
+					e.printStackTrace();
+					returnValue = -4;
+				} finally {
+					if (true) {
+						out.close();
+					}
+				}
+
+				if (returnValue == 0) {
+					System.out.println("exit(" + returnValue + ").");
+				} else {
+					String output = baos.toString().replace("\n", " ").trim();
+					System.out.println(output);
+				}
+			}
+			if ("formula".equals(line)) {
+				String theFormula = "#FORMULA " + in.readLine();
+				parseFormula(theFormula, context);
+			}
+			if ("expression".equals(line)) {
+				String theFormula = "#EXPRESSION " + in.readLine();
+				parseFormula(theFormula, context);
+			}
+			if ("predicate".equals(line)) {
+				String theFormula = "#PREDICATE " + in.readLine();
+				parseFormula(theFormula, context);
+			}
+			if ("extendedexpression".equals(line)) {
+				String theFormula = "#EXPRESSION " + in.readLine();
+				parseExtendedFormula(theFormula, context);
+			}
+			if ("extendedpredicate".equals(line)) {
+				String theFormula = "#PREDICATE " + in.readLine();
+				parseExtendedFormula(theFormula, context);
+			}
+
+		} while (!"halt".equals(line));
+	}
+
+	private static void parseExtendedFormula(String theFormula,
+			Definitions context) {
 		try {
-			Start start = BParser.eparse(theFormula);
+			BParser parser = new BParser(context);
+			Start start = parser.eparse(theFormula);
+
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			ASTProlog printer = new ASTProlog(strOutput, null);
 			start.apply(printer);
@@ -169,9 +189,10 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseFormula(String theFormula) {
+	private static void parseFormula(String theFormula, Definitions context) {
 		try {
-			Start start = BParser.parse(theFormula);
+			BParser parser = new BParser(context);
+			Start start = parser.parse(theFormula, false);
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			ASTProlog printer = new ASTProlog(strOutput, null);
 			start.apply(printer);

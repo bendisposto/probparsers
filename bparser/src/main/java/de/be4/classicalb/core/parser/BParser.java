@@ -62,7 +62,7 @@ public class BParser {
 
 	private Parser parser;
 	private SourcePositions sourcePositions;
-	private final Definitions definitions = new Definitions();
+	private Definitions definitions;
 	private final ParseOptions parseOptions = new ParseOptions();
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
@@ -71,11 +71,20 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 
 	public BParser() {
-		this(null);
+		this((String) null);
 	}
 
 	public BParser(final String fileName) {
+		this(fileName, new Definitions());
+	}
+
+	public BParser(final Definitions definitions) {
+		this(null, definitions);
+	}
+
+	public BParser(final String fileName, final Definitions definitions) {
 		this.fileName = fileName;
+		setDefinitions(definitions);
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -184,8 +193,8 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public static Start eparse(String theFormula) throws BException,
-			LexerException, IOException {
+	public Start eparse(String theFormula) throws BException, LexerException,
+			IOException {
 		Start ast = null;
 		boolean ok = false;
 
@@ -352,7 +361,7 @@ public class BParser {
 					defTypes);
 
 			rootNode.apply(collector);
-			definitions.addAll(collector.getDefintions());
+			getDefinitions().addAll(collector.getDefintions());
 
 			// perfom AST tranformations that can't be done by SableCC
 			applyAstTransformations(rootNode);
@@ -407,14 +416,14 @@ public class BParser {
 		 * Collect the definitions of all referenced definition files and add
 		 * them to the internal definitions
 		 */
-		definitions.addAll(preParser.getDefFileDefinitions());
+		getDefinitions().addAll(preParser.getDefFileDefinitions());
 		pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}
 
 	private void applyAstTransformations(final Start rootNode) {
-		rootNode.apply(new OpSubstitutions(sourcePositions, definitions));
+		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
 
 		// TODO more AST transformations?
@@ -549,6 +558,14 @@ public class BParser {
 
 	public List<Pragma> getPragmas() {
 		return pragmas;
+	}
+
+	public void setDefinitions(Definitions definitions) {
+		if (this.definitions != null) {
+			throw new IllegalStateException(
+					"Cannot set Definitions multiple times");
+		}
+		this.definitions = definitions;
 	}
 
 	// private Properties readHashValues(final File target, final File dir) {

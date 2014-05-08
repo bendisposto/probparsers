@@ -61,7 +61,8 @@ public class PredVarsTest {
 
 	private String getTreeAsString(final String testMachine) throws BException,
 			LexerException, IOException {
-		Start ast = BParser.eparse(testMachine);
+		final BParser parser = new BParser("testcase");
+		Start ast = parser.eparse(testMachine);
 		final Ast2String ast2String = new Ast2String();
 		ast.apply(ast2String);
 		final String string = ast2String.toString();
