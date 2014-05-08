@@ -109,8 +109,8 @@ public class CliBParser {
 		PrintStream out;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line = "";
-		Definitions context = null;
-		IFileContentProvider provider = null;
+		Definitions context = new Definitions();
+		IFileContentProvider provider = new NoContentProvider();
 		do {
 			line = in.readLine();
 
