@@ -10,6 +10,7 @@ import java.util.Scanner;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -36,7 +37,7 @@ public class SatProblem {
 	private String getTreeAsString(final String testMachine) throws BException,
 			LexerException, IOException {
 		final BParser parser = new BParser("testcase");
-		Start ast = parser.eparse(testMachine);
+		Start ast = parser.eparse(testMachine, new Definitions());
 		final Ast2String ast2String = new Ast2String();
 		ast.apply(ast2String);
 		final String string = ast2String.toString();

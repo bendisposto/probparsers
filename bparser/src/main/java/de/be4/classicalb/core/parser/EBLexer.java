@@ -22,8 +22,9 @@ public class EBLexer extends BLexer {
 	// True means Expression
 	private Map<String, Boolean> v = null;
 
-	public EBLexer(String theFormula, BigInteger b, List<String> ids) {
-		super(new PushbackReader(new StringReader(theFormula)));
+	public EBLexer(String theFormula, BigInteger b, List<String> ids,
+			Definitions context) {
+		super(new PushbackReader(new StringReader(theFormula)),new DefinitionTypes(context.getTypes()));
 		v = constructMap(b, ids);
 	}
 

@@ -62,7 +62,7 @@ public class BParser {
 
 	private Parser parser;
 	private SourcePositions sourcePositions;
-	private Definitions definitions;
+	private final Definitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
@@ -75,16 +75,7 @@ public class BParser {
 	}
 
 	public BParser(final String fileName) {
-		this(fileName, new Definitions());
-	}
-
-	public BParser(final Definitions definitions) {
-		this(null, definitions);
-	}
-
-	public BParser(final String fileName, final Definitions definitions) {
 		this.fileName = fileName;
-		setDefinitions(definitions);
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -193,7 +184,7 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start eparse(String theFormula) throws BException, LexerException,
+	public Start eparse(String theFormula, Definitions context) throws BException, LexerException,
 			IOException {
 		Start ast = null;
 		boolean ok = false;
@@ -212,7 +203,7 @@ public class BParser {
 			}
 		} while (!(t instanceof EOF));
 
-		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids));
+		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids, context));
 		try {
 			ast = p.parse();
 			ok = true;
@@ -225,7 +216,7 @@ public class BParser {
 		b = b.subtract(BigInteger.ONE);
 
 		while (!ok && b.compareTo(BigInteger.ZERO) > 0) {
-			p = new Parser(new EBLexer(theFormula, b, ids));
+			p = new Parser(new EBLexer(theFormula, b, ids, context));
 			try {
 				ast = p.parse();
 				ok = true;
@@ -326,6 +317,8 @@ public class BParser {
 				System.out.println();
 			}
 
+			defTypes.addAll(definitions.getTypes());
+			
 			/*
 			 * Main parser
 			 */
@@ -558,14 +551,6 @@ public class BParser {
 
 	public List<Pragma> getPragmas() {
 		return pragmas;
-	}
-
-	public void setDefinitions(Definitions definitions) {
-		if (this.definitions != null) {
-			throw new IllegalStateException(
-					"Cannot set Definitions multiple times");
-		}
-		this.definitions = definitions;
 	}
 
 	// private Properties readHashValues(final File target, final File dir) {
