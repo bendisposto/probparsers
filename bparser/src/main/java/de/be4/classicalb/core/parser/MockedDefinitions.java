@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -33,7 +32,7 @@ public class MockedDefinitions extends IDefinitions {
 
 	@Override
 	public PDefinition getDefinition(String defName) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 
 	}
 
@@ -59,23 +58,23 @@ public class MockedDefinitions extends IDefinitions {
 
 	@Override
 	public void addDefinition(APredicateDefinitionDefinition defNode, Type type) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void addDefinition(ASubstitutionDefinitionDefinition defNode,
 			Type type) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void addDefinition(AExpressionDefinitionDefinition defNode, Type type) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void addDefinition(PDefinition defNode, Type type, String key) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -87,17 +86,17 @@ public class MockedDefinitions extends IDefinitions {
 
 	@Override
 	public PDefinition removeDefinition(String key) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void addDefinitionFile(File defFile) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Set<File> getDefinitionFiles() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 }
