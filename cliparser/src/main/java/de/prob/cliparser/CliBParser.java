@@ -110,10 +110,20 @@ public class CliBParser {
 		String line = "";
 		Definitions context = new Definitions();
 		IFileContentProvider provider = new NoContentProvider();
-		do {
+		boolean terminate = false;
+		while (!terminate) {
 			line = in.readLine();
 
-			if ("machine".equals(line)) {
+			if (line == null) {
+				throw new UnsupportedOperationException(
+						"Received NULL from input. Terminated?");
+			}
+
+			EPreplCommands command = EPreplCommands.valueOf(line);
+			String theFormula;
+
+			switch (command) {
+			case machine:
 				String filename = in.readLine();
 				String outFile = in.readLine();
 				out = new PrintStream(outFile);
@@ -142,29 +152,36 @@ public class CliBParser {
 					String output = baos.toString().replace("\n", " ").trim();
 					System.out.println(output);
 				}
-			}
-			if ("formula".equals(line)) {
-				String theFormula = "#FORMULA " + in.readLine();
+				break;
+			case formula:
+				theFormula = "#FORMULA " + in.readLine();
 				parseFormula(theFormula, context, provider);
-			}
-			if ("expression".equals(line)) {
-				String theFormula = "#EXPRESSION " + in.readLine();
+				break;
+			case expression:
+				theFormula = "#EXPRESSION " + in.readLine();
 				parseFormula(theFormula, context, provider);
-			}
-			if ("predicate".equals(line)) {
-				String theFormula = "#PREDICATE " + in.readLine();
+				break;
+			case predicate:
+				theFormula = "#PREDICATE " + in.readLine();
 				parseFormula(theFormula, context, provider);
-			}
-			if ("extendedexpression".equals(line)) {
-				String theFormula = "#EXPRESSION " + in.readLine();
+				break;
+			case extendedexpression:
+				theFormula = "#EXPRESSION " + in.readLine();
 				parseFormula(theFormula, context, provider);
-			}
-			if ("extendedpredicate".equals(line)) {
-				String theFormula = "#PREDICATE " + in.readLine();
+				break;
+			case extendedpredicate:
+				theFormula = "#PREDICATE " + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
+				break;
+			case halt:
+				terminate = true;
+				break;
+			default:
+				throw new UnsupportedOperationException("Unsupported Command "
+						+ line);
 			}
 
-		} while (!"halt".equals(line));
+		}
 	}
 
 	private static void parseExtendedFormula(String theFormula,
