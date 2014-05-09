@@ -18,9 +18,10 @@ import de.be4.classicalb.core.parser.node.Start;
 
 public class SatProblem {
 	@Test
-	public void testAandB() throws Exception {
+	public void compareSatPredAndPredVars() throws Exception {
 		final String test = "#PREDICATE"
-				+ new Scanner(new File("src/test/resources/predvars/sat_pred"))
+				+ new Scanner(new File(
+						"src/test/resources/predvars/sat_predvars"))
 						.useDelimiter("\\Z").next();
 		final String reference = "#PREDICATE"
 				+ new Scanner(new File("src/test/resources/predvars/sat_pred"))
