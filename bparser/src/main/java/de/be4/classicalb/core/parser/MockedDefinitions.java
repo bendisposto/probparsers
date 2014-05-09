@@ -20,7 +20,7 @@ public class MockedDefinitions extends IDefinitions {
 		if ("predicate".equals(type)) {
 			types.put(name, Type.Predicate);
 		}
-		if ("expressiom".equals(type)) {
+		if ("expression".equals(type)) {
 			types.put(name, Type.Expression);
 		}
 		arity.put(name, new Integer(parameterCount));
