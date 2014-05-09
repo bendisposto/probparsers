@@ -62,7 +62,7 @@ public class BParser {
 
 	private Parser parser;
 	private SourcePositions sourcePositions;
-	private final Definitions definitions = new Definitions();
+	private IDefinitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
@@ -184,8 +184,8 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start eparse(String theFormula, Definitions context) throws BException, LexerException,
-			IOException {
+	public Start eparse(String theFormula, IDefinitions context)
+			throws BException, LexerException, IOException {
 		Start ast = null;
 		boolean ok = false;
 
@@ -203,7 +203,8 @@ public class BParser {
 			}
 		} while (!(t instanceof EOF));
 
-		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids, context));
+		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids,
+				context));
 		try {
 			ast = p.parse();
 			ok = true;
@@ -318,7 +319,7 @@ public class BParser {
 			}
 
 			defTypes.addAll(definitions.getTypes());
-			
+
 			/*
 			 * Main parser
 			 */
@@ -440,8 +441,12 @@ public class BParser {
 		return sourcePositions;
 	}
 
-	public Definitions getDefinitions() {
+	public IDefinitions getDefinitions() {
 		return definitions;
+	}
+
+	public void setDefinitions(IDefinitions definitions) {
+		this.definitions = definitions;
 	}
 
 	public static String getBuildRevision() {

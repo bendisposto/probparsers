@@ -39,7 +39,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		final BParser parser = new BParser("testcase");
 		parser.parse(testMachine, true, this);
 
-		final Definitions definitions = parser.getDefinitions();
+		final IDefinitions definitions = parser.getDefinitions();
 		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def1");
 		assertEquals("def1", def1.getName().getText());
@@ -64,7 +64,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		final BParser parser = new BParser("testcase");
 		parser.parse(testMachine, false, this);
 
-		final Definitions definitions = parser.getDefinitions();
+		final IDefinitions definitions = parser.getDefinitions();
 		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def1");
 		assertEquals("def1", def1.getName().getText());
@@ -133,7 +133,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		File machine = new File(uri);
 		parser.parseFile(machine, false);
 
-		final Definitions definitions = parser.getDefinitions();
+		final IDefinitions definitions = parser.getDefinitions();
 		final APredicateDefinitionDefinition def1 = (APredicateDefinitionDefinition) definitions
 				.getDefinition("GRD2");
 		assertEquals("GRD2", def1.getName().getText());
@@ -179,15 +179,15 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		int getStoredCounter = 0;
 		int storeCounter = 0;
 		int getContentCounter = 0;
-		private final Map<String, Definitions> store = new HashMap<String, Definitions>();
+		private final Map<String, IDefinitions> store = new HashMap<String, IDefinitions>();
 
-		public Definitions getDefinitions(final String filename) {
+		public IDefinitions getDefinitions(final String filename) {
 			getStoredCounter++;
 			return store.get(filename);
 		}
 
 		public void storeDefinition(final String filename,
-				final Definitions definitions) {
+				final IDefinitions definitions) {
 			storeCounter++;
 			store.put(filename, definitions);
 		}

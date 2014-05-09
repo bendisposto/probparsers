@@ -7,7 +7,7 @@ import java.util.Map;
 public class CachingDefinitionFileProvider extends PlainFileContentProvider
 		implements IDefinitionFileProvider {
 
-	private final Map<String, Definitions> store = new HashMap<String, Definitions>();
+	private final Map<String, IDefinitions> store = new HashMap<String, IDefinitions>();
 
 	/**
 	 * s. {@link PlainFileContentProvider#PlainFileContentProvider()}
@@ -25,12 +25,12 @@ public class CachingDefinitionFileProvider extends PlainFileContentProvider
 		super(parentFile);
 	}
 
-	public Definitions getDefinitions(final String filename) {
+	public IDefinitions getDefinitions(final String filename) {
 		return store.get(filename);
 	}
 
 	public void storeDefinition(final String filename,
-			final Definitions definitions) {
+			final IDefinitions definitions) {
 		store.put(filename, definitions);
 	}
 }

@@ -27,7 +27,7 @@ public class DefinitionTypes {
 		if (types.containsKey(definitionName)) {
 			return types.get(definitionName);
 		} else {
-			return Definitions.Type.NoDefinition;
+			return IDefinitions.Type.NoDefinition;
 		}
 	}
 }

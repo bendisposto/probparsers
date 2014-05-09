@@ -10,7 +10,9 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
@@ -108,7 +110,7 @@ public class CliBParser {
 		PrintStream out;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line = "";
-		Definitions context = new Definitions();
+		IDefinitions context = new MockedDefinitions();
 		IFileContentProvider provider = new NoContentProvider();
 		boolean terminate = false;
 		while (!terminate) {
@@ -123,6 +125,16 @@ public class CliBParser {
 			String theFormula;
 
 			switch (command) {
+			case definition:
+				String name = in.readLine();
+				String type = in.readLine();
+				String parameterCount = in.readLine();
+				if (context instanceof Definitions) {
+					context = new MockedDefinitions();
+				}
+				((MockedDefinitions) context).addMockedDefinition(name, type,
+						parameterCount);
+				break;
 			case machine:
 				String filename = in.readLine();
 				String outFile = in.readLine();
@@ -185,10 +197,10 @@ public class CliBParser {
 	}
 
 	private static void parseExtendedFormula(String theFormula,
-			Definitions context, IFileContentProvider provider) {
+			IDefinitions context, IFileContentProvider provider) {
 		try {
 			BParser parser = new BParser();
-			parser.getDefinitions().addAll(context);
+			parser.setDefinitions(context);
 			Start start = parser.eparse(theFormula, context);
 
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
@@ -211,11 +223,11 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseFormula(String theFormula, Definitions context,
+	private static void parseFormula(String theFormula, IDefinitions context,
 			IFileContentProvider provider) {
 		try {
 			BParser parser = new BParser();
-			parser.getDefinitions().addAll(context);
+			parser.setDefinitions(context);
 			Start start = parser.parse(theFormula, false, provider);
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			ASTProlog printer = new ASTProlog(strOutput, null);

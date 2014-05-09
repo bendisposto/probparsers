@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.classicalb.core.parser.Definitions;
-import de.be4.classicalb.core.parser.Definitions.Type;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
@@ -87,11 +87,11 @@ import de.hhu.stups.sablecc.patch.SourcePositions;
 public class OpSubstitutions extends DepthFirstAdapter {
 
 	private final SourcePositions sourcePositions;
-	private final Definitions definitions;
+	private final IDefinitions definitions;
 	private final Map<String, Integer> scopedVariables = new HashMap<String, Integer>();
 
 	public OpSubstitutions(final SourcePositions sourcePositions,
-			final Definitions definitions) {
+			final IDefinitions definitions) {
 		this.sourcePositions = sourcePositions;
 		this.definitions = definitions;
 	}
@@ -337,15 +337,14 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			node.getIdentifier().apply(this);
 		}
 
-		if (node.getIdentifier() instanceof ADefinitionExpression && ((ADefinitionExpression) node
-				.getIdentifier()).getParameters().isEmpty()) {
+		if (node.getIdentifier() instanceof ADefinitionExpression
+				&& ((ADefinitionExpression) node.getIdentifier())
+						.getParameters().isEmpty()) {
 			final LinkedList<PExpression> paramList = new LinkedList<PExpression>(
 					node.getParameters());
 
-
-
-				final TIdentifierLiteral identifier = ((ADefinitionExpression) node
-						.getIdentifier()).getDefLiteral();
+			final TIdentifierLiteral identifier = ((ADefinitionExpression) node
+					.getIdentifier()).getDefLiteral();
 
 			if (paramList.size() <= definitions.getParameterCount(identifier
 					.getText())) {
