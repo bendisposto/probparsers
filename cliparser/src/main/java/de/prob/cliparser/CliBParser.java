@@ -10,9 +10,7 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
-import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IFileContentProvider;
-import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -158,7 +156,7 @@ public class CliBParser {
 			}
 			if ("extendedexpression".equals(line)) {
 				String theFormula = "#EXPRESSION " + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseFormula(theFormula, context, provider);
 			}
 			if ("extendedpredicate".equals(line)) {
 				String theFormula = "#PREDICATE " + in.readLine();
