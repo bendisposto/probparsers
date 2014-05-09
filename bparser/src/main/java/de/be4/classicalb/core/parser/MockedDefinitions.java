@@ -48,7 +48,12 @@ public class MockedDefinitions extends IDefinitions {
 
 	@Override
 	public Type getType(String defName) {
-		return types.get(defName);
+		Type type = types.get(defName);
+
+		if (type == null)
+			return Type.NoDefinition;
+
+		return type;
 	}
 
 	@Override

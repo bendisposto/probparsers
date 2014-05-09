@@ -192,7 +192,7 @@ public class BParser {
 		List<String> ids = new ArrayList<String>();
 
 		BLexer bLexer = new BLexer(new PushbackReader(new StringReader(
-				theFormula)));
+				theFormula)), new DefinitionTypes(definitions.getTypes()));
 		Token t;
 		do {
 			t = bLexer.next();
