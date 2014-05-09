@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
