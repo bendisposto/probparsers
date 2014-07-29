@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,9 @@ import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -59,7 +62,7 @@ public class BParser {
 
 	private Parser parser;
 	private SourcePositions sourcePositions;
-	private final Definitions definitions = new Definitions();
+	private IDefinitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
@@ -68,7 +71,7 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 
 	public BParser() {
-		this(null);
+		this((String) null);
 	}
 
 	public BParser(final String fileName) {
@@ -181,6 +184,51 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
+	public Start eparse(String theFormula, IDefinitions context)
+			throws BException, LexerException, IOException {
+		Start ast = null;
+		boolean ok = false;
+
+		List<String> ids = new ArrayList<String>();
+
+		BLexer bLexer = new BLexer(new PushbackReader(new StringReader(
+				theFormula)), new DefinitionTypes(definitions.getTypes()));
+		Token t;
+		do {
+			t = bLexer.next();
+			if (t instanceof TIdentifierLiteral) {
+				if (!ids.contains(t.getText())) {
+					ids.add(t.getText());
+				}
+			}
+		} while (!(t instanceof EOF));
+
+		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids,
+				context));
+		try {
+			ast = p.parse();
+			ok = true;
+		} catch (Exception e) {
+			// e.printStackTrace();
+		}
+
+		BigInteger b = new BigInteger("2");
+		b = b.pow(ids.size());
+		b = b.subtract(BigInteger.ONE);
+
+		while (!ok && b.compareTo(BigInteger.ZERO) > 0) {
+			p = new Parser(new EBLexer(theFormula, b, ids, context));
+			try {
+				ast = p.parse();
+				ok = true;
+			} catch (Exception e) {
+				b = b.subtract(BigInteger.ONE);
+			}
+		}
+
+		return ast;
+	}
+
 	/**
 	 * Like {@link #parse(String, boolean, IFileContentProvider)}, but with
 	 * {@link NoContentProvider} as last parameter, i.e., loading of referenced
@@ -270,6 +318,8 @@ public class BParser {
 				System.out.println();
 			}
 
+			defTypes.addAll(definitions.getTypes());
+
 			/*
 			 * Main parser
 			 */
@@ -305,7 +355,7 @@ public class BParser {
 					defTypes);
 
 			rootNode.apply(collector);
-			definitions.addAll(collector.getDefintions());
+			getDefinitions().addAll(collector.getDefintions());
 
 			// perfom AST tranformations that can't be done by SableCC
 			applyAstTransformations(rootNode);
@@ -360,14 +410,14 @@ public class BParser {
 		 * Collect the definitions of all referenced definition files and add
 		 * them to the internal definitions
 		 */
-		definitions.addAll(preParser.getDefFileDefinitions());
+		getDefinitions().addAll(preParser.getDefFileDefinitions());
 		pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}
 
 	private void applyAstTransformations(final Start rootNode) {
-		rootNode.apply(new OpSubstitutions(sourcePositions, definitions));
+		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
 
 		// TODO more AST transformations?
@@ -391,8 +441,12 @@ public class BParser {
 		return sourcePositions;
 	}
 
-	public Definitions getDefinitions() {
+	public IDefinitions getDefinitions() {
 		return definitions;
+	}
+
+	public void setDefinitions(IDefinitions definitions) {
+		this.definitions = definitions;
 	}
 
 	public static String getBuildRevision() {

@@ -137,6 +137,10 @@ public class UnicodeTranslator {
 	}
 
 	private static String translate(final String input, final String target) {
+		if (input.isEmpty()) {
+			return "";
+		}
+
 		StringBuilder sb = new StringBuilder(input.length());
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());

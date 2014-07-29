@@ -38,7 +38,7 @@ public class LtlConsoleParser {
 	private static final String CLI_LTL = "-ltl";
 	private static final String CLI_CTL = "-ctl";
 
-	private enum Mode {
+	public static enum Mode {
 		LTL, CTL
 	};
 
@@ -174,7 +174,7 @@ public class LtlConsoleParser {
 		return sb.toString();
 	}
 
-	private static ProBParserBase getExtensionParser(final String pattern) {
+	public static ProBParserBase getExtensionParser(final String pattern) {
 		final ProBParserBase result;
 		if (pattern == null) {
 			result = UNPARSED_PARSER_BASE;

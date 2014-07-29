@@ -36,7 +36,7 @@ public class PreParser {
 	private boolean debugOutput = false;
 	private DefinitionTypes types;
 
-	private final Definitions defFileDefinitions = new Definitions();
+	private final IDefinitions defFileDefinitions = new Definitions();
 	private final List<Pragma> pragmas = new ArrayList<Pragma>();
 	private final IFileContentProvider contentProvider;
 	private final Set<String> doneDefFiles;
@@ -96,7 +96,7 @@ public class PreParser {
 					throw new PreParseException(fileNameToken, "'" + fileName
 							+ "' is a circular reference");
 
-				Definitions definitions;
+				IDefinitions definitions;
 
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
@@ -189,27 +189,26 @@ public class PreParser {
 
 		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
 				BParser.FORMULA_PREFIX, definitionRhs);
-		
+
 		if (expr != null) {
 			// Predicate?
 			PParseUnit parseunit = expr.getPParseUnit();
 			if (parseunit instanceof APredicateParseUnit)
-				return Definitions.Type.Predicate;
-			// Expression or Expression/Substituion (e.g. f(x))? 
+				return IDefinitions.Type.Predicate;
+			// Expression or Expression/Substituion (e.g. f(x))?
 			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
 			PExpression expression = unit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
 					|| (expression instanceof AFunctionExpression)
 					|| (expression instanceof ADefinitionExpression))
-				return Definitions.Type.ExprOrSubst;
+				return IDefinitions.Type.ExprOrSubst;
 			else
-				return Definitions.Type.Expression;
+				return IDefinitions.Type.Expression;
 		} else {
 			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
-					: Definitions.Type.Substitution;
+					: IDefinitions.Type.Substitution;
 		}
 	}
-
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs) {
@@ -233,7 +232,7 @@ public class PreParser {
 		return null;
 	}
 
-	public Definitions getDefFileDefinitions() {
+	public IDefinitions getDefFileDefinitions() {
 		return defFileDefinitions;
 	}
 

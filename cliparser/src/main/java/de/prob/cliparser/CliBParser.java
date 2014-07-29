@@ -9,13 +9,24 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.Definitions;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.MockedDefinitions;
+import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.ltl.core.parser.CtlParser;
+import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.LtlParser;
+import de.be4.ltl.core.parser.TemporalLogicParser;
+import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.PrologTermStringOutput;
+import de.prob.prolog.term.PrologTerm;
 
 public class CliBParser {
 
@@ -84,47 +95,7 @@ public class CliBParser {
 		behaviour.fastPrologOutput = options.isOptionSet(CLI_SWITCH_FASTPROLOG);
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					System.in));
-			String line = "";
-			do {
-				line = in.readLine();
-
-				if ("machine".equals(line)) {
-					String filename = in.readLine();
-					String outFile = in.readLine();
-					out = new PrintStream(outFile);
-					final File bfile = new File(filename);
-
-					int returnValue;
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					PrintStream ps = new PrintStream(baos);
-					returnValue = doFileParsing(behaviour, out, ps, true, bfile);
-
-					if (returnValue == 0) {
-						System.out.println("exit(" + returnValue + ").");
-					} else {
-						System.out.println(baos.toString());
-					}
-				}
-				if ("formula".equals(line)) {
-					String theFormula = "#FORMULA " + in.readLine();
-					try {
-						Start start = BParser.parse(theFormula);
-						PrologTermStringOutput strOutput = new PrologTermStringOutput();
-						ASTProlog printer = new ASTProlog(strOutput, null);
-						start.apply(printer);
-						strOutput.fullstop();
-
-						// A Friendly Reminder: strOutput includes a newline!
-						System.out.print(strOutput.toString());
-					} catch (BException e) {
-						System.out.println("EXCEPTION "
-								+ e.getLocalizedMessage().replace("\n", " "));
-					}
-				}
-
-			} while (!"halt".equals(line));
+			runPRepl(behaviour);
 		} else {
 			String filename = args[args.length - 1];
 			final File bfile = new File(filename);
@@ -137,6 +108,185 @@ public class CliBParser {
 						bfile);
 			}
 			System.exit(returnValue);
+		}
+	}
+
+	private static void runPRepl(final ParsingBehaviour behaviour)
+			throws IOException, FileNotFoundException {
+		PrintStream out;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		String line = "";
+		IDefinitions context = new MockedDefinitions();
+		IFileContentProvider provider = new NoContentProvider();
+		boolean terminate = false;
+		while (!terminate) {
+			line = in.readLine();
+
+			if (line == null) {
+				throw new UnsupportedOperationException(
+						"Received NULL from input. Terminated?");
+			}
+
+			EPreplCommands command = EPreplCommands.valueOf(line);
+			String theFormula;
+
+			switch (command) {
+			case definition:
+				String name = in.readLine();
+				String type = in.readLine();
+				String parameterCount = in.readLine();
+				if (context instanceof Definitions) {
+					context = new MockedDefinitions();
+				}
+				((MockedDefinitions) context).addMockedDefinition(name, type,
+						parameterCount);
+				break;
+			case machine:
+				String filename = in.readLine();
+				String outFile = in.readLine();
+				out = new PrintStream(outFile);
+				final File bfile = new File(filename);
+
+				int returnValue;
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(baos);
+				try {
+					final BParser parser = new BParser(bfile.getName());
+					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
+					context = parser.getDefinitions();
+					provider = parser.getContentProvider();
+				} catch (Exception e) {
+					e.printStackTrace();
+					returnValue = -4;
+				} finally {
+					if (true) {
+						out.close();
+					}
+				}
+
+				if (returnValue == 0) {
+					System.out.println("exit(" + returnValue + ").");
+				} else {
+					String output = baos.toString().replace("\n", " ").trim();
+					System.out.println(output);
+				}
+				break;
+			case formula:
+				theFormula = "#FORMULA " + in.readLine();
+				parseFormula(theFormula, context, provider);
+				break;
+			case expression:
+				theFormula = "#EXPRESSION " + in.readLine();
+				parseFormula(theFormula, context, provider);
+				break;
+			case predicate:
+				theFormula = "#PREDICATE " + in.readLine();
+				parseFormula(theFormula, context, provider);
+				break;
+			case extendedexpression:
+				theFormula = "#EXPRESSION " + in.readLine();
+				parseFormula(theFormula, context, provider);
+				break;
+			case extendedpredicate:
+				theFormula = "#PREDICATE " + in.readLine();
+				parseExtendedFormula(theFormula, context, provider);
+				break;
+			case ltl_b:
+				final ProBParserBase extParser = LtlConsoleParser
+						.getExtensionParser("B");
+				final TemporalLogicParser<?> parser = new LtlParser(extParser);
+
+				parseTemporalFormula(in, parser);
+
+				break;
+			case ctl_b:
+				final ProBParserBase extParser2 = LtlConsoleParser
+						.getExtensionParser("B");
+				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
+				parseTemporalFormula(in, parser2);
+				break;
+
+			case halt:
+				terminate = true;
+				break;
+			default:
+				throw new UnsupportedOperationException("Unsupported Command "
+						+ line);
+			}
+
+		}
+	}
+
+	private static void parseTemporalFormula(BufferedReader in,
+			final TemporalLogicParser<?> parser) throws IOException {
+		String theFormula;
+		PrologTermStringOutput strOutput = new PrologTermStringOutput();
+		theFormula = in.readLine();
+
+		try {
+			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
+			strOutput.openTerm("ltl").printTerm(term).closeTerm();
+		} catch (LtlParseException e) {
+			strOutput.openTerm("syntax_error")
+					.printAtom(e.getLocalizedMessage()).closeTerm();
+		}
+
+		strOutput.fullstop();
+
+		// A Friendly Reminder: strOutput includes a newline!
+		System.out.print(strOutput.toString());
+	}
+
+	private static void parseExtendedFormula(String theFormula,
+			IDefinitions context, IFileContentProvider provider) {
+		try {
+			BParser parser = new BParser();
+			parser.setDefinitions(context);
+			Start start = parser.eparse(theFormula, context);
+
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			ASTProlog printer = new ASTProlog(strOutput, null);
+			start.apply(printer);
+			strOutput.fullstop();
+
+			// A Friendly Reminder: strOutput includes a newline!
+			System.out.print(strOutput.toString());
+		} catch (NullPointerException e) {
+			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
+			// NullPointerException returns NULL itself, thus triggering another
+			// NullPointerException in the catch statement. Therefore we need a
+			// second catch statement with a special case for the
+			// NullPointerException instead of catching a general Exception
+			System.out.println("EXCEPTION NullPointerException");
+		} catch (Exception e) {
+			System.out.println("EXCEPTION "
+					+ e.getLocalizedMessage().replace("\n", " "));
+		}
+	}
+
+	private static void parseFormula(String theFormula, IDefinitions context,
+			IFileContentProvider provider) {
+		try {
+			BParser parser = new BParser();
+			parser.setDefinitions(context);
+			Start start = parser.parse(theFormula, false, provider);
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			ASTProlog printer = new ASTProlog(strOutput, null);
+			start.apply(printer);
+			strOutput.fullstop();
+
+			// A Friendly Reminder: strOutput includes a newline!
+			System.out.print(strOutput.toString());
+		} catch (NullPointerException e) {
+			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
+			// NullPointerException returns NULL itself, thus triggering another
+			// NullPointerException in the catch statement. Therefore we need a
+			// second catch statement with a special case for the
+			// NullPointerException instead of catching a general Exception
+			System.out.println("EXCEPTION NullPointerException");
+		} catch (BException e) {
+			System.out.println("EXCEPTION "
+					+ e.getLocalizedMessage().replace("\n", " "));
 		}
 	}
 
