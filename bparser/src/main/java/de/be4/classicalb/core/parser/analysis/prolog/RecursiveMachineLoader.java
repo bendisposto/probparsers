@@ -16,8 +16,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
@@ -75,7 +75,7 @@ public class RecursiveMachineLoader {
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
-			final SourcePositions positions, final Definitions definitions,
+			final SourcePositions positions, final IDefinitions definitions,
 			final List<Pragma> pragmas) throws BException {
 		allPragmas = pragmas;
 		injectDefinitions(main, definitions);
@@ -163,7 +163,7 @@ public class RecursiveMachineLoader {
 				parser.getSourcePositions());
 	}
 
-	private void registerDefinitionFileUsage(final Definitions definitions) {
+	private void registerDefinitionFileUsage(final IDefinitions definitions) {
 		files.addAll(definitions.getDefinitionFiles());
 	}
 
@@ -255,7 +255,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void injectDefinitions(final Start tree,
-			final Definitions definitions) {
+			final IDefinitions definitions) {
 		final DefInjector defInjector = new DefInjector(definitions);
 		tree.apply(defInjector);
 	}
@@ -269,9 +269,9 @@ public class RecursiveMachineLoader {
 	}
 
 	private static class DefInjector extends DepthFirstAdapter {
-		private final Definitions definitions;
+		private final IDefinitions definitions;
 
-		public DefInjector(final Definitions definitions) {
+		public DefInjector(final IDefinitions definitions) {
 			this.definitions = definitions;
 		}
 

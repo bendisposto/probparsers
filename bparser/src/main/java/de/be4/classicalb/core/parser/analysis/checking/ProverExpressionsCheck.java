@@ -54,13 +54,14 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements
 					node);
 		}
 	}
-	
+
 	@Override
 	public void caseASubstitutionPredicate(ASubstitutionPredicate node) {
-		if (error == null) {
-			error = new CheckException("Substitution in Predicates are not supported in ordinary B files",
-					node);
-		}
+		// if (error == null) {
+		// error = new
+		// CheckException("Substitution in Predicates are not supported in ordinary B files",
+		// node);
+		// }
 	}
 
 }

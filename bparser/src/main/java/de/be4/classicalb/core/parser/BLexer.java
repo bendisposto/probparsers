@@ -14,12 +14,16 @@ import de.be4.classicalb.core.parser.node.TComment;
 import de.be4.classicalb.core.parser.node.TCommentEnd;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
+import de.be4.classicalb.core.parser.node.TDot;
+import de.be4.classicalb.core.parser.node.TDotPar;
 import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TLeftPar;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
 
@@ -31,7 +35,7 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
-	// private final List<Token> tokenList;
+	private final List<IToken> dotList = new ArrayList<IToken>();
 
 	private boolean debugOutput = false;
 
@@ -55,8 +59,27 @@ public class BLexer extends Lexer {
 		this(in, null);
 	}
 
+	private void printList(List l) {
+		if (l.size() == 0) {
+			System.out.println("EMPTY");
+		}
+		for (Object object : l) {
+			System.out.print(object.getClass().getSimpleName());
+			System.out.print(" ");
+		}
+		System.out.println();
+	}
+
 	@Override
 	protected void filter() throws LexerException, IOException {
+
+		// System.out.println("\n=======================");
+		// System.out.println("Tokens");
+		// printList(getTokenList());
+		// System.out.println("Dot");
+		// printList(dotList);
+		// System.out.println(token.getClass().getSimpleName());
+		// System.out.println(token.getText());
 
 		if (state.equals(State.COMMENT)) {
 			collectComment();
@@ -91,6 +114,33 @@ public class BLexer extends Lexer {
 						+ token.getText() + "') ");
 			}
 		}
+
+		if (token != null) {
+			if (token instanceof TDot) {
+				dotList.clear();
+				dotList.add((IToken) token.clone());
+				token = null;
+			} else {
+
+				if (!dotList.isEmpty()) {
+					if (token instanceof TWhiteSpace
+							|| token instanceof TComment) {
+						dotList.add((IToken) token.clone());
+						token = null;
+					} else if (token instanceof TLeftPar) {
+						dotList.set(0, new TDotPar(".(", dotList.get(0)
+								.getLine(), dotList.get(0).getPos()));
+						getNextList().addAll(dotList);
+						dotList.clear();
+						token = null;
+					} else {
+						getNextList().addAll(dotList);
+						dotList.clear();
+					}
+				}
+			}
+		}
+
 	}
 
 	private void replaceDefTokens() {

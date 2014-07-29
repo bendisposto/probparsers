@@ -3,7 +3,7 @@ package de.be4.classicalb.core.parser.analysis.checking;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.Definitions;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -17,11 +17,11 @@ import de.be4.classicalb.core.parser.node.Start;
 public class DefinitionUsageCheck extends DepthFirstAdapter implements
 		SemanticCheck {
 
-	private final Definitions definitions;
+	private final IDefinitions definitions;
 
 	private final Set<Node> erroneousNodes = new HashSet<Node>();
 
-	public DefinitionUsageCheck(final Definitions definitions) {
+	public DefinitionUsageCheck(final IDefinitions definitions) {
 		this.definitions = definitions;
 	}
 

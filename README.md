@@ -8,6 +8,10 @@ On windows you need to install the program 'patch.exe'.
 
 The artifacts are copied to the build folder. 
 
+# Bugs
+Please report bugs and feature requests at http://jira.cobra.cs.uni-duesseldorf.de/
+
+
 ## Content
 
 - bparser - parser for classical B (more information in http://www.stups.uni-duesseldorf.de/w/An_Object_Oriented_Parser_For_B_Specifications)

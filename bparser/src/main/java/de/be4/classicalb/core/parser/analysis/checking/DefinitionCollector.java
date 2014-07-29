@@ -2,7 +2,8 @@ package de.be4.classicalb.core.parser.analysis.checking;
 
 import de.be4.classicalb.core.parser.DefinitionTypes;
 import de.be4.classicalb.core.parser.Definitions;
-import de.be4.classicalb.core.parser.Definitions.Type;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
@@ -19,7 +20,7 @@ import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
  */
 public class DefinitionCollector extends DepthFirstAdapter {
 
-	private final Definitions defintions = new Definitions();
+	private final IDefinitions defintions = new Definitions();
 	private final DefinitionTypes defTypes;
 
 	public DefinitionCollector(final DefinitionTypes defTypes) {
@@ -27,27 +28,30 @@ public class DefinitionCollector extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+	public void inAPredicateDefinitionDefinition(
+			final APredicateDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
 	}
 
 	@Override
-	public void inASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+	public void inASubstitutionDefinitionDefinition(
+			final ASubstitutionDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
 	}
 
 	@Override
-	public void inAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+	public void inAExpressionDefinitionDefinition(
+			final AExpressionDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
 	}
 
-	public Definitions getDefintions() {
+	public IDefinitions getDefintions() {
 		return defintions;
 	}
 }

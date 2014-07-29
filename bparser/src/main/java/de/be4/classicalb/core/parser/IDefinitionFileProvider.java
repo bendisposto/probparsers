@@ -10,7 +10,7 @@ public interface IDefinitionFileProvider extends IFileContentProvider {
 	 * @param filename
 	 * @return
 	 */
-	public Definitions getDefinitions(final String filename);
+	public IDefinitions getDefinitions(final String filename);
 
 	/**
 	 * Stores the definitions for this file name in chache.
@@ -19,5 +19,5 @@ public interface IDefinitionFileProvider extends IFileContentProvider {
 	 * @param definitions
 	 */
 	public void storeDefinition(final String filename,
-			final Definitions definitions);
+			final IDefinitions definitions);
 }

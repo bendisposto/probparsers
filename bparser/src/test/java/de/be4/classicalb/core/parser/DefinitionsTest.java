@@ -145,7 +145,7 @@ public class DefinitionsTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-			     	"Start(AMachineClauseParseUnit(ADefinitionsMachineClause([AExpressionDefinitionDefinition(def1,[],ACompositionExpression(AIdentifierExpression([f]),AIdentifierExpression([g]))),ASubstitutionDefinitionDefinition(def2,[],ASkipSubstitution())])))",			     
+				"Start(AMachineClauseParseUnit(ADefinitionsMachineClause([AExpressionDefinitionDefinition(def1,[],ACompositionExpression(AIdentifierExpression([f]),AIdentifierExpression([g]))),ASubstitutionDefinitionDefinition(def2,[],ASkipSubstitution())])))",
 				result);
 	}
 
@@ -155,7 +155,7 @@ public class DefinitionsTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-			        "Start(AMachineClauseParseUnit(ADefinitionsMachineClause([APredicateDefinitionDefinition(law6,[],ASubsetPredicate(ADomainExpression(ACompositionExpression(AIdentifierExpression([ff]),AReverseExpression(AIdentifierExpression([gg])))),ADomainExpression(AIdentifierExpression([ff]))))])))",
+				"Start(AMachineClauseParseUnit(ADefinitionsMachineClause([APredicateDefinitionDefinition(law6,[],ASubsetPredicate(ADomainExpression(ACompositionExpression(AIdentifierExpression([ff]),AReverseExpression(AIdentifierExpression([gg])))),ADomainExpression(AIdentifierExpression([ff]))))])))",
 				result);
 	}
 
@@ -314,15 +314,6 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	@Ignore
-	public void testPredicateAsParameter() throws BException {
-		// this test shall pass as soon as predicates are allowed as
-		// definition parameters
-		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefSubst(predicat) == SELECT predicat THEN skip END\nEND";
-		getTreeAsString(testMachine);
-	}
-
-	@Test
 	public void testParamsCount1() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr END\nEND";
 		try {
@@ -337,24 +328,6 @@ public class DefinitionsTest {
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
-	}
-
-	@Ignore
-	@Test
-	public void testParamsCount2() throws BException {
-		fail("not yet implemented");
-		// final String testMachine = "MACHINE Test\n"
-		// + "DEFINITIONS\n"
-		// + "Rotate(T,offset) == %x.(x:DIRECTIONS|T((x+offset) mod 6));\n"
-		// + "opposite == {N |-> S, S |-> N};\n" + "OPERATIONS\n"
-		// + "change=BEGIN x:=Rotate(a, b)(opposite(c)) END\n" + "END";
-
-		/*
-		 * FIXME Problem: The DefExpr Rotate is transformed twice and therefore
-		 * the surrounding FuncExpr disappears. It becomes a DefExpr with
-		 * "Rotate" as name. In this step we loose Rotate's previous parameters.
-		 */
-		// final String treeAsString = getTreeAsString(testMachine);
 	}
 
 	public void testAssertInDefinition() throws BException {

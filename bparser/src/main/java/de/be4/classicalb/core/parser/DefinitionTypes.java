@@ -7,6 +7,13 @@ public class DefinitionTypes {
 
 	private final Map<String, Definitions.Type> types = new HashMap<String, Definitions.Type>();
 
+	public DefinitionTypes() {
+	}
+
+	public DefinitionTypes(final Map<String, Definitions.Type> newTypes) {
+		addAll(newTypes);
+	}
+
 	public void addTyping(final String definitionName,
 			final Definitions.Type type) {
 		types.put(definitionName, type);
@@ -20,7 +27,7 @@ public class DefinitionTypes {
 		if (types.containsKey(definitionName)) {
 			return types.get(definitionName);
 		} else {
-			return Definitions.Type.NoDefinition;
+			return IDefinitions.Type.NoDefinition;
 		}
 	}
 }
