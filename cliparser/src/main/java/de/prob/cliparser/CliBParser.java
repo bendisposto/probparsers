@@ -191,17 +191,19 @@ public class CliBParser {
 				theFormula = "#PREDICATE " + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
-			case ltl_b:
+			case ltl:
+				String extension = in.readLine();
 				final ProBParserBase extParser = LtlConsoleParser
-						.getExtensionParser("B");
+						.getExtensionParser(extension);
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
 
 				break;
-			case ctl_b:
+			case ctl:
+				String extension2 = in.readLine();
 				final ProBParserBase extParser2 = LtlConsoleParser
-						.getExtensionParser("B");
+						.getExtensionParser(extension2);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
 				break;
