@@ -20,7 +20,13 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.ltl.core.parser.CtlParser;
+import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.LtlParser;
+import de.be4.ltl.core.parser.TemporalLogicParser;
+import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.PrologTermStringOutput;
+import de.prob.prolog.term.PrologTerm;
 
 public class CliBParser {
 
@@ -185,6 +191,21 @@ public class CliBParser {
 				theFormula = "#PREDICATE " + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
+			case ltl_b:
+				final ProBParserBase extParser = LtlConsoleParser
+						.getExtensionParser("B");
+				final TemporalLogicParser<?> parser = new LtlParser(extParser);
+
+				parseTemporalFormula(in, parser);
+
+				break;
+			case ctl_b:
+				final ProBParserBase extParser2 = LtlConsoleParser
+						.getExtensionParser("B");
+				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
+				parseTemporalFormula(in, parser2);
+				break;
+
 			case halt:
 				terminate = true;
 				break;
@@ -194,6 +215,26 @@ public class CliBParser {
 			}
 
 		}
+	}
+
+	private static void parseTemporalFormula(BufferedReader in,
+			final TemporalLogicParser<?> parser) throws IOException {
+		String theFormula;
+		PrologTermStringOutput strOutput = new PrologTermStringOutput();
+		theFormula = in.readLine();
+
+		try {
+			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
+			strOutput.openTerm("ltl").printTerm(term).closeTerm();
+		} catch (LtlParseException e) {
+			strOutput.openTerm("syntax_error")
+					.printAtom(e.getLocalizedMessage()).closeTerm();
+		}
+
+		strOutput.fullstop();
+
+		// A Friendly Reminder: strOutput includes a newline!
+		System.out.print(strOutput.toString());
 	}
 
 	private static void parseExtendedFormula(String theFormula,
