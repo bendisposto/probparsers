@@ -1,6 +1,10 @@
 package de.be4.eventb.parser;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
+
+import org.junit.Test;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.node.AInvariant;
@@ -10,7 +14,7 @@ import de.be4.eventb.core.parser.node.PInvariant;
 import de.be4.eventb.core.parser.node.Start;
 
 public class LexerTest extends AbstractTest {
-
+	@Test
 	public void testStringLabeledElements() throws BException {
 		final Start rootNode = parseInput(
 				"machine Test invariants \n\t@inv1 asdf \n fdsa \n\t@inv2 qwer: \t rewq \nend",
@@ -35,6 +39,7 @@ public class LexerTest extends AbstractTest {
 		assertEquals("qwer: \t rewq", invariant.getPredicate().getText());
 	}
 
+	@Test
 	public void testStringVariant() throws BException {
 		final Start rootNode = parseInput("machine Test\nvariant y-x\nend",
 				false);

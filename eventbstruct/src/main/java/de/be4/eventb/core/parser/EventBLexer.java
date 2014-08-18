@@ -157,8 +157,8 @@ public class EventBLexer extends Lexer {
 			} else {
 				// end of comment reached?
 				if (token instanceof TMultiCommentEnd) {
-					token = new TComment(commentBuffer.toString(), commentStart
-							.getLine(), commentStart.getPos());
+					token = new TComment(commentBuffer.toString(),
+							commentStart.getLine(), commentStart.getPos());
 					commentStart = null;
 					commentBuffer = null;
 					state = State.NORMAL;

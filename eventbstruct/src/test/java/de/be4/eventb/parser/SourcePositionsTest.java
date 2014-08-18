@@ -1,6 +1,12 @@
 package de.be4.eventb.parser;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import de.be4.eventb.core.parser.EventBParser;
 import de.be4.eventb.core.parser.node.AMachineParseUnit;
@@ -12,16 +18,17 @@ public class SourcePositionsTest extends AbstractTest {
 
 	EventBParser parser = new EventBParser();
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		parser = new EventBParser();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		parser = null;
 	}
 
+	@Test
 	public void testGetEndLine() throws Exception {
 		final Start root = parser.parse(
 				"machine\nTestMachine\n\nvariables\nx\n\nend", false);

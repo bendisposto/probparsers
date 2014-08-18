@@ -1,7 +1,14 @@
 package de.be4.eventb.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+
+import org.junit.Test;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.EventBParseException;
@@ -18,7 +25,7 @@ import de.be4.eventb.core.parser.node.Start;
 import de.be4.eventb.core.parser.node.TComment;
 
 public class CommentTest extends AbstractTest {
-
+	@Test
 	public void testCommentPredicates1() throws Exception {
 		final Start rootNode = parseInput(
 				"machine CommentPredicates1 invariants\n @inv1 asdf //MyComment\nend",
@@ -33,6 +40,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("MyComment", invariant.getComments().get(0).getText());
 	}
 
+	@Test
 	public void testCommentPredicates2() throws Exception {
 		final Start rootNode = parseInput(
 				"machine CommentPredicates2 invariants\n @inv0 asdf\n @inv1 asdf\n//MyComment\nend",
@@ -58,6 +66,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("asdf", invariant.getPredicate().getText());
 	}
 
+	@Test
 	public void testInvariantsAndMultiComments() throws BException {
 		final String input = "machine InvariantsAndMultiComments invariants\n"
 				+ "@inv1 1=1\n" + "@inv2 2=2\n" + "/*inv2\ncomment*/\n" + "end";
@@ -81,6 +90,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("2=2", invariant.getPredicate().getText());
 	}
 
+	@Test
 	public void testMultiLineComment() throws Exception {
 		final Start rootNode = parseInput(
 				"machine MultiLineComment invariants @inv1 asdf\n/* First line\n  Second line*/\nend",
@@ -108,6 +118,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("asdf", invariant.getPredicate().getText());
 	}
 
+	@Test
 	public void testCommentVariables1() throws Exception {
 		final Start rootNode = parseInput(
 				"machine CommentVariables1 variables\n" + "varA"
@@ -142,6 +153,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("comment", tokenizer.nextToken());
 	}
 
+	@Test
 	public void testMultiLineMachineComment() throws Exception {
 		final Start rootNode = parseInput("machine MultiLineMachineComment"
 				+ "/*\n" + " comment\n" + " in multiple\n" + " lines\n"
@@ -160,6 +172,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals(" lines", tokenizer.nextToken());
 	}
 
+	@Test
 	public void testAtSignInComment() throws Exception {
 		final Start rootNode = parseInput(
 				"machine AtSignInComment\nevents\nevent testEvent\nthen\n@act1 skip\n@act2 skip\n// MyComment@act2\nend\nend",
@@ -183,6 +196,7 @@ public class CommentTest extends AbstractTest {
 				.getText());
 	}
 
+	@Test
 	public void testMultipleComments1() throws Exception {
 		final Start rootNode = parseInput("machine MultipleComments1"
 				+ "// line1\n" + "/* line2\nline3*/" + "// line4\n" + "\nend",
@@ -198,6 +212,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("line4", comments.get(2).getText());
 	}
 
+	@Test
 	public void testMultipleComments2() throws Exception {
 		final Start rootNode = parseInput(
 				"machine MultipleComments2" + "/* line1*/\n"
@@ -213,6 +228,7 @@ public class CommentTest extends AbstractTest {
 		assertEquals("line4", comments.get(2).getText());
 	}
 
+	@Test
 	public void testCommentAtBeginErrorMessage() {
 		try {
 			parseInput(
@@ -223,11 +239,12 @@ public class CommentTest extends AbstractTest {
 			final Exception cause = e.getCause();
 			assertTrue(cause instanceof EventBParseException);
 			assertTrue(((EventBParseException) cause).getToken() instanceof TComment);
-			assertEquals(EventBParser.MSG_COMMENT_PLACEMENT, cause
-					.getLocalizedMessage());
+			assertEquals(EventBParser.MSG_COMMENT_PLACEMENT,
+					cause.getLocalizedMessage());
 		}
 	}
 
+	@Test
 	public void testMisplacedCommentMessage() {
 		try {
 			parseInput(
@@ -236,8 +253,9 @@ public class CommentTest extends AbstractTest {
 			fail("Expecting exception here");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();
-			assertTrue("Unexpected cause: " + e.getCause() + " - "
-					+ e.getLocalizedMessage(),
+			assertTrue(
+					"Unexpected cause: " + e.getCause() + " - "
+							+ e.getLocalizedMessage(),
 					cause instanceof EventBParseException);
 			assertTrue(
 					"Unexpected token: "
@@ -247,8 +265,8 @@ public class CommentTest extends AbstractTest {
 					((EventBParseException) cause).getToken() instanceof TComment);
 			assertEquals("Unexpected message: " + e.getLocalizedMessage()
 					+ " - " + e.getLocalizedMessage(),
-					EventBParser.MSG_COMMENT_PLACEMENT, cause
-							.getLocalizedMessage());
+					EventBParser.MSG_COMMENT_PLACEMENT,
+					cause.getLocalizedMessage());
 		}
 	}
 }
