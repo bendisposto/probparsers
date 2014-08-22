@@ -167,6 +167,9 @@ public class BParser {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
 		String content = builder.toString();
+
+		inputStreamReader.close();
+
 		return content.replaceAll("\r\n", "\n");
 	}
 

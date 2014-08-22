@@ -55,8 +55,8 @@ public class EventBParser {
 			final long start = System.currentTimeMillis();
 			final EventBParser parser = new EventBParser();
 			final Start tree = parser.parseFile(
-					new File(args[args.length - 1]), isCliSwitchSet(args,
-							CLI_SWITCH_VERBOSE));
+					new File(args[args.length - 1]),
+					isCliSwitchSet(args, CLI_SWITCH_VERBOSE));
 			final long end = System.currentTimeMillis();
 			System.out.println();
 
@@ -106,6 +106,7 @@ public class EventBParser {
 		while ((read = inputStreamReader.read(buffer)) >= 0) {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
+		inputStreamReader.close();
 
 		return parse(builder.toString(), verbose);
 	}
