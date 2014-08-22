@@ -54,7 +54,7 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	// variables. We use a stack to push on indent tokens...
 	private String indent = "", output = "";
 	private boolean last = false;
-	private final Stack indentchar = new Stack();
+	private final Stack<String> indentchar = new Stack<String>();
 	private boolean color = false;
 
 	/*
@@ -91,7 +91,7 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 		// replace the current indent with the one from the stack
 		indent = indent.substring(0, indent.length() - 3);
 		indent = indent.substring(0, indent.length() - 1)
-				+ (String) indentchar.pop();
+				+ indentchar.pop();
 
 		// prepend this line to the output.
 		output = indent

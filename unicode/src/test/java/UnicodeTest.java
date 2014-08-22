@@ -1,6 +1,5 @@
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.prob.unicode.UnicodeTranslator;
@@ -43,7 +42,7 @@ public class UnicodeTest {
 	public void testQuotes() {
 		assertEquals("\"", UnicodeTranslator.toUnicode("\""));
 	}
-	
+
 	@Test
 	public void NoSpaceAndAmpersand() {
 		assertEquals("active \u2227 waiting",

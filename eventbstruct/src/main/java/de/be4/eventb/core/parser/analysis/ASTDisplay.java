@@ -26,12 +26,12 @@ import de.be4.eventb.core.parser.node.Token;
 
 public class ASTDisplay extends DepthFirstAdapter {
 
-	private final Stack parents = new Stack();
+	private final Stack<DefaultMutableTreeNode> parents = new Stack<DefaultMutableTreeNode>();
 
 	@Override
 	public void outStart(final Start node) {
 		final JFrame frame = new JFrame("AST Displayer");
-		final JTree tree = new JTree((DefaultMutableTreeNode) parents.pop());
+		final JTree tree = new JTree(parents.pop());
 		final JScrollPane pane = new JScrollPane(tree);
 
 		expandAll(tree);
@@ -64,9 +64,9 @@ public class ASTDisplay extends DepthFirstAdapter {
 	 */
 	@Override
 	public void defaultOut(final Node node) {
-		final DefaultMutableTreeNode thisNode = (DefaultMutableTreeNode) parents
+		final DefaultMutableTreeNode thisNode = parents
 				.pop();
-		((DefaultMutableTreeNode) parents.peek()).add(thisNode);
+		parents.peek().add(thisNode);
 	}
 
 	/*
@@ -77,7 +77,7 @@ public class ASTDisplay extends DepthFirstAdapter {
 	public void defaultCase(final Node node) {
 		final DefaultMutableTreeNode thisNode = new DefaultMutableTreeNode(
 				((Token) node).getText());
-		((DefaultMutableTreeNode) parents.peek()).add(thisNode);
+		parents.peek().add(thisNode);
 	}
 
 	@Override
@@ -98,9 +98,9 @@ public class ASTDisplay extends DepthFirstAdapter {
 	}
 
 	public static void expandAll(final JTree tree, final TreePath path) {
-		for (final Iterator i = extremalPaths(tree.getModel(), path,
-				new HashSet()).iterator(); i.hasNext();) {
-			tree.expandPath((TreePath) i.next());
+		for (final Iterator<TreePath> i = extremalPaths(tree.getModel(), path,
+				new HashSet<TreePath>()).iterator(); i.hasNext();) {
+			tree.expandPath(i.next());
 		}
 	}
 
@@ -115,8 +115,8 @@ public class ASTDisplay extends DepthFirstAdapter {
 	 * that it is given, and for convenience return it. The extremal paths are
 	 * stored in the order in which they appear in pre-order in the tree model.
 	 */
-	public static Collection extremalPaths(final TreeModel data,
-			final TreePath path, final Collection result) {
+	public static Collection<TreePath> extremalPaths(final TreeModel data,
+			final TreePath path, final Collection<TreePath> result) {
 		result.clear();
 
 		if (data.isLeaf(path.getLastPathComponent())) {
@@ -129,7 +129,7 @@ public class ASTDisplay extends DepthFirstAdapter {
 	}
 
 	private static void extremalPathsImpl(final TreeModel data,
-			final TreePath path, final Collection result) {
+			final TreePath path, final Collection<TreePath> result) {
 		final Object node = path.getLastPathComponent();
 
 		boolean hasNonLeafChildren = false;
