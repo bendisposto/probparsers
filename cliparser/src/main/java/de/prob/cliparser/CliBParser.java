@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
@@ -41,6 +42,11 @@ public class CliBParser {
 	private static final String CLI_SWITCH_OUTPUT = "-out";
 	private static final String CLI_SWITCH_INDENTION = "-indent";
 	private static final String CLI_SWITCH_PREPL = "-prepl";
+
+	private static final String osEncoding = System
+			.getProperty("file.encoding");
+	private static final String encoding = "MacRoman".equals(osEncoding) ? "UTF-8"
+			: osEncoding;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
@@ -113,6 +119,7 @@ public class CliBParser {
 
 	private static void runPRepl(final ParsingBehaviour behaviour)
 			throws IOException, FileNotFoundException {
+
 		PrintStream out;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line = "";
@@ -146,7 +153,7 @@ public class CliBParser {
 			case machine:
 				String filename = in.readLine();
 				String outFile = in.readLine();
-				out = new PrintStream(outFile);
+				out = new PrintStream(outFile, encoding);
 				final File bfile = new File(filename);
 
 				int returnValue;
@@ -254,17 +261,17 @@ public class CliBParser {
 			strOutput.fullstop();
 
 			// A Friendly Reminder: strOutput includes a newline!
-			System.out.print(strOutput.toString());
+			print(strOutput.toString());
 		} catch (NullPointerException e) {
 			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
 			// NullPointerException returns NULL itself, thus triggering another
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			System.out.println("EXCEPTION NullPointerException");
+			print("EXCEPTION NullPointerException\n");
 		} catch (Exception e) {
-			System.out.println("EXCEPTION "
-					+ e.getLocalizedMessage().replace("\n", " "));
+			print("EXCEPTION " + e.getLocalizedMessage().replace("\n", " ")
+					+ "\n");
 		}
 	}
 
@@ -280,17 +287,28 @@ public class CliBParser {
 			strOutput.fullstop();
 
 			// A Friendly Reminder: strOutput includes a newline!
-			System.out.print(strOutput.toString());
+			String output = strOutput.toString();
+			print(output);
 		} catch (NullPointerException e) {
 			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
 			// NullPointerException returns NULL itself, thus triggering another
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			System.out.println("EXCEPTION NullPointerException");
+			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			System.out.println("EXCEPTION "
-					+ e.getLocalizedMessage().replace("\n", " "));
+			print("EXCEPTION " + e.getLocalizedMessage().replace("\n", " ")
+					+ "\n");
+		}
+	}
+
+	private static void print(String output) {
+		try {
+			PrintStream out = new PrintStream(System.out, true,
+					CliBParser.encoding);
+			out.print(output);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 	}
 
