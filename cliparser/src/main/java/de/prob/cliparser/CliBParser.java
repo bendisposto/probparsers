@@ -207,13 +207,17 @@ public class CliBParser {
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
 				break;
-
 			case halt:
 				terminate = true;
 				break;
 			default:
-				throw new UnsupportedOperationException("Unsupported Command "
-						+ line);
+				// this should only happen when ProB has quit -> quit the parser
+				// service as well
+				// we can not rely on the "halt" command as this is not send
+				// when the user just quits sicstus
+				System.exit(0);
+				// throw new
+				// UnsupportedOperationException("Unsupported Command " + line);
 			}
 
 		}
