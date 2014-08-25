@@ -1,12 +1,4 @@
-// ProB Answer Parser 
-
-//dependsOn(':prologlib')
-
-
-
 dependencies {
-
-    compile project(path: ":prologlib", configuration: "archives") 
 }
 
 sourceSets {
@@ -21,14 +13,14 @@ sourceSets {
 
 task genParser(type:JavaExec) {
 	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
+	inputs.dir new File('src/main/resources/grammars')
 	outputs.dir new File('build/temp')
 //	doFirst{ file('build/temp').mkdirs() }
 	 main = 'org.sablecc.sablecc.SableCC'
 	// classpath =  sourceSets.main.compileClasspath
 	 classpath = configurations.sablecc
 	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/prob.scc']
+	 args = ['-d','build/temp','src/main/resources/grammars/EventBParser.sablecc']
 }
 
 jar {	
@@ -41,10 +33,7 @@ jar {
 }
 
 compileJava { 
- dependsOn = ['genParser',':prologlib:deploy'] 
- doLast {
-	 ant.patch(patchfile: 'warnings.patch', originalfile: 'build/temp/de/prob/core/sablecc/parser/Parser.java', failonerror:'true'  )
- }
+ dependsOn = ['genParser'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

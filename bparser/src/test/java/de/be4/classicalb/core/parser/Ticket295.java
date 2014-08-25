@@ -1,21 +1,17 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.PushbackReader;
 import java.io.StringReader;
-import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
-import de.hhu.stups.sablecc.patch.IToken;
 
 public class Ticket295 {
 

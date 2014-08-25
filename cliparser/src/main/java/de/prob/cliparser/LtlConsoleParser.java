@@ -164,13 +164,19 @@ public class LtlConsoleParser {
 	private static String readFormula(final String inputFile)
 			throws IOException {
 		StringBuilder sb = new StringBuilder();
-		final Reader reader = inputFile != null ? new FileReader(inputFile)
-				: new InputStreamReader(System.in);
-		final Reader in = new BufferedReader(reader);
+		Reader in;
+		if (inputFile != null) {
+			in = new BufferedReader(new FileReader(inputFile));
+		} else {
+			in = new BufferedReader(new InputStreamReader(System.in));
+		}
 		int c;
 		while ((c = in.read()) != -1) {
 			sb.append((char) c);
 		}
+
+		in.close();
+
 		return sb.toString();
 	}
 
