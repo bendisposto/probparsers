@@ -174,10 +174,10 @@ public class CliBParser {
 				}
 
 				if (returnValue == 0) {
-					System.out.println("exit(" + returnValue + ").");
+					print("exit(" + returnValue + ").\n");
 				} else {
 					String output = baos.toString().replace("\n", " ").trim();
-					System.out.println(output);
+					print(output + "\n");
 				}
 				break;
 			case formula:
