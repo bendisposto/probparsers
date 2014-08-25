@@ -245,7 +245,7 @@ public class CliBParser {
 		strOutput.fullstop();
 
 		// A Friendly Reminder: strOutput includes a newline!
-		System.out.print(strOutput.toString());
+		print(strOutput.toString());
 	}
 
 	private static void parseExtendedFormula(String theFormula,
