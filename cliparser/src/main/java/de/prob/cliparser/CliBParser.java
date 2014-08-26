@@ -121,7 +121,8 @@ public class CliBParser {
 			throws IOException, FileNotFoundException {
 
 		PrintStream out;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in,
+				encoding));
 		String line = "";
 		IDefinitions context = new MockedDefinitions();
 		IFileContentProvider provider = new NoContentProvider();
