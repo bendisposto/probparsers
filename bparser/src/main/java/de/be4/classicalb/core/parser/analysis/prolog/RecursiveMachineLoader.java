@@ -48,7 +48,8 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys" };
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch",
+			".sys" };
 	private final String directory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
@@ -71,7 +72,7 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param main
 	 *            The main machine
-	 * @param list
+	 * @param pragmas
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
@@ -91,10 +92,10 @@ public class RecursiveMachineLoader {
 	}
 
 	/**
-	 * Prints the machines loaded by {@link #loadAllMachines(Start)}.
+	 * Prints the machines loaded by {@link
+	 * #loadAllMachines(File,Start,SourcePositions,IDefinitions,List<Pragma>)}.
 	 * 
 	 * @param pout
-	 * @param pragmas
 	 */
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(

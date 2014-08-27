@@ -22,7 +22,6 @@ public interface ProBParserBase {
 	 * @param wrap
 	 *            whether the Prolog representation should be wrapped by a term
 	 *            that indicates the type of formalism.
-	 * @return the parsed string as Prolog term.
 	 * @throws ProBParseException
 	 *             in case of a parse error (e.g. syntax or lexer errors)
 	 * @throws UnsupportedOperationException
@@ -41,7 +40,6 @@ public interface ProBParserBase {
 	 * @param wrap
 	 *            whether the Prolog representation should be wrapped by a term
 	 *            that indicates the type of formalism.
-	 * @return the parsed string as Prolog term.
 	 * @throws ProBParseException
 	 *             in case of a parse error (e.g. syntax or lexer errors)
 	 * @throws UnsupportedOperationException
@@ -61,7 +59,6 @@ public interface ProBParserBase {
 	 * @param wrap
 	 *            whether the Prolog representation should be wrapped by a term
 	 *            that indicates the type of formalism.
-	 * @return the parsed string as prolog term.
 	 * @throws ProBParseException
 	 *             in case of a parse error (e.g. syntax or lexer errors)
 	 * @throws UnsupportedOperationException

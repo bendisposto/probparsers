@@ -18,7 +18,7 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
  * is easier to know which element is the last child in any node. This makes it
  * easier to do nice indenting.
  * 
- * @author Roger Keays <rogerk@ieee.org> 7/9/2001
+ * @author Roger Keays
  */
 public class ASTPrinter extends ReversedDepthFirstAdapter {
 
@@ -101,11 +101,11 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 		indent = indent.substring(0, indent.length() - 1) + indentchar.pop();
 
 		// prepend this line to the output.
-		output = indent
-				+ "- "
-				+ setColor(BOLD, FG_CYAN, BG_BLACK)
-				+ node.getClass().getSimpleName() + ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos()
-				+ treeColor() + "\n" + output;
+		output = indent + "- " + setColor(BOLD, FG_CYAN, BG_BLACK)
+				+ node.getClass().getSimpleName()
+				+ ((PositionedNode) node).getStartPos() + "-"
+				+ ((PositionedNode) node).getEndPos() + treeColor() + "\n"
+				+ output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';
@@ -123,7 +123,10 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 
 		// prepend this line to the output
 		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK)
-				+ ((Token) node).getText() + ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n" + output;
+				+ ((Token) node).getText()
+				+ ((PositionedNode) node).getStartPos() + "-"
+				+ ((PositionedNode) node).getEndPos() + treeColor() + "\n"
+				+ output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';

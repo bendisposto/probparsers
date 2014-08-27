@@ -263,7 +263,6 @@ public class BParser {
 	 *            provider is used for referenced definition files for example.
 	 * @return the root node of the AST
 	 * @throws BException
-	 *             <p>
 	 *             The {@link BException} class stores the actual exception as
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
@@ -273,7 +272,6 @@ public class BParser {
 	 *             exception. The {@link BException} class offers a
 	 *             {@link BException#getCause()} method for this, which returns
 	 *             the delegate exception.
-	 *             </p>
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
@@ -306,7 +304,6 @@ public class BParser {
 	 *             problem. For example, if we find dublicate machine clauses,
 	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
-	 *             </p>
 	 */
 	public Start parse(final String input, final boolean debugOutput,
 			final IFileContentProvider contentProvider) throws BException {

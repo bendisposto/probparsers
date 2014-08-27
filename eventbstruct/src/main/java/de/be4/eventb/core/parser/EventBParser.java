@@ -134,9 +134,10 @@ public class EventBParser {
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li> {@link PreParseException}: This exception contains errors
-	 *             that occur during the preparsing. If possible it supplies a
-	 *             token, where the error occured.</li>
+	 *             <li> {@link de.be4.core.parser.exceptions.PreParseException}:
+	 *             This exception contains errors that occur during the
+	 *             preparsing. If possible it supplies a token, where the error
+	 *             occured.</li>
 	 *             <li> {@link EventBLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
@@ -149,13 +150,13 @@ public class EventBParser {
 	 *             were read from the input.</li>
 	 *             <li> {@link EventBParseException}: This exception is thrown in
 	 *             two situations. On the one hand if the parser throws a
-	 *             {@link ParseException} we convert it into a
-	 *             {@link EventBParseException}. On the other hand it can be
-	 *             thrown if any error is found during the AST transformations
-	 *             after the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
+	 *             {@link de.be4.core.parser.exceptions.ParserException} we
+	 *             convert it into a {@link EventBParseException}. On the other
+	 *             hand it can be thrown if any error is found during the AST
+	 *             transformations after the parser has finished. We try to
+	 *             provide a token if a single token is involved in the error.
+	 *             Otherwise a {@link SourcecodeRange} is provided, which can be
+	 *             used to retrieve detailed position information from the
 	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
 	 *             <li> {@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
