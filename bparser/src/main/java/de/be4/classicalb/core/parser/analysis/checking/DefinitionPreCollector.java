@@ -12,12 +12,12 @@ import de.be4.classicalb.core.preparser.node.Token;
 
 /**
  * Collects the {@link ADefinition} nodes which were found by the PreParser and
- * stores them into a mapping "definition identifer" -> "rhs of definition".
+ * stores them into a mapping "definition identifer" -&gt; "rhs of definition".
  * 
  * @author Fabian
  * 
  */
-public class DefintionPreCollector extends DepthFirstAdapter {
+public class DefinitionPreCollector extends DepthFirstAdapter {
 
 	private final Map<Token, Token> definitions = new HashMap<Token, Token>();
 	private final List<Token> fileDefinitions = new ArrayList<Token>();
@@ -34,7 +34,7 @@ public class DefintionPreCollector extends DepthFirstAdapter {
 
 	/**
 	 * Returns the result of this DFS visitor, i.e. a mapping "definition
-	 * identifer" -> "rhs of definition"
+	 * identifer" -&gt; "rhs of definition"
 	 * 
 	 * @return
 	 */

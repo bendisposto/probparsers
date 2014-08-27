@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.analysis.checking.DefintionPreCollector;
+import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
@@ -72,7 +72,7 @@ public class PreParser {
 			throw new PreParseException(e.getLocalizedMessage());
 		}
 
-		final DefintionPreCollector collector = new DefintionPreCollector();
+		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
 		evaluateDefintionFiles(collector.getFileDefinitions());

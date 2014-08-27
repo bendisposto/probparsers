@@ -120,7 +120,6 @@ public class EventBParser {
 	 *            output debug messages on standard out?
 	 * @return the root node of the AST
 	 * @throws BException
-	 *             <p>
 	 *             The {@link BException} class stores the actual exception as
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
@@ -130,14 +129,9 @@ public class EventBParser {
 	 *             exception. The {@link BException} class offers a
 	 *             {@link BException#getCause()} method for this, which returns
 	 *             the delegate exception.
-	 *             </p>
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li> {@link de.be4.core.parser.exceptions.PreParseException}:
-	 *             This exception contains errors that occur during the
-	 *             preparsing. If possible it supplies a token, where the error
-	 *             occured.</li>
 	 *             <li> {@link EventBLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
@@ -150,13 +144,13 @@ public class EventBParser {
 	 *             were read from the input.</li>
 	 *             <li> {@link EventBParseException}: This exception is thrown in
 	 *             two situations. On the one hand if the parser throws a
-	 *             {@link de.be4.core.parser.exceptions.ParserException} we
-	 *             convert it into a {@link EventBParseException}. On the other
-	 *             hand it can be thrown if any error is found during the AST
-	 *             transformations after the parser has finished. We try to
-	 *             provide a token if a single token is involved in the error.
-	 *             Otherwise a {@link SourcecodeRange} is provided, which can be
-	 *             used to retrieve detailed position information from the
+	 *             {@link ParserException} we convert it into a
+	 *             {@link EventBParseException}. On the other hand it can be
+	 *             thrown if any error is found during the AST transformations
+	 *             after the parser has finished. We try to provide a token if a
+	 *             single token is involved in the error. Otherwise a
+	 *             {@link SourcecodeRange} is provided, which can be used to
+	 *             retrieve detailed position information from the
 	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
 	 *             <li> {@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
@@ -164,7 +158,6 @@ public class EventBParser {
 	 *             problem. For example, if we find dublicate machine clauses,
 	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
-	 *             </p>
 	 */
 	public Start parse(final String input, final boolean debugOutput)
 			throws BException {

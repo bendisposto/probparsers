@@ -92,8 +92,8 @@ public class RecursiveMachineLoader {
 	}
 
 	/**
-	 * Prints the machines loaded by {@link
-	 * #loadAllMachines(File,Start,SourcePositions,IDefinitions,List<Pragma>)}.
+	 * Prints the machines loaded by
+	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions,List)}.
 	 * 
 	 * @param pout
 	 */

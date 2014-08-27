@@ -7,12 +7,27 @@ import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
+import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
+import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
+import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.AMachineReference;
+import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
+import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
+import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
+import de.be4.classicalb.core.parser.node.ASeesMachineClause;
+import de.be4.classicalb.core.parser.node.AUsesMachineClause;
+import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method
- * {@link #getReferencedMachines(Node)}.
+ * Use this class by calling the static method {@link #getReferencedMachines()}.
  * 
  * @author plagge
  */
