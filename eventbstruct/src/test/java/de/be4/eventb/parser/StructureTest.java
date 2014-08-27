@@ -73,13 +73,15 @@ public class StructureTest extends AbstractTest {
 
 	@Test
 	public void testUnicodeIdentifiers1() throws Exception {
-		parseInput("context UnicodeIdentifiers1 constants Über mäh end", false);
+		parseInput(
+				"context UnicodeIdentifiers1 constants \u00dcber \u00E6 m\u00e4h end",
+				false);
 	}
 
 	@Test
 	public void testUnicodeIdentifiers2() {
 		try {
-			parseInput("context UnicodeIdentifiers2 constants Über @ end",
+			parseInput("context UnicodeIdentifiers2 constants \u00dcber @ end",
 					false);
 			fail("Expecting exception");
 		} catch (final BException e) {
