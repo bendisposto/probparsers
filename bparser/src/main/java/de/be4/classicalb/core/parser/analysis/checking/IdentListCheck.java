@@ -43,7 +43,7 @@ import de.be4.classicalb.core.parser.node.Start;
  * </p>
  * <p>
  * Additionally it checks if the LHS of an {@link AAssignSubstitution} and the
- * result list of an {@link AOpWithReturnSubstitution} only contain
+ * result list of an {@link AOperationCallSubstitution} only contain
  * {@link AIdentifierExpression} or {@link AFunctionExpression} nodes.
  * </p>
  * 
