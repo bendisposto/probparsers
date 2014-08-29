@@ -141,6 +141,9 @@ public class CliBParser {
 			}
 
 			switch (command) {
+			case version:
+				print(CliBParser.getBuildRevision() + "\n");
+				break;
 			case definition:
 				String name = in.readLine();
 				String type = in.readLine();
