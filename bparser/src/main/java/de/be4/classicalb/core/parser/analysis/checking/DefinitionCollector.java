@@ -10,10 +10,13 @@ import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 
 /**
- * Collects the {@link APredicateDefinition}, {@link ASubstitutionDefinition}
- * and {@link AExpressionDefinition} nodes, i.e. the declarations which were
- * found by the main parser to store them into an instance of
- * {@link Definitions}.
+ * Collects the
+ * {@link de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition},
+ * {@link de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition}
+ * and
+ * {@link de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition}
+ * nodes, i.e. the declarations which were found by the main parser to store
+ * them into an instance of {@link Definitions}.
  * 
  * @author Fabian
  * 

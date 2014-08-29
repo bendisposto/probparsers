@@ -121,7 +121,8 @@ public class CliBParser {
 			throws IOException, FileNotFoundException {
 
 		PrintStream out;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in,
+				encoding));
 		String line = "";
 		IDefinitions context = new MockedDefinitions();
 		IFileContentProvider provider = new NoContentProvider();
@@ -140,6 +141,9 @@ public class CliBParser {
 			}
 
 			switch (command) {
+			case version:
+				print(CliBParser.getBuildRevision() + "\n");
+				break;
 			case definition:
 				String name = in.readLine();
 				String type = in.readLine();
@@ -174,10 +178,10 @@ public class CliBParser {
 				}
 
 				if (returnValue == 0) {
-					System.out.println("exit(" + returnValue + ").");
+					print("exit(" + returnValue + ").\n");
 				} else {
 					String output = baos.toString().replace("\n", " ").trim();
-					System.out.println(output);
+					print(output + "\n");
 				}
 				break;
 			case formula:
@@ -245,7 +249,7 @@ public class CliBParser {
 		strOutput.fullstop();
 
 		// A Friendly Reminder: strOutput includes a newline!
-		System.out.print(strOutput.toString());
+		print(strOutput.toString());
 	}
 
 	private static void parseExtendedFormula(String theFormula,

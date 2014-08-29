@@ -8,8 +8,7 @@ public class LtlParseException extends Exception {
 	private final UniversalToken token;
 
 	/**
-	 * @noreference This constructor is not intended to be referenced by
-	 *              clients.
+	 * This constructor is not intended to be referenced by clients.
 	 */
 	public LtlParseException(final UniversalToken token, final String msg) {
 		super(msg);

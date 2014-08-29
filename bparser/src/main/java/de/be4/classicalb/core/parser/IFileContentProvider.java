@@ -17,7 +17,6 @@ public interface IFileContentProvider {
 	 * </p>
 	 * 
 	 * @param filename
-	 * @param referencedByFile
 	 * @return
 	 */
 	public String getFileContent(final String filename) throws IOException;

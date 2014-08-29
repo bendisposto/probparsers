@@ -9,16 +9,12 @@ import java.util.List;
 import de.be4.classicalb.core.parser.node.*;
 
 /**
- * <p>
  * An extended version of the default {@link DepthFirstAdapter} of SableCC.
- * </p>
  * <p>
- * 
  * This version supports depth first traversals on the AST which are aware of
  * lists and children within a node. It offers methods which are called before,
  * between and after visiting elements in lists. Additionally there's a method
  * that is called between visiting each child of a node.
- * </p>
  * <p>
  * See the following methods for details:
  * <ul>
@@ -27,10 +23,8 @@ import de.be4.classicalb.core.parser.node.*;
  * <li>{@link #endList(Node)}</li>
  * <li>{@link #betweenChildren(Node)}</li>
  * </ul>
- * </p>
  * <p>
  * An example of usage is the class <code>Ast2String</code> in test project.
- * </p>
  * 
  * @author Fabian
  * 

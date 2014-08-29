@@ -7,13 +7,13 @@ buildscript {
 	}
 
  dependencies {
-    classpath(group: 'de.stups', name: 'sablecc', version: '3.2.9-SNAPSHOT')
+    classpath(group: 'de.stups', name: 'sablecc', version: '3.2.9-SNAPSHOT', changing: true)
  }
 }
 
 
 
-def global_version = '2.4.28'
+def global_version = '2.4.29'
 
 project.version = global_version;
 project.group = 'de.prob'
