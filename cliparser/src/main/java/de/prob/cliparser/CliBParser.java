@@ -275,12 +275,13 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e);
+			PrologExceptionPrinter.printException(System.out, e, false);
 		} catch (LexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(System.out, e, theFormula);
+			PrologExceptionPrinter.printException(System.out, e, theFormula,
+					false);
 		}
 	}
 
@@ -306,7 +307,7 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e);
+			PrologExceptionPrinter.printException(System.out, e, false);
 
 		}
 	}

@@ -28,7 +28,12 @@ import de.prob.prolog.output.PrologTermOutput;
 public final class PrologExceptionPrinter {
 	static public void printException(final OutputStream out,
 			final IOException e, final String filename) {
-		IPrologTermOutput pto = new PrologTermOutput(out);
+		printException(out, e, filename, true);
+	}
+
+	static public void printException(final OutputStream out,
+			final IOException e, final String filename, boolean useIndentation) {
+		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		pto.openTerm("io_exception");
 		printMsg(pto, e, filename);
 		pto.closeTerm();
@@ -37,7 +42,12 @@ public final class PrologExceptionPrinter {
 	}
 
 	static public void printException(final OutputStream out, final BException e) {
-		IPrologTermOutput pto = new PrologTermOutput(out);
+		printException(out, e, true);
+	}
+
+	static public void printException(final OutputStream out,
+			final BException e, boolean useIndentation) {
+		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		Throwable cause = e.getCause();
 		String filename = e.getFilename();
 		if (cause == null) {
