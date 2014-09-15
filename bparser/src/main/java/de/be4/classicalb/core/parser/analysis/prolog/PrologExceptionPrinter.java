@@ -28,29 +28,42 @@ import de.prob.prolog.output.PrologTermOutput;
 public final class PrologExceptionPrinter {
 	static public void printException(final OutputStream out,
 			final IOException e, final String filename) {
-		IPrologTermOutput pto = new PrologTermOutput(out);
+		printException(out, e, filename, true);
+	}
+
+	static public void printException(final OutputStream out,
+			final IOException e, final String filename, boolean useIndentation) {
+		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		pto.openTerm("io_exception");
-		printMsg(pto, e, filename);
+		printMsg(pto, e, filename, useIndentation);
 		pto.closeTerm();
 		pto.fullstop();
 		pto.flush();
 	}
 
 	static public void printException(final OutputStream out, final BException e) {
-		IPrologTermOutput pto = new PrologTermOutput(out);
+		printException(out, e, true);
+	}
+
+	static public void printException(final OutputStream out,
+			final BException e, boolean useIndentation) {
+		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		Throwable cause = e.getCause();
 		String filename = e.getFilename();
 		if (cause == null) {
-			printGeneralException(pto, e, filename);
+			printGeneralException(pto, e, filename, useIndentation);
 		} else {
 			if (cause instanceof BParseException) {
-				printBPException(pto, (BParseException) cause, filename);
+				printBPException(pto, (BParseException) cause, filename,
+						useIndentation);
 			} else if (cause instanceof PreParseException) {
-				printPreParseException(pto, (PreParseException) cause, filename);
+				printPreParseException(pto, (PreParseException) cause,
+						filename, useIndentation);
 			} else if (cause instanceof CheckException) {
-				printCheckException(pto, (CheckException) cause, filename);
+				printCheckException(pto, (CheckException) cause, filename,
+						useIndentation);
 			} else {
-				printGeneralException(pto, cause, filename);
+				printGeneralException(pto, cause, filename, useIndentation);
 			}
 		}
 		pto.fullstop();
@@ -58,7 +71,8 @@ public final class PrologExceptionPrinter {
 	}
 
 	private static void printCheckException(final IPrologTermOutput pto,
-			final CheckException cause, final String filename) {
+			final CheckException cause, final String filename,
+			final boolean useIndentation) {
 		final Node[] nodes = cause.getNodes();
 		final SourcePosition pos;
 		if (nodes != null && nodes.length > 0) {
@@ -66,18 +80,20 @@ public final class PrologExceptionPrinter {
 		} else {
 			pos = null;
 		}
-		printParseException(pto, cause, filename, pos);
+		printParseException(pto, cause, filename, pos, useIndentation);
 	}
 
 	private static void printGeneralException(final IPrologTermOutput pto,
-			final Throwable cause, final String filename) {
+			final Throwable cause, final String filename,
+			final boolean useIndentation) {
 		pto.openTerm("exception");
-		printMsg(pto, cause, filename);
+		printMsg(pto, cause, filename, useIndentation);
 		pto.closeTerm();
 	}
 
 	private static void printPreParseException(final IPrologTermOutput pto,
-			final PreParseException e, final String filename) {
+			final PreParseException e, final String filename,
+			final boolean useIndentation) {
 		de.be4.classicalb.core.preparser.node.Token[] tokens = e.getTokens();
 		pto.openTerm("preparse_exception");
 		pto.openList();
@@ -94,20 +110,22 @@ public final class PrologExceptionPrinter {
 			}
 		}
 		pto.closeList();
-		printMsg(pto, e, filename);
+		printMsg(pto, e, filename, useIndentation);
 		pto.closeTerm();
 	}
 
 	private static void printBPException(final IPrologTermOutput pto,
-			final BParseException e, final String filename) {
+			final BParseException e, final String filename,
+			final boolean useIndentation) {
 		final Token token = e.getToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(
 				token.getLine(), token.getPos());
-		printParseException(pto, e, filename, pos);
+		printParseException(pto, e, filename, pos, useIndentation);
 	}
 
 	private static void printParseException(final IPrologTermOutput pto,
-			final Throwable e, final String filename, final SourcePosition pos) {
+			final Throwable e, final String filename, final SourcePosition pos,
+			final boolean useIndentation) {
 		pto.openTerm("parse_exception");
 		if (pos == null) {
 			pto.printAtom("none");
@@ -118,14 +136,20 @@ public final class PrologExceptionPrinter {
 			pto.printAtom(filename);
 			pto.closeTerm();
 		}
-		printMsg(pto, e, filename);
+		printMsg(pto, e, filename, useIndentation);
 		pto.closeTerm();
 	}
 
 	private static void printMsg(final IPrologTermOutput pto,
-			final Throwable cause, final String filename) {
+			final Throwable cause, final String filename,
+			final boolean useIndentation) {
 		final Exception wrapper = new BException(filename, cause);
-		pto.printAtom(wrapper.getLocalizedMessage());
+		if (useIndentation) {
+			pto.printAtom(wrapper.getLocalizedMessage());
+		} else {
+			pto.printAtom(wrapper.getLocalizedMessage().replace("\n", " "));
+
+		}
 	}
 
 }
