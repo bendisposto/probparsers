@@ -20,6 +20,7 @@ import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
@@ -273,9 +274,13 @@ public class CliBParser {
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
-		} catch (Exception e) {
-			print("EXCEPTION " + e.getLocalizedMessage().replace("\n", " ")
-					+ "\n");
+		} catch (BException e) {
+			PrologExceptionPrinter.printException(System.out, e);
+		} catch (LexerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			PrologExceptionPrinter.printException(System.out, e, theFormula);
 		}
 	}
 
@@ -301,8 +306,8 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			print("EXCEPTION " + e.getLocalizedMessage().replace("\n", " ")
-					+ "\n");
+			PrologExceptionPrinter.printException(System.out, e);
+
 		}
 	}
 
