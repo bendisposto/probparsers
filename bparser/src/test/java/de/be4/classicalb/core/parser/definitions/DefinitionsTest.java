@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.definitions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.PlainFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
