@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.definitions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +12,12 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.IDefinitionFileProvider;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.PlainFileContentProvider;
+import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;

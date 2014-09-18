@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,32 +134,59 @@ public class PreParser {
 
 	private void evaluateTypes(final Map<Token, Token> definitions)
 			throws PreParseException {
-
-		final List<Token> list = sortDefinitions(definitions);
+		// use linked list as we rely on pop() and push()
+		final LinkedList<Token> remainingDefinitions = sortDefinitions(definitions);
+		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<Token>();
 
 		// use main parser for the rhs of each definition to determine type
-		for (final Iterator<Token> iterator = list.iterator(); iterator
-				.hasNext();) {
-			final Token definition = iterator.next();
+		// if a definition can not be typed this way, it may be due to another
+		// definition that is not yet parser (because it appears later in the
+		// source code)
+		// in this case, the definition is appended to the list again
+		// the algorithm terminates if the queue is empty or if no definition
+		// has been parsed
+		boolean oneParsed = true;
+		while (oneParsed) {
+			oneParsed = false;
 
+			while (!remainingDefinitions.isEmpty()) {
+				final Token definition = remainingDefinitions.pop();
+
+				final Token defRhs = definitions.get(definition);
+				final Definitions.Type type = determineType(defRhs);
+
+				if (type != null) {
+					oneParsed = true;
+					types.addTyping(definition.getText(), type);
+				} else {
+					currentlyUnparseableDefinitions.push(definition);
+				}
+			}
+
+			remainingDefinitions.addAll(currentlyUnparseableDefinitions);
+			currentlyUnparseableDefinitions.clear();
+		}
+
+		if (!remainingDefinitions.isEmpty()) {
+			final Token definition = remainingDefinitions.pop();
 			final Token defRhs = definitions.get(definition);
-			final Definitions.Type type = determineType(defRhs);
-
-			if (type != null) {
-				types.addTyping(definition.getText(), type);
-			} else
-				throw new PreParseException(
-						defRhs,
-						"["
-								+ defRhs.getLine()
-								+ ","
-								+ defRhs.getPos()
-								+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
+			throw new PreParseException(
+					defRhs,
+					"["
+							+ defRhs.getLine()
+							+ ","
+							+ defRhs.getPos()
+							+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
 		}
 	}
 
-	private List<Token> sortDefinitions(final Map<Token, Token> definitions) {
-		final List<Token> list = new ArrayList<Token>();
+	private LinkedList<Token> sortDefinitions(
+			final Map<Token, Token> definitions) {
+		// LinkedList will be used as a queue later on!
+		// however, the list is needed for collections.sort
+		// we can not use a priority queue to sort, as the sorting is done once
+		// afterwards, it has to remain unsorted
+		final LinkedList<Token> list = new LinkedList<Token>();
 
 		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator
 				.hasNext();) {
@@ -168,7 +196,8 @@ public class PreParser {
 
 		/*
 		 * Sort the definitions in order of their appearance in the sourcecode.
-		 * TODO check if dependency analysis is possible/better
+		 * Dependencies in between definitions are handled later when computing
+		 * there type
 		 */
 		Collections.sort(list, new Comparator<Token>() {
 			public int compare(final Token o1, final Token o2) {
