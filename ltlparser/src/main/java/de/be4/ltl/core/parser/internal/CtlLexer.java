@@ -66,5 +66,29 @@ public class CtlLexer extends Lexer {
 			return !(token instanceof EOF) || count == 0;
 		}
 
+		@Override
+		protected boolean isOpeningActionArg(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isClosingActionArg(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isInActions(State state) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isBeginningActionsToken(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
 	}
 }

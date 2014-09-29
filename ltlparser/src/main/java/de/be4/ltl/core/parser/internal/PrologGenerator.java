@@ -6,19 +6,24 @@
 
 package de.be4.ltl.core.parser.internal;
 
+import java.util.LinkedList;
+
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
+import de.be4.ltl.core.parser.node.ADetLtl;
 import de.be4.ltl.core.parser.node.AEnabledLtl;
 import de.be4.ltl.core.parser.node.AAvailableLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
+import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.Node;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.be4.ltl.core.parser.node.Start;
@@ -120,6 +125,24 @@ public class PrologGenerator extends DepthFirstAdapter {
     }
 
 
+	@Override
+	public void caseADlkLtl(ADlkLtl node) {
+		helper.dlk(node, this);
+	}
+
+	@Override
+	public void caseADetLtl(ADetLtl node) {
+		helper.det(node, this);
+	}
+
+	@Override
+	public void caseAOpActions(AOpActions node) {
+		final Token token = node.getOperation();
+		p.openTerm("action");
+		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		p.closeTerm();
+	}
+	
 	@Override
 	public void inStart(final Start node) {
 		// Do not call default in Method

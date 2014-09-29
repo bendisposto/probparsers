@@ -27,19 +27,24 @@ Package de.be4.ltl.core.parser;
 	enabled_start = 'e(';
     available_start = 'Av(';
     
+    dlk_action_start = 'deadlock(';
+    det_action_start = 'deterministic(';
+    
     strong_fair_start = 'SF(';
     weak_fair_start = 'WF(';
     
     exists_quantor = '#';
     forall_quantor = '!';
     dot = '.';
+ 
+    comma = ',';
     
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
 
  States 
-  ltl, atomic, action;
+  ltl, atomic, action, actions;
 
 
 /*******************************************************************
@@ -50,6 +55,8 @@ Tokens
 
     {ltl} true = 'true';
     {ltl} false = 'false';
+  	{ltl -> actions} dlk = dlk_action_start;
+  	{ltl -> actions} det = det_action_start;
     {ltl} sink ='sink';
     {ltl} deadlock ='deadlock';
     {ltl} current = 'current';
@@ -71,6 +78,11 @@ Tokens
 
 	{ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 	{ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+	
+    {actions} args_begin = l_paren;
+    {actions} args_end = r_paren;
+    {actions} actions_split = comma;
+    {actions} action_char = ([0 .. 0xffff]);
 	
 /* Boolean Operators */
     {ltl} implies = '=>';
@@ -100,7 +112,7 @@ Tokens
     {ltl} yesterday = 'Y';
 		
  	white_space = white_space;
-
+     
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
@@ -157,9 +169,15 @@ Ignored Tokens
                           {forall}       forall_identifier 
                                                 l_par atomic_proposition_begin implies ltl_formula r_par 
                                     { -> New ltl.forall(forall_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          {dlk}          dlk  [args]:arg_list                                         { -> New ltl.dlk([args.actions])} |
+                          {det}          det  [args]:arg_list                                         { -> New ltl.det([args.actions])} |
                           {unparsed}     atomic_proposition_begin                                     { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
+  arg_list {-> actions*} = {single}   [arg]:arg                 { -> [arg.actions]} |
+                           {multiple} [arg]:arg [rest]:arg_list { -> [arg.actions, rest.actions]} ;
 
+  arg {-> actions} =   {op} action_char { -> New actions.op(action_char)};
+  
 // LTL Fairness Assumption Productions
   ltl_fairness {-> ltl} = {and_fair1} [left]:ltl_strong_fairness and  [right]:ltl_weak_fairness { -> New ltl.and_fair1(left.ltl,right.ltl)} |
   						  {and_fair2} [left]:ltl_weak_fairness   and  [right]:ltl_strong_fairness { -> New ltl.and_fair2(left.ltl,right.ltl)} |
@@ -220,4 +238,10 @@ Abstract Syntax Tree
    {strong_assumptions} ltl |
    {weak_assumptions}   ltl|
    {and_fair1}    [left]:ltl [right]:ltl | 
-   {and_fair2}    [left]:ltl [right]:ltl;
+   {and_fair2}    [left]:ltl [right]:ltl |
+   {dlk}          [args]:actions* |
+   {det}          [args]:actions*;
+
+  actions =
+      {op} [operation]:action_char;
+         

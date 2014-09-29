@@ -12,8 +12,12 @@ import de.be4.ltl.core.parser.lexer.Lexer;
 import de.be4.ltl.core.parser.node.EOF;
 import de.be4.ltl.core.parser.node.TActionBegin;
 import de.be4.ltl.core.parser.node.TActionEnd;
+import de.be4.ltl.core.parser.node.TArgsBegin;
+import de.be4.ltl.core.parser.node.TArgsEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
 import de.be4.ltl.core.parser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.parser.node.TDet;
+import de.be4.ltl.core.parser.node.TDlk;
 import de.be4.ltl.core.parser.node.TExistsIdentifier;
 import de.be4.ltl.core.parser.node.TForallIdentifier;
 import de.be4.ltl.core.parser.node.Token;
@@ -66,6 +70,11 @@ public class LtlLexer extends Lexer {
 		}
 
 		@Override
+		protected boolean isInActions(State state) {
+			return state.equals(State.ACTIONS);
+		}
+		
+		@Override
 		protected String readToken(Token token) {
 			return token.getText();
 		}
@@ -80,5 +89,19 @@ public class LtlLexer extends Lexer {
 			return !(token instanceof EOF) || count == 0;
 		}
 
+		@Override
+		protected boolean isOpeningActionArg(Token token) {
+			return token instanceof TArgsBegin;
+		}
+
+		@Override
+		protected boolean isClosingActionArg(Token token) {
+			return token instanceof TArgsEnd;
+		}
+
+		@Override
+		protected boolean isBeginningActionsToken(Token token) {
+			return (token instanceof TDlk) || (token instanceof TDet);
+		}
 	}
 }
