@@ -48,9 +48,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 		state = newState;
 		if (isInAction(state)) {
 			if (externalFormula == null) {
-				externalFormula = token;
-				text = new StringBuilder();
-				count = 1;
+				initialiseActionToken(token);
 				token = null;
 			} else {
 				final String tokenText = readToken(token);
@@ -77,9 +75,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 			// ignore the first token in the arguments' list (this is either 'deadlock(' or 'deterministic(')
 			if (!isBeginningActionsToken(token)) { 
 				if (externalFormula == null) {
-					externalFormula = token;
-					text = new StringBuilder();
-					count = 1;
+					initialiseActionToken(token);
 					final String tokenText = readToken(token);
 					text.append(tokenText);
 					token=null;
@@ -112,6 +108,12 @@ abstract class LexerHelper<TOKEN, STATE> {
 		return token;
 	}
 
+	public void initialiseActionToken(TOKEN token) {
+		this.externalFormula = token;
+		this.text = new StringBuilder();
+		this.count = 1;
+	}
+	
 	public TOKEN updateTokenText() {
 		writeToken(this.externalFormula, this.text.toString().trim());
 		TOKEN tok = externalFormula;
