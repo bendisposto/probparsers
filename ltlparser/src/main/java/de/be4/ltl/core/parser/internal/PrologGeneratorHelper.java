@@ -201,11 +201,9 @@ final class PrologGeneratorHelper {
 
 	public void dlk(ADlkLtl node, PrologGenerator gen) {
 		LinkedList<PActions> list = node.getArgs();
-		System.out.println("list length " + list.size());
 		pto.openTerm("dlk");
 		pto.openList();
 		for (PActions pLtl : list) {
-			System.out.println("Node " + pLtl.toString());
 			pLtl.apply(gen);
 		}
 		pto.closeList();
@@ -214,11 +212,9 @@ final class PrologGeneratorHelper {
 
 	public void det(ADetLtl node, PrologGenerator gen) {
 		LinkedList<PActions> list = node.getArgs();
-		System.out.println("list length " + list.size());
 		pto.openTerm("det");
 		pto.openList();
 		for (PActions pLtl : list) {
-			System.out.println("Node " + pLtl.toString());
 			pLtl.apply(gen);
 		}
 		pto.closeList();

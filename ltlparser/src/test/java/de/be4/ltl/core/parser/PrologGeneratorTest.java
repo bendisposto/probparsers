@@ -433,6 +433,12 @@ public class PrologGeneratorTest {
 	}
 
 	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_DET() throws Exception {
+		String buggy = "deterministic()";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
 	public void ticket_parserlib_11() throws Exception {
 		String buggy = "G {taken= {} ";
 		parse(buggy);
