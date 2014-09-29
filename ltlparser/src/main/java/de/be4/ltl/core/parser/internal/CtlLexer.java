@@ -90,5 +90,17 @@ public class CtlLexer extends Lexer {
 			return false;
 		}
 
+		@Override
+		protected boolean isArgumentClosing(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isArgumentSplittingToken(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
 	}
 }

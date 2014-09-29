@@ -1,5 +1,5 @@
 /** 
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
+ * (c) 2009-2014 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
  * Heinrich Heine Universitaet Duesseldorf
  * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
  * */
@@ -12,6 +12,7 @@ import de.be4.ltl.core.parser.lexer.Lexer;
 import de.be4.ltl.core.parser.node.EOF;
 import de.be4.ltl.core.parser.node.TActionBegin;
 import de.be4.ltl.core.parser.node.TActionEnd;
+import de.be4.ltl.core.parser.node.TActionsSplit;
 import de.be4.ltl.core.parser.node.TArgsBegin;
 import de.be4.ltl.core.parser.node.TArgsEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
@@ -99,6 +100,16 @@ public class LtlLexer extends Lexer {
 			return token instanceof TArgsEnd;
 		}
 
+		@Override
+		protected boolean isArgumentClosing(Token token) {
+			return (token instanceof TActionsSplit) || (token instanceof TArgsEnd);
+		}
+		
+		@Override
+		protected boolean isArgumentSplittingToken(Token token) {
+			return token instanceof TActionsSplit;
+		}
+		
 		@Override
 		protected boolean isBeginningActionsToken(Token token) {
 			return (token instanceof TDlk) || (token instanceof TDet);

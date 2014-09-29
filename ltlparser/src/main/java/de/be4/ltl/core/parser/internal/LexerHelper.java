@@ -3,8 +3,6 @@
  */
 package de.be4.ltl.core.parser.internal;
 
-import de.be4.ltl.core.parser.node.TActionsSplit;
-import de.be4.ltl.core.parser.node.TArgsEnd;
 import de.be4.ltl.core.parser.node.Token;
 
 /**
@@ -37,6 +35,10 @@ abstract class LexerHelper<TOKEN, STATE> {
 	abstract protected boolean isClosingActionArg(final TOKEN token);
 
 	abstract protected boolean isBeginningActionsToken(final TOKEN token);
+
+	abstract protected boolean isArgumentClosing(final TOKEN token);
+	
+	abstract protected boolean isArgumentSplittingToken(final TOKEN token);
 
 	public LexerHelper(final STATE initialState) {
 		this.lastState = initialState;
@@ -90,23 +92,14 @@ abstract class LexerHelper<TOKEN, STATE> {
 					if (!correctBalancedParenthesis(count, token)) {
 						return token;
 					}
-					if (! ((token instanceof TActionsSplit) || (token instanceof TArgsEnd))) {
+					if (! isArgumentClosing(token)) {
 						final String tokenText = readToken(token);
 						text.append(tokenText);
 					}
-//					System.out.println("Grrrrrr " + text.toString() + ", count " + count + ", current_token " + token.toString());
-					if (count == 1 && token instanceof TActionsSplit) {
+					if (count == 1 && isArgumentSplittingToken(token)) {
 						token = updateTokenText();
-//						writeToken(externalFormula, text.toString().trim());
-////						System.out.println("externalFormula " + externalFormula.toString().trim());
-//						token = externalFormula;
-//						externalFormula = null;
 					} else if (count==0) {
 						token = updateTokenText();
-//						writeToken(externalFormula, text.toString().trim());
-//						token = externalFormula;
-////						System.out.println("token " + token.toString());
-//						externalFormula = null;
 						state = lastState;
 					} else {
 						token = null;
