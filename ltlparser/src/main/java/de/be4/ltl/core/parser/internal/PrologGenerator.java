@@ -9,6 +9,7 @@ package de.be4.ltl.core.parser.internal;
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
+import de.be4.ltl.core.parser.node.ACtrlLtl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
 import de.be4.ltl.core.parser.node.ADetLtl;
@@ -131,6 +132,11 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseADetLtl(ADetLtl node) {
 		helper.det(node, this);
+	}
+
+	@Override
+	public void caseACtrlLtl(ACtrlLtl node) {
+		helper.ctrl(node, this);
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import de.be4.ltl.core.parser.node.TArgsBegin;
 import de.be4.ltl.core.parser.node.TArgsEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
 import de.be4.ltl.core.parser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.parser.node.TCtrl;
 import de.be4.ltl.core.parser.node.TDet;
 import de.be4.ltl.core.parser.node.TDlk;
 import de.be4.ltl.core.parser.node.TExistsIdentifier;
@@ -116,7 +117,8 @@ public class LtlLexer extends Lexer {
 		
 		@Override
 		protected boolean isBeginningActionsToken(Token token) {
-			return (token instanceof TDlk) || (token instanceof TDet);
+			return (token instanceof TDlk) || (token instanceof TDet)
+					|| (token instanceof TCtrl);
 		}
 	}
 }

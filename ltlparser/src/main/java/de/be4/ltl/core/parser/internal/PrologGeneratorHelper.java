@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.node.ACtrlLtl;
 import de.be4.ltl.core.parser.node.ADetLtl;
 import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
@@ -216,6 +217,19 @@ final class PrologGeneratorHelper {
 		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("det");
+		pto.openList();
+		for (PActions pLtl : list) {
+			pLtl.apply(gen);
+		}
+		pto.closeList();
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+
+	public void ctrl(ACtrlLtl node, PrologGenerator gen) {
+		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
+		pto.openTerm("ctrl");
 		pto.openList();
 		for (PActions pLtl : list) {
 			pLtl.apply(gen);

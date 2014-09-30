@@ -417,6 +417,21 @@ public class PrologGeneratorTest {
 		check("deterministic(bla   , argg)", expected);
 	}
 
+	@Test
+	public void testCtrl() throws Exception {
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		
+		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		
+		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
+		final PrologTerm det = new CompoundPrologTerm("ctrl",args);
+		final PrologTerm expected = new CompoundPrologTerm("ap",det);
+		
+		check("controller(bla,argg)", expected);
+	}
+
 
 	@Test(expected = LtlParseException.class)
 	public void ticket_parsing_fairness_assumptions() throws Exception {

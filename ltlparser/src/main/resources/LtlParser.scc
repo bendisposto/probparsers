@@ -29,6 +29,7 @@ Package de.be4.ltl.core.parser;
     
     dlk_action_start = 'deadlock(';
     det_action_start = 'deterministic(';
+    ctrl_action_start = 'controller(';
     
     strong_fair_start = 'SF(';
     weak_fair_start = 'WF(';
@@ -57,6 +58,7 @@ Tokens
     {ltl} false = 'false';
   	{ltl -> actions} dlk = dlk_action_start;
   	{ltl -> actions} det = det_action_start;
+  	{ltl -> actions} ctrl = ctrl_action_start;
     {ltl} sink ='sink';
     {ltl} deadlock ='deadlock';
     {ltl} current = 'current';
@@ -171,6 +173,7 @@ Ignored Tokens
                                     { -> New ltl.forall(forall_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
                           {dlk}          dlk  [args]:arg_list                                         { -> New ltl.dlk([args.actions])} |
                           {det}          det  [args]:arg_list                                         { -> New ltl.det([args.actions])} |
+                          {ctrl}         ctrl [args]:arg_list                                         { -> New ltl.ctrl([args.actions])} |
                           {unparsed}     atomic_proposition_begin                                     { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
   arg_list {-> actions*} = {single}   [arg]:arg                 { -> [arg.actions]} |
@@ -240,7 +243,8 @@ Abstract Syntax Tree
    {and_fair1}    [left]:ltl [right]:ltl | 
    {and_fair2}    [left]:ltl [right]:ltl |
    {dlk}          [args]:actions* |
-   {det}          [args]:actions*;
+   {det}          [args]:actions* |
+   {ctrl}         [args]:actions*;
 
   actions =
       {op} [operation]:action_char;
