@@ -6,8 +6,6 @@
 
 package de.be4.ltl.core.parser.internal;
 
-import java.util.LinkedList;
-
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
@@ -138,8 +136,10 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseAOpActions(AOpActions node) {
 		final Token token = node.getOperation();
-		p.openTerm("action");
+		p.openTerm("ap");
+		p.openTerm("enabled");
 		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		p.closeTerm();
 		p.closeTerm();
 	}
 	

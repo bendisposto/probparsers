@@ -21,6 +21,8 @@ import de.be4.ltl.core.parser.node.TDet;
 import de.be4.ltl.core.parser.node.TDlk;
 import de.be4.ltl.core.parser.node.TExistsIdentifier;
 import de.be4.ltl.core.parser.node.TForallIdentifier;
+import de.be4.ltl.core.parser.node.TLPar;
+import de.be4.ltl.core.parser.node.TRPar;
 import de.be4.ltl.core.parser.node.Token;
 
 public class LtlLexer extends Lexer {
@@ -55,11 +57,13 @@ public class LtlLexer extends Lexer {
 			super(State.LTL);
 		}
 
+		@Override
 		protected boolean isOpening(final Token token) {
 			return token instanceof TAtomicPropositionBegin
 					|| token instanceof TActionBegin;
 		}
 
+		@Override
 		protected boolean isClosing(final Token token) {
 			return token instanceof TAtomicPropositionEnd
 					|| token instanceof TActionEnd;
@@ -92,17 +96,17 @@ public class LtlLexer extends Lexer {
 
 		@Override
 		protected boolean isOpeningActionArg(Token token) {
-			return token instanceof TArgsBegin;
+			return token instanceof TArgsBegin || token instanceof TLPar;
 		}
 
 		@Override
 		protected boolean isClosingActionArg(Token token) {
-			return token instanceof TArgsEnd;
+			return token instanceof TArgsEnd || token instanceof TRPar;
 		}
 
 		@Override
 		protected boolean isArgumentClosing(Token token) {
-			return (token instanceof TActionsSplit) || (token instanceof TArgsEnd);
+			return (token instanceof TActionsSplit);
 		}
 		
 		@Override

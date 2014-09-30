@@ -379,9 +379,10 @@ public class PrologGeneratorTest {
 	public void testDLK() throws Exception {
 		final PrologTerm transPred = new CompoundPrologTerm("bla");
 		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm action = new CompoundPrologTerm("action", wrapped);
+		final PrologTerm action = new CompoundPrologTerm("enabled", wrapped);
+		final PrologTerm ap = new CompoundPrologTerm("ap", action);
 		
-		final PrologTerm args = new ListPrologTerm(action);
+		final PrologTerm args = new ListPrologTerm(ap);
 		final PrologTerm expected = new CompoundPrologTerm("dlk",args);
 		
 		check("deadlock( bla  )", expected);
@@ -391,29 +392,33 @@ public class PrologGeneratorTest {
 	public void testDLK2() throws Exception {
 		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
 		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm action1 = new CompoundPrologTerm("action", wrapped1);
+		final PrologTerm action1 = new CompoundPrologTerm("enabled", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", action1);
 		
 		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
 		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm action2 = new CompoundPrologTerm("action", wrapped2);
+		final PrologTerm action2 = new CompoundPrologTerm("enabled", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", action2);
 		
-		final PrologTerm args = new ListPrologTerm(action1,action2);
+		final PrologTerm args = new ListPrologTerm(ap1,ap2);
 		final PrologTerm expected = new CompoundPrologTerm("dlk",args);
 		
-		check("deadlock( bla  , argg   )", expected);
+		check("deadlock( bla, argg   )", expected);
 	}
 
 	@Test
 	public void testDET() throws Exception {
 		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
 		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm action1 = new CompoundPrologTerm("action", wrapped1);
+		final PrologTerm action1 = new CompoundPrologTerm("enabled", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", action1);
 		
 		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
 		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm action2 = new CompoundPrologTerm("action", wrapped2);
+		final PrologTerm action2 = new CompoundPrologTerm("enabled", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", action2);
 		
-		final PrologTerm args = new ListPrologTerm(action1,action2);
+		final PrologTerm args = new ListPrologTerm(ap1,ap2);
 		final PrologTerm expected = new CompoundPrologTerm("det",args);
 		
 		check("deterministic( bla  , argg   )", expected);

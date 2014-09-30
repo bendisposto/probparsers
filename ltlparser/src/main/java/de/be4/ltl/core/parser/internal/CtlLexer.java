@@ -36,11 +36,13 @@ public class CtlLexer extends Lexer {
 			super(State.CTL);
 		}
 
+		@Override
 		protected boolean isOpening(final Token token) {
 			return token instanceof TAtomicPropositionBegin
 					|| token instanceof TActionBegin;
 		}
 
+		@Override
 		protected boolean isClosing(final Token token) {
 			return token instanceof TAtomicPropositionEnd
 					|| token instanceof TActionEnd;
