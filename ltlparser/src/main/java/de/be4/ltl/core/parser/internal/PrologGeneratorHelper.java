@@ -201,6 +201,7 @@ final class PrologGeneratorHelper {
 
 	public void dlk(ADlkLtl node, PrologGenerator gen) {
 		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
 		pto.openTerm("dlk");
 		pto.openList();
 		for (PActions pLtl : list) {
@@ -208,16 +209,19 @@ final class PrologGeneratorHelper {
 		}
 		pto.closeList();
 		pto.closeTerm();
+		pto.closeTerm();
 	}
 
 	public void det(ADetLtl node, PrologGenerator gen) {
 		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
 		pto.openTerm("det");
 		pto.openList();
 		for (PActions pLtl : list) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
+		pto.closeTerm();
 		pto.closeTerm();
 	}
 

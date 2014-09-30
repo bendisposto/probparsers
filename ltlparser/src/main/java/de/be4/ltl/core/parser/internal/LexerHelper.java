@@ -88,7 +88,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 					if (!correctBalancedParenthesis(count, token)) {
 						return token;
 					}
-					if (! isArgumentClosing(token)) {
+					if ((count == 1 && !isArgumentClosing(token)) || count>1) {
 						final String tokenText = readToken(token);
 						text.append(tokenText);
 					}

@@ -136,11 +136,7 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseAOpActions(AOpActions node) {
 		final Token token = node.getOperation();
-		p.openTerm("ap");
-		p.openTerm("enabled");
 		helper.parseTransitionPredicate(UniversalToken.createToken(token));
-		p.closeTerm();
-		p.closeTerm();
 	}
 	
 	@Override
