@@ -20,6 +20,7 @@ import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 
 public class PrologGeneratorTest {
@@ -374,11 +375,80 @@ public class PrologGeneratorTest {
 		check("( (SF(bla) & SF(blubb)) => (true))", expected);
 	}
 
+	@Test
+	public void testDLK() throws Exception {
+		final PrologTerm transPred = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
+		
+		final PrologTerm args = new ListPrologTerm(wrapped);
+		final PrologTerm dlk = new CompoundPrologTerm("dlk",args);
+		final PrologTerm expected = new CompoundPrologTerm("ap", dlk);
+		
+		check("deadlock( bla)", expected);
+	}
+
+	@Test
+	public void testDLK2() throws Exception {
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		
+		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		
+		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
+		final PrologTerm dlk = new CompoundPrologTerm("dlk",args);
+		final PrologTerm expected = new CompoundPrologTerm("ap",dlk);
+		
+		check("deadlock(bla,argg)", expected);
+	}
+
+	@Test
+	public void testDET() throws Exception {
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		
+		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		
+		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
+		final PrologTerm det = new CompoundPrologTerm("det",args);
+		final PrologTerm expected = new CompoundPrologTerm("ap",det);
+		
+		check("deterministic(bla   , argg)", expected);
+	}
+
+	@Test
+	public void testCtrl() throws Exception {
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		
+		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		
+		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
+		final PrologTerm det = new CompoundPrologTerm("ctrl",args);
+		final PrologTerm expected = new CompoundPrologTerm("ap",det);
+		
+		check("controller(bla,argg)", expected);
+	}
+
+
 	@Test(expected = LtlParseException.class)
 	public void ticket_parsing_fairness_assumptions() throws Exception {
 		String buggy = "SF(bla) & F{blubb} => true";
 		parse(buggy);
+	}
 
+	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_DLK() throws Exception {
+		String buggy = "deadlock()";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_DET() throws Exception {
+		String buggy = "deterministic()";
+		parse(buggy);
 	}
 
 	@Test(expected = LtlParseException.class)

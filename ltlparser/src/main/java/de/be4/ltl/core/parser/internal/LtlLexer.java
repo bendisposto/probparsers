@@ -1,5 +1,5 @@
 /** 
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
+ * (c) 2009-2014 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
  * Heinrich Heine Universitaet Duesseldorf
  * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
  * */
@@ -12,10 +12,18 @@ import de.be4.ltl.core.parser.lexer.Lexer;
 import de.be4.ltl.core.parser.node.EOF;
 import de.be4.ltl.core.parser.node.TActionBegin;
 import de.be4.ltl.core.parser.node.TActionEnd;
+import de.be4.ltl.core.parser.node.TActionsSplit;
+import de.be4.ltl.core.parser.node.TArgsBegin;
+import de.be4.ltl.core.parser.node.TArgsEnd;
 import de.be4.ltl.core.parser.node.TAtomicPropositionBegin;
 import de.be4.ltl.core.parser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.parser.node.TCtrl;
+import de.be4.ltl.core.parser.node.TDet;
+import de.be4.ltl.core.parser.node.TDlk;
 import de.be4.ltl.core.parser.node.TExistsIdentifier;
 import de.be4.ltl.core.parser.node.TForallIdentifier;
+import de.be4.ltl.core.parser.node.TLPar;
+import de.be4.ltl.core.parser.node.TRPar;
 import de.be4.ltl.core.parser.node.Token;
 
 public class LtlLexer extends Lexer {
@@ -50,11 +58,13 @@ public class LtlLexer extends Lexer {
 			super(State.LTL);
 		}
 
+		@Override
 		protected boolean isOpening(final Token token) {
 			return token instanceof TAtomicPropositionBegin
 					|| token instanceof TActionBegin;
 		}
 
+		@Override
 		protected boolean isClosing(final Token token) {
 			return token instanceof TAtomicPropositionEnd
 					|| token instanceof TActionEnd;
@@ -65,6 +75,11 @@ public class LtlLexer extends Lexer {
 			return state.equals(State.ATOMIC) || state.equals(State.ACTION);
 		}
 
+		@Override
+		protected boolean isInActions(State state) {
+			return state.equals(State.ACTIONS);
+		}
+		
 		@Override
 		protected String readToken(Token token) {
 			return token.getText();
@@ -80,5 +95,30 @@ public class LtlLexer extends Lexer {
 			return !(token instanceof EOF) || count == 0;
 		}
 
+		@Override
+		protected boolean isOpeningActionArg(Token token) {
+			return token instanceof TArgsBegin || token instanceof TLPar;
+		}
+
+		@Override
+		protected boolean isClosingActionArg(Token token) {
+			return token instanceof TArgsEnd || token instanceof TRPar;
+		}
+
+		@Override
+		protected boolean isArgumentClosing(Token token) {
+			return (token instanceof TActionsSplit);
+		}
+		
+		@Override
+		protected boolean isArgumentSplittingToken(Token token) {
+			return token instanceof TActionsSplit;
+		}
+		
+		@Override
+		protected boolean isBeginningActionsToken(Token token) {
+			return (token instanceof TDlk) || (token instanceof TDet)
+					|| (token instanceof TCtrl);
+		}
 	}
 }
