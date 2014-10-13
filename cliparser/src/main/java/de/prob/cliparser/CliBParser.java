@@ -46,8 +46,8 @@ public class CliBParser {
 
 	private static final String osEncoding = System
 			.getProperty("file.encoding");
-	private static final String encoding = "MacRoman".equals(osEncoding) ? "UTF-8"
-			: osEncoding;
+	private static final String encoding = "MacRoman".equals(osEncoding)
+			|| "Cp1252".equals(osEncoding) ? "UTF-8" : osEncoding;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
