@@ -13,11 +13,11 @@ buildscript {
 
 
 
-def global_version = '2.4.33-SNAPSHOT'
+def global_version = '2.4.33'
 
 project.version = global_version;
 project.group = 'de.prob'
- 
+
 // // The real configuration
 allprojects {
   apply plugin: 'java'
@@ -25,11 +25,11 @@ allprojects {
   sourceCompatibility = 1.5
 
 
- 
+
   clean {
 	doLast {
       def delClos
-      delClos = { 
+      delClos = {
         it.eachDir( delClos );
         it.eachFile { it.delete() }
 	    it.delete()
@@ -107,15 +107,15 @@ task globaljavadoc(type: Javadoc, dependsOn: subprojects.assemble) {
 }
 
 
-task uberjar(type: Jar, dependsOn: subprojects.deploy) { 
-    baseName = 'probcliparser' 
-    subprojects.each { subproject -> 
-        from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) } 
-    } 
+task uberjar(type: Jar, dependsOn: subprojects.deploy) {
+    baseName = 'probcliparser'
+    subprojects.each { subproject ->
+        from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) }
+    }
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
-task deploy(dependsOn: [subprojects.deploy,globaljavadoc]) 
+task deploy(dependsOn: [subprojects.deploy,globaljavadoc])
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.0-rc-3'
