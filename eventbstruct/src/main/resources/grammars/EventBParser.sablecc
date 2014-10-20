@@ -88,7 +88,7 @@ Helpers
 	    [0x0e50..0x0e59] | [0x0ed0..0x0ed9] | [0x0f20..0x0f29] | [0xff10..0xff19];
 
 	tick = 39;
-	identifier = (unicode_letter | unicode_digit) (unicode_letter | unicode_digit | underscore)* tick?;
+	identifier = (underscore | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | underscore)* tick?;
 	label = [all_chars - layout_char]+ tick?;
 
 
