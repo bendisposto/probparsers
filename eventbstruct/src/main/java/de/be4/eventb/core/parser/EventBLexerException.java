@@ -11,6 +11,11 @@ public class EventBLexerException extends LexerException {
 	private final int lastLine;
 	private final int lastPos;
 
+	public EventBLexerException(final Token token, final String message) {
+		this(token, message, token.getText().toString(), token.getLine(), token
+				.getPos());
+	}
+
 	public EventBLexerException(final Token lastToken, final String message,
 			final String lastText, final int lastLine, final int lastPos) {
 		super(message);
