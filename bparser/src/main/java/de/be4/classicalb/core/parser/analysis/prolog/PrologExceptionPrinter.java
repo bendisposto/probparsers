@@ -5,11 +5,14 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Token;
 import de.hhu.stups.sablecc.patch.SourcePosition;
@@ -53,7 +56,10 @@ public final class PrologExceptionPrinter {
 		if (cause == null) {
 			printGeneralException(pto, e, filename, useIndentation);
 		} else {
-			if (cause instanceof BParseException) {
+			if (cause instanceof LexerException) {
+				printLexerException(pto, (LexerException) cause, filename,
+						useIndentation);
+			} else if (cause instanceof BParseException) {
 				printBPException(pto, (BParseException) cause, filename,
 						useIndentation);
 			} else if (cause instanceof PreParseException) {
@@ -68,6 +74,27 @@ public final class PrologExceptionPrinter {
 		}
 		pto.fullstop();
 		pto.flush();
+	}
+
+	private static void printLexerException(IPrologTermOutput pto,
+			LexerException cause, String filename, boolean useIndentation) {
+		pto.openTerm("parse_exception");
+		// there is no source information / position attached to lexer
+		// exceptions -> extract from message
+		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
+		Matcher m = p.matcher(cause.getMessage());
+		if (m.lookingAt()) {
+			pto.openTerm("pos");
+			pto.printNumber(Integer.parseInt(m.group(1)));
+			pto.printNumber(Integer.parseInt(m.group(2)));
+			pto.printAtom(filename);
+			pto.closeTerm();
+		} else {
+			pto.printAtom("none");
+		}
+
+		printMsg(pto, cause, filename, useIndentation);
+		pto.closeTerm();
 	}
 
 	private static void printCheckException(final IPrologTermOutput pto,
