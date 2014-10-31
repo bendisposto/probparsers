@@ -186,23 +186,23 @@ public class CliBParser {
 				}
 				break;
 			case formula:
-				theFormula = "#FORMULA " + in.readLine();
+				theFormula = "#FORMULA\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case expression:
-				theFormula = "#EXPRESSION " + in.readLine();
+				theFormula = "#EXPRESSION\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case predicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case extendedexpression:
-				theFormula = "#EXPRESSION " + in.readLine();
+				theFormula = "#EXPRESSION\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case extendedpredicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case ltl:
@@ -275,13 +275,13 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false);
+			PrologExceptionPrinter.printException(System.out, e, false, true);
 		} catch (LexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			PrologExceptionPrinter.printException(System.out, e, theFormula,
-					false);
+					false, true);
 		}
 	}
 
@@ -307,7 +307,7 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false);
+			PrologExceptionPrinter.printException(System.out, e, false, true);
 
 		}
 	}
