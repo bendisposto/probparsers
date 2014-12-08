@@ -72,13 +72,14 @@ public class CliBParser {
 		PrintStream out;
 		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
+			f = new File(filename);
+
 			try {
 				out = new PrintStream(filename);
-				f = new File(filename);
 			} catch (final FileNotFoundException e) {
 				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
 					PrologExceptionPrinter.printException(System.err, e,
-							filename);
+							f.getAbsolutePath());
 				} else {
 					System.err.println("Unable to create file '" + filename
 							+ "'");
