@@ -176,6 +176,12 @@ public class BParser {
 
 		inputStreamReader.close();
 
+		// remove utf-8 byte order mark
+		// replaceAll \uFEFF did not work for some reason
+		if (Character.codePointAt(content, 0) == 65279) {
+			content = content.substring(1);
+		}
+
 		return content.replaceAll("\r\n", "\n");
 	}
 
