@@ -166,7 +166,7 @@ public class CliBParser {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
 				try {
-					final BParser parser = new BParser(bfile.getName());
+					final BParser parser = new BParser(bfile.getAbsolutePath());
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
 					context = parser.getDefinitions();
 					provider = parser.getContentProvider();
@@ -332,7 +332,7 @@ public class CliBParser {
 			final boolean closeStream, final File bfile) {
 		int returnValue;
 		try {
-			final BParser parser = new BParser(bfile.getName());
+			final BParser parser = new BParser(bfile.getAbsolutePath());
 			returnValue = parser.fullParsing(bfile, behaviour, out, err);
 		} catch (Exception e) {
 			e.printStackTrace();
