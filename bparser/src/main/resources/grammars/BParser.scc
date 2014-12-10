@@ -719,7 +719,9 @@ expression_keyword {-> expression} =
 	{record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
 	{next_level} [expr]:expression_func {-> expr.expression} ;
 
-rec_entry {-> rec_entry} = [identifier]:expression_top element_of [value]:expression_in_par {-> New rec_entry(identifier.expression, value.expression)} ;
+rec_entry {-> rec_entry} =
+	{in_pars} left_par [identifier]:expression_top element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
+	{no_pars} [identifier]:expression_top element_of [value]:expression_in_par {-> New rec_entry(identifier.expression, value.expression)};
 
 rec_entry_list {-> rec_entry*} =
 	{single} [entry]:rec_entry {-> [entry.rec_entry]} |

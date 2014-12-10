@@ -26,13 +26,17 @@ Package de.be4.ltl.core.parser;
 	
 	enabled_start = 'e(';
     available_start = 'Av(';
-    
+
+    strong_fair_start = 'sf(';
+    weak_fair_start = 'wf(';
+
+    /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */   
+    strong_fair_start_capital = 'SF(';
+    weak_fair_start_capital = 'WF(';
+
     dlk_action_start = 'deadlock(';
     det_action_start = 'deterministic(';
     ctrl_action_start = 'controller(';
-    
-    strong_fair_start = 'SF(';
-    weak_fair_start = 'WF(';
     
     exists_quantor = '#';
     forall_quantor = '!';
@@ -64,7 +68,7 @@ Tokens
     {ltl} current = 'current';
     {ltl} l_par = l_paren;
     {ltl} r_par = r_paren;
- 
+  
     {ltl -> action} l_sq = l_bracket;
     {ltl -> action} enabled = enabled_start;
     {ltl -> action} available = available_start;
@@ -92,10 +96,6 @@ Tokens
     {ltl} or = 'or';
     {ltl} not = 'not';
 
-/* Fairness LTL operators */
-    {ltl -> action} strong_fair = strong_fair_start;
-    {ltl -> action} weak_fair = weak_fair_start;
-
 /* LTL temporal operators */
     {ltl} until = 'U';
     {ltl} weakuntil ='W';
@@ -112,6 +112,10 @@ Tokens
     {ltl} historically = 'H';
     {ltl} once = 'O';
     {ltl} yesterday = 'Y';
+
+ /* Fairness LTL operators */
+    {ltl -> action} strong_fair = (strong_fair_start | strong_fair_start_capital);
+    {ltl -> action} weak_fair = (weak_fair_start | weak_fair_start_capital);
 		
  	white_space = white_space;
      

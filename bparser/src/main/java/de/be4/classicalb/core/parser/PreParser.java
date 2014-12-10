@@ -125,7 +125,7 @@ public class PreParser {
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameToken,
 						"Definition file cannot be read: "
-								+ e.getLocalizedMessage() + " used in"
+								+ e.getLocalizedMessage() + " used in "
 								+ modelFileName);
 			} finally {
 			}

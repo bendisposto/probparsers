@@ -76,7 +76,7 @@ public class EventBLexer extends Lexer {
 	}
 
 	@Override
-	protected void filter() throws LexerException, IOException {
+	protected void filter() throws IOException, EventBLexerException {
 		checkClauseOrders();
 		collectString();
 		collectMultiLineComment();
@@ -90,7 +90,7 @@ public class EventBLexer extends Lexer {
 		}
 	}
 
-	private void checkClauseOrders() throws LexerException {
+	private void checkClauseOrders() throws EventBLexerException {
 		if (token != null) {
 			// entering event?
 			if (!inEvent && token instanceof TEvent) {
@@ -133,17 +133,17 @@ public class EventBLexer extends Lexer {
 	}
 
 	private void throwClausesOrderException(final String message)
-			throws LexerException {
+			throws EventBLexerException {
 		throw new EventBLexerException(token, message, token.getText()
 				.toString(), token.getLine(), token.getPos());
 	}
 
-	private void collectMultiLineComment() throws LexerException {
+	private void collectMultiLineComment() throws EventBLexerException {
 		if (state.equals(State.MULTI_COMMENT)) {
 			if (token instanceof EOF) {
 				// make sure we don't loose this token, needed for error message
 				// tokenList.add(token);
-				throw new LexerException("Comment not closed");
+				throw new EventBLexerException(token, "Comment not closed");
 			}
 
 			/*
@@ -170,7 +170,7 @@ public class EventBLexer extends Lexer {
 		}
 	}
 
-	private void collectString() throws LexerException {
+	private void collectString() throws EventBLexerException {
 		if (state.equals(State.FORMULA)) {
 			// we are entering state STRING
 			if (string == null) {
@@ -184,7 +184,11 @@ public class EventBLexer extends Lexer {
 		}
 		// we just left state STRING
 		else if (string != null) {
-			endStringToken();
+			try {
+				endStringToken();
+			} catch (LexerException e) {
+				throw new EventBLexerException(token, e.getMessage());
+			}
 		}
 	}
 
@@ -211,7 +215,7 @@ public class EventBLexer extends Lexer {
 		stringBuffer = null;
 	}
 
-	private void beginStringToken() throws LexerException {
+	private void beginStringToken() throws EventBLexerException {
 		// expected before actual string begins
 		if (token instanceof TColon || token instanceof TWhiteSpace
 				|| token instanceof TVariant) {
@@ -222,7 +226,7 @@ public class EventBLexer extends Lexer {
 			// make sure we don't loose this token, needed for error
 			// message
 			// tokenList.add(token);
-			throw new LexerException("Unexpected token '"
+			throw new EventBLexerException(token, "Unexpected token '"
 					+ token.getClass().getSimpleName().substring(1) + "'");
 		}
 

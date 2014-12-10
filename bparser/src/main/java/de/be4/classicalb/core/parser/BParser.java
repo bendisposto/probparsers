@@ -67,7 +67,9 @@ public class BParser {
 	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
-	private final String fileName;
+
+	private final String absolutePath;
+
 	private IDefinitionFileProvider contentProvider;
 
 	public BParser() {
@@ -75,7 +77,11 @@ public class BParser {
 	}
 
 	public BParser(final String fileName) {
-		this.fileName = fileName;
+		if (fileName == null) {
+			this.absolutePath = null;
+		} else {
+			this.absolutePath = new File(fileName).getAbsolutePath();
+		}
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -169,6 +175,20 @@ public class BParser {
 		String content = builder.toString();
 
 		inputStreamReader.close();
+
+		// remove utf-8 byte order mark
+		// replaceAll \uFEFF did not work for some reason
+		// apparently, unix like systems report a single character with the code
+		// below
+		if (Character.codePointAt(content, 0) == 65279) {
+			content = content.substring(1);
+		}
+		// while windows splits it up into three characters with the codes below
+		if (Character.codePointAt(content, 0) == 239
+				&& Character.codePointAt(content, 1) == 187
+				&& Character.codePointAt(content, 2) == 191) {
+			content = content.substring(3);
+		}
 
 		return content.replaceAll("\r\n", "\n");
 	}
@@ -376,24 +396,24 @@ public class BParser {
 			 * 'LexerAspect' replaces any LexerException to provide sourcecode
 			 * position information in the BLexerException.
 			 */
-			throw new BException(fileName, e);
+			throw new BException(absolutePath, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
 					: sourcePositions.getSourcecodeRange(token);
 			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
-			throw new BException(fileName, new BParseException(token, range,
-					msg, realMsg));
+			throw new BException(absolutePath, new BParseException(token,
+					range, msg, realMsg));
 		} catch (final BParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(absolutePath, e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
 			throw new Error("Using Reader failed", e);
 		} catch (final PreParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(absolutePath, e);
 		} catch (final CheckException e) {
-			throw new BException(fileName, e);
+			throw new BException(absolutePath, e);
 		}
 	}
 
@@ -402,7 +422,7 @@ public class BParser {
 			throws IOException, PreParseException, BException {
 		final PreParser preParser = new PreParser(
 				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.fileName);
+				this.absolutePath);
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
 
@@ -516,7 +536,8 @@ public class BParser {
 			}
 		} catch (final IOException e) {
 			if (options.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, bfile.getName());
+				PrologExceptionPrinter.printException(err, e,
+						bfile.getAbsolutePath());
 			} else {
 				err.println();
 				err.println("Error reading input file: "

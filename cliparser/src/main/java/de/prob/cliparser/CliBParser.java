@@ -72,13 +72,14 @@ public class CliBParser {
 		PrintStream out;
 		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
+			f = new File(filename);
+
 			try {
 				out = new PrintStream(filename);
-				f = new File(filename);
 			} catch (final FileNotFoundException e) {
 				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
 					PrologExceptionPrinter.printException(System.err, e,
-							filename);
+							f.getAbsolutePath());
 				} else {
 					System.err.println("Unable to create file '" + filename
 							+ "'");
@@ -165,7 +166,7 @@ public class CliBParser {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
 				try {
-					final BParser parser = new BParser(bfile.getName());
+					final BParser parser = new BParser(bfile.getAbsolutePath());
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
 					context = parser.getDefinitions();
 					provider = parser.getContentProvider();
@@ -186,23 +187,27 @@ public class CliBParser {
 				}
 				break;
 			case formula:
-				theFormula = "#FORMULA " + in.readLine();
+				theFormula = "#FORMULA\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case expression:
-				theFormula = "#EXPRESSION " + in.readLine();
+				theFormula = "#EXPRESSION\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case predicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
+				break;
+			case extendedformula:
+				theFormula = "#FORMULA\n" + in.readLine();
+				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case extendedexpression:
-				theFormula = "#EXPRESSION " + in.readLine();
-				parseFormula(theFormula, context, provider);
+				theFormula = "#EXPRESSION\n" + in.readLine();
+				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case extendedpredicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case ltl:
@@ -275,13 +280,13 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false);
+			PrologExceptionPrinter.printException(System.out, e, false, true);
 		} catch (LexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			PrologExceptionPrinter.printException(System.out, e, theFormula,
-					false);
+					false, true);
 		}
 	}
 
@@ -307,7 +312,7 @@ public class CliBParser {
 			// NullPointerException instead of catching a general Exception
 			print("EXCEPTION NullPointerException\n");
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false);
+			PrologExceptionPrinter.printException(System.out, e, false, true);
 
 		}
 	}
@@ -327,7 +332,7 @@ public class CliBParser {
 			final boolean closeStream, final File bfile) {
 		int returnValue;
 		try {
-			final BParser parser = new BParser(bfile.getName());
+			final BParser parser = new BParser(bfile.getAbsolutePath());
 			returnValue = parser.fullParsing(bfile, behaviour, out, err);
 		} catch (Exception e) {
 			e.printStackTrace();

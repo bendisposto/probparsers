@@ -66,6 +66,16 @@ public class PrologGeneratorTest {
 	}
 
 	@Test
+	public void testCurrent1() throws Exception {
+		final PrologTerm root = new CompoundPrologTerm("root");
+		final PrologTerm stateid = new CompoundPrologTerm("stateid", root);
+		final PrologTerm ap = new CompoundPrologTerm("ap", stateid);
+		final PrologTerm implies = new CompoundPrologTerm("implies",ap,TERM_TRUE);
+		final PrologTerm expected = new CompoundPrologTerm("globally", implies);
+		check("G (current => true)", expected);
+	}
+
+	@Test
 	public void testAnd() throws Exception {
 		final PrologTerm expected = new CompoundPrologTerm("and", TERM_TRUE,
 				TERM_FALSE);
@@ -306,6 +316,21 @@ public class PrologGeneratorTest {
 
 		final PrologTerm expected = new CompoundPrologTerm(
 				"fairnessimplication", weak_assumption, TERM_TRUE);
+		check("wf(bla) => true", expected);
+	}
+
+	@Test
+	public void testWeakFairCapital() throws Exception {
+
+		final PrologTerm transPred = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
+		final PrologTerm wf = new CompoundPrologTerm("weak_fair", wrapped);
+		final PrologTerm ap = new CompoundPrologTerm("ap", wf);
+		final PrologTerm weak_assumption = new CompoundPrologTerm(
+				"weakassumptions", ap);
+
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", weak_assumption, TERM_TRUE);
 		check("WF(bla) => true", expected);
 	}
 
@@ -326,7 +351,7 @@ public class PrologGeneratorTest {
 		final PrologTerm expected = new CompoundPrologTerm(
 				"fairnessimplication", weak_assumption, TERM_TRUE);
 
-		check("WF(bla) or WF(blubb) => true", expected);
+		check("wf(bla) or wf(blubb) => true", expected);
 	}
 
 	@Test
@@ -351,7 +376,32 @@ public class PrologGeneratorTest {
 
 		final PrologTerm expected = new CompoundPrologTerm(
 				"fairnessimplication", andPred, TERM_TRUE);
-		check("(SF(bla)) & (WF(blubb)) => true", expected);
+		check("(sf(bla)) & (wf(blubb)) => true", expected);
+	}
+
+	@Test
+	public void testStrongFairCapital() throws Exception {
+
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
+		final PrologTerm strong_assumptions = new CompoundPrologTerm(
+				"strongassumptions", ap1);
+
+		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
+		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
+		final PrologTerm sf2 = new CompoundPrologTerm("weak_fair", wrapped2);
+		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
+		final PrologTerm weak_assumptions = new CompoundPrologTerm(
+				"weakassumptions", ap2);
+
+		final PrologTerm andPred = new CompoundPrologTerm("and",
+				strong_assumptions, weak_assumptions);
+
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", andPred, TERM_TRUE);
+		check("(SF(bla)) & (wf(blubb)) => true", expected);
 	}
 
 	@Test
@@ -372,7 +422,7 @@ public class PrologGeneratorTest {
 		final PrologTerm expected = new CompoundPrologTerm(
 				"fairnessimplication", strong_assumption, TERM_TRUE);
 
-		check("( (SF(bla) & SF(blubb)) => (true))", expected);
+		check("( (sf(bla) & sf(blubb)) => (true))", expected);
 	}
 
 	@Test

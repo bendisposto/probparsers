@@ -151,7 +151,7 @@ public class RecursiveMachineLoader {
 		if (files.contains(machineFile)) {
 			return;
 		}
-		final BParser parser = new BParser(machineFile.getName());
+		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
 		files.add(machineFile);

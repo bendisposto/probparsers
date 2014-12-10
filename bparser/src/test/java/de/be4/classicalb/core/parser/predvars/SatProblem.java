@@ -19,13 +19,17 @@ import de.be4.classicalb.core.parser.node.Start;
 public class SatProblem {
 	@Test
 	public void compareSatPredAndPredVars() throws Exception {
-		final String test = "#PREDICATE"
-				+ new Scanner(new File(
-						"src/test/resources/predvars/sat_predvars"))
-						.useDelimiter("\\Z").next();
-		final String reference = "#PREDICATE"
-				+ new Scanner(new File("src/test/resources/predvars/sat_pred"))
-						.useDelimiter("\\Z").next();
+		final File f1 = new File("src/test/resources/predvars/sat_predvars");
+		final File f2 = new File("src/test/resources/predvars/sat_pred");
+
+		final Scanner s1 = new Scanner(f1);
+		final Scanner s2 = new Scanner(f2);
+
+		final String test = "#PREDICATE" + s1.useDelimiter("\\Z").next();
+		final String reference = "#PREDICATE" + s2.useDelimiter("\\Z").next();
+
+		s1.close();
+		s2.close();
 
 		final String result1 = getTreeAsString(test);
 		final String result2 = getTreeAsStringOrg(reference);
