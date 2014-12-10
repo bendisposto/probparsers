@@ -178,6 +178,7 @@ public class BParser {
 
 		// remove utf-8 byte order mark
 		// replaceAll \uFEFF did not work for some reason
+		System.out.println("Code Point: " + Character.codePointAt(content, 0));
 		if (Character.codePointAt(content, 0) == 65279) {
 			content = content.substring(1);
 		}
