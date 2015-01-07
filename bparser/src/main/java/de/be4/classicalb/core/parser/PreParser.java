@@ -5,6 +5,7 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -137,6 +139,10 @@ public class PreParser {
 		// use linked list as we rely on pop() and push()
 		final LinkedList<Token> remainingDefinitions = sortDefinitions(definitions);
 		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<Token>();
+		Set<String> todoDefs = new HashSet<String>();
+		for (Token token : remainingDefinitions) {
+			todoDefs.add(token.getText());
+		}
 
 		// use main parser for the rhs of each definition to determine type
 		// if a definition can not be typed this way, it may be due to another
@@ -153,9 +159,10 @@ public class PreParser {
 				final Token definition = remainingDefinitions.pop();
 
 				final Token defRhs = definitions.get(definition);
-				final Definitions.Type type = determineType(defRhs);
+				final Definitions.Type type = determineType(defRhs, todoDefs);
 
 				if (type != null) {
+					todoDefs.remove(definition.getText());
 					oneParsed = true;
 					types.addTyping(definition.getText(), type);
 				} else {
@@ -213,7 +220,8 @@ public class PreParser {
 		return list;
 	}
 
-	private Definitions.Type determineType(final Token rhsToken) {
+	private Definitions.Type determineType(final Token rhsToken,
+			Set<String> definitions) {
 		final String definitionRhs = rhsToken.getText().trim();
 
 		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
@@ -226,13 +234,22 @@ public class PreParser {
 				return IDefinitions.Type.Predicate;
 			// Expression or Expression/Substituion (e.g. f(x))?
 			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
+
+			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(
+					definitions);
+			unit.apply(visitor);
+
+			if (visitor.isKaboom())
+				return null;
+
 			PExpression expression = unit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
 					|| (expression instanceof AFunctionExpression)
-					|| (expression instanceof ADefinitionExpression))
+					|| (expression instanceof ADefinitionExpression)) {
 				return IDefinitions.Type.ExprOrSubst;
-			else
-				return IDefinitions.Type.Expression;
+			}
+
+			return IDefinitions.Type.Expression;
 		} else {
 			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
 					: IDefinitions.Type.Substitution;
@@ -243,7 +260,9 @@ public class PreParser {
 			final String prefix, final String definitionRhs) {
 
 		final Reader reader = new StringReader(prefix + " " + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types);
+		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
+																				// Magic
+																				// number!!!!
 		lexer.setDebugOutput(debugOutput);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);

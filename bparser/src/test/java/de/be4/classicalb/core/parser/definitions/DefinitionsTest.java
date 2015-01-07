@@ -331,6 +331,16 @@ public class DefinitionsTest {
 		}
 	}
 
+	@Test
+	public void testDefOrder() throws BException {
+		final String testMachine = "MACHINE Test  \n DEFINITIONS  \n bar(y) == foo(y);  \n foo(x)==x<3;  \n END";
+		String asString = getTreeAsString(testMachine);
+		System.out.println(asString);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([APredicateDefinitionDefinition(bar,[AIdentifierExpression([y])],ADefinitionPredicate(foo,[AIdentifierExpression([y])])),APredicateDefinitionDefinition(foo,[AIdentifierExpression([x])],ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3)))])]))",
+				asString);
+	}
+
 	public void testAssertInDefinition() throws BException {
 		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n"
 				+ "ABORT == ASSERT TRUE=FALSE THEN skip END\n" + "END\n";
