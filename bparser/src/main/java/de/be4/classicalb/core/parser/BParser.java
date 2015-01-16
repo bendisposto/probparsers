@@ -140,7 +140,7 @@ public class BParser {
 	 */
 	public Start parseFile(final File machine, final boolean verbose)
 			throws IOException, BException {
-		contentProvider = new CachingDefinitionFileProvider(machine);
+		contentProvider = new ResolvingDefintionFileProvider(machine);
 		return parseFile(machine, verbose, contentProvider);
 	}
 
@@ -422,7 +422,7 @@ public class BParser {
 			throws IOException, PreParseException, BException {
 		final PreParser preParser = new PreParser(
 				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.absolutePath);
+				this.absolutePath); // FIXME remove magic number
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
 
