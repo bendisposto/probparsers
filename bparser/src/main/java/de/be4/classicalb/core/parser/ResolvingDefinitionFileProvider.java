@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-public class ResolvingDefintionFileProvider extends CachingDefinitionFileProvider {
-    public ResolvingDefintionFileProvider(final File parentFile) {
+public class ResolvingDefinitionFileProvider extends CachingDefinitionFileProvider {
+    public ResolvingDefinitionFileProvider(final File parentFile) {
         super(parentFile);
     }
 

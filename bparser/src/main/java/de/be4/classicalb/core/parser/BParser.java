@@ -140,7 +140,7 @@ public class BParser {
 	 */
 	public Start parseFile(final File machine, final boolean verbose)
 			throws IOException, BException {
-		contentProvider = new ResolvingDefintionFileProvider(machine);
+		contentProvider = new ResolvingDefinitionFileProvider(machine);
 		return parseFile(machine, verbose, contentProvider);
 	}
 
