@@ -12,30 +12,19 @@ public class ResolvingDefinitionFileProvider extends CachingDefinitionFileProvid
     }
 
     public File getFile(final String filename) {
-        File f = super.getFile(filename);
-        if(f.exists() && f.isFile()) {
-            return f;
-        }
-        try {
-            return resolve(filename);
-        } catch (IOException e) {
-            return f;
-        }
-    }
-
-    private File resolve(String fileName) throws FileNotFoundException {
-        String probPath = System.getenv("PROBPATH");
-        if(probPath == null) {
-            probPath = ".";
+        // TODO this is a bit redundant
+        File o = super.getFile(filename);
+        if(o.exists() && o.isFile()) {
+            return o;
         }
 
-        for (String s : probPath.split(":")) {
-            Path path = FileSystems.getDefault().getPath(s, fileName);
-            java.io.File f = new java.io.File(path.toString());
+        for(File f : new FileSearchPathProvider(filename)) {
             if(f.exists() && f.isFile()) {
                 return f;
             }
         }
-        throw new FileNotFoundException();
+        // TODO should raise exception when we know the file is not available
+        // returning file object to keep interface
+        return new File(filename);
     }
 }
