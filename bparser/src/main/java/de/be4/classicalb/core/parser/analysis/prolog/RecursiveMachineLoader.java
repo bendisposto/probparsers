@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -15,10 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.IDefinitionFileProvider;
-import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.*;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -182,9 +180,10 @@ public class RecursiveMachineLoader {
 		final String prefix = directory == null ? "" : directory
 				+ File.separator;
 		for (final String suffix : SUFFICES) {
-			final File file = new File(prefix + machineName + suffix);
-			if (file.exists()) {
-				return file;
+			try {
+				return new FileSearchPathProvider(prefix, machineName + suffix).resolve();
+			} catch (FileNotFoundException e) {
+				// could not resolve the combination of prefix, machineName and suffix, trying next one
 			}
 		}
 		throw new BException(null, "Machine file not found: " + machineName,
