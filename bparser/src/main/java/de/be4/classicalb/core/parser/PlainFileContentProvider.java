@@ -45,14 +45,14 @@ public class PlainFileContentProvider implements IFileContentProvider {
 					: parentFile.getParent();
 			provider = new FileSearchPathProvider(parentPath, filename);
 		}
-		for(File f : provider) {
-			if(f.exists() && f.isFile()) {
-				return f;
-			}
+		try {
+			return provider.resolve();
+		} catch(FileNotFoundException e) {
+			// TODO should raise exception when we know the file is not available
 		}
-		// TODO should raise exception when we know the file is not available
 		// returning file object to keep interface
 		return new File(filename);
+
 	}
 
 	public static String readFileContent(final File file)

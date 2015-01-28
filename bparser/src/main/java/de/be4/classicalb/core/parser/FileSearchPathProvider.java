@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,6 +46,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 
     private String get(int idx) {
         return this.searchPath.get(idx);
+    }
+
+    public File resolve() throws FileNotFoundException {
+        for(File f : this) {
+            if(f.exists() && f.isFile()) {
+                return f;
+            }
+        }
+        throw new FileNotFoundException(fileName);
     }
 
     private class SearchPathIterator implements Iterator<File> {
