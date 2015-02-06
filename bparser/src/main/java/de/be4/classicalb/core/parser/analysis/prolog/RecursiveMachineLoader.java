@@ -16,7 +16,11 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.be4.classicalb.core.parser.*;
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
+import de.be4.classicalb.core.parser.IDefinitionFileProvider;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -181,9 +185,11 @@ public class RecursiveMachineLoader {
 				+ File.separator;
 		for (final String suffix : SUFFICES) {
 			try {
-				return new FileSearchPathProvider(prefix, machineName + suffix).resolve();
+				return new FileSearchPathProvider(prefix, machineName + suffix)
+						.resolve();
 			} catch (FileNotFoundException e) {
-				// could not resolve the combination of prefix, machineName and suffix, trying next one
+				// could not resolve the combination of prefix, machineName and
+				// suffix, trying next one
 			}
 		}
 		throw new BException(null, "Machine file not found: " + machineName,
@@ -208,7 +214,13 @@ public class RecursiveMachineLoader {
 		final String name = refMachines.getName();
 		final SortedSet<String> references = refMachines
 				.getReferencedMachines();
-		getParsedMachines().put(name, current);
+
+		try {
+			getParsedMachines().put(name, current);
+		} catch (NullPointerException e) {
+			throw new BException(machineFile.getName(),
+					"No machines loaded so far.", e);
+		}
 
 		if (name != null) {
 			ancestors.add(name);
