@@ -39,7 +39,7 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 		int returnValue = parser.fullParsing(machine, behaviour, out, out);
 
 		assertEquals(returnValue, -3);
-		assertEquals("exception('null in file: LibraryIO.def').\n",
-				baos.toString());
+		assertEquals("exception('null in file: LibraryIO.def').", baos
+				.toString().trim());
 	}
 }
