@@ -104,5 +104,10 @@ public class CtlLexer extends Lexer {
 			return false;
 		}
 
+		@Override
+		protected boolean isQuote(Token token) {
+			return token.getText().equals("\"");
+		}
+
 	}
 }
