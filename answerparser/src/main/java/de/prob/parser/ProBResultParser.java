@@ -37,18 +37,18 @@ public final class ProBResultParser {
 		try {
 			parseResult = parser.parse();
 		} catch (final ParserException e) {
-			String message = "Internal Error while parsing ProB Answer. This ist most likly a bug in the Result-Parser. String was: '"
+			String message = "Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser. String was: '"
 					+ prologAnswer
 					+ "'. Last Token was '"
 					+ e.getToken()
 					+ "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		} catch (final LexerException e) {
-			String message = "Internal Error while parsing ProB Answer. This ist most likly a bug in the Result-Parser String was: '"
+			String message = "Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser String was: '"
 					+ prologAnswer + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		} catch (final IOException e) {
-			String message = "Internal Error while parsing ProB Answer. This ist most likly a bug in the Result-Parser String was: "
+			String message = "Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser String was: "
 					+ prologAnswer + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		}
