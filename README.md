@@ -22,10 +22,11 @@ Please report bugs and feature requests at http://jira.cobra.cs.uni-duesseldorf.
 - answerparser - parser to read answers from the ProB prolog core 
 - unicode - lexer that transforms Event-B expressions and predicates from ASCII to Unicode syntax and vice3 versa (note: this is not extensible!)
 - cliparser - glue code for embedding the parser in the prolog core (deprecated!)
+- translator - translator for B expressions to java
 
 ## Contributors
 The libraries contain contributions from (in alphabetical order)
-Jens Bendisposto, Marc Büngener, Fabian Fritz, Sebastian Krings, Michael Leuschel, Daniel Plagge
+Jens Bendisposto, Marc Büngener, Fabian Fritz, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider
 
 ## Licence 
 
