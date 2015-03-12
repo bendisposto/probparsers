@@ -6,105 +6,92 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 public class Set implements BObject, java.util.Set<BObject> {
-    private final HashSet<BObject> set;
+	private final HashSet<BObject> set;
 
-    public Set(java.util.Set<BObject> elements) {
-        this.set = new HashSet<BObject>(elements);
-    }
+	public Set(java.util.Set<BObject> elements) {
+		this.set = new HashSet<BObject>(elements);
+	}
 
-    public Set() {
-        this.set = new HashSet<BObject>();
-    }
+	public Set() {
+		this.set = new HashSet<BObject>();
+	}
 
-    @Override
-    public String toString() {
-        return "{" + set + '}';
-    }
+	public String toString() {
+		return "{" + set + '}';
+	}
 
-    @Override
-    public int size() {
-        return this.set.size();
-    }
+	public int size() {
+		return this.set.size();
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return this.set.isEmpty();
-    }
+	public boolean isEmpty() {
+		return this.set.isEmpty();
+	}
 
-    @Override
-    public boolean contains(Object o) {
-        return set.contains(o);
-    }
+	public boolean contains(Object o) {
+		return set.contains(o);
+	}
 
-    @Override
-    public boolean add(BObject bObject) {
-        throw new UnsupportedOperationException();
-    }
+	public boolean add(BObject bObject) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
+	public boolean remove(Object o) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public Object clone() {
-        return new Set((java.util.Set<BObject>) this.set.clone());
-    }
+	@SuppressWarnings("unchecked")
+	public Object clone() {
+		return new Set((java.util.Set<BObject>) this.set.clone());
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
-        Set bObjects = (Set) o;
+		Set bObjects = (Set) o;
 
-        if (!set.equals(bObjects.set)) return false;
+		if (!set.equals(bObjects.set))
+			return false;
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public int hashCode() {
-        return set.hashCode();
-    }
+	public int hashCode() {
+		return set.hashCode();
+	}
 
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
+	public boolean removeAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public Object[] toArray() {
-        return set.toArray();
-    }
+	public Object[] toArray() {
+		return set.toArray();
+	}
 
-    @Override
-    public <T> T[] toArray(T[] a) {
-        return set.toArray(a);
-    }
+	public <T> T[] toArray(T[] a) {
+		return set.toArray(a);
+	}
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return set.containsAll(c);
-    }
+	public boolean containsAll(Collection<?> c) {
+		return set.containsAll(c);
+	}
 
-    @Override
-    public boolean addAll(Collection<? extends BObject> c) {
-        throw new UnsupportedOperationException();
-    }
+	public boolean addAll(Collection<? extends BObject> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        return set.retainAll(c);
-    }
+	public boolean retainAll(Collection<?> c) {
+		return set.retainAll(c);
+	}
 
-    @Override
-    public Iterator<BObject> iterator() {
-        return set.iterator();
-    }
+	public Iterator<BObject> iterator() {
+		return set.iterator();
+	}
 }
