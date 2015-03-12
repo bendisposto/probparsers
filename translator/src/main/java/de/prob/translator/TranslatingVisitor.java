@@ -115,7 +115,7 @@ public class TranslatingVisitor extends DepthFirstAdapter {
     }
 
     private java.util.Set<BObject> transformList(LinkedList<PExpression> elements) {
-        HashSet s = new HashSet<BObject>();
+        HashSet<BObject> s = new HashSet<BObject>();
         for (PExpression p : elements) {
             p.apply(this);
             s.add(this.getResult());
