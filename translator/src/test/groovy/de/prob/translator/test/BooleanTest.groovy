@@ -5,7 +5,7 @@ import org.junit.Test
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue;
 
-class TestBoolenAPI {
+class BooleanTest {
 	@Test
 	void testAnd() {
 		def a = Translator.translate("TRUE")

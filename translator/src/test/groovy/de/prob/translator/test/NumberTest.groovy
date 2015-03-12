@@ -6,7 +6,7 @@ import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue;
 
 
-public class TestGroovyAPI {
+public class NumberTest {
     @Test
     void testAddNubers() {
         def one = Translator.translate("1")
