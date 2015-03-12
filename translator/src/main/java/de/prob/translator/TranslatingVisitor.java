@@ -67,7 +67,8 @@ public class TranslatingVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseARecExpression(ARecExpression node) {
-        HashMap<java.lang.String, BObject> s = new HashMap<java.lang.String, BObject>();
+        Map<java.lang.String, BObject> s = Record.newStorage();
+        // TODO or make the record immutable after filling it
         for (PRecEntry e : node.getEntries()) {
             e.apply(this);
             RecordEntry entry = (RecordEntry) this.getResult();

@@ -2,6 +2,7 @@ package de.prob.translator.types;
 
 import java.lang.String;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Record implements BObject, Map<java.lang.String, BObject> {
@@ -318,5 +319,7 @@ public class Record implements BObject, Map<java.lang.String, BObject> {
 
 	public String toString() {
 		return "rec(" + map + ')';
+	public static Map<java.lang.String, BObject> newStorage() {
+		return new LinkedHashMap<java.lang.String, BObject>();
 	}
 }
