@@ -212,4 +212,33 @@ public class Boolean implements BObject {
 	public Boolean(java.lang.String s) {
 		this.value = new java.lang.Boolean(s);
 	}
+
+	/* groovy operator overloading support */
+	Object asType(Class clazz) {
+		if (clazz == new java.lang.Boolean(true).getClass()) {
+			return this.booleanValue();
+		}
+		return this;
+	}
+	public boolean or(Boolean other) {
+		return this.booleanValue() || other.booleanValue();
+	}
+	
+	public boolean or(java.lang.Boolean other) {
+		return this.booleanValue() || other;
+	}
+
+	public boolean xor(Boolean other) {
+		return this.booleanValue() ^ other.booleanValue();
+	}
+	public boolean xor(java.lang.Boolean other) {
+		return this.booleanValue() ^ other;
+	}
+
+	public boolean and(Boolean other) {
+		return this.booleanValue() && other.booleanValue();
+	}
+	public boolean and(java.lang.Boolean other) {
+		return this.booleanValue() && other;
+	}
 }
