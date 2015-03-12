@@ -131,8 +131,14 @@ public class Tuple implements BObject, List<BObject> {
         return this.get(1);
     }
 
+    public BObject getAt(final int key) {
+        return this.get(key);
+    }
+
     @Override
     public String toString() {
+
+
         return "(" + this.getFirst() + " |-> " + this.getSecond() + ')';
     }
 }
