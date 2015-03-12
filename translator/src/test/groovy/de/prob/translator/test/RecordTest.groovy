@@ -1,4 +1,4 @@
-package de.prob.translator.types;
+package de.prob.translator.test;
 
 import static org.junit.Assert.*;
 
