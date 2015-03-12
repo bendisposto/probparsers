@@ -30,7 +30,7 @@ public class TranslatingVisitor extends DepthFirstAdapter {
     @Override
     public void caseTIntegerLiteral(final TIntegerLiteral node) {
         final java.lang.String text = node.getText();
-        this.setResult(new de.prob.translator.types.Integer(text));
+        this.setResult(de.prob.translator.types.Number.build(text));
     }
 
     @Override

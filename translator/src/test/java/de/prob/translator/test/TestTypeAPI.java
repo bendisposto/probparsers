@@ -2,7 +2,7 @@ package de.prob.translator.test;
 
 import de.prob.translator.Translator;
 import de.prob.translator.types.*;
-import de.prob.translator.types.Integer;
+import de.prob.translator.types.Number;
 import de.prob.translator.types.String;
 import org.junit.Test;
 
@@ -61,15 +61,15 @@ public class TestTypeAPI {
 
     @Test
     public void testBInt() throws Exception {
-        Integer a = new Integer(5);
-        Integer b = new Integer(6);
-        Integer c = new Integer(5);
+        Number a = Number.build(5);
+        Number b = Number.build(6);
+        Number c = Number.build(5);
 
         assertEquals(a, c);
 
-        Integer aa = new Integer("123123123123123123121");
-        Integer bb = new Integer("123123123123123123123");
-        Integer cc = new Integer("123123123123123123121");
+        Number aa = Number.build("123123123123123123121");
+        Number bb = Number.build("123123123123123123123");
+        Number cc = Number.build("123123123123123123121");
 
         assertEquals(aa, cc);
 

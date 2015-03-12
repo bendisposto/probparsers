@@ -3,7 +3,7 @@ package de.prob.translator.test;
 import de.prob.translator.Translator;
 import de.prob.translator.types.*;
 import de.prob.translator.types.Boolean;
-import de.prob.translator.types.Integer;
+import de.prob.translator.types.Number;
 import de.prob.translator.types.String;
 import org.junit.Test;
 
@@ -20,9 +20,9 @@ public class TestTranslator {
 
     @Test
     public void testTranslateNumber() throws Exception {
-        Integer o = (Integer) Translator.translate("5");
+        Number o = (Number) Translator.translate("5");
 
-        assertTrue(o.compareTo(new Integer("5")) == 0);
+        assertTrue(o.compareTo(Number.build("5")) == 0);
     }
 
     @Test
@@ -58,16 +58,16 @@ public class TestTranslator {
     public void testTranslateIntSet() throws Exception {
         Set o = (Set) Translator.translate("{5,6,7}");
         assertTrue(o.size() == 3);
-        assertFalse(o.contains(new Integer("8")));
+        assertFalse(o.contains(Number.build("8")));
     }
 
     @Test
     public void testTranslateTuple() throws Exception {
         Tuple o = (Tuple) Translator.translate("(1,2)");
         assertTrue(o.size() == 2);
-        assertTrue(o.contains(new Integer("1")));
-        assertTrue(o.contains(new Integer("2")));
-        assertFalse(o.contains(new Integer("8")));
+        assertTrue(o.contains(Number.build("1")));
+        assertTrue(o.contains(Number.build("2")));
+        assertFalse(o.contains(Number.build("8")));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class TestTranslator {
         Sequence s = (Sequence) Translator.translate("[1,2,3]");
         assertTrue(s.size() == 3);
         for (int i = 1; i <= s.size(); i++) {
-            assertTrue(s.get(i).equals(new Integer("" + (i))));
+            assertTrue(s.get(i).equals(Number.build("" + (i))));
         }
     }
 }
