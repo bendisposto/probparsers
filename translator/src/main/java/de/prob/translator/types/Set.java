@@ -1,23 +1,38 @@
 package de.prob.translator.types;
 
-import java.lang.String;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 public class Set implements BObject, java.util.Set<BObject> {
-	private final HashSet<BObject> set;
+	private final java.util.Set<BObject> set;
 
 	public Set(java.util.Set<BObject> elements) {
-		this.set = new HashSet<BObject>(elements);
+		this.set = elements; 
+	}
+	
+	public static LinkedHashSet<BObject> newStorage() {
+		return new LinkedHashSet<BObject>();
 	}
 
 	public Set() {
 		this.set = new HashSet<BObject>();
 	}
 
-	public String toString() {
-		return "{" + set + '}';
+	public java.lang.String toString() {
+		Iterator<BObject> it = this.iterator();
+		StringBuffer sb = new StringBuffer();
+		sb.append("{");
+		while(it.hasNext()) {
+			BObject b = (BObject) it.next();
+			sb.append(b.toString());
+			if(it.hasNext()) {
+				sb.append(", ");
+			}
+		}
+		sb.append("}");
+			return sb.toString();
 	}
 
 	public int size() {
@@ -42,11 +57,6 @@ public class Set implements BObject, java.util.Set<BObject> {
 
 	public void clear() {
 		throw new UnsupportedOperationException();
-	}
-
-	@SuppressWarnings("unchecked")
-	public Object clone() {
-		return new Set((java.util.Set<BObject>) this.set.clone());
 	}
 
 	public boolean equals(Object o) {

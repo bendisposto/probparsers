@@ -1,12 +1,32 @@
 package de.prob.translator;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.*;
-import de.prob.translator.types.*;
-import de.prob.translator.types.Boolean;
-import de.prob.translator.types.String;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
+import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
+import de.be4.classicalb.core.parser.node.ACoupleExpression;
+import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
+import de.be4.classicalb.core.parser.node.AEmptySetExpression;
+import de.be4.classicalb.core.parser.node.ARecEntry;
+import de.be4.classicalb.core.parser.node.ARecExpression;
+import de.be4.classicalb.core.parser.node.ASequenceExtensionExpression;
+import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
+import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.PRecEntry;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.prob.translator.types.Atom;
+import de.prob.translator.types.BObject;
+import de.prob.translator.types.Boolean;
+import de.prob.translator.types.Record;
+import de.prob.translator.types.Sequence;
+import de.prob.translator.types.String;
+import de.prob.translator.types.Tuple;
 
 public class TranslatingVisitor extends DepthFirstAdapter {
     private BObject result;
@@ -46,7 +66,7 @@ public class TranslatingVisitor extends DepthFirstAdapter {
     @Override
     public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 
-        java.util.Set<BObject> elements = transformList(node.getExpressions());
+        java.util.Set<BObject> elements = listToSet(node.getExpressions());
         this.setResult(new de.prob.translator.types.Set(elements));
     }
 
@@ -120,8 +140,8 @@ public class TranslatingVisitor extends DepthFirstAdapter {
         this.setResult(new Boolean(false));
     }
 
-    private java.util.Set<BObject> transformList(LinkedList<PExpression> elements) {
-        HashSet<BObject> s = new HashSet<BObject>();
+    private java.util.Set<BObject> listToSet(LinkedList<PExpression> elements) {
+        java.util.Set<BObject> s = de.prob.translator.types.Set.newStorage();
         for (PExpression p : elements) {
             p.apply(this);
             s.add(this.getResult());
