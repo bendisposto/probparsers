@@ -54,6 +54,6 @@ public class String implements BObject {
 	}
 
 	public java.lang.String toString() {
-		return this.value;
+		return '"' + this.value + '"';
 	}
 }
