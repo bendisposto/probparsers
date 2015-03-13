@@ -104,6 +104,11 @@ public class TranslatingVisitor extends DepthFirstAdapter {
         }
         this.setResult(new Sequence(s));
     }
+    
+    @Override
+	public void caseAEmptySequenceExpression(AEmptySequenceExpression node) {
+    	this.setResult(new Sequence());
+    }
 
     @Override
     public void caseABooleanTrueExpression(ABooleanTrueExpression node) {

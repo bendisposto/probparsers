@@ -1,13 +1,22 @@
 package de.prob.translator.test;
 
-import de.prob.translator.Translator;
-import de.prob.translator.types.*;
-import de.prob.translator.types.Boolean;
-import de.prob.translator.types.Number;
-import de.prob.translator.types.String;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import de.prob.translator.Translator;
+import de.prob.translator.types.Atom;
+import de.prob.translator.types.BObject;
+import de.prob.translator.types.Boolean;
+import de.prob.translator.types.String;
+import de.prob.translator.types.Sequence;
+import de.prob.translator.types.Record;
+import de.prob.translator.types.Set;
+import de.prob.translator.types.Tuple;
+import de.prob.translator.types.Number;
 
 
 public class TestTranslator {
@@ -46,6 +55,7 @@ public class TestTranslator {
     @Test
     public void testTranslateString() throws Exception {
         String str = (String) Translator.translate("\"a\"");
+        assert str.getValue() == "\"a\"";
     }
 
     @Test
@@ -73,7 +83,6 @@ public class TestTranslator {
     @Test
     public void testTranslateRecord() throws Exception {
         Record o = (Record) Translator.translate("rec(key1:1, key2:2)");
-        java.util.Set<java.lang.String> keys = o.keySet();
         assertTrue(o.containsKey("key1"));
         assertTrue(o.containsKey("key2"));
         assertFalse(o.containsKey("key3"));
@@ -86,6 +95,12 @@ public class TestTranslator {
         for (int i = 1; i <= s.size(); i++) {
             assertTrue(s.get(i).equals(Number.build("" + (i))));
         }
+    }
+    
+    @Test
+    public void testTranslateEmptySequence() throws Exception {
+        Sequence s = (Sequence) Translator.translate("[]");
+        assertTrue(s.size() == 0);
     }
 }
 
