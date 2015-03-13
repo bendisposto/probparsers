@@ -55,7 +55,7 @@ public class TestTranslator {
     @Test
     public void testTranslateString() throws Exception {
         String str = (String) Translator.translate("\"a\"");
-        assert str.getValue() == "\"a\"";
+        assert str.getValue().equals("a");
     }
 
     @Test
