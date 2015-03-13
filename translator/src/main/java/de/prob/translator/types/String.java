@@ -56,4 +56,8 @@ public class String implements BObject {
 	public java.lang.String toString() {
 		return '"' + this.value + '"';
 	}
+	
+	public boolean isCase(Object o) {
+		return this.value.equals(o);
+	}
 }

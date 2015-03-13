@@ -11,7 +11,7 @@ class StringTest {
 
 	def str1
 	def str2
-	
+
 	@Before
 	public void setUp() throws Exception {
 		str1 = Translator.translate("\"lorem ipsum\"")
@@ -28,7 +28,7 @@ class StringTest {
 	public void testEqualsObject() {
 		def other = Translator.translate("\"lorem ipsum\"")
 		assertFalse str1 == str2
-		assert str1 == other 
+		assert str1 == other
 	}
 
 	@Test
@@ -49,4 +49,14 @@ class StringTest {
 		assert str2.toString() == "\"\""
 	}
 
+	@Test
+	public void testIsCase() {
+		switch("lorem ipsum") {
+			case str1:
+				assert true
+				break
+			default:
+				assert false
+		}
+	}
 }
