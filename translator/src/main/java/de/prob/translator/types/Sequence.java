@@ -380,7 +380,7 @@ public class Sequence implements List<BObject>, BObject {
 	}
 
 	public BObject getAt(final int key) {
-		return this.list.get(key);
+		return this.get(key);
 	}
 
 	/**
@@ -589,7 +589,11 @@ public class Sequence implements List<BObject>, BObject {
 		this.list = l;
 	}
 
+	public Sequence() {
+		this.list = new java.util.ArrayList<BObject>();
+	}
+
 	public String toString() {
-		return "[" + list + ']';
+		return list.toString();
 	}
 }
