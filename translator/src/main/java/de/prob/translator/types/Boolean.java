@@ -214,6 +214,7 @@ public class Boolean implements BObject {
 	}
 
 	/* groovy operator overloading support */
+	@SuppressWarnings("rawtypes")
 	Object asType(Class clazz) {
 		if (clazz == new java.lang.Boolean(true).getClass()) {
 			return this.booleanValue();
