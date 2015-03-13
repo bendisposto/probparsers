@@ -96,4 +96,14 @@ class RecordTest {
 		def str = rec1.toString();
 		assert str == "rec(a: 1, b: 2)"
 	}
+	
+	@Test
+	public void testIterator() {
+		def values = []
+		rec1.each { entry ->
+			values << [entry.key, entry.value.intValue()]
+		}
+		assert values == [['a', 1], ['b', 2]]
+		
+	}
 }
