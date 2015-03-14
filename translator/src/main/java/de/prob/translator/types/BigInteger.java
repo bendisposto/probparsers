@@ -8,13 +8,10 @@ public class BigInteger extends Number {
 			return true;
 		if (obj == null)
 			return false;
+		if (obj instanceof java.lang.Number) {
+			return this.compareTo((java.lang.Number)obj) == 0;
+		}
 		if (getClass() != obj.getClass())
-			return false;
-		BigInteger other = (BigInteger) obj;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}
