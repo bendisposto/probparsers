@@ -59,4 +59,9 @@ class StringTest {
 				assert false
 		}
 	}
+	
+	@Test
+	public void testAsType() {
+		assert (str1 as java.lang.String).getClass() == java.lang.String
+	}
 }
