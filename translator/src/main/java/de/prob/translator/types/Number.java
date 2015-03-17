@@ -2,12 +2,10 @@ package de.prob.translator.types;
 
 public abstract class Number extends java.lang.Number implements
 		Comparable<Number>, BObject {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 7702079048348822936L;
 
-	// XXX Maybe add a Integer subtype that promotes to BigInter on operations
+	// TODO Maybe add a Integer subtype that promotes to BigInter on operations
 	public static Number build(java.lang.String s) {
 		return new BigInteger(new java.math.BigInteger(s));
 	}

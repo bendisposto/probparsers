@@ -14,16 +14,16 @@ class BooleanTest {
 		assertFalse(a & b)
 		assertFalse(b & a)
 		assertFalse(b & b)
-		
+
 		assertTrue(a & true)
 		assertTrue(true & a as java.lang.Boolean)
-		
+
 		assertFalse(a & false)
 		assertFalse(false & a as java.lang.Boolean)
-		
+
 		assertFalse(b & false)
 	}
-	
+
 	@Test
 	void testOr() {
 		def a = Translator.translate("TRUE")
@@ -32,12 +32,12 @@ class BooleanTest {
 		assertTrue(a | b)
 		assertTrue(b | a)
 		assertFalse(b | b)
-		
+
 		assertTrue(a | true)
 		assertTrue(true | b as java.lang.Boolean)
 		assertFalse(false |  b as java.lang.Boolean)
 	}
-	
+
 	@Test
 	void testXor() {
 		def a = Translator.translate("TRUE")
@@ -46,7 +46,7 @@ class BooleanTest {
 		assertTrue(a ^ b)
 		assertTrue(b ^ a)
 		assertFalse(b ^ b)
-		
+
 		assertTrue(a ^ false)
 		assertTrue(false ^ a  as java.lang.Boolean)
 	}

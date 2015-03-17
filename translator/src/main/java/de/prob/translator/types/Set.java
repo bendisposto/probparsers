@@ -9,9 +9,9 @@ public class Set implements BObject, java.util.Set<BObject> {
 	private final java.util.Set<BObject> set;
 
 	public Set(java.util.Set<BObject> elements) {
-		this.set = elements; 
+		this.set = elements;
 	}
-	
+
 	public static LinkedHashSet<BObject> newStorage() {
 		return new LinkedHashSet<BObject>();
 	}
@@ -24,15 +24,15 @@ public class Set implements BObject, java.util.Set<BObject> {
 		Iterator<BObject> it = this.iterator();
 		StringBuffer sb = new StringBuffer();
 		sb.append("{");
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			BObject b = (BObject) it.next();
 			sb.append(b.toString());
-			if(it.hasNext()) {
+			if (it.hasNext()) {
 				sb.append(", ");
 			}
 		}
 		sb.append("}");
-			return sb.toString();
+		return sb.toString();
 	}
 
 	public int size() {

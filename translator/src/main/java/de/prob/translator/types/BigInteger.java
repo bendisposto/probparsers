@@ -9,16 +9,13 @@ public class BigInteger extends Number {
 		if (obj == null)
 			return false;
 		if (obj instanceof java.lang.Number) {
-			return this.compareTo((java.lang.Number)obj) == 0;
+			return this.compareTo((java.lang.Number) obj) == 0;
 		}
 		if (getClass() != obj.getClass())
 			return false;
 		return true;
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6484548796859331267L;
 	private java.math.BigInteger value;
 

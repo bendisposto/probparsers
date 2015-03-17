@@ -22,24 +22,10 @@ public class String implements BObject {
 		return true;
 	}
 
-	/**
-	 * Returns the length of this string. The length is equal to the number of
-	 * <a href="Character.html#unicode">Unicode code units</a> in the string.
-	 * 
-	 * @return the length of the sequence of characters represented by this
-	 *         object.
-	 */
 	public int length() {
 		return value.length();
 	}
 
-	/**
-	 * Returns <tt>true</tt> if, and only if, {@link #length()} is <tt>0</tt>.
-	 * 
-	 * @return <tt>true</tt> if {@link #length()} is <tt>0</tt>, otherwise
-	 *         <tt>false</tt>
-	 * @since 1.6
-	 */
 	public boolean isEmpty() {
 		return value.isEmpty();
 	}
@@ -56,7 +42,7 @@ public class String implements BObject {
 	public java.lang.String toString() {
 		return '"' + this.value + '"';
 	}
-	
+
 	public boolean isCase(Object o) {
 		return this.value.equals(o);
 	}

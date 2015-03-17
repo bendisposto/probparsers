@@ -11,7 +11,7 @@ class SequenceTest {
 	def seq1
 	def seq2
 	def atom_a
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.seq1 = Translator.translate("[a,b,c]")
@@ -42,15 +42,14 @@ class SequenceTest {
 		def values = []
 		seq1.each {
 			values << it.toString();
-		} 
+		}
 		assert values == ['a', 'b', 'c']
 		values = []
-		
+
 		for(BObject i : seq1) {
 			values << i.toString()
 		}
 		assert values == ['a', 'b', 'c']
-		
 	}
 
 	@Test
@@ -133,5 +132,4 @@ class SequenceTest {
 	public void testToString() {
 		assert seq1.toString() == "[a, b, c]"
 	}
-
 }

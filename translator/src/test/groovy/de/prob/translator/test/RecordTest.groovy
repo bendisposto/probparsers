@@ -58,7 +58,7 @@ class RecordTest {
 	public void testPutAt() {
 		rec1['a'] = 5
 	}
-	
+
 	@Test(expected = UnsupportedOperationException.class)
 	public void testPut() {
 		rec1.put('a', one)
@@ -96,14 +96,16 @@ class RecordTest {
 		def str = rec1.toString();
 		assert str == "rec(a: 1, b: 2)"
 	}
-	
+
 	@Test
 	public void testIterator() {
 		def values = []
 		rec1.each { entry ->
-			values << [entry.key, entry.value.intValue()]
+			values << [
+				entry.key,
+				entry.value.intValue()
+			]
 		}
 		assert values == [['a', 1], ['b', 2]]
-		
 	}
 }

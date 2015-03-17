@@ -43,7 +43,7 @@ class SetTest {
 	public void testContains() {
 		assert set1.contains(one)
 		assertFalse set1.contains(2)
-		
+
 		assertFalse(set2.contains(one))
 	}
 
@@ -68,7 +68,6 @@ class SetTest {
 		assertFalse set1 == set2
 		assert set1 == set3
 		assertFalse set2 == one
-		
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -88,7 +87,7 @@ class SetTest {
 		assert set1.containsAll([one])
 		assertFalse set2.containsAll([one])
 	}
-	
+
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testAddAll() {
@@ -102,6 +101,6 @@ class SetTest {
 			values << it.intValue()
 		}
 		values.sort()
-		assert values == [1,2,3]
+		assert values == [1, 2, 3]
 	}
 }

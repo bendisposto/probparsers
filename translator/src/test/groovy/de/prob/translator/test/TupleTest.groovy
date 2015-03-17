@@ -10,12 +10,12 @@ import static org.junit.Assert.assertTrue;
 
 class TupleTest {
 	def t1
-	def one 
+	def one
 	def other
 	@Before
 	public void setUp() throws Exception {
 		this.t1 = Translator.translate("(1 |-> 2)")
-		
+
 		this.one = Translator.translate("1")
 		this.other = Translator.translate("99")
 	}
@@ -27,7 +27,7 @@ class TupleTest {
 
 	@Test
 	public void testIsEmpty() {
-		assertFalse t1.isEmpty() 
+		assertFalse t1.isEmpty()
 	}
 
 	@Test
@@ -42,12 +42,12 @@ class TupleTest {
 		for(Number x: t1) {
 			sols << x.intValue()
 		}
-		assertTrue(sols == [1,2])
+		assertTrue(sols == [1, 2])
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testAddBObject() {
-		t1 << one 
+		t1 << one
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -64,7 +64,7 @@ class TupleTest {
 	public void testAddAll() {
 		t1.addAll([one])
 	}
-	
+
 	@Test(expected = UnsupportedOperationException.class)
 	public void testRemoveAll() {
 		t1.removeAll([one])
@@ -110,5 +110,4 @@ class TupleTest {
 	public void testToString() {
 		assertTrue(t1.toString() == "(1 |-> 2)")
 	}
-
 }
