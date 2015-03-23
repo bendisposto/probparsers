@@ -86,6 +86,20 @@ public class TestTranslator {
 		assertTrue(o.containsKey("key2"));
 		assertFalse(o.containsKey("key3"));
 	}
+	
+	@Test
+	public void testTranslateRecordWithSetValues() throws Exception {
+		Record o = (Record) Translator.translate("rec(key1:{1,2,3}, key2:{a,b})");
+		Set a = (Set) o.get("key1");
+		assertTrue(a.contains(Number.build(1)));
+	}
+	
+	@Test
+	public void testTranslateRecordWithSequenceValues() throws Exception {
+		Record o = (Record) Translator.translate("rec(key1:[1,2,3])");
+		Sequence a = (Sequence) o.get("key1");
+		assertTrue(a.contains(Number.build(1)));
+	}
 
 	@Test
 	public void testTranslateSequence() throws Exception {
