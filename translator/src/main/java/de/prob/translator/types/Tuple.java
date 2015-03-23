@@ -1,6 +1,6 @@
 package de.prob.translator.types;
 
-import java.lang.String;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +13,13 @@ public class Tuple implements BObject, List<BObject> {
 		if (s.size() != 2) {
 			throw new IllegalArgumentException("");
 		}
+		this.elements = s;
+	}
+
+	public Tuple(BObject first, BObject second) {
+		List<BObject> s = new ArrayList<BObject>(2);
+		s.add(first);
+		s.add(second);
 		this.elements = s;
 	}
 
@@ -140,8 +147,7 @@ public class Tuple implements BObject, List<BObject> {
 	}
 
 	@Override
-	public String toString() {
-
+	public java.lang.String toString() {
 		return "(" + this.getFirst() + " |-> " + this.getSecond() + ')';
 	}
 }

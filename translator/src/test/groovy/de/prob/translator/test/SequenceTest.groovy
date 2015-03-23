@@ -41,15 +41,15 @@ class SequenceTest {
 	public void testIterator() {
 		def values = []
 		seq1.each {
-			values << it.toString();
+			values << [it.first, it.second.toString()]
 		}
-		assert values == ['a', 'b', 'c']
+		assert values == [[1, 'a'], [2, 'b'], [3, 'c']]
 		values = []
 
 		for(BObject i : seq1) {
-			values << i.toString()
+			values << [i.first, i.second.toString()]
 		}
-		assert values == ['a', 'b', 'c']
+		assert values == [[1, 'a'], [2, 'b'], [3, 'c']]
 	}
 
 	@Test
@@ -131,5 +131,36 @@ class SequenceTest {
 	@Test
 	public void testToString() {
 		assert seq1.toString() == "[a, b, c]"
+	}
+
+	@Test
+	public void testSequenceIteration() {
+		def i = seq1.iterator()
+		assert i.hasNext()
+		assertFalse i.hasPrevious()
+
+		assert i.previousIndex() == -1
+		i.next() == i.previous()
+		def t1 = i.next()
+		i.next() == i.previous()
+		def t2 = i.next()
+		i.next() == i.previous()
+		def t3 = i.next()
+		
+		assert i.hasPrevious()
+		assertFalse i.hasNext()
+		
+		assert i.previous() == t3
+		i.next() == i.previous()
+		assert i.previous() == t2
+		i.next() == i.previous()
+		assert i.previous() == t1
+		
+		assert i.previousIndex() == -1
+		
+		assert t1.first == 1
+		assert t1.second == atom_a
+		assert t2.first == 2
+		assert t3.first == 3
 	}
 }

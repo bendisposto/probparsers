@@ -22,7 +22,7 @@ public class Sequence implements List<BObject>, BObject {
 	}
 
 	public Iterator<BObject> iterator() {
-		return list.iterator();
+		return new SequenceIterator(this);
 	}
 
 	public Object[] toArray() {
@@ -116,11 +116,11 @@ public class Sequence implements List<BObject>, BObject {
 	}
 
 	public ListIterator<BObject> listIterator() {
-		return list.listIterator();
+		return new SequenceIterator(this);
 	}
 
 	public ListIterator<BObject> listIterator(int index) {
-		return list.listIterator(index - 1);
+		return new SequenceIterator(this, index);
 	}
 
 	public List<BObject> subList(int fromIndex, int toIndex) {
