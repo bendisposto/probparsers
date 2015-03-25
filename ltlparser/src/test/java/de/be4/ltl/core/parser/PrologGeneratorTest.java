@@ -426,6 +426,67 @@ public class PrologGeneratorTest {
 	}
 
 	@Test
+	public void testWeakFairAll() throws Exception {
+
+		final PrologTerm ap = new CompoundPrologTerm("all");
+		final PrologTerm weak_assumption = new CompoundPrologTerm(
+				"weakassumptions", ap);
+
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", weak_assumption, TERM_TRUE);
+		check("WEF => true", expected);
+	}
+
+	@Test
+	public void testStrongFairAll() throws Exception {
+
+		final PrologTerm ap = new CompoundPrologTerm("all");
+		final PrologTerm strong_assumption = new CompoundPrologTerm(
+				"strongassumptions", ap);
+
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", strong_assumption, TERM_TRUE);
+		check("SEF => true", expected);
+	}
+
+	@Test
+	public void testWeakStrongFairAll() throws Exception {
+
+		final PrologTerm ap = new CompoundPrologTerm("all");
+		final PrologTerm weak_assumption = new CompoundPrologTerm(
+				"weakassumptions", ap);
+
+		final PrologTerm strong_assumption = new CompoundPrologTerm(
+				"strongassumptions", ap);
+
+		final PrologTerm and = new CompoundPrologTerm("and",strong_assumption, weak_assumption);
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", and, TERM_TRUE);
+		check("SEF & WEF => true", expected);
+	}
+
+	@Test
+	public void testWeakStrongFairAll1() throws Exception {
+
+		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
+		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
+		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
+		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
+
+		final PrologTerm ap = new CompoundPrologTerm("all");
+		final PrologTerm weak_assumption = new CompoundPrologTerm(
+				"weakassumptions", ap);
+
+		final PrologTerm strong_assumption = new CompoundPrologTerm(
+				"strongassumptions", ap1);
+
+		final PrologTerm and = new CompoundPrologTerm("and",strong_assumption, weak_assumption);
+		final PrologTerm expected = new CompoundPrologTerm(
+				"fairnessimplication", and, TERM_TRUE);
+		check("sf(bla) & WEF => true", expected);
+	}
+
+	@Test
 	public void testDLK() throws Exception {
 		final PrologTerm transPred = new CompoundPrologTerm("bla");
 		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);

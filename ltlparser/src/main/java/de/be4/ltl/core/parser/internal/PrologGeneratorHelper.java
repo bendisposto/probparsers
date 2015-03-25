@@ -200,6 +200,14 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void weak_fair_all() {
+		pto.printAtom("all");
+	}
+
+	public void strong_fair_all() {
+		pto.printAtom("all");
+	}
+
 	public void dlk(ADlkLtl node, PrologGenerator gen) {
 		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");

@@ -9,6 +9,7 @@ package de.be4.ltl.core.parser.internal;
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
+import de.be4.ltl.core.parser.node.AAndFair2Ltl;
 import de.be4.ltl.core.parser.node.ACtrlLtl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
@@ -19,8 +20,10 @@ import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
+import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
+import de.be4.ltl.core.parser.node.AWeakFairAllLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
 import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.Node;
@@ -95,7 +98,14 @@ public class PrologGenerator extends DepthFirstAdapter {
 		final PLtl right_node = node.getRight();
 		helper.and_fair1(left_node,right_node,this);
 	}
-	
+
+	@Override
+	public void caseAAndFair2Ltl(final AAndFair2Ltl node) {
+		final PLtl left_node = node.getLeft();
+		final PLtl right_node = node.getRight();
+		helper.and_fair2(left_node,right_node,this);
+	}
+
 	@Override
 	public void caseASinkLtl(final ASinkLtl node) {
 		helper.sink();
@@ -109,6 +119,16 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseACurrentLtl(final ACurrentLtl node) {
 		helper.current();
+	}
+
+	@Override
+	public void caseAWeakFairAllLtl(final AWeakFairAllLtl node) {
+		helper.weak_fair_all();
+	}
+
+	@Override
+	public void caseAStrongFairAllLtl(final AStrongFairAllLtl node) {
+		helper.strong_fair_all();
 	}
 
 	@Override
