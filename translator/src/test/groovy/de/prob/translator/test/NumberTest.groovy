@@ -100,4 +100,10 @@ public class NumberTest {
 		// assert b != b2
 
 	}
+
+	@Test
+	void testNegativeNumber() {
+		def a = Translator.translate("-1")
+		assert -1 == a
+	}
 }

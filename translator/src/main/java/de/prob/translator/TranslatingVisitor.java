@@ -15,6 +15,7 @@ import de.be4.classicalb.core.parser.node.ARecEntry;
 import de.be4.classicalb.core.parser.node.ARecExpression;
 import de.be4.classicalb.core.parser.node.ASequenceExtensionExpression;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
+import de.be4.classicalb.core.parser.node.AUnaryMinusExpression;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PRecEntry;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -30,6 +31,7 @@ import de.prob.translator.types.Tuple;
 
 public class TranslatingVisitor extends DepthFirstAdapter {
 	private BObject result;
+	private boolean inUnaryMinus;
 
 	public BObject getResult() {
 		if (this.result == null) {
@@ -39,7 +41,6 @@ public class TranslatingVisitor extends DepthFirstAdapter {
 		BObject res = this.result;
 		this.result = null;
 		return res;
-
 	}
 
 	public void setResult(BObject result) {
@@ -52,8 +53,19 @@ public class TranslatingVisitor extends DepthFirstAdapter {
 
 	@Override
 	public void caseTIntegerLiteral(final TIntegerLiteral node) {
-		final java.lang.String text = node.getText();
+		java.lang.String text = node.getText();
+		if (this.inUnaryMinus) {
+			text = "-" + text;
+		}
 		this.setResult(de.prob.translator.types.Number.build(text));
+	}
+
+	public void inAUnaryMinusExpression(AUnaryMinusExpression node) {
+		this.inUnaryMinus = true;
+	}
+
+	public void outAUnaryMinusExpression(AUnaryMinusExpression node) {
+		this.inUnaryMinus = false;
 	}
 
 	@Override
