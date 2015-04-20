@@ -17,3 +17,5 @@ PROB_LOGFILE_IS_UNDEFINED
 src/main/resources/build.properties
 bparser/src/main/resources/revision.properties
 config.groovy
+*.iml
+*.idea

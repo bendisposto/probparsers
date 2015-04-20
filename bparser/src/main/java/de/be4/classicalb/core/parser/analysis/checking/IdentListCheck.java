@@ -8,7 +8,28 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.node.AAnySubstitution;
+import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
+import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
+import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
+import de.be4.classicalb.core.parser.node.AFunctionExpression;
+import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
+import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.ALambdaExpression;
+import de.be4.classicalb.core.parser.node.ALetSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
+import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
+import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
+import de.be4.classicalb.core.parser.node.AVarSubstitution;
+import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.Start;
 
 /**
  * <p>
@@ -22,7 +43,7 @@ import de.be4.classicalb.core.parser.node.*;
  * </p>
  * <p>
  * Additionally it checks if the LHS of an {@link AAssignSubstitution} and the
- * result list of an {@link AOpWithReturnSubstitution} only contain
+ * result list of an {@link AOperationCallSubstitution} only contain
  * {@link AIdentifierExpression} or {@link AFunctionExpression} nodes.
  * </p>
  * 
@@ -41,21 +62,21 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 * </p>
 	 * <p>
 	 * An {@link CheckException} is thrown if there are
-	 * {@link AAssignSubstitution} or {@link AOpWithReturnSubstitution} nodes
+	 * {@link AAssignSubstitution} or {@link AOperationCallSubstitution} nodes
 	 * with illegal elements in the LHS. Otherwise the other relevant nodes are
 	 * checked for illegal entries in their identifier lists.
 	 * </p>
 	 * <p>
 	 * In both cases the erroneous nodes are collected, so that only one
 	 * exception is thrown for the {@link AAssignSubstitution} and
-	 * {@link AOpWithReturnSubstitution} nodes respectively one for all other
+	 * {@link AOperationCallSubstitution} nodes respectively one for all other
 	 * nodes.
 	 * </p>
 	 * 
 	 * @param rootNode
 	 * @throws CheckException
 	 *             : Erroneous {@link AAssignSubstitution} and
-	 *             {@link AOpWithReturnSubstitution} nodes are collected in one
+	 *             {@link AOperationCallSubstitution} nodes are collected in one
 	 *             exception and all other nodes in another one.
 	 */
 	public void runChecks(final Start rootNode) throws CheckException {
@@ -82,20 +103,18 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 		if (nonIdentifiers.size() > 0) {
 			// at least one error was found
-			throw new CheckException("Identifier expected", nonIdentifiers
-					.toArray(new Node[nonIdentifiers.size()]));
+			throw new CheckException("Identifier expected",
+					nonIdentifiers.toArray(new Node[nonIdentifiers.size()]));
 		}
 	}
 
 	@Override
-	public void inAExistsPredicate(
-			final AExistsPredicate node) {
+	public void inAExistsPredicate(final AExistsPredicate node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAForallPredicate(
-			final AForallPredicate node) {
+	public void inAForallPredicate(final AForallPredicate node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 

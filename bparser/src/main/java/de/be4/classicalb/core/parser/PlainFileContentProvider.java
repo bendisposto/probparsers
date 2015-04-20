@@ -37,15 +37,22 @@ public class PlainFileContentProvider implements IFileContentProvider {
 	}
 
 	public File getFile(final String filename) {
-		final File file;
+		FileSearchPathProvider provider;
 		if (parentFile == null) {
-			file = new File(filename);
+			provider = new FileSearchPathProvider(filename);
 		} else {
-			final File parentPath = parentFile.isDirectory() ? parentFile
-					: parentFile.getParentFile();
-			file = new File(parentPath, filename);
+			final String parentPath = parentFile.isDirectory() ? parentFile.getPath()
+					: parentFile.getParent();
+			provider = new FileSearchPathProvider(parentPath, filename);
 		}
-		return file;
+		try {
+			return provider.resolve();
+		} catch(FileNotFoundException e) {
+			// TODO should raise exception when we know the file is not available
+		}
+		// returning file object to keep interface
+		return new File(filename);
+
 	}
 
 	public static String readFileContent(final File file)
@@ -59,6 +66,8 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		while ((read = inputStreamReader.read(buffer)) >= 0) {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
+
+		inputStreamReader.close();
 
 		return builder.toString().replaceAll("\r\n", "\n");
 	}

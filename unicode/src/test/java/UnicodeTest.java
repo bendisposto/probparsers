@@ -43,7 +43,7 @@ public class UnicodeTest {
 	public void testQuotes() {
 		assertEquals("\"", UnicodeTranslator.toUnicode("\""));
 	}
-	
+
 	@Test
 	public void NoSpaceAndAmpersand() {
 		assertEquals("active \u2227 waiting",
@@ -110,5 +110,15 @@ public class UnicodeTest {
 
 		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
 		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
+	}
+
+	@Test
+	@Ignore
+	public void testUnicodeInVsSetMinus() {
+		String unicode = "\u2200i,s·(s\u2208open \u2227 i\u2208INVARIANTS\u2216invs_to_verify[{s}] \u21d2 s \u21a6 i \u2208 truth)";
+		String ascii = "!i,s.(s:open & i:INVARIANTS\\invs_to_verify[{s}] => s |-> i : truth)";
+
+		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
+		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
 	}
 }

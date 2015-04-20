@@ -15,20 +15,27 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.AConstructorFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.ADisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AEvent;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
 import de.be4.classicalb.core.parser.node.AEventsModelClause;
 import de.be4.classicalb.core.parser.node.AFalsityPredicate;
+import de.be4.classicalb.core.parser.node.AFreetype;
+import de.be4.classicalb.core.parser.node.AFreetypesMachineClause;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
+import de.be4.classicalb.core.parser.node.AIntegerSetExpression;
 import de.be4.classicalb.core.parser.node.APartitionPredicate;
+import de.be4.classicalb.core.parser.node.APowSubsetExpression;
 import de.be4.classicalb.core.parser.node.ATruthPredicate;
 import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PEvent;
 import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.PFreetype;
+import de.be4.classicalb.core.parser.node.PFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.PModelClause;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
@@ -118,9 +125,15 @@ public class ASTPrologTest {
 
 	@Test
 	public void testMachine() throws BException {
-		String m = "MACHINE name"
-				+ "  OPERATIONS op=skip END";
-                String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo: warum taucht hier die 5 zweimal auf?
+		String m = "MACHINE name" + "  OPERATIONS op=skip END";
+		String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo:
+																																					// warum
+																																					// taucht
+																																					// hier
+																																					// die
+																																					// 5
+																																					// zweimal
+																																					// auf?
 		checkProlog(1, m, expected);
 	}
 
@@ -130,7 +143,7 @@ public class ASTPrologTest {
 				+ "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
 				+ "  INVARIANT x:NAT  INITIALISATION x:=5"
 				+ "  OPERATIONS op=skip; r,s <-- op2(a,b) = skip  END";
-       		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
+		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
 				+ "sees($,[identifier($,see),identifier($,'s.see2')]),"
@@ -153,11 +166,8 @@ public class ASTPrologTest {
 
 	@Test
 	public void testEmptyString() throws BException {
-		checkExpression(
-				"\"test\"+\"\"",
-				"add(2,string(3,test),string(4,''))");
+		checkExpression("\"test\"+\"\"", "add(2,string(3,test),string(4,''))");
 	}
-
 
 	@Test
 	public void testPredicates() throws BException {
@@ -318,4 +328,41 @@ public class ASTPrologTest {
 		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(
 				name)));
 	}
+
+	@Test
+	public void testFreeType() throws BException {
+		final AConstructorFreetypeConstructor multi = new AConstructorFreetypeConstructor(
+
+		new TIdentifierLiteral("multi"), new APowSubsetExpression(
+				new AIntegerSetExpression()));
+
+		final AConstructorFreetypeConstructor single = new AConstructorFreetypeConstructor(
+				new TIdentifierLiteral("single"),
+
+				new AIntegerSetExpression());
+
+		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"),
+				Arrays.<PFreetypeConstructor> asList(multi, single));
+
+		AFreetypesMachineClause clause = new AFreetypesMachineClause(
+				Arrays.<PFreetype> asList(freetype));
+
+		final StringWriter swriter = new StringWriter();
+		NodeIdAssignment nodeids = new NodeIdAssignment();
+		clause.apply(nodeids);
+		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter),
+				false);
+		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
+		ASTProlog prolog = new ASTProlog(pout, pprinter);
+
+		clause.apply(prolog);
+
+		String code = swriter.toString();
+		assertFalse(code.isEmpty());
+		assertEquals(
+				"freetypes(0,[freetype(1,'T',[constructor(2,multi,pow_subset(3,integer_set(4))),constructor(5,single,integer_set(6))])])",
+				code);
+
+	}
+
 }

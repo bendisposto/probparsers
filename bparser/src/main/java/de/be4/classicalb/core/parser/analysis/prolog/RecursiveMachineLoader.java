@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
@@ -48,7 +50,8 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys" };
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch",
+			".sys" };
 	private final String directory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
@@ -71,7 +74,7 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param main
 	 *            The main machine
-	 * @param list
+	 * @param pragmas
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
@@ -91,10 +94,10 @@ public class RecursiveMachineLoader {
 	}
 
 	/**
-	 * Prints the machines loaded by {@link #loadAllMachines(Start)}.
+	 * Prints the machines loaded by
+	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions,List)}.
 	 * 
 	 * @param pout
-	 * @param pragmas
 	 */
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
@@ -150,7 +153,7 @@ public class RecursiveMachineLoader {
 		if (files.contains(machineFile)) {
 			return;
 		}
-		final BParser parser = new BParser(machineFile.getName());
+		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
 		files.add(machineFile);
@@ -181,9 +184,12 @@ public class RecursiveMachineLoader {
 		final String prefix = directory == null ? "" : directory
 				+ File.separator;
 		for (final String suffix : SUFFICES) {
-			final File file = new File(prefix + machineName + suffix);
-			if (file.exists()) {
-				return file;
+			try {
+				return new FileSearchPathProvider(prefix, machineName + suffix)
+						.resolve();
+			} catch (FileNotFoundException e) {
+				// could not resolve the combination of prefix, machineName and
+				// suffix, trying next one
 			}
 		}
 		throw new BException(null, "Machine file not found: " + machineName,
@@ -208,7 +214,13 @@ public class RecursiveMachineLoader {
 		final String name = refMachines.getName();
 		final SortedSet<String> references = refMachines
 				.getReferencedMachines();
-		getParsedMachines().put(name, current);
+
+		try {
+			getParsedMachines().put(name, current);
+		} catch (NullPointerException e) {
+			throw new BException(machineFile.getName(),
+					"No machines loaded so far.", e);
+		}
 
 		if (name != null) {
 			ancestors.add(name);

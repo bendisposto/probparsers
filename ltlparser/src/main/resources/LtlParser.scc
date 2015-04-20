@@ -26,20 +26,32 @@ Package de.be4.ltl.core.parser;
 	
 	enabled_start = 'e(';
     available_start = 'Av(';
-    
-    strong_fair_start = 'SF(';
-    weak_fair_start = 'WF(';
+
+    strong_fair_start = 'sf(';
+    weak_fair_start = 'wf(';
+
+    /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */   
+    strong_fair_all = 'SEF';
+    strong_fair_start_capital = 'SF(';
+    weak_fair_start_capital = 'WF(';
+    weak_fair_all = 'WEF';
+
+    dlk_action_start = 'deadlock(';
+    det_action_start = 'deterministic(';
+    ctrl_action_start = 'controller(';
     
     exists_quantor = '#';
     forall_quantor = '!';
     dot = '.';
+ 
+    comma = ',';
     
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
 
  States 
-  ltl, atomic, action;
+  ltl, atomic, action, actions;
 
 
 /*******************************************************************
@@ -50,12 +62,15 @@ Tokens
 
     {ltl} true = 'true';
     {ltl} false = 'false';
+  	{ltl -> actions} dlk = dlk_action_start;
+  	{ltl -> actions} det = det_action_start;
+  	{ltl -> actions} ctrl = ctrl_action_start;
     {ltl} sink ='sink';
     {ltl} deadlock ='deadlock';
     {ltl} current = 'current';
     {ltl} l_par = l_paren;
     {ltl} r_par = r_paren;
- 
+  
     {ltl -> action} l_sq = l_bracket;
     {ltl -> action} enabled = enabled_start;
     {ltl -> action} available = available_start;
@@ -72,15 +87,16 @@ Tokens
 	{ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 	{ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 	
+    {actions} args_begin = l_paren;
+    {actions} args_end = r_paren;
+    {actions} actions_split = comma;
+    {actions} action_char = ([0 .. 0xffff]);
+	
 /* Boolean Operators */
     {ltl} implies = '=>';
     {ltl} and = '&';
     {ltl} or = 'or';
     {ltl} not = 'not';
-
-/* Fairness LTL operators */
-    {ltl -> action} strong_fair = strong_fair_start;
-    {ltl -> action} weak_fair = weak_fair_start;
 
 /* LTL temporal operators */
     {ltl} until = 'U';
@@ -98,9 +114,15 @@ Tokens
     {ltl} historically = 'H';
     {ltl} once = 'O';
     {ltl} yesterday = 'Y';
-		
- 	white_space = white_space;
 
+ /* Fairness LTL operators */
+    {ltl} strong_fair_everything = strong_fair_all;
+    {ltl} weak_fair_everything = weak_fair_all;
+    {ltl -> action} strong_fair = (strong_fair_start | strong_fair_start_capital);
+    {ltl -> action} weak_fair = (weak_fair_start | weak_fair_start_capital);
+
+ 	white_space = white_space;
+     
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
@@ -157,21 +179,34 @@ Ignored Tokens
                           {forall}       forall_identifier 
                                                 l_par atomic_proposition_begin implies ltl_formula r_par 
                                     { -> New ltl.forall(forall_identifier,atomic_proposition_begin,ltl_formula.ltl)} |
+                          {dlk}          dlk  [args]:arg_list                                         { -> New ltl.dlk([args.actions])} |
+                          {det}          det  [args]:arg_list                                         { -> New ltl.det([args.actions])} |
+                          {ctrl}         ctrl [args]:arg_list                                         { -> New ltl.ctrl([args.actions])} |
                           {unparsed}     atomic_proposition_begin                                     { -> New ltl.unparsed(atomic_proposition_begin) }  ;
 
+  arg_list {-> actions*} = {single}   [arg]:arg                 { -> [arg.actions]} |
+                           {multiple} [arg]:arg [rest]:arg_list { -> [arg.actions, rest.actions]} ;
 
+  arg {-> actions} =   {op} action_char { -> New actions.op(action_char)};
+  
 // LTL Fairness Assumption Productions
-  ltl_fairness {-> ltl} = {and_fair1} [left]:ltl_strong_fairness and  [right]:ltl_weak_fairness { -> New ltl.and_fair1(left.ltl,right.ltl)} |
-  						  {and_fair2} [left]:ltl_weak_fairness   and  [right]:ltl_strong_fairness { -> New ltl.and_fair2(left.ltl,right.ltl)} |
-						  {strong_assumptions} ltl_strong_fairness { -> New ltl.strong_assumptions(ltl_strong_fairness.ltl)} |
-						  {weak_assumptions}   ltl_weak_fairness   { -> New ltl.weak_assumptions(ltl_weak_fairness.ltl)};
-						  
+  ltl_fairness {-> ltl} = {and_fair1} [left]:ltl_strong_fairness1 and  [right]:ltl_weak_fairness1 { -> New ltl.and_fair1(left.ltl,right.ltl)} |
+  						  {and_fair2} [left]:ltl_weak_fairness1   and  [right]:ltl_strong_fairness1 { -> New ltl.and_fair2(left.ltl,right.ltl)} |
+						  {strong_assumptions} ltl_strong_fairness1 { -> New ltl.strong_assumptions(ltl_strong_fairness1.ltl)} |
+						  {weak_assumptions}   ltl_weak_fairness1   { -> New ltl.weak_assumptions(ltl_weak_fairness1.ltl)};
+
+  ltl_strong_fairness1 {-> ltl} = {strong_fair_all} strong_fair_everything { -> New ltl.strong_fair_all()} |
+                                  ltl_strong_fairness    { -> ltl_strong_fairness.ltl};
+  
   ltl_strong_fairness {-> ltl} = {and} [left]:ltl_strong_fairness and [right]:ltl_strong_arg { -> New ltl.and(left.ltl, right.ltl)} |
                           		 {or}  [left]:ltl_strong_fairness or  [right]:ltl_strong_arg { -> New ltl.or(left.ltl, right.ltl)} |
                                  	   ltl_strong_arg                                  { -> ltl_strong_arg.ltl };
 
   ltl_strong_arg {-> ltl} = {strong_fair} strong_fair { -> New ltl.strong_fair(strong_fair)} |
   	  					    {par} l_par ltl_strong_fairness r_par { -> ltl_strong_fairness.ltl};
+
+  ltl_weak_fairness1 {-> ltl} = {weak_fair_all} weak_fair_everything { -> New ltl.weak_fair_all()} |
+                                ltl_weak_fairness    { -> ltl_weak_fairness.ltl};
 
   ltl_weak_fairness {-> ltl} = {and} [left]:ltl_weak_fairness and [right]:ltl_weak_arg { -> New ltl.and(left.ltl, right.ltl)} |
                           	   {or}  [left]:ltl_weak_fairness or  [right]:ltl_weak_arg { -> New ltl.or(left.ltl, right.ltl)} |
@@ -219,5 +254,14 @@ Abstract Syntax Tree
    {fairness_implication} [left]:ltl [right]:ltl |
    {strong_assumptions} ltl |
    {weak_assumptions}   ltl|
+   {strong_fair_all} |
+   {weak_fair_all}   |   
    {and_fair1}    [left]:ltl [right]:ltl | 
-   {and_fair2}    [left]:ltl [right]:ltl;
+   {and_fair2}    [left]:ltl [right]:ltl |
+   {dlk}          [args]:actions* |
+   {det}          [args]:actions* |
+   {ctrl}         [args]:actions*;
+
+  actions =
+      {op} [operation]:action_char;
+         

@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import de.prob.core.sablecc.node.AAtomTerm;
 import de.prob.core.sablecc.node.AEmptyMoreParams;
 import de.prob.core.sablecc.node.AExceptionResult;
+import de.prob.core.sablecc.node.AInterruptedResult;
 import de.prob.core.sablecc.node.AMoreParams;
 import de.prob.core.sablecc.node.ANoResult;
 import de.prob.core.sablecc.node.ANumberTerm;
@@ -46,6 +47,8 @@ public class PrologTermGenerator {
 		if (topnode instanceof AYesResult) {
 			term = toPrologTerm(((AYesResult) topnode).getTerm());
 		} else if (topnode instanceof ANoResult) {
+			term = null;
+		} else if (topnode instanceof AInterruptedResult) {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
 			String message = "ProB raised an exception: "

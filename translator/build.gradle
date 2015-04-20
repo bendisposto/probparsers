@@ -1,0 +1,8 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+dependencies {
+    compile project(path: ":bparser", configuration: "archives")
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile 'org.codehaus.groovy:groovy-all:2.3.6'
+}

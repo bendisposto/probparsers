@@ -3,11 +3,16 @@
  */
 package de.be4.ltl.core.parser.internal;
 
+import java.util.LinkedList;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.node.ACtrlLtl;
+import de.be4.ltl.core.parser.node.ADetLtl;
+import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.PActions;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
@@ -62,6 +67,14 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void dlk_tp_char(final UniversalToken token) {
+		pto.openTerm("tp");
+		pto.openTerm("action");
+		parseTransitionPredicate(token);
+		pto.closeTerm();
+		pto.closeTerm();		
+	}
+	
 	public void available(final UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("available");
@@ -184,6 +197,53 @@ final class PrologGeneratorHelper {
 		right_node.apply(gen);
 		pto.closeTerm();
 		
+		pto.closeTerm();
+	}
+
+	public void weak_fair_all() {
+		pto.printAtom("all");
+	}
+
+	public void strong_fair_all() {
+		pto.printAtom("all");
+	}
+
+	public void dlk(ADlkLtl node, PrologGenerator gen) {
+		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
+		pto.openTerm("dlk");
+		pto.openList();
+		for (PActions pLtl : list) {
+			pLtl.apply(gen);
+		}
+		pto.closeList();
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+
+	public void det(ADetLtl node, PrologGenerator gen) {
+		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
+		pto.openTerm("det");
+		pto.openList();
+		for (PActions pLtl : list) {
+			pLtl.apply(gen);
+		}
+		pto.closeList();
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+
+	public void ctrl(ACtrlLtl node, PrologGenerator gen) {
+		LinkedList<PActions> list = node.getArgs();
+		pto.openTerm("ap");
+		pto.openTerm("ctrl");
+		pto.openList();
+		for (PActions pLtl : list) {
+			pLtl.apply(gen);
+		}
+		pto.closeList();
+		pto.closeTerm();
 		pto.closeTerm();
 	}
 

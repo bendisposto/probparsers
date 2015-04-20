@@ -59,28 +59,8 @@ public class BLexer extends Lexer {
 		this(in, null);
 	}
 
-	private void printList(List l) {
-		if (l.size() == 0) {
-			System.out.println("EMPTY");
-		}
-		for (Object object : l) {
-			System.out.print(object.getClass().getSimpleName());
-			System.out.print(" ");
-		}
-		System.out.println();
-	}
-
 	@Override
 	protected void filter() throws LexerException, IOException {
-
-		// System.out.println("\n=======================");
-		// System.out.println("Tokens");
-		// printList(getTokenList());
-		// System.out.println("Dot");
-		// printList(dotList);
-		// System.out.println(token.getClass().getSimpleName());
-		// System.out.println(token.getText());
-
 		if (state.equals(State.COMMENT)) {
 			collectComment();
 		}

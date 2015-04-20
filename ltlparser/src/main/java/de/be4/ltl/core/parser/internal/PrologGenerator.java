@@ -1,5 +1,5 @@
 /** 
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
+ * (c) 2009-2014 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
  * Heinrich Heine Universitaet Duesseldorf
  * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
  * */
@@ -9,16 +9,23 @@ package de.be4.ltl.core.parser.internal;
 import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
+import de.be4.ltl.core.parser.node.AAndFair2Ltl;
+import de.be4.ltl.core.parser.node.ACtrlLtl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
+import de.be4.ltl.core.parser.node.ADetLtl;
 import de.be4.ltl.core.parser.node.AEnabledLtl;
 import de.be4.ltl.core.parser.node.AAvailableLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
+import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
+import de.be4.ltl.core.parser.node.AWeakFairAllLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
+import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.Node;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.be4.ltl.core.parser.node.Start;
@@ -91,7 +98,14 @@ public class PrologGenerator extends DepthFirstAdapter {
 		final PLtl right_node = node.getRight();
 		helper.and_fair1(left_node,right_node,this);
 	}
-	
+
+	@Override
+	public void caseAAndFair2Ltl(final AAndFair2Ltl node) {
+		final PLtl left_node = node.getLeft();
+		final PLtl right_node = node.getRight();
+		helper.and_fair2(left_node,right_node,this);
+	}
+
 	@Override
 	public void caseASinkLtl(final ASinkLtl node) {
 		helper.sink();
@@ -108,6 +122,16 @@ public class PrologGenerator extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAWeakFairAllLtl(final AWeakFairAllLtl node) {
+		helper.weak_fair_all();
+	}
+
+	@Override
+	public void caseAStrongFairAllLtl(final AStrongFairAllLtl node) {
+		helper.strong_fair_all();
+	}
+
+	@Override
     public void caseAExistsLtl(AExistsLtl node)
     {
 		helper.existsTerm(node, this);
@@ -120,6 +144,27 @@ public class PrologGenerator extends DepthFirstAdapter {
     }
 
 
+	@Override
+	public void caseADlkLtl(ADlkLtl node) {
+		helper.dlk(node, this);
+	}
+
+	@Override
+	public void caseADetLtl(ADetLtl node) {
+		helper.det(node, this);
+	}
+
+	@Override
+	public void caseACtrlLtl(ACtrlLtl node) {
+		helper.ctrl(node, this);
+	}
+
+	@Override
+	public void caseAOpActions(AOpActions node) {
+		final Token token = node.getOperation();
+		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+	}
+	
 	@Override
 	public void inStart(final Start node) {
 		// Do not call default in Method

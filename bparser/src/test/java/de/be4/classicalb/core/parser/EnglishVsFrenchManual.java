@@ -19,7 +19,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
  * 
  * @author plagge
  */
-public class EnglishVsFrenshManual {
+public class EnglishVsFrenchManual {
 
 	@Test
 	public void testImplicationVsEquivalence() throws BException {
@@ -37,17 +37,17 @@ public class EnglishVsFrenshManual {
 		// & has 40 in both
 		final String pred = "(1=2) <=> (3=4) & (5=6)";
 		final String english = "1=2 <=> (3=4 & 5=6)";
-		final String frensh = "((1=2) <=> (3=4)) & (5=6)";
-		checkPred(pred, english, frensh);
+		final String french = "((1=2) <=> (3=4)) & (5=6)";
+		checkPred(pred, english, french);
 	}
 
 	private void checkPred(final String pred, final String english,
 			final String french) throws BException {
 		final String parsedPred = parsePred(pred);
 		final String parsedEnglish = parsePred(english);
-		final String parsedFrensh = parsePred(french);
+		final String parsedFrench = parsePred(french);
 
-		assertEquals(parsedFrensh, parsedPred);
+		assertEquals(parsedFrench, parsedPred);
 		assertTrue(!parsedPred.equals(parsedEnglish));
 	}
 
@@ -57,13 +57,13 @@ public class EnglishVsFrenshManual {
 		// <-> has 125 in both
 		final String expr = "A <+ B <-> B";
 		final String english = "A <+ (B <-> B)";
-		final String frensh = "(A <+ B) <-> B";
+		final String french = "(A <+ B) <-> B";
 
 		final String parsedExpr = parseExpr(expr);
 		final String parsedEnglish = parseExpr(english);
-		final String parsedFrensh = parseExpr(frensh);
+		final String parsedFrench = parseExpr(french);
 
-		assertEquals(parsedFrensh, parsedExpr);
+		assertEquals(parsedFrench, parsedExpr);
 		assertTrue(!parsedExpr.equals(parsedEnglish));
 	}
 

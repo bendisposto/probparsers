@@ -17,7 +17,7 @@ import de.be4.classicalb.core.preparser.node.Token;
  * is easier to know which element is the last child in any node. This makes it
  * easier to do nice indenting.
  * 
- * @author Roger Keays <rogerk@ieee.org> 7/9/2001
+ * @author Roger Keays
  */
 public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 
@@ -91,15 +91,16 @@ public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 	public void defaultOut(final Node node) {
 		// replace the current indent with the one from the stack
 		indent = indent.substring(0, indent.length() - 3);
-		indent = indent.substring(0, indent.length() - 1)
-				+ indentchar.pop();
+		indent = indent.substring(0, indent.length() - 1) + indentchar.pop();
 
 		// prepend this line to the output.
 		output = indent
 				+ "- "
 				+ setColor(BOLD, FG_CYAN, BG_BLACK)
-				+ node.getClass().getName().substring(
-						node.getClass().getName().lastIndexOf('.') + 1)
+				+ node.getClass()
+						.getName()
+						.substring(
+								node.getClass().getName().lastIndexOf('.') + 1)
 				+ treeColor() + "\n" + output;
 
 		// replace any ` with a |

@@ -36,11 +36,13 @@ public class CtlLexer extends Lexer {
 			super(State.CTL);
 		}
 
+		@Override
 		protected boolean isOpening(final Token token) {
 			return token instanceof TAtomicPropositionBegin
 					|| token instanceof TActionBegin;
 		}
 
+		@Override
 		protected boolean isClosing(final Token token) {
 			return token instanceof TAtomicPropositionEnd
 					|| token instanceof TActionEnd;
@@ -64,6 +66,47 @@ public class CtlLexer extends Lexer {
 		@Override
 		protected boolean correctBalancedParenthesis(int count, Token token) {
 			return !(token instanceof EOF) || count == 0;
+		}
+
+		@Override
+		protected boolean isOpeningActionArg(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isClosingActionArg(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isInActions(State state) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isBeginningActionsToken(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isArgumentClosing(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isArgumentSplittingToken(Token token) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected boolean isQuote(Token token) {
+			return token.getText().equals("\"");
 		}
 
 	}

@@ -1,13 +1,14 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.definitions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.PlainFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
@@ -328,6 +329,16 @@ public class DefinitionsTest {
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
+	}
+
+	@Test
+	public void testDefOrder() throws BException {
+		final String testMachine = "MACHINE Test  \n DEFINITIONS  \n bar(y) == foo(y);  \n foo(x)==x<3;  \n END";
+		String asString = getTreeAsString(testMachine);
+		System.out.println(asString);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([APredicateDefinitionDefinition(bar,[AIdentifierExpression([y])],ADefinitionPredicate(foo,[AIdentifierExpression([y])])),APredicateDefinitionDefinition(foo,[AIdentifierExpression([x])],ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3)))])]))",
+				asString);
 	}
 
 	public void testAssertInDefinition() throws BException {

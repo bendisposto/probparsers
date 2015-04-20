@@ -23,8 +23,8 @@ import de.prob.prolog.term.VariablePrologTerm;
 
 /**
  * Takes a Prolog term of the form (only its canonical form) "[x=a,y=b,z=c]" and
- * converts it into a mapping x->a, y->b, z->c, where x,y and z are identifiers
- * and a,b,c prolog terms.
+ * converts it into a mapping x-&gt;a, y-&gt;b, z-&gt;c, where x,y and z are
+ * identifiers and a,b,c prolog terms.
  * 
  * @author plagge
  */
