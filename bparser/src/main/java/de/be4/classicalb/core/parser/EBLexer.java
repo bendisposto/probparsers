@@ -23,8 +23,9 @@ public class EBLexer extends BLexer {
 	private Map<String, Boolean> v = null;
 
 	public EBLexer(String theFormula, BigInteger b, List<String> ids,
-			IDefinitions context) {
-		super(new PushbackReader(new StringReader(theFormula)),new DefinitionTypes(context.getTypes()));
+			DefinitionTypes defTypes) {
+		super(new PushbackReader(new StringReader(theFormula), 99), defTypes,
+				theFormula.length());
 		v = constructMap(b, ids);
 	}
 
