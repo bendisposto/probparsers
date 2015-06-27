@@ -5,7 +5,6 @@ import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -27,11 +26,8 @@ import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
 
-	private static final String PRAGMA_END = "@*/";
-	private static final String PRAGMA_START = "/*@";
-	private TComment comment = null;
+	private Token comment = null;
 	private StringBuilder commentBuffer = null;
-	private List<RawPragma> pragmas = new ArrayList<RawPragma>();
 
 	private final DefinitionTypes definitions;
 
@@ -196,25 +192,10 @@ public class BLexer extends Lexer {
 				commentBuffer = null;
 				state = State.NORMAL;
 
-				if (text.startsWith(PRAGMA_START)) {
-					String pragmaText = "";
-					if (text.endsWith(PRAGMA_END))
-						pragmaText = text.substring(3, text.length() - 3)
-								.trim();
-					else
-						pragmaText = text.substring(3, text.length() - 2)
-								.trim();
-					pragmas.add(new RawPragma(token.getStartPos(), token
-							.getEndPos(), pragmaText));
-				}
 			} else {
 				token = null;
 			}
 		}
-	}
-
-	public List<RawPragma> getPragmas() {
-		return pragmas;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {

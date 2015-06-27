@@ -26,9 +26,6 @@ import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
-import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
-import de.be4.classicalb.core.parser.analysis.pragma.PragmaLocator;
-import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.Couples;
@@ -64,7 +61,6 @@ public class BParser {
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
-	private List<Pragma> pragmas = new ArrayList<Pragma>();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 
@@ -97,11 +93,7 @@ public class BParser {
 		final SourcePositions positions = withLineInfo ? parser
 				.getSourcePositions() : null;
 
-		List<Pragma> pragmas = new ArrayList<Pragma>();
-		pragmas.addAll(parser.getPragmas());
-
-		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions(),
-				pragmas);
+		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out), idention);
 	}
 
@@ -390,10 +382,6 @@ public class BParser {
 
 			// locate the pragmas
 
-			List<RawPragma> locateTasks = lexer.getPragmas();
-
-			pragmas.addAll(PragmaLocator.locate(rootNode, locateTasks, input));
-
 			return rootNode;
 		} catch (final LexerException e) {
 			/*
@@ -436,7 +424,6 @@ public class BParser {
 		 * them to the internal definitions
 		 */
 		getDefinitions().addAll(preParser.getDefFileDefinitions());
-		pragmas.addAll(preParser.getPragmas());
 		reader.reset();
 		return definitionTypes;
 	}
@@ -578,10 +565,6 @@ public class BParser {
 		// }
 		// }
 		return false;
-	}
-
-	public List<Pragma> getPragmas() {
-		return pragmas;
 	}
 
 	// private Properties readHashValues(final File target, final File dir) {
