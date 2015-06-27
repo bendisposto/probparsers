@@ -1,5 +1,7 @@
 # ProB Parser Library
 
+[![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
+
 ## Building
 Run the 'deploy' target with gradle. If you don't have gradle installed, you can use the provided wrapper 
    ./gradlew uberjar

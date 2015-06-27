@@ -207,15 +207,20 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start eparse(String theFormula, IDefinitions context)
-			throws BException, LexerException, IOException {
+	public Start eparse(String input, IDefinitions context) throws BException,
+			LexerException, IOException {
+		final Reader reader = new StringReader(input);
+
 		Start ast = null;
 		boolean ok = false;
 
 		List<String> ids = new ArrayList<String>();
 
-		BLexer bLexer = new BLexer(new PushbackReader(new StringReader(
-				theFormula)), new DefinitionTypes(definitions.getTypes()));
+		final DefinitionTypes defTypes = new DefinitionTypes();
+		defTypes.addAll(context.getTypes());
+
+		BLexer bLexer = new BLexer(new PushbackReader(reader, 99), defTypes,
+				input.length() / APPROXIMATE_TOKEN_LENGTH);
 		Token t;
 		do {
 			t = bLexer.next();
@@ -226,8 +231,8 @@ public class BParser {
 			}
 		} while (!(t instanceof EOF));
 
-		Parser p = new Parser(new EBLexer(theFormula, BigInteger.ZERO, ids,
-				context));
+		Parser p = new Parser(
+				new EBLexer(input, BigInteger.ZERO, ids, defTypes));
 		try {
 			ast = p.parse();
 			ok = true;
@@ -240,7 +245,7 @@ public class BParser {
 		b = b.subtract(BigInteger.ONE);
 
 		while (!ok && b.compareTo(BigInteger.ZERO) > 0) {
-			p = new Parser(new EBLexer(theFormula, b, ids, context));
+			p = new Parser(new EBLexer(input, b, ids, defTypes));
 			try {
 				ast = p.parse();
 				ok = true;
