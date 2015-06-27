@@ -20,16 +20,6 @@ sourceSets {
 }
 
 
-task genPragmaArgumentLexer(type:JavaExec) {
-	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp/de/be4/classicalb/core/pragma') // prevent rebuild because the second parser replaces patchfiles
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/grammars/PragmaArgumentLexer.scc']
-}
 
 task genPreparser(type:JavaExec) {
 	inputs.dir new File('src/main/resources/grammars')
@@ -43,7 +33,7 @@ task genPreparser(type:JavaExec) {
 }
 
 task genBParser(type:JavaExec) {
-	dependsOn = ['genPreparser','genPragmaArgumentLexer']
+	dependsOn = ['genPreparser']
 	inputs.dir new File('src/main/resources/grammars')
 	outputs.dir new File('build/temp')
 //	doFirst{ file('build/temp').mkdirs() }

@@ -35,7 +35,8 @@ States
 
 	normal,
 	shebang,
-	comment;
+	comment,
+	pragma;
 
 
 /*******************************************************************
@@ -47,13 +48,21 @@ Tokens
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
+    {normal->pragma} pragma_start = '/*@';
+    {pragma->normal} pragma_end = '*/';
+    {pragma} pragma_unit = 'unit';
+    {pragma} pragma_generated = 'generated';
+    {pragma} pragma_symbolic = 'symbolic';
+    {pragma} pragma_label = 'label'|'@';
+    {pragma} pragma_word = (letter | digit | underscore)*;
+
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
 	{comment} star = '*';
 	{comment} slash = '/';
 	
-	{normal} string_literal = double_quotation all_chars_without_quote* double_quotation;
+	{normal,pragma} string_literal = double_quotation all_chars_without_quote* double_quotation;
 	{normal} for_any = '!' | 0x2200;
 	{normal} exists = '#' | 0x2203;
 	{normal} dollar = '$';
@@ -307,7 +316,7 @@ Tokens
 Ignored Tokens
 shebang, shebang_char, shebang_end,
 	white_space,
-	comment, comment_body, comment_end;
+	comment, comment_body, comment_end, pragma_start, pragma_end;
 
 
 /*******************************************************************
@@ -348,7 +357,10 @@ parse_unit {-> parse_unit} =
 	{oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
 	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
-machine {-> parse_unit} =
+machine {-> parse_unit} = 
+   {generated} pragma_generated machine_x {-> New parse_unit.generated(machine_x.parse_unit)} | machine_x {-> machine_x.parse_unit};
+
+machine_x {-> parse_unit} =
 	{abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
 	{refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
 	{implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} ;
@@ -859,6 +871,7 @@ op_pattern_param {-> argpattern} =
 Abstract Syntax Tree
 
 parse_unit =
+    {generated} parse_unit |
 	{abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
 	{refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
 	{implementation_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |

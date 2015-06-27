@@ -22,6 +22,6 @@ public class AtelierBCompatibilityTest {
 		assertNotNull(ast);
 		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH,
 				bparser.getContentProvider());
-		rml.loadAllMachines(f, ast, null, bparser.getDefinitions(), bparser.getPragmas());
+		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
 	}
 }

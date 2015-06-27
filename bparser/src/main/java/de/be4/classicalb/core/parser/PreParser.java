@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -16,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
-import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
@@ -26,7 +23,6 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -40,7 +36,6 @@ public class PreParser {
 	private DefinitionTypes types;
 
 	private final IDefinitions defFileDefinitions = new Definitions();
-	private final List<Pragma> pragmas = new ArrayList<Pragma>();
 	private final IFileContentProvider contentProvider;
 	private final Set<String> doneDefFiles;
 	private final String modelFileName;
@@ -110,7 +105,6 @@ public class PreParser {
 					final BParser parser = new BParser(fileName);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
-					pragmas.addAll(parser.getPragmas());
 					newDoneList.remove(fileName);
 
 					definitions = parser.getDefinitions();
@@ -284,7 +278,4 @@ public class PreParser {
 		return defFileDefinitions;
 	}
 
-	public List<? extends Pragma> getPragmas() {
-		return pragmas;
-	}
 }
