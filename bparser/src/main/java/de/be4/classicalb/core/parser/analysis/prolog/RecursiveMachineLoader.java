@@ -72,7 +72,6 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param main
 	 *            The main machine
-	 * @param pragmas
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
@@ -92,7 +91,7 @@ public class RecursiveMachineLoader {
 
 	/**
 	 * Prints the machines loaded by
-	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions,List)}.
+	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions)}.
 	 * 
 	 * @param pout
 	 */
