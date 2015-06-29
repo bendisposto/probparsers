@@ -9,7 +9,7 @@ PROPERTIES
  /*@ label axm4 */ a+b = c & 
  /*@ label axm5 */ a>b
 ASSERTIONS
- /*@ label thm1 */ a=c-b &
+ /*@ label "this is the first theorem" */ a=c-b &
  /*@ label thm2 */ b=c-a &
  /*@ label thm3 */ (c mod 2 = 1 => a/=b)
 END

@@ -26,6 +26,8 @@ Helpers
 	line_break = [lf + cr];
 	layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 	white_space = line_break | layout_char+;
+	string_literal = double_quotation all_chars_without_quote* double_quotation;
+	identifier_literal = letter (letter | digit | underscore)*;
 
 /*******************************************************************
  * States                                                          *
@@ -54,6 +56,7 @@ Tokens
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label'|'@';
+    {pragma} pragma_label_content = string_literal | identifier_literal;
 
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
@@ -61,7 +64,7 @@ Tokens
 	{comment} star = '*';
 	{comment} slash = '/';
 
-	{normal,pragma} string_literal = double_quotation all_chars_without_quote* double_quotation;
+	{normal} string_literal = string_literal;
 	{normal} for_any = '!' | 0x2200;
 	{normal} exists = '#' | 0x2203;
 	{normal} dollar = '$';
@@ -296,7 +299,7 @@ Tokens
 	{normal} kw_values = '#VALUES';
 	{normal} kw_oppattern = '#OPPATTERN';
 
-	{normal,pragma} identifier_literal = letter (letter | digit | underscore)*;
+	{normal,pragma} identifier_literal = identifier_literal;
 	{normal} def_literal_substitution = '#literal_substitution' letter*;
 	{normal} def_literal_predicate = '#literal_predicate' letter*;
 	{normal} predicate_identifier = '#predicate_identifier' letter*;
@@ -523,7 +526,7 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:identifier_literal [predicate]:predicate_p60 {-> New predicate.label(name,predicate.predicate)} |
+       {label} pragma_label [name]:pragma_label_content [predicate]:predicate_p60 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
@@ -971,7 +974,7 @@ eventstatus = {ordinary} | {anticipated} | {convergent};
 
 /* Predicates */
 predicate =
-  {label} [name]:identifier_literal [predicate]:predicate |
+  {label} [name]:pragma_label_content [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
 	{conjunct} [left]:predicate [right]:predicate |
 	{negation} [predicate]:predicate |
