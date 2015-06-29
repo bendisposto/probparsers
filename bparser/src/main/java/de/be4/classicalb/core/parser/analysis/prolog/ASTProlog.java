@@ -134,7 +134,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
 			Arrays.asList("event", "freetype", "machine_header",
 					"machine_reference", "operation", "rec_entry",
-					"values_entry", "witness"));
+					"values_entry", "witness","unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them

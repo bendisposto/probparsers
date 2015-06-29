@@ -38,7 +38,8 @@ States
 	normal,
 	shebang,
 	comment,
-	pragma;
+	pragma,
+	unit;
 
 
 /*******************************************************************
@@ -51,12 +52,16 @@ Tokens
 	{shebang} shebang_char = all_chars;
 
     {normal->pragma} pragma_start = '/*@';
-    {pragma->normal} pragma_end = '*/';
-    {pragma} pragma_unit = 'unit';
+    {pragma->normal, unit->normal} pragma_end = '*/';
+    {pragma->unit} pragma_unit = 'units';
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
-    {pragma} pragma_label = 'label'|'@';
-    {pragma} pragma_label_content = string_literal | identifier_literal;
+    {pragma} pragma_label = 'label';
+    {pragma} pragma_conversion = 'conversion';
+    {pragma} pragma_id_or_string = string_literal | identifier_literal;
+
+    {unit} unit_var = identifier_literal;
+    {unit} unit_content = string_literal;
 
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
@@ -415,7 +420,11 @@ definition_list {-> definition*} =
 	{single} [def]:definition {-> [def.definition]} |
 	{multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
 
-definition {-> definition} =
+definition {-> definition} = 
+  {conversion} pragma_conversion definition_x {-> New definition.conversion(definition_x.definition)} |
+  definition_x {-> definition_x.definition};
+
+definition_x {-> definition} =
 	{predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
 	{substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l2 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
 	{expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
@@ -441,7 +450,18 @@ machine_ref_list {-> machine_reference*} =
 
 machine_reference {-> machine_reference} = [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
+
+unit {-> unit} = [var]:unit_var [content]:unit_content {-> New unit(var,content) };
+
+units {-> unit*} = 
+  {single} unit {-> [unit]} |
+  {multi} [rest]:units [first]:unit {-> [rest.unit, first.unit]};
+
 variables_clause {-> machine_clause} =
+    {units} pragma_unit [u]:units variables_clause_x {-> New machine_clause.units(variables_clause_x.machine_clause,[u.unit])} |
+    variables_clause_x {-> variables_clause_x.machine_clause};
+
+variables_clause_x {-> machine_clause} =
 	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
 	variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
 
@@ -526,7 +546,7 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:pragma_label_content [predicate]:predicate_p60 {-> New predicate.label(name,predicate.predicate)} |
+       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_p60 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
@@ -921,10 +941,14 @@ model_clause =
  {variant} [variant]:expression |
  {events} event*;
 
+/* Units */
+unit = T.unit_var T.unit_content;
+
+
 machine_clause =
+	{units} machine_clause [units]:unit* |
 	{definitions} [definitions]:definition* |
 	{sees} [machine_names]:expression* |
-
 	 /* promotes contains operation names, not machine names.
 	    See http://jira.cobra.cs.uni-duesseldorf.de/browse/PARSERLIB-4  */
 	{promotes} [machine_names]:expression* |
@@ -950,6 +974,7 @@ machine_clause =
 machine_reference = [machine_name]:identifier_literal* [parameters]:expression* ;
 
 definition =
+    {conversion} definition |
 	{predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
 	{substitution_definition} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
 	{expression_definition} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
@@ -974,7 +999,7 @@ eventstatus = {ordinary} | {anticipated} | {convergent};
 
 /* Predicates */
 predicate =
-  {label} [name]:pragma_label_content [predicate]:predicate |
+  {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
 	{conjunct} [left]:predicate [right]:predicate |
 	{negation} [predicate]:predicate |
@@ -1146,6 +1171,7 @@ expression =
 	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
 	{typeof} [expression]:expression [type]:expression; /* Has no concrete syntax, is only generated by the translation process */
 rec_entry = [identifier]:expression [value]:expression;
+
 
 
 /* Substitutions */
