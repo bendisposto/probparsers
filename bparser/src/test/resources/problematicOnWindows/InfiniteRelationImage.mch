@@ -4,7 +4,7 @@ DEFINITIONS
   SET_PREF_CLPFD == TRUE
 CONSTANTS divisors, perfect
 PROPERTIES
- divisors = /*@ symbolic */ ({x,d| x:NATURAL & d:NATURAL1 & d<x & x mod d = 0}) &
+ divisors = /*@ symbolic */ {x,d| x:NATURAL & d:NATURAL1 & d<x & x mod d = 0} &
  
  perfect : 7..50 & SIGMA(x).(x:divisors[{perfect}]|x) = perfect
 ASSERTIONS

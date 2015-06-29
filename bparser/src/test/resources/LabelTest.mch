@@ -16,11 +16,11 @@ buy(mm) =
 
 board(nn) =
   PRE nn : NAT
-  THEN passengers := passengers /*@ non-negative */ + nn
+  THEN passengers := passengers  + nn
   END;
 
 dble =
   BEGIN
-   tickets, passengers /*@ symbolic */ := 2*tickets, 2*passengers
+   tickets, passengers  := 2*tickets, 2*passengers
   END
 END
