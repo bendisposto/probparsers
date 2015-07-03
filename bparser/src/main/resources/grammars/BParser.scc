@@ -153,7 +153,7 @@ Tokens
 	{normal} nat = 'NAT'; 
 	{normal} nat1 = 'NAT1'; 
 	{normal} natural = 'NATURAL' | 0x2115;
-	{normal} natural1 = 'NATURAL1 | 0x2115 0x0031 | 0x2115 0x2081';
+	{normal} natural1 = 'NATURAL1' | 0x2115 0x0031 | 0x2115 0x2081;
 	{normal} of = 'OF';
 	{normal} operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS fuer Event-B */
 	{normal} or = 'OR';
