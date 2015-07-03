@@ -104,7 +104,7 @@ Tokens
 	{normal} assign = ':=';
 	{normal} semicolon = ';';
 	{normal} less = '<';
-	{normal} overwrite_relation = '<+' | 0xe103;
+	{normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* Why are there two unicode symbols ? Check whether 0xe103 is correct; 0x22d6 comes from Vlad Gheorge's machine */
 	{normal} set_relation = '<->' | 0x2194;
 	{normal} insert_end_sequence = '<-';
 	{normal} output_parameters = '<--';
@@ -166,10 +166,10 @@ Tokens
 	{normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
 	{normal} max_int = 'MAXINT';
 	{normal} min_int = 'MININT';
-	{normal} nat = 'NAT' | 0x2115;
-	{normal} nat1 = 'NAT1' | 0x2115 0x0031;
+	{normal} nat = 'NAT'; % leuschel: removed Unicode version; TO DO: check with Atelier-B
+	{normal} nat1 = 'NAT1'; % leuschel: removed Unicode version; TO DO: check with Atelier-B
 	{normal} natural = 'NATURAL' | 0x2115;
-	{normal} natural1 = 'NATURAL1';
+	{normal} natural1 = 'NATURAL1 | 0x2115 0x0031';
 	{normal} of = 'OF';
 	{normal} operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS fuer Event-B */
 	{normal} or = 'OR';
@@ -203,7 +203,7 @@ Tokens
 	{normal} right_bracket = ']';
 	{normal} union = '\/' | 0x222a;
 	{normal} restrict_tail_sequence = '\|/';
-	{normal} concat_sequence = '^';
+	{normal} concat_sequence = '^' | 0x2312;
 	{normal} arity = 'arity';
 	{normal} bin = 'bin';
 	{normal} bool_cast = 'bool';
