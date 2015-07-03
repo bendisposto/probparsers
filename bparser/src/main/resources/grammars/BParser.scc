@@ -148,7 +148,7 @@ Tokens
 	{normal} extends = 'EXTENDS';
 	{normal} false = 'FALSE' | 0x22a5;
 	{normal} fin = 'FIN';
-	{normal} fin1 = 'FIN1';
+	{normal} fin1 = 'FIN1';  // add 'FIN'0x8321 ?
 	{normal} if = 'IF';
 	{normal} implementation = 'IMPLEMENTATION';
 	{normal} imports = 'IMPORTS';
@@ -210,7 +210,7 @@ Tokens
 	{normal} btree = 'btree';
 	{normal} card = 'card';
 	{normal} closure = 'closure';
-	{normal} closure1 = 'closure1';
+	{normal} closure1 = 'closure1'; // add  'closure' 0x8321 ?
 	{normal} conc = 'conc';
 	{normal} const = 'const';
 	{normal} dom = 'dom';
@@ -222,7 +222,7 @@ Tokens
 	{normal} infix = 'infix';
 	{normal} generalized_inter = 'inter';
 	{normal} iseq = 'iseq';
-	{normal} iseq1 = 'iseq1';
+	{normal} iseq1 = 'iseq1'; // add 'iseq'0x8321 ?
 	{normal} iterate = 'iterate';
 	{normal} last = 'last';
 	{normal} left = 'left';
@@ -236,7 +236,7 @@ Tokens
 	{normal} postfix = 'postfix';
 	{normal} pred = 'pred';
 	{normal} prefix = 'prefix';
-	{normal} prj1 = 'prj1';
+	{normal} prj1 = 'prj1'; // add | 'iseq'0x8321 ?
 	{normal} prj2 = 'prj2';
 	{normal} rank = 'rank';
 	{normal} ran = 'ran';
@@ -245,7 +245,7 @@ Tokens
 	{normal} rev = 'rev';
 	{normal} right = 'right';
 	{normal} seq = 'seq';
-	{normal} seq1 = 'seq1';
+	{normal} seq1 = 'seq1'; // add | 'seq'0x8321 ?
 	{normal} sizet = 'sizet';
 	{normal} size = 'size';
 	{normal} skip = 'skip';
