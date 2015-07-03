@@ -166,8 +166,8 @@ Tokens
 	{normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
 	{normal} max_int = 'MAXINT';
 	{normal} min_int = 'MININT';
-	{normal} nat = 'NAT'; % leuschel: removed Unicode version; TO DO: check with Atelier-B
-	{normal} nat1 = 'NAT1'; % leuschel: removed Unicode version; TO DO: check with Atelier-B
+	{normal} nat = 'NAT'; 
+	{normal} nat1 = 'NAT1'; 
 	{normal} natural = 'NATURAL' | 0x2115;
 	{normal} natural1 = 'NATURAL1 | 0x2115 0x0031 | 0x2115 0x2081';
 	{normal} of = 'OF';
