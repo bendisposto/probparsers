@@ -100,7 +100,7 @@ Tokens
 	{normal} intersection = '/\' | 0x2229;
 	{normal} restrict_head_sequence = '/|\';
 	{normal} element_of = ':' | 0x2208;
-	{normal} double_colon = '::';
+	{normal} double_colon = '::' | ':' 0x2208;  /* becomes_element_of */
 	{normal} assign = ':=';
 	{normal} semicolon = ';';
 	{normal} less = '<';
