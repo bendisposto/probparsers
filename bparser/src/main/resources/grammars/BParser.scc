@@ -39,6 +39,7 @@ States
 	shebang,
 	comment,
 	pragma,
+	description,
 	unit;
 
 
@@ -57,8 +58,10 @@ Tokens
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
+    {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
+    {description->normal} pragma_free_text = all_chars* '*/'; 
 
     {unit} unit_var = identifier_literal;
     {unit} unit_content = string_literal;
@@ -66,6 +69,7 @@ Tokens
 	{normal -> comment, comment} comment = comment_start ;
 	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
+
 	{comment} star = '*';
 	{comment} slash = '/';
 
@@ -546,10 +550,14 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_p60 {-> New predicate.label(name,predicate.predicate)} |
+       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x41 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
-predicate_x41 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
+predicate_x41 {-> predicate} =
+       {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
+  {next_level} [pred]:predicate_x42 {-> pred.predicate};
+
+predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
 	{equivalence} [left]:predicate_p60 equivalence [right]:predicate_x60 {-> New predicate.equivalence(left.predicate, right.predicate)} |
@@ -998,7 +1006,9 @@ witness = [name]:identifier_literal [predicate]:predicate;
 eventstatus = {ordinary} | {anticipated} | {convergent};
 
 /* Predicates */
+
 predicate =
+  {description} [content]:pragma_free_text [predicate]:predicate |
   {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
 	{conjunct} [left]:predicate [right]:predicate |

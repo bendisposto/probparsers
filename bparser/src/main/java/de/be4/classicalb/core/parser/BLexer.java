@@ -19,6 +19,7 @@ import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TLeftPar;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
@@ -57,8 +58,14 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+
 		if (state.equals(State.COMMENT)) {
 			collectComment();
+		}
+
+		if (token instanceof TPragmaFreeText) {
+			token.setText(token.getText().substring(0,
+					token.getText().length() - 3));
 		}
 
 		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
