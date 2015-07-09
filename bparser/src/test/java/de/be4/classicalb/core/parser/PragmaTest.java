@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.PrintWriter;
+import java.io.PushbackReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.junit.Test;
@@ -10,8 +12,10 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
+import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.Token;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -19,7 +23,16 @@ public class PragmaTest {
 
 	@Test
 	public void testLexer() throws Exception {
-		String input = "/*@ generated */ MACHINE foo /* lala */ END";
+		String input = "/*@ generated */ MACHINE foo(x) /* look at me. */ PROPERTIES /*@ label foo */ x : NAT /*@ desc prop */ SETS A;B /*@desc trololo !!!*/;C END";
+		
+		BLexer lex = new BLexer(new PushbackReader(new StringReader(input), 500));
+		Token t;
+		while(!((t=lex.next()) instanceof EOF)) {
+			System.out.print(t.getClass().getSimpleName()+"("+t.getText()+")");
+			System.out.print(" ");
+		}
+		
+		
 		BParser p = new BParser();
 		Start ast = p.parse(input, false);
 

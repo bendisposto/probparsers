@@ -61,13 +61,13 @@ Tokens
     {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
-    {description->normal} pragma_free_text = all_chars* '*/'; 
+    {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
     {unit} unit_var = identifier_literal;
     {unit} unit_content = string_literal;
 
 	{normal -> comment, comment} comment = comment_start ;
-	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
+	{comment, description} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
 
 	{comment} star = '*';
@@ -484,6 +484,7 @@ set_def_list {-> set*} =
 	{multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]} ;
 
 set {-> set} =
+	{description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
 	{deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
 	{enumerated} [identifier]:composed_identifier equal left_brace [elements]:expression_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} ;
 
@@ -550,7 +551,7 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x41 {-> New predicate.label(name,predicate.predicate)} |
+       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
@@ -989,6 +990,7 @@ definition =
 	{file_definition} [filename]:string_literal ;
 
 set =
+    {description} T.pragma_free_text set |
 	{deferred_set} [identifier]:identifier_literal* |
 	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
 
