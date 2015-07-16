@@ -23,7 +23,14 @@ public class PragmaTest {
 
 	@Test
 	public void testLexer() throws Exception {
-		String input = "/*@ generated */ MACHINE foo(x) /* look at me. */ PROPERTIES /*@ label foo */ x : NAT /*@ desc prop */ SETS A;B /*@desc trololo !!!*/;C END";
+		String input = "/*@ generated */ MACHINE foo(x) "
+				+ "/* look at me. */ "
+				+ "PROPERTIES "
+				+ "/*@ label foo */ "
+				+ "x = /*@ symbolic */ {y|->z| y < z } "
+				+ "/*@ desc prop */ "
+				+ "SETS A;B /*@ desc trololo !!! */;C END";
+//		String input = "MACHINE foo  PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z| y < z }  END";
 		
 		BLexer lex = new BLexer(new PushbackReader(new StringReader(input), 500));
 		Token t;
