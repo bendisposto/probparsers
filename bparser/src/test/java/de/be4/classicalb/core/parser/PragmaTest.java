@@ -27,6 +27,7 @@ public class PragmaTest {
 				+ "/* look at me. */ "
 				+ "PROPERTIES "
 				+ "/*@ label foo */ "
+				+ "/*@ label bar */ "
 				+ "x = /*@ symbolic */ {y|->z| y < z } "
 				+ "/*@ desc prop */ "
 				+ "SETS A;B /*@ desc trololo !!! */;C END";
