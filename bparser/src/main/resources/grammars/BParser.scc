@@ -66,8 +66,8 @@ Tokens
     {unit} unit_var = identifier_literal;
     {unit} unit_content = string_literal;
 
-	{normal -> comment, comment} comment = comment_start ;
-	{comment, description} comment_end = comment_end; // return to state 'normal' is done in Lexer
+	{normal -> comment} comment = comment_start ;
+	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
 
 	{comment} star = '*';
@@ -170,8 +170,8 @@ Tokens
 	{normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
 	{normal} max_int = 'MAXINT';
 	{normal} min_int = 'MININT';
-	{normal} nat = 'NAT'; 
-	{normal} nat1 = 'NAT1'; 
+	{normal} nat = 'NAT';
+	{normal} nat1 = 'NAT1';
 	{normal} natural = 'NATURAL' | 0x2115;
 	{normal} natural1 = 'NATURAL1' | 0x2115 0x0031 | 0x2115 0x2081;
 	{normal} of = 'OF';
@@ -424,7 +424,7 @@ definition_list {-> definition*} =
 	{single} [def]:definition {-> [def.definition]} |
 	{multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
 
-definition {-> definition} = 
+definition {-> definition} =
   {conversion} pragma_conversion definition_x {-> New definition.conversion(definition_x.definition)} |
   definition_x {-> definition_x.definition};
 
@@ -457,7 +457,7 @@ machine_reference {-> machine_reference} = [machine_name]:composed_identifier [p
 
 unit {-> unit} = [var]:unit_var [content]:unit_content {-> New unit(var,content) };
 
-units {-> unit*} = 
+units {-> unit*} =
   {single} unit {-> [unit]} |
   {multi} [rest]:units [first]:unit {-> [rest.unit, first.unit]};
 
