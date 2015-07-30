@@ -1,16 +1,3 @@
-buildscript {
-	repositories {
-	    maven {
-	      name "cobra"
-	      url "http://cobra.cs.uni-duesseldorf.de/artifactory/repo"
-	    }
-	}
-
- dependencies {
-    classpath(group: 'de.stups', name: 'sablecc', version: '3.2.9-SNAPSHOT', changing: true)
- }
-}
-
 def global_version = '2.5.0-SNAPSHOT'
 
 project.version = global_version;
@@ -51,9 +38,10 @@ subprojects {
  group = 'de.prob'
  version = global_version;
 repositories {
+	  mavenCentral()
     maven {
-      name "cobra"
-      url "http://cobra.cs.uni-duesseldorf.de/artifactory/repo"
+      name "sonatype"
+      url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
     }
 }
 configurations {
@@ -69,7 +57,7 @@ configurations.all {
 }
 
 dependencies {
-    sablecc(group: 'de.stups', name: 'sablecc', version: '3.2.9-SNAPSHOT', changing: true)
+    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.10', changing: true)
     compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
  }
