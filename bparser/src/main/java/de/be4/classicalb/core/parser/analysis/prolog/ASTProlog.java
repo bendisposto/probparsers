@@ -388,6 +388,13 @@ public class ASTProlog extends DepthFirstAdapter {
 		printOCAsList(node, node.getSetDefinitions());
 	}
 
+	public void caseAUnitsMachineClause(final AUnitsMachineClause node) {
+		open(node);
+		node.getMachineClause().apply(this);
+		printAsList(node.getUnits());
+		close(node);
+	}
+
 	@Override
 	public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
 		printOCAsList(node, node.getIdentifiers());
@@ -558,6 +565,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getPredicates().apply(this);
 		close(node);
 	}
+
 	@Override
 	public void caseASymbolicComprehensionSetExpression(
 			final ASymbolicComprehensionSetExpression node) {
@@ -566,8 +574,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getPredicates().apply(this);
 		close(node);
 	}
-
-
 
 	@Override
 	public void caseAProverComprehensionSetExpression(
