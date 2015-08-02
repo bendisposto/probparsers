@@ -19,3 +19,4 @@ bparser/src/main/resources/revision.properties
 config.groovy
 *.iml
 *.idea
+local.*

@@ -1,15 +1,13 @@
 def global_version = '2.5.0-SNAPSHOT'
 
 project.version = global_version;
-project.group = 'de.prob'
+project.group = 'de.hhu.stups'
 
 // // The real configuration
 allprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
   sourceCompatibility = 1.7
-
-
 
   clean {
 	doLast {
@@ -34,16 +32,16 @@ allprojects {
 
 subprojects {
  apply plugin: 'eclipse'
- //apply from: 'https://raw.github.com/gist/1527604/c0376aa40de59a0481cb33f17ebe5a26ee4f59d0/emma.gradle'
- group = 'de.prob'
+ group = 'de.hhu.stups'
  version = global_version;
-repositories {
+ repositories {
 	  mavenCentral()
     maven {
       name "snapshots"
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
 }
+
 configurations {
 	sablecc
 }
@@ -79,6 +77,63 @@ dependencies {
 		include 'org.eclipse.jdt.ui.prefs'
     }
  }
+
+ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+
+ println "Configuring deployment for ${ project.name }"
+
+ apply plugin: 'signing'
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name project.getName()
+        packaging 'jar'
+        // optionally artifactId can be defined here
+        description 'Part of the ProB Parser library'
+        url 'https://github.com/bendisposto/probparsers'
+
+        licenses {
+          license {
+            name 'Eclipse Public License, Version 1.0'
+            url 'http://www.eclipse.org/org/documents/epl-v10.html'
+          }
+        }
+
+        scm {
+          connection 'scm:git:git://github.com/bendisposto/probparsers.git'
+          developerConnection 'scm:git:git@github.com:bendisposto/probparsers.git'
+          url 'https://github.com/bendisposto/probparsers'
+        }
+
+
+        developers {
+          developer {
+            id 'bendisposto'
+            name 'Jens Bendisposto'
+            email 'jens@bendisposto.de'
+          }
+        }
+      }
+    }
+  }
+}
+}
 
 }
 
