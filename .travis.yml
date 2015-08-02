@@ -1,2 +1,12 @@
 language: java
-script: "./gradlew deploy"
+
+before_install:
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in gradle.properties.enc -out gradle.properties -d
+
+script: gradle uploadArchives
+
+env:
+  global:
+    secure: O5nLPed3KcRB+9iE9wxrBKD5Smn4DvS//UUXz9OW1RwuLiZQlJOs3mWOcfy1khtDFqCSn7k2Z0IU0slxNwBGpOuZQJuuI/GuPOQIt7JlGpYW+o9/v2tZYJiucOd9KyhEjAozWEOm6qpc+85KisAsV4vsaVY7MPAKgF/59pVo2L4=
