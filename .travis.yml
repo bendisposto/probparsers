@@ -7,7 +7,9 @@ before_install:
 
 sudo: false
 
-script: gradle uploadArchives
+install: /bin/true
+
+script: gradle clean uploadArchives
 
 env:
   global:
