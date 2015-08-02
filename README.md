@@ -3,8 +3,7 @@
 [![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
 
 ## Building
-Run the 'deploy' target with gradle. If you don't have gradle installed, you can use the provided wrapper 
-   ./gradlew uberjar
+Run the 'deploy' target with gradle. 
 
 On windows you need to install the program 'patch.exe'. 
 
@@ -41,8 +40,5 @@ to anyone for the consequences of using it or for whether it serves
 any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
-
-## Commercial Support 
-For availability of commercial support, please contact Formal Mind (http://www.formalmind.com/).
 
 (c) 2011 STUPS group, University of Düsseldorf
