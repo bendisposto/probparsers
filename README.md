@@ -10,7 +10,7 @@ On windows you need to install the program 'patch.exe'.
 The artifacts are copied to the build folder. 
 
 # Bugs
-Please report bugs and feature requests at http://jira.cobra.cs.uni-duesseldorf.de/
+Please report bugs and feature requests at https://probjira.atlassian.net
 
 
 ## Content
