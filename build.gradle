@@ -25,9 +25,6 @@ allprojects {
       if (bin_dir.exists()) delClos(bin_dir)
     }
   }
-
-
-
 }
 
 subprojects {
@@ -173,6 +170,3 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
 
 task deploy(dependsOn: [subprojects.deploy,globaljavadoc])
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
-}
