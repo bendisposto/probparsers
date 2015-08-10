@@ -7,6 +7,7 @@
 package de.be4.ltl.core.parser.internal;
 
 import de.be4.ltl.core.ctlparser.analysis.DepthFirstAdapter;
+import de.be4.ltl.core.ctlparser.node.AActionCtl;
 import de.be4.ltl.core.ctlparser.node.ACurrentCtl;
 import de.be4.ltl.core.ctlparser.node.ADeadlockCtl;
 import de.be4.ltl.core.ctlparser.node.AEnaCtl;
@@ -84,6 +85,14 @@ public class PrologCtlGenerator extends DepthFirstAdapter {
 	@Override
 	public void outStart(final Start node) {
 		// Do not call default out Method
+	}
+
+	@Override
+	public void caseAActionCtl(final AActionCtl node) {
+		final Token token = node.getOperation();
+		p.openTerm("action");
+		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		p.closeTerm();
 	}
 
 }
