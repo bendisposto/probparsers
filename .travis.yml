@@ -1,8 +1,8 @@
 language: java
 
 jdk:
-  - oraclejdk7
-
+  - oraclejdk8
+    
 before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg -d
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg -d
