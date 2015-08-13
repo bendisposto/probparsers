@@ -13,8 +13,7 @@ dependencies {
 	compile group: "de.hhu.stups", name: "parserbase", version: parser_version 
 	compile group: "de.hhu.stups", name: "prologlib", version: parser_version 
 }
-<pre>
-
+</pre>
 
 The repository contains some additional parsers:
 
