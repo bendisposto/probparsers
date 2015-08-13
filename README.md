@@ -1,6 +1,29 @@
-# ProB Parser Library
+# ProB Parsers Library
 
 [![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
+
+## Using
+Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
+
+def parser_version = '2.4.40'
+dependencies {
+	compile group: "de.hhu.stups", name: "bparser", version: parser_version 
+	compile group: "de.hhu.stups", name: "ltlparser", version: parser_version// optional 
+	compile group: "de.hhu.stups", name: "parserbase", version: parser_version 
+	compile group: "de.hhu.stups", name: "prologlib", version: parser_version 
+}
+
+The repository contains some additional parsers:
+answerparser - Parses the answers sent by probcli
+bparser	- Parser for classical B
+cliparser	- Commandline interface for the classical B + LTL parser
+eventbstruct	- Parser for the Camille structural syntax 
+ltlparser	- Parser for LTL and CTL
+parserbase	- Interface classes for the Parsers 
+prologlib - Library to produce valid Prolog terms  
+theorymapping	- Parser for Theory mapping files (translation of EventB operators to Prolog predicates)
+translator - Translates B values into Java objects. 
+unicode - Conversion of EventB Unicode Strings to ASCII and vice versa 
 
 ## Building
 Run the 'deploy' target with gradle. 
