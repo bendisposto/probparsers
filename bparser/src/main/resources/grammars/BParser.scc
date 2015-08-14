@@ -52,6 +52,8 @@ Tokens
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
+  {normal} line_comment = '//' [all_chars - line_break]* line_break;
+
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
     {pragma->unit} pragma_unit = 'units';
@@ -327,7 +329,7 @@ Tokens
 Ignored Tokens
 shebang, shebang_char, shebang_end,
 	white_space,
-	comment, comment_body, comment_end, pragma_start, pragma_end;
+	comment, comment_body, comment_end, pragma_start, pragma_end, line_comment;
 
 
 /*******************************************************************
