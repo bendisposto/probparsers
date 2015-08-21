@@ -1,4 +1,4 @@
-Package de.be4.eventb.core.parser;
+Package de.be4.eventbalg.core.parser;
 
 /*******************************************************************
  * Helpers                                                         *
@@ -10,6 +10,7 @@ Helpers
     at = '@';
     lf = 10;
     cr = 13;
+    semicolon = ';';
     space = ' ';
     slash = '/';
     comment_start = slash slash;
@@ -24,8 +25,8 @@ Helpers
 	line_break = [lf + cr];
 	layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 	all_chars = [0 .. 0xffff];
-	all_formula_chars = [[[[all_chars - layout_char] - line_break] - at] - slash];
-    
+	all_formula_chars = [[[[[all_chars - layout_char] - line_break] - at] - slash] - semicolon];
+
 	unicode_letter =
 	    [0x0041..0x005a] | [0x0061..0x007a] | [0x00aa..0x00aa] | [0x00b5..0x00b5] |
 	    [0x00ba..0x00ba] | [0x00c0..0x00d6] | [0x00d8..0x00f6] | [0x00f8..0x01f5] |
@@ -115,7 +116,7 @@ Tokens
 	{normal -> comment, formula -> normal} comment_start = comment_start space*;
 	{comment} comment = [all_chars - line_break]*;
 	{comment -> normal} comment_end = line_break;
-	
+
 	// multiline comments: a lot of it is handle in the lexer
 	{normal -> multi_comment, formula -> multi_comment} multi_comment_start = multi_comment_start space*;
 	{multi_comment} multi_comment_body = [all_chars - ['*' + '/']]*;
@@ -126,6 +127,7 @@ Tokens
 	{normal -> label, formula -> normal} at = at;
 	{normal} comma = ',';
 	{normal -> formula} colon = ':';
+  {normal, formula -> normal} semicolon = ';';
 
 	{normal} equal = '=';
 
@@ -149,16 +151,24 @@ Tokens
 	{normal, formula -> normal} sets = 'sets' ;
 	{normal, formula -> normal} constants = 'constants' ;
 	{normal, formula -> normal} axioms = 'axioms' ;
-	
+
 	{normal, formula -> normal} event = 'event' ;
 	{normal, formula -> normal} any = 'any' ;
 	{normal, formula -> normal} where = 'where' | 'when' ;
 	{normal, formula -> normal} with = 'with' ;
 	{normal, formula -> normal} then = 'then' | 'begin';
-	
+
+  {normal, formula -> normal} do = 'do' ;
+  {normal, formula -> normal} assert = 'assert';
+  {normal, formula -> normal} assign = 'assign';
+  {normal, formula -> normal} algorithm = 'algorithm';
+  {normal, formula -> normal} while = 'while';
+  {normal, formula -> normal} if = 'if';
+  {normal, formula -> normal} else = 'else';
+
 	{normal} identifier_literal = identifier;
 	{label} label = label;
-	
+
 	{normal, label -> formula, formula} white_space = line_break | layout_char+;
 
 	{formula} formula = all_formula_chars+ ;
@@ -198,7 +208,8 @@ machine {-> parse_unit} =
 	[invariants]:invariants_clause?
 	[variant]:variant_clause?
 	[events]:events_clause?
-	end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [variables.variable], [invariants.invariant], variant.variant, [events.event])};
+  [algorithm]:P.algorithm?
+	end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [variables.variable], [invariants.invariant], variant.variant, [events.event], [algorithm.algorithm])};
 
 refines_clause {-> identifier_literal*} = T.refines [first]:identifier_literal [rest]:refines_clause_tail* {-> [first, rest.identifier_literal]} ;
 refines_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
@@ -222,7 +233,7 @@ variant_clause {-> P.variant} = T.variant [expression]:formula [comment]:comment
 events_clause {-> P.event*} = T.events [first]:P.event [rest]:events_tail* {-> [first.event, rest.event]} ;
 events_tail {-> P.event} = [event]:P.event {-> event.event} ;
 
-event {-> P.event} = 
+event {-> P.event} =
 	[convergence]:convergence?
 	T.event [name]:identifier_literal
 	[comment]:comment*
@@ -241,7 +252,7 @@ convergence {-> convergence} =
 event_refinement {-> event_refinement} =
 	{refines} [names]:event_refines {-> New event_refinement.refines([names.identifier_literal])} |
 	{extended} extends [name]:identifier_literal {-> New event_refinement.extended(name)} ;
-	
+
 event_refines {-> identifier_literal*} = refines [first]:identifier_literal [rest]:event_refines_tail* {-> [first, rest.identifier_literal]} ;
 event_refines_tail {-> identifier_literal} = [refines]:identifier_literal {-> refines};
 
@@ -264,7 +275,20 @@ event_then {-> action*} = then [first]:action [rest]:event_then_tail* {-> [first
 event_then_tail {-> action} = [action]:action {-> action.action};
 action {-> action} = [label]:P.label [action]:formula [comment]:comment* {-> New action([comment], label.label, action)} ;
 
+algorithm {-> P.algorithm} = T.algorithm [block]:alg_block end {-> New algorithm([block.stmt])};
 
+alg_block {-> stmt*} = {sequence} [first]:statement semicolon [second]:statement [rest]:stmt_tail? {-> [first.stmt, second.stmt, rest.stmt]} |
+      {next_level} statement {-> [statement.stmt]};
+
+statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comment* {-> New stmt.assert([comment],predicate)} |
+                    {assign} [label]:P.label [action]:formula [comment]:comment* {-> New stmt.assign([comment], label.label, action)} |
+                    {while} while colon [condition]:formula [comment]:comment* do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt])} |
+                    {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])};
+
+if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
+
+stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
+                         {multi} semicolon [first]:statement [rest]:statement {-> [first.stmt, rest.stmt]};
 /*
 	Structure of a context file
 */
@@ -273,13 +297,13 @@ context {-> parse_unit} =
 	T.context [name]:identifier_literal
 	[comment]:comment*
 	[extends]:extends_clause?
-	[sets]:sets_clause? 
+	[sets]:sets_clause?
     [constants]:constants_clause?
 	[axioms]:axioms_clause?
-	end	{-> New parse_unit.context([comment], name, [extends.identifier_literal], [sets.carrier_set], [constants.constant], [axioms.axiom])} ; 
- 
-		 
- 
+	end	{-> New parse_unit.context([comment], name, [extends.identifier_literal], [sets.carrier_set], [constants.constant], [axioms.axiom])} ;
+
+
+
 extends_clause {-> identifier_literal*} = T.extends [first]:identifier_literal [rest]:extends_clause_tail* {-> [first, rest.identifier_literal]} ;
 extends_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
 
@@ -293,7 +317,7 @@ constant {-> constant} = [name]:identifier_literal [comment]:comment* {-> New co
 
 axioms_clause {-> axiom*} = T.axioms [first]:axiom [rest]:axioms_clause_tail* {-> [first.axiom, rest.axiom]} ;
 axioms_clause_tail {-> axiom} = [axiom]:axiom {-> axiom.axiom} ;
-axiom {-> axiom} = 
+axiom {-> axiom} =
 	[label]:P.label [predicate]:formula [comment]:comment* {-> New axiom([comment], label.label, predicate)} |
 	{derived} theorem [label]:P.label [predicate]:formula [comment]:comment* {-> New axiom.derived([comment], label.label, predicate)} ;
 
@@ -315,25 +339,26 @@ parse_unit =
 		[variables]:variable*
 		[invariants]:invariant*
 		[variant]:P.variant?
-		[events]:P.event* |
-	
+		[events]:P.event*
+    [algorithm]:P.algorithm* |
+
 	{context}
 		[comments]:comment*
 		[name]:identifier_literal
 		[extends_names]:identifier_literal*
-		[sets]:carrier_set* 
+		[sets]:carrier_set*
   	    [constants]:constant*
 		[axioms]:axiom*;
-		
+
 variable = [comments]:comment* [name]:identifier_literal;
 variant = [comments]:comment* [expression]:formula ;
 invariant =
 	[comments]:comment* [name]:label [predicate]:formula |
 	{derived} [comments]:comment* [name]:label [predicate]:formula ;
-	
+
 carrier_set = [comments]:comment* [name]:identifier_literal;
 constant = [comments]:comment* [name]:identifier_literal;
-axiom = 
+axiom =
 	[comments]:comment* [name]:label [predicate]:formula |
 	{derived} [comments]:comment* [name]:label [predicate]:formula ;
 
@@ -355,9 +380,16 @@ event_refinement =
 
 parameter = [comments]:comment* [name]:identifier_literal;
 
-guard = 
+guard =
 	[comments]:comment* [name]:label [predicate]:formula |
-	{derived} [comments]:comment* [name]:label [predicate]:formula; 
+	{derived} [comments]:comment* [name]:label [predicate]:formula;
 
 witness = [comments]:comment* [name]:label [predicate]:formula ;
 action = [comments]:comment* [name]:label [action]:formula ;
+
+algorithm = [block]:stmt* ;
+
+stmt = {assert} [comments]:comment* [predicate]:formula |
+       {assign} [comments]:comment* [name]:label [action]:formula |
+       {while}  [comments]:comment* [condition]:formula [statements]:stmt* |
+       {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;
