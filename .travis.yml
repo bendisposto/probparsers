@@ -10,6 +10,8 @@ before_install:
 
 install: /bin/true
 
+sudo: false
+
 script: TERM=dumb gradle clean uploadArchives
 
 env:
