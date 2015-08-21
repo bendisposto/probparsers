@@ -1,4 +1,4 @@
-package de.be4.eventb.core.parser.analysis;
+package de.be4.eventbalg.core.parser.analysis;
 
 /*
  * NOTES
@@ -19,10 +19,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import de.be4.eventb.core.parser.node.EOF;
-import de.be4.eventb.core.parser.node.Node;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.Token;
+import de.be4.eventbalg.core.parser.analysis.DepthFirstAdapter;
+import de.be4.eventbalg.core.parser.node.EOF;
+import de.be4.eventbalg.core.parser.node.Node;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.Token;
 
 public class ASTDisplay extends DepthFirstAdapter {
 

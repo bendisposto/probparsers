@@ -1,4 +1,4 @@
-package de.be4.eventb.parser;
+package de.be4.eventbalg.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,18 +8,18 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import de.be4.eventb.core.parser.BException;
-import de.be4.eventb.core.parser.EventBParseException;
-import de.be4.eventb.core.parser.lexer.LexerException;
-import de.be4.eventb.core.parser.node.AEvent;
-import de.be4.eventb.core.parser.node.AMachineParseUnit;
-import de.be4.eventb.core.parser.node.AVariable;
-import de.be4.eventb.core.parser.node.AWitness;
-import de.be4.eventb.core.parser.node.PEvent;
-import de.be4.eventb.core.parser.node.PVariable;
-import de.be4.eventb.core.parser.node.PWitness;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.TAt;
+import de.be4.eventbalg.core.parser.BException;
+import de.be4.eventbalg.core.parser.EventBParseException;
+import de.be4.eventbalg.core.parser.lexer.LexerException;
+import de.be4.eventbalg.core.parser.node.AEvent;
+import de.be4.eventbalg.core.parser.node.AMachineParseUnit;
+import de.be4.eventbalg.core.parser.node.AVariable;
+import de.be4.eventbalg.core.parser.node.AWitness;
+import de.be4.eventbalg.core.parser.node.PEvent;
+import de.be4.eventbalg.core.parser.node.PVariable;
+import de.be4.eventbalg.core.parser.node.PWitness;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.TAt;
 
 public class StructureTest extends AbstractTest {
 	@Test

@@ -1,4 +1,4 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
 @SuppressWarnings("serial")
 public class BException extends Exception {

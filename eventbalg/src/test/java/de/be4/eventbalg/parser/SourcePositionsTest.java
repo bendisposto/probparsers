@@ -1,4 +1,4 @@
-package de.be4.eventb.parser;
+package de.be4.eventbalg.parser;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,10 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.eventb.core.parser.EventBParser;
-import de.be4.eventb.core.parser.node.AMachineParseUnit;
-import de.be4.eventb.core.parser.node.PVariable;
-import de.be4.eventb.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.EventBParser;
+import de.be4.eventbalg.core.parser.node.AMachineParseUnit;
+import de.be4.eventbalg.core.parser.node.PVariable;
+import de.be4.eventbalg.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class SourcePositionsTest extends AbstractTest {

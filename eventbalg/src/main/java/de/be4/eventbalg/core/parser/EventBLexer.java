@@ -1,4 +1,4 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -6,19 +6,19 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.be4.eventb.core.parser.lexer.Lexer;
-import de.be4.eventb.core.parser.lexer.LexerException;
-import de.be4.eventb.core.parser.node.EOF;
-import de.be4.eventb.core.parser.node.TColon;
-import de.be4.eventb.core.parser.node.TComment;
-import de.be4.eventb.core.parser.node.TEnd;
-import de.be4.eventb.core.parser.node.TEvent;
-import de.be4.eventb.core.parser.node.TFormula;
-import de.be4.eventb.core.parser.node.TMultiCommentEnd;
-import de.be4.eventb.core.parser.node.TMultiCommentStart;
-import de.be4.eventb.core.parser.node.TVariant;
-import de.be4.eventb.core.parser.node.TWhiteSpace;
-import de.be4.eventb.core.parser.node.Token;
+import de.be4.eventbalg.core.parser.lexer.Lexer;
+import de.be4.eventbalg.core.parser.lexer.LexerException;
+import de.be4.eventbalg.core.parser.node.EOF;
+import de.be4.eventbalg.core.parser.node.TColon;
+import de.be4.eventbalg.core.parser.node.TComment;
+import de.be4.eventbalg.core.parser.node.TEnd;
+import de.be4.eventbalg.core.parser.node.TEvent;
+import de.be4.eventbalg.core.parser.node.TFormula;
+import de.be4.eventbalg.core.parser.node.TMultiCommentEnd;
+import de.be4.eventbalg.core.parser.node.TMultiCommentStart;
+import de.be4.eventbalg.core.parser.node.TVariant;
+import de.be4.eventbalg.core.parser.node.TWhiteSpace;
+import de.be4.eventbalg.core.parser.node.Token;
 
 public class EventBLexer extends Lexer {
 

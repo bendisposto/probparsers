@@ -1,6 +1,6 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
-import de.be4.eventb.core.parser.node.Node;
+import de.be4.eventbalg.core.parser.node.Node;
 
 @SuppressWarnings("serial")
 public class CheckException extends Exception {

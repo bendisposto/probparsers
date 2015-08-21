@@ -1,4 +1,4 @@
-package de.be4.eventb.parser;
+package de.be4.eventbalg.parser;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,12 +6,12 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import de.be4.eventb.core.parser.BException;
-import de.be4.eventb.core.parser.node.AInvariant;
-import de.be4.eventb.core.parser.node.AMachineParseUnit;
-import de.be4.eventb.core.parser.node.AVariant;
-import de.be4.eventb.core.parser.node.PInvariant;
-import de.be4.eventb.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.BException;
+import de.be4.eventbalg.core.parser.node.AInvariant;
+import de.be4.eventbalg.core.parser.node.AMachineParseUnit;
+import de.be4.eventbalg.core.parser.node.AVariant;
+import de.be4.eventbalg.core.parser.node.PInvariant;
+import de.be4.eventbalg.core.parser.node.Start;
 
 public class LexerTest extends AbstractTest {
 	@Test

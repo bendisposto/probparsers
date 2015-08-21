@@ -1,4 +1,4 @@
-package de.be4.eventb.parser;
+package de.be4.eventbalg.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -10,19 +10,19 @@ import java.util.StringTokenizer;
 
 import org.junit.Test;
 
-import de.be4.eventb.core.parser.BException;
-import de.be4.eventb.core.parser.EventBParseException;
-import de.be4.eventb.core.parser.EventBParser;
-import de.be4.eventb.core.parser.node.AAction;
-import de.be4.eventb.core.parser.node.AEvent;
-import de.be4.eventb.core.parser.node.AInvariant;
-import de.be4.eventb.core.parser.node.AMachineParseUnit;
-import de.be4.eventb.core.parser.node.AVariable;
-import de.be4.eventb.core.parser.node.PAction;
-import de.be4.eventb.core.parser.node.PInvariant;
-import de.be4.eventb.core.parser.node.PVariable;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.TComment;
+import de.be4.eventbalg.core.parser.BException;
+import de.be4.eventbalg.core.parser.EventBParseException;
+import de.be4.eventbalg.core.parser.EventBParser;
+import de.be4.eventbalg.core.parser.node.AAction;
+import de.be4.eventbalg.core.parser.node.AEvent;
+import de.be4.eventbalg.core.parser.node.AInvariant;
+import de.be4.eventbalg.core.parser.node.AMachineParseUnit;
+import de.be4.eventbalg.core.parser.node.AVariable;
+import de.be4.eventbalg.core.parser.node.PAction;
+import de.be4.eventbalg.core.parser.node.PInvariant;
+import de.be4.eventbalg.core.parser.node.PVariable;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.TComment;
 
 public class CommentTest extends AbstractTest {
 	@Test

@@ -1,21 +1,22 @@
-package de.be4.eventb.core.parser.analysis;
+package de.be4.eventbalg.core.parser.analysis;
 
 /* -*- jde -*- ASTPrinter.java.in */
 
 import java.util.Stack;
 
-import de.be4.eventb.core.parser.node.EOF;
-import de.be4.eventb.core.parser.node.Node;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.Token;
+import de.be4.eventbalg.core.parser.analysis.ReversedDepthFirstAdapter;
+import de.be4.eventbalg.core.parser.node.EOF;
+import de.be4.eventbalg.core.parser.node.Node;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.Token;
 
 /**
  * Text display of the AST, with (optionally) color output.
- * 
+ *
  * To print the AST we do a reverse depth first traversal. We do this because it
  * is easier to know which element is the last child in any node. This makes it
  * easier to do nice indenting.
- * 
+ *
  * @author Roger Keays
  */
 public class ASTPrinter extends ReversedDepthFirstAdapter {
@@ -97,10 +98,10 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 				+ "- "
 				+ setColor(BOLD, FG_CYAN, BG_BLACK)
 				+ node.getClass()
-						.getName()
-						.substring(
-								node.getClass().getName().lastIndexOf('.') + 1)
-				+ treeColor() + "\n" + output;
+				.getName()
+				.substring(
+						node.getClass().getName().lastIndexOf('.') + 1)
+						+ treeColor() + "\n" + output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';

@@ -1,4 +1,4 @@
-package de.be4.eventb.parser;
+package de.be4.eventbalg.parser;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,10 +6,10 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import de.be4.eventb.core.parser.node.AAxiom;
-import de.be4.eventb.core.parser.node.AContextParseUnit;
-import de.be4.eventb.core.parser.node.PAxiom;
-import de.be4.eventb.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.AAxiom;
+import de.be4.eventbalg.core.parser.node.AContextParseUnit;
+import de.be4.eventbalg.core.parser.node.PAxiom;
+import de.be4.eventbalg.core.parser.node.Start;
 
 public class TheoriesIssuesTest extends AbstractTest {
 	@Test

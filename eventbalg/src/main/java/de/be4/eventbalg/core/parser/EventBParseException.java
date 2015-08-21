@@ -1,7 +1,7 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
-import de.be4.eventb.core.parser.node.Node;
-import de.be4.eventb.core.parser.node.Token;
+import de.be4.eventbalg.core.parser.node.Node;
+import de.be4.eventbalg.core.parser.node.Token;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
 
 @SuppressWarnings("serial")

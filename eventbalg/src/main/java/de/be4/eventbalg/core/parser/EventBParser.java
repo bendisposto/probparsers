@@ -1,4 +1,4 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,14 +10,14 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.eventb.core.parser.analysis.ASTDisplay;
-import de.be4.eventb.core.parser.analysis.ASTPrinter;
-import de.be4.eventb.core.parser.lexer.LexerException;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.TComment;
-import de.be4.eventb.core.parser.node.Token;
-import de.be4.eventb.core.parser.parser.Parser;
-import de.be4.eventb.core.parser.parser.ParserException;
+import de.be4.eventbalg.core.parser.analysis.ASTDisplay;
+import de.be4.eventbalg.core.parser.analysis.ASTPrinter;
+import de.be4.eventbalg.core.parser.lexer.LexerException;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.TComment;
+import de.be4.eventbalg.core.parser.node.Token;
+import de.be4.eventbalg.core.parser.parser.Parser;
+import de.be4.eventbalg.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.IParser;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.ITokenListContainer;

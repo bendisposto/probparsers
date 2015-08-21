@@ -1,12 +1,12 @@
-package de.be4.eventb.core.parser;
+package de.be4.eventbalg.core.parser;
 
 import java.util.List;
 
-import de.be4.eventb.core.parser.node.AContextParseUnit;
-import de.be4.eventb.core.parser.node.AMachineParseUnit;
-import de.be4.eventb.core.parser.node.PParseUnit;
-import de.be4.eventb.core.parser.node.Start;
-import de.be4.eventb.core.parser.node.TIdentifierLiteral;
+import de.be4.eventbalg.core.parser.node.AContextParseUnit;
+import de.be4.eventbalg.core.parser.node.AMachineParseUnit;
+import de.be4.eventbalg.core.parser.node.PParseUnit;
+import de.be4.eventbalg.core.parser.node.Start;
+import de.be4.eventbalg.core.parser.node.TIdentifierLiteral;
 
 public class Utils {
 
