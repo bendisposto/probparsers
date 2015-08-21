@@ -81,6 +81,10 @@ dependencies {
 
  apply plugin: 'signing'
  
+ javadoc {
+	failOnError = false
+ }
+ 
  task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
