@@ -170,6 +170,13 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseTUnitContent(TUnitContent node) {
+		String text = node.getText();
+		String content = text.substring(1, text.length()-1);
+		pout.printString(content);
+	}
+	
+	@Override
 	public void caseEOF(final EOF node) {
 		// do nothing
 	}
