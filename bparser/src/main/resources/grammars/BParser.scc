@@ -56,7 +56,8 @@ Tokens
 
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
-    {pragma->unit} pragma_unit = 'units';
+    {pragma->unit} pragma_unit = 'unit';
+    {pragma->unit} ipragma_unit = 'inferred_unit';
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
@@ -65,7 +66,6 @@ Tokens
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
     {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
-    {unit} unit_var = identifier_literal;
     {unit} unit_content = string_literal;
 
 	{normal -> comment} comment = comment_start ;
@@ -456,28 +456,17 @@ machine_ref_list {-> machine_reference*} =
 
 machine_reference {-> machine_reference} = [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
-
-unit {-> unit} = [var]:unit_var [content]:unit_content {-> New unit(var,content) };
-
-units {-> unit*} =
-  {single} unit {-> [unit]} |
-  {multi} [rest]:units [first]:unit {-> [rest.unit, first.unit]};
-
 variables_clause {-> machine_clause} =
-    {units} pragma_unit [u]:units variables_clause_x {-> New machine_clause.units(variables_clause_x.machine_clause,[u.unit])} |
-    variables_clause_x {-> variables_clause_x.machine_clause};
-
-variables_clause_x {-> machine_clause} =
-	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
-	variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
+	{abstract} abstract_variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} |
+	variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} ;
 
 constants_clause {-> machine_clause} =
-	{concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
-	constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} ;
+	{concrete} concrete_constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} |
+	constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} ;
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:variables_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:variables_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -887,6 +876,15 @@ identifier_list {-> expression*} =
 	{single} [identifier]:composed_identifier_expression {-> [identifier.expression]} |
 	{multi} [rest]:identifier_list comma [identifier]:composed_identifier_expression {-> [rest.expression, identifier.expression]} ;
 
+variables_list {-> expression*} =
+	{single} [identifier]:identifier_expression {-> [identifier.expression]} |
+	{multi} [rest]:variables_list comma [identifier]:identifier_expression {-> [rest.expression, identifier.expression]} ;
+
+identifier_expression {-> expression} =
+	{unit} pragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.unit(content,identifier.expression)} |
+	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
+	[identifier]:identifier_literal {-> New expression.identifier([identifier])}  ;
+
 composed_identifier_expression {-> expression} =
 	[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
 
@@ -952,12 +950,9 @@ model_clause =
  {variant} [variant]:expression |
  {events} event*;
 
-/* Units */
-unit = T.unit_var T.unit_content;
 
 
 machine_clause =
-	{units} machine_clause [units]:unit* |
 	{definitions} [definitions]:definition* |
 	{sees} [machine_names]:expression* |
 	 /* promotes contains operation names, not machine names.
@@ -1047,6 +1042,8 @@ predicate =
 
 /* Expressions */
 expression =
+	{unit} [content]:unit_content [identifier]:expression |
+	{inferredunit} [content]:unit_content [identifier]:expression |
 	{identifier} [identifier]:identifier_literal* |
 	{primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
 	{string} [content]:string_literal |

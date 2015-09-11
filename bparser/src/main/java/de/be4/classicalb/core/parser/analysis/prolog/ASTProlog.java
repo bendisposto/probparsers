@@ -388,12 +388,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		printOCAsList(node, node.getSetDefinitions());
 	}
 
-	public void caseAUnitsMachineClause(final AUnitsMachineClause node) {
-		open(node);
-		node.getMachineClause().apply(this);
-		printAsList(node.getUnits());
-		close(node);
-	}
 
 	@Override
 	public void caseAVariablesMachineClause(final AVariablesMachineClause node) {

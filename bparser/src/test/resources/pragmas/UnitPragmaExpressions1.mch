@@ -1,8 +1,8 @@
 MACHINE UnitPragmaExpressions1
 VARIABLES
-  /*@ unit 10**1 * m**1 */ xx,
-  /*@ unit 10**1 * m**1 */ yy,
-  /*@ unit 10**2 * m**2 */ zz,
+  /*@ unit "10**1 * m**1" */ xx,
+  /*@ unit "10**1 * m**1" */ yy,
+  /*@ unit "10**2 * m**2" */ zz,
   test 
 INVARIANT
   xx:NAT &
