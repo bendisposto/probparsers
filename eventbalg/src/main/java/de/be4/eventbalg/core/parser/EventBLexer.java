@@ -14,6 +14,7 @@ import de.be4.eventbalg.core.parser.node.TComment;
 import de.be4.eventbalg.core.parser.node.TEnd;
 import de.be4.eventbalg.core.parser.node.TEvent;
 import de.be4.eventbalg.core.parser.node.TFormula;
+import de.be4.eventbalg.core.parser.node.TInvariant;
 import de.be4.eventbalg.core.parser.node.TMultiCommentEnd;
 import de.be4.eventbalg.core.parser.node.TMultiCommentStart;
 import de.be4.eventbalg.core.parser.node.TVariant;
@@ -30,24 +31,24 @@ public class EventBLexer extends Lexer {
 	private List<Token> stringBuffer;
 
 	private static String[] clauseErrorMessages = {
-			"'machine' is only allowed at the beginning of a file",
-			"Variable declarations are only allowed before invariant declarations",
-			"Invariant declarations are only allowed after variables and before the variant",
-			"The variant is only allowed after invariants and before events",
-			"The events clause is only allowed at the end",
-			"'context' is only allowed at the beginning of a file",
-			"Set declarations are only allowed before the constants declarations",
-			"Constants declarations are only allowed after sets and before axioms",
-			"The axioms clause is only allowed at the end" };
+		"'machine' is only allowed at the beginning of a file",
+		"Variable declarations are only allowed before invariant declarations",
+		"Invariant declarations are only allowed after variables and before the variant",
+		"The variant is only allowed after invariants and before events",
+		"The events clause is only allowed at the end",
+		"'context' is only allowed at the beginning of a file",
+		"Set declarations are only allowed before the constants declarations",
+		"Constants declarations are only allowed after sets and before axioms",
+	"The axioms clause is only allowed at the end" };
 	private static List<String> clausesOrder = new LinkedList<String>();
 	private int lastClauseIndex;
 
 	private boolean inEvent;
 	private static String[] eventClauseErrorMessages = {
-			"Parameter declarations (any) are only allowed at the beginning of an event",
-			"Guards (where) are only allowed after parameters and before witnesses",
-			"Witnesses (with) are only allowed after guards and before actions",
-			"Actions (then) are only allowed at the end of an event" };
+		"Parameter declarations (any) are only allowed at the beginning of an event",
+		"Guards (where) are only allowed after parameters and before witnesses",
+		"Witnesses (with) are only allowed after guards and before actions",
+	"Actions (then) are only allowed at the end of an event" };
 	private static List<String> eventClausesOrder = new LinkedList<String>();
 	private int lastEventClauseIndex;
 
@@ -218,7 +219,7 @@ public class EventBLexer extends Lexer {
 	private void beginStringToken() throws EventBLexerException {
 		// expected before actual string begins
 		if (token instanceof TColon || token instanceof TWhiteSpace
-				|| token instanceof TVariant) {
+				|| token instanceof TVariant || token instanceof TInvariant) {
 			return;
 		}
 

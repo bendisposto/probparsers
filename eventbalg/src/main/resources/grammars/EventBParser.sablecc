@@ -144,6 +144,7 @@ Tokens
 	{normal, formula -> normal} theorem = 'theorem' ;
 	{normal, formula -> normal} events = 'events' ;
 	{normal -> formula, formula -> normal} variant = 'variant' ;
+  {normal -> formula, formula -> normal} invariant = 'invariant';
 	{normal, formula -> normal} end = 'end' ;
 
 	{normal, formula -> normal} context = 'context' ;
@@ -161,7 +162,7 @@ Tokens
   {normal, formula -> normal} do = 'do' ;
   {normal, formula -> normal} assert = 'assert';
   {normal, formula -> normal} assign = 'assign';
-  {normal, formula -> normal} invariant = 'invariant';
+
   {normal, formula -> normal} algorithm = 'algorithm';
   {normal, formula -> normal} while = 'while';
   {normal, formula -> normal} if = 'if';
@@ -291,8 +292,8 @@ if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
 stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
                          {multi} semicolon [first]:statement [rest]:statement {-> [first.stmt, rest.stmt]};
 
-loop_invariant {-> P.loop_invariant} = T.invariant colon [predicate]:formula [comment]:comment* {-> New loop_invariant([comment],predicate)};
-loop_variant {-> P.loop_variant} = T.variant colon [expression]:formula [comment]:comment* {-> New loop_variant([comment],expression)};
+loop_invariant {-> P.loop_invariant} = T.invariant [predicate]:formula [comment]:comment* {-> New loop_invariant([comment], predicate)};
+loop_variant {-> P.loop_variant} = T.variant [expression]:formula [comment]:comment* {-> New loop_variant([comment], expression)};
 
 /*
 	Structure of a context file
@@ -316,9 +317,9 @@ sets_clause {-> carrier_set*} = T.sets [first]:set [rest]:sets_clause_tail* {-> 
 sets_clause_tail {-> carrier_set} = [set]:set {-> set.carrier_set};
 set {-> carrier_set} = [name]:identifier_literal [comment]:comment* {-> New carrier_set([comment], name)};
 
-constants_clause {-> constant*} = constants [first]:constant [rest]:constants_clause_tail* {-> [first.constant, rest.constant]} ;
-constants_clause_tail {-> constant} = [constant]:constant {-> constant.constant};
-constant {-> constant} = [name]:identifier_literal [comment]:comment* {-> New constant([comment], name)};
+constants_clause {-> P.constant*} = constants [first]:P.constant [rest]:constants_clause_tail* {-> [first.constant, rest.constant]} ;
+constants_clause_tail {-> P.constant} = [constant]:P.constant {-> constant.constant};
+constant {-> P.constant} = [name]:identifier_literal [comment]:comment* {-> New constant([comment], name)};
 
 axioms_clause {-> axiom*} = T.axioms [first]:axiom [rest]:axioms_clause_tail* {-> [first.axiom, rest.axiom]} ;
 axioms_clause_tail {-> axiom} = [axiom]:axiom {-> axiom.axiom} ;
@@ -352,7 +353,7 @@ parse_unit =
 		[name]:identifier_literal
 		[extends_names]:identifier_literal*
 		[sets]:carrier_set*
-  	    [constants]:constant*
+  	    [constants]:P.constant*
 		[axioms]:axiom*;
 
 variable = [comments]:comment* [name]:identifier_literal;
@@ -399,5 +400,5 @@ loop_variant = [comments]:comment* [expression]:formula;
 
 stmt = {assert} [comments]:comment* [predicate]:formula |
        {assign} [comments]:comment* [name]:label [action]:formula |
-       {while}  [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
+       {while} [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
        {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;
