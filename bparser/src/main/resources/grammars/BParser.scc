@@ -1070,6 +1070,8 @@ expression =
 	{cartesian_product} [left]:expression [right]:expression | // only used by EventB translator
 	{mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
 	{div} [left]:expression [right]:expression |
+	{floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
+	{if_then_else} [condition]:predicate [then]:expression [else]:expression | /* has no concrete syntax, generated for example by TLA translation */
 	{modulo} [left]:expression [right]:expression |
 	{power_of} [left]:expression [right]:expression |
 	{successor} |
