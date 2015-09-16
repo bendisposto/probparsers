@@ -118,7 +118,7 @@ Tokens
 	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
 	{definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = all_chars;
+	{normal} something = all_chars | double_quotation all_chars_without_quote* double_quotation;
 
 	white_space = layout_char+;
 

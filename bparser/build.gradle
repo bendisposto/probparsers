@@ -3,12 +3,11 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
-sourceCompatibility = 1.5
 
 
 dependencies {
-    compile project(path: ":prologlib", configuration: "archives") 
-    compile project(path: ":parserbase", configuration: "archives") 
+    compile project(path: ":prologlib", configuration: "archives")
+    compile project(path: ":parserbase", configuration: "archives")
 }
 
 sourceSets {
@@ -47,7 +46,7 @@ task genBParser(type:JavaExec) {
 jar {
  include '**/*.class'
  include '**/*.java'
- exclude '**.*.scc' 
+ exclude '**.*.scc'
  from 'build/temp'
  include '**/*.dat'
  include '**/*.properties'
@@ -64,8 +63,8 @@ task patches << {
 	ant.patch(patchfile: 'patches/fix_deprecation_RDFA.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/analysis/ReversedDepthFirstAdapter.java', failonerror:'true'  )
 }
 
-compileJava { 
- dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy'] 
+compileJava {
+ dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")
@@ -75,6 +74,3 @@ compileJava {
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-
-

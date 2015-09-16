@@ -8,6 +8,7 @@ allprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
   sourceCompatibility = 1.7
+  targetCompatibility = 1.7
 
   clean {
 	doLast {
@@ -80,7 +81,11 @@ dependencies {
  println "Configuring deployment for ${ project.name }"
 
  apply plugin: 'signing'
- 
+
+ javadoc {
+	failOnError = false
+ }
+
  task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
@@ -169,4 +174,3 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
 }
 
 task deploy(dependsOn: [subprojects.deploy,globaljavadoc])
-
