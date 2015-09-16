@@ -9,6 +9,7 @@ import java.util.List;
 import de.be4.eventbalg.core.parser.lexer.Lexer;
 import de.be4.eventbalg.core.parser.lexer.LexerException;
 import de.be4.eventbalg.core.parser.node.EOF;
+import de.be4.eventbalg.core.parser.node.TAlgorithm;
 import de.be4.eventbalg.core.parser.node.TColon;
 import de.be4.eventbalg.core.parser.node.TComment;
 import de.be4.eventbalg.core.parser.node.TEnd;
@@ -44,6 +45,7 @@ public class EventBLexer extends Lexer {
 	private int lastClauseIndex;
 
 	private boolean inEvent;
+	private boolean inAlgorithm;
 	private static String[] eventClauseErrorMessages = {
 		"Parameter declarations (any) are only allowed at the beginning of an event",
 		"Guards (where) are only allowed after parameters and before witnesses",
@@ -74,6 +76,7 @@ public class EventBLexer extends Lexer {
 		lastClauseIndex = 0;
 		lastEventClauseIndex = 0;
 		inEvent = false;
+		inAlgorithm = false;
 	}
 
 	@Override
@@ -105,10 +108,21 @@ public class EventBLexer extends Lexer {
 				return;
 			}
 
+			// entering algorithm?
+			if (!inAlgorithm && token instanceof TAlgorithm) {
+				inAlgorithm = true;
+				return;
+			}
+			// leaving algorithm?
+			else if (inAlgorithm && token instanceof TEnd) {
+				inAlgorithm = false;
+				return;
+			}
+
 			final String className = token.getClass().getSimpleName();
 
 			// check machine/context clauses' order
-			if (!inEvent && clausesOrder.contains(className)) {
+			if (!inEvent && !inAlgorithm && clausesOrder.contains(className)) {
 				final int nextIndex = clausesOrder.indexOf(className);
 
 				if (nextIndex < lastClauseIndex) {

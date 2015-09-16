@@ -64,4 +64,11 @@ public class AlgorithmTest extends AbstractTest {
 				"machine euclid\n  sees definitions limits\nvariables u v\ninvariants\n  @inv u : 0..k\n  @inv2 v : 0..k\n\nevents\n  event INITIALISATION\n    then\n      @act u:=m\n      @act2 v:=n\n  end\n\n  algorithm\n    while: u /= 0 \n    do\n      if: u < v then\n        @u u := v ;\n        @v v := u\n      end ;\n      @uu u := u - v\n    end ;\n    assert: u|->m|->n : IsGCD\n  end\n\nend",
 				false);
 	}
+
+	@Test
+	public void withVariant() throws BException {
+		parseInput(
+				"machine euclid\n  sees definitions limits\nvariables u v\ninvariants\n  @inv u : 0..k\n  @inv2 v : 0..k\n  @loop GCD[{m↦n}] = GCD[{u↦v}]\n\nevents\n  event INITIALISATION\n    then\n      @act u:=m\n      @act2 v:=n\n  end\n\nalgorithm\n  while: u /= 0 \n  	variant u + v\n  do\n    if: u < v then\n      @v v := v - u \n    else\n      @u u := u - v \n    end \n  end ;\n  assert: m↦n↦v ∈ GCD\nend\n\nend\n",
+				false);
+	}
 }
