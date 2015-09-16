@@ -161,6 +161,7 @@ Tokens
   {normal, formula -> normal} do = 'do' ;
   {normal, formula -> normal} assert = 'assert';
   {normal, formula -> normal} assign = 'assign';
+  {normal, formula -> normal} invariant = 'invariant';
   {normal, formula -> normal} algorithm = 'algorithm';
   {normal, formula -> normal} while = 'while';
   {normal, formula -> normal} if = 'if';
@@ -222,9 +223,9 @@ variable_list {-> variable*} =
 	{single} [identifier]:identifier_literal [comment]:comment* {-> [New variable([comment], identifier)]} |
 	{multi} [rest]:variable_list [identifier]:identifier_literal [comment]:comment* {-> [rest.variable, New variable([comment], identifier)]} ;
 
-invariants_clause {-> invariant*} = T.invariants [first]:invariant [rest]:invariants_tail* {-> [first.invariant, rest.invariant]} ;
-invariants_tail {-> invariant} = [invariant]:invariant {-> invariant.invariant} ;
-invariant {-> invariant} =
+invariants_clause {-> P.invariant*} = T.invariants [first]:P.invariant [rest]:invariants_tail* {-> [first.invariant, rest.invariant]} ;
+invariants_tail {-> P.invariant} = [invariant]:P.invariant {-> invariant.invariant} ;
+invariant {-> P.invariant} =
 	[label]:P.label [predicate]:formula [comment]:comment* {-> New invariant([comment], label.label, predicate)} |
 	{derived} theorem [label]:P.label [predicate]:formula [comment]:comment* {-> New invariant.derived([comment], label.label, predicate)} ;
 
@@ -282,13 +283,17 @@ alg_block {-> stmt*} = {sequence} [first]:statement semicolon [second]:statement
 
 statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comment* {-> New stmt.assert([comment],predicate)} |
                     {assign} [label]:P.label [action]:formula [comment]:comment* {-> New stmt.assign([comment], label.label, action)} |
-                    {while} while colon [condition]:formula [comment]:comment* do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt])} |
+                    {while} while colon [condition]:formula [comment]:comment* [inv]:loop_invariant? [var]:loop_variant? do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt], inv, var)} |
                     {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])};
 
 if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
 
 stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
                          {multi} semicolon [first]:statement [rest]:statement {-> [first.stmt, rest.stmt]};
+
+loop_invariant {-> P.loop_invariant} = T.invariant colon [predicate]:formula [comment]:comment* {-> New loop_invariant([comment],predicate)};
+loop_variant {-> P.loop_variant} = T.variant colon [expression]:formula [comment]:comment* {-> New loop_variant([comment],expression)};
+
 /*
 	Structure of a context file
 */
@@ -337,7 +342,7 @@ parse_unit =
 		[refines_names]:identifier_literal*
 		[seen_names]:identifier_literal*
 		[variables]:variable*
-		[invariants]:invariant*
+		[invariants]:P.invariant*
 		[variant]:P.variant?
 		[events]:P.event*
     [algorithm]:P.algorithm* |
@@ -389,7 +394,10 @@ action = [comments]:comment* [name]:label [action]:formula ;
 
 algorithm = [block]:stmt* ;
 
+loop_invariant = [comments]:comment* [predicate]:formula;
+loop_variant = [comments]:comment* [expression]:formula;
+
 stmt = {assert} [comments]:comment* [predicate]:formula |
        {assign} [comments]:comment* [name]:label [action]:formula |
-       {while}  [comments]:comment* [condition]:formula [statements]:stmt* |
+       {while}  [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
        {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;

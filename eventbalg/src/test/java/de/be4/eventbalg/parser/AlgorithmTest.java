@@ -3,6 +3,9 @@ package de.be4.eventbalg.parser;
 import org.junit.Test;
 
 import de.be4.eventbalg.core.parser.BException;
+import de.be4.eventbalg.core.parser.analysis.ASTDisplay;
+import de.be4.eventbalg.core.parser.analysis.ASTPrinter;
+import de.be4.eventbalg.core.parser.node.Start;
 
 public class AlgorithmTest extends AbstractTest {
 
@@ -24,6 +27,27 @@ public class AlgorithmTest extends AbstractTest {
 	public void nestedWhiles() throws BException {
 		parseInput(
 				"machine m0 algorithm while: a do while: b do @act u:=v end; while: c do @act2 u:=r end end end end",
+				false);
+	}
+
+	@Test
+	public void nestedWhilesWithVariant() throws BException {
+		parseInput(
+				"machine m0 algorithm while: a variant: x+y do while: b variant: b do @act u:=v end; while: c do @act2 u:=r end end end end",
+				true);
+	}
+
+	@Test
+	public void nestedWhilesWithInvariant() throws BException {
+		parseInput(
+				"machine m0 algorithm while: a invariant: x+y=0 do while: b invariant: b/=0 do @act u:=v end; while: c do @act2 u:=r end end end end",
+				false);
+	}
+
+	@Test
+	public void nestedWhilesWithVariantAndInvariant() throws BException {
+		parseInput(
+				"machine m0 algorithm while: a invariant: x+y=0 variant: x+y do while: b invariant: x+y=0 variant: b do @act u:=v end; while: c do @act2 u:=r end end end end",
 				false);
 	}
 
