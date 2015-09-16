@@ -290,7 +290,7 @@ statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comm
 if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
 
 stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
-                         {multi} semicolon [first]:statement [rest]:statement {-> [first.stmt, rest.stmt]};
+                         {multi} semicolon [first]:statement [rest]:stmt_tail {-> [first.stmt, rest.stmt]};
 
 loop_invariant {-> P.loop_invariant} = T.invariant [predicate]:formula [comment]:comment* {-> New loop_invariant([comment], predicate)};
 loop_variant {-> P.loop_variant} = T.variant [expression]:formula [comment]:comment* {-> New loop_variant([comment], expression)};
