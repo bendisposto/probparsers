@@ -52,26 +52,28 @@ Tokens
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
+  {normal} line_comment = '//' [all_chars - line_break]* line_break;
+
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
-    {pragma->unit} pragma_unit = 'units';
+    {pragma->unit} pragma_unit = 'unit';
+    {pragma->unit} ipragma_unit = 'inferred_unit';
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
     {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
-    {description->normal} pragma_free_text = all_chars* '*/'; 
+    {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
-    {unit} unit_var = identifier_literal;
     {unit} unit_content = string_literal;
 
-	{normal -> comment, comment} comment = comment_start ;
-	{comment} comment_end = comment_end; // return to state 'normal' is done in Lexer
+	{normal -> comment} comment = comment_start ;
+	{comment,description} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
 
-	{comment} star = '*';
-	{comment} slash = '/';
+	{comment,description} star = '*';
+	{comment,description} slash = '/';
 
 	{normal} string_literal = string_literal;
 	{normal} for_any = '!' | 0x2200;
@@ -170,8 +172,8 @@ Tokens
 	{normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
 	{normal} max_int = 'MAXINT';
 	{normal} min_int = 'MININT';
-	{normal} nat = 'NAT'; 
-	{normal} nat1 = 'NAT1'; 
+	{normal} nat = 'NAT';
+	{normal} nat1 = 'NAT1';
 	{normal} natural = 'NATURAL' | 0x2115;
 	{normal} natural1 = 'NATURAL1' | 0x2115 0x0031 | 0x2115 0x2081;
 	{normal} of = 'OF';
@@ -327,7 +329,7 @@ Tokens
 Ignored Tokens
 shebang, shebang_char, shebang_end,
 	white_space,
-	comment, comment_body, comment_end, pragma_start, pragma_end;
+	comment, comment_body, comment_end, pragma_start, pragma_end, line_comment;
 
 
 /*******************************************************************
@@ -424,7 +426,7 @@ definition_list {-> definition*} =
 	{single} [def]:definition {-> [def.definition]} |
 	{multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
 
-definition {-> definition} = 
+definition {-> definition} =
   {conversion} pragma_conversion definition_x {-> New definition.conversion(definition_x.definition)} |
   definition_x {-> definition_x.definition};
 
@@ -454,28 +456,17 @@ machine_ref_list {-> machine_reference*} =
 
 machine_reference {-> machine_reference} = [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
-
-unit {-> unit} = [var]:unit_var [content]:unit_content {-> New unit(var,content) };
-
-units {-> unit*} = 
-  {single} unit {-> [unit]} |
-  {multi} [rest]:units [first]:unit {-> [rest.unit, first.unit]};
-
 variables_clause {-> machine_clause} =
-    {units} pragma_unit [u]:units variables_clause_x {-> New machine_clause.units(variables_clause_x.machine_clause,[u.unit])} |
-    variables_clause_x {-> variables_clause_x.machine_clause};
-
-variables_clause_x {-> machine_clause} =
-	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
-	variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
+	{abstract} abstract_variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} |
+	variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} ;
 
 constants_clause {-> machine_clause} =
-	{concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
-	constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} ;
+	{concrete} concrete_constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} |
+	constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} ;
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:variables_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:variables_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -484,6 +475,7 @@ set_def_list {-> set*} =
 	{multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]} ;
 
 set {-> set} =
+	{description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
 	{deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
 	{enumerated} [identifier]:composed_identifier equal left_brace [elements]:expression_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} ;
 
@@ -550,7 +542,7 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x41 {-> New predicate.label(name,predicate.predicate)} |
+       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
@@ -884,6 +876,15 @@ identifier_list {-> expression*} =
 	{single} [identifier]:composed_identifier_expression {-> [identifier.expression]} |
 	{multi} [rest]:identifier_list comma [identifier]:composed_identifier_expression {-> [rest.expression, identifier.expression]} ;
 
+variables_list {-> expression*} =
+	{single} [identifier]:identifier_expression {-> [identifier.expression]} |
+	{multi} [rest]:variables_list comma [identifier]:identifier_expression {-> [rest.expression, identifier.expression]} ;
+
+identifier_expression {-> expression} =
+	{unit} pragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.unit(content,identifier.expression)} |
+	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
+	[identifier]:identifier_literal {-> New expression.identifier([identifier])}  ;
+
 composed_identifier_expression {-> expression} =
 	[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
 
@@ -949,12 +950,9 @@ model_clause =
  {variant} [variant]:expression |
  {events} event*;
 
-/* Units */
-unit = T.unit_var T.unit_content;
 
 
 machine_clause =
-	{units} machine_clause [units]:unit* |
 	{definitions} [definitions]:definition* |
 	{sees} [machine_names]:expression* |
 	 /* promotes contains operation names, not machine names.
@@ -989,6 +987,7 @@ definition =
 	{file_definition} [filename]:string_literal ;
 
 set =
+    {description} T.pragma_free_text set |
 	{deferred_set} [identifier]:identifier_literal* |
 	{enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
 
@@ -1043,6 +1042,8 @@ predicate =
 
 /* Expressions */
 expression =
+	{unit} [content]:unit_content [identifier]:expression |
+	{inferredunit} [content]:unit_content [identifier]:expression |
 	{identifier} [identifier]:identifier_literal* |
 	{primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
 	{string} [content]:string_literal |
@@ -1069,6 +1070,8 @@ expression =
 	{cartesian_product} [left]:expression [right]:expression | // only used by EventB translator
 	{mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
 	{div} [left]:expression [right]:expression |
+	{floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
+	{if_then_else} [condition]:predicate [then]:expression [else]:expression | /* has no concrete syntax, generated for example by TLA translation */
 	{modulo} [left]:expression [right]:expression |
 	{power_of} [left]:expression [right]:expression |
 	{successor} |
@@ -1132,8 +1135,8 @@ expression =
 	{total_relation} [left]:expression [right]:expression | // EventB only
 	{surjection_relation} [left]:expression [right]:expression | // EventB only
 	{total_surjection_relation} [left]:expression [right]:expression | // EventB only
-  {lambda} [identifiers]:expression* [predicate]:predicate [expression]:expression |
-  {symbolic_lambda} [identifiers]:expression* [predicate]:predicate [expression]:expression |
+    {lambda} [identifiers]:expression* [predicate]:predicate [expression]:expression |
+    {symbolic_lambda} [identifiers]:expression* [predicate]:predicate [expression]:expression |
 	{trans_function} [expression]:expression |
 	{trans_relation} [expression]:expression |
 	{seq} [expression]:expression |
@@ -1180,6 +1183,7 @@ expression =
 	{record_field} [record]:expression [identifier]:expression |
 	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
 	{typeof} [expression]:expression [type]:expression; /* Has no concrete syntax, is only generated by the translation process */
+
 rec_entry = [identifier]:expression [value]:expression;
 
 

@@ -116,6 +116,7 @@ Ignored Tokens
                           {af}           forall finally [cont]:ctl_formula4            { -> New ctl.af(cont.ctl) } |
                           {unparsed}     atomic_proposition_begin                       { -> New ctl.unparsed(atomic_proposition_begin) } |
                           {enabled}      enabled                                        { -> New ctl.enabled(enabled) } |     
+                          {action}       l_sq                                           { -> New ctl.action(l_sq)} | 
                           {sink}         sink                                           { -> New ctl.sink() } | 
                           {deadlock}     deadlock                                       { -> New ctl.deadlock() } | 
                           {current}      current                                        { -> New ctl.current() };
@@ -135,6 +136,7 @@ Abstract Syntax Tree
    {eu}           [left]:ctl [right]:ctl | 
    {not}          ctl |
    {ena}          [operation]:l_sq [cont]:ctl |
+   {action}       [operation]:l_sq |
    {en}           ctl |
    {an}           ctl |
    {eg}           ctl |

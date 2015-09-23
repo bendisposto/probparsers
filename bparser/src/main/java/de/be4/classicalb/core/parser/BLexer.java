@@ -19,6 +19,7 @@ import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TLeftPar;
+import de.be4.classicalb.core.parser.node.TPragmaDescription;
 import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
@@ -63,9 +64,8 @@ public class BLexer extends Lexer {
 			collectComment();
 		}
 
-		if (token instanceof TPragmaFreeText) {
-			token.setText(token.getText().substring(0,
-					token.getText().length() - 3));
+		if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
+			collectComment();
 		}
 
 		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
@@ -184,8 +184,8 @@ public class BLexer extends Lexer {
 
 		// starting a new comment
 		if (comment == null) {
-			comment = (TComment) token;
 			commentBuffer = new StringBuilder(token.getText());
+			comment = token;
 			token = null;
 		} else {
 			commentBuffer.append(token.getText());
@@ -193,7 +193,8 @@ public class BLexer extends Lexer {
 			// end of comment reached?
 			if (token instanceof TCommentEnd) {
 				String text = commentBuffer.toString();
-				comment.setText(text);
+				if (state.equals(State.DESCRIPTION)) text = text.substring(0, text.length()-2);
+				comment.setText(text.trim());
 				token = comment;
 				comment = null;
 				commentBuffer = null;

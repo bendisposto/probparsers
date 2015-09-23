@@ -10,103 +10,7 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.AAbstractConstantsContextClause;
-import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
-import de.be4.classicalb.core.parser.node.AAssignSubstitution;
-import de.be4.classicalb.core.parser.node.AAxiomsContextClause;
-import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
-import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
-import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
-import de.be4.classicalb.core.parser.node.ACaseOrSubstitution;
-import de.be4.classicalb.core.parser.node.ACaseSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
-import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AConcreteVariablesMachineClause;
-import de.be4.classicalb.core.parser.node.AConstantsContextClause;
-import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.AConstructorFreetypeConstructor;
-import de.be4.classicalb.core.parser.node.ACoupleExpression;
-import de.be4.classicalb.core.parser.node.ADefinitionExpression;
-import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
-import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
-import de.be4.classicalb.core.parser.node.AElementFreetypeConstructor;
-import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
-import de.be4.classicalb.core.parser.node.AEvent;
-import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AEventBContextParseUnit;
-import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
-import de.be4.classicalb.core.parser.node.AEventsModelClause;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
-import de.be4.classicalb.core.parser.node.AExtendedExprExpression;
-import de.be4.classicalb.core.parser.node.AExtendedPredPredicate;
-import de.be4.classicalb.core.parser.node.AExtendsContextClause;
-import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AFreetype;
-import de.be4.classicalb.core.parser.node.AFreetypesMachineClause;
-import de.be4.classicalb.core.parser.node.AFunctionExpression;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.AIfSubstitution;
-import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AImportsMachineClause;
-import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
-import de.be4.classicalb.core.parser.node.AIntegerExpression;
-import de.be4.classicalb.core.parser.node.AInvariantModelClause;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
-import de.be4.classicalb.core.parser.node.AMachineClauseParseUnit;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AMachineReference;
-import de.be4.classicalb.core.parser.node.AOpSubstitution;
-import de.be4.classicalb.core.parser.node.AOperation;
-import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
-import de.be4.classicalb.core.parser.node.AOppatternParseUnit;
-import de.be4.classicalb.core.parser.node.AParallelSubstitution;
-import de.be4.classicalb.core.parser.node.APartitionPredicate;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.APredicateParseUnit;
-import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
-import de.be4.classicalb.core.parser.node.APromotesMachineClause;
-import de.be4.classicalb.core.parser.node.AProverComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.ARecExpression;
-import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
-import de.be4.classicalb.core.parser.node.ASeesMachineClause;
-import de.be4.classicalb.core.parser.node.ASeesModelClause;
-import de.be4.classicalb.core.parser.node.ASelectSubstitution;
-import de.be4.classicalb.core.parser.node.ASequenceExtensionExpression;
-import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
-import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
-import de.be4.classicalb.core.parser.node.ASetsContextClause;
-import de.be4.classicalb.core.parser.node.ASetsMachineClause;
-import de.be4.classicalb.core.parser.node.AStructExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASubstitutionParseUnit;
-import de.be4.classicalb.core.parser.node.ATheoremsContextClause;
-import de.be4.classicalb.core.parser.node.ATheoremsModelClause;
-import de.be4.classicalb.core.parser.node.AUsesMachineClause;
-import de.be4.classicalb.core.parser.node.AValuesMachineClause;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
-import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
-import de.be4.classicalb.core.parser.node.AVariablesModelClause;
-import de.be4.classicalb.core.parser.node.AWitness;
-import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PEventstatus;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.node.*;
 import de.prob.prolog.output.IPrologTermOutput;
 
 /**
@@ -134,7 +38,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
 			Arrays.asList("event", "freetype", "machine_header",
 					"machine_reference", "operation", "rec_entry",
-					"values_entry", "witness","unit"));
+					"values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -265,6 +169,13 @@ public class ASTProlog extends DepthFirstAdapter {
 		pout.printAtom(text);
 	}
 
+	@Override
+	public void caseTUnitContent(TUnitContent node) {
+		String text = node.getText();
+		String content = text.substring(1, text.length()-1);
+		pout.printString(content);
+	}
+	
 	@Override
 	public void caseEOF(final EOF node) {
 		// do nothing
@@ -484,6 +395,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		printOCAsList(node, node.getSetDefinitions());
 	}
 
+
 	@Override
 	public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
 		printOCAsList(node, node.getIdentifiers());
@@ -656,6 +568,15 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicComprehensionSetExpression(
+			final ASymbolicComprehensionSetExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		node.getPredicates().apply(this);
+		close(node);
+	}
+
+	@Override
 	public void caseAProverComprehensionSetExpression(
 			final AProverComprehensionSetExpression node) {
 		open(node);
@@ -701,6 +622,15 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseALambdaExpression(final ALambdaExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		node.getPredicate().apply(this);
+		node.getExpression().apply(this);
+		close(node);
+	}
+
+	@Override
+	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicate().apply(this);

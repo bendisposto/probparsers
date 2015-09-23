@@ -1,9 +1,9 @@
-/*@ unit_alias myKMpH km * s**-1 */
+/* unit_alias myKMpH km * s**-1 */
 MACHINE UnitPragmaExpressions2
 ABSTRACT_VARIABLES
-  /*@ unit myKMpH  */ xx,
+  /*@ unit "myKMpH"  */ xx,
   test,
-  /*@ unit km * s**-1 */ test2
+  /*@ unit "km * s**-1" */ test2
 INVARIANT
     xx : NAT
   & test : NAT

@@ -1,17 +1,43 @@
-# ProB Parser Library
+# ProB Parsers Library
 
 [![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
 
+## Using
+Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
+
+<pre>
+def parser_version = '2.4.40' // development version: 2.5.0-SNAPSHOT
+dependencies {
+	compile group: "de.hhu.stups", name: "bparser", version: parser_version 
+	compile group: "de.hhu.stups", name: "ltlparser", version: parser_version// optional 
+	compile group: "de.hhu.stups", name: "parserbase", version: parser_version 
+	compile group: "de.hhu.stups", name: "prologlib", version: parser_version 
+}
+</pre>
+
+The repository contains some additional parsers:
+
+
+* answerparser - Parses the answers sent by probcli
+* bparser	- Parser for classical B
+* cliparser	- Commandline interface for the classical B + LTL parser
+* eventbstruct	- Parser for the Camille structural syntax 
+* ltlparser	- Parser for LTL and CTL
+* parserbase	- Interface classes for the Parsers 
+* prologlib - Library to produce valid Prolog terms  
+* theorymapping	- Parser for Theory mapping files (translation of EventB operators to Prolog predicates)
+* translator - Translates B values into Java objects. 
+* unicode - Conversion of EventB Unicode Strings to ASCII and vice versa 
+
 ## Building
-Run the 'deploy' target with gradle. If you don't have gradle installed, you can use the provided wrapper 
-   ./gradlew uberjar
+Run the 'deploy' target with gradle. 
 
 On windows you need to install the program 'patch.exe'. 
 
 The artifacts are copied to the build folder. 
 
 # Bugs
-Please report bugs and feature requests at http://jira.cobra.cs.uni-duesseldorf.de/
+Please report bugs and feature requests at https://probjira.atlassian.net
 
 
 ## Content
@@ -42,7 +68,4 @@ any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
 
-## Commercial Support 
-For availability of commercial support, please contact Formal Mind (http://www.formalmind.com/).
-
-(c) 2011 STUPS group, University of Düsseldorf
+(c) 2011-2015 STUPS group, University of Düsseldorf
