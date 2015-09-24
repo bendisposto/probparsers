@@ -23,19 +23,21 @@ public class PragmaTest {
 
 	@Test
 	public void testLexer() throws Exception {
-		String input = "/*@ generated */ MACHINE foo(x) \n"
-				+ "/* look at me. */ \n"
-				+ "DEFINITIONS \n" 
-				+ " /*@ conversion */ foo(m) == m \n"
-				+ "PROPERTIES \n"
-				+ "/*@ label foo */ \n"
-				+ "/*@ label bar */ \n"
-				+ "x = /*@ symbolic */ {y|->z| y < z } \n"
-				+ "/*@ desc prop */ \n"
-				+ "SETS A;B /*@ desc trololo !!! */;C END";
+//		String input = "/*@ generated */ MACHINE foo(x) \n"
+//				+ "/* look at me. */ \n"
+//				+ "DEFINITIONS \n" 
+//				+ " /*@ conversion */ foo(m) == m \n"
+//				+ "PROPERTIES \n"
+//				+ "/*@ label foo */ \n"
+//				+ "/*@ label bar */ \n"
+//				+ "x = /*@ symbolic */ {y|->z| y < z } \n"
+//				+ "/*@ desc prop */ \n"
+//				+ "SETS A;B={a,b} /*@ desc trololo !!! */;C END";
+		
+		
 //		String input = "MACHINE foo  PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z| y < z }  END";
 		
-		
+		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
 		
 		BLexer lex = new BLexer(new PushbackReader(new StringReader(input), 500));
 		Token t;
