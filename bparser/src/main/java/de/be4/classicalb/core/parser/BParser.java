@@ -389,7 +389,7 @@ public class BParser {
 			 * 'LexerAspect' replaces any LexerException to provide sourcecode
 			 * position information in the BLexerException.
 			 */
-			throw new BException(absolutePath, e);
+ 			throw new BException(absolutePath, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null

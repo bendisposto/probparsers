@@ -25,6 +25,8 @@ public class PragmaTest {
 	public void testLexer() throws Exception {
 		String input = "/*@ generated */ MACHINE foo(x) "
 				+ "/* look at me. */ "
+				+ "DEFINITIONS " 
+				+ " /*@ conversion */ foo(m) == m "
 				+ "PROPERTIES "
 				+ "/*@ label foo */ "
 				+ "/*@ label bar */ "
