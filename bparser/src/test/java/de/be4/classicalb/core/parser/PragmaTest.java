@@ -23,17 +23,19 @@ public class PragmaTest {
 
 	@Test
 	public void testLexer() throws Exception {
-		String input = "/*@ generated */ MACHINE foo(x) "
-				+ "/* look at me. */ "
-				+ "DEFINITIONS " 
-				+ " /*@ conversion */ foo(m) == m "
-				+ "PROPERTIES "
-				+ "/*@ label foo */ "
-				+ "/*@ label bar */ "
-				+ "x = /*@ symbolic */ {y|->z| y < z } "
-				+ "/*@ desc prop */ "
+		String input = "/*@ generated */ MACHINE foo(x) \n"
+				+ "/* look at me. */ \n"
+				+ "DEFINITIONS \n" 
+				+ " /*@ conversion */ foo(m) == m \n"
+				+ "PROPERTIES \n"
+				+ "/*@ label foo */ \n"
+				+ "/*@ label bar */ \n"
+				+ "x = /*@ symbolic */ {y|->z| y < z } \n"
+				+ "/*@ desc prop */ \n"
 				+ "SETS A;B /*@ desc trololo !!! */;C END";
 //		String input = "MACHINE foo  PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z| y < z }  END";
+		
+		
 		
 		BLexer lex = new BLexer(new PushbackReader(new StringReader(input), 500));
 		Token t;
@@ -44,6 +46,10 @@ public class PragmaTest {
 		
 		
 		BParser p = new BParser();
+		
+		System.out.println("\n"+input);	
+		
+		
 		Start ast = p.parse(input, false);
 
 		ASTPrinter pr = new ASTPrinter();

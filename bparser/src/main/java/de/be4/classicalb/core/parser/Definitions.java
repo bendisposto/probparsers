@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -45,8 +46,11 @@ public class Definitions extends IDefinitions {
 	 * .String)
 	 */
 	public int getParameterCount(final String defName) {
-		final Node defNode = getDefinition(defName);
+		final PDefinition defNode = getDefinition(defName);
+		return getParameterCount(defNode);
+	}
 
+	private int getParameterCount(PDefinition defNode) {
 		if (defNode instanceof APredicateDefinitionDefinition)
 			return ((APredicateDefinitionDefinition) defNode).getParameters()
 					.size();
@@ -56,8 +60,12 @@ public class Definitions extends IDefinitions {
 		else if (defNode instanceof AExpressionDefinitionDefinition)
 			return ((AExpressionDefinitionDefinition) defNode).getParameters()
 					.size();
-		else
+		else if (defNode instanceof AConversionDefinition) {
+			return getParameterCount(((AConversionDefinition) defNode)
+					.getDefinition());
+		} else
 			return -1;
+
 	}
 
 	/*
