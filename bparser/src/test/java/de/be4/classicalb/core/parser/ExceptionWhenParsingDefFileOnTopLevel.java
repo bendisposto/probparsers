@@ -38,6 +38,9 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 		final BParser parser = new BParser(machine.getName());
 		int returnValue = parser.fullParsing(machine, behaviour, out, out);
 
+		
+		System.out.println(baos.toString());
+		
 		assertEquals(returnValue, -3);
 		assertEquals("exception('null in file: LibraryIO.def').", baos
 				.toString().trim());

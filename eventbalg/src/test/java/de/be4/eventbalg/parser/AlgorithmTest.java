@@ -3,9 +3,6 @@ package de.be4.eventbalg.parser;
 import org.junit.Test;
 
 import de.be4.eventbalg.core.parser.BException;
-import de.be4.eventbalg.core.parser.analysis.ASTDisplay;
-import de.be4.eventbalg.core.parser.analysis.ASTPrinter;
-import de.be4.eventbalg.core.parser.node.Start;
 
 public class AlgorithmTest extends AbstractTest {
 
@@ -76,6 +73,13 @@ public class AlgorithmTest extends AbstractTest {
 	public void withVariant() throws BException {
 		parseInput(
 				"machine euclid\n  sees definitions limits\nvariables u v\ninvariants\n  @inv u : 0..k\n  @inv2 v : 0..k\n  @loop GCD[{m↦n}] = GCD[{u↦v}]\n\nevents\n  event INITIALISATION\n    then\n      @act u:=m\n      @act2 v:=n\n  end\n\nalgorithm\n  while: u /= 0 \n  	variant u + v\n  do\n    if: u < v then\n      @v v := v - u \n    else\n      @u u := u - v \n    end \n  end ;\n  assert: m↦n↦v ∈ GCD\nend\n\nend\n",
+				false);
+	}
+
+	@Test
+	public void sixStatements() throws BException {
+		parseInput(
+				"machine m0 algorithm @x x:=1 ; @y x:=1 ; @z z:=1 ; @f f:=1 ; @g g:=1 ; @h h:=1 end end",
 				false);
 	}
 }

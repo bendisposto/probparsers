@@ -1,13 +1,18 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import de.be4.classicalb.core.parser.DefinitionTypes;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.PDefinition;
 
 /**
  * Collects the
@@ -52,6 +57,18 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
 		defintions.addDefinition(node, type);
+	}
+
+	@Override
+	public void outAConversionDefinition(AConversionDefinition node) {
+		PDefinition target = node.getDefinition();
+		Set<String> definitionNames = defintions.getDefinitionNames();
+		for (String n : definitionNames) {
+			PDefinition d = defintions.getDefinition(n);
+			if (d == target) {
+				defintions.addDefinition(node, defintions.getType(n),n);
+			}
+		}
 	}
 
 	public IDefinitions getDefintions() {
