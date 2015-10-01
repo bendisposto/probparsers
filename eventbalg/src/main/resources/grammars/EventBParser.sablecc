@@ -161,6 +161,7 @@ Tokens
 
   {normal, formula -> normal} do = 'do' ;
   {normal, formula -> normal} assert = 'assert';
+  {normal, formula -> normal} assume = 'assume';
   {normal, formula -> normal} assign = 'assign';
 
   {normal, formula -> normal} algorithm = 'algorithm';
@@ -283,6 +284,7 @@ alg_block {-> stmt*} = {sequence} [first]:statement semicolon [second]:statement
       {next_level} statement {-> [statement.stmt]};
 
 statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comment* {-> New stmt.assert([comment],predicate)} |
+					{assume} T.assume colon [predicate]:formula [comment]:comment* {-> New stmt.assume([comment],predicate)} |
                     {assign} [label]:P.label [action]:formula [comment]:comment* {-> New stmt.assign([comment], label.label, action)} |
                     {while} while colon [condition]:formula [comment]:comment* [inv]:loop_invariant? [var]:loop_variant? do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt], inv, var)} |
                     {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])};
@@ -399,6 +401,7 @@ loop_invariant = [comments]:comment* [predicate]:formula;
 loop_variant = [comments]:comment* [expression]:formula;
 
 stmt = {assert} [comments]:comment* [predicate]:formula |
+	   {assume} [comments]:comment* [predicate]:formula |
        {assign} [comments]:comment* [name]:label [action]:formula |
        {while} [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
        {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;
