@@ -21,6 +21,13 @@ public class AlgorithmTest extends AbstractTest {
 	}
 
 	@Test
+	public void test3() throws BException {
+		parseInput(
+				"machine m0 algorithm while: u /=0 do if: u < v then @act u:=v; assume: x = 4; @act2 v:=u else @act4 r:=x end; @act3 u := u - v end end end",
+				false);
+	}
+
+	@Test
 	public void nestedWhiles() throws BException {
 		parseInput(
 				"machine m0 algorithm while: a do while: b do @act u:=v end; while: c do @act2 u:=r end end end end",
