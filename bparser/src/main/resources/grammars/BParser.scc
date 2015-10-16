@@ -536,10 +536,37 @@ predicate_p30 {-> predicate} =
 	{next_level} [pred]:predicate_x30 {-> pred.predicate};
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
+/*
 predicate_p40 {-> predicate} =
 	{disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
 	{conjunct} [left]:predicate_p40 conjunction [right]:predicate_x40 {-> New predicate.conjunct(left.predicate, right.predicate)} |
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
+*/
+
+	predicate_p40 {-> predicate} =
+		{disjunct} disjunction_list {-> New predicate.disjunct([disjunction_list.predicate])} |
+		{conjunct} conjunction_list {-> New predicate.conjunct([conjunction_list.predicate])} |
+		{next_level} [pred]:predicate_x40 {-> pred.predicate};
+
+	disjunction_list {-> predicate*} =
+		{dislist_dis_pred} [left]:disjunction_list logical_or [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{dislist_dis_expr} [left]:disjunction_list logical_or [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{conlist_dis_pred} [left]:conjunction_list logical_or [right]:predicate_x40   {-> [New predicate.conjunct([left.predicate]), right.predicate]} |
+		{conlist_dis_expr} [left]:conjunction_list logical_or [right]:expression_p125 {-> [New predicate.conjunct([left.predicate]), New predicate.expression(right.expression)]} |
+		{pred_dis_pred}    [left]:predicate_x40    logical_or [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{pred_dis_expr}    [left]:predicate_x40    logical_or [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{expr_dis_pred}    [left]:expression_p125  logical_or [right]:predicate_x40   {-> [New predicate.expression(left.expression), right.predicate]} |
+		{expr_dis_expr}    [left]:expression_p125  logical_or [right]:expression_p125 {-> [New predicate.expression(left.expression), New predicate.expression(right.expression)]} ;
+
+	conjunction_list {-> predicate*} =
+		{conlist_con_pred} [left]:conjunction_list conjunction [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{conlist_con_expr} [left]:conjunction_list conjunction [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{dislist_con_pred} [left]:disjunction_list conjunction [right]:predicate_x40   {-> [New predicate.disjunct([left.predicate]), right.predicate]} |
+		{dislist_con_expr} [left]:disjunction_list conjunction [right]:expression_p125 {-> [New predicate.disjunct([left.predicate]), New predicate.expression(right.expression)]} |
+		{pred_con_pred}    [left]:predicate_x40    conjunction [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{pred_con_expr}    [left]:predicate_x40    conjunction [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{expr_con_pred}    [left]:expression_p125  conjunction [right]:predicate_x40   {-> [New predicate.expression(left.expression), right.predicate]} |
+		{expr_con_expr}    [left]:expression_p125  conjunction [right]:expression_p125 {-> [New predicate.expression(left.expression), New predicate.expression(right.expression)]} ;
 
 predicate_x40 {-> predicate} =
        {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
@@ -1011,9 +1038,14 @@ predicate =
   {description} [content]:pragma_free_text [predicate]:predicate |
   {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
-	{conjunct} [left]:predicate [right]:predicate |
+
+		{conjunct} [predicates]:predicate* |
+		{disjunct} [predicates]:predicate* |
+		{expression} expression | /* transformation to an expression is exclusively for conjunction and disjunction now */
+	/* {conjunct} [left]:predicate [right]:predicate | */
+	/* {disjunct} [left]:predicate [right]:predicate | */
+
 	{negation} [predicate]:predicate |
-	{disjunct} [left]:predicate [right]:predicate |
 	{implication} [left]:predicate [right]:predicate |
 	{equivalence} [left]:predicate [right]:predicate |
 	{forall} [identifiers]:expression* [implication]:predicate |
