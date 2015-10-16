@@ -35,7 +35,7 @@ public class PredicatesTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(APredicateParseUnit(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([x]),AIdentifierExpression([ID])),AMemberPredicate(AIdentifierExpression([y]),AIdentifierExpression([ID])))))",
+				"Start(APredicateParseUnit(AConjunctPredicate([AMemberPredicate(AIdentifierExpression([x]),AIdentifierExpression([ID])),AMemberPredicate(AIdentifierExpression([y]),AIdentifierExpression([ID]))])))",
 				result);
 	}
 
@@ -58,7 +58,22 @@ public class PredicatesTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(APredicateParseUnit(AConjunctPredicate(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([hasread]),ARelationsExpression(AIdentifierExpression([READER]),AIdentifierExpression([BOOK]))),AMemberPredicate(AIdentifierExpression([reading]),APartialInjectionExpression(AIdentifierExpression([READER]),AIdentifierExpression([COPY])))),AEqualPredicate(AIntersectionExpression(ACompositionExpression(AIdentifierExpression([reading]),AIdentifierExpression([copyof])),AIdentifierExpression([hasread])),AEmptySetExpression()))))",
+				"Start("
+					+ "APredicateParseUnit("
+						+ "AConjunctPredicate(["
+							+ "AMemberPredicate("
+								+ "AIdentifierExpression([hasread]),ARelationsExpression(AIdentifierExpression([READER]),AIdentifierExpression([BOOK]))"
+							+ "),"
+							+ "AMemberPredicate("
+								+ "AIdentifierExpression([reading]),APartialInjectionExpression(AIdentifierExpression([READER]),AIdentifierExpression([COPY]))"
+							+ "),"
+							+ "AEqualPredicate("
+								+ "AIntersectionExpression(ACompositionExpression(AIdentifierExpression([reading]),AIdentifierExpression([copyof])),AIdentifierExpression([hasread])),"
+								+ "AEmptySetExpression()"
+							+ ")"
+						+ "])"
+					+ ")"
+				+ ")",
 				result);
 	}
 
@@ -103,7 +118,7 @@ public class PredicatesTest {
 		final String testMachine = "#PREDICATE 4 < 5 & 6 >= 7";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(APredicateParseUnit(AConjunctPredicate(ALessPredicate(AIntegerExpression(4),AIntegerExpression(5)),AGreaterEqualPredicate(AIntegerExpression(6),AIntegerExpression(7)))))",
+				"Start(APredicateParseUnit(AConjunctPredicate([ALessPredicate(AIntegerExpression(4),AIntegerExpression(5)),AGreaterEqualPredicate(AIntegerExpression(6),AIntegerExpression(7))])))",
 				result);
 	}
 
@@ -188,7 +203,7 @@ public class PredicatesTest {
 		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		parser.getOptions().restrictProverExpressions = false;
         final String astString = getTreeAsString(testMachine);
-        assertEquals("Start(APredicateParseUnit(AConjunctPredicate(AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10))))))", astString);
+        assertEquals("Start(APredicateParseUnit(AConjunctPredicate([AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10)))])))", astString);
 	}
 
 	@Test

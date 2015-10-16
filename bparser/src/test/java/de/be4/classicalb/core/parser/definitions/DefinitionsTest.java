@@ -83,7 +83,7 @@ public class DefinitionsTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([AExpressionDefinitionDefinition(def_expr1,[],AIntegerExpression(42))]),AOperationsMachineClause([AOperation([],[op],[],APreconditionSubstitution(AConjunctPredicate(AExistsPredicate([AIdentifierExpression([def_expr1])],AConjunctPredicate(AExistsPredicate([AIdentifierExpression([def_expr1])],ALessPredicate(AIdentifierExpression([def_expr1]),AIntegerExpression(43))),AGreaterPredicate(AIdentifierExpression([def_expr1]),AIntegerExpression(41)))),AEqualPredicate(ADefinitionExpression(def_expr1,[]),AIntegerExpression(42))),ASkipSubstitution()))])]))",
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([AExpressionDefinitionDefinition(def_expr1,[],AIntegerExpression(42))]),AOperationsMachineClause([AOperation([],[op],[],APreconditionSubstitution(AConjunctPredicate([AExistsPredicate([AIdentifierExpression([def_expr1])],AConjunctPredicate([AExistsPredicate([AIdentifierExpression([def_expr1])],ALessPredicate(AIdentifierExpression([def_expr1]),AIntegerExpression(43))),AGreaterPredicate(AIdentifierExpression([def_expr1]),AIntegerExpression(41))])),AEqualPredicate(ADefinitionExpression(def_expr1,[]),AIntegerExpression(42))]),ASkipSubstitution()))])]))",
 				result);
 	}
 
