@@ -908,12 +908,20 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	@Override
 	public void caseAConjunctPredicate(final AConjunctPredicate node) {
 		inAConjunctPredicate(node);
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-		betweenChildren(node);
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
+		{
+			final List<PPredicate> copy = new ArrayList<PPredicate>(
+					node.getPredicates());
+			beginList(node);
+			for (final Iterator<PPredicate> iterator = copy.iterator(); iterator
+					.hasNext();) {
+				final PPredicate p = iterator.next();
+				p.apply(this);
+
+				if (iterator.hasNext()) {
+					betweenListElements(node);
+				}
+			}
+			endList(node);
 		}
 		outAConjunctPredicate(node);
 	}
@@ -930,12 +938,20 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	@Override
 	public void caseADisjunctPredicate(final ADisjunctPredicate node) {
 		inADisjunctPredicate(node);
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-		betweenChildren(node);
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
+		{
+			final List<PPredicate> copy = new ArrayList<PPredicate>(
+					node.getPredicates());
+			beginList(node);
+			for (final Iterator<PPredicate> iterator = copy.iterator(); iterator
+					.hasNext();) {
+				final PPredicate p = iterator.next();
+				p.apply(this);
+
+				if (iterator.hasNext()) {
+					betweenListElements(node);
+				}
+			}
+			endList(node);
 		}
 		outADisjunctPredicate(node);
 	}
