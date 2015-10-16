@@ -881,6 +881,7 @@ variables_list {-> expression*} =
 	{multi} [rest]:variables_list comma [identifier]:identifier_expression {-> [rest.expression, identifier.expression]} ;
 
 identifier_expression {-> expression} =
+    {description} [identifier]:composed_identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}| 
 	{unit} pragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.unit(content,identifier.expression)} |
 	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
 	[identifier]:identifier_literal {-> New expression.identifier([identifier])}  ;
@@ -1042,6 +1043,7 @@ predicate =
 
 /* Expressions */
 expression =
+    {description} [content]:pragma_free_text [expression]:expression |
 	{unit} [content]:unit_content [identifier]:expression |
 	{inferredunit} [content]:unit_content [identifier]:expression |
 	{identifier} [identifier]:identifier_literal* |

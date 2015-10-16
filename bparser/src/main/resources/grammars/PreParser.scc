@@ -16,7 +16,9 @@ Helpers
     cr = 13;
     comment_start = '/*';
     comment_end = '*/';
-
+    
+    line_break = [lf + cr];
+    
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
@@ -80,6 +82,8 @@ Tokens
 	{comment} comment_end = comment_end ; 
 	{comment} comment_content = all_chars ;
 	
+	{normal} line_comment = '//' [all_chars - line_break]* line_break;
+		
 	{normal -> definitions} definitions = 'DEFINITIONS';
 	{normal, definitions -> normal, definitions_rhs} other_clause_begin =
 		abstract_constants | abstract_variables | assertions | concrete_constants |
@@ -129,7 +133,7 @@ Tokens
 Ignored Tokens
 
 	white_space, other_clause_begin, end_machine, something,
-	comment, comment_content, comment_end;
+	comment, comment_content, comment_end, line_comment;
 
 
 /*******************************************************************
