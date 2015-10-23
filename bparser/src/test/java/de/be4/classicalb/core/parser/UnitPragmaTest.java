@@ -13,9 +13,9 @@ import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
-import de.be4.classicalb.core.parser.node.Node;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
