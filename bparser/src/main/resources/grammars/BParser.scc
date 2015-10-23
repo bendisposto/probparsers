@@ -58,6 +58,7 @@ Tokens
     {pragma->normal, unit->normal} pragma_end = '*/';
     {pragma->unit} pragma_unit = 'unit';
     {pragma->unit} ipragma_unit = 'inferred_unit';
+    {pragma} pragma_unit_alias = 'unit_alias';
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
@@ -371,7 +372,9 @@ parse_unit {-> parse_unit} =
 	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
 machine {-> parse_unit} =
-   {generated} pragma_generated machine_x {-> New parse_unit.generated(machine_x.parse_unit)} | machine_x {-> machine_x.parse_unit};
+   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} | 
+   {unit_alias} pragma_unit_alias [name]:pragma_id_or_string [content]:pragma_id_or_string [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} |
+   machine_x {-> machine_x.parse_unit};
 
 machine_x {-> parse_unit} =
 	{abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
@@ -912,6 +915,7 @@ Abstract Syntax Tree
 
 parse_unit =
     {generated} parse_unit |
+    {unit_alias} [name]:pragma_id_or_string [content]:pragma_id_or_string parse_unit |
 	{abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
 	{refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
 	{implementation_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
@@ -923,7 +927,7 @@ parse_unit =
 	{event_b_context} [name]:identifier_literal [context_clauses]:context_clause* |
 	{event_b_model} [name]:identifier_literal [model_clauses]:model_clause* |
 	{oppattern} [name]:identifier_literal* [parameters]:argpattern* |
-        {parse_unit_definition} definition;
+    {parse_unit_definition} definition;
 
 argpattern = {undef} | {def} expression;
 /* csppattern = argtype argpattern; */
