@@ -46,6 +46,29 @@ public class UnitPragmaTest {
 
 	}
 
+	@Test
+	public void testUnitAlias() throws Exception {
+		String input = "/*@ unit_alias kmph \"km/h\" */ MACHINE UnitAlias VARIABLES lala INVARIANT lala=0 INITIALISATION lala:=0 END";
+
+		BLexer lex = new BLexer(
+				new PushbackReader(new StringReader(input), 500));
+		Token t;
+		while (!((t = lex.next()) instanceof EOF)) {
+			System.out.print(t.getClass().getSimpleName() + "(" + t.getText()
+					+ ")");
+			System.out.print(" ");
+		}
+
+		BParser p = new BParser();
+		Start ast = p.parse(input, false);
+
+		ASTPrinter pr = new ASTPrinter();
+		ast.apply(pr);
+
+		System.out.println(printAST(ast));
+
+	}
+
 	private String printAST(final Node node) {
 		final StringWriter swriter = new StringWriter();
 		NodeIdAssignment nodeids = new NodeIdAssignment();
