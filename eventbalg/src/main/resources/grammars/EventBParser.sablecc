@@ -89,7 +89,7 @@ Helpers
 	    [0x0e50..0x0e59] | [0x0ed0..0x0ed9] | [0x0f20..0x0f29] | [0xff10..0xff19];
 
 	tick = 39;
-	identifier = (underscore | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | underscore)* tick?;
+	identifier = (underscore | unicode_letter) (unicode_letter | unicode_digit | underscore)* tick?;
 	label = [all_chars - layout_char]+ tick?;
 
 
@@ -128,6 +128,9 @@ Tokens
 	{normal} comma = ',';
 	{normal -> formula} colon = ':';
   {normal, formula -> normal} semicolon = ';';
+  {normal -> formula} oparan = '(';
+  {normal, formula -> normal} cparan = ')';
+  {normal -> formula} bcmeq = ':=' | 0x2254;
 
 	{normal} equal = '=';
 
@@ -169,6 +172,12 @@ Tokens
   {normal, formula -> normal} if = 'if';
   {normal, formula -> normal} else = 'else';
 
+  {normal} primitive = 'NAT1' | 'NAT' | 'INT' | 'BOOL';
+  {normal} var = 'var';
+  {normal -> formula, formula -> normal} type = 'type';
+  {normal -> formula, formula -> normal} init = 'init';
+
+
 	{normal} identifier_literal = identifier;
 	{label} label = label;
 
@@ -207,12 +216,13 @@ machine {-> parse_unit} =
 	[comment]:comment*
 	[refines]:refines_clause?
 	[sees]:sees_clause?
+  [typedvars]:typed_variables?
 	[variables]:variables_clause?
 	[invariants]:invariants_clause?
 	[variant]:variant_clause?
 	[events]:events_clause?
   [algorithm]:P.algorithm?
-	end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [variables.variable], [invariants.invariant], variant.variant, [events.event], [algorithm.algorithm])};
+	end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [typedvars.typed_var], [variables.variable], [invariants.invariant], variant.variant, [events.event], [algorithm.algorithm])};
 
 refines_clause {-> identifier_literal*} = T.refines [first]:identifier_literal [rest]:refines_clause_tail* {-> [first, rest.identifier_literal]} ;
 refines_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
@@ -220,9 +230,15 @@ refines_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name
 sees_clause {-> identifier_literal*} = T.sees [first]:identifier_literal [rest]:sees_clause_tail* {-> [first, rest.identifier_literal]} ;
 sees_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
 
+typed_variables {-> typed_var*} = {sequence} [first]:typed_variable semicolon [rest]:typed_variables {-> [first.typed_var, rest.typed_var]} |
+    {single} [only]:typed_variable {-> [only.typed_var]};
+
+typed_variable {-> typed_var} = {primitive} [p]:primitive [id]:identifier_literal bcmeq [f]:formula [comment]:comment* {-> New typed_var.primitive([comment], p, id, f)} |
+  {complex} T.var [id]:identifier_literal [c1]:comment* T.type [pred]:formula [c2]:comment* T.init [ini]:formula [c3]:comment* {-> New typed_var.complex([c1], id, [c2], pred, [c3], ini)};
+
 variables_clause {-> variable*} = [token]:T.variables [variables]:variable_list {-> [variables.variable]} ;
 variable_list {-> variable*} =
-	{single} [identifier]:identifier_literal [comment]:comment* {-> [New variable([comment], identifier)]} |
+	{single} [identifier]:identifier_literal [comment]:comment*  {-> [New variable([comment], identifier)]} |
 	{multi} [rest]:variable_list [identifier]:identifier_literal [comment]:comment* {-> [rest.variable, New variable([comment], identifier)]} ;
 
 invariants_clause {-> P.invariant*} = T.invariants [first]:P.invariant [rest]:invariants_tail* {-> [first.invariant, rest.invariant]} ;
@@ -344,6 +360,7 @@ parse_unit =
 		[name]:identifier_literal
 		[refines_names]:identifier_literal*
 		[seen_names]:identifier_literal*
+    [typedvars]:typed_var*
 		[variables]:variable*
 		[invariants]:P.invariant*
 		[variant]:P.variant?
@@ -358,7 +375,10 @@ parse_unit =
   	    [constants]:P.constant*
 		[axioms]:axiom*;
 
-variable = [comments]:comment* [name]:identifier_literal;
+typed_var = {primitive} [comments]:comment* [type]:primitive [name]:identifier_literal [expression]:formula |
+       {complex} [cmts1]:comment* [name]:identifier_literal [cmts2]:comment* [typingpred]:formula [cmts3]:comment* [init]:formula;
+
+variable = [comments]:comment* [name]:identifier_literal ;
 variant = [comments]:comment* [expression]:formula ;
 invariant =
 	[comments]:comment* [name]:label [predicate]:formula |
