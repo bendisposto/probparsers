@@ -174,7 +174,7 @@ public class PreParser {
 			final Token definition = remainingDefinitions.pop();
 			final Token defRhs = definitions.get(definition);
 			throw new PreParseException(
-					defRhs,
+					definition,
 					"["
 							+ definition.getLine()
 							+ ","
