@@ -58,4 +58,18 @@ public class TypedVarsTest extends AbstractTest {
 				"machine m0 NAT x := x + 1; var y type y : NAT1 init y := 1; INT x := x + 1; BOOL x := x + 1; var x type x : NAT init x := x + 1 end",
 				false);
 	}
+
+	@Test
+	public void fullEuclid() throws BException {
+		parseInput(
+				"machine euclid sees definitions limits var u type u : 0..k init u:=m ; var v type v : 0..k init v:=n algorithm while: u /= 0 do if: u < v then @u u := v ; @v v := u end ; @uu u := u - v end ; assert: u|->m|->n : IsGCD end end",
+				true);
+	}
+
+	@Test
+	public void testDefinitions() throws BException {
+		parseInput(
+				"context definitions constants Divides GCD axioms @axm Divides = {i↦j ∣ ∃k·k∈0‥j ∧ j = i∗k} @axm2 GCD = {x↦y↦res ∣ res↦x ∈ Divides ∧ res↦y ∈ Divides ∧ (∀r· r ∈ (0‥x ∪ 0‥y) ⇒ (r↦x ∈ Divides ∧ r↦y ∈ Divides ⇒ r↦res ∈ Divides) ) } end",
+				true);
+	}
 }

@@ -128,8 +128,6 @@ Tokens
 	{normal} comma = ',';
 	{normal -> formula} colon = ':';
   {normal, formula -> normal} semicolon = ';';
-  {normal -> formula} oparan = '(';
-  {normal, formula -> normal} cparan = ')';
   {normal -> formula} bcmeq = ':=' | 0x2254;
 
 	{normal} equal = '=';
