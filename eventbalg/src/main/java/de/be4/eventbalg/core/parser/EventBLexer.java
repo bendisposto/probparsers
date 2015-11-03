@@ -10,14 +10,18 @@ import de.be4.eventbalg.core.parser.lexer.Lexer;
 import de.be4.eventbalg.core.parser.lexer.LexerException;
 import de.be4.eventbalg.core.parser.node.EOF;
 import de.be4.eventbalg.core.parser.node.TAlgorithm;
+import de.be4.eventbalg.core.parser.node.TBcmeq;
 import de.be4.eventbalg.core.parser.node.TColon;
 import de.be4.eventbalg.core.parser.node.TComment;
 import de.be4.eventbalg.core.parser.node.TEnd;
 import de.be4.eventbalg.core.parser.node.TEvent;
 import de.be4.eventbalg.core.parser.node.TFormula;
+import de.be4.eventbalg.core.parser.node.TInit;
 import de.be4.eventbalg.core.parser.node.TInvariant;
 import de.be4.eventbalg.core.parser.node.TMultiCommentEnd;
 import de.be4.eventbalg.core.parser.node.TMultiCommentStart;
+import de.be4.eventbalg.core.parser.node.TPrimitive;
+import de.be4.eventbalg.core.parser.node.TType;
 import de.be4.eventbalg.core.parser.node.TVariant;
 import de.be4.eventbalg.core.parser.node.TWhiteSpace;
 import de.be4.eventbalg.core.parser.node.Token;
@@ -28,7 +32,7 @@ public class EventBLexer extends Lexer {
 
 	private TMultiCommentStart commentStart = null;
 	private StringBuilder commentBuffer = null;
-	private TFormula string = null;
+	private Token string = null;
 	private List<Token> stringBuffer;
 
 	private static String[] clauseErrorMessages = {
@@ -233,7 +237,9 @@ public class EventBLexer extends Lexer {
 	private void beginStringToken() throws EventBLexerException {
 		// expected before actual string begins
 		if (token instanceof TColon || token instanceof TWhiteSpace
-				|| token instanceof TVariant || token instanceof TInvariant) {
+				|| token instanceof TVariant || token instanceof TInvariant
+				|| token instanceof TBcmeq || token instanceof TType
+				|| token instanceof TInit) {
 			return;
 		}
 
@@ -245,7 +251,7 @@ public class EventBLexer extends Lexer {
 					+ token.getClass().getSimpleName().substring(1) + "'");
 		}
 
-		string = (TFormula) token;
+		string = token;
 		stringBuffer = new ArrayList<Token>();
 		stringBuffer.add(token);
 		token = null;
