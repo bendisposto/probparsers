@@ -531,9 +531,19 @@ freetypecons {-> freetype_constructor} =
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
+/*
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
 	{next_level} [pred]:predicate_x30 {-> pred.predicate};
+*/
+
+	predicate_p30 {-> predicate} =
+		{implication_p_p} [left]:predicate_p30   implies [right]:predicate_x30   {-> New predicate.implication(left.predicate, right.predicate)} |
+		{implication_p_e} [left]:predicate_p30   implies [right]:expression_p125 {-> New predicate.implication(left.predicate, New predicate.expression(right.expression))} |
+		{implication_e_p} [left]:expression_p125 implies [right]:predicate_x30   {-> New predicate.implication(New predicate.expression(left.expression), right.predicate)} |
+		{implication_e_e} [left]:expression_p125 implies [right]:expression_p125 {-> New predicate.implication(New predicate.expression(left.expression), New predicate.expression(right.expression))} |
+		{next_level} [pred]:predicate_x30 {-> pred.predicate};
+
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 /*
@@ -578,9 +588,19 @@ predicate_x41 {-> predicate} =
 
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
+/*
 predicate_p60 {-> predicate} =
 	{equivalence} [left]:predicate_p60 equivalence [right]:predicate_x60 {-> New predicate.equivalence(left.predicate, right.predicate)} |
 	{next_level} [pred]:predicate_x60 {-> pred.predicate};
+*/
+
+	predicate_p60 {-> predicate} =
+		{equivalence_p_p} [left]:predicate_p60   equivalence [right]:predicate_x60   {-> New predicate.equivalence(left.predicate, right.predicate)} |
+		{equivalence_p_e} [left]:predicate_p60   equivalence [right]:expression_p125 {-> New predicate.equivalence(left.predicate, New predicate.expression(right.expression))} |
+		{equivalence_e_p} [left]:expression_p125 equivalence [right]:predicate_x60   {-> New predicate.equivalence(New predicate.expression(left.expression), right.predicate)} |
+		{equivalence_e_e} [left]:expression_p125 equivalence [right]:expression_p125 {-> New predicate.equivalence(New predicate.expression(left.expression), New predicate.expression(right.expression))} |
+		{next_level} [pred]:predicate_x60 {-> pred.predicate};
+
 predicate_x60 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 
 /* The predicates of the following levels have completely moved down to the atomic level:
@@ -619,7 +639,8 @@ predicate_atomic {-> predicate} =
 	{bfalse} bfalse {-> New predicate.falsity()} |
 	{truth_predicate} truth_predicate {-> New predicate.truth()} |
 	{bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
-	{negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
+	{negation_pred} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
+	{negation_expr} not left_par [expression]:expression_in_par right_par {-> New predicate.negation(New predicate.expression(expression.expression))} |
 	{forall} for_any [identifiers]:expression_list dot_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)} | // check in typechecker: predicate must be an implication predicate
 	{exists} exists [identifiers]:expression_list dot_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
