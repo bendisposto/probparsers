@@ -126,6 +126,9 @@ Tokens
 
 	{normal -> label, formula -> normal} at = at;
 	{normal} comma = ',';
+	{normal} paranl = '(';
+	{normal} paranr = ')';
+	{normal} returns = '=>';
 	{normal -> formula} colon = ':';
   {normal, formula -> normal} semicolon = ';';
   {normal -> formula} bcmeq = ':=' | 0x2254;
@@ -164,11 +167,18 @@ Tokens
   {normal, formula -> normal} assert = 'assert';
   {normal, formula -> normal} assume = 'assume';
   {normal, formula -> normal} assign = 'assign';
+  {normal, formula -> normal} return = 'return';
 
   {normal, formula -> normal} algorithm = 'algorithm';
   {normal, formula -> normal} while = 'while';
   {normal, formula -> normal} if = 'if';
   {normal, formula -> normal} else = 'else';
+
+  {normal, formula -> normal} procedure = 'procedure' ;
+  {normal -> formula, formula -> normal} precondition = 'precondition' ;
+  {normal -> formula, formula -> normal} postcondition = 'postcondition' ;
+  {normal, formula -> normal} implementation = 'implementation' ;
+  {normal, formula -> normal} typing = 'typing' ;
 
   {normal} primitive = 'NAT1' | 'NAT' | 'INT' | 'BOOL';
   {normal} var = 'var';
@@ -204,7 +214,8 @@ Productions
 
 parse_unit {-> parse_unit} =
 	{machine} [parse_unit]:P.machine {-> parse_unit.parse_unit} |
-	{context} [parse_unit]:P.context {-> parse_unit.parse_unit} ;
+	{context} [parse_unit]:P.context {-> parse_unit.parse_unit} |
+	{procedure} [parse_unit]:P.procedure {-> parse_unit.parse_unit};
 
 /*
 	Structure of a machine file
@@ -214,12 +225,12 @@ machine {-> parse_unit} =
 	[comment]:comment*
 	[refines]:refines_clause?
 	[sees]:sees_clause?
-  [typedvars]:typed_variables?
+    [typedvars]:typed_variables?
 	[variables]:variables_clause?
 	[invariants]:invariants_clause?
 	[variant]:variant_clause?
 	[events]:events_clause?
-  [algorithm]:P.algorithm?
+    [algorithm]:P.algorithm?
 	end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [typedvars.typed_var], [variables.variable], [invariants.invariant], variant.variant, [events.event], [algorithm.algorithm])};
 
 refines_clause {-> identifier_literal*} = T.refines [first]:identifier_literal [rest]:refines_clause_tail* {-> [first, rest.identifier_literal]} ;
@@ -292,6 +303,50 @@ event_then {-> action*} = then [first]:action [rest]:event_then_tail* {-> [first
 event_then_tail {-> action} = [action]:action {-> action.action};
 action {-> action} = [label]:P.label [action]:formula [comment]:comment* {-> New action([comment], label.label, action)} ;
 
+/*
+	Algorithm and procedures
+*/
+
+procedure {-> parse_unit} =
+	T.procedure [name]:identifier_literal
+	[comment]:comment*
+	paranl	[arguments]:identifier_list? paranr T.returns
+	[results]:identifier_list?
+	[typing]:typing_list?
+	[pre]:parse_precondition
+	[post]:parse_postcondition
+	[mch]:simple_machine_body
+	end
+	{-> New parse_unit.procedure([comment], name, [arguments.identifier_definition],
+	       [results.identifier_definition], [typing.typing_stmt], pre.precondition, post.postcondition, mch.simplified_machine)} ;
+
+simple_machine_body {-> simplified_machine} = 
+	T.implementation [comment]:comment*
+	[typedvars]:typed_variables?
+	[variables]:variables_clause?
+	[invariants]:invariants_clause?
+	[variant]:variant_clause?
+	[events]:events_clause?
+    [algorithm]:P.algorithm
+	end
+	{-> New simplified_machine([comment], [typedvars.typed_var], [variables.variable], 
+	[invariants.invariant], variant.variant, [events.event], algorithm.algorithm)};
+
+identifier_list {-> identifier_definition*} = {sequence} [first]:identifier_def comma [rest]:identifier_list {-> [first.identifier_definition, rest.identifier_definition]} |
+    {single} [only]:identifier_def {-> [only.identifier_definition]};
+
+identifier_def {-> identifier_definition} = 
+	{typed} [prim]:primitive [id]:identifier_literal {-> New identifier_definition.typed(prim, id)} | {untyped} [id]:identifier_literal {-> New identifier_definition.untyped(id)};
+
+typing_list {-> typing_stmt*} = {sequence} [first]:typing_statement [rest]:typing_list {-> [first.typing_stmt, rest.typing_stmt]} |
+	{single} [only]:typing_statement {-> [only.typing_stmt]};
+
+typing_statement {-> typing_stmt} = T.typing [name]:identifier_literal colon [expression]:formula [comment]:comment* {-> New typing_stmt([comment], name, expression)};
+
+parse_precondition {-> P.precondition} = T.precondition [pre]:formula [comment]:comment* {-> New precondition([comment], pre)};
+
+parse_postcondition {-> P.postcondition} = T.postcondition [post]:formula [comment]:comment* {-> New postcondition([comment], post)};
+
 algorithm {-> P.algorithm} = T.algorithm [block]:alg_block end {-> New algorithm([block.stmt])};
 
 alg_block {-> stmt*} = {sequence} [first]:statement semicolon [second]:statement [rest]:stmt_tail? {-> [first.stmt, second.stmt, rest.stmt]} |
@@ -300,8 +355,10 @@ alg_block {-> stmt*} = {sequence} [first]:statement semicolon [second]:statement
 statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comment* {-> New stmt.assert([comment],predicate)} |
 					{assume} T.assume colon [predicate]:formula [comment]:comment* {-> New stmt.assume([comment],predicate)} |
                     {assign} [label]:P.label [action]:formula [comment]:comment* {-> New stmt.assign([comment], label.label, action)} |
+                    {simple} T.assign colon [action]:formula [comment]:comment* {-> New stmt.simple_assign([comment], action)} |
                     {while} while colon [condition]:formula [comment]:comment* [inv]:loop_invariant? [var]:loop_variant? do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt], inv, var)} |
-                    {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])};
+                    {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])} |
+                    {return} T.return [ids]:id_list? [comment]:comment* {-> New stmt.return([comment], [ids.id]) };
 
 if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
 
@@ -310,6 +367,11 @@ stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
 
 loop_invariant {-> P.loop_invariant} = T.invariant [predicate]:formula [comment]:comment* {-> New loop_invariant([comment], predicate)};
 loop_variant {-> P.loop_variant} = T.variant [expression]:formula [comment]:comment* {-> New loop_variant([comment], expression)};
+
+id_list {-> id*} = {multiple} [first]:identifier_literal comma [rest]:id_list {-> [New id(first), rest.id]} |
+     {single} [only]:identifier_literal {-> [New id(only)]};
+
+
 
 /*
 	Structure of a context file
@@ -371,10 +433,37 @@ parse_unit =
 		[extends_names]:identifier_literal*
 		[sets]:carrier_set*
   	    [constants]:P.constant*
-		[axioms]:axiom*;
+		[axioms]:axiom* |
+
+	{procedure}
+		[comments]:comment*
+		[name]:identifier_literal
+		[arguments]:identifier_definition*
+		[results]:identifier_definition*
+		[typing]:typing_stmt*
+		[precondition]:P.precondition
+		[postcondition]:P.postcondition
+		[implementation]:simplified_machine;
+
+simplified_machine = 
+		[comments]:comment*
+    	[typedvars]:typed_var*
+		[variables]:variable*
+		[invariants]:P.invariant*
+		[variant]:P.variant?
+		[events]:P.event*
+    	[algorithm]:P.algorithm;
 
 typed_var = {primitive} [comments]:comment* [type]:primitive [name]:identifier_literal [expression]:formula |
        {complex} [cmts1]:comment* [name]:identifier_literal [cmts2]:comment* [typingpred]:formula [cmts3]:comment* [init]:formula;
+
+identifier_definition = {typed} [type]:primitive [name]:identifier_literal |
+        {untyped} [name]:identifier_literal;
+
+typing_stmt = [comments]:comment* [name]:identifier_literal [expression]:formula;
+
+precondition = [comments]:comment* [expression]:formula;
+postcondition = [comments]:comment* [expression]:formula;
 
 variable = [comments]:comment* [name]:identifier_literal ;
 variant = [comments]:comment* [expression]:formula ;
@@ -421,5 +510,9 @@ loop_variant = [comments]:comment* [expression]:formula;
 stmt = {assert} [comments]:comment* [predicate]:formula |
 	   {assume} [comments]:comment* [predicate]:formula |
        {assign} [comments]:comment* [name]:label [action]:formula |
+       {simple_assign} [comments]:comment* [action]:formula |
        {while} [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
-       {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;
+       {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt* |
+       {return} [comments]:comment* [identifiers]:id*;
+
+id = [name]:identifier_literal;

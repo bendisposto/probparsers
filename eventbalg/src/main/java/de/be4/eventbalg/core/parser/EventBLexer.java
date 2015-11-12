@@ -20,7 +20,8 @@ import de.be4.eventbalg.core.parser.node.TInit;
 import de.be4.eventbalg.core.parser.node.TInvariant;
 import de.be4.eventbalg.core.parser.node.TMultiCommentEnd;
 import de.be4.eventbalg.core.parser.node.TMultiCommentStart;
-import de.be4.eventbalg.core.parser.node.TPrimitive;
+import de.be4.eventbalg.core.parser.node.TPostcondition;
+import de.be4.eventbalg.core.parser.node.TPrecondition;
 import de.be4.eventbalg.core.parser.node.TType;
 import de.be4.eventbalg.core.parser.node.TVariant;
 import de.be4.eventbalg.core.parser.node.TWhiteSpace;
@@ -36,25 +37,25 @@ public class EventBLexer extends Lexer {
 	private List<Token> stringBuffer;
 
 	private static String[] clauseErrorMessages = {
-		"'machine' is only allowed at the beginning of a file",
-		"Variable declarations are only allowed before invariant declarations",
-		"Invariant declarations are only allowed after variables and before the variant",
-		"The variant is only allowed after invariants and before events",
-		"The events clause is only allowed at the end",
-		"'context' is only allowed at the beginning of a file",
-		"Set declarations are only allowed before the constants declarations",
-		"Constants declarations are only allowed after sets and before axioms",
-	"The axioms clause is only allowed at the end" };
+			"'machine' is only allowed at the beginning of a file",
+			"Variable declarations are only allowed before invariant declarations",
+			"Invariant declarations are only allowed after variables and before the variant",
+			"The variant is only allowed after invariants and before events",
+			"The events clause is only allowed at the end",
+			"'context' is only allowed at the beginning of a file",
+			"Set declarations are only allowed before the constants declarations",
+			"Constants declarations are only allowed after sets and before axioms",
+			"The axioms clause is only allowed at the end" };
 	private static List<String> clausesOrder = new LinkedList<String>();
 	private int lastClauseIndex;
 
 	private boolean inEvent;
 	private boolean inAlgorithm;
 	private static String[] eventClauseErrorMessages = {
-		"Parameter declarations (any) are only allowed at the beginning of an event",
-		"Guards (where) are only allowed after parameters and before witnesses",
-		"Witnesses (with) are only allowed after guards and before actions",
-	"Actions (then) are only allowed at the end of an event" };
+			"Parameter declarations (any) are only allowed at the beginning of an event",
+			"Guards (where) are only allowed after parameters and before witnesses",
+			"Witnesses (with) are only allowed after guards and before actions",
+			"Actions (then) are only allowed at the end of an event" };
 	private static List<String> eventClausesOrder = new LinkedList<String>();
 	private int lastEventClauseIndex;
 
@@ -239,7 +240,8 @@ public class EventBLexer extends Lexer {
 		if (token instanceof TColon || token instanceof TWhiteSpace
 				|| token instanceof TVariant || token instanceof TInvariant
 				|| token instanceof TBcmeq || token instanceof TType
-				|| token instanceof TInit) {
+				|| token instanceof TInit || token instanceof TPrecondition
+				|| token instanceof TPostcondition) {
 			return;
 		}
 
