@@ -463,8 +463,8 @@ identifier_definition = {typed} [type]:primitive [name]:identifier_literal |
 
 typing_stmt = [comments]:comment* [name]:identifier_literal [expression]:formula;
 
-precondition = [comments]:comment* [expression]:formula;
-postcondition = [comments]:comment* [expression]:formula;
+precondition = [comments]:comment* [predicate]:formula;
+postcondition = [comments]:comment* [predicate]:formula;
 
 variable = [comments]:comment* [name]:identifier_literal ;
 variant = [comments]:comment* [expression]:formula ;
