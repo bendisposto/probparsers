@@ -82,4 +82,14 @@ public class AlgorithmTest extends AbstractTest {
 				"machine m0 algorithm @x x:=1 ; @y x:=1 ; @z z:=1 ; @f f:=1 ; @g g:=1 ; @h h:=1 end end",
 				false);
 	}
+
+	@Test
+	public void callAProcedure() throws BException {
+		parseInput("machine m0 algorithm e,q := dequeue(q) end end", false);
+	}
+
+	@Test
+	public void callAProcedureNoArgs() throws BException {
+		parseInput("machine m0 algorithm e,q := dequeue() end end", false);
+	}
 }

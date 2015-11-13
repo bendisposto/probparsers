@@ -52,7 +52,7 @@ public class ParseProceduresTest extends AbstractTest {
 	public void testDequeue() throws BException {
 		parseInput(
 				"procedure dequeue(queue) => NAT element, newQueue typing queue: POW(NAT) typing newQueue: POW(NAT) precondition queue /= {} postcondition element : queue & newQueue = queue \\ {element}"
-						+ " implementation NAT e := 0 ; var q type q : POW(NAT) init q := queue  invariants @inv q <: queue "
+						+ " implementation var e type e : NAT init e :: NAT ; var q type q : POW(NAT) init q := queue  invariants @inv q <: queue "
 						+ "algorithm assert: q /= {} & q = queue; assign: e :: q ; assign: q := q \\ {e}; assert: e : queue & q = queue \\ {e}; return q,e end end end",
 				false);
 	}

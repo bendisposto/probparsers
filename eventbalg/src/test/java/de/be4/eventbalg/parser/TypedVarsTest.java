@@ -8,22 +8,22 @@ public class TypedVarsTest extends AbstractTest {
 
 	@Test
 	public void testNAT() throws BException {
-		parseInput("machine m0 NAT x := x + 1 end", false);
+		parseInput("machine m0 var x type x : NAT init x := 0 end", false);
 	}
 
 	@Test
 	public void testNAT1() throws BException {
-		parseInput("machine m0 NAT1 x := x + 1 end", false);
+		parseInput("machine m0 var x type x : NAT1 init x := 1 end", false);
 	}
 
 	@Test
 	public void testINT() throws BException {
-		parseInput("machine m0 INT x := x + 1 end", false);
+		parseInput("machine m0 var x type x : INT init x := 1 end", false);
 	}
 
 	@Test
 	public void testBOOL() throws BException {
-		parseInput("machine m0 BOOL x := x + 1 end", false);
+		parseInput("machine m0 var x type x : BOOL init x := x + 1 end", false);
 	}
 
 	@Test
@@ -34,28 +34,7 @@ public class TypedVarsTest extends AbstractTest {
 	@Test
 	public void testMultiple() throws BException {
 		parseInput(
-				"machine m0 NAT x := x + 1 ; NAT1 x := x + 1; INT x := x + 1 end",
-				false);
-	}
-
-	@Test
-	public void testMultiple2() throws BException {
-		parseInput(
-				"machine m0 NAT x := x + 1; NAT1 x := x + 1; INT x := x + 1; BOOL x := x + 1 end",
-				false);
-	}
-
-	@Test
-	public void testMultiple3() throws BException {
-		parseInput(
-				"machine m0 NAT x := x + 1; NAT1 x := x + 1; INT x := x + 1; BOOL x := x + 1; var x type x : NAT init := x + 1 end",
-				false);
-	}
-
-	@Test
-	public void testMultiple3Mixed() throws BException {
-		parseInput(
-				"machine m0 NAT x := x + 1; var y type y : NAT1 init y := 1; INT x := x + 1; BOOL x := x + 1; var x type x : NAT init x := x + 1 end",
+				"machine m0 var x type x : NAT init x := 0 ; var y type y : NAT init y := 1; var z type z : NAT init z := 2 end",
 				false);
 	}
 

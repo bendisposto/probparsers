@@ -131,7 +131,7 @@ Tokens
 	{normal} returns = '=>';
 	{normal -> formula} colon = ':';
   {normal, formula -> normal} semicolon = ';';
-  {normal -> formula} bcmeq = ':=' | 0x2254;
+  {normal} bcmeq = ':=' | 0x2254;
 
 	{normal} equal = '=';
 
@@ -242,8 +242,8 @@ sees_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
 typed_variables {-> typed_var*} = {sequence} [first]:typed_variable semicolon [rest]:typed_variables {-> [first.typed_var, rest.typed_var]} |
     {single} [only]:typed_variable {-> [only.typed_var]};
 
-typed_variable {-> typed_var} = {primitive} [p]:primitive [id]:identifier_literal bcmeq [f]:formula [comment]:comment* {-> New typed_var.primitive([comment], p, id, f)} |
-  {complex} T.var [id]:identifier_literal [c1]:comment* T.type [pred]:formula [c2]:comment* T.init [ini]:formula [c3]:comment* {-> New typed_var.complex([c1], id, [c2], pred, [c3], ini)};
+typed_variable {-> typed_var} = 
+  T.var [id]:identifier_literal [c1]:comment* T.type [pred]:formula [c2]:comment* T.init [ini]:formula [c3]:comment* {-> New typed_var([c1], id, [c2], pred, [c3], ini)};
 
 variables_clause {-> variable*} = [token]:T.variables [variables]:variable_list {-> [variables.variable]} ;
 variable_list {-> variable*} =
@@ -358,7 +358,9 @@ statement {-> stmt} = {assert} T.assert colon [predicate]:formula [comment]:comm
                     {simple} T.assign colon [action]:formula [comment]:comment* {-> New stmt.simple_assign([comment], action)} |
                     {while} while colon [condition]:formula [comment]:comment* [inv]:loop_invariant? [var]:loop_variant? do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt], inv, var)} |
                     {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])} |
-                    {return} T.return [ids]:id_list? [comment]:comment* {-> New stmt.return([comment], [ids.id]) };
+                    {return} T.return [ids]:id_list? [comment]:comment* {-> New stmt.return([comment], [ids.id]) } |
+                    {call} [res]:id_list bcmeq [name]:identifier_literal paranl [arg]:id_list? paranr [comment]:comment*  {-> New stmt.call([comment], name, [res.id], [arg.id])};
+                    
 
 if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
 
@@ -368,9 +370,9 @@ stmt_tail {-> stmt*} = {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
 loop_invariant {-> P.loop_invariant} = T.invariant [predicate]:formula [comment]:comment* {-> New loop_invariant([comment], predicate)};
 loop_variant {-> P.loop_variant} = T.variant [expression]:formula [comment]:comment* {-> New loop_variant([comment], expression)};
 
-id_list {-> id*} = {multiple} [first]:identifier_literal comma [rest]:id_list {-> [New id(first), rest.id]} |
-     {single} [only]:identifier_literal {-> [New id(only)]};
-
+id_list {-> id*} = {multiple} [head]:parse_id comma [rest]:id_list {-> [head.id, rest.id]} |
+     {single} [only]:parse_id {-> [only.id]};
+parse_id {-> id} = [one]:identifier_literal {-> New id(one)};
 
 
 /*
@@ -454,8 +456,7 @@ simplified_machine =
 		[events]:P.event*
     	[algorithm]:P.algorithm;
 
-typed_var = {primitive} [comments]:comment* [type]:primitive [name]:identifier_literal [expression]:formula |
-       {complex} [cmts1]:comment* [name]:identifier_literal [cmts2]:comment* [typingpred]:formula [cmts3]:comment* [init]:formula;
+typed_var = [comments1]:comment* [name]:identifier_literal [comments2]:comment* [typingpred]:formula [comments3]:comment* [init]:formula;
 
 identifier_definition = {typed} [type]:primitive [name]:identifier_literal |
         {untyped} [name]:identifier_literal;
@@ -513,6 +514,7 @@ stmt = {assert} [comments]:comment* [predicate]:formula |
        {simple_assign} [comments]:comment* [action]:formula |
        {while} [comments]:comment* [condition]:formula [statements]:stmt* [invariant]:loop_invariant? [variant]:loop_variant? |
        {if}     [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt* |
-       {return} [comments]:comment* [identifiers]:id*;
+       {return} [comments]:comment* [identifiers]:id* |
+       {call} [comments]:comment* [name]:identifier_literal [results]:id* [arguments]:id*; 
 
 id = [name]:identifier_literal;
