@@ -56,4 +56,11 @@ public class ParseProceduresTest extends AbstractTest {
 						+ "algorithm assert: q /= {} & q = queue; assign: e :: q ; assign: q := q \\ {e}; assert: e : queue & q = queue \\ {e}; return q,e end end end",
 				false);
 	}
+
+	@Test
+	public void testSeen() throws BException {
+		parseInput(
+				"procedure dequeue(x,y)=> r,z sees definitions precondition TRUE=TRUE postcondition r=x implementation algorithm assert: 1=1 end end end",
+				false);
+	}
 }
