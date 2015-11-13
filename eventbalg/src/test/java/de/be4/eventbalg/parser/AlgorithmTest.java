@@ -23,7 +23,7 @@ public class AlgorithmTest extends AbstractTest {
 	@Test
 	public void test3() throws BException {
 		parseInput(
-				"machine m0 algorithm while: u /=0 do if: u < v then @act u:=v; assume: x = 4; @act2 v:=u else @act4 r:=x end; @act3 u := u - v end end end",
+				"machine m0 algorithm while: u /=0 do if: u < v then @act u:=v; @act2 v:=u else @act4 r:=x end; @act3 u := u - v end end end",
 				false);
 	}
 
