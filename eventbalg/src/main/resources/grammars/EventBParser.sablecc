@@ -308,9 +308,8 @@ action {-> action} = [label]:P.label [action]:formula [comment]:comment* {-> New
 
 procedure {-> parse_unit} =
 	T.procedure [name]:identifier_literal
-	[comment]:comment*
 	paranl	[arguments]:identifier_list? paranr T.returns
-	[results]:identifier_list?
+	[results]:identifier_list? [comment]:comment*
   [seen]:sees_clause?
 	[typing]:typing_list?
 	[pre]:parse_precondition
