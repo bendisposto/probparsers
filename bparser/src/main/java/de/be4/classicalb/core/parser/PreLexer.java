@@ -12,6 +12,7 @@ import de.be4.classicalb.core.preparser.node.TCommentContent;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
+import de.be4.classicalb.core.preparser.node.TLineComment;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
@@ -142,6 +143,8 @@ public class PreLexer extends Lexer {
 		} else if (token instanceof TCommentEnd) {
 			state = stateBeforeComment;
 			stateBeforeComment = null;
+			token = null;
+		} else if (token instanceof TLineComment) {
 			token = null;
 		}
 	}
