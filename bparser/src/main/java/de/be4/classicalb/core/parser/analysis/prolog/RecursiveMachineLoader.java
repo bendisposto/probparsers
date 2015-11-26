@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
@@ -60,7 +59,6 @@ public class RecursiveMachineLoader {
 	private final List<File> files = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
-	private List<Pragma> allPragmas;
 
 	public RecursiveMachineLoader(final String directory,
 			final IDefinitionFileProvider contentProvider2) {
@@ -74,13 +72,11 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param main
 	 *            The main machine
-	 * @param pragmas
 	 * @throws BException
 	 */
 	public void loadAllMachines(final File startfile, final Start main,
-			final SourcePositions positions, final IDefinitions definitions,
-			final List<Pragma> pragmas) throws BException {
-		allPragmas = pragmas;
+			final SourcePositions positions, final IDefinitions definitions)
+			throws BException {
 		injectDefinitions(main, definitions);
 		registerDefinitionFileUsage(definitions);
 		files.add(startfile);
@@ -95,7 +91,7 @@ public class RecursiveMachineLoader {
 
 	/**
 	 * Prints the machines loaded by
-	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions,List)}.
+	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions)}.
 	 * 
 	 * @param pout
 	 */
@@ -134,16 +130,6 @@ public class RecursiveMachineLoader {
 			pout.fullstop();
 		}
 
-		if (allPragmas.size() > 0) {
-			NodeIdAssignment ids = pprinter.nodeIds;
-
-			List<Pragma> pragmas = allPragmas;
-			for (Pragma pragma : pragmas) {
-				pragma.printProlog(pout, ids);
-				pout.fullstop();
-			}
-
-		}
 		pout.flush();
 	}
 
@@ -157,8 +143,6 @@ public class RecursiveMachineLoader {
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider);
 		files.add(machineFile);
-
-		allPragmas.addAll(parser.getPragmas());
 
 		registerDefinitionFileUsage(parser.getDefinitions());
 		injectDefinitions(tree, parser.getDefinitions());

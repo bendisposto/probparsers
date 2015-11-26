@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -15,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
-import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
@@ -26,7 +24,6 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -40,7 +37,6 @@ public class PreParser {
 	private DefinitionTypes types;
 
 	private final IDefinitions defFileDefinitions = new Definitions();
-	private final List<Pragma> pragmas = new ArrayList<Pragma>();
 	private final IFileContentProvider contentProvider;
 	private final Set<String> doneDefFiles;
 	private final String modelFileName;
@@ -110,7 +106,6 @@ public class PreParser {
 					final BParser parser = new BParser(fileName);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
-					pragmas.addAll(parser.getPragmas());
 					newDoneList.remove(fileName);
 
 					definitions = parser.getDefinitions();
@@ -159,7 +154,8 @@ public class PreParser {
 				final Token definition = remainingDefinitions.pop();
 
 				final Token defRhs = definitions.get(definition);
-				final Definitions.Type type = determineType(defRhs, todoDefs);
+				final Definitions.Type type = determineType(definition, defRhs,
+						todoDefs);
 
 				if (type != null) {
 					todoDefs.remove(definition.getText());
@@ -178,11 +174,11 @@ public class PreParser {
 			final Token definition = remainingDefinitions.pop();
 			final Token defRhs = definitions.get(definition);
 			throw new PreParseException(
-					defRhs,
+					definition,
 					"["
-							+ defRhs.getLine()
+							+ definition.getLine()
 							+ ","
-							+ defRhs.getPos()
+							+ definition.getPos()
 							+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
 		}
 	}
@@ -220,14 +216,15 @@ public class PreParser {
 		return list;
 	}
 
-	private Definitions.Type determineType(final Token rhsToken,
-			Set<String> definitions) {
+	private Definitions.Type determineType(final Token definition,
+			final Token rhsToken, Set<String> definitions) {
+
 		final String definitionRhs = rhsToken.getText().trim();
 
-		de.be4.classicalb.core.parser.node.Start expr = tryParsing(
-				BParser.FORMULA_PREFIX, definitionRhs);
-
-		if (expr != null) {
+		de.be4.classicalb.core.parser.node.Start expr;
+		de.be4.classicalb.core.parser.node.Token errorToken = null;
+		try {
+			expr = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
 			// Predicate?
 			PParseUnit parseunit = expr.getPParseUnit();
 			if (parseunit instanceof APredicateParseUnit)
@@ -250,14 +247,28 @@ public class PreParser {
 			}
 
 			return IDefinitions.Type.Expression;
-		} else {
-			return tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs) == null ? null
-					: IDefinitions.Type.Substitution;
+
+		} catch (RhsException e) {
+			errorToken = e.getToken();
+			try {
+				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
+				return IDefinitions.Type.Substitution;
+			} catch (RhsException ex) {
+				int line = errorToken.getLine();
+				definition.setLine(definition.getLine() + line - 1);
+				int pos = errorToken.getPos();
+				pos = line == 1 ? pos - 10 : pos;
+				definition.setPos(pos);
+				return null;
+			}
+
 		}
+
 	}
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
-			final String prefix, final String definitionRhs) {
+			final String prefix, final String definitionRhs)
+			throws RhsException {
 
 		final Reader reader = new StringReader(prefix + " " + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
@@ -269,12 +280,15 @@ public class PreParser {
 
 		try {
 			return parser.parse();
-		} catch (final de.be4.classicalb.core.parser.parser.ParserException e) {
-			// IGNORE
-		} catch (final de.be4.classicalb.core.parser.lexer.LexerException e) {
-			// IGNORE
 		} catch (final IOException e) {
 			// IGNORE
+		}
+
+		catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
+			throw new RhsException(ex.getToken());
+		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
+			// IGNORE
+			throw new RhsException(null);
 		}
 
 		return null;
@@ -284,7 +298,4 @@ public class PreParser {
 		return defFileDefinitions;
 	}
 
-	public List<? extends Pragma> getPragmas() {
-		return pragmas;
-	}
 }

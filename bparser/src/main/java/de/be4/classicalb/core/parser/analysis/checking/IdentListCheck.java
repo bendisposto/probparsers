@@ -26,6 +26,8 @@ import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
+import de.be4.classicalb.core.parser.node.ARecEntry;
+import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
@@ -171,6 +173,23 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	public void inAVarSubstitution(final AVarSubstitution node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
+	
+	@Override
+	public void inARecordFieldExpression(ARecordFieldExpression node) {
+		PExpression identifier = node.getIdentifier();
+		if (!(isIdentifierExpression(identifier))) {
+			nonIdentifiers.add(identifier);
+		}
+	}
+	
+	@Override
+	public void inARecEntry(ARecEntry node) {
+		PExpression identifier = node.getIdentifier();
+		if (!(isIdentifierExpression(identifier))) {
+			nonIdentifiers.add(identifier);
+		}
+	}
+	
 
 	@Override
 	public void inABecomesSuchSubstitution(final ABecomesSuchSubstitution node) {

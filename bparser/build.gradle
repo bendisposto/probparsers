@@ -3,12 +3,11 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
-sourceCompatibility = 1.5
 
 
 dependencies {
-    compile project(path: ":prologlib", configuration: "archives") 
-    compile project(path: ":parserbase", configuration: "archives") 
+    compile project(path: ":prologlib", configuration: "archives")
+    compile project(path: ":parserbase", configuration: "archives")
 }
 
 sourceSets {
@@ -20,16 +19,6 @@ sourceSets {
 }
 
 
-task genPragmaArgumentLexer(type:JavaExec) {
-	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp/de/be4/classicalb/core/pragma') // prevent rebuild because the second parser replaces patchfiles
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/grammars/PragmaArgumentLexer.scc']
-}
 
 task genPreparser(type:JavaExec) {
 	inputs.dir new File('src/main/resources/grammars')
@@ -43,7 +32,7 @@ task genPreparser(type:JavaExec) {
 }
 
 task genBParser(type:JavaExec) {
-	dependsOn = ['genPreparser','genPragmaArgumentLexer']
+	dependsOn = ['genPreparser']
 	inputs.dir new File('src/main/resources/grammars')
 	outputs.dir new File('build/temp')
 //	doFirst{ file('build/temp').mkdirs() }
@@ -57,7 +46,7 @@ task genBParser(type:JavaExec) {
 jar {
  include '**/*.class'
  include '**/*.java'
- exclude '**.*.scc' 
+ exclude '**.*.scc'
  from 'build/temp'
  include '**/*.dat'
  include '**/*.properties'
@@ -74,8 +63,8 @@ task patches << {
 	ant.patch(patchfile: 'patches/fix_deprecation_RDFA.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/analysis/ReversedDepthFirstAdapter.java', failonerror:'true'  )
 }
 
-compileJava { 
- dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy'] 
+compileJava {
+ dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")
@@ -85,6 +74,3 @@ compileJava {
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-
-

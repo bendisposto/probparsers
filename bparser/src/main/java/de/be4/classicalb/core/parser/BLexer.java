@@ -5,7 +5,6 @@ import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.be4.classicalb.core.parser.analysis.pragma.internal.RawPragma;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -20,6 +19,8 @@ import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TLeftPar;
+import de.be4.classicalb.core.parser.node.TPragmaDescription;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
@@ -27,11 +28,8 @@ import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
 
-	private static final String PRAGMA_END = "@*/";
-	private static final String PRAGMA_START = "/*@";
-	private TComment comment = null;
+	private Token comment = null;
 	private StringBuilder commentBuffer = null;
-	private List<RawPragma> pragmas = new ArrayList<RawPragma>();
 
 	private final DefinitionTypes definitions;
 
@@ -61,7 +59,12 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+
 		if (state.equals(State.COMMENT)) {
+			collectComment();
+		}
+
+		if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
 			collectComment();
 		}
 
@@ -181,8 +184,8 @@ public class BLexer extends Lexer {
 
 		// starting a new comment
 		if (comment == null) {
-			comment = (TComment) token;
 			commentBuffer = new StringBuilder(token.getText());
+			comment = token;
 			token = null;
 		} else {
 			commentBuffer.append(token.getText());
@@ -190,31 +193,17 @@ public class BLexer extends Lexer {
 			// end of comment reached?
 			if (token instanceof TCommentEnd) {
 				String text = commentBuffer.toString();
-				comment.setText(text);
+				if (state.equals(State.DESCRIPTION)) text = text.substring(0, text.length()-2);
+				comment.setText(text.trim());
 				token = comment;
 				comment = null;
 				commentBuffer = null;
 				state = State.NORMAL;
 
-				if (text.startsWith(PRAGMA_START)) {
-					String pragmaText = "";
-					if (text.endsWith(PRAGMA_END))
-						pragmaText = text.substring(3, text.length() - 3)
-								.trim();
-					else
-						pragmaText = text.substring(3, text.length() - 2)
-								.trim();
-					pragmas.add(new RawPragma(token.getStartPos(), token
-							.getEndPos(), pragmaText));
-				}
 			} else {
 				token = null;
 			}
 		}
-	}
-
-	public List<RawPragma> getPragmas() {
-		return pragmas;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {

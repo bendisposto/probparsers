@@ -1,43 +1,79 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.IOException;
-import java.util.List;
-
-import junit.framework.Assert;
+import java.io.PrintWriter;
+import java.io.PushbackReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.analysis.pragma.Pragma;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.analysis.ASTPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.Token;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 public class PragmaTest {
 
 	@Test
-	public void test() throws LexerException, IOException, BException {
-		pragmacheck("MACHINE m1 /*@ symbolic x y */ END", 1);
-		pragmacheck(
-				"MACHINE m0 /*dingo*/ /*@ symbolic x y */ \n  VARIABLES x  INVARIANT x:NAT INITIALISATION x:= (2+5) /*@ x == 7 @*/ \nEND",
-				2);
-		pragmacheck(
-				"MACHINE m0 \n  VARIABLES x \n INVARIANT x = (1+4) /*@ should be 5 */ * (3+6) INITIALISATION x:= (2+5)  \nEND",
-				1);
-		pragmacheck(
-				"MACHINE m0 \n  VARIABLES x \n INVARIANT x = (1+ /*@ should be 5 */ 4) * (3+6) INITIALISATION x:= (2+5)  \nEND",
-				1);
-	}
-
-	private void pragmacheck(String input, int number) throws BException {
-		BParser p = new BParser();
-		p.parse(input, false);
-		// ASTPrinter pr = new ASTPrinter(System.out);
-		// start.apply(pr);
-		// System.out.println(input);
-		List<Pragma> pragmas = p.getPragmas();
-		for (Pragma pragma : pragmas) {
-			System.out.println(pragma.toString());
+	public void testLexer() throws Exception {
+//		String input = "/*@ generated */ MACHINE foo(x) \n"
+//				+ "/* look at me. */ \n"
+//				+ "DEFINITIONS \n" 
+//				+ " /*@ conversion */ foo(m) == m \n"
+//				+ "PROPERTIES \n"
+//				+ "/*@ label foo */ \n"
+//				+ "/*@ label bar */ \n"
+//				+ "x = /*@ symbolic */ {y|->z| y < z } \n"
+//				+ "/*@ desc prop */ \n"
+//				+ "SETS A;B={a,b} /*@ desc trololo !!! */;C END";
+		
+		
+//		String input = "MACHINE foo  PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z| y < z }  END";
+		
+		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
+		
+		BLexer lex = new BLexer(new PushbackReader(new StringReader(input), 500));
+		Token t;
+		while(!((t=lex.next()) instanceof EOF)) {
+			System.out.print(t.getClass().getSimpleName()+"("+t.getText()+")");
+			System.out.print(" ");
 		}
-		Assert.assertEquals(number, pragmas.size());
+		
+		
+		BParser p = new BParser();
+		
+		System.out.println("\n"+input);	
+		
+		
+		Start ast = p.parse(input, false);
+
+		ASTPrinter pr = new ASTPrinter();
+		ast.apply(pr);
+		
+		System.out.println(printAST(ast));
+
 	}
+	
+	private String printAST(final Node node) {
+		final StringWriter swriter = new StringWriter();
+		NodeIdAssignment nodeids = new NodeIdAssignment();
+		node.apply(nodeids);
+		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter),
+				false);
+		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
+		ASTProlog prolog = new ASTProlog(pout, pprinter);
+		node.apply(prolog);
+		swriter.flush();
+		return swriter.toString();
+	}
+	
+	
 
 }

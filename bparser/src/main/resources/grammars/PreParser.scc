@@ -5,7 +5,10 @@ Package de.be4.classicalb.core.preparser;
  *******************************************************************/
 
 Helpers
-
+	line_comment_start = '//';
+	comment_start = '/*';
+    comment_end = '*/';
+    
 	underscore = '_';
 	semicolon = ';'; 
 	star = '*';
@@ -14,9 +17,9 @@ Helpers
 	double_quotation = '"';
     lf = 10;
     cr = 13;
-    comment_start = '/*';
-    comment_end = '*/';
-
+        
+    line_break = [lf + cr];
+    
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
@@ -25,7 +28,7 @@ Helpers
 	all_chars = [0 .. 0xffff];
 	layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 	all_chars_without_quote = [all_chars - double_quotation];
-	word_chars = [[[[all_chars - layout_char] - semicolon] - '('] - ')'];
+	word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
 	comment_char = [[all_chars - star] - slash];
 	
 	abstract_constants = 'ABSTRACT_CONSTANTS';
@@ -80,6 +83,8 @@ Tokens
 	{comment} comment_end = comment_end ; 
 	{comment} comment_content = all_chars ;
 	
+	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break;
+		
 	{normal -> definitions} definitions = 'DEFINITIONS';
 	{normal, definitions -> normal, definitions_rhs} other_clause_begin =
 		abstract_constants | abstract_variables | assertions | concrete_constants |
@@ -104,6 +109,7 @@ Tokens
 	{definitions} identifier_literal = letter (letter | digit | underscore)* ;
 	{definitions, definitions_rhs} left_par = '(';
 	{definitions, definitions_rhs} right_par = ')';
+	{definitions, definitions_rhs} slash = slash;
 	{definitions} comma = ',';
 
 	{definitions -> definitions_rhs} begin_def_body = '==';
@@ -118,7 +124,7 @@ Tokens
 	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
 	{definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = all_chars;
+	{normal} something = all_chars | double_quotation all_chars_without_quote* double_quotation;
 
 	white_space = layout_char+;
 
@@ -129,7 +135,7 @@ Tokens
 Ignored Tokens
 
 	white_space, other_clause_begin, end_machine, something,
-	comment, comment_content, comment_end;
+	comment, comment_content, comment_end, line_comment;
 
 
 /*******************************************************************
