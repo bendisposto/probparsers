@@ -1040,9 +1040,10 @@ predicate =
 	{finite} [set]:expression |
 	{partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
-        {predicate_identifier} [identifier]:predicate_identifier |
-        {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
-		{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
+    {predicate_identifier} [identifier]:predicate_identifier |
+    {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
+    {let_predicate} [identifiers]:expression* [assignments]:expression* [pred]:predicate | /* has no concrete syntax, generated for example by TLA translation */
+    {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
 
 
 
@@ -1079,6 +1080,7 @@ expression =
 	{div} [left]:expression [right]:expression |
 	{floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
 	{if_then_else} [condition]:predicate [then]:expression [else]:expression | /* has no concrete syntax, generated for example by TLA translation */
+	{let_expression} [identifiers]:expression* [assignments]:expression* [expr]:expression | /* has no concrete syntax, generated for example by TLA translation */
 	{modulo} [left]:expression [right]:expression |
 	{power_of} [left]:expression [right]:expression |
 	{successor} |

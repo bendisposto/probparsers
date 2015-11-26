@@ -490,15 +490,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	// predicate
 
 	@Override
-	public void caseAIfThenElseExpression(final AIfThenElseExpression node) {
-		open(node);
-		node.getCondition().apply(this);
-		node.getThen().apply(this);
-		node.getElse().apply(this);
-		close(node);
-	}
-
-	@Override
 	public void caseAForallPredicate(final AForallPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -522,7 +513,32 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
+	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		printAsList(node.getAssignments());
+		node.getPred().apply(this);
+		close(node);
+	}
+
 	// expression
+
+	public void caseALetExpressionExpression(ALetExpressionExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		printAsList(node.getAssignments());
+		node.getExpr().apply(this);
+		close(node);
+	}
+
+	@Override
+	public void caseAIfThenElseExpression(final AIfThenElseExpression node) {
+		open(node);
+		node.getCondition().apply(this);
+		node.getThen().apply(this);
+		node.getElse().apply(this);
+		close(node);
+	}
 
 	@Override
 	public void caseAGeneralSumExpression(final AGeneralSumExpression node) {
