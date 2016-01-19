@@ -242,7 +242,12 @@ public class ClausesCheck implements SemanticCheck {
 			final Set<Node> nodesforClause = iterator.next();
 
 			if (nodesforClause.size() > 1) {
-				throw new CheckException("Clause is used more than once",
+				final Node clauseNode = nodesforClause.iterator().next();
+				final String simpleClassName = clauseNode.getClass().getSimpleName();
+				final int endIndex = simpleClassName.indexOf("MachineClause");
+				final String clauseName = simpleClassName.substring(1, endIndex).toUpperCase();
+				
+				throw new CheckException("Clause '" + clauseName + "' is used more than once",
 						nodesforClause.toArray(new Node[nodesforClause.size()]));
 			}
 		}
