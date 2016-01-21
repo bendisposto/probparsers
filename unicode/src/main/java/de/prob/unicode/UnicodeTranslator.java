@@ -28,8 +28,7 @@ public class UnicodeTranslator {
 			// If the operator begins with a letter, and the last character
 			// before is also a letter, there needs to be a space to separate
 			// them
-			return (Character.isLetter(ascii.charAt(0)) && needsSpace ? " "
-					: "") + ascii;
+			return (Character.isLetter(ascii.charAt(0)) && needsSpace ? " " : "") + ascii;
 		}
 
 		public String getUnicode() {
@@ -110,10 +109,12 @@ public class UnicodeTranslator {
 		m.put("TTake", new Translation("/|\\", "/|\\"));
 		m.put("TDrop", new Translation("\\|/", "\\|/"));
 		m.put("TWhitespace", new Translation(" ", " "));
+
+		m.put("TTypeofOpen", new Translation("/*", "/*"));
+		m.put("TTypeofClose", new Translation("*/", "*/"));
 	}
 
-	public static void main(final String[] args) throws LexerException,
-			IOException {
+	public static void main(final String[] args) throws LexerException, IOException {
 		String input = args[0];
 		StringReader reader = new StringReader(input);
 		PushbackReader r = new PushbackReader(reader, input.length());
@@ -154,8 +155,7 @@ public class UnicodeTranslator {
 				if (t instanceof TSeparator) {
 					sb.append(t.getText());
 				} else if (t instanceof TAnyChar) {
-					boolean before = sb.length() > 0
-							&& Character.isLetter(sb.charAt(sb.length() - 1));
+					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
 					if (before && "ascii".equals(target)) {
 						sb.append(' ');
 					}
@@ -168,9 +168,7 @@ public class UnicodeTranslator {
 					}
 					if ("ascii".equals(target)) {
 						boolean before = (last != null && last instanceof TAnyChar)
-								|| sb.length() > 0
-								&& (Character
-										.isLetter(sb.charAt(sb.length() - 1)));
+								|| sb.length() > 0 && (Character.isLetter(sb.charAt(sb.length() - 1)));
 						translated = translation.getAscii(before);
 					}
 					sb.append(translated);

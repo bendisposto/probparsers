@@ -14,19 +14,13 @@ public class UnicodeTest {
 		assertEquals("x:NAT", UnicodeTranslator.toAscii("x\u2208\u2115"));
 		assertEquals("x :NAT", UnicodeTranslator.toAscii("x  \u2208\u2115"));
 		assertEquals("INTERNAT", UnicodeTranslator.toAscii("INTERNAT"));
-		assertEquals("cur_floor := groundf",
-				UnicodeTranslator.toAscii("cur_floor \u2254 groundf"));
-		assertEquals("cur_floor < groundf",
-				UnicodeTranslator.toAscii("cur_floor < groundf"));
-		assertEquals("direction_up = FALSE",
-				UnicodeTranslator.toAscii("direction_up = FALSE"));
-		assertEquals("b : (groundf .. topf)",
-				UnicodeTranslator.toAscii("b \u2208 (groundf \uu2025 topf)"));
+		assertEquals("cur_floor := groundf", UnicodeTranslator.toAscii("cur_floor \u2254 groundf"));
+		assertEquals("cur_floor < groundf", UnicodeTranslator.toAscii("cur_floor < groundf"));
+		assertEquals("direction_up = FALSE", UnicodeTranslator.toAscii("direction_up = FALSE"));
+		assertEquals("b : (groundf .. topf)", UnicodeTranslator.toAscii("b \u2208 (groundf \uu2025 topf)"));
 		assertEquals("call_buttons := call_buttons \\/ {b}",
-				UnicodeTranslator
-						.toAscii("call_buttons \u2254 call_buttons \u222a {b}"));
-		assertEquals("b /: call_buttons",
-				UnicodeTranslator.toAscii("b \u2209 call_buttons"));
+				UnicodeTranslator.toAscii("call_buttons \u2254 call_buttons \u222a {b}"));
+		assertEquals("b /: call_buttons", UnicodeTranslator.toAscii("b \u2209 call_buttons"));
 	}
 
 	@Test
@@ -46,14 +40,10 @@ public class UnicodeTest {
 
 	@Test
 	public void NoSpaceAndAmpersand() {
-		assertEquals("active \u2227 waiting",
-				UnicodeTranslator.toUnicode("active & waiting"));
-		assertEquals("active \u2227waiting",
-				UnicodeTranslator.toUnicode("active &waiting"));
-		assertEquals("active\u2227 waiting",
-				UnicodeTranslator.toUnicode("active& waiting"));
-		assertEquals("active\u2227waiting",
-				UnicodeTranslator.toUnicode("active&waiting"));
+		assertEquals("active \u2227 waiting", UnicodeTranslator.toUnicode("active & waiting"));
+		assertEquals("active \u2227waiting", UnicodeTranslator.toUnicode("active &waiting"));
+		assertEquals("active\u2227 waiting", UnicodeTranslator.toUnicode("active& waiting"));
+		assertEquals("active\u2227waiting", UnicodeTranslator.toUnicode("active&waiting"));
 	}
 
 	@Test
@@ -71,8 +61,7 @@ public class UnicodeTest {
 		String unicode = "\u22a4\u2228\u00acmss_button=ato\u2228ato_availability=TRUE";
 		String unicodeWithSpaces = "\u22a4 \u2228 \u00ac mss_button=ato \u2228 ato_availability=TRUE";
 		String ascii = UnicodeTranslator.toAscii(unicode);
-		assertEquals("true or not mss_button=ato or ato_availability=TRUE",
-				ascii);
+		assertEquals("true or not mss_button=ato or ato_availability=TRUE", ascii);
 		assertEquals(unicodeWithSpaces, UnicodeTranslator.toUnicode(ascii));
 	}
 
@@ -120,5 +109,14 @@ public class UnicodeTest {
 
 		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
 		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
+	}
+
+	@Test
+	public void testIncludingTypeOf() {
+		String ascii = "true /* v : BOOL */";
+		String unicode = "\u22a4 /* v \u2208 BOOL */";
+
+		assertEquals(unicode, UnicodeTranslator.toUnicode(ascii));
+		assertEquals(ascii, UnicodeTranslator.toAscii(unicode));
 	}
 }
