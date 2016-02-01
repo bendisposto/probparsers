@@ -233,8 +233,7 @@ public class ASTPrologTest {
 		checkPredicate("FALSE : BOOL", "member($,boolean_false($),bool_set($))");
 
 		final ADisjunctPredicate disjunction = new ADisjunctPredicate();
-		disjunction.setLeft(new ATruthPredicate());
-		disjunction.setRight(new AFalsityPredicate());
+		disjunction.setPredicates(Arrays.asList(new ATruthPredicate(), new AFalsityPredicate()));
 
 		checkAST(0, "disjunct($,truth($),falsity($))", disjunction);
 	}

@@ -135,7 +135,7 @@ public class ExpressionTest {
 		final String testMachine = "#EXPRESSION UNION x,y . (x=0 & y=x | (x,y) )";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(AExpressionParseUnit(AQuantifiedUnionExpression([AIdentifierExpression([x]),AIdentifierExpression([y])],AConjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(0)),AEqualPredicate(AIdentifierExpression([y]),AIdentifierExpression([x]))),ACoupleExpression([AIdentifierExpression([x]),AIdentifierExpression([y])]))))",
+				"Start(AExpressionParseUnit(AQuantifiedUnionExpression([AIdentifierExpression([x]),AIdentifierExpression([y])],AConjunctPredicate([AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(0)),AEqualPredicate(AIdentifierExpression([y]),AIdentifierExpression([x]))]),ACoupleExpression([AIdentifierExpression([x]),AIdentifierExpression([y])]))))",
 				result);
 	}
 

@@ -535,15 +535,52 @@ freetypecons {-> freetype_constructor} =
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
+/*
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
 	{next_level} [pred]:predicate_x30 {-> pred.predicate};
+*/
+
+	predicate_p30 {-> predicate} =
+		{implication_p_p} [left]:predicate_p30   implies [right]:predicate_x30   {-> New predicate.implication(left.predicate, right.predicate)} |
+		{implication_p_e} [left]:predicate_p30   implies [right]:expression_p125 {-> New predicate.implication(left.predicate, New predicate.expression(right.expression))} |
+		{implication_e_p} [left]:expression_p125 implies [right]:predicate_x30   {-> New predicate.implication(New predicate.expression(left.expression), right.predicate)} |
+		{implication_e_e} [left]:expression_p125 implies [right]:expression_p125 {-> New predicate.implication(New predicate.expression(left.expression), New predicate.expression(right.expression))} |
+		{next_level} [pred]:predicate_x30 {-> pred.predicate};
+
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
+/*
 predicate_p40 {-> predicate} =
 	{disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
 	{conjunct} [left]:predicate_p40 conjunction [right]:predicate_x40 {-> New predicate.conjunct(left.predicate, right.predicate)} |
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
+*/
+
+	predicate_p40 {-> predicate} =
+		{disjunct} disjunction_list {-> New predicate.disjunct([disjunction_list.predicate])} |
+		{conjunct} conjunction_list {-> New predicate.conjunct([conjunction_list.predicate])} |
+		{next_level} [pred]:predicate_x40 {-> pred.predicate};
+
+	disjunction_list {-> predicate*} =
+		{dislist_dis_pred} [left]:disjunction_list logical_or [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{dislist_dis_expr} [left]:disjunction_list logical_or [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{conlist_dis_pred} [left]:conjunction_list logical_or [right]:predicate_x40   {-> [New predicate.conjunct([left.predicate]), right.predicate]} |
+		{conlist_dis_expr} [left]:conjunction_list logical_or [right]:expression_p125 {-> [New predicate.conjunct([left.predicate]), New predicate.expression(right.expression)]} |
+		{pred_dis_pred}    [left]:predicate_x40    logical_or [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{pred_dis_expr}    [left]:predicate_x40    logical_or [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{expr_dis_pred}    [left]:expression_p125  logical_or [right]:predicate_x40   {-> [New predicate.expression(left.expression), right.predicate]} |
+		{expr_dis_expr}    [left]:expression_p125  logical_or [right]:expression_p125 {-> [New predicate.expression(left.expression), New predicate.expression(right.expression)]} ;
+
+	conjunction_list {-> predicate*} =
+		{conlist_con_pred} [left]:conjunction_list conjunction [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{conlist_con_expr} [left]:conjunction_list conjunction [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{dislist_con_pred} [left]:disjunction_list conjunction [right]:predicate_x40   {-> [New predicate.disjunct([left.predicate]), right.predicate]} |
+		{dislist_con_expr} [left]:disjunction_list conjunction [right]:expression_p125 {-> [New predicate.disjunct([left.predicate]), New predicate.expression(right.expression)]} |
+		{pred_con_pred}    [left]:predicate_x40    conjunction [right]:predicate_x40   {-> [left.predicate, right.predicate]} |
+		{pred_con_expr}    [left]:predicate_x40    conjunction [right]:expression_p125 {-> [left.predicate, New predicate.expression(right.expression)]} |
+		{expr_con_pred}    [left]:expression_p125  conjunction [right]:predicate_x40   {-> [New predicate.expression(left.expression), right.predicate]} |
+		{expr_con_expr}    [left]:expression_p125  conjunction [right]:expression_p125 {-> [New predicate.expression(left.expression), New predicate.expression(right.expression)]} ;
 
 predicate_x40 {-> predicate} =
        {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
@@ -555,9 +592,19 @@ predicate_x41 {-> predicate} =
 
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
+/*
 predicate_p60 {-> predicate} =
 	{equivalence} [left]:predicate_p60 equivalence [right]:predicate_x60 {-> New predicate.equivalence(left.predicate, right.predicate)} |
 	{next_level} [pred]:predicate_x60 {-> pred.predicate};
+*/
+
+	predicate_p60 {-> predicate} =
+		{equivalence_p_p} [left]:predicate_p60   equivalence [right]:predicate_x60   {-> New predicate.equivalence(left.predicate, right.predicate)} |
+		{equivalence_p_e} [left]:predicate_p60   equivalence [right]:expression_p125 {-> New predicate.equivalence(left.predicate, New predicate.expression(right.expression))} |
+		{equivalence_e_p} [left]:expression_p125 equivalence [right]:predicate_x60   {-> New predicate.equivalence(New predicate.expression(left.expression), right.predicate)} |
+		{equivalence_e_e} [left]:expression_p125 equivalence [right]:expression_p125 {-> New predicate.equivalence(New predicate.expression(left.expression), New predicate.expression(right.expression))} |
+		{next_level} [pred]:predicate_x60 {-> pred.predicate};
+
 predicate_x60 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 
 /* The predicates of the following levels have completely moved down to the atomic level:
@@ -596,7 +643,8 @@ predicate_atomic {-> predicate} =
 	{bfalse} bfalse {-> New predicate.falsity()} |
 	{truth_predicate} truth_predicate {-> New predicate.truth()} |
 	{bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
-	{negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
+	{negation_pred} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
+	{negation_expr} not left_par [expression]:expression_in_par right_par {-> New predicate.negation(New predicate.expression(expression.expression))} |
 	{forall} for_any [identifiers]:expression_list dot_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)} | // check in typechecker: predicate must be an implication predicate
 	{exists} exists [identifiers]:expression_list dot_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
@@ -1016,9 +1064,14 @@ predicate =
   {description} [content]:pragma_free_text [predicate]:predicate |
   {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
-	{conjunct} [left]:predicate [right]:predicate |
+
+		{conjunct} [predicates]:predicate* |
+		{disjunct} [predicates]:predicate* |
+		{expression} expression | /* transformation to an expression is exclusively for conjunction and disjunction now */
+	/* {conjunct} [left]:predicate [right]:predicate | */
+	/* {disjunct} [left]:predicate [right]:predicate | */
+
 	{negation} [predicate]:predicate |
-	{disjunct} [left]:predicate [right]:predicate |
 	{implication} [left]:predicate [right]:predicate |
 	{equivalence} [left]:predicate [right]:predicate |
 	{forall} [identifiers]:expression* [implication]:predicate |
