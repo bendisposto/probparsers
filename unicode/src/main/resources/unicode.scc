@@ -5,6 +5,8 @@ Helpers
     space = [[' ' + 9] + [10 + 13]];
 
 Tokens
+    typeof_open = '/*';
+    typeof_close = '*/';
 	in = ':' | '\in' | 0x2208;
 	notsubseteq = '/<:' | '\notsubseteq' | 0x2288;
 	notsubset = '/<<:'| '\notsubset' | 0x2284;
@@ -69,11 +71,10 @@ Tokens
 	div = '/' | '\div'| 0x00f7;
 	mult = '*' | 0x2217;
 	minus = '-' | 0x2212;
-	
+
 	take = '/|\';
 	drop = '\|/';
-	
+
 	any_char = ([[0x0000 .. 0xffff] - [separator + space]])*;
 	whitespace = space*;
 	separator = separator;
- 
