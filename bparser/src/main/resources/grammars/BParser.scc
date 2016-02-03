@@ -611,6 +611,7 @@ predicate_atomic {-> predicate} =
 expression_in_par {-> expression} =
 	{composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
 	{parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
+	{if_then_else} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end {-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
 	{next_level} [expr]:expression_top {-> expr.expression};
 
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
@@ -763,7 +764,7 @@ expression_keyword {-> expression} =
 	{struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
 	{rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
 	{record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
-	{next_level} [expr]:expression_func {-> expr.expression} ;
+	{next_level} [expr]:expression_func {-> expr.expression} ; 
 
 rec_entry {-> rec_entry} =
 	{in_pars} left_par [identifier]:expression_top element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
