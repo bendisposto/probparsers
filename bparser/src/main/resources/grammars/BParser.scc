@@ -537,7 +537,8 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-	{next_level} [pred]:predicate_x30 {-> pred.predicate};
+	{next_level} [pred]:predicate_x30 {-> pred.predicate} |
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
@@ -612,6 +613,7 @@ expression_in_par {-> expression} =
 	{composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
 	{parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
 	{if_then_else} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end {-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
+	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{next_level} [expr]:expression_top {-> expr.expression};
 
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
@@ -1043,7 +1045,7 @@ predicate =
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
     {predicate_identifier} [identifier]:predicate_identifier |
     {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
-    {let_predicate} [identifiers]:expression* [assignments]:expression* [pred]:predicate | /* has no concrete syntax, generated for example by TLA translation */
+    {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
     {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
 
 
@@ -1080,8 +1082,8 @@ expression =
 	{mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
 	{div} [left]:expression [right]:expression |
 	{floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
-	{if_then_else} [condition]:predicate [then]:expression [else]:expression | /* has no concrete syntax, generated for example by TLA translation */
-	{let_expression} [identifiers]:expression* [assignments]:expression* [expr]:expression | /* has no concrete syntax, generated for example by TLA translation */
+	{if_then_else} [condition]:predicate [then]:expression [else]:expression |
+	{let_expression} [identifiers]:expression* [assignment]:predicate [expr]:expression |
 	{modulo} [left]:expression [right]:expression |
 	{power_of} [left]:expression [right]:expression |
 	{successor} |

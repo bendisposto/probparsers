@@ -516,7 +516,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
-		printAsList(node.getAssignments());
+		node.getAssignment().apply(this);
 		node.getPred().apply(this);
 		close(node);
 	}
@@ -526,7 +526,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
-		printAsList(node.getAssignments());
+		node.getAssignment().apply(this);
 		node.getExpr().apply(this);
 		close(node);
 	}
