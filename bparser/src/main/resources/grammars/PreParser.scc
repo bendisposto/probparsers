@@ -83,7 +83,7 @@ Tokens
 	{comment} comment_end = comment_end ; 
 	{comment} comment_content = all_chars ;
 	
-	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break;
+	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 		
 	{normal -> definitions} definitions = 'DEFINITIONS';
 	{normal, definitions -> normal, definitions_rhs} other_clause_begin =

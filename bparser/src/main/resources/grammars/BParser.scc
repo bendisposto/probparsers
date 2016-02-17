@@ -52,7 +52,7 @@ Tokens
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
-  {normal} line_comment = '//' [all_chars - line_break]* line_break;
+  	{normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
