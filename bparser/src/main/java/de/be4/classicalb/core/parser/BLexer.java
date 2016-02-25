@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.TComment;
 import de.be4.classicalb.core.parser.node.TCommentEnd;
+import de.be4.classicalb.core.parser.node.TConjunction;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TDot;
@@ -45,6 +46,8 @@ public class BLexer extends Lexer {
 	static {
 		addInvalid(TSemicolon.class, TSemicolon.class,
 				"Two succeeding semicolons are not allowed.");
+		addInvalid(TConjunction.class, TConjunction.class,
+				"& & is not allowed.");
 
 		/*
 		 * This is wrong! see testSemicolonAdEnd2 for an example where the
