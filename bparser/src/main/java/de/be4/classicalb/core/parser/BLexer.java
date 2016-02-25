@@ -48,6 +48,12 @@ public class BLexer extends Lexer {
 				"Two succeeding semicolons are not allowed.");
 		addInvalid(TConjunction.class, TConjunction.class,
 				"& & is not allowed.");
+		addInvalid(TLogicalOr.class, TLogicalOr.class,
+				"or or is not allowed.");
+		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
+				"|| || is not allowed.");
+		addInvalid(TSetSubtraction.class, TEqual.class,
+				"You need to use /= for inequality and not \=.");
 
 		/*
 		 * This is wrong! see testSemicolonAdEnd2 for an example where the
