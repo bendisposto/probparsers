@@ -45,10 +45,13 @@ public class BLexer extends Lexer {
 	static {
 		addInvalid(TSemicolon.class, TSemicolon.class,
 				"Two succeeding semicolons are not allowed.");
-		addInvalid(
-				TSemicolon.class,
-				TEnd.class,
-				"A semicolon is not allowed before END. Remember: The last Operation must not end with a semicolon.");
+
+		/*
+		 * This is wrong! see testSemicolonAdEnd2 for an example where the
+		 * combination is valid addInvalid( TSemicolon.class, TEnd.class,
+		 * "A semicolon is not allowed before END. Remember: The last Operation must not end with a semicolon."
+		 * );
+		 */
 	}
 
 	private Map<Class<? extends Token>, String> currentlyInvalid = null;
