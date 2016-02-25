@@ -3,7 +3,9 @@ package de.be4.classicalb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
@@ -15,18 +17,41 @@ import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TDot;
 import de.be4.classicalb.core.parser.node.TDotPar;
+import de.be4.classicalb.core.parser.node.TEnd;
 import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TLeftPar;
 import de.be4.classicalb.core.parser.node.TPragmaDescription;
-import de.be4.classicalb.core.parser.node.TPragmaFreeText;
+import de.be4.classicalb.core.parser.node.TSemicolon;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TWhiteSpace;
 import de.be4.classicalb.core.parser.node.Token;
 import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
+
+	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
+
+	private static void addInvalid(Class<? extends Token> f,
+			Class<? extends Token> s, String message) {
+		Map<Class<? extends Token>, String> secs = invalid.get(f);
+		if (secs == null)
+			secs = new HashMap<Class<? extends Token>, String>();
+		secs.put(s, message);
+		invalid.put(f, secs);
+	}
+
+	static {
+		addInvalid(TSemicolon.class, TSemicolon.class,
+				"Two succeeding semicolons are not allowed.");
+		addInvalid(
+				TSemicolon.class,
+				TEnd.class,
+				"A semicolon is not allowed before END. Remember: The last Operation must not end with a semicolon.");
+	}
+
+	private Map<Class<? extends Token>, String> currentlyInvalid = null;
 
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
@@ -60,11 +85,23 @@ public class BLexer extends Lexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
 
+		if (currentlyInvalid != null
+				&& currentlyInvalid.containsKey(token.getClass())) {
+			int l = token.getLine() + 1;
+			int c = token.getPos();
+			String errormessage = currentlyInvalid.get(token.getClass())
+					+ "\n The error occurred near [" + l + "," + c + "]";
+			throw new LexerException(errormessage);
+		} else if (!(token instanceof TWhiteSpace)) {
+			currentlyInvalid = invalid.get(token.getClass());
+		}
+
 		if (state.equals(State.COMMENT)) {
 			collectComment();
 		}
 
-		if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
+		if (state.equals(State.DESCRIPTION)
+				&& !(token instanceof TPragmaDescription)) {
 			collectComment();
 		}
 
@@ -193,7 +230,8 @@ public class BLexer extends Lexer {
 			// end of comment reached?
 			if (token instanceof TCommentEnd) {
 				String text = commentBuffer.toString();
-				if (state.equals(State.DESCRIPTION)) text = text.substring(0, text.length()-2);
+				if (state.equals(State.DESCRIPTION))
+					text = text.substring(0, text.length() - 2);
 				comment.setText(text.trim());
 				token = comment;
 				comment = null;
