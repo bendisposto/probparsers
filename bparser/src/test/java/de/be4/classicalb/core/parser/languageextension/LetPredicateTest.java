@@ -10,7 +10,7 @@ import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 
-public class IfThenElseExpressionTest {
+public class LetPredicateTest {
 
 	private BParser parser;
 
@@ -20,12 +20,12 @@ public class IfThenElseExpressionTest {
 	}
 
 	@Test
-	public void testIfThenElseExpression1() throws Exception {
-		final String testMachine = "#EXPRESSION (IF x < 3 THEN 5 ELSE 17 END)";
+	public void testSingleIdentifierLetPredicate() throws Exception {
+		final String testMachine = "#PREDICATE (LET x BE x = 5 IN x < 7 END)";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(AExpressionParseUnit(AIfThenElseExpression(ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3))AIntegerExpression(5)AIntegerExpression(17))))",
+				"Start(APredicateParseUnit(ALetPredicatePredicate(AIdentifierExpression([x])AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5))ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(7)))))",
 				result);
 	}
 
