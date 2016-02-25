@@ -511,9 +511,12 @@ operations_clause {-> machine_clause} = operations [operation_list]:operation_li
 
 operation_list {-> operation*} =
 	{single} [operation]:operation {-> [operation.operation]} |
-	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} ;
+	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} |
+	{missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
+
 
 operation {-> operation} = [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2 {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} ;
+
 
 operation_return_values {-> expression*} =
 	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
@@ -1005,7 +1008,9 @@ freetype_constructor =
 
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
-operation = [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution ;
+operation = 
+[return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
+{missing_semicolon} operation;
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;
 

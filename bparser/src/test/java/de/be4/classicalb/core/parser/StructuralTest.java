@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.util.LinkedList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
@@ -229,6 +230,18 @@ public class StructuralTest {
 		assertEquals(
 				"Start(ASubstitutionParseUnit(AAssignSubstitution([AIdentifierExpression([a]),AIdentifierExpression([b])],[AIntegerExpression(1),AIntegerExpression(2)])))",
 				result);
+	}
+
+	@Test
+	public void checkForMissingSemicolon() throws Exception {
+		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END\n r <-- Get = BEGIN r := xx END\nEND";
+		try {
+			final String result = getTreeAsString(s);
+			fail("Missing Semicolon was not detected");
+		} catch (BException e) {
+			assertTrue(e.getMessage().startsWith("Semicolon missing"));
+		}
+		
 	}
 
 	@Test
