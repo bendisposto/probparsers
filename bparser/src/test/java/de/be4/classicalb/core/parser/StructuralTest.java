@@ -236,7 +236,7 @@ public class StructuralTest {
 	public void checkForMissingSemicolon() throws Exception {
 		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END\n r <-- Get = BEGIN r := xx END\nEND";
 		try {
-			final String result = getTreeAsString(s);
+			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BException e) {
 			assertTrue(e.getMessage().startsWith("Semicolon missing"));
@@ -247,10 +247,9 @@ public class StructuralTest {
 	public void checkForDuplicateSemicolon() throws Exception {
 		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END;\n ;r <-- Get = BEGIN r := xx END\nEND";
 		try {
-			final String result = getTreeAsString(s);
+			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BException e) {
-			e.printStackTrace();
 			assertTrue(e.getMessage().startsWith("Two succeeding"));
 		}
 	}
