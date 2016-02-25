@@ -47,11 +47,27 @@ public class BLexer extends Lexer {
 		addInvalid(TSemicolon.class, TSemicolon.class,
 				"Two succeeding semicolons are not allowed.");
 		addInvalid(TConjunction.class, TConjunction.class,
-				"& & is not allowed.");
+				"& & is not allowed (probably one & too many).");
+		addInvalid(TConjunction.class, TLogicalOr.class,
+				"& or is not allowed.");
+		addInvalid(TConjunction.class, TImplies.class,
+				"& => is not allowed.");
+		addInvalid(TConjunction.class, TEquivalence.class,
+				"& <=> is not allowed.");
+		addInvalid(TImplies.class, TConjunction.class,
+				"=> & is not allowed.");
+		addInvalid(TImplies.class, TImplies.class,
+				"=> => is not allowed.");
+		addInvalid(TEquivalence.class, TConjunction.class,
+				"<=> & is not allowed.");
+		addInvalid(TEquivalence.class, TEquivalence.class,
+				"<=> <=> is not allowed.");
+		addInvalid(TLogicalOr.class, TConjunction.class,
+				"or & is not allowed.");
 		addInvalid(TLogicalOr.class, TLogicalOr.class,
-				"or or is not allowed.");
+				"or or is not allowed (probably one or too many).");
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
-				"|| || is not allowed.");
+				"|| || is not allowed (probably one || too many).");
 		addInvalid(TSetSubtraction.class, TEqual.class,
 				"You need to use /= for inequality and not \=.");
 
