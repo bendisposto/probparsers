@@ -117,8 +117,7 @@ public class BLexer extends Lexer {
 				&& currentlyInvalid.containsKey(token.getClass())) {
 			int l = token.getLine() + 1;
 			int c = token.getPos();
-			String errormessage = currentlyInvalid.get(token.getClass())
-					+ "\n The error occurred near [" + l + "," + c + "]";
+			String errormessage = "[" + l + "," + c + "] invalid combination of symbols: " + currentlyInvalid.get(token.getClass()) + "\n";
 			throw new LexerException(errormessage);
 		} else if (!(token instanceof TWhiteSpace)) {
 			currentlyInvalid = invalid.get(token.getClass());
