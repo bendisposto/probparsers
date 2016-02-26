@@ -239,7 +239,7 @@ public class StructuralTest {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BException e) {
-			assertTrue(e.getMessage().startsWith("Semicolon missing"));
+			assertTrue(e.getMessage().contains("Semicolon missing"));
 		}
 	}
 
@@ -250,7 +250,8 @@ public class StructuralTest {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BException e) {
-			assertTrue(e.getMessage().startsWith("Two succeeding"));
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("Two succeeding"));
 		}
 	}
 

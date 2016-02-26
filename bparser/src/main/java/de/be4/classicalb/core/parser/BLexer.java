@@ -11,23 +11,7 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.TComment;
-import de.be4.classicalb.core.parser.node.TCommentEnd;
-import de.be4.classicalb.core.parser.node.TConjunction;
-import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
-import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
-import de.be4.classicalb.core.parser.node.TDot;
-import de.be4.classicalb.core.parser.node.TDotPar;
-import de.be4.classicalb.core.parser.node.TEnd;
-import de.be4.classicalb.core.parser.node.THexLiteral;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.node.TLeftPar;
-import de.be4.classicalb.core.parser.node.TPragmaDescription;
-import de.be4.classicalb.core.parser.node.TSemicolon;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.node.TWhiteSpace;
-import de.be4.classicalb.core.parser.node.Token;
+import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
@@ -69,7 +53,7 @@ public class BLexer extends Lexer {
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
 				"|| || is not allowed (probably one || too many).");
 		addInvalid(TSetSubtraction.class, TEqual.class,
-				"You need to use /= for inequality and not \=.");
+				"You need to use /= for inequality and not \\=.");
 
 		/*
 		 * This is wrong! see testSemicolonAdEnd2 for an example where the
