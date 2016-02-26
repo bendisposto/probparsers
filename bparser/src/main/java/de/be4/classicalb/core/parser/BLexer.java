@@ -108,14 +108,13 @@ public class BLexer extends Lexer {
 
 	private Token lastToken;
 
-	private void findSyntaxErrors() throws LexerException {
-		if (token instanceof TWhiteSpace) {
+	private void findSyntaxError() throws LexerException {
+		if (token instanceof TWhiteSpace || token instanceof TLineComment) {
 			return;
 		}else if(lastToken == null){
 			lastToken = token;
 			return;
 		}
-
 		Class<? extends Token> lastTokenClass = lastToken.getClass();
 		Class<? extends Token> tokenClass = token.getClass();
 		
@@ -143,8 +142,9 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-
-		findSyntaxErrors();
+		if(state.equals(State.NORMAL)){
+			findSyntaxError();
+		}
 
 		if (state.equals(State.COMMENT)) {
 			collectComment();

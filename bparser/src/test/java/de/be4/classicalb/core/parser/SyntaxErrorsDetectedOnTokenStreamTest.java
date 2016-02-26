@@ -35,6 +35,30 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		}
 	}
 	
+	@Test
+	public void checkForCommentBetweenDuplicateAnd() throws Exception {
+		String s = "MACHINE Definitions\nPROPERTIES 1=1 & /* comment */ &  2 = 2  END";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate & was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("& &"));
+		}
+	}
+	
+	@Test
+	public void checkForSingleLineCommentBetweenDuplicateAnd() throws Exception {
+		String s = "MACHINE Definitions\nPROPERTIES 1=1 & // comment 1 comment \n &  2 = 2  END";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate & was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("& &"));
+		}
+	}
+	
 	
 	private String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing: \"" + testMachine + "\":");
