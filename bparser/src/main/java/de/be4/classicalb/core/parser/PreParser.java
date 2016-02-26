@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
@@ -172,7 +171,7 @@ public class PreParser {
 
 		if (!remainingDefinitions.isEmpty()) {
 			final Token definition = remainingDefinitions.pop();
-			final Token defRhs = definitions.get(definition);
+			//final Token defRhs = definitions.get(definition); //unused
 			throw new PreParseException(
 					definition,
 					"["

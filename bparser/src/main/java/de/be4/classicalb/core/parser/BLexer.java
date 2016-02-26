@@ -99,7 +99,7 @@ public class BLexer extends Lexer {
 
 		if (currentlyInvalid != null
 				&& currentlyInvalid.containsKey(token.getClass())) {
-			int l = token.getLine() + 1;
+			int l = token.getLine();
 			int c = token.getPos();
 			String errormessage = "[" + l + "," + c + "] invalid combination of symbols: " + currentlyInvalid.get(token.getClass()) + "\n";
 			throw new LexerException(errormessage);

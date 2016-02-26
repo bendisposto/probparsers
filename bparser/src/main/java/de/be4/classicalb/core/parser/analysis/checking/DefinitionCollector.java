@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.DefinitionTypes;
