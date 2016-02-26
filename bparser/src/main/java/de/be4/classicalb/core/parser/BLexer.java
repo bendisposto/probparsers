@@ -4,19 +4,21 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.IToken;
 
 public class BLexer extends Lexer {
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
+	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 
 	private static void addInvalid(Class<? extends Token> f,
 			Class<? extends Token> s, String message) {
@@ -32,22 +34,17 @@ public class BLexer extends Lexer {
 				"Two succeeding semicolons are not allowed.");
 		addInvalid(TConjunction.class, TConjunction.class,
 				"& & is not allowed (probably one & too many).");
-		addInvalid(TConjunction.class, TLogicalOr.class,
-				"& or is not allowed.");
-		addInvalid(TConjunction.class, TImplies.class,
-				"& => is not allowed.");
+		addInvalid(TConjunction.class, TLogicalOr.class, "& or is not allowed.");
+		addInvalid(TConjunction.class, TImplies.class, "& => is not allowed.");
 		addInvalid(TConjunction.class, TEquivalence.class,
 				"& <=> is not allowed.");
-		addInvalid(TImplies.class, TConjunction.class,
-				"=> & is not allowed.");
-		addInvalid(TImplies.class, TImplies.class,
-				"=> => is not allowed.");
+		addInvalid(TImplies.class, TConjunction.class, "=> & is not allowed.");
+		addInvalid(TImplies.class, TImplies.class, "=> => is not allowed.");
 		addInvalid(TEquivalence.class, TConjunction.class,
 				"<=> & is not allowed.");
 		addInvalid(TEquivalence.class, TEquivalence.class,
 				"<=> <=> is not allowed.");
-		addInvalid(TLogicalOr.class, TConjunction.class,
-				"or & is not allowed.");
+		addInvalid(TLogicalOr.class, TConjunction.class, "or & is not allowed.");
 		addInvalid(TLogicalOr.class, TLogicalOr.class,
 				"or or is not allowed (probably one or too many).");
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
@@ -61,9 +58,24 @@ public class BLexer extends Lexer {
 		 * "A semicolon is not allowed before END. Remember: The last Operation must not end with a semicolon."
 		 * );
 		 */
+
+		clauseTokenClasses.add(TConstants.class);
+		clauseTokenClasses.add(TAssertions.class);
+		clauseTokenClasses.add(TVariables.class);
+		clauseTokenClasses.add(TInvariant.class);
+		clauseTokenClasses.add(TInitialisation.class);
+		clauseTokenClasses.add(TOperations.class);
+		clauseTokenClasses.add(TVariables.class);
+		// ...
+		
+		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
+			addInvalid(TConjunction.class, clauseTokenClass,
+					"& " + clauseName +  " is not allowed.");
+		}
+
 	}
 
-	private Map<Class<? extends Token>, String> currentlyInvalid = null;
 
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
@@ -94,18 +106,45 @@ public class BLexer extends Lexer {
 		this(in, null);
 	}
 
+	private Token lastToken;
+
+	private void findSyntaxErrors() throws LexerException {
+		if (token instanceof TWhiteSpace) {
+			return;
+		}else if(lastToken == null){
+			lastToken = token;
+			return;
+		}
+
+		Class<? extends Token> lastTokenClass = lastToken.getClass();
+		Class<? extends Token> tokenClass = token.getClass();
+		
+		checkForInvalidCombinations(lastTokenClass, tokenClass);
+
+		lastToken = token;
+	}
+
+	private void checkForInvalidCombinations(
+			Class<? extends Token> lastTokenClass,
+			Class<? extends Token> tokenClass) throws LexerException {
+		Map<Class<? extends Token>, String> map = invalid.get(lastTokenClass);
+		if (map != null) {
+			String string = map.get(tokenClass);
+			if (string != null) {
+				int l = token.getLine();
+				int c = token.getPos();
+				String errormessage = "[" + l + "," + c
+						+ "] invalid combination of symbols: " + string + "\n";
+				throw new LexerException(errormessage);
+			}
+		}
+
+	}
+
 	@Override
 	protected void filter() throws LexerException, IOException {
 
-		if (currentlyInvalid != null
-				&& currentlyInvalid.containsKey(token.getClass())) {
-			int l = token.getLine();
-			int c = token.getPos();
-			String errormessage = "[" + l + "," + c + "] invalid combination of symbols: " + currentlyInvalid.get(token.getClass()) + "\n";
-			throw new LexerException(errormessage);
-		} else if (!(token instanceof TWhiteSpace)) {
-			currentlyInvalid = invalid.get(token.getClass());
-		}
+		findSyntaxErrors();
 
 		if (state.equals(State.COMMENT)) {
 			collectComment();

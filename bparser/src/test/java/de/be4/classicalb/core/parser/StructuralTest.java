@@ -243,18 +243,6 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void checkForDuplicateSemicolon() throws Exception {
-		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END;\n ;r <-- Get = BEGIN r := xx END\nEND";
-		try {
-			getTreeAsString(s);
-			fail("Missing Semicolon was not detected");
-		} catch (BException e) {
-			System.out.println(e.getMessage());
-			assertTrue(e.getMessage().contains("Two succeeding"));
-		}
-	}
-
-	@Test
 	public void testRepeatingClauses() {
 		final String testMachine = "MACHINE TestMachineX\n"
 				+ "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"
