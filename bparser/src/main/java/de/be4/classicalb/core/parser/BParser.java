@@ -36,6 +36,8 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
+import de.be4.classicalb.core.parser.extensions.IGrammar;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -62,6 +64,7 @@ public class BParser {
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
+	private IGrammar grammar = new DefaultGrammar();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 
@@ -79,6 +82,7 @@ public class BParser {
 		} else {
 			this.absolutePath = new File(fileName).getAbsolutePath();
 		}
+		
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -214,6 +218,7 @@ public class BParser {
 
 		BLexer bLexer = new BLexer(new PushbackReader(reader, 99), defTypes,
 				input.length() / APPROXIMATE_TOKEN_LENGTH);
+		bLexer.setGrammar(this.grammar);
 		Token t;
 		do {
 			t = bLexer.next();
@@ -344,11 +349,13 @@ public class BParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
 					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
 			lexer.setDebugOutput(debugOutput);
-
+			lexer.setGrammar(this.grammar);
+			
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
-
+			
+			this.grammar = lexer.getGrammar();
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
@@ -430,10 +437,13 @@ public class BParser {
 	}
 
 	private void applyAstTransformations(final Start rootNode) {
+		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
+		grammar.applyAstTransformation(rootNode);
 
 		// TODO more AST transformations?
+		
 	}
 
 	private void performSemanticChecks(final Start rootNode)
@@ -449,6 +459,10 @@ public class BParser {
 			check.setOptions(parseOptions);
 			check.runChecks(rootNode);
 		}
+	}
+	
+	public void setGrammar(IGrammar grammar){
+		this.grammar = grammar;
 	}
 
 	public SourcePositions getSourcePositions() {

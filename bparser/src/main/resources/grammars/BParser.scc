@@ -324,6 +324,16 @@ Tokens
 
 	white_space = white_space;
 
+  // grammar extensions
+  // the following tokens tokens are never parsed
+  {normal} kw_rules_machine = 'RULES_MACHINE';
+  {normal} kw_rule = 'RULE';
+  {normal} kw_rule_fail = 'RULE_FAIL';
+  {normal} kw_rule_success = 'RULE_SUCCESS';
+  {normal} kw_depends_on_rules = 'DEPENDS_ON_RULES';
+  {normal} kw_for_all = 'FORALL';
+  {normal} kw_expect = 'EXPECT';
+
 
 /*******************************************************************
  * Ignored Tokens                                                  *
@@ -373,7 +383,7 @@ parse_unit {-> parse_unit} =
 	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
 machine {-> parse_unit} =
-   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} | 
+   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
    {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} |
    machine_x {-> machine_x.parse_unit};
 
@@ -515,8 +525,11 @@ operation_list {-> operation*} =
 	{missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 
-operation {-> operation} = [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2 {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} ;
-
+operation {-> operation} =
+  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
+    {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
+  {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l2
+    {-> New operation.rule(rule_name, operation_body.substitution)};
 
 operation_return_values {-> expression*} =
 	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
@@ -605,7 +618,8 @@ predicate_atomic {-> predicate} =
 	{exists} exists [identifiers]:expression_list dot_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
 	{identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
-	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} ;
+	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
+  {depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])}; // extension for rules
 
 
 /* Expressions */
@@ -769,7 +783,7 @@ expression_keyword {-> expression} =
 	{struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
 	{rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
 	{record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
-	{next_level} [expr]:expression_func {-> expr.expression} ; 
+	{next_level} [expr]:expression_func {-> expr.expression} ;
 
 rec_entry {-> rec_entry} =
 	{in_pars} left_par [identifier]:expression_top element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
@@ -842,7 +856,13 @@ substitution_l3 {-> substitution} =
 	{operation_call} [return_values]:expression_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
 	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
 	{let} let [identifiers]:expression_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
-	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} ;
+	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
+    // extensions for rules
+  {forall_sub} kw_for_all [identifiers]:expression_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
+    {-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
+  {rule_fail} kw_rule_fail left_par [expression]:expression_in_par right_par {-> New substitution.rule_fail(expression.expression)} |
+  {rule_success} kw_rule_success {-> New substitution.rule_success()} ;
+
 
 parallel_subst_tail {-> substitution*} =
 	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
@@ -891,7 +911,7 @@ variables_list {-> expression*} =
 	{multi} [rest]:variables_list comma [identifier]:identifier_expression {-> [rest.expression, identifier.expression]} ;
 
 identifier_expression {-> expression} =
-    {description} [identifier]:composed_identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}| 
+    {description} [identifier]:composed_identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
 	{unit} pragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.unit(content,identifier.expression)} |
 	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
 	[identifier]:identifier_literal {-> New expression.identifier([identifier])}  ;
@@ -1010,9 +1030,11 @@ freetype_constructor =
 
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
-operation = 
-[return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
-{missing_semicolon} operation;
+operation =
+  [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
+  {missing_semicolon} operation |
+  {rule} [rule_name]:identifier_literal [rule_body]:substitution ;
+
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;
 
@@ -1048,11 +1070,11 @@ predicate =
 	{finite} [set]:expression |
 	{partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
-    {predicate_identifier} [identifier]:predicate_identifier |
-    {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
-    {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
-    {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
-
+  {predicate_identifier} [identifier]:predicate_identifier |
+  {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
+  {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
+  {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*| /* Event-B only predicate - theory plugin */
+  {depends_on_rules} [identifiers]:expression* ; // extension for rules
 
 
 /* Expressions */
@@ -1231,4 +1253,7 @@ substitution =
 	{operation_call} [result_identifiers]:expression* [operation]:identifier_literal* [parameters]:expression* |
 	{while} [condition]:predicate [do_subst]:substitution [invariant]:predicate [variant]:expression |
 	{parallel} [substitutions]:substitution* |
-	{definition} [def_literal]:def_literal_substitution [parameters]:expression* ;
+	{definition} [def_literal]:def_literal_substitution [parameters]:expression* |
+  {forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
+  {rule_fail} [expression]:expression | //extension for rules
+  {rule_success} ; // extension for rules

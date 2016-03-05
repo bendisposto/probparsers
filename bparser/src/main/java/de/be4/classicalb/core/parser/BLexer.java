@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
+import de.be4.classicalb.core.parser.extensions.IGrammar;
+import de.be4.classicalb.core.parser.extensions.RuleExtension;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
@@ -67,16 +70,17 @@ public class BLexer extends Lexer {
 		clauseTokenClasses.add(TOperations.class);
 		clauseTokenClasses.add(TVariables.class);
 		// ...
-		
+
 		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
-			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
-			addInvalid(TConjunction.class, clauseTokenClass,
-					"& " + clauseName +  " is not allowed.");
+			String clauseName = clauseTokenClass.getSimpleName().substring(1)
+					.toUpperCase();
+			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName
+					+ " is not allowed.");
 		}
 
 	}
 
-
+	private IGrammar grammar = null;
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
 
@@ -111,13 +115,13 @@ public class BLexer extends Lexer {
 	private void findSyntaxError() throws LexerException {
 		if (token instanceof TWhiteSpace || token instanceof TLineComment) {
 			return;
-		}else if(lastToken == null){
+		} else if (lastToken == null) {
 			lastToken = token;
 			return;
 		}
 		Class<? extends Token> lastTokenClass = lastToken.getClass();
 		Class<? extends Token> tokenClass = token.getClass();
-		
+
 		checkForInvalidCombinations(lastTokenClass, tokenClass);
 
 		lastToken = token;
@@ -140,9 +144,28 @@ public class BLexer extends Lexer {
 
 	}
 
+	private void detectGrammarExtension() {
+		if (grammar instanceof DefaultGrammar && lastToken == null) {
+			// first token
+			if (token instanceof TIdentifierLiteral
+					&& token.getText().equals(RuleExtension.getModelType())) {
+				this.setGrammar(new RuleExtension());
+			}
+		}
+	}
+
+	private void applyGrammarExtension() {
+		detectGrammarExtension();
+		if (grammar != null
+				&& this.grammar.containsAlternativeDefinitionForToken(token)) {
+			token = this.grammar.createNewToken(token);
+		}
+	}
+
 	@Override
 	protected void filter() throws LexerException, IOException {
-		if(state.equals(State.NORMAL)){
+		if (state.equals(State.NORMAL)) {
+			applyGrammarExtension();
 			findSyntaxError();
 		}
 
@@ -292,6 +315,14 @@ public class BLexer extends Lexer {
 				token = null;
 			}
 		}
+	}
+
+	public void setGrammar(IGrammar grammar) {
+		this.grammar = grammar;
+	}
+
+	public IGrammar getGrammar() {
+		return this.grammar;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
