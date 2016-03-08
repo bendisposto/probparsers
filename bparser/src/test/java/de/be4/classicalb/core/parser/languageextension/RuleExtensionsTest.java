@@ -40,6 +40,16 @@ public class RuleExtensionsTest {
 	}
 
 	@Test
+	public void testRuleOperationAndExistingVariables() throws Exception {
+		final String testMachine = "RULES_MACHINE Test VARIABLES x INVARIANT x = 1 INITIALISATION x:= 1 OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
+		final String result = getTreeAsString(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([x]),AIdentifierExpression([foo])]),AInvariantMachineClause(AConjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(1)),AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])))),AInitialisationMachineClause(AParallelSubstitution([AAssignSubstitution([AIdentifierExpression([x])],[AIntegerExpression(1)]),AAssignSubstitution([AIdentifierExpression([foo])],[AStringExpression(NOT_CHECKED)])])),AOperationsMachineClause([AOperation([AIdentifierExpression([res]),AIdentifierExpression([ce])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ASequenceSubstitution([ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([ce])],[AStringExpression(SUCCESS),AStringExpression()])),AAssertionSubstitution(ANotEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AIfSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(SUCCESS)),AAssignSubstitution([AIdentifierExpression([res])],[AStringExpression(SUCCESS)]),[],AAssignSubstitution([AIdentifierExpression([res])],[AStringExpression(FAIL)])))]),[],))])]))",
+				result);
+	}
+
+	@Test
 	public void testDependsOnRule() throws Exception {
 		final String testMachine = "MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS END;"
 				+ " RULE foo2 = SELECT DEPENDS_ON_RULES(foo) THEN RULE_SUCCESS END END";

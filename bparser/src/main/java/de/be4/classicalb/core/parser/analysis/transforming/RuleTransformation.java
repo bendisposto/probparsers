@@ -110,8 +110,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 				subList.add(assign);
 				AParallelSubstitution parallelSub = new AParallelSubstitution(
 						subList);
-				initialisationMachineClause.getSubstitutions().replaceBy(
-						parallelSub);
+				initialisationMachineClause.setSubstitutions(parallelSub);
 			} else {
 				initialisationMachineClause.setSubstitutions(assign);
 			}
@@ -152,7 +151,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		AInitialisationMachineClause initialisationMachineClause = null;
 
 		@Override
-		public void caseAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
+		public void inAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 			abstractMachineParseUnit = node;
 		}
 
