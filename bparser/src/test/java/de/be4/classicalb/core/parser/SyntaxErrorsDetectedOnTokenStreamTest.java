@@ -25,13 +25,25 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	
 	@Test
 	public void checkForClauseAfterConjunction() throws Exception {
-		String s = "MACHINE Definitions\nPROPERTIES 1=1 & VARIABLES";
+		String s = "MACHINE Definitions\nPROPERTIES\n 1=1 & VARIABLES";
 		try {
 			getTreeAsString(s);
 			fail("& VARIABLES was not detected");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("& VARIABLES"));
+		}
+	}
+
+	@Test
+	public void checkForDuplicateAnd() throws Exception {
+		String s = "MACHINE Definitions\nPROPERTIES\n 1=1 & &  2 = 2  END";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate & was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("& &"));
 		}
 	}
 	
@@ -50,6 +62,18 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	@Test
 	public void checkForSingleLineCommentBetweenDuplicateAnd() throws Exception {
 		String s = "MACHINE Definitions\nPROPERTIES 1=1 & // comment 1 comment \n &  2 = 2  END";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate & was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("& &"));
+		}
+	}
+	
+	@Test
+	public void checkForDublicateAndInDefinitionsClause() throws Exception {
+		String s = "MACHINE Definitions\nDEFINITIONS\n foo == 1=1 && 2=2  \nEND";
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");

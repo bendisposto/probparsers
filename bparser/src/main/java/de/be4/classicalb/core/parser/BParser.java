@@ -82,7 +82,7 @@ public class BParser {
 		} else {
 			this.absolutePath = new File(fileName).getAbsolutePath();
 		}
-		
+
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -350,11 +350,11 @@ public class BParser {
 					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
 			lexer.setDebugOutput(debugOutput);
 			lexer.setGrammar(this.grammar);
-			
+
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
-			
+
 			this.grammar = lexer.getGrammar();
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
@@ -397,7 +397,13 @@ public class BParser {
 			 * 'LexerAspect' replaces any LexerException to provide sourcecode
 			 * position information in the BLexerException.
 			 */
- 			throw new BException(absolutePath, e);
+			if(e instanceof BLexerException){
+				BLexerException be = (BLexerException) e;
+				final String message = "[" + be.getLastLine() + "," + be.getLastPos()
+						+ "] " + e.getLocalizedMessage();
+				throw new BException(absolutePath, message, e);
+			}
+			throw new BException(absolutePath, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
@@ -443,7 +449,7 @@ public class BParser {
 		grammar.applyAstTransformation(rootNode);
 
 		// TODO more AST transformations?
-		
+
 	}
 
 	private void performSemanticChecks(final Start rootNode)
@@ -460,8 +466,8 @@ public class BParser {
 			check.runChecks(rootNode);
 		}
 	}
-	
-	public void setGrammar(IGrammar grammar){
+
+	public void setGrammar(IGrammar grammar) {
 		this.grammar = grammar;
 	}
 

@@ -136,9 +136,8 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				int l = token.getLine();
 				int c = token.getPos();
-				String errormessage = "[" + l + "," + c
-						+ "] invalid combination of symbols: " + string + "\n";
-				throw new LexerException(errormessage);
+				throw new BLexerException(token, "Invalid combination of symbols: " + string + "\n",
+						string, l, c);
 			}
 		}
 

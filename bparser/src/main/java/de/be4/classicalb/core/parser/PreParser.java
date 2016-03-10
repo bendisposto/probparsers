@@ -15,6 +15,7 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -153,8 +154,13 @@ public class PreParser {
 				final Token definition = remainingDefinitions.pop();
 
 				final Token defRhs = definitions.get(definition);
-				final Definitions.Type type = determineType(definition, defRhs,
-						todoDefs);
+				Definitions.Type type = null;
+				try {
+					type = determineType(definition, defRhs,
+							todoDefs);
+				} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
+					throw new PreParseException(e.getLocalizedMessage());
+				}
 
 				if (type != null) {
 					todoDefs.remove(definition.getText());
@@ -171,7 +177,7 @@ public class PreParser {
 
 		if (!remainingDefinitions.isEmpty()) {
 			final Token definition = remainingDefinitions.pop();
-			//final Token defRhs = definitions.get(definition); //unused
+			// final Token defRhs = definitions.get(definition); //unused
 			throw new PreParseException(
 					definition,
 					"["
@@ -216,7 +222,7 @@ public class PreParser {
 	}
 
 	private Definitions.Type determineType(final Token definition,
-			final Token rhsToken, Set<String> definitions) {
+			final Token rhsToken, Set<String> definitions) throws de.be4.classicalb.core.parser.lexer.LexerException {
 
 		final String definitionRhs = rhsToken.getText().trim();
 
@@ -259,15 +265,25 @@ public class PreParser {
 				pos = line == 1 ? pos - 10 : pos;
 				definition.setPos(pos);
 				return null;
+			} catch (de.be4.classicalb.core.parser.lexer.LexerException e1) {
+				// should not happen
+				return null;
 			}
 
+		} catch (BLexerException e) {
+			errorToken = e.getLastToken();
+			int line = errorToken.getLine();
+			int pos = errorToken.getPos();
+			pos = line == 1 ? rhsToken.getPos() + pos - BParser.FORMULA_PREFIX.length()-1 : pos;
+			line = definition.getLine() + line - 1;
+			throw new de.be4.classicalb.core.parser.lexer.LexerException("["+line+","+pos+"] "+ e.getMessage());
 		}
 
 	}
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs)
-			throws RhsException {
+			throws RhsException, de.be4.classicalb.core.parser.lexer.LexerException {
 
 		final Reader reader = new StringReader(prefix + " " + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
@@ -285,9 +301,6 @@ public class PreParser {
 
 		catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
 			throw new RhsException(ex.getToken());
-		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			// IGNORE
-			throw new RhsException(null);
 		}
 
 		return null;
