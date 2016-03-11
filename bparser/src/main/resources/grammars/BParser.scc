@@ -13,6 +13,12 @@ Helpers
     comment_start = '/*';
     comment_end = '*/';
 
+	minus = '-' | 0x2212;
+	plus = '+' | 0x002b;
+	gt = '>' | 0x003e;
+	lt = '<' | 0x003c;
+	eq = '=' | 0x003d;
+
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
@@ -88,14 +94,14 @@ Tokens
 	{normal} right_par = ')';
 	{normal} product = '*' | 0x00d7;
 	{normal} power_of = '**';
-	{normal} plus = '+' | 0x002b;
-	{normal} partial_function = '+->' | 0x21f8;
-	{normal} partial_surjection = '+->>' | 0x2900;
+	{normal} plus = plus;
+	{normal} partial_function = plus minus gt | 0x21f8;
+	{normal} partial_surjection = plus minus gt gt | 0x2900;
 	{normal} comma = ',';
-	{normal} minus = '-' | 0x2212;
-	{normal} total_function = '-->' | 0x2192;
-	{normal} total_surjection = '-->>' | 0x21a0;
-	{normal} insert_start_sequence = '->' | 0x21fe;
+	{normal} minus = minus;
+	{normal} total_function = minus minus gt | 0x2192;
+	{normal} total_surjection = minus minus gt gt | 0x21a0;
+	{normal} insert_start_sequence = minus gt | 0x21fe;
 	{normal} dot = '.';
 	{normal} interval = '..' | 0x2025;
 	{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
@@ -109,29 +115,29 @@ Tokens
 	{normal} restrict_head_sequence = '/|\' | 0x2191;
 	{normal} element_of = ':' | 0x2208;
 	{normal} double_colon = '::' | ':' 0x2208;  /* becomes_element_of */
-	{normal} assign = ':=';
+	{normal} assign = ':' eq;
 	{normal} semicolon = ';';
-	{normal} less = '<';
-	{normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
-	{normal} set_relation = '<->' | 0x2194;
+	{normal} less = lt;
+	{normal} overwrite_relation = lt plus | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
+	{normal} set_relation = lt minus gt | 0x2194;
 	{normal} insert_end_sequence = '<-' | 0x21fd;
 	{normal} output_parameters = '<--' | 0x2190;
 	{normal} inclusion = '<:' | 0x2286;
 	{normal} strict_inclusion = '<<:' | 0x2282;
 	{normal} domain_subtraction = '<<|' | 0x2a64 | 0x25c0;
-	{normal} less_equal = '<=' | 0x2264;
-	{normal} equivalence = '<=>' | 0x21d4;
-	{normal} domain_restriction = '<|' | 0x25c1;
-	{normal} equal = '=';
-	{normal} double_equal = '==';
-	{normal} implies = '=>' | 0x21d2;
-	{normal} greater = '>';
-	{normal} partial_injection = '>+>' | 0x2914;
-	{normal} total_injection = '>->' | 0x21a3;
-	{normal} partial_bijection = '>+>>';
-	{normal} total_bijection = '>->>' | 0x2916;
-	{normal} direct_product = '><' | 0x2297;
-	{normal} greater_equal = '>=' | 0x2265;
+	{normal} less_equal = lt eq | 0x2264;
+	{normal} equivalence = lt eq gt | 0x21d4;
+	{normal} domain_restriction = lt '|' | 0x25c1;
+	{normal} equal = eq;
+	{normal} double_equal = eq eq;
+	{normal} implies = eq gt | 0x21d2;
+	{normal} greater = gt;
+	{normal} partial_injection = gt plus gt | 0x2914;
+	{normal} total_injection = gt minus gt | 0x21a3;
+	{normal} partial_bijection = gt plus gt gt;
+	{normal} total_bijection = gt minus gt gt | 0x2916;
+	{normal} direct_product = gt lt | 0x2297;
+	{normal} greater_equal = gt eq | 0x2265;
 	{normal} abstract_constants = 'ABSTRACT_CONSTANTS';
 	{normal} abstract_variables = 'ABSTRACT_VARIABLES';
 	{normal} any = 'ANY';
@@ -277,9 +283,9 @@ Tokens
 	{normal} tilde = '~' | 0x223c | 0x207b 0xb9;
 
 	// Extensions
-	{normal} total_relation = '<<->' | 0xe100;
-	{normal} surjection_relation = '<->>' | 0xe101;
-	{normal} total_surjection_relation = '<<->>' | 0xe102;
+	{normal} total_relation = lt lt minus gt | 0xe100;
+	{normal} surjection_relation = lt minus gt gt | 0xe101;
+	{normal} total_surjection_relation = lt lt minus gt gt | 0xe102;
 	{normal} kw_freetypes = 'FREETYPES';
 
 	// keywords for special parsing modes

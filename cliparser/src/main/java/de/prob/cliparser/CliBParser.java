@@ -181,27 +181,27 @@ public class CliBParser {
 				}
 				break;
 			case formula:
-				theFormula = "#FORMULA " + in.readLine();
+				theFormula = "#FORMULA\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case expression:
-				theFormula = "#EXPRESSION " + in.readLine();
+				theFormula = "#EXPRESSION\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case predicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
 			case extendedformula:
-				theFormula = "#FORMULA " + in.readLine();
+				theFormula = "#FORMULA\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case extendedexpression:
-				theFormula = "#EXPRESSION " + in.readLine();
+				theFormula = "#EXPRESSION\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case extendedpredicate:
-				theFormula = "#PREDICATE " + in.readLine();
+				theFormula = "#PREDICATE\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case ltl:
