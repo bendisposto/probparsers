@@ -297,9 +297,7 @@ public class PreParser {
 			return parser.parse();
 		} catch (final IOException e) {
 			// IGNORE
-		}
-
-		catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
+		} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
 			throw new RhsException(ex.getToken());
 		}
 

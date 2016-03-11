@@ -283,12 +283,11 @@ public class BLexer extends Lexer {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
 			// tokenList.add(token);
-			final int line = token.getLine() - 1;
-			final int pos = token.getPos() - 1;
+			//final int line = token.getLine() - 1;
+			//final int pos = token.getPos() - 1;
 			final String text = token.getText();
-
-			throw new BLexerException(token, "Comment not closed",
-					text.toString(), line, pos);
+			throw new BLexerException(comment, "Comment not closed.",
+					text.toString(), comment.getLine(), comment.getPos());
 		}
 
 		// starting a new comment

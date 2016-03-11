@@ -194,20 +194,13 @@ public class StructuralTest {
 
 	@Test
 	public void testUnclosedComment() {
-		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
+		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n  /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
 		try {
 			getTreeAsString(emptyMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BException e) {
-			assertTrue(e.getCause() instanceof BLexerException);
-			final BLexerException ex = (BLexerException) e.getCause();
-
-			assertEquals("", ex.getLastText());
-			assertEquals(7, ex.getLastLine());
-			assertEquals(3, ex.getLastPos());
-			assertNotNull(ex.getLocalizedMessage());
-
-			assertTrue(ex.getLastToken() instanceof EOF);
+			assertNotNull(e.getMessage());
+			assertTrue(e.getMessage().contains("[3,3]"));
 		}
 	}
 
