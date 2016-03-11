@@ -391,18 +391,16 @@ public class BParser {
 			// locate the pragmas
 
 			return rootNode;
-		} catch (final LexerException e) {
+		}catch (final BLexerException e){
+			final String message = "[" + e.getLastLine() + "," + e.getLastPos()
+					+ "] " + e.getLocalizedMessage();
+			throw new BException(absolutePath, null, new LexerException(message));
+		}catch (final LexerException e) {
 			/*
 			 * Actually it's supposed to be a BLexerException because the aspect
 			 * 'LexerAspect' replaces any LexerException to provide sourcecode
 			 * position information in the BLexerException.
 			 */
-			if(e instanceof BLexerException){
-				BLexerException be = (BLexerException) e;
-				final String message = "[" + be.getLastLine() + "," + be.getLastPos()
-						+ "] " + e.getLocalizedMessage();
-				throw new BException(absolutePath, message, e);
-			}
 			throw new BException(absolutePath, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();

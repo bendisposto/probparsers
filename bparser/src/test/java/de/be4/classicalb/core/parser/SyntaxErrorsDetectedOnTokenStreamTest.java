@@ -43,6 +43,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("[3,8]"));
 			assertTrue(e.getMessage().contains("& &"));
 		}
 	}
@@ -79,6 +80,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("[3,14]"));
 			assertTrue(e.getMessage().contains("& &"));
 		}
 	}
