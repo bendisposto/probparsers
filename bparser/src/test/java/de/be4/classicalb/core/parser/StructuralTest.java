@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -194,13 +194,16 @@ public class StructuralTest {
 
 	@Test
 	public void testUnclosedComment() {
-		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n  /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
+		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
 		try {
 			getTreeAsString(emptyMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BException e) {
-			assertNotNull(e.getMessage());
-			assertTrue(e.getMessage().contains("[3,3]"));
+			final BLexerException ex = (BLexerException) e.getCause();
+			// checking the start position of the comment
+			assertEquals(3, ex.getLastLine());
+			assertEquals(2, ex.getLastPos());
+			assertTrue(e.getMessage().contains("Comment not closed."));
 		}
 	}
 
@@ -226,11 +229,15 @@ public class StructuralTest {
 
 	@Test
 	public void checkForMissingSemicolon() throws Exception {
-		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END\n r <-- Get = BEGIN r := xx END\nEND";
+		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n  BAR= BEGIN r := xx END\nEND";
 		try {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			Node node = cause.getNodes()[0];
+			assertEquals(4, node.getStartPos().getLine());
+			assertEquals(3, node.getStartPos().getPos());
 			assertTrue(e.getMessage().contains("Semicolon missing"));
 		}
 	}

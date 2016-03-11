@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Utils {
 
@@ -51,16 +52,20 @@ public class Utils {
 
 	public static String getRevisionFromManifest() {
 		String revision = "";
-		InputStream stream = Utils.class.getClassLoader().getResourceAsStream("revision.properties");
+		InputStream stream = Utils.class.getClassLoader().getResourceAsStream(
+				"revision.properties");
 		Properties properties = new Properties();
 		try {
-		properties.load(stream);
-		stream.close();
-		revision = properties.getProperty("CompileDate");
-		}
-		catch (IOException e) {
+			properties.load(stream);
+			stream.close();
+			revision = properties.getProperty("CompileDate");
+		} catch (IOException e) {
 			revision = String.valueOf(System.currentTimeMillis());
 		}
 		return revision;
+	}
+
+	public static String getSourcePositionAsString(SourcePosition sourcePos) {
+		return "[" + sourcePos.getLine() + "," + sourcePos.getPos() + "]";
 	}
 }

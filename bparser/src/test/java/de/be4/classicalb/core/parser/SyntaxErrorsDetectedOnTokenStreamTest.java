@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -7,13 +8,14 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class SyntaxErrorsDetectedOnTokenStreamTest {
 
 	@Test
 	public void checkForDuplicateSemicolon() throws Exception {
-		String s = "MACHINE MissingSemicolon\nSETS\nID={aa,bb}\nVARIABLES xx\nINVARIANT\nxx:ID\nINITIALISATION xx:=iv\nOPERATIONS\n Set(yy) = PRE yy:ID THEN xx:= yy END;\n ;r <-- Get = BEGIN r := xx END\nEND";
+		String s = "MACHINE DuplicateSemicolon\nOPERATIONS\n Foo = BEGIN skip END;\n ;r <-- Get = BEGIN r := xx END\nEND";
 		try {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
@@ -22,6 +24,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			assertTrue(e.getMessage().contains("Two succeeding"));
 		}
 	}
+	
 	
 	@Test
 	public void checkForClauseAfterConjunction() throws Exception {
@@ -37,26 +40,32 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 
 	@Test
 	public void checkForDuplicateAnd() throws Exception {
-		String s = "MACHINE Definitions\nPROPERTIES\n 1=1 & &  2 = 2  END";
+		String s = "MACHINE Definitions\nPROPERTIES\n 1=1 &\n &  2 = 2  END";
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
-			assertTrue(e.getMessage().contains("[3,8]"));
-			assertTrue(e.getMessage().contains("& &"));
+			final BLexerException ex = (BLexerException) e.getCause();
+			// checking the position of the second &
+			assertEquals(4, ex.getLastLine());
+			assertEquals(2, ex.getLastPos());
 		}
 	}
 	
 	@Test
 	public void checkForCommentBetweenDuplicateAnd() throws Exception {
-		String s = "MACHINE Definitions\nPROPERTIES 1=1 & /* comment */ &  2 = 2  END";
+		String s = "MACHINE Definitions\nPROPERTIES 1=1 & /* comment */\n &  2 = 2  END";
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("& &"));
+			final BLexerException ex = (BLexerException) e.getCause();
+			// checking the position of the second &
+			assertEquals(3, ex.getLastLine());
+			assertEquals(2, ex.getLastPos());
 		}
 	}
 	
@@ -79,7 +88,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
-			System.out.println(e.getMessage());
+			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,14]"));
 			assertTrue(e.getMessage().contains("& &"));
 		}

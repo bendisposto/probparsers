@@ -155,12 +155,7 @@ public class PreParser {
 
 				final Token defRhs = definitions.get(definition);
 				Definitions.Type type = null;
-				try {
-					type = determineType(definition, defRhs,
-							todoDefs);
-				} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-					throw new PreParseException(e.getLocalizedMessage());
-				}
+				type = determineType(definition, defRhs, todoDefs);
 
 				if (type != null) {
 					todoDefs.remove(definition.getText());
@@ -222,7 +217,8 @@ public class PreParser {
 	}
 
 	private Definitions.Type determineType(final Token definition,
-			final Token rhsToken, Set<String> definitions) throws de.be4.classicalb.core.parser.lexer.LexerException {
+			final Token rhsToken, Set<String> definitions)
+			throws PreParseException {
 
 		final String definitionRhs = rhsToken.getText().trim();
 
@@ -274,16 +270,21 @@ public class PreParser {
 			errorToken = e.getLastToken();
 			int line = errorToken.getLine();
 			int pos = errorToken.getPos();
-			pos = line == 1 ? rhsToken.getPos() + pos - BParser.FORMULA_PREFIX.length()-1 : pos;
+			pos = line == 1 ? rhsToken.getPos() + pos
+					- BParser.FORMULA_PREFIX.length() - 1 : pos;
 			line = definition.getLine() + line - 1;
-			throw new de.be4.classicalb.core.parser.lexer.LexerException("["+line+","+pos+"] "+ e.getMessage());
+			throw new PreParseException("["
+					+ line + "," + pos + "] " + e.getMessage());
+		}catch (de.be4.classicalb.core.parser.lexer.LexerException e){
+			throw new PreParseException(e.getMessage());
 		}
 
 	}
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs)
-			throws RhsException, de.be4.classicalb.core.parser.lexer.LexerException {
+			throws RhsException,
+			de.be4.classicalb.core.parser.lexer.LexerException {
 
 		final Reader reader = new StringReader(prefix + " " + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
