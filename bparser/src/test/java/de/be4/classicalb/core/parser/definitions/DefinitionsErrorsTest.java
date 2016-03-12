@@ -37,7 +37,7 @@ public class DefinitionsErrorsTest {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,15]"));
-			assertTrue(e.getMessage().contains("EOF"));
+			assertTrue(e.getMessage().contains("expecting end of definition"));
 		}
 	}
 	
