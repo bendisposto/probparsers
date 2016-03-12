@@ -74,13 +74,13 @@ public class PreParser {
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
-		evaluateDefintionFiles(collector.getFileDefinitions());
+		evaluateDefinitionFiles(collector.getFileDefinitions());
 		evaluateTypes(collector.getDefinitions());
 
 		return types;
 	}
 
-	private void evaluateDefintionFiles(final List<Token> list)
+	private void evaluateDefinitionFiles(final List<Token> list)
 			throws PreParseException, BException {
 		final Set<String> newDoneList = new HashSet<String>(doneDefFiles);
 		IDefinitionFileProvider cache = null;
@@ -155,8 +155,9 @@ public class PreParser {
 
 				final Token defRhs = definitions.get(definition);
 				Definitions.Type type = null;
-				type = determineType(definition, defRhs, todoDefs);
-
+				DefinitionType definitionType = determineType(definition,
+						defRhs, todoDefs);
+				type = definitionType.type;
 				if (type != null) {
 					todoDefs.remove(definition.getText());
 					oneParsed = true;
@@ -172,14 +173,24 @@ public class PreParser {
 
 		if (!remainingDefinitions.isEmpty()) {
 			final Token definition = remainingDefinitions.pop();
-			// final Token defRhs = definitions.get(definition); //unused
-			throw new PreParseException(
-					definition,
-					"["
-							+ definition.getLine()
-							+ ","
-							+ definition.getPos()
-							+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
+			final Token defRhs = definitions.get(definition);
+			DefinitionType definitionType = determineType(definition, defRhs,
+					todoDefs);
+			if (definitionType.errorMessage != null) {
+				throw new PreParseException(definitionType.errorMessage);
+			} else {
+
+				// final Token defRhs = definitions.get(definition); //unused
+				// cycle in the definitions?
+				// TODO write test case and improve error message
+				throw new PreParseException(
+						definition,
+						"["
+								+ definition.getLine()
+								+ ","
+								+ definition.getPos()
+								+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
+			}
 		}
 	}
 
@@ -216,11 +227,29 @@ public class PreParser {
 		return list;
 	}
 
-	private Definitions.Type determineType(final Token definition,
+	class DefinitionType {
+		Definitions.Type type;
+		String errorMessage;
+
+		DefinitionType() {
+
+		}
+
+		DefinitionType(Definitions.Type t) {
+			this.type = t;
+		}
+
+		DefinitionType(String errorMessage) {
+			this.errorMessage = errorMessage;
+		}
+	}
+
+	private DefinitionType determineType(final Token definition,
+	// private Definitions.Type determineType(final Token definition,
 			final Token rhsToken, Set<String> definitions)
 			throws PreParseException {
 
-		final String definitionRhs = rhsToken.getText().trim();
+		final String definitionRhs = rhsToken.getText();
 
 		de.be4.classicalb.core.parser.node.Start expr;
 		de.be4.classicalb.core.parser.node.Token errorToken = null;
@@ -228,8 +257,10 @@ public class PreParser {
 			expr = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
 			// Predicate?
 			PParseUnit parseunit = expr.getPParseUnit();
-			if (parseunit instanceof APredicateParseUnit)
-				return IDefinitions.Type.Predicate;
+			if (parseunit instanceof APredicateParseUnit) {
+				return new DefinitionType(IDefinitions.Type.Predicate);
+			}
+
 			// Expression or Expression/Substituion (e.g. f(x))?
 			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
 
@@ -237,72 +268,92 @@ public class PreParser {
 					definitions);
 			unit.apply(visitor);
 
-			if (visitor.isKaboom())
-				return null;
+			if (visitor.isKaboom()) {
+				// return null;
+				return new DefinitionType();
+			}
 
 			PExpression expression = unit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
 					|| (expression instanceof AFunctionExpression)
 					|| (expression instanceof ADefinitionExpression)) {
-				return IDefinitions.Type.ExprOrSubst;
+				return new DefinitionType(IDefinitions.Type.ExprOrSubst);
 			}
 
-			return IDefinitions.Type.Expression;
+			return new DefinitionType(IDefinitions.Type.Expression);
 
-		} catch (RhsException e) {
+		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
 			errorToken = e.getToken();
 			try {
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
-				return IDefinitions.Type.Substitution;
-			} catch (RhsException ex) {
-				int line = errorToken.getLine();
-				definition.setLine(definition.getLine() + line - 1);
-				int pos = errorToken.getPos();
-				pos = line == 1 ? pos - 10 : pos;
-				definition.setPos(pos);
-				return null;
-			} catch (de.be4.classicalb.core.parser.lexer.LexerException e1) {
-				// should not happen
-				return null;
+				return new DefinitionType(IDefinitions.Type.Substitution);
+			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
+				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex
+						.getToken();
+				if (errorToken.getLine() > errorToken2.getLine()
+						|| (errorToken.getLine() == errorToken2.getLine() && errorToken
+								.getPos() >= errorToken2.getPos())) {
+					final String newMessage = determineNewErrorMessage(
+							definition, rhsToken, errorToken, e.getMessage());
+					return new DefinitionType(newMessage);
+				} else {
+					final String newMessage = determineNewErrorMessage(
+							definition, rhsToken, errorToken2, ex.getMessage());
+					return new DefinitionType(newMessage);
+				}
+			} catch (BLexerException e1) {
+				errorToken = e1.getLastToken();
+				final String newMessage = determineNewErrorMessage(definition,
+						rhsToken, errorToken, e.getMessage());
+				throw new PreParseException(newMessage);
+			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
+				throw new PreParseException(e3.getMessage());
 			}
-
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
-			int line = errorToken.getLine();
-			int pos = errorToken.getPos();
-			pos = line == 1 ? rhsToken.getPos() + pos
-					- BParser.FORMULA_PREFIX.length() - 1 : pos;
-			line = definition.getLine() + line - 1;
-			throw new PreParseException("["
-					+ line + "," + pos + "] " + e.getMessage());
-		}catch (de.be4.classicalb.core.parser.lexer.LexerException e){
+			final String newMessage = determineNewErrorMessage(definition,
+					rhsToken, errorToken, e.getMessage());
+			throw new PreParseException(newMessage);
+		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 			throw new PreParseException(e.getMessage());
 		}
 
 	}
 
+	private String determineNewErrorMessage(Token definition, Token rhsToken,
+			de.be4.classicalb.core.parser.node.Token errorToken,
+			String oldMessage) {
+		// the parsed string starts in the second line, e.g. #formula\n ...
+		int line = errorToken.getLine();
+		int pos = errorToken.getPos();
+		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
+		line = definition.getLine() + line - 2;
+		final int index = oldMessage.indexOf("]");
+		String message = oldMessage.substring(index + 1);
+		if(oldMessage.contains("expecting: EOF")){
+			message = "expecting end of definition";
+		}
+		return "[" + line + "," + pos + "] " + message;
+	}
+
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs)
-			throws RhsException,
-			de.be4.classicalb.core.parser.lexer.LexerException {
+			throws de.be4.classicalb.core.parser.lexer.LexerException,
+			de.be4.classicalb.core.parser.parser.ParserException {
 
-		final Reader reader = new StringReader(prefix + " " + definitionRhs);
+		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
 																				// Magic
 																				// number!!!!
 		lexer.setDebugOutput(debugOutput);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);
-
 		try {
 			return parser.parse();
 		} catch (final IOException e) {
 			// IGNORE
-		} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
-			throw new RhsException(ex.getToken());
+			return null;
 		}
-
-		return null;
 	}
 
 	public IDefinitions getDefFileDefinitions() {

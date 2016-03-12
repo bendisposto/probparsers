@@ -88,11 +88,28 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BException e) {
+			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,14]"));
 			assertTrue(e.getMessage().contains("& &"));
 		}
 	}
+	
+	@Test
+	public void checkForDublicateAndInDefinitionsClause2() throws Exception {
+		String s = "MACHINE Definitions \n DEFINITIONS\n foo == \n \n 1=1 \n&    & 2=2  \nEND";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate & was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			// there is no token available, hence the position is in the text
+			assertTrue(e.getMessage().contains("[6,6]"));
+			assertTrue(e.getMessage().contains("& &"));
+		}
+	}
+	
+	
 	
 	
 	private String getTreeAsString(final String testMachine) throws BException {

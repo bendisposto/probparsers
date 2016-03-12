@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
@@ -57,7 +58,10 @@ public final class PrologExceptionPrinter {
 		if (cause == null) {
 			printGeneralException(pto, e, filename, useIndentation, lineOneOff);
 		} else {
-			if (cause instanceof LexerException) {
+			if(cause instanceof BLexerException){
+				printBLexerException(pto, (BLexerException) cause, filename,
+						useIndentation, lineOneOff);
+			}else if (cause instanceof LexerException) {
 				printLexerException(pto, (LexerException) cause, filename,
 						useIndentation, lineOneOff);
 			} else if (cause instanceof BParseException) {
@@ -157,6 +161,15 @@ public final class PrologExceptionPrinter {
 			final BParseException e, final String filename,
 			final boolean useIndentation, final boolean lineOneOff) {
 		final Token token = e.getToken();
+		final SourcePosition pos = token == null ? null : new SourcePosition(
+				token.getLine(), token.getPos());
+		printParseException(pto, e, filename, pos, useIndentation, lineOneOff);
+	}
+	
+	private static void printBLexerException(final IPrologTermOutput pto,
+			final BLexerException e, final String filename,
+			final boolean useIndentation, final boolean lineOneOff) {
+		final Token token = e.getLastToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(
 				token.getLine(), token.getPos());
 		printParseException(pto, e, filename, pos, useIndentation, lineOneOff);
