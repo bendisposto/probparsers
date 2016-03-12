@@ -3,6 +3,14 @@ def global_version = '2.5.2-SNAPSHOT'
 project.version = global_version;
 project.group = 'de.hhu.stups'
 
+
+defaultTasks 'remind', 'clean', 'deploy'
+
+
+task remind << {
+  println "You did not specify a task. Assuming you mean gradle clean deploy."
+}
+
 // // The real configuration
 allprojects {
   apply plugin: 'java'
