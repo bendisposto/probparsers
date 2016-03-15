@@ -1,4 +1,4 @@
-MACHINE BinPacking_UnicodeMinus
+﻿MACHINE BinPacking_UnicodeMinus
 // below we use a unicode minus twice for --> 
 SETS
   OBJECTS = {o1, o2, o3, o4, o5, o6, o7}
