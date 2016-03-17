@@ -43,6 +43,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public static final String RULE_FAIL = "FAIL";
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
+	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
+	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLE";
 
 	AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	AVariablesMachineClause variablesMachineClause = null;
@@ -204,10 +206,10 @@ public class RuleTransformation extends DepthFirstAdapter {
 		List<PSubstitution> elsIf = new ArrayList<>();
 		AIfSubstitution ifSub = new AIfSubstitution(
 				ifPred,
-				createAssignNode(createIdentifier("res"),
+				createAssignNode(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
 						new AStringExpression(new TStringLiteral(RULE_SUCCESS))),
 				elsIf,
-				createAssignNode(createIdentifier("res"),
+				createAssignNode(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
 						new AStringExpression(new TStringLiteral(RULE_FAIL))));
 		AAssertionSubstitution assertSub = new AAssertionSubstitution(notEqual,
 				ifSub);
@@ -221,8 +223,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 		//select.setThen(node.getRuleBody());
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
-		returnValues.add(createIdentifier("res"));
-		returnValues.add(createIdentifier("ce"));
+		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
+		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
 
@@ -243,7 +245,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		ArrayList<PExpression> nameList = new ArrayList<>();
 		ArrayList<PExpression> exprList = new ArrayList<>();
 		nameList.add(createRuleIdentifier(currentRuleLiteral));
-		nameList.add(createIdentifier("ce"));
+		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
 		exprList.add(new AStringExpression(new TStringLiteral("")));
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
@@ -256,7 +258,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		ArrayList<PExpression> exprList = new ArrayList<>();
 		nameList.add(createRuleIdentifier(currentRuleLiteral));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
-		nameList.add(createIdentifier("ce"));
+		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		exprList.add(node.getExpression());
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		node.replaceBy(assign);
