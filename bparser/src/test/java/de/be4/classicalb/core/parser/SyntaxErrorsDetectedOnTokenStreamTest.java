@@ -110,6 +110,20 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	}
 	
 	
+	@Test
+	public void checkForDublicateDefinitionClause() throws Exception {
+		String s = "MACHINE Definitions \n DEFINITIONS\n foo == 1\n CONSTANTS k \n DEFINITIONS\n bar == 1  \nEND";
+		try {
+			getTreeAsString(s);
+			fail("Duplicate 'DEFINITION' clause was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("[5,2] Clause 'DEFINITIONS' is used more than once"));
+		}
+	}
+	
+	
+	
 	
 	
 	private String getTreeAsString(final String testMachine) throws BException {

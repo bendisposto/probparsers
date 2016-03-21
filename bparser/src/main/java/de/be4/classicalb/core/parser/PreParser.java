@@ -66,7 +66,16 @@ public class PreParser {
 		try {
 			rootNode = preParser.parse();
 		} catch (final ParserException e) {
-			throw new PreParseException(e.getToken(), e.getLocalizedMessage());
+			if (e.getToken() instanceof de.be4.classicalb.core.preparser.node.TDefinitions) {
+				final Token errorToken = e.getToken();
+				final String message = "[" + errorToken.getLine() + ","
+						+ errorToken.getPos() + "] "
+						+ "Clause 'DEFINITIONS' is used more than once";
+				throw new PreParseException(e.getToken(), message);
+			} else {
+				throw new PreParseException(e.getToken(),
+						e.getLocalizedMessage());
+			}
 		} catch (final LexerException e) {
 			throw new PreParseException(e.getLocalizedMessage());
 		}
@@ -179,7 +188,6 @@ public class PreParser {
 			if (definitionType.errorMessage != null) {
 				throw new PreParseException(definitionType.errorMessage);
 			} else {
-
 				// final Token defRhs = definitions.get(definition); //unused
 				// cycle in the definitions?
 				// TODO write test case and improve error message
@@ -330,7 +338,8 @@ public class PreParser {
 		line = definition.getLine() + line - 2;
 		final int index = oldMessage.indexOf("]");
 		String message = oldMessage.substring(index + 1);
-		if(oldMessage.contains("expecting: EOF")){
+		System.out.println(errorToken);
+		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
 		}
 		return "[" + line + "," + pos + "] " + message;
