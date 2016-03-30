@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
@@ -172,7 +173,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		}
 	}
 
-	private TIdentifierLiteral currentRuleLiteral = null; 
+	private TIdentifierLiteral currentRuleLiteral = null;
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
@@ -204,12 +205,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 		// new AIfSubstitution(_condition_, _then_, _elsifSubstitutions_,
 		// _else_)
 		List<PSubstitution> elsIf = new ArrayList<>();
-		AIfSubstitution ifSub = new AIfSubstitution(
-				ifPred,
-				createAssignNode(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
-						new AStringExpression(new TStringLiteral(RULE_SUCCESS))),
-				elsIf,
-				createAssignNode(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
+		AIfSubstitution ifSub = new AIfSubstitution(ifPred, createAssignNode(
+				createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
+				new AStringExpression(new TStringLiteral(RULE_SUCCESS))),
+				elsIf, createAssignNode(
+						createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME),
 						new AStringExpression(new TStringLiteral(RULE_FAIL))));
 		AAssertionSubstitution assertSub = new AAssertionSubstitution(notEqual,
 				ifSub);
@@ -220,11 +220,12 @@ public class RuleTransformation extends DepthFirstAdapter {
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 
 		select.setThen(seqSub);
-		//select.setThen(node.getRuleBody());
+		// select.setThen(node.getRuleBody());
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+		returnValues
+				.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
 
@@ -292,14 +293,14 @@ public class RuleTransformation extends DepthFirstAdapter {
 		final List<PExpression> list1 = new ArrayList<PExpression>();
 		final List<PExpression> list2 = new ArrayList<PExpression>();
 		for (PExpression id : node.getIdentifiers()) {
-			list1.add((PExpression) id.clone());
-			list2.add((PExpression) id.clone());
+			list1.add((PExpression) cloneNode(id));
+			list2.add((PExpression) cloneNode(id));
 		}
 
-		final PPredicate where1 = (PPredicate) node.getWhere().clone();
-		final PPredicate where2 = (PPredicate) node.getWhere().clone();
-		final PPredicate expect1 = (PPredicate) node.getExpect().clone();
-		final PPredicate expect2 = (PPredicate) node.getExpect().clone();
+		final PPredicate where1 = (PPredicate) cloneNode(node.getWhere());
+		final PPredicate where2 = (PPredicate) cloneNode(node.getWhere());
+		final PPredicate expect1 = (PPredicate) cloneNode(node.getExpect());
+		final PPredicate expect2 = (PPredicate) cloneNode(node.getExpect());
 
 		final AForallPredicate forAllPred = new AForallPredicate(list1,
 				new AImplicationPredicate(where1, expect1));
