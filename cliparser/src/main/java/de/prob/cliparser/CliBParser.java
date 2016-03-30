@@ -274,7 +274,7 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			print("EXCEPTION NullPointerException\n");
+			print("EXCEPTION NullPointerException" + System.lineSeparator());
 		} catch (BException e) {
 			PrologExceptionPrinter.printException(System.out, e, false, true);
 		} catch (LexerException e) {
@@ -312,7 +312,7 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			print("EXCEPTION NullPointerException\n");
+			print("EXCEPTION NullPointerException" + System.lineSeparator());
 		} catch (BException e) {
 			PrologExceptionPrinter.printException(System.out, e, false, true);
 
