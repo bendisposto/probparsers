@@ -10,11 +10,7 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 /**
- * This class checks several dependencies between machine clauses. Examples are:
- * Which clauses are valid for an abstract machine? Is a PROPERTIES clause
- * present, if a CONSTANTS clause is used?
- * 
- * 
+ * This class checks that there is non missing semicolon between two operations.
  */
 public class MissingSemicolonBetweenOperationsCheck implements SemanticCheck {
 

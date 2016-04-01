@@ -28,3 +28,4 @@ parserbase/.gitignore
 prologlib/.gitignore
 theorymapping/.gitignore
 unicode/.gitignore
+.gitignore

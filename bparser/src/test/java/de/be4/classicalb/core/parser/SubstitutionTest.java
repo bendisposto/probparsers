@@ -34,6 +34,28 @@ public class SubstitutionTest {
 		}
 
 	}
+	
+	
+	@Test
+	public void testRenamedIdentifierInAnySubstitution() {
+		final String testMachine = "#SUBSTITUTION ANY x.y WHERE x.y = 1 THEN skip END ";
+		try {
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (final BException e) {
+		}
+	}
+	
+	@Test
+	public void testInvalidIdentifierListInAnySubstitution() throws BException {
+		final String testMachine = "#SUBSTITUTION ANY (x|->y) WHERE x = 1 & y = 1 THEN skip END ";
+		try {
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (final BException e) {
+		}
+	}
+	
 
 	@Test
 	public void testPreconditionBool() throws Exception {
