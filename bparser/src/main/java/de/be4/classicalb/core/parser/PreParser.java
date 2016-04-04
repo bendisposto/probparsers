@@ -338,7 +338,6 @@ public class PreParser {
 		line = definition.getLine() + line - 2;
 		final int index = oldMessage.indexOf("]");
 		String message = oldMessage.substring(index + 1);
-		System.out.println(errorToken);
 		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
 		}
