@@ -36,8 +36,6 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.IGrammar;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -63,8 +61,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions = new ParseOptions();
-	private IGrammar grammar = new DefaultGrammar();
+	private final ParseOptions parseOptions = ParseOptions.getInstance();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 
@@ -218,7 +215,7 @@ public class BParser {
 
 		BLexer bLexer = new BLexer(new PushbackReader(reader, 99), defTypes,
 				input.length() / APPROXIMATE_TOKEN_LENGTH);
-		bLexer.setGrammar(this.grammar);
+		bLexer.setParseOptions(parseOptions);
 		Token t;
 		do {
 			t = bLexer.next();
@@ -235,7 +232,7 @@ public class BParser {
 			ast = p.parse();
 			ok = true;
 		} catch (Exception e) {
-			// e.printStackTrace();
+			 e.printStackTrace();
 		}
 
 		BigInteger b = new BigInteger("2");
@@ -349,13 +346,12 @@ public class BParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
 					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
 			lexer.setDebugOutput(debugOutput);
-			lexer.setGrammar(this.grammar);
+			lexer.setParseOptions(parseOptions);
 
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
 
-			this.grammar = lexer.getGrammar();
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
@@ -391,8 +387,7 @@ public class BParser {
 			// locate the pragmas
 
 			return rootNode;
-		}
-		catch (final LexerException e) {
+		} catch (final LexerException e) {
 			throw new BException(absolutePath, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
@@ -436,7 +431,7 @@ public class BParser {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
-		grammar.applyAstTransformation(rootNode);
+		this.parseOptions.grammar.applyAstTransformation(rootNode);
 
 		// TODO more AST transformations?
 
@@ -455,10 +450,6 @@ public class BParser {
 			check.setOptions(parseOptions);
 			check.runChecks(rootNode);
 		}
-	}
-
-	public void setGrammar(IGrammar grammar) {
-		this.grammar = grammar;
 	}
 
 	public SourcePositions getSourcePositions() {

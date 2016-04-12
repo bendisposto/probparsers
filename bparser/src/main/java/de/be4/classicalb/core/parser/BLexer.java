@@ -11,7 +11,6 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.IGrammar;
 import de.be4.classicalb.core.parser.extensions.RuleExtension;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -79,8 +78,8 @@ public class BLexer extends Lexer {
 		}
 
 	}
+	private ParseOptions parseOptions = null;
 
-	private IGrammar grammar = null;
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
 
@@ -136,7 +135,8 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				int l = token.getLine();
 				int c = token.getPos();
-				throw new BLexerException(token, "Invalid combination of symbols: " + string + "\n",
+				throw new BLexerException(token,
+						"Invalid combination of symbols: " + string + "\n",
 						string, l, c);
 			}
 		}
@@ -144,25 +144,28 @@ public class BLexer extends Lexer {
 	}
 
 	private void detectGrammarExtension() {
-		if (grammar instanceof DefaultGrammar && lastToken == null) {
+		if (parseOptions != null
+				&& parseOptions.grammar instanceof DefaultGrammar
+				&& lastToken == null) {
 			// first token
 			if (token instanceof TIdentifierLiteral
 					&& token.getText().equals(RuleExtension.getModelType())) {
-				this.setGrammar(new RuleExtension());
+				this.parseOptions.grammar = RuleExtension.getInstance();
 			}
 		}
 	}
 
 	private void applyGrammarExtension() {
 		detectGrammarExtension();
-		if (grammar != null
-				&& this.grammar.containsAlternativeDefinitionForToken(token)) {
-			token = this.grammar.createNewToken(token);
+		if (parseOptions != null && this.parseOptions.grammar
+				.containsAlternativeDefinitionForToken(token)) {
+			token = this.parseOptions.grammar.createNewToken(token);
 		}
 	}
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+		System.out.println(token.getClass());
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
@@ -283,8 +286,8 @@ public class BLexer extends Lexer {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
 			// tokenList.add(token);
-			//final int line = token.getLine() - 1;
-			//final int pos = token.getPos() - 1;
+			// final int line = token.getLine() - 1;
+			// final int pos = token.getPos() - 1;
 			final String text = token.getText();
 			throw new BLexerException(comment, "Comment not closed.",
 					text.toString(), comment.getLine(), comment.getPos());
@@ -315,12 +318,12 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	public void setGrammar(IGrammar grammar) {
-		this.grammar = grammar;
+	public ParseOptions getParseOptions() {
+		return parseOptions;
 	}
 
-	public IGrammar getGrammar() {
-		return this.grammar;
+	public void setParseOptions(ParseOptions parseOptions) {
+		this.parseOptions = parseOptions;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {

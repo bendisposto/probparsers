@@ -19,10 +19,6 @@ import de.be4.classicalb.core.parser.node.Start;
  * @author bendisposto
  *
  */
-/**
- * @author bendisposto
- *
- */
 @RunWith(PolySuite.class)
 public class ParsableMachineTest extends AbstractParseMachineTest {
 

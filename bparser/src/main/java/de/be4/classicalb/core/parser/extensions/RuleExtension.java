@@ -18,6 +18,18 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class RuleExtension implements IGrammar {
 
+	
+	private static RuleExtension ruleExtension;
+	public static RuleExtension  getInstance(){
+		if(ruleExtension == null){
+			ruleExtension = new RuleExtension();
+		}
+		return ruleExtension;
+	}
+	
+	private RuleExtension(){}
+	
+	
 	private static HashMap<String, Class<? extends Token>> map = new HashMap<>();
 	static {
 		add(TKwRule.class);

@@ -63,7 +63,7 @@ public class RuleExtensionsTest {
 	private String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
-		parser.setGrammar(new RuleExtension());
+		parser.getOptions().grammar = RuleExtension.getInstance();
 		final Start startNode = parser.parse(testMachine, false);
 
 		// startNode.apply(new ASTPrinter());

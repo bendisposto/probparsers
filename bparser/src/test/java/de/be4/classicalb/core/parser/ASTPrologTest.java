@@ -76,7 +76,6 @@ public class ASTPrologTest {
 			final String expected) throws BException {
 		final BParser parser = new BParser("testcase");
 		if (remove_restrictions) {
-			parser.getOptions().restrictPrimedIdentifiers = false;
 			parser.getOptions().restrictProverExpressions = false;
 		}
 		final Start startNode = parser.parse(bspec, false,
