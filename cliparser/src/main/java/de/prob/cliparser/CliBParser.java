@@ -104,7 +104,14 @@ public class CliBParser {
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);
 		} else {
-			String filename = args[args.length - 1];
+			// there should be just one remaining argument
+			// otherwise no filename was provided, or some arguments were not
+			// parsed correctly
+			if (options.getRemainingOptions().length != 1) {
+				options.printUsage(System.err);
+				System.exit(-1);
+			}
+			String filename = options.getRemainingOptions()[0];
 			final File bfile = new File(filename);
 			int returnValue;
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
