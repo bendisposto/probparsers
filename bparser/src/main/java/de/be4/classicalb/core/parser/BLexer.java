@@ -165,6 +165,10 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+		if(debugOutput){
+			System.err.println(token.getClass());
+		}
+		
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
@@ -204,7 +208,7 @@ public class BLexer extends Lexer {
 
 			if (debugOutput && !(token instanceof TWhiteSpace)
 					&& !(token instanceof EOF)) {
-				System.out.print(token.getClass().getSimpleName() + "('"
+				System.err.print(token.getClass().getSimpleName() + "('"
 						+ token.getText() + "') ");
 			}
 		}

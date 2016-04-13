@@ -1,0 +1,5 @@
+MACHINE SeenMachine
+SEES Foo
+CONSTANTS k
+PROPERTIES k = 1
+END

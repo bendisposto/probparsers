@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.pragmas;
 
 import java.io.PrintWriter;
 import java.io.PushbackReader;
@@ -7,6 +7,8 @@ import java.io.StringWriter;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BLexer;
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;

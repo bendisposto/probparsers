@@ -52,17 +52,28 @@ public class RecursiveMachineLoader {
 	private static final String[] SUFFICES = new String[] { ".ref", ".mch",
 			".sys" };
 	private final String directory;
+	private final File rootDirectory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
 	private boolean verbose;
 	private final Map<String, Start> parsedMachines = new TreeMap<String, Start>();
+	private final Map<String, File> parsedFiles = new TreeMap<String, File>();
 	private final List<File> files = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
 
 	public RecursiveMachineLoader(final String directory,
-			final IDefinitionFileProvider contentProvider2) {
+			final IDefinitionFileProvider contentProvider2) throws BException {
 		this.directory = directory;
+		if (directory == null) {
+			this.rootDirectory = new File(".");
+		} else {
+			this.rootDirectory = new File(directory);
+		}
+		if (!rootDirectory.exists()) {
+			throw new BException(null, new IOException(
+					"Directory does not exist: " + directory));
+		}
 		contentProvider = contentProvider2;
 	}
 
@@ -80,8 +91,8 @@ public class RecursiveMachineLoader {
 		injectDefinitions(main, definitions);
 		registerDefinitionFileUsage(definitions);
 		files.add(startfile);
-		recursivlyLoadMachine(startfile, main, Collections.<String> emptySet(),
-				true, positions);
+		recursivlyLoadMachine(startfile, main, new ArrayList<String>(), true,
+				positions, rootDirectory);
 	}
 
 	public void printAsProlog(final PrintWriter out, final boolean useIndention) {
@@ -133,9 +144,8 @@ public class RecursiveMachineLoader {
 		pout.flush();
 	}
 
-	private void loadMachine(final Set<String> ancestors,
-			final String machineName) throws BException, IOException {
-		final File machineFile = lookupFile(machineName);
+	private void loadMachine(final List<String> ancestors,
+			final File machineFile) throws BException, IOException {
 		if (files.contains(machineFile)) {
 			return;
 		}
@@ -147,7 +157,7 @@ public class RecursiveMachineLoader {
 		registerDefinitionFileUsage(parser.getDefinitions());
 		injectDefinitions(tree, parser.getDefinitions());
 		recursivlyLoadMachine(machineFile, tree, ancestors, false,
-				parser.getSourcePositions());
+				parser.getSourcePositions(), machineFile.getParentFile());
 	}
 
 	private void registerDefinitionFileUsage(final IDefinitions definitions) {
@@ -164,13 +174,12 @@ public class RecursiveMachineLoader {
 	 * @throws BException
 	 *             if file is not found
 	 */
-	private File lookupFile(final String machineName) throws BException {
-		final String prefix = directory == null ? "" : directory
-				+ File.separator;
+	private File lookupFile(final File directory, final String machineName)
+			throws BException {
 		for (final String suffix : SUFFICES) {
 			try {
-				return new FileSearchPathProvider(prefix, machineName + suffix)
-						.resolve();
+				return new FileSearchPathProvider(directory.getAbsolutePath(),
+						machineName + suffix).resolve();
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -181,11 +190,12 @@ public class RecursiveMachineLoader {
 	}
 
 	private void recursivlyLoadMachine(final File machineFile,
-			final Start current, Set<String> ancestors, final boolean isMain,
-			final SourcePositions sourcePositions) throws BException {
+			final Start current, List<String> ancestors, final boolean isMain,
+			final SourcePositions sourcePositions, File directory)
+			throws BException {
 
 		// make a copy of the referencing machines
-		ancestors = new TreeSet<String>(ancestors);
+		ancestors = new ArrayList(ancestors);
 
 		final int fileNumber = files.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
@@ -196,11 +206,10 @@ public class RecursiveMachineLoader {
 
 		final ReferencedMachines refMachines = new ReferencedMachines(current);
 		final String name = refMachines.getName();
-		final SortedSet<String> references = refMachines
-				.getReferencedMachines();
 
 		try {
 			getParsedMachines().put(name, current);
+			parsedFiles.put(name, machineFile);
 		} catch (NullPointerException e) {
 			throw new BException(machineFile.getName(),
 					"No machines loaded so far.", e);
@@ -212,32 +221,61 @@ public class RecursiveMachineLoader {
 		if (isMain) {
 			main = name;
 		}
-
 		positions.put(name, sourcePositions);
+
+		final SortedSet<String> references = refMachines
+				.getReferencedMachines();
 		checkForCycles(ancestors, references);
 
 		for (final String refMachine : references) {
-			if (!getParsedMachines().containsKey(refMachine)) {
-				try {
-					loadMachine(ancestors, refMachine);
-				} catch (final BException e) {
-					// TODO[dp, 22.04.2008]
-					throw new BException(machineFile.getName(), e);
-				} catch (final IOException e) {
-					// TODO[dp, 22.04.2008]
-					throw new BException(machineFile.getName(), e);
+			try {
+				final String filePragma = refMachines.getFilePragma(refMachine);
+				File file = null;
+				if (filePragma == null) {
+					file = lookupFile(directory, refMachine);
+				} else {
+					File p = new File(filePragma);
+					if (p.isAbsolute()) {
+						file = p;
+					} else {
+						file = new File(directory, filePragma);
+					}
 				}
+				if (parsedFiles.containsKey(refMachine)
+						&& !parsedFiles.get(refMachine).getAbsoluteFile()
+								.equals(file.getAbsoluteFile())) {
+					throw new BException(null,
+							"Two files with the same name are referenced:\n"
+									+ parsedFiles.get(refMachine)
+											.getAbsoluteFile() + "\n"
+									+ file.getAbsoluteFile(), null);
+				}
+				if (!getParsedMachines().containsKey(refMachine)) {
+					loadMachine(ancestors, file);
+				}
+			} catch (final BException e) {
+				// TODO[dp, 22.04.2008]
+				throw new BException(machineFile.getName(), e);
+			} catch (final IOException e) {
+				// TODO[dp, 22.04.2008]
+				throw new BException(machineFile.getName(), e);
 			}
 		}
 	}
 
-	private void checkForCycles(final Set<String> ancestors,
-			final Set<String> references) {
+	private void checkForCycles(final List<String> ancestors,
+			final Set<String> references) throws BException {
 		final Set<String> cycles = new TreeSet<String>(ancestors);
 		intersect(cycles, references);
 		if (!cycles.isEmpty()) {
 			// TODO[dp, 22.04.2008] Use sensible exception
-			throw new IllegalStateException("cycle detected");
+			StringBuilder sb = new StringBuilder();
+			for (String string : ancestors) {
+				sb.append(string).append(" -> ");
+			}
+			String next = cycles.iterator().next();
+			sb.append(next);
+			throw new BException(null, "Cycle detected: " + sb.toString(), null);
 		}
 	}
 

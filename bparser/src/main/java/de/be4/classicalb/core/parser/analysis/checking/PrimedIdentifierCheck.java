@@ -55,7 +55,7 @@ public class PrimedIdentifierCheck extends DepthFirstAdapter implements
 		final String grade = node.getGrade().getText();
 		if (!"0".equals(grade)) {
 			error = new CheckException(
-					"construct $ only allowed with zero here (" + id + "$0)",
+					"construct $ only allowed with 0 (you should use " + id + "$0)",
 					node);
 		}
 	}

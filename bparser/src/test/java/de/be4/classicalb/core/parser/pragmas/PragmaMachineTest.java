@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.pragmas;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -11,14 +11,11 @@ import test.AbstractParseMachineTest;
 import test.PolySuite;
 import test.PolySuite.Config;
 import test.PolySuite.Configuration;
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 
-/**
- * @author bendisposto
- *
- */
 /**
  * @author bendisposto
  *

@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
@@ -9,6 +10,7 @@ import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
@@ -33,6 +35,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
  */
 public class ReferencedMachines extends DepthFirstAdapter {
 	private SortedSet<String> machines = new TreeSet<String>();
+	private HashMap<String, String> machineFileTable = new HashMap<>();
 	private String name;
 
 	/**
@@ -111,11 +114,26 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		}
 	}
 
+	public String getFilePragma(String fileName) {
+		return machineFileTable.get(fileName);
+	}
+
 	private void registerMachineNames(List<PExpression> machineNames) {
 		for (PExpression machineName : machineNames) {
 			if (machineName instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) machineName;
 				machines.add(getIdentifier(identifier.getIdentifier()));
+			} else if (machineName instanceof AFileExpression) {
+				final AFileExpression fileNode = (AFileExpression) machineName;
+				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode
+						.getIdentifier();
+				String file = fileNode.getContent().getText().replaceAll("\"", "");
+				final String name = getIdentifier(identifier.getIdentifier());
+				machines.add(name);
+				machineFileTable.put(name, file);
+			} else {
+				throw new RuntimeException("Not supported class: "
+						+ machineName.getClass());
 			}
 		}
 	}

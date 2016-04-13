@@ -68,6 +68,7 @@ Tokens
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
+    {pragma} pragma_file = 'file';
     {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
@@ -908,12 +909,14 @@ composed_identifier {-> identifier_literal*} =
 	{single} [name]:identifier_literal {-> [name]} |
 	{multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]} ;
 
+
 composed_identifier_list {-> expression*} =
 	{single} [identifier]:composed_identifier_expression {-> [identifier.expression]} |
 	{multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_expression {-> [rest.expression, identifier.expression]} ;
 
 composed_identifier_expression {-> expression} =
-	[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
+	{normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} |
+	{file} [identifier]:composed_identifier pragma_file [file]:pragma_id_or_string {-> New expression.file(New expression.identifier([identifier.identifier_literal]), file)} ;
 
 variables_list {-> expression*} =
 	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
@@ -1099,6 +1102,7 @@ predicate =
 
 /* Expressions */
 expression =
+	{file} [identifier]:expression [content]:pragma_id_or_string |
     {description} [content]:pragma_free_text [expression]:expression |
 	{unit} [content]:unit_content [identifier]:expression |
 	{inferredunit} [content]:unit_content [identifier]:expression |

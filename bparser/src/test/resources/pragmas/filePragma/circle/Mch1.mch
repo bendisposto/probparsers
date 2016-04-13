@@ -1,0 +1,4 @@
+MACHINE Mch1
+SEES Mch2
+END
+
