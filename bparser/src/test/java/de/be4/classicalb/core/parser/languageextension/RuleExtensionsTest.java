@@ -7,7 +7,7 @@ import org.junit.Test;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.extensions.RuleExtension;
+import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class RuleExtensionsTest {
@@ -63,7 +63,7 @@ public class RuleExtensionsTest {
 	private String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
-		parser.getOptions().grammar = RuleExtension.getInstance();
+		parser.getOptions().grammar = RuleGrammar.getInstance();
 		final Start startNode = parser.parse(testMachine, false);
 
 		// startNode.apply(new ASTPrinter());

@@ -12,7 +12,7 @@ public class DefaultGrammar implements IGrammar {
 
 	@Override
 	public Token createNewToken(Token token) {
-		return null;
+		throw new RuntimeException("No rewrite rules prepared in default grammar.");
 	}
 
 	@Override

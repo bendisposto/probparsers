@@ -16,21 +16,21 @@ import de.be4.classicalb.core.parser.node.TKwRulesMachine;
 import de.be4.classicalb.core.parser.node.TMachine;
 import de.be4.classicalb.core.parser.node.Token;
 
-public class RuleExtension implements IGrammar {
+public class RuleGrammar implements IGrammar {
 
 	
-	private static RuleExtension ruleExtension;
-	public static RuleExtension  getInstance(){
+	private static RuleGrammar ruleExtension;
+	public static RuleGrammar  getInstance(){
 		if(ruleExtension == null){
-			ruleExtension = new RuleExtension();
+			ruleExtension = new RuleGrammar();
 		}
 		return ruleExtension;
 	}
 	
-	private RuleExtension(){}
+	private RuleGrammar(){}
 	
 	
-	private static HashMap<String, Class<? extends Token>> map = new HashMap<>();
+	private static final HashMap<String, Class<? extends Token>> map = new HashMap<>();
 	static {
 		add(TKwRule.class);
 		add(TKwRuleFail.class);

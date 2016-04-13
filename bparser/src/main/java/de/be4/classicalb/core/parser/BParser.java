@@ -61,7 +61,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions = ParseOptions.getInstance();
+	private final ParseOptions parseOptions = new ParseOptions();
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 
@@ -333,10 +333,6 @@ public class BParser {
 			// PreParsing
 			final DefinitionTypes defTypes = preParsing(debugOutput, reader,
 					contentProvider);
-
-			if (debugOutput) {
-				System.out.println();
-			}
 
 			defTypes.addAll(definitions.getTypes());
 
