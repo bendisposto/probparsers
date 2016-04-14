@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,13 +44,11 @@ import de.prob.prolog.output.PrologTermOutput;
  * the error message is mapped to the uses/includes/etc. statement in the main
  * machine.
  * 
- * @author plagge
  * 
  */
 public class RecursiveMachineLoader {
 	private static final String[] SUFFICES = new String[] { ".ref", ".mch",
 			".sys" };
-	private final String directory;
 	private final File rootDirectory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
@@ -64,7 +61,6 @@ public class RecursiveMachineLoader {
 
 	public RecursiveMachineLoader(final String directory,
 			final IDefinitionFileProvider contentProvider2) throws BException {
-		this.directory = directory;
 		if (directory == null) {
 			this.rootDirectory = new File(".");
 		} else {
@@ -195,7 +191,7 @@ public class RecursiveMachineLoader {
 			throws BException {
 
 		// make a copy of the referencing machines
-		ancestors = new ArrayList(ancestors);
+		ancestors = new ArrayList<String>(ancestors);
 
 		final int fileNumber = files.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
@@ -275,7 +271,7 @@ public class RecursiveMachineLoader {
 			}
 			String next = cycles.iterator().next();
 			sb.append(next);
-			throw new BException(null, "Cycle detected: " + sb.toString(), null);
+			throw new BException(next, "Cycle detected: " + sb.toString(), null);
 		}
 	}
 

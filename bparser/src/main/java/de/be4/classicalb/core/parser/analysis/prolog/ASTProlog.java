@@ -1025,5 +1025,13 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAFileExpression(AFileExpression node) {
 		node.getIdentifier().apply(this);
+		//node.getContent().apply(this);
 	}
+
+	@Override
+	public void caseAFileMachineReference(AFileMachineReference node) {
+		node.getReference().apply(this);
+		// node.getFile().apply(this);
+	}
+
 }

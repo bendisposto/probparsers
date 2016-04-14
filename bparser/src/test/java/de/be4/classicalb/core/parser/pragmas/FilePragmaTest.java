@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.pragmas;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +9,10 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class FilePragmaTest {
@@ -28,6 +30,16 @@ public class FilePragmaTest {
 		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
 	}
 	
+	@Test
+	public void testInvalidUseOfFilePragma() {
+		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
+		try {
+			getTreeAsString(testMachine);
+		} catch (BException e) {
+			assertTrue(e.getMessage().startsWith("A file pragma"));
+		}
+	}
+	
 	@Test (expected= BException.class)
 	public void testFilePragma2() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
@@ -40,6 +52,15 @@ public class FilePragmaTest {
 				bparser.getContentProvider());
 		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
 	}
+	
+
+	@Test
+	public void testFilePragmaExtends() throws IOException, BException {
+		String PATH = "src/test/resources/pragmas/filePragma/";
+		String file = PATH + "Extends.mch";
+		parseFile(file);
+	}
+	
 
 	@Test
 	public void testFilePragma3() throws IOException, BException {
@@ -72,5 +93,19 @@ public class FilePragmaTest {
 		} else
 			throw new IllegalArgumentException("Filename '" + filename
 					+ "' has no extension");
+	}
+	
+	private String getTreeAsString(final String testMachine) throws BException {
+		// System.out.println("Parsing \"" + testMachine + "\"");
+		final BParser parser = new BParser("testcase");
+		parser.getOptions().grammar = RuleGrammar.getInstance();
+		final Start startNode = parser.parse(testMachine, false);
+
+		// startNode.apply(new ASTPrinter());
+		final Ast2String ast2String = new Ast2String();
+		startNode.apply(ast2String);
+		final String string = ast2String.toString();
+		// System.out.println(string);
+		return string;
 	}
 }

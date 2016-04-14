@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileExpression;
+import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
@@ -74,7 +75,14 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineReference(AMachineReference node) {
-		machines.add(getIdentifier(node.getMachineName()));
+		String name = getIdentifier(node.getMachineName());
+		machines.add(name);
+		if (node.parent() instanceof AFileMachineReference) {
+			final AFileMachineReference fileNode = (AFileMachineReference) node
+					.parent();
+			String file = fileNode.getFile().getText().replaceAll("\"", "");
+			machineFileTable.put(name, file);
+		}
 	}
 
 	private String getIdentifier(LinkedList<TIdentifierLiteral> list) {
@@ -127,7 +135,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				final AFileExpression fileNode = (AFileExpression) machineName;
 				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode
 						.getIdentifier();
-				String file = fileNode.getContent().getText().replaceAll("\"", "");
+				String file = fileNode.getContent().getText()
+						.replaceAll("\"", "");
 				final String name = getIdentifier(identifier.getIdentifier());
 				machines.add(name);
 				machineFileTable.put(name, file);

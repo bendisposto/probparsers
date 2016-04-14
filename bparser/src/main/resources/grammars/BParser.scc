@@ -457,7 +457,7 @@ definition_x {-> definition} =
 	{expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
 	{file} [filename]:string_literal {-> New definition.file_definition(filename)};
 
-def_parameters {-> expression*} = left_par [parameters]:composed_identifier_list right_par {-> [parameters.expression]} ;
+def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
 
 sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
 
@@ -475,19 +475,22 @@ machine_ref_list {-> machine_reference*} =
 	{single} [ref]:machine_reference {-> [ref.machine_reference]} |
 	{multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]} ;
 
-machine_reference {-> machine_reference} = [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
+machine_reference {-> machine_reference} = 
+	{simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} |
+	{file} [machine_name]:composed_identifier [parameters]:machine_params? pragma_file [file]:pragma_id_or_string 
+		{-> New machine_reference.file(New machine_reference([machine_name.identifier_literal], [parameters.expression]), file)} ;
 
 variables_clause {-> machine_clause} =
-	{abstract} abstract_variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} |
-	variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} ;
+	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
+	variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
 
 constants_clause {-> machine_clause} =
-	{concrete} concrete_constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} |
-	constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} ;
+	{concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
+	constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} ;
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:variables_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:variables_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -539,7 +542,7 @@ operation {-> operation} =
     {-> New operation.rule(rule_name, operation_body.substitution)};
 
 operation_return_values {-> expression*} =
-	[return_values]:composed_identifier_list output_parameters {-> [return_values.expression]} ;
+	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
 
 freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_list {-> New machine_clause.freetypes([freetype_list.freetype])};
 freetype_list {-> freetype*} =
@@ -561,7 +564,7 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
 	{next_level} [pred]:predicate_x30 {-> pred.predicate} |
-	{let_predicate} let [identifiers]:composed_identifier_list be [definition]:predicate_top in [pred]:predicate_top end {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
@@ -637,7 +640,7 @@ expression_in_par {-> expression} =
 	{composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
 	{parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
 	{if_then_else} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end {-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
-	{let_expression} let [identifiers]:composed_identifier_list be [definition]:predicate_top in [expr]:expression_top end {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
+	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{next_level} [expr]:expression_top {-> expr.expression};
 
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
@@ -855,17 +858,17 @@ substitution_l3 {-> substitution} =
 	{if} if [condition]:predicate_top then [then_subst]:substitution_l1 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
 	{select} select [condition]:predicate_top then [then_subst]:substitution_l1 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
 	{case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l1 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
-	{any} any [identifiers]:variables_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+	{any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
 	{becomes_element_of} [identifiers]:expression_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
 	{becomes_such} [identifiers]:expression_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
-	{var} var [identifiers]:variables_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
+	{var} var [identifiers]:identifier_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
 	{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // check in semantic check if expression is a function
 	{operation_call} [return_values]:expression_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
 	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
-	{let} let [identifiers]:variables_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
+	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
 	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
     // extensions for rules
-	{forall_sub} kw_for_all [identifiers]:variables_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
+	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
 	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
  	{rule_success} kw_rule_success {-> New substitution.rule_success()} ;
@@ -918,13 +921,13 @@ composed_identifier_expression {-> expression} =
 	{normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} |
 	{file} [identifier]:composed_identifier pragma_file [file]:pragma_id_or_string {-> New expression.file(New expression.identifier([identifier.identifier_literal]), file)} ;
 
-variables_list {-> expression*} =
+identifier_list {-> expression*} =
 	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
-	{multi} [rest]:variables_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
+	{multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
 
 quantified_variables_list {-> expression*} =
-	{parentheses} left_par [id]:variables_list right_par {-> [id.expression]} |
-	{no_parentheses} [id]:variables_list {-> [id.expression]};
+	{parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |
+	{no_parentheses} [id]:identifier_list {-> [id.expression]};
 
 /*
 Avoid the following transformation rule which would yield to an AIdentifierNode without a position information. Include an indirection!
@@ -1032,7 +1035,9 @@ machine_clause =
 	{local_operations} [operations]:operation* |
 	{operations} [operations]:operation* ;
 
-machine_reference = [machine_name]:identifier_literal* [parameters]:expression* ;
+machine_reference = 
+	[machine_name]:identifier_literal* [parameters]:expression* |
+	{file} [reference]:machine_reference [file]:pragma_id_or_string  ;
 
 definition =
     {conversion} definition |

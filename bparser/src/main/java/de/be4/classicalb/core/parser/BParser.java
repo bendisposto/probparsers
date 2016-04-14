@@ -40,6 +40,7 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TPragmaFile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -232,7 +233,7 @@ public class BParser {
 			ast = p.parse();
 			ok = true;
 		} catch (Exception e) {
-			 e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		BigInteger b = new BigInteger("2");
@@ -389,7 +390,10 @@ public class BParser {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
 					: sourcePositions.getSourcecodeRange(token);
-			final String msg = e.getLocalizedMessage();
+			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
+			if (msg == null) {
+				msg = e.getLocalizedMessage();
+			}
 			final String realMsg = e.getRealMsg();
 			throw new BException(absolutePath, new BParseException(token,
 					range, msg, realMsg));
@@ -403,6 +407,13 @@ public class BParser {
 		} catch (final CheckException e) {
 			throw new BException(absolutePath, e);
 		}
+	}
+
+	private String getImprovedErrorMessageBasedOnTheErrorToken(Token token) {
+		if (token instanceof TPragmaFile) {
+			return "A file pragma (/*@file ...*/) is not allowed here";
+		}
+		return null;
 	}
 
 	private DefinitionTypes preParsing(final boolean debugOutput,
