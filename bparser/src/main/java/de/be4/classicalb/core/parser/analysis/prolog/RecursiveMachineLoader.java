@@ -241,8 +241,8 @@ public class RecursiveMachineLoader {
 					}
 				}
 				if (parsedFiles.containsKey(refMachine)
-						&& !parsedFiles.get(refMachine).getAbsoluteFile()
-								.equals(file.getAbsoluteFile())) {
+						&& !parsedFiles.get(refMachine).getCanonicalPath()
+								.equals(file.getCanonicalPath())) {
 					throw new BException(null,
 							"Two files with the same name are referenced:\n"
 									+ parsedFiles.get(refMachine)
