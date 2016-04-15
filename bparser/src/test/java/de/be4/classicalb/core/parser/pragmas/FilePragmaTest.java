@@ -69,6 +69,13 @@ public class FilePragmaTest {
 		parseFile(file);
 	}
 	
+	@Test
+	public void testFilePragmaDefinitionsFiles() throws IOException, BException {
+		String PATH = "src/test/resources/pragmas/filePragma/";
+		String file = PATH + "Main3.mch";
+		parseFile(file);
+	}
+	
 	@Test (expected = BException.class)
 	public void testFileCircle() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/circle/";
@@ -76,6 +83,13 @@ public class FilePragmaTest {
 		parseFile(file);
 	}
 
+	@Test (expected = BException.class)
+	public void testInvalidPragmaFile() throws IOException, BException {
+		String PATH = "src/test/resources/pragmas/filePragma/";
+		String file = PATH + "InvalidPragmaFile.mch";
+		parseFile(file);
+	}
+	
 	private static void parseFile(final String filename) throws IOException,
 			BException {
 		final int dot = filename.lastIndexOf('.');

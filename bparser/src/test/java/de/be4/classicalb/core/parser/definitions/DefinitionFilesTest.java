@@ -180,6 +180,12 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public String getFileContent(final String filename) throws IOException {
 		return defFileContents.get(filename);
 	}
+	
+	@Override
+	public String getFileContent(File directory, String filename)
+			throws IOException {
+		return defFileContents.get(filename);
+	}
 
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {
 		int getStoredCounter = 0;
@@ -198,7 +204,9 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			store.put(filename, definitions);
 		}
 
-		public String getFileContent(final String filename) throws IOException {
+		@Override
+		public String getFileContent(File directory, String filename)
+				throws IOException {
 			getContentCounter++;
 			if ("DefFile1".equals(filename)) {
 				return "DEFINITIONS \"DefFile2\"; def1 == 1";
@@ -209,12 +217,17 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			}
 		}
 
-		public File getFile(String fileName) {
+
+
+		@Override
+		public File getFile(File directory, String fileName) throws IOException {
 			return null;
 		}
 	}
 
-	public File getFile(String fileName) {
+	@Override
+	public File getFile(File directory, String fileName) throws IOException {
 		return null;
 	}
+
 }

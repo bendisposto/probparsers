@@ -5,12 +5,16 @@ import java.io.IOException;
 
 public class NoContentProvider implements IFileContentProvider {
 
-	public String getFileContent(final String filename) throws IOException {
+	@Override
+	public String getFileContent(File directory, String filename)
+			throws IOException {
 		throw new IOException("Loading of file content not supported.");
 	}
 
-	public File getFile(String fileName) {
+	public File getFile(final File directory, String fileName) {
 		return null;
 	}
+
+
 	
 }

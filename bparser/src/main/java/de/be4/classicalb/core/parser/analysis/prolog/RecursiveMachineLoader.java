@@ -16,7 +16,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -148,8 +147,10 @@ public class RecursiveMachineLoader {
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		final Start tree = parser.parseFile(machineFile, verbose,
-				new CachingDefinitionFileProvider(machineFile));
-		//contentProvider
+				contentProvider
+				//new CachingDefinitionFileProvider(machineFile)
+		);
+		//
 		
 		files.add(machineFile);
 

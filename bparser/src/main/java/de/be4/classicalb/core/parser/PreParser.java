@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
@@ -40,14 +41,17 @@ public class PreParser {
 	private final IFileContentProvider contentProvider;
 	private final Set<String> doneDefFiles;
 	private final String modelFileName;
+	private final File directory;
 
 	public PreParser(final PushbackReader pushbackReader,
 			final IFileContentProvider contentProvider,
-			final Set<String> doneDefFiles, final String modelFileName) {
+			final Set<String> doneDefFiles, final String modelFileName,
+			File directory) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
 		this.modelFileName = modelFileName;
+		this.directory = directory;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
@@ -105,12 +109,11 @@ public class PreParser {
 							+ "' is a circular reference");
 
 				IDefinitions definitions;
-
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					final String content = contentProvider
-							.getFileContent(fileName);
+					final String content = contentProvider.getFileContent(
+							directory, fileName);
 					newDoneList.add(fileName);
 					final BParser parser = new BParser(fileName);
 					parser.setDoneDefFiles(newDoneList);
@@ -125,8 +128,8 @@ public class PreParser {
 				}
 
 				defFileDefinitions.addAll(definitions);
-				defFileDefinitions.addDefinitionFile(contentProvider
-						.getFile(fileName));
+				defFileDefinitions.addDefinitionFile(contentProvider.getFile(
+						directory, fileName));
 				types.addAll(definitions.getTypes());
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameToken,

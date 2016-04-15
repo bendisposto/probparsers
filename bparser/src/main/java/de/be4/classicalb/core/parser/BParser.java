@@ -66,7 +66,8 @@ public class BParser {
 
 	private Set<String> doneDefFiles = new HashSet<String>();
 
-	private final String absolutePath;
+	private final String fileName;
+	private File directory;
 
 	private IDefinitionFileProvider contentProvider;
 
@@ -75,12 +76,7 @@ public class BParser {
 	}
 
 	public BParser(final String fileName) {
-		if (fileName == null) {
-			this.absolutePath = null;
-		} else {
-			this.absolutePath = new File(fileName).getAbsolutePath();
-		}
-
+		this.fileName = fileName;
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -127,16 +123,17 @@ public class BParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean, IFileContentProvider)
-	 * @param machine
+	 * @param machineFile
 	 * @param verbose
 	 * @return
 	 * @throws IOException
 	 * @throws BException
 	 */
-	public Start parseFile(final File machine, final boolean verbose)
+	public Start parseFile(final File machineFile, final boolean verbose)
 			throws IOException, BException {
-		contentProvider = new CachingDefinitionFileProvider(machine);
-		return parseFile(machine, verbose, contentProvider);
+		this.directory = machineFile.getParentFile();
+		contentProvider = new CachingDefinitionFileProvider();
+		return parseFile(machineFile, verbose, contentProvider);
 	}
 
 	/**
@@ -149,10 +146,11 @@ public class BParser {
 	 * @throws IOException
 	 * @throws BException
 	 */
-	public Start parseFile(final File machine, final boolean verbose,
+	public Start parseFile(final File machineFile, final boolean verbose,
 			final IFileContentProvider contentProvider) throws IOException,
 			BException {
-		String content = readFile(machine);
+		this.directory = machineFile.getParentFile();
+		String content = readFile(machineFile);
 		return parse(content, verbose, contentProvider);
 	}
 
@@ -333,7 +331,7 @@ public class BParser {
 		try {
 			// PreParsing
 			final DefinitionTypes defTypes = preParsing(debugOutput, reader,
-					contentProvider);
+					contentProvider, directory);
 
 			defTypes.addAll(definitions.getTypes());
 
@@ -375,7 +373,7 @@ public class BParser {
 			rootNode.apply(collector);
 			getDefinitions().addAll(collector.getDefintions());
 
-			// perfom AST tranformations that can't be done by SableCC
+			// perfom AST transformations that can't be done by SableCC
 			applyAstTransformations(rootNode);
 
 			// perform some semantic checks which are not done in the parser
@@ -385,7 +383,7 @@ public class BParser {
 
 			return rootNode;
 		} catch (final LexerException e) {
-			throw new BException(absolutePath, e);
+			throw new BException(fileName, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
@@ -395,17 +393,17 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(absolutePath, new BParseException(token,
+			throw new BException(fileName, new BParseException(token,
 					range, msg, realMsg));
 		} catch (final BParseException e) {
-			throw new BException(absolutePath, e);
+			throw new BException(fileName, e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
 			throw new Error("Using Reader failed", e);
 		} catch (final PreParseException e) {
-			throw new BException(absolutePath, e);
+			throw new BException(fileName, e);
 		} catch (final CheckException e) {
-			throw new BException(absolutePath, e);
+			throw new BException(fileName, e);
 		}
 	}
 
@@ -417,11 +415,11 @@ public class BParser {
 	}
 
 	private DefinitionTypes preParsing(final boolean debugOutput,
-			final Reader reader, final IFileContentProvider contentProvider)
+			final Reader reader, final IFileContentProvider contentProvider, File directory)
 			throws IOException, PreParseException, BException {
 		final PreParser preParser = new PreParser(
 				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.absolutePath); // FIXME remove magic number
+				this.fileName, directory); // FIXME remove magic number
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
 

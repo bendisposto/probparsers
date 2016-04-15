@@ -19,7 +19,7 @@ public interface IFileContentProvider {
 	 * @param filename
 	 * @return
 	 */
-	public String getFileContent(final String filename) throws IOException;
+	public String getFileContent(final File directory, final String filename) throws IOException;
 
-	public File getFile(String fileName);
+	public File getFile(final File directory, String fileName) throws IOException;
 }
