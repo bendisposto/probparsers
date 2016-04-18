@@ -22,6 +22,7 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
@@ -173,20 +174,22 @@ public class RecursiveMachineLoader {
 	 *         but never <code>null</code>.
 	 * @throws BException
 	 *             if file is not found
+	 * @throws CheckException 
 	 */
-	private File lookupFile(final File directory, final String machineName)
-			throws BException {
+	private File lookupFile(final File directory, final MachineReference machineRef)
+			throws BException, CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
 				return new FileSearchPathProvider(directory.getAbsolutePath(),
-						machineName + suffix).resolve();
+						machineRef.getName() + suffix).resolve();
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
 			}
 		}
-		throw new BException(null, "Machine file not found: " + machineName,
-				null);
+		throw new CheckException("Machine file not found: " + machineRef.getName(), machineRef.getNode());
+//		throw new BException(null, "Machine file not found: " + machineName,
+//				null);
 	}
 
 	private void recursivlyLoadMachine(final File machineFile,
@@ -223,13 +226,14 @@ public class RecursiveMachineLoader {
 		}
 		positions.put(name, sourcePositions);
 
-		final SortedSet<String> references = refMachines
+		final SortedSet<String> references2 = refMachines
 				.getReferencedMachines();
-		checkForCycles(ancestors, references);
+		checkForCycles(ancestors, references2);
 
-		for (final String refMachine : references) {
+		Set<MachineReference> references = refMachines.getReferences();
+		for (final MachineReference refMachine : references) {
 			try {
-				final String filePragma = refMachines.getFilePragma(refMachine);
+				final String filePragma = refMachine.getPath();
 				File file = null;
 				if (filePragma == null) {
 					file = lookupFile(directory, refMachine);
@@ -241,16 +245,16 @@ public class RecursiveMachineLoader {
 						file = new File(directory, filePragma);
 					}
 				}
-				if (parsedFiles.containsKey(refMachine)
-						&& !parsedFiles.get(refMachine).getCanonicalPath()
+				if (parsedFiles.containsKey(refMachine.getName())
+						&& !parsedFiles.get(refMachine.getName()).getCanonicalPath()
 								.equals(file.getCanonicalPath())) {
 					throw new BException(null,
 							"Two files with the same name are referenced:\n"
-									+ parsedFiles.get(refMachine)
+									+ parsedFiles.get(refMachine.getName())
 											.getAbsoluteFile() + "\n"
 									+ file.getAbsoluteFile(), null);
 				}
-				if (!getParsedMachines().containsKey(refMachine)) {
+				if (!getParsedMachines().containsKey(refMachine.getName())) {
 					loadMachine(ancestors, file);
 				}
 			} catch (final BException e) {
@@ -258,6 +262,8 @@ public class RecursiveMachineLoader {
 				throw new BException(machineFile.getName(), e);
 			} catch (final IOException e) {
 				// TODO[dp, 22.04.2008]
+				throw new BException(machineFile.getName(), e);
+			} catch (CheckException e) {
 				throw new BException(machineFile.getName(), e);
 			}
 		}

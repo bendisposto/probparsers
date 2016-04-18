@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -40,7 +41,7 @@ public class FilePragmaTest {
 		}
 	}
 	
-	@Test (expected= BException.class)
+	@Test (expected=BException.class)
 	public void testFilePragma2() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
 		String file = PATH + "Main2.mch";

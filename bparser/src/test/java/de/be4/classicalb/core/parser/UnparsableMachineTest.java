@@ -7,10 +7,10 @@ import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import test.AbstractParseMachineTest;
-import test.PolySuite;
-import test.PolySuite.Config;
-import test.PolySuite.Configuration;
+import util.AbstractParseMachineTest;
+import util.PolySuite;
+import util.PolySuite.Config;
+import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 
