@@ -1,0 +1,4 @@
+MACHINE MachineIncludingNotExistingDefinitionFile
+DEFINITIONS
+  "ThisDefinitionFileDoesNotExists.def"
+END

@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,9 +133,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	@Test
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
-		URI uri = getClass().getClassLoader()
-				.getResource("parsable/DefinitionFileTest.mch").toURI();
-		File machine = new File(uri);
+		File machine = new File("src/test/resources/parsable/DefinitionFileTest.mch");
 		parser.parseFile(machine, false);
 
 		final IDefinitions definitions = parser.getDefinitions();

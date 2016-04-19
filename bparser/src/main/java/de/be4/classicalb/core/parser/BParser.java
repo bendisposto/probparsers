@@ -12,10 +12,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.ASTDisplay;
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
@@ -64,7 +62,7 @@ public class BParser {
 	private IDefinitions definitions = new Definitions();
 	private final ParseOptions parseOptions = new ParseOptions();
 
-	private Set<String> doneDefFiles = new HashSet<String>();
+	private List<String> doneDefFiles = new ArrayList<String>();
 
 	private final String fileName;
 	private File directory;
@@ -86,7 +84,7 @@ public class BParser {
 
 	public static void printASTasProlog(final PrintStream out,
 			final BParser parser, final File bfile, final Start tree,
-			final boolean idention, final boolean withLineInfo,
+			final boolean indention, final boolean withLineInfo,
 			IDefinitionFileProvider contentProvider) throws BException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
 				bfile.getParent(), contentProvider);
@@ -94,7 +92,7 @@ public class BParser {
 				.getSourcePositions() : null;
 
 		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions());
-		rml.printAsProlog(new PrintWriter(out), idention);
+		rml.printAsProlog(new PrintWriter(out), indention);
 	}
 
 	// private static String getASTasFastProlog(final BParser parser,
@@ -132,7 +130,6 @@ public class BParser {
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose)
 			throws IOException, BException {
-		this.directory = machineFile.getParentFile();
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
@@ -474,11 +471,11 @@ public class BParser {
 		return Utils.getRevisionFromManifest();
 	}
 
-	public Set<String> getDoneDefFiles() {
+	public List<String> getDoneDefFiles() {
 		return doneDefFiles;
 	}
 
-	public void setDoneDefFiles(final Set<String> doneDefFiles) {
+	public void setDoneDefFiles(final List<String> doneDefFiles) {
 		this.doneDefFiles = doneDefFiles;
 	}
 
@@ -547,7 +544,8 @@ public class BParser {
 			return -2;
 		} catch (final BException e) {
 			if (options.prologOutput) {
-				PrologExceptionPrinter.printException(err, e);
+				PrologExceptionPrinter.printException(err, e, options.useIndention, false/*options.addLineNumbers*/);
+				//PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
 				err.println("Error parsing input file: "

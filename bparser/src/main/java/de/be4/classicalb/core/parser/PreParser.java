@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -39,13 +40,14 @@ public class PreParser {
 
 	private final IDefinitions defFileDefinitions = new Definitions();
 	private final IFileContentProvider contentProvider;
-	private final Set<String> doneDefFiles;
+	private final List<String> doneDefFiles;
+	@SuppressWarnings("unused")
 	private final String modelFileName;
 	private final File directory;
 
 	public PreParser(final PushbackReader pushbackReader,
 			final IFileContentProvider contentProvider,
-			final Set<String> doneDefFiles, final String modelFileName,
+			final List<String> doneDefFiles, final String modelFileName,
 			final File directory) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
@@ -87,7 +89,6 @@ public class PreParser {
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
-		
 		evaluateDefinitionFiles(collector.getFileDefinitions());
 		evaluateTypes(collector.getDefinitions());
 
@@ -96,18 +97,25 @@ public class PreParser {
 
 	private void evaluateDefinitionFiles(final List<Token> list)
 			throws PreParseException, BException {
-		final Set<String> newDoneList = new HashSet<String>(doneDefFiles);
+		
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
 		for (final Token fileNameToken : list) {
+			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
 			try {
 				final String fileName = fileNameToken.getText();
-				if (doneDefFiles.contains(fileName))
-					throw new PreParseException(fileNameToken, "'" + fileName
-							+ "' is a circular reference");
+				if (doneDefFiles.contains(fileName)) {
+					StringBuilder sb = new StringBuilder();
+					for (String string : doneDefFiles) {
+						sb.append(string).append(" -> ");
+					}
+					sb.append(fileName);
+					throw new PreParseException(fileNameToken,
+							"Cyclic references in definition files: " + sb.toString());
+				}
 
 				IDefinitions definitions;
 				if (cache != null && cache.getDefinitions(fileName) != null) {
@@ -120,7 +128,6 @@ public class PreParser {
 					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
-					newDoneList.remove(fileName);
 
 					definitions = parser.getDefinitions();
 
@@ -136,8 +143,9 @@ public class PreParser {
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameToken,
 						"Definition file cannot be read: "
-								+ e.getLocalizedMessage() + " used in "
-								+ modelFileName);
+								+ e.getLocalizedMessage()
+				// + " used in " + modelFileName
+				);
 			} finally {
 			}
 		}
@@ -193,9 +201,7 @@ public class PreParser {
 			if (definitionType.errorMessage != null) {
 				throw new PreParseException(definitionType.errorMessage);
 			} else {
-				// final Token defRhs = definitions.get(definition); //unused
-				// cycle in the definitions?
-				// TODO write test case and improve error message
+				// fall back message
 				throw new PreParseException(
 						definition,
 						"["

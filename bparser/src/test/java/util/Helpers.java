@@ -29,48 +29,64 @@ public class Helpers {
 		return string;
 	}
 
-	public static void parseFile2(String filename) throws
-			IOException {
+	public static String parseFile2(String filename) throws IOException {
 		final File machineFile = new File(filename);
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		Start tree;
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+
 		try {
 			tree = parser.parseFile(machineFile, false);
-			OutputStream o = new OutputStream() {
-				
-				@Override
-				public void write(int b) throws IOException {
-				}
-			};
-			PrintStream p = new PrintStream(o);
-			BParser.printASTasProlog(System.out, parser, machineFile, tree, false,
-					false, parser.getContentProvider());
-			
-
+			PrintStream printStream = new PrintStream(output);
+			BParser.printASTasProlog(printStream, parser, machineFile, tree,
+					false, false, parser.getContentProvider());
+			return output.toString();
 		} catch (BException e) {
-			OutputStream output = new OutputStream()
-		    {
-		        private StringBuilder string = new StringBuilder();
-		        @Override
-		        public void write(int b) throws IOException {
-		            this.string.append((char) b );
-		        }
-
-		        public String toString(){
-		            return this.string.toString();
-		        }
-		    };
 			PrologExceptionPrinter.printException(output, e);
-			String result = output.toString();
-			System.out.println(result);
+			return output.toString();
 		}
-		
+
 		//
 
 		// int fullParsing = parser.fullParsing(machineFile, behaviour,
 		// System.out,
 		// System.err);
 		// System.out.println(fullParsing);
+	}
+
+	public static String fullParsing(String filename) {
+		final File machineFile = new File(filename);
+		final BParser parser = new BParser(machineFile.getAbsolutePath());
+		final ParsingBehaviour behaviour = new ParsingBehaviour();
+		behaviour.prologOutput = true;
+		behaviour.useIndention = false;
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		PrintStream printStream = new PrintStream(output);
+		//int fullParsing = 
+		parser.fullParsing(machineFile, behaviour, printStream, printStream);
+		return output.toString();
 	}
 
 	public static void parseFile(final String filename) throws IOException,

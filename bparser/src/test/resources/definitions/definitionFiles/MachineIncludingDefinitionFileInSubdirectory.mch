@@ -1,0 +1,4 @@
+MACHINE MachineIncludingDefinitionFileInSubdirectory
+DEFINITIONS
+"subdirectory/Bazz.def"
+END

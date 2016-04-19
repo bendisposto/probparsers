@@ -1,0 +1,4 @@
+MACHINE MachineIncludingDefinitionsFromAnotherMachine
+DEFINITIONS
+ "MachineWithDefinitions.mch";
+END

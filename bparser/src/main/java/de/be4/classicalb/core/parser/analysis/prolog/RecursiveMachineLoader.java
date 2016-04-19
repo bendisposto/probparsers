@@ -56,7 +56,8 @@ public class RecursiveMachineLoader {
 	private boolean verbose;
 	private final Map<String, Start> parsedMachines = new TreeMap<String, Start>();
 	private final Map<String, File> parsedFiles = new TreeMap<String, File>();
-	private final List<File> files = new ArrayList<File>();
+	private final List<File> machineFilesLoaded = new ArrayList<File>();
+	private final List<File> definitionFilesLoaded = new ArrayList<File>();
 	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
 	private final IFileContentProvider contentProvider;
 
@@ -87,7 +88,7 @@ public class RecursiveMachineLoader {
 			throws BException {
 		injectDefinitions(main, definitions);
 		registerDefinitionFileUsage(definitions);
-		files.add(startfile);
+		machineFilesLoaded.add(startfile);
 		recursivlyLoadMachine(startfile, main, new ArrayList<String>(), true,
 				positions, rootDirectory);
 	}
@@ -118,7 +119,11 @@ public class RecursiveMachineLoader {
 		pout.openTerm("classical_b");
 		pout.printAtom(main);
 		pout.openList();
-		for (final File file : files) {
+		
+		List<File> allFiles = new ArrayList<File>();
+		allFiles.addAll(machineFilesLoaded);
+		allFiles.addAll(definitionFilesLoaded);
+		for (final File file : allFiles) {
 			try {
 				pout.printAtom(file.getCanonicalPath());
 			} catch (IOException e) {
@@ -143,17 +148,15 @@ public class RecursiveMachineLoader {
 
 	private void loadMachine(final List<String> ancestors,
 			final File machineFile) throws BException, IOException {
-		if (files.contains(machineFile)) {
+		if (machineFilesLoaded.contains(machineFile)) {
 			return;
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		final Start tree = parser.parseFile(machineFile, verbose,
 				contentProvider
-				//new CachingDefinitionFileProvider(machineFile)
 		);
-		//
 		
-		files.add(machineFile);
+		machineFilesLoaded.add(machineFile);
 
 		registerDefinitionFileUsage(parser.getDefinitions());
 		injectDefinitions(tree, parser.getDefinitions());
@@ -162,7 +165,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void registerDefinitionFileUsage(final IDefinitions definitions) {
-		files.addAll(definitions.getDefinitionFiles());
+		definitionFilesLoaded.addAll(definitions.getDefinitionFiles());
 	}
 
 	/**
@@ -200,7 +203,7 @@ public class RecursiveMachineLoader {
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
-		final int fileNumber = files.indexOf(machineFile) + 1;
+		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
 			getNodeIdMapping().assignIdentifiers(fileNumber, current);
 		} else {
