@@ -77,6 +77,7 @@ public class BParser {
 
 	public BParser(final String fileName) {
 		this.fileName = fileName;
+		
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -573,6 +574,10 @@ public class BParser {
 		// }
 		// }
 		return false;
+	}
+
+	public void setDirectory(final File directory) {
+		this.directory = directory;
 	}
 
 	// private Properties readHashValues(final File target, final File dir) {

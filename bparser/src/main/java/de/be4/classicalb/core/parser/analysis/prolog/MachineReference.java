@@ -30,5 +30,10 @@ public class MachineReference {
 		return node;
 	}
 	
+	@Override
+	public String toString(){
+		return name;
+	}
+	
 	
 }

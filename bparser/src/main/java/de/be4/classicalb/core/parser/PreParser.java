@@ -46,7 +46,7 @@ public class PreParser {
 	public PreParser(final PushbackReader pushbackReader,
 			final IFileContentProvider contentProvider,
 			final Set<String> doneDefFiles, final String modelFileName,
-			File directory) {
+			final File directory) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
@@ -87,6 +87,7 @@ public class PreParser {
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
+		
 		evaluateDefinitionFiles(collector.getFileDefinitions());
 		evaluateTypes(collector.getDefinitions());
 
@@ -116,6 +117,7 @@ public class PreParser {
 							directory, fileName);
 					newDoneList.add(fileName);
 					final BParser parser = new BParser(fileName);
+					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
 					newDoneList.remove(fileName);

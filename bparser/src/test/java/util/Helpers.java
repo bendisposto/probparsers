@@ -36,6 +36,13 @@ public class Helpers {
 		Start tree;
 		try {
 			tree = parser.parseFile(machineFile, false);
+			OutputStream o = new OutputStream() {
+				
+				@Override
+				public void write(int b) throws IOException {
+				}
+			};
+			PrintStream p = new PrintStream(o);
 			BParser.printASTasProlog(System.out, parser, machineFile, tree, false,
 					false, parser.getContentProvider());
 			

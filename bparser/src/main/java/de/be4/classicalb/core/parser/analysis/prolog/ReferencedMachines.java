@@ -113,6 +113,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
+		String name = node.getRefMachine().getText();
+		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 		machines.add(node.getRefMachine().getText());
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -124,6 +126,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAImplementationMachineParseUnit(
 			AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
+		String name = node.getRefMachine().getText();
+		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 		machines.add(node.getRefMachine().getText());
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);

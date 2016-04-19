@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.composition;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import org.junit.Test;
