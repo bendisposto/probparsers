@@ -50,10 +50,10 @@ public class BException extends Exception {
 
 	private void printFileRef(final StringBuilder sb, final String filename,
 			final boolean loaded) {
-		if (filename != null) {
-			sb.append(" ").append(loaded ? "loaded by" : "in file");
-			sb.append(": ").append(filename);
-		}
+//		if (filename != null) {
+//			sb.append(" ").append(loaded ? "loaded by" : "in file");
+//			sb.append(": ").append(filename);
+//		}
 	}
 
 	public String getFilename() {

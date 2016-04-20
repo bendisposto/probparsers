@@ -17,7 +17,6 @@ import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
-import de.be4.classicalb.core.preparser.node.TWhiteSpace;
 import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
@@ -28,7 +27,6 @@ public class PreLexer extends Lexer {
 	private int parenNestingLevel = 0;
 
 	private State stateBeforeComment;
-	private boolean debugOutput = false;
 
 	public PreLexer(final PushbackReader in) {
 		super(in);
@@ -42,11 +40,6 @@ public class PreLexer extends Lexer {
 			collectRhs();
 		}
 
-		if (token != null && debugOutput && !(token instanceof TWhiteSpace)
-				&& !(token instanceof EOF)) {
-			System.out.print(token.getClass().getSimpleName() + "('"
-					+ token.getText() + "') ");
-		}
 	}
 
 	private void collectRhs() throws LexerException, IOException {
@@ -149,7 +142,4 @@ public class PreLexer extends Lexer {
 		}
 	}
 
-	public void setDebugOutput(final boolean debugOutput) {
-		this.debugOutput = debugOutput;
-	}
 }

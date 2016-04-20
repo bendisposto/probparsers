@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -50,8 +51,8 @@ public class BatchParser {
 			Start tree = parser.parseFile(machineFile, false);
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree, false,
-					true, parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree,
+					new ParsingBehaviour(), parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename

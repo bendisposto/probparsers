@@ -87,8 +87,6 @@ public class BLexer extends Lexer {
 
 	private final List<IToken> dotList = new ArrayList<IToken>();
 
-	private boolean debugOutput = false;
-
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions,
 			final int tokenCountPrediction) {
 		super(in);
@@ -165,9 +163,6 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-		if(debugOutput){
-			System.err.println(token.getClass());
-		}
 		
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
@@ -206,11 +201,6 @@ public class BLexer extends Lexer {
 
 			buildTokenList();
 
-			if (debugOutput && !(token instanceof TWhiteSpace)
-					&& !(token instanceof EOF)) {
-				System.err.print(token.getClass().getSimpleName() + "('"
-						+ token.getText() + "') ");
-			}
 		}
 
 		if (token != null) {
@@ -329,7 +319,4 @@ public class BLexer extends Lexer {
 		this.parseOptions = parseOptions;
 	}
 
-	public void setDebugOutput(final boolean debugOutput) {
-		this.debugOutput = debugOutput;
-	}
 }

@@ -58,14 +58,21 @@ public final class PrologExceptionPrinter {
 		if (cause == null) {
 			printGeneralException(pto, e, filename, useIndentation, lineOneOff);
 		} else {
-			if(cause instanceof BLexerException){
+			while(cause.getClass().equals(BException.class) &&
+					cause.getCause() != null){
+				System.out.println("hier");
+				BException bex = (BException) cause;
+				cause = bex.getCause();
+				filename = bex.getFilename();
+			}
+			if (cause instanceof BLexerException) {
 				printBLexerException(pto, (BLexerException) cause, filename,
 						useIndentation, lineOneOff);
-			}else if (cause instanceof LexerException) {
+			} else if (cause instanceof LexerException) {
 				printLexerException(pto, (LexerException) cause, filename,
 						useIndentation, lineOneOff);
 			} else if (cause instanceof BParseException) {
-				printBPException(pto, (BParseException) cause, filename,
+				printBParseException(pto, (BParseException) cause, filename,
 						useIndentation, lineOneOff);
 			} else if (cause instanceof PreParseException) {
 				printPreParseException(pto, (PreParseException) cause,
@@ -118,7 +125,7 @@ public final class PrologExceptionPrinter {
 		} else {
 			pos = null;
 		}
-		printParseException(pto, cause, filename, pos, useIndentation,
+		printExceptionWithSourcePosition(pto, cause, filename, pos, useIndentation,
 				lineOneOff);
 	}
 
@@ -157,25 +164,25 @@ public final class PrologExceptionPrinter {
 		pto.closeTerm();
 	}
 
-	private static void printBPException(final IPrologTermOutput pto,
+	private static void printBParseException(final IPrologTermOutput pto,
 			final BParseException e, final String filename,
 			final boolean useIndentation, final boolean lineOneOff) {
 		final Token token = e.getToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(
 				token.getLine(), token.getPos());
-		printParseException(pto, e, filename, pos, useIndentation, lineOneOff);
+		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
 	}
-	
+
 	private static void printBLexerException(final IPrologTermOutput pto,
 			final BLexerException e, final String filename,
 			final boolean useIndentation, final boolean lineOneOff) {
 		final Token token = e.getLastToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(
 				token.getLine(), token.getPos());
-		printParseException(pto, e, filename, pos, useIndentation, lineOneOff);
+		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
 	}
 
-	private static void printParseException(final IPrologTermOutput pto,
+	private static void printExceptionWithSourcePosition(final IPrologTermOutput pto,
 			final Throwable e, final String filename, final SourcePosition pos,
 			final boolean useIndentation, final boolean lineOneOff) {
 		pto.openTerm("parse_exception");

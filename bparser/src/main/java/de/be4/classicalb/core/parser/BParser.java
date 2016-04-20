@@ -42,6 +42,7 @@ import de.be4.classicalb.core.parser.node.TPragmaFile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
+import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -75,7 +76,7 @@ public class BParser {
 
 	public BParser(final String fileName) {
 		this.fileName = fileName;
-		
+
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -84,15 +85,13 @@ public class BParser {
 
 	public static void printASTasProlog(final PrintStream out,
 			final BParser parser, final File bfile, final Start tree,
-			final boolean indention, final boolean withLineInfo,
+			final ParsingBehaviour parsingBehaviour,
 			IDefinitionFileProvider contentProvider) throws BException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-				bfile.getParent(), contentProvider);
-		final SourcePositions positions = withLineInfo ? parser
-				.getSourcePositions() : null;
-
-		rml.loadAllMachines(bfile, tree, positions, parser.getDefinitions());
-		rml.printAsProlog(new PrintWriter(out), indention);
+				bfile.getParent(), contentProvider, parsingBehaviour);
+		rml.loadAllMachines(bfile, tree, parser
+				.getSourcePositions(), parser.getDefinitions());
+		rml.printAsProlog(new PrintWriter(out));
 	}
 
 	// private static String getASTasFastProlog(final BParser parser,
@@ -148,6 +147,10 @@ public class BParser {
 			final IFileContentProvider contentProvider) throws IOException,
 			BException {
 		this.directory = machineFile.getParentFile();
+		if (verbose) {
+			DebugPrinter.println("Parsing file '"
+					+ machineFile.getCanonicalPath() + "'");
+		}
 		String content = readFile(machineFile);
 		return parse(content, verbose, contentProvider);
 	}
@@ -338,7 +341,6 @@ public class BParser {
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
 					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
-			lexer.setDebugOutput(debugOutput);
 			lexer.setParseOptions(parseOptions);
 
 			parser = new Parser(lexer);
@@ -391,8 +393,8 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(fileName, new BParseException(token,
-					range, msg, realMsg));
+			throw new BException(fileName, new BParseException(token, range,
+					msg, realMsg));
 		} catch (final BParseException e) {
 			throw new BException(fileName, e);
 		} catch (final IOException e) {
@@ -413,8 +415,8 @@ public class BParser {
 	}
 
 	private DefinitionTypes preParsing(final boolean debugOutput,
-			final Reader reader, final IFileContentProvider contentProvider, File directory)
-			throws IOException, PreParseException, BException {
+			final Reader reader, final IFileContentProvider contentProvider,
+			File directory) throws IOException, PreParseException, BException {
 		final PreParser preParser = new PreParser(
 				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
 				this.fileName, directory); // FIXME remove magic number
@@ -483,48 +485,47 @@ public class BParser {
 		return parseOptions;
 	}
 
-	public int fullParsing(final File bfile, final ParsingBehaviour options,
+	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour,
 			final PrintStream out, final PrintStream err) {
 
 		try {
 
 			// Properties hashes = new Properties();
 
-			if (options.outputFile != null) {
-				if (hashesStillValid(options.outputFile))
+			if (parsingBehaviour.outputFile != null) {
+				if (hashesStillValid(parsingBehaviour.outputFile))
 					return 0;
 			}
 
 			final long start = System.currentTimeMillis();
-			final Start tree = parseFile(bfile, options.verbose);
+			final Start tree = parseFile(bfile, parsingBehaviour.verbose);
 			final long end = System.currentTimeMillis();
 
-			if (options.printTime) {
+			if (parsingBehaviour.printTime) {
 				out.println("Time for parsing: " + (end - start) + "ms");
 			}
 
-			if (options.printAST) {
+			if (parsingBehaviour.printAST) {
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
 
-			if (options.displayGraphically) {
+			if (parsingBehaviour.displayGraphically) {
 				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
 
-			if (options.prologOutput) {
-				printASTasProlog(out, this, bfile, tree, options.useIndention,
-						options.addLineNumbers, contentProvider);
+			if (parsingBehaviour.prologOutput) {
+				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
 
-			if (options.printTime) {
+			if (parsingBehaviour.printTime) {
 				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 
-			if (options.fastPrologOutput) {
+			if (parsingBehaviour.fastPrologOutput) {
 				// try {
 				// String fp = getASTasFastProlog(this, bfile, tree);
 				// out.println(fp);
@@ -533,7 +534,7 @@ public class BParser {
 				// }
 			}
 		} catch (final IOException e) {
-			if (options.prologOutput) {
+			if (parsingBehaviour.prologOutput) {
 				PrologExceptionPrinter.printException(err, e,
 						bfile.getAbsolutePath());
 			} else {
@@ -543,9 +544,10 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BException e) {
-			if (options.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, options.useIndention, false/*options.addLineNumbers*/);
-				//PrologExceptionPrinter.printException(err, e);
+			if (parsingBehaviour.prologOutput) {
+				PrologExceptionPrinter
+						.printException(err, e, parsingBehaviour.useIndention, false);
+				// PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
 				err.println("Error parsing input file: "

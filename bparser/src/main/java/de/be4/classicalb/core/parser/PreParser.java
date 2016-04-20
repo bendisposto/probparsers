@@ -65,7 +65,6 @@ public class PreParser {
 		types = new DefinitionTypes();
 
 		final PreLexer preLexer = new PreLexer(pushbackReader);
-		preLexer.setDebugOutput(debugOutput);
 
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
@@ -364,7 +363,6 @@ public class PreParser {
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
 																				// Magic
 																				// number!!!!
-		lexer.setDebugOutput(debugOutput);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);
 		try {

@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -26,10 +27,10 @@ public class FilePragmaTest {
 		Start ast = bparser.parseFile(f, false);
 		assertNotNull(ast);
 		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH,
-				bparser.getContentProvider());
+				bparser.getContentProvider(), new ParsingBehaviour());
 		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
 	}
-	
+
 	@Test
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
@@ -39,8 +40,8 @@ public class FilePragmaTest {
 			assertTrue(e.getMessage().startsWith("A file pragma"));
 		}
 	}
-	
-	@Test (expected=BException.class)
+
+	@Test(expected = BException.class)
 	public void testFilePragma2() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
 		String file = PATH + "Main2.mch";
@@ -52,7 +53,6 @@ public class FilePragmaTest {
 				bparser.getContentProvider());
 		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
 	}
-	
 
 	@Test
 	public void testFilePragmaExtends() throws IOException, BException {
@@ -60,7 +60,6 @@ public class FilePragmaTest {
 		String file = PATH + "Extends.mch";
 		parseFile(file);
 	}
-	
 
 	@Test
 	public void testFilePragma3() throws IOException, BException {
@@ -68,28 +67,28 @@ public class FilePragmaTest {
 		String file = PATH + "Main1.mch";
 		parseFile(file);
 	}
-	
+
 	@Test
 	public void testFilePragmaDefinitionsFiles() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
 		String file = PATH + "Main3.mch";
 		parseFile(file);
 	}
-	
-	@Test (expected = BException.class)
+
+	@Test(expected = BException.class)
 	public void testFileCircle() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/circle/";
 		String file = PATH + "Mch1.mch";
 		parseFile(file);
 	}
 
-	@Test (expected = BException.class)
+	@Test(expected = BException.class)
 	public void testInvalidPragmaFile() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
 		String file = PATH + "InvalidPragmaFile.mch";
 		parseFile(file);
 	}
-	
+
 	private static void parseFile(final String filename) throws IOException,
 			BException {
 		final int dot = filename.lastIndexOf('.');
@@ -101,14 +100,14 @@ public class FilePragmaTest {
 			Start tree = parser.parseFile(machineFile, false);
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree, false,
-					true, parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree,
+					new ParsingBehaviour(), parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename
 					+ "' has no extension");
 	}
-	
+
 	private String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");

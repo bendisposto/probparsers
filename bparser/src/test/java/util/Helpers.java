@@ -50,7 +50,7 @@ public class Helpers {
 			tree = parser.parseFile(machineFile, false);
 			PrintStream printStream = new PrintStream(output);
 			BParser.printASTasProlog(printStream, parser, machineFile, tree,
-					false, false, parser.getContentProvider());
+					new ParsingBehaviour(), parser.getContentProvider());
 			return output.toString();
 		} catch (BException e) {
 			PrologExceptionPrinter.printException(output, e);
@@ -71,6 +71,8 @@ public class Helpers {
 		final ParsingBehaviour behaviour = new ParsingBehaviour();
 		behaviour.prologOutput = true;
 		behaviour.useIndention = false;
+		behaviour.addLineNumbers = false;
+		behaviour.verbose = true;
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -84,8 +86,9 @@ public class Helpers {
 			}
 		};
 		PrintStream printStream = new PrintStream(output);
-		//int fullParsing = 
+		// int fullParsing =
 		parser.fullParsing(machineFile, behaviour, printStream, printStream);
+		// printStream.close();
 		return output.toString();
 	}
 
@@ -100,8 +103,7 @@ public class Helpers {
 			Start tree = parser.parseFile(machineFile, false);
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree, false,
-					true, parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree, new ParsingBehaviour(), parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename
