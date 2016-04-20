@@ -121,11 +121,11 @@ public class BParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean, IFileContentProvider)
-	 * @param machineFile
-	 * @param verbose
-	 * @return
-	 * @throws IOException
-	 * @throws BException
+	 * @param machineFile	the machine file to be parsed
+	 * @param verbose	print debug information
+	 * @return the start AST node
+	 * @throws IOException if the file cannot be read
+	 * @throws BException if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose)
 			throws IOException, BException {
@@ -137,11 +137,12 @@ public class BParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean)
-	 * @param machine
-	 * @param verbose
-	 * @return
-	 * @throws IOException
-	 * @throws BException
+	 * @param machineFile	the machine file to be parsed
+	 * @param verbose	print debug information
+	 * @param contentProvider	used to get the content of files
+	 * @return	the AST node
+	 * @throws IOException	if the file cannot be read
+	 * @throws BException	if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose,
 			final IFileContentProvider contentProvider) throws IOException,
@@ -192,9 +193,9 @@ public class BParser {
 	 * the AST or an Exception, but no information about source positions. If
 	 * you need those, call the instance method of BParser instead
 	 * 
-	 * @param input
+	 * @param input the B machine as input string
 	 * @return AST of the input
-	 * @throws BException
+	 * @throws BException	if the B machine can not be parsed
 	 */
 	public static Start parse(final String input) throws BException {
 		BParser parser = new BParser("String Input");
@@ -260,10 +261,10 @@ public class BParser {
 	 * Use {@link #parse(String, boolean, IFileContentProvider)} instead to be
 	 * able to control loading of referenced files.
 	 * 
-	 * @param input
-	 * @param debugOutput
-	 * @return
-	 * @throws BException
+	 * @param input	the B machine as input string
+	 * @param debugOutput	print debug information
+	 * @return	the AST node
+	 * @throws BException if the B machine cannot be parsed
 	 */
 	public Start parse(final String input, final boolean debugOutput)
 			throws BException {

@@ -8,14 +8,9 @@ import java.io.InputStreamReader;
 
 public class PlainFileContentProvider implements IFileContentProvider {
 
-	/**
-	 * Please use {@link #PlainFileContentProvider(File)} as constructor to
-	 * define a parent directory for the file references.
-	 */
 	public PlainFileContentProvider() {
 	}
 
-	
 	@Override
 	public String getFileContent(File directory, String filename)
 			throws IOException {
@@ -26,14 +21,15 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		return readFileContent(file);
 	}
 
-	public File getFile(final File directory, final String filename) throws IOException {
+	public File getFile(final File directory, final String filename)
+			throws IOException {
 		FileSearchPathProvider provider;
 		if (directory == null) {
 			provider = new FileSearchPathProvider(filename);
 		} else {
 			String parentPath;
-				parentPath = directory.getCanonicalPath();
-				provider = new FileSearchPathProvider(parentPath, filename);
+			parentPath = directory.getCanonicalPath();
+			provider = new FileSearchPathProvider(parentPath, filename);
 		}
 		return provider.resolve();
 	}
@@ -54,6 +50,5 @@ public class PlainFileContentProvider implements IFileContentProvider {
 
 		return builder.toString().replaceAll("\r\n", "\n");
 	}
-
 
 }
