@@ -1,5 +1,7 @@
 package de.be4.classicalb.core.parser.pragmas;
 
+import static util.Helpers.getTreeAsString;
+
 import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.StringReader;
@@ -48,6 +50,12 @@ public class UnitPragmaTest {
 
 	}
 
+	@Test
+	public void testNewUnit() throws Exception {
+		final String testMachine = "MACHINE test CONSTANTS\n /*@new_unit \"m\"*/ k\n PROPERTIES k = 1 END";
+		getTreeAsString(testMachine);
+	}
+	
 	@Test
 	public void testUnitAlias() throws Exception {
 		String input = "/*@ unit_alias kmph \"km/h\" */ MACHINE UnitAlias VARIABLES lala INVARIANT lala=0 INITIALISATION lala:=0 END";

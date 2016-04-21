@@ -26,7 +26,7 @@ public class MachineReference {
 		File file = new File(path);
 		if (file.isDirectory()) {
 			throw new CheckException(
-					"Declared path in file pragma is and an directory and not a file: "
+					"Declared path in file pragma is an directory and not a file: "
 							+ path, node);
 		} else {
 			String fileName = file.getName();
@@ -34,7 +34,7 @@ public class MachineReference {
 			if (!baseName.equals(name)) {
 				throw new CheckException(
 						"Declared name in file pragma does not match with the name of the machine referenced: "
-								+ baseName, node);
+								+ name + " vs. " + baseName , node);
 			}
 		}
 	}

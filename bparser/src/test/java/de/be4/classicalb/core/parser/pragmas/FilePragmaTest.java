@@ -8,6 +8,7 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
@@ -79,7 +80,7 @@ public class FilePragmaTest {
 	public void testFileCircle() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/circle/";
 		String file = PATH + "Mch1.mch";
-		parseFile(file);
+		Helpers.parseFile(file);
 	}
 
 	@Test(expected = BException.class)

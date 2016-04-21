@@ -60,7 +60,6 @@ public final class PrologExceptionPrinter {
 		} else {
 			while(cause.getClass().equals(BException.class) &&
 					cause.getCause() != null){
-				System.out.println("hier");
 				BException bex = (BException) cause;
 				cause = bex.getCause();
 				filename = bex.getFilename();

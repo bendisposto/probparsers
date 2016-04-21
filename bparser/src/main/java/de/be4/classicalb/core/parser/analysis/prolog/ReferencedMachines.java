@@ -35,9 +35,9 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #getSetOfReferencedMachines()}.
+ * Use this class by calling the static method
+ * {@link #getSetOfReferencedMachines()}.
  * 
- * @author plagge
  */
 public class ReferencedMachines extends DepthFirstAdapter {
 	private SortedSet<String> machines = new TreeSet<String>();
@@ -78,10 +78,10 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return name;
 	}
 
-	public Hashtable<String, MachineReference> getReferencesTable(){
+	public Hashtable<String, MachineReference> getReferencesTable() {
 		return new Hashtable<>(referncesTable);
 	}
-	
+
 	public Set<MachineReference> getReferences() {
 		return new HashSet<>(referncesTable.values());
 	}

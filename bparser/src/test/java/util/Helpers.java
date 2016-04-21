@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.node.Start;
 
 public class Helpers {
 
-	public String getTreeAsString(final String testMachine) throws BException {
+	public static String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().grammar = RuleGrammar.getInstance();
@@ -109,4 +109,5 @@ public class Helpers {
 			throw new IllegalArgumentException("Filename '" + filename
 					+ "' has no extension");
 	}
+	
 }

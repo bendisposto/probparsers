@@ -63,6 +63,7 @@ Tokens
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
     {pragma->unit} pragma_unit = 'unit';
+    {pragma->unit} new_pragma_unit = 'new_unit';
     {pragma->unit} ipragma_unit = 'inferred_unit';
     {pragma->unit} pragma_unit_alias = 'unit_alias';
     {pragma} pragma_generated = 'generated';
@@ -476,9 +477,12 @@ machine_ref_list {-> machine_reference*} =
 	{multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]} ;
 
 machine_reference {-> machine_reference} = 
-	{simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} |
-	{file} [machine_name]:composed_identifier [parameters]:machine_params? pragma_file [file]:pragma_id_or_string 
-		{-> New machine_reference.file(New machine_reference([machine_name.identifier_literal], [parameters.expression]), file)} ;
+	{simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
+	{file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
+		{-> New machine_reference.file(machine_reference.machine_reference, file)} ;
+
+machine_reference2 {-> machine_reference} = 
+	{simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
 variables_clause {-> machine_clause} =
 	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
@@ -914,12 +918,15 @@ composed_identifier {-> identifier_literal*} =
 
 
 composed_identifier_list {-> expression*} =
-	{single} [identifier]:composed_identifier_expression {-> [identifier.expression]} |
-	{multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_expression {-> [rest.expression, identifier.expression]} ;
+	{single} [identifier]:composed_identifier_file_pragma_expression {-> [identifier.expression]} |
+	{multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]} ;
+
+composed_identifier_file_pragma_expression {-> expression} =
+	{normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
+	{file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} ;
 
 composed_identifier_expression {-> expression} =
-	{normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} |
-	{file} [identifier]:composed_identifier pragma_file [file]:pragma_id_or_string {-> New expression.file(New expression.identifier([identifier.identifier_literal]), file)} ;
+	{normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
 
 identifier_list {-> expression*} =
 	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
@@ -936,6 +943,7 @@ Avoid the following transformation rule which would yield to an AIdentifierNode 
 identifier_declaration_expression {-> expression} =
     {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
 	{unit} pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.unit(content,identifier.expression)} |
+	{new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
 	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
 	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 		
@@ -1110,6 +1118,7 @@ expression =
 	{file} [identifier]:expression [content]:pragma_id_or_string |
     {description} [content]:pragma_free_text [expression]:expression |
 	{unit} [content]:unit_content [identifier]:expression |
+	{new_unit} [content]:unit_content [identifier]:expression |
 	{inferredunit} [content]:unit_content [identifier]:expression |
 	{identifier} [identifier]:identifier_literal* |
 	{primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |

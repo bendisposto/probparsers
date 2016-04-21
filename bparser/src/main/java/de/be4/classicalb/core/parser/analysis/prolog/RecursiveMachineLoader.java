@@ -237,7 +237,11 @@ public class RecursiveMachineLoader {
 		try {
 			refMachines = new ReferencedMachines(current);
 		} catch (CheckException e) {
-			throw new BException(machineFile.getName(), e);
+			try {
+				throw new BException(machineFile.getCanonicalPath(), e);
+			} catch (IOException e1) {
+				throw new BException(machineFile.getAbsolutePath(), e);
+			}
 		}
 		final String name = refMachines.getName();
 		if (name == null) {
@@ -298,9 +302,17 @@ public class RecursiveMachineLoader {
 				// we do not longer wrap a B Exception in a B Exception
 				throw e;
 			} catch (final IOException e) {
-				throw new BException(machineFile.getAbsolutePath(), e);
+				try {
+					throw new BException(machineFile.getCanonicalPath(), e);
+				} catch (IOException e1) {
+					throw new BException(machineFile.getAbsolutePath(), e);
+				}
 			} catch (CheckException e) {
-				throw new BException(machineFile.getAbsolutePath(), e);
+				try {
+					throw new BException(machineFile.getCanonicalPath(), e);
+				} catch (IOException e1) {
+					throw new BException(machineFile.getAbsolutePath(), e);
+				}
 			}
 		}
 	}
