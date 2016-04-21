@@ -76,7 +76,6 @@ public class BParser {
 
 	public BParser(final String fileName) {
 		this.fileName = fileName;
-
 	}
 
 	public IDefinitionFileProvider getContentProvider() {

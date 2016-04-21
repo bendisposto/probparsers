@@ -18,6 +18,7 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -41,7 +42,6 @@ public class PreParser {
 	private final IDefinitions defFileDefinitions = new Definitions();
 	private final IFileContentProvider contentProvider;
 	private final List<String> doneDefFiles;
-	@SuppressWarnings("unused")
 	private final String modelFileName;
 	private final File directory;
 
@@ -96,7 +96,7 @@ public class PreParser {
 
 	private void evaluateDefinitionFiles(final List<Token> list)
 			throws PreParseException, BException {
-		
+
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
 			cache = (IDefinitionFileProvider) contentProvider;
@@ -113,7 +113,8 @@ public class PreParser {
 					}
 					sb.append(fileName);
 					throw new PreParseException(fileNameToken,
-							"Cyclic references in definition files: " + sb.toString());
+							"Cyclic references in definition files: "
+									+ sb.toString());
 				}
 
 				IDefinitions definitions;
@@ -123,7 +124,13 @@ public class PreParser {
 					final String content = contentProvider.getFileContent(
 							directory, fileName);
 					newDoneList.add(fileName);
-					final BParser parser = new BParser(fileName);
+					final File file = contentProvider.getFile(directory,
+							fileName);
+					String filePath = fileName;
+					if (file != null) {
+						filePath = file.getCanonicalPath();
+					}
+					final BParser parser = new BParser(filePath);
 					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
@@ -198,7 +205,11 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs,
 					todoDefs);
 			if (definitionType.errorMessage != null) {
-				throw new PreParseException(definitionType.errorMessage);
+				// throw new PreParseException(definitionType.errorToken,
+				// definitionType.errorMessage );
+				throw new BParseException(definitionType.errorToken,
+						definitionType.errorMessage + " in file: "
+								+ modelFileName);
 			} else {
 				// fall back message
 				throw new PreParseException(
@@ -248,17 +259,26 @@ public class PreParser {
 	class DefinitionType {
 		Definitions.Type type;
 		String errorMessage;
+		de.be4.classicalb.core.parser.node.Token errorToken;
 
 		DefinitionType() {
 
+		}
+
+		DefinitionType(Definitions.Type t,
+				de.be4.classicalb.core.parser.node.Token n) {
+			this.type = t;
+			this.errorToken = n;
 		}
 
 		DefinitionType(Definitions.Type t) {
 			this.type = t;
 		}
 
-		DefinitionType(String errorMessage) {
+		DefinitionType(String errorMessage,
+				de.be4.classicalb.core.parser.node.Token t) {
 			this.errorMessage = errorMessage;
+			this.errorToken = t;
 		}
 	}
 
@@ -304,7 +324,8 @@ public class PreParser {
 			errorToken = e.getToken();
 			try {
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
-				return new DefinitionType(IDefinitions.Type.Substitution);
+				return new DefinitionType(IDefinitions.Type.Substitution,
+						errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
 				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex
 						.getToken();
@@ -313,11 +334,11 @@ public class PreParser {
 								.getPos() >= errorToken2.getPos())) {
 					final String newMessage = determineNewErrorMessage(
 							definition, rhsToken, errorToken, e.getMessage());
-					return new DefinitionType(newMessage);
+					return new DefinitionType(newMessage, errorToken);
 				} else {
 					final String newMessage = determineNewErrorMessage(
 							definition, rhsToken, errorToken2, ex.getMessage());
-					return new DefinitionType(newMessage);
+					return new DefinitionType(newMessage, errorToken2);
 				}
 			} catch (BLexerException e1) {
 				errorToken = e1.getLastToken();

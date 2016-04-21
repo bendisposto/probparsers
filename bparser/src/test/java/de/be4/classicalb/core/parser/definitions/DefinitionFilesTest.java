@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -133,7 +134,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	@Test
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
-		File machine = new File("src/test/resources/parsable/DefinitionFileTest.mch");
+		File machine = new File(
+				"src/test/resources/parsable/DefinitionFileTest.mch");
 		parser.parseFile(machine, false);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -177,11 +179,29 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public String getFileContent(final String filename) throws IOException {
 		return defFileContents.get(filename);
 	}
-	
+
 	@Override
 	public String getFileContent(File directory, String filename)
 			throws IOException {
 		return defFileContents.get(filename);
+	}
+
+	@Test
+	public void testErrorInDefinitions() throws IOException, BException {
+		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
+		String result = Helpers.fullParsing(file);
+		assertTrue(result
+				.startsWith("parse_exception(pos(3,1,"));
+	}
+
+	@Test
+	public void testErrorInIncludedDefinitionFile() throws IOException,
+			BException {
+		String file = "./src/test/resources/definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
+		String result = Helpers.fullParsing(file);
+		System.out.println(result);
+		assertTrue(result
+				.startsWith("parse_exception(pos(3,1,"));
 	}
 
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {
@@ -213,8 +233,6 @@ public class DefinitionFilesTest implements IFileContentProvider {
 				return "";
 			}
 		}
-
-
 
 		@Override
 		public File getFile(File directory, String fileName) throws IOException {

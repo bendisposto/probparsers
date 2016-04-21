@@ -17,11 +17,11 @@ public interface IFileContentProvider {
 	 * </p>
 	 * 
 	 * @param directory the directory to search the file
-	 * @param filename the name of file without file extension
+	 * @param fileName the name of file without file extension
 	 * @throws IOException	when the given file cannot be found
 	 * @return 	the content of the file
 	 */
-	public String getFileContent(final File directory, final String filename) throws IOException;
+	public String getFileContent(final File directory, final String fileName) throws IOException;
 
 	public File getFile(final File directory, String fileName) throws IOException;
 }

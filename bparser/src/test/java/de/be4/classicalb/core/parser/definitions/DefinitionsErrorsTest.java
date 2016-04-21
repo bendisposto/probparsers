@@ -28,6 +28,19 @@ public class DefinitionsErrorsTest {
 	}
 	
 	@Test
+	public void checkForInvalidExpression() throws Exception {
+		String s = "MACHINE Definitions \n DEFINITIONS \n foo == 1 + \nEND";
+		try {
+			getTreeAsString(s);
+			fail("Invalid definition was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("[4,1]"));
+		}
+	}
+	
+	
+	@Test
 	public void checkForInvalidDefinition() throws Exception {
 		String s = "MACHINE Definitions \n DEFINITIONS \n foo == BEING x :=1 END \nEND";
 		try {
