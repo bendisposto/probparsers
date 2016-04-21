@@ -18,6 +18,7 @@ public interface IFileContentProvider {
 	 * 
 	 * @param directory the directory to search the file
 	 * @param filename the name of file without file extension
+	 * @throws IOException	when the given file cannot be found
 	 * @return 	the content of the file
 	 */
 	public String getFileContent(final File directory, final String filename) throws IOException;

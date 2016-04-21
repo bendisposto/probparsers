@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +35,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #getReferencedMachines()}.
+ * Use this class by calling the static method {@link #getSetOfReferencedMachines()}.
  * 
  * @author plagge
  */
@@ -65,7 +66,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * 
 	 * @return a set of machine names, never <code>null</code>
 	 */
-	public SortedSet<String> getReferencedMachines() {
+	public SortedSet<String> getSetOfReferencedMachines() {
 		return machines;
 	}
 
@@ -77,6 +78,10 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return name;
 	}
 
+	public Hashtable<String, MachineReference> getReferencesTable(){
+		return new Hashtable<>(referncesTable);
+	}
+	
 	public Set<MachineReference> getReferences() {
 		return new HashSet<>(referncesTable.values());
 	}

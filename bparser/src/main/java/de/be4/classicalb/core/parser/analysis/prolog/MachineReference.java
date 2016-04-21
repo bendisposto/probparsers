@@ -5,32 +5,36 @@ import java.io.File;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
 
-
 public class MachineReference {
 
 	private final String name;
 	private final Node node;
-	private final String path;
-	
+	private final String pragmaPath;
+
 	public MachineReference(String name, Node node) {
 		this.name = name;
 		this.node = node;
-		this.path = null;
+		this.pragmaPath = null;
 	}
-	
-	public MachineReference(String name, Node node, String path) throws CheckException{
+
+	public MachineReference(String name, Node node, String path)
+			throws CheckException {
 		this.name = name;
 		this.node = node;
-		this.path = path;
-		
+		this.pragmaPath = path;
+
 		File file = new File(path);
-		if(file.isDirectory()){
-			throw new CheckException("Declared path in file pragma is and an directory and not a file: " + path, node);
+		if (file.isDirectory()) {
+			throw new CheckException(
+					"Declared path in file pragma is and an directory and not a file: "
+							+ path, node);
 		} else {
 			String fileName = file.getName();
 			String baseName = fileName.substring(0, fileName.lastIndexOf("."));
-			if(!baseName.equals(name)){
-				throw new CheckException("Declared name in file pragma does not match with the name of the machine referenced: " + baseName, node);
+			if (!baseName.equals(name)) {
+				throw new CheckException(
+						"Declared name in file pragma does not match with the name of the machine referenced: "
+								+ baseName, node);
 			}
 		}
 	}
@@ -40,17 +44,16 @@ public class MachineReference {
 	}
 
 	public String getPath() {
-		return path;
+		return pragmaPath;
 	}
 
 	public Node getNode() {
 		return node;
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return name;
 	}
-	
-	
+
 }

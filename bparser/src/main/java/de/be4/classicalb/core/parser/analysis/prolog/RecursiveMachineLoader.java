@@ -161,8 +161,8 @@ public class RecursiveMachineLoader {
 			return;
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		final Start tree = parser.parseFile(machineFile, parsingBehaviour.verbose,
-				contentProvider);
+		final Start tree = parser.parseFile(machineFile,
+				parsingBehaviour.verbose, contentProvider);
 
 		machineFilesLoaded.add(machineFile);
 
@@ -185,29 +185,34 @@ public class RecursiveMachineLoader {
 	 *            Name of the machine to include, never <code>null</code>
 	 * @return reference to a file containing the machine, may be non-existent
 	 *         but never <code>null</code>.
-	 * @throws BException
-	 *             if file is not found
 	 * @throws CheckException
+	 *             if the file cannot be found
 	 */
 	private File lookupFile(final File directory,
 			final MachineReference machineRef, List<String> ancestors)
-			throws BException, CheckException {
+			throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				return new FileSearchPathProvider(directory.getAbsolutePath(),
-						machineRef.getName() + suffix).resolve();
+				File file = new FileSearchPathProvider(
+						directory.getAbsolutePath(), machineRef.getName()
+								+ suffix).resolve();
+				return file;
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
 			}
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("Machine file not found: '");
+		sb.append("Machine not found: '");
 		sb.append(machineRef.getName());
 		sb.append("'");
-		sb.append(" in '").append(ancestors.get(ancestors.size() - 1)).append("'");
+		String fileNameOfErrorMachine = parsedFiles.get(
+				ancestors.get(ancestors.size() - 1)).getName();
+		sb.append(" in '").append(fileNameOfErrorMachine).append("'");
+
 		for (int i = ancestors.size() - 2; i >= 0; i--) {
-			String fileName = ancestors.get(i);
+			String name = ancestors.get(i);
+			String fileName = parsedFiles.get(name).getName();
 			sb.append(" loaded by ").append("'").append(fileName).append("'");
 		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
@@ -241,7 +246,8 @@ public class RecursiveMachineLoader {
 			 * machine is null
 			 */
 			throw new BException(machineFile.getName(),
-					"Expecting a B machine but was a definition file in '" + machineFile.getName() + "'", null);
+					"Expecting a B machine but was a definition file in '"
+							+ machineFile.getName() + "'", null);
 		}
 
 		getParsedMachines().put(name, current);
@@ -255,11 +261,11 @@ public class RecursiveMachineLoader {
 		}
 		positions.put(name, sourcePositions);
 
-		final SortedSet<String> references2 = refMachines
-				.getReferencedMachines();
-		checkForCycles(ancestors, references2);
+		final SortedSet<String> referencesSet = refMachines
+				.getSetOfReferencedMachines();
+		checkForCycles(ancestors, referencesSet);
 
-		Set<MachineReference> references = refMachines.getReferences();
+		final Set<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
 			try {
 				final String filePragma = refMachine.getPath();
@@ -288,14 +294,13 @@ public class RecursiveMachineLoader {
 					loadMachine(ancestors, file);
 				}
 			} catch (final BException e) {
-				// TODO[dp, 22.04.2008]
-				throw e;
 				// throw new BException(machineFile.getName(), e);
+				// we do not longer wrap a B Exception in a B Exception
+				throw e;
 			} catch (final IOException e) {
-				// TODO[dp, 22.04.2008]
-				throw new BException(machineFile.getName(), e);
+				throw new BException(machineFile.getAbsolutePath(), e);
 			} catch (CheckException e) {
-				throw new BException(machineFile.getName(), e);
+				throw new BException(machineFile.getAbsolutePath(), e);
 			}
 		}
 	}
