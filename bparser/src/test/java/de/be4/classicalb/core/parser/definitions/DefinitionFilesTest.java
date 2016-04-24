@@ -190,8 +190,9 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testErrorInDefinitions() throws IOException, BException {
 		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
 		String result = Helpers.fullParsing(file);
+		System.out.println(result);
 		assertTrue(result
-				.startsWith("parse_exception(pos(3,1,"));
+				.startsWith("preparse_exception([],'[2,23] "));
 	}
 
 	@Test
@@ -201,7 +202,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
-				.startsWith("parse_exception(pos(3,1,"));
+				.startsWith("preparse_exception([],'[3,1]"));
 	}
 
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {

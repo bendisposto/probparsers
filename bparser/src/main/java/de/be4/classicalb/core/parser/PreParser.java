@@ -18,7 +18,6 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -205,11 +204,10 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs,
 					todoDefs);
 			if (definitionType.errorMessage != null) {
-				// throw new PreParseException(definitionType.errorToken,
-				// definitionType.errorMessage );
-				throw new BParseException(definitionType.errorToken,
-						definitionType.errorMessage + " in file: "
-								+ modelFileName);
+				 throw new PreParseException(definitionType.errorMessage + " in file: " + modelFileName );
+//				throw new BParseException(definitionType.errorToken,
+//						definitionType.errorMessage + " in file: "
+//								+ modelFileName);
 			} else {
 				// fall back message
 				throw new PreParseException(

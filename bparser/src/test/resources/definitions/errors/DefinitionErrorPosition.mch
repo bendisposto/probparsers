@@ -1,3 +1,3 @@
 MACHINE Position
-DEFINITIONS aa == 1 +
+DEFINITIONS aa == 1 + +
 END
