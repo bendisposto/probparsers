@@ -52,7 +52,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
-	 * @throws Exception
+	 * @throws CheckException
 	 */
 	public ReferencedMachines(Node node) throws CheckException {
 		node.apply(this);

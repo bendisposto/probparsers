@@ -42,7 +42,7 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 		System.out.println(baos.toString());
 		
 		assertEquals(returnValue, -3);
-		assertEquals("exception('Expecting a B machine but was a definition file in \\'LibraryIO.def\\'').", baos
+		assertEquals("exception('Expecting a B machine but was a definition file in file: \\'LibraryIO.def\\'').", baos
 				.toString().trim());
 	}
 }

@@ -3,7 +3,7 @@ package de.be4.classicalb.core.parser.exceptions;
 @SuppressWarnings("serial")
 public class BException extends Exception {
 
-	private final Throwable ex;
+	private final Throwable cause;
 	private final String filename;
 	private final String message;
 
@@ -12,15 +12,15 @@ public class BException extends Exception {
 	}
 
 	public BException(final String filename, final String message,
-			final Throwable ex) {
+			final Throwable cause) {
 		this.filename = filename;
 		this.message = message;
-		this.ex = ex;
+		this.cause = cause;
 	}
 
 	@Override
 	public Throwable getCause() {
-		return ex;
+		return cause;
 	}
 
 	@Override
@@ -34,27 +34,27 @@ public class BException extends Exception {
 		if (message != null) {
 			sb.append(message);
 		}
-		if (ex != null) {
-			if (ex instanceof BException) {
-				final BException other = (BException) ex;
+		if (cause != null) {
+			if (cause instanceof BException) {
+				final BException other = (BException) cause;
 				other.writeMessage(sb);
-				printFileRef(sb, filename, other.filename != null);
+				//printFileRef(sb, filename, other.filename != null);
 			} else {
-				sb.append(ex.getMessage());
-				printFileRef(sb, filename, false);
+				sb.append(cause.getMessage());
+				//printFileRef(sb, filename, false);
 			}
 		} else {
-			printFileRef(sb, filename, false);
+			//printFileRef(sb, filename, false);
 		}
 	}
 
-	private void printFileRef(final StringBuilder sb, final String filename,
-			final boolean loaded) {
+//	private void printFileRef(final StringBuilder sb, final String filename,
+//			final boolean loaded) {
 //		if (filename != null) {
 //			sb.append(" ").append(loaded ? "loaded by" : "in file");
 //			sb.append(": ").append(filename);
 //		}
-	}
+//	}
 
 	public String getFilename() {
 		return filename;
@@ -67,6 +67,6 @@ public class BException extends Exception {
 
 	@Override
 	public StackTraceElement[] getStackTrace() {
-		return ex.getStackTrace();
+		return cause.getStackTrace();
 	}
 }

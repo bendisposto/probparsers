@@ -250,8 +250,8 @@ public class RecursiveMachineLoader {
 			 * machine is null
 			 */
 			throw new BException(machineFile.getName(),
-					"Expecting a B machine but was a definition file in '"
-							+ machineFile.getName() + "'", null);
+					"Expecting a B machine but was a definition file in file: '"
+							+ machineFile.getName() + "\'", null);
 		}
 
 		getParsedMachines().put(name, current);
