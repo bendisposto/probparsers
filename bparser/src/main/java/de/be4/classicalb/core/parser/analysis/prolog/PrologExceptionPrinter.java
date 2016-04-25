@@ -223,7 +223,7 @@ public final class PrologExceptionPrinter {
 			message = wrapper.getLocalizedMessage();
 		}
 		if (includeFileNameInMessage && !message.contains("in file:")) {
-			message = message + " in file: \'" + filename + "\'";
+			message = message + " in file: " + filename;
 
 		}
 		if (useIndentation) {
