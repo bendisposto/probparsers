@@ -214,7 +214,6 @@ Tokens
 	{normal} when = 'WHEN';
 	{normal} where = 'WHERE';
 	{normal} while = 'WHILE';
-	{normal} empty_sequence = '[' white_space* ']' | '<' white_space* '>';
 	{normal} left_bracket = '[';
 	{normal} right_bracket = ']';
 	{normal} union = '\/' | 0x222a;
@@ -274,7 +273,7 @@ Tokens
 	{normal} top = 'top';
 	{normal} tree = 'tree';
 	{normal} generalized_union = 'union';
-	{normal} empty_set = '{' white_space* '}' | 0x2205;
+	{normal} empty_set = 0x2205;
 	{normal} left_brace = '{';
 	{normal} right_brace = '}';
 	{normal} vertical_bar = '|';
@@ -756,7 +755,8 @@ expression_keyword {-> expression} =
 	{iseq} iseq left_par [expression]:expression_in_par right_par {-> New expression.iseq(expression.expression)} |
 	{iseq1} iseq1 left_par [expression]:expression_in_par right_par {-> New expression.iseq1(expression.expression)} |
 	{perm} perm left_par [expression]:expression_in_par right_par {-> New expression.perm(expression.expression)} |
-	{empty_sequence} empty_sequence {-> New expression.empty_sequence()} |
+	{empty_sequence1} left_bracket right_bracket {-> New expression.empty_sequence()} |
+	{empty_sequence2} less greater {-> New expression.empty_sequence()} |
 	{size} size left_par [expression]:expression_in_par right_par {-> New expression.size(expression.expression)} |
 	{first} first left_par [expression]:expression_in_par right_par {-> New expression.first(expression.expression)} |
 	{last} last left_par [expression]:expression_in_par right_par {-> New expression.last(expression.expression)} |
@@ -767,8 +767,8 @@ expression_keyword {-> expression} =
 	{second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
 	{iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)} |
 	{comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}  |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
-  {quantified_union} quantified_union [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+	{symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
+	{quantified_union} quantified_union [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
 	{quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
 	{quantified_set} quantified_set [identifiers]:expression_list dot_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}  |
 	{set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
@@ -823,7 +823,8 @@ expression_atomic {-> expression} =
 	{integer} [literal]:integer_literal {-> New expression.integer(literal)} |
 	{max_int} max_int {-> New expression.max_int()} |
 	{min_int} min_int {-> New expression.min_int()} |
-	{empty_set} empty_set {-> New expression.empty_set()} |
+	{empty_set_symbol} empty_set {-> New expression.empty_set()} |
+	{empty_set} left_brace right_brace {-> New expression.empty_set()} |
 	{integer_set} integer {-> New expression.integer_set()} |
 	{natural_set} natural {-> New expression.natural_set()} |
 	{natural1_set} natural1 {-> New expression.natural1_set()} |
