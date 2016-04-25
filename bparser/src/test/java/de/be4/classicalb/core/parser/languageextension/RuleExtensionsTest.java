@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.exceptions.BException;
 import static util.Helpers.getTreeAsString;
 
 public class RuleExtensionsTest {
@@ -26,12 +27,33 @@ public class RuleExtensionsTest {
 				result);
 	}
 
+	@Test(expected = BException.class)
+	public void testRuleOperationMissingFailOrSuccess() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip END END";
+		getTreeAsString(testMachine);
+	}
+
+	@Test(expected = BException.class)
+	public void testDuplicateRuleAssignStatement() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;RULE_SUCCESS  END END";
+		getTreeAsString(testMachine);
+	}
+
 	@Test
-	public void testRuleFail() throws Exception {
-		final String testMachine = "MACHINE Test OPERATIONS RULE foo = BEGIN RuleFail(\"foo is violated\") END END";
+	public void testRuleFailNoMessage() throws Exception {
+		final String testMachine = "MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL END END";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo])]),AInvariantMachineClause(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)]))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo])],[AStringExpression(NOT_CHECKED)])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ASequenceSubstitution([ABlockSubstitution(AOpSubstitution(AIdentifierExpression([RuleFail]),[AStringExpression(foo is violated)])),AAssertionSubstitution(ANotEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AIfSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(SUCCESS)),AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(SUCCESS)]),[],AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(FAIL)])))]),[],))])]))",
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo])]),AInvariantMachineClause(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)]))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo])],[AStringExpression(NOT_CHECKED)])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ASequenceSubstitution([ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#COUNTEREXAMPLE])],[AStringExpression(FAIL),AStringExpression()])),AAssertionSubstitution(ANotEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AIfSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(SUCCESS)),AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(SUCCESS)]),[],AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(FAIL)])))]),[],))])]))",
+				result);
+	}
+
+	@Test
+	public void testRuleFail() throws Exception {
+		final String testMachine = "MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL(\"foo is violated\") END END";
+		final String result = getTreeAsString(testMachine);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo])]),AInvariantMachineClause(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)]))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo])],[AStringExpression(NOT_CHECKED)])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ASequenceSubstitution([ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#COUNTEREXAMPLE])],[AStringExpression(FAIL),AStringExpression(foo is violated)])),AAssertionSubstitution(ANotEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AIfSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(SUCCESS)),AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(SUCCESS)]),[],AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(FAIL)])))]),[],))])]))",
 				result);
 	}
 
@@ -39,7 +61,6 @@ public class RuleExtensionsTest {
 	public void testRuleOperationAndExistingVariables() throws Exception {
 		final String testMachine = "RULES_MACHINE Test VARIABLES x INVARIANT x = 1 INITIALISATION x:= 1 OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
 		final String result = getTreeAsString(testMachine);
-		System.out.println(result);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([x]),AIdentifierExpression([foo])]),AInvariantMachineClause(AConjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(1)),AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])))),AInitialisationMachineClause(AParallelSubstitution([AAssignSubstitution([AIdentifierExpression([x])],[AIntegerExpression(1)]),AAssignSubstitution([AIdentifierExpression([foo])],[AStringExpression(NOT_CHECKED)])])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ASequenceSubstitution([ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#COUNTEREXAMPLE])],[AStringExpression(SUCCESS),AStringExpression()])),AAssertionSubstitution(ANotEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AIfSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(SUCCESS)),AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(SUCCESS)]),[],AAssignSubstitution([AIdentifierExpression([#RESULT])],[AStringExpression(FAIL)])))]),[],))])]))",
 				result);

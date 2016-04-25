@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.extensions;
 import java.util.HashMap;
 
 import de.be4.classicalb.core.parser.analysis.transforming.RuleTransformation;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TKwDependsOnRules;
@@ -84,8 +85,7 @@ public class RuleGrammar implements IGrammar {
 		}
 	}
 
-	@Override
-	public void applyAstTransformation(Start start) {
-		start.apply(new RuleTransformation());
+	public void applyAstTransformation(Start start) throws CheckException {
+		new RuleTransformation().runTransformation(start);
 	}
 }

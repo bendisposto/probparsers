@@ -1,10 +1,12 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssertionSubstitution;
@@ -32,6 +34,7 @@ import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
@@ -47,12 +50,22 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLE";
 
-	AAbstractMachineParseUnit abstractMachineParseUnit = null;
-	AVariablesMachineClause variablesMachineClause = null;
-	AInvariantMachineClause invariantMachineClause = null;
-	AInitialisationMachineClause initialisationMachineClause = null;
-	ArrayList<String> ruleNames = new ArrayList<>();
-	ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
+	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
+	private AVariablesMachineClause variablesMachineClause = null;
+	private AInvariantMachineClause invariantMachineClause = null;
+	private AInitialisationMachineClause initialisationMachineClause = null;
+	private ArrayList<String> ruleNames = new ArrayList<>();
+	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
+
+	public void runTransformation(Start start) throws CheckException {
+		CorrectRuleChecker correctRuleChecker = new CorrectRuleChecker();
+		start.apply(correctRuleChecker);
+		if (correctRuleChecker.errorlist.size() > 0) {
+			throw correctRuleChecker.errorlist.get(0);
+		}
+
+		start.apply(this);
+	}
 
 	@Override
 	public void outStart(Start node) {
@@ -260,7 +273,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 		nameList.add(createRuleIdentifier(currentRuleLiteral));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
-		exprList.add(node.getExpression());
+		if(node.getExpression()!= null){
+			exprList.add(node.getExpression());
+		}else{
+			exprList.add(new AStringExpression(new TStringLiteral("")));
+		}
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		node.replaceBy(assign);
 	}
@@ -316,4 +333,48 @@ public class RuleTransformation extends DepthFirstAdapter {
 		node.replaceBy(ifElseSub);
 	}
 
+	class CorrectRuleChecker extends DepthFirstAdapter {
+		ArrayList<CheckException> errorlist = new ArrayList<>();
+		Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
+
+		@Override
+		public void defaultOut(Node node) {
+			if (ruleAssignmentTable.containsKey(node)) {
+				Node value = ruleAssignmentTable.get(node);
+				if (node.parent() != null) {
+					setParent(node.parent(), value);
+				}
+			}
+		}
+
+		private void setParent(Node parent, Node value) {
+			if (ruleAssignmentTable.containsKey(parent)) {
+				errorlist
+						.add(new CheckException(
+								"Result value of rule operation is assigned more than once",
+								value));
+			} else {
+				ruleAssignmentTable.put(parent, value);
+			}
+		}
+
+		@Override
+		public void outARuleFailSubstitution(ARuleFailSubstitution node) {
+			ruleAssignmentTable.put(node, node);
+			defaultOut(node);
+		}
+
+		@Override
+		public void outARuleSuccessSubstitution(ARuleSuccessSubstitution node) {
+			ruleAssignmentTable.put(node, node);
+			defaultOut(node);
+		}
+
+		public void outARuleOperation(ARuleOperation node) {
+			if (!ruleAssignmentTable.containsKey(node)) {
+				errorlist.add(new CheckException(
+						"No result value assigned in rule operation", node));
+			}
+		}
+	}
 }

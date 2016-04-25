@@ -432,7 +432,7 @@ public class BParser {
 		return definitionTypes;
 	}
 
-	private void applyAstTransformations(final Start rootNode) {
+	private void applyAstTransformations(final Start rootNode) throws CheckException {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
