@@ -332,14 +332,18 @@ Tokens
 	white_space = white_space;
 
 	// grammar extensions
-	// the following tokens tokens are never parsed
+	// the following tokens are never recognized by the lexer because they declared below identifier_literal
+	// keywords should be synchronized with RuleGrammar.java
 	{normal} kw_rules_machine = 'RULES_MACHINE';
 	{normal} kw_rule = 'RULE';
 	{normal} kw_rule_fail = 'RULE_FAIL';
 	{normal} kw_rule_success = 'RULE_SUCCESS';
 	{normal} kw_depends_on_rules = 'DEPENDS_ON_RULES';
 	{normal} kw_for_all = 'FORALL';
+	{normal} kw_rule_for_all = 'RULE_FORALL';
 	{normal} kw_expect = 'EXPECT';
+	{normal} kw_counterexample = 'COUNTEREXAMPLE';
+	
 
 
 /*******************************************************************
@@ -567,7 +571,11 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
 	{next_level} [pred]:predicate_x30 {-> pred.predicate} |
-	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
+	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end 
+		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
+		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
+
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
@@ -875,6 +883,8 @@ substitution_l3 {-> substitution} =
     // extensions for rules
 	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
+   	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top end
+    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression)} |	
 	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
  	{rule_success} kw_rule_success {-> New substitution.rule_success()} ;
 
@@ -1110,6 +1120,7 @@ predicate =
 	{predicate_identifier} [identifier]:predicate_identifier |
 	{predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
 	{let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
+	{if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
 	{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*| /* Event-B only predicate - theory plugin */
 	{depends_on_rules} [identifiers]:expression* ; // extension for rules
 
@@ -1294,5 +1305,6 @@ substitution =
 	{parallel} [substitutions]:substitution* |
 	{definition} [def_literal]:def_literal_substitution [parameters]:expression* |
 	{forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
+	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression | //extension for rules
 	{rule_fail} [expression]:expression? | //extension for rules
 	{rule_success} ; // extension for rules

@@ -29,6 +29,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.Couples;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
+import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
@@ -88,8 +89,8 @@ public class BParser {
 			IDefinitionFileProvider contentProvider) throws BException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
 				bfile.getParent(), contentProvider, parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser
-				.getSourcePositions(), parser.getDefinitions());
+		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(),
+				parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
@@ -120,11 +121,15 @@ public class BParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean, IFileContentProvider)
-	 * @param machineFile	the machine file to be parsed
-	 * @param verbose	print debug information
+	 * @param machineFile
+	 *            the machine file to be parsed
+	 * @param verbose
+	 *            print debug information
 	 * @return the start AST node
-	 * @throws IOException if the file cannot be read
-	 * @throws BException if the file cannot be parsed
+	 * @throws IOException
+	 *             if the file cannot be read
+	 * @throws BException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose)
 			throws IOException, BException {
@@ -136,12 +141,17 @@ public class BParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean)
-	 * @param machineFile	the machine file to be parsed
-	 * @param verbose	print debug information
-	 * @param contentProvider	used to get the content of files
-	 * @return	the AST node
-	 * @throws IOException	if the file cannot be read
-	 * @throws BException	if the file cannot be parsed
+	 * @param machineFile
+	 *            the machine file to be parsed
+	 * @param verbose
+	 *            print debug information
+	 * @param contentProvider
+	 *            used to get the content of files
+	 * @return the AST node
+	 * @throws IOException
+	 *             if the file cannot be read
+	 * @throws BException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose,
 			final IFileContentProvider contentProvider) throws IOException,
@@ -192,9 +202,11 @@ public class BParser {
 	 * the AST or an Exception, but no information about source positions. If
 	 * you need those, call the instance method of BParser instead
 	 * 
-	 * @param input the B machine as input string
+	 * @param input
+	 *            the B machine as input string
 	 * @return AST of the input
-	 * @throws BException	if the B machine can not be parsed
+	 * @throws BException
+	 *             if the B machine can not be parsed
 	 */
 	public static Start parse(final String input) throws BException {
 		BParser parser = new BParser("String Input");
@@ -260,10 +272,13 @@ public class BParser {
 	 * Use {@link #parse(String, boolean, IFileContentProvider)} instead to be
 	 * able to control loading of referenced files.
 	 * 
-	 * @param input	the B machine as input string
-	 * @param debugOutput	print debug information
-	 * @return	the AST node
-	 * @throws BException if the B machine cannot be parsed
+	 * @param input
+	 *            the B machine as input string
+	 * @param debugOutput
+	 *            print debug information
+	 * @return the AST node
+	 * @throws BException
+	 *             if the B machine cannot be parsed
 	 */
 	public Start parse(final String input, final boolean debugOutput)
 			throws BException {
@@ -432,10 +447,13 @@ public class BParser {
 		return definitionTypes;
 	}
 
-	private void applyAstTransformations(final Start rootNode) throws CheckException {
+	private void applyAstTransformations(final Start rootNode)
+			throws CheckException {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
+		rootNode.apply(new SyntaxExtensionTranslator());
+
 		this.parseOptions.grammar.applyAstTransformation(rootNode);
 
 		// TODO more AST transformations?
@@ -485,8 +503,9 @@ public class BParser {
 		return parseOptions;
 	}
 
-	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour,
-			final PrintStream out, final PrintStream err) {
+	public int fullParsing(final File bfile,
+			final ParsingBehaviour parsingBehaviour, final PrintStream out,
+			final PrintStream err) {
 
 		try {
 
@@ -517,7 +536,8 @@ public class BParser {
 			final long start2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.prologOutput) {
-				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
+				printASTasProlog(out, this, bfile, tree, parsingBehaviour,
+						contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
 
@@ -545,8 +565,8 @@ public class BParser {
 			return -2;
 		} catch (final BException e) {
 			if (parsingBehaviour.prologOutput) {
-				PrologExceptionPrinter
-						.printException(err, e, parsingBehaviour.useIndention, false);
+				PrologExceptionPrinter.printException(err, e,
+						parsingBehaviour.useIndention, false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();

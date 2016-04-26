@@ -6,12 +6,14 @@ import de.be4.classicalb.core.parser.analysis.transforming.RuleTransformation;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TKwCounterexample;
 import de.be4.classicalb.core.parser.node.TKwDependsOnRules;
 //import de.be4.classicalb.core.parser.node.TKwDependsOnRule;
 import de.be4.classicalb.core.parser.node.TKwExpect;
 import de.be4.classicalb.core.parser.node.TKwForAll;
 import de.be4.classicalb.core.parser.node.TKwRule;
 import de.be4.classicalb.core.parser.node.TKwRuleFail;
+import de.be4.classicalb.core.parser.node.TKwRuleForAll;
 import de.be4.classicalb.core.parser.node.TKwRuleSuccess;
 import de.be4.classicalb.core.parser.node.TKwRulesMachine;
 import de.be4.classicalb.core.parser.node.TMachine;
@@ -39,7 +41,8 @@ public class RuleGrammar implements IGrammar {
 		add(TKwDependsOnRules.class);
 		add(TKwForAll.class);
 		add(TKwExpect.class);
-		
+		add(TKwCounterexample.class);
+		add(TKwRuleForAll.class);
 		map.put(new TKwRulesMachine().getText() ,TMachine.class);
 	}
 	
