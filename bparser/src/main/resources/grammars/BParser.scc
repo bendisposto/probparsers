@@ -570,11 +570,7 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-	{next_level} [pred]:predicate_x30 {-> pred.predicate} |
-	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end 
-		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
-	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
-		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)};
+	{next_level} [pred]:predicate_x30 {-> pred.predicate} ;
 
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
@@ -640,7 +636,11 @@ predicate_atomic {-> predicate} =
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
 	{identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
 	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
-  {depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])}; // extension for rules
+	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end 
+		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
+		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
+	{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])}; // extension for rules
 
 
 /* Expressions */
@@ -650,8 +650,6 @@ predicate_atomic {-> predicate} =
 expression_in_par {-> expression} =
 	{composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
 	{parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
-	{if_then_else} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end {-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
-	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{next_level} [expr]:expression_top {-> expr.expression};
 
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
@@ -840,6 +838,10 @@ expression_atomic {-> expression} =
 	{nat1_set} nat1 {-> New expression.nat1_set()} |
 	{int_set} int {-> New expression.int_set()} |
 	{bool_set} bool {-> New expression.bool_set()} |
+	{if_expression} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end 
+		{-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
+	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end 
+		{-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{string_set} string {-> New expression.string_set()} ;
 
 expression_list {-> expression*} =
@@ -864,7 +866,7 @@ substitution_l2 {-> substitution} =
 substitution_l3 {-> substitution} =
 	{block} begin [substitution]:substitution_l1 end {-> New substitution.block(substitution.substitution)} |
 	{skip} skip {-> New substitution.skip()} |
-	{assign} [lhs_expression]:expression_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
+	{assign} [lhs_expression]:assign_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
 	{precondition} pre [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
 	{assertion} assert [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
 	{choice} choice [first]:substitution_l1 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
@@ -872,14 +874,16 @@ substitution_l3 {-> substitution} =
 	{select} select [condition]:predicate_top then [then_subst]:substitution_l1 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
 	{case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l1 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
 	{any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
-	{becomes_element_of} [identifiers]:expression_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
-	{becomes_such} [identifiers]:expression_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
+	{becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
+	{becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
 	{var} var [identifiers]:identifier_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
-	{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // check in semantic check if expression is a function
-	{operation_call} [return_values]:expression_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
+	//{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
+	{operation_call_without_parameter} [op]:identifier_or_function {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
+	{operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
 	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
 	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
 	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
+    
     // extensions for rules
 	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
@@ -942,6 +946,17 @@ composed_identifier_expression {-> expression} =
 identifier_list {-> expression*} =
 	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
 	{multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
+
+assign_list {-> expression*} =
+	{single} [name]:identifier_or_function {-> [name.expression]} |
+	{multi} [rest]:assign_list comma [name]:identifier_or_function {-> [rest.expression, name.expression]} ;
+
+identifier_or_function {-> expression} =
+	 {single} [name]:composed_identifier_expression {-> name.expression} |
+	 {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
+
+normal_identifier_expression {-> expression} = 
+	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 quantified_variables_list {-> expression*} =
 	{parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |

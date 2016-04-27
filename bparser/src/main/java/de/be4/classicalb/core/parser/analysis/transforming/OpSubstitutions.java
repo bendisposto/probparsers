@@ -45,7 +45,7 @@ import de.hhu.stups.sablecc.patch.SourcePositions;
  * of a definition is an expression or a substitution. Function and operation
  * calls are syntactically the same in most cases. So we postpone the decision
  * until this DFS is made. The first usage of a definition determines which type
- * is asumed. All other uses need to follow this typing otherwise an error is
+ * is assumed. All other uses need to follow this typing otherwise an error is
  * thrown.
  * </p>
  * <p>

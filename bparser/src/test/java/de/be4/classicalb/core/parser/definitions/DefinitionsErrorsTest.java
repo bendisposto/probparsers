@@ -15,15 +15,14 @@ public class DefinitionsErrorsTest {
 	
 	@Test
 	public void checkForInvalidSubstitution() throws Exception {
-		String s = "MACHINE Definitions \n DEFINITIONS \n foo == BEGIN x=1 END \nEND";
+		String s = "MACHINE Definitions \n DEFINITIONS \n foo == BEGIN\n x=1 END \nEND";
 		try {
 			getTreeAsString(s);
 			fail("Invalid substitution was not detected.");
 		} catch (BException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
-			assertTrue(e.getMessage().contains("[3,16]"));
-			assertTrue(e.getMessage().contains("assign"));
+			assertTrue(e.getMessage().contains("[4,3]"));
 		}
 	}
 	
