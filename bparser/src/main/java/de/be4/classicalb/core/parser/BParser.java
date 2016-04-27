@@ -454,7 +454,7 @@ public class BParser {
 		rootNode.apply(new Couples());
 		rootNode.apply(new SyntaxExtensionTranslator());
 
-		this.parseOptions.grammar.applyAstTransformation(rootNode);
+		this.parseOptions.grammar.applyAstTransformation(rootNode, this);
 
 		// TODO more AST transformations?
 

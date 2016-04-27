@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.extensions;
 
 import java.util.HashMap;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.transforming.RuleTransformation;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -88,7 +89,7 @@ public class RuleGrammar implements IGrammar {
 		}
 	}
 
-	public void applyAstTransformation(Start start) throws CheckException {
-		new RuleTransformation().runTransformation(start);
+	public void applyAstTransformation(Start start, BParser bparser) throws CheckException {
+		new RuleTransformation().runTransformation(start, bparser.getDefinitions());
 	}
 }

@@ -57,6 +57,8 @@ public class RuleExtensionsTest {
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AConstantsMachineClause([AIdentifierExpression([RULE_FAI])]),APropertiesMachineClause(AEqualPredicate(AIdentifierExpression([RULE_FAI]),AIntegerExpression(1)))]))",
 				result);
 	}
+	
+	
 
 	@Test(expected = BException.class)
 	public void testDuplicateRuleAssignStatement() throws Exception {
@@ -83,6 +85,30 @@ public class RuleExtensionsTest {
 	@Test
 	public void testRuleOperationAndExistingVariables() throws Exception {
 		final String testMachine = "RULES_MACHINE Test VARIABLES x INVARIANT x = 1 INITIALISATION x:= 1 OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
+		getTreeAsString(testMachine);
+	}
+	
+	@Test
+	public void testRuleIfThenElse() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
+		getTreeAsString(testMachine);
+	}
+	
+	@Test (expected=BException.class)
+	public void testRuleSkip() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = skip END";
+		getTreeAsString(testMachine);
+	}
+	
+	@Test (expected=BException.class)
+	public void testRuleDefinitionSubstituion() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == skip OPERATIONS RULE rule1 = BEGIN RULE_SUCCESS; foo END END";
+		getTreeAsString(testMachine);
+	}
+	
+	@Test (expected=BException.class)
+	public void testRuleIfThenElseError() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = IF 1=1 THEN RULE_SUCCESS ELSE skip END END";
 		getTreeAsString(testMachine);
 	}
 

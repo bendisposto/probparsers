@@ -12,8 +12,12 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.ACaseSubstitution;
+import de.be4.classicalb.core.parser.node.AChoiceOrSubstitution;
+import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
+import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.ADependsOnRulesPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
@@ -37,6 +41,7 @@ import de.be4.classicalb.core.parser.node.ARuleFailSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
 import de.be4.classicalb.core.parser.node.ARuleSuccessSubstitution;
 import de.be4.classicalb.core.parser.node.ASelectSubstitution;
+import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStringSetExpression;
@@ -61,7 +66,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTER_EXAMPLE_SET = "#CT_SET";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
-	private Definitions definitions;
+	private IDefinitions definitions;
 	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	private AVariablesMachineClause variablesMachineClause = null;
 	private AInvariantMachineClause invariantMachineClause = null;
@@ -69,8 +74,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 	private ArrayList<String> ruleNames = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
 
-	public void runTransformation(Start start) throws CheckException {
-		this.definitions = new Definitions();
+	public void runTransformation(Start start, IDefinitions definitions) throws CheckException {
+		this.definitions = definitions;
 		CorrectRuleChecker correctRuleChecker = new CorrectRuleChecker();
 		start.apply(correctRuleChecker);
 		if (correctRuleChecker.errorlist.size() > 0) {
@@ -438,7 +443,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
 		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
 		toStringDef.setName(new TIdentifierLiteral("TO_STRING"));
-		toStringDef.setParameters(createIdentifierList("X"));
+		toStringDef.setParameters(createIdentifierList("S"));
 		toStringDef.setRhs(new AStringExpression(new TStringLiteral("0")));
 		definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
 
@@ -462,6 +467,46 @@ public class RuleTransformation extends DepthFirstAdapter {
 	class CorrectRuleChecker extends DepthFirstAdapter {
 		ArrayList<CheckException> errorlist = new ArrayList<>();
 		Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
+		private boolean inRule = false;
+
+		@Override
+		public void caseARuleOperation(ARuleOperation node) {
+			inRule = true;
+			node.getRuleBody().apply(this);
+			inRule = false;
+			if (!ruleAssignmentTable.containsKey(node)) {
+				errorlist.add(new CheckException(
+						"No result value assigned in rule operation", node));
+			}
+		}
+
+		@Override
+		public void inADefinitionSubstitution(ADefinitionSubstitution node) {
+			if (inRule) {
+				errorlist
+						.add(new CheckException(
+								"Definition calls of type substitution are not allowed in rule operations",
+								node));
+			}
+		}
+
+		public void inAChoiceSubstitution(AChoiceSubstitution node) {
+			if (inRule) {
+				errorlist
+						.add(new CheckException(
+								"A CHOICE substitution is not allowed in rule operations",
+								node));
+			}
+		}
+
+		public void inACaseSubstitution(ACaseSubstitution node) {
+			if (inRule) {
+				errorlist
+						.add(new CheckException(
+								"A CASE substitution is not allowed in rule operations",
+								node));
+			}
+		}
 
 		@Override
 		public void defaultOut(Node node) {
@@ -475,13 +520,32 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 		private void setParent(Node parent, Node value) {
 			if (ruleAssignmentTable.containsKey(parent)) {
-				errorlist
-						.add(new CheckException(
-								"Result value of rule operation is assigned more than once",
-								value));
+				if (parent instanceof ASequenceSubstitution
+						|| parent instanceof AParallelSubstitution) {
+					errorlist
+							.add(new CheckException(
+									"Result value of rule operation is assigned more than once",
+									value));
+				}
 			} else {
 				ruleAssignmentTable.put(parent, value);
 			}
+		}
+
+		public void outAIfSubstitution(AIfSubstitution node) {
+			if (!ruleAssignmentTable.containsKey(node.getThen())) {
+				errorlist
+						.add(new CheckException(
+								"Result value of rule operation is not assigned in then branch",
+								node));
+			}
+			if (!ruleAssignmentTable.containsKey(node.getElse())) {
+				errorlist
+						.add(new CheckException(
+								"Result value of rule operation is not assigned in else branch",
+								node));
+			}
+			defaultOut(node);
 		}
 
 		@Override
@@ -503,11 +567,5 @@ public class RuleTransformation extends DepthFirstAdapter {
 			defaultOut(node);
 		}
 
-		public void outARuleOperation(ARuleOperation node) {
-			if (!ruleAssignmentTable.containsKey(node)) {
-				errorlist.add(new CheckException(
-						"No result value assigned in rule operation", node));
-			}
-		}
 	}
 }

@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.extensions;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
 
@@ -16,7 +17,7 @@ public class DefaultGrammar implements IGrammar {
 	}
 
 	@Override
-	public void applyAstTransformation(Start start) {
+	public void applyAstTransformation(Start start, BParser bParser) {
 	}
 
 }
