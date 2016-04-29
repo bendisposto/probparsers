@@ -28,7 +28,7 @@ public class StringLiteralNotClosedTest {
 	@Test
 	public void testStringLiteralNotClosedLongString() {
 		final String testMachine = "MACHINE Test CONSTANTS the_string PROPERTIES the_string = \"not closed"
-				+ randomString(10000) + "END";
+				+ randomString(100) + "END";
 		try {
 			getTreeAsString(testMachine);
 			fail("Exception did not occur");
