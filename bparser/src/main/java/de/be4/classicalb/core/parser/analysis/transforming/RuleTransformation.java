@@ -5,7 +5,6 @@ import java.util.Hashtable;
 import java.util.List;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -13,11 +12,9 @@ import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceOrSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
-import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.ADependsOnRulesPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
@@ -74,7 +71,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 	private ArrayList<String> ruleNames = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
 
-	public void runTransformation(Start start, IDefinitions definitions) throws CheckException {
+	public void runTransformation(Start start, IDefinitions definitions)
+			throws CheckException {
 		this.definitions = definitions;
 		CorrectRuleChecker correctRuleChecker = new CorrectRuleChecker();
 		start.apply(correctRuleChecker);
@@ -466,7 +464,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 	class CorrectRuleChecker extends DepthFirstAdapter {
 		ArrayList<CheckException> errorlist = new ArrayList<>();
-		Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
+		final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
 		private boolean inRule = false;
 
 		@Override
@@ -477,16 +475,6 @@ public class RuleTransformation extends DepthFirstAdapter {
 			if (!ruleAssignmentTable.containsKey(node)) {
 				errorlist.add(new CheckException(
 						"No result value assigned in rule operation", node));
-			}
-		}
-
-		@Override
-		public void inADefinitionSubstitution(ADefinitionSubstitution node) {
-			if (inRule) {
-				errorlist
-						.add(new CheckException(
-								"Definition calls of type substitution are not allowed in rule operations",
-								node));
 			}
 		}
 
@@ -510,7 +498,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 		@Override
 		public void defaultOut(Node node) {
-			if (ruleAssignmentTable.containsKey(node)) {
+			if (inRule && ruleAssignmentTable.containsKey(node)) {
 				Node value = ruleAssignmentTable.get(node);
 				if (node.parent() != null) {
 					setParent(node.parent(), value);
@@ -532,30 +520,57 @@ public class RuleTransformation extends DepthFirstAdapter {
 			}
 		}
 
+		private boolean resultIsSet(Node node) {
+			return ruleAssignmentTable.containsKey(node);
+		}
+
 		public void outAIfSubstitution(AIfSubstitution node) {
-			if (!ruleAssignmentTable.containsKey(node.getThen())) {
-				errorlist
-						.add(new CheckException(
-								"Result value of rule operation is not assigned in then branch",
-								node));
+			if (inRule) {
+				if (resultIsSet(node.getThen())) {
+					if (node.getElse() == null) {
+						errorlist
+								.add(new CheckException(
+										"There must be an ELSE branch if a result value is set in the THEN branch",
+										node));
+					} else if (!resultIsSet(node.getElse())) {
+						errorlist
+								.add(new CheckException(
+										"Result value is set in the THEN branch but not in ELSE branch",
+										node));
+					}
+				} else {
+					// no result set in THEN
+					if (node.getElse() != null) {
+						if (resultIsSet(node.getElse())) {
+							errorlist
+									.add(new CheckException(
+											"Result value is not set in the THEN branch but set in the ELSE branch",
+											node));
+						}
+
+					}
+				}
+				defaultOut(node);
 			}
-			if (!ruleAssignmentTable.containsKey(node.getElse())) {
-				errorlist
-						.add(new CheckException(
-								"Result value of rule operation is not assigned in else branch",
-								node));
-			}
-			defaultOut(node);
+
 		}
 
 		@Override
 		public void outARuleFailSubstitution(ARuleFailSubstitution node) {
+			if (!inRule) {
+				errorlist.add(new CheckException(
+						"RULE_FAIL used outside of a RULE operation", node));
+			}
 			ruleAssignmentTable.put(node, node);
 			defaultOut(node);
 		}
 
 		@Override
 		public void outARuleSuccessSubstitution(ARuleSuccessSubstitution node) {
+			if (!inRule) {
+				errorlist.add(new CheckException(
+						"RULE_SUCCESS used outside of a RULE operation", node));
+			}
 			ruleAssignmentTable.put(node, node);
 			defaultOut(node);
 		}
@@ -563,6 +578,10 @@ public class RuleTransformation extends DepthFirstAdapter {
 		@Override
 		public void outAForallSubMessageSubstitution(
 				AForallSubMessageSubstitution node) {
+			if (!inRule) {
+				errorlist.add(new CheckException(
+						"RULE_FORALL used outside of a RULE operation", node));
+			}
 			ruleAssignmentTable.put(node, node);
 			defaultOut(node);
 		}

@@ -27,4 +27,8 @@ public class CheckException extends Exception {
 	public Node[] getNodes() {
 		return nodes;
 	}
+
+	public Node getFirstNode() {
+		return nodes[0];
+	}
 }

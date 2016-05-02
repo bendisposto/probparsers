@@ -39,6 +39,7 @@ public class PreParser {
 	private DefinitionTypes types;
 
 	private final IDefinitions defFileDefinitions = new Definitions();
+	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
 	private final List<String> doneDefFiles;
 	private final String modelFileName;
@@ -47,12 +48,13 @@ public class PreParser {
 	public PreParser(final PushbackReader pushbackReader,
 			final IFileContentProvider contentProvider,
 			final List<String> doneDefFiles, final String modelFileName,
-			final File directory) {
+			final File directory, ParseOptions parseOptions) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
 		this.modelFileName = modelFileName;
 		this.directory = directory;
+		this.parseOptions = parseOptions;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
@@ -129,7 +131,7 @@ public class PreParser {
 					if (file != null) {
 						filePath = file.getCanonicalPath();
 					}
-					final BParser parser = new BParser(filePath);
+					final BParser parser = new BParser(filePath, parseOptions);
 					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.parse(content, debugOutput, contentProvider);
@@ -204,10 +206,11 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs,
 					todoDefs);
 			if (definitionType.errorMessage != null) {
-				 throw new PreParseException(definitionType.errorMessage + " in file: " + modelFileName );
-//				throw new BParseException(definitionType.errorToken,
-//						definitionType.errorMessage + " in file: "
-//								+ modelFileName);
+				throw new PreParseException(definitionType.errorMessage
+						+ " in file: " + modelFileName);
+				// throw new BParseException(definitionType.errorToken,
+				// definitionType.errorMessage + " in file: "
+				// + modelFileName);
 			} else {
 				// fall back message
 				throw new PreParseException(
@@ -382,6 +385,7 @@ public class PreParser {
 		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
 																				// Magic
 																				// number!!!!
+		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);
 		try {

@@ -62,7 +62,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions = new ParseOptions();
+	private final ParseOptions parseOptions;
 
 	private List<String> doneDefFiles = new ArrayList<String>();
 
@@ -77,6 +77,12 @@ public class BParser {
 
 	public BParser(final String fileName) {
 		this.fileName = fileName;
+		this.parseOptions = new ParseOptions();
+	}
+
+	public BParser(final String fileName, ParseOptions parseOptions) {
+		this.fileName = fileName;
+		this.parseOptions = parseOptions;
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -357,7 +363,6 @@ public class BParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
 					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
 			lexer.setParseOptions(parseOptions);
-
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
@@ -393,6 +398,8 @@ public class BParser {
 
 			// perform some semantic checks which are not done in the parser
 			performSemanticChecks(rootNode);
+
+			this.parseOptions.grammar.applyAstTransformation(rootNode, this);
 
 			// locate the pragmas
 
@@ -434,10 +441,9 @@ public class BParser {
 			File directory) throws IOException, PreParseException, BException {
 		final PreParser preParser = new PreParser(
 				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.fileName, directory); // FIXME remove magic number
+				this.fileName, directory, parseOptions); // FIXME remove magic number
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
-
 		/*
 		 * Collect the definitions of all referenced definition files and add
 		 * them to the internal definitions
@@ -453,8 +459,6 @@ public class BParser {
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new Couples());
 		rootNode.apply(new SyntaxExtensionTranslator());
-
-		this.parseOptions.grammar.applyAstTransformation(rootNode, this);
 
 		// TODO more AST transformations?
 

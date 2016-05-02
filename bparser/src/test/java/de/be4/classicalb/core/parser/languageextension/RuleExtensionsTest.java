@@ -2,15 +2,20 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class RuleExtensionsTest {
 
@@ -42,10 +47,20 @@ public class RuleExtensionsTest {
 				result);
 	}
 
-	@Test(expected = BException.class)
-	public void testRuleOperationMissingFailOrSuccess() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip END END";
-		getTreeAsString(testMachine);
+	@Test
+	public void testRuleOperationMissingFailOrSuccess() {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS\n RULE foo = BEGIN skip END END";
+			getTreeAsString(testMachine);
+			fail("Missing exception.");
+		} catch (BException e) {
+			assertEquals("No result value assigned in rule operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			Node node = check.getFirstNode();
+			assertEquals(2, node.getStartPos().getLine());
+			assertEquals(2, node.getStartPos().getPos());
+		}
 	}
 
 	@Test
@@ -57,13 +72,66 @@ public class RuleExtensionsTest {
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AConstantsMachineClause([AIdentifierExpression([RULE_FAI])]),APropertiesMachineClause(AEqualPredicate(AIdentifierExpression([RULE_FAI]),AIntegerExpression(1)))]))",
 				result);
 	}
-	
-	
 
-	@Test(expected = BException.class)
+	@Test
 	public void testDuplicateRuleAssignStatement() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;RULE_SUCCESS  END END";
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;\nRULE_SUCCESS  END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals(
+					"Result value of rule operation is assigned more than once",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+
+	@Test
+	public void testOrdinaryOperationInRulesMachine() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = BEGIN skip END END";
 		getTreeAsString(testMachine);
+	}
+
+	@Test
+	public void testOrdinaryOperationWithIfThenElse() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = IF 1=1 THEN skip ELSE skip END END";
+		getTreeAsString(testMachine);
+	}
+
+	@Test
+	public void testRuleSuccessInOrdinaryOperation() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS foo = IF 1=1 THEN RULE_SUCCESS ELSE skip END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals("RULE_SUCCESS used outside of a RULE operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(1, startPos.getLine());
+			assertEquals(49, startPos.getPos());
+		}
+	}
+
+	@Test
+	public void testRuleFailInOrdinaryOperation() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS foo = IF 1=1 THEN RULE_FAIL ELSE skip END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals("RULE_FAIL used outside of a RULE operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(1, startPos.getLine());
+			assertEquals(49, startPos.getPos());
+		}
 	}
 
 	@Test
@@ -87,29 +155,128 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test VARIABLES x INVARIANT x = 1 INITIALISATION x:= 1 OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
 		getTreeAsString(testMachine);
 	}
-	
+
 	@Test
 	public void testRuleIfThenElse() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
 		getTreeAsString(testMachine);
 	}
 	
-	@Test (expected=BException.class)
-	public void testRuleSkip() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = skip END";
+	@Test
+	public void testSequencingSubstitution() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;skip END END";
+		getTreeAsString(testMachine);
+		final String testMachine2 = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip;RULE_SUCCESS END END";
+		getTreeAsString(testMachine2);
+	}
+	
+	@Test
+	public void testIfWithoutElseBranch() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS foo = IF 1=1 THEN RULE_FAIL ELSE skip END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals("RULE_FAIL used outside of a RULE operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(1, startPos.getLine());
+			assertEquals(49, startPos.getPos());
+		}
+	}
+	
+	@Test
+	public void testSequencingSubstitution2() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;IF 1=1 THEN skip END END END";
 		getTreeAsString(testMachine);
 	}
 	
-	@Test (expected=BException.class)
-	public void testRuleDefinitionSubstituion() throws Exception {
+	@Test
+	public void testSequencingSubstitution3() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo = BEGIN skip;IF 1=1 THEN skip END END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals("No result value assigned in rule operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+	
+	@Test
+	public void testResultOnlySetInTheElseBranch() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN \nIF 1=1 THEN skip ELSE RULE_SUCCESS END END END";
+			getTreeAsString(testMachine);
+			fail("Exception expected");
+		} catch (BException e) {
+			assertEquals("Result value is not set in the THEN branch but set in the ELSE branch",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+	
+	@Test
+	public void testRuleSkip() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo = skip END";
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (BException e) {
+			assertEquals("No result value assigned in rule operation",
+					e.getMessage());
+			final CheckException check = (CheckException) e.getCause();
+			final SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+
+	@Test
+	public void testAllowedDefinitionCall() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == skip OPERATIONS RULE rule1 = BEGIN RULE_SUCCESS; foo END END";
 		getTreeAsString(testMachine);
 	}
-	
-	@Test (expected=BException.class)
+
+	@Test
+	public void testInvalidDefinitionCall() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == \nRULE_FAIL OPERATIONS RULE rule1 = BEGIN RULE_SUCCESS; foo END END";
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (BException e) {
+			assertEquals("RULE_FAIL used outside of a RULE operation",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+
+	@Test
 	public void testRuleIfThenElseError() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = IF 1=1 THEN RULE_SUCCESS ELSE skip END END";
-		getTreeAsString(testMachine);
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = \nIF 1=1 THEN RULE_SUCCESS ELSE skip END END";
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (BException e) {
+			assertEquals(
+					"Result value is set in the THEN branch but not in ELSE branch",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
 	}
 
 	@Test
