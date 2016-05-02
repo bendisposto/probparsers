@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import util.Helpers;
@@ -161,7 +160,7 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
 		getTreeAsString(testMachine);
 	}
-	
+
 	@Test
 	public void testSequencingSubstitution() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;skip END END";
@@ -169,7 +168,7 @@ public class RuleExtensionsTest {
 		final String testMachine2 = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip;RULE_SUCCESS END END";
 		getTreeAsString(testMachine2);
 	}
-	
+
 	@Test
 	public void testIfWithoutElseBranch() throws Exception {
 		try {
@@ -185,13 +184,13 @@ public class RuleExtensionsTest {
 			assertEquals(49, startPos.getPos());
 		}
 	}
-	
+
 	@Test
 	public void testSequencingSubstitution2() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;IF 1=1 THEN skip END END END";
 		getTreeAsString(testMachine);
 	}
-	
+
 	@Test
 	public void testSequencingSubstitution3() throws Exception {
 		try {
@@ -207,7 +206,7 @@ public class RuleExtensionsTest {
 			assertEquals(1, startPos.getPos());
 		}
 	}
-	
+
 	@Test
 	public void testResultOnlySetInTheElseBranch() throws Exception {
 		try {
@@ -215,7 +214,8 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals("Result value is not set in the THEN branch but set in the ELSE branch",
+			assertEquals(
+					"Result value is not set in the THEN branch but set in the ELSE branch",
 					e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
@@ -223,7 +223,7 @@ public class RuleExtensionsTest {
 			assertEquals(1, startPos.getPos());
 		}
 	}
-	
+
 	@Test
 	public void testRuleSkip() throws Exception {
 		try {
@@ -271,6 +271,40 @@ public class RuleExtensionsTest {
 		} catch (BException e) {
 			assertEquals(
 					"Result value is set in the THEN branch but not in ELSE branch",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+
+	@Test
+	public void testElseIfError() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = IF 1=1 THEN RULE_SUCCESS \nELSIF 1=1 THEN skip ELSE RULE_SUCCESS END END";
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (BException e) {
+			assertEquals(
+					"Result value is set in the THEN branch but not in ELSIF branch",
+					e.getMessage());
+			CheckException check = (CheckException) e.getCause();
+			SourcePosition startPos = check.getFirstNode().getStartPos();
+			assertEquals(2, startPos.getLine());
+			assertEquals(1, startPos.getPos());
+		}
+	}
+
+	@Test
+	public void testElseIf2Error() throws Exception {
+		try {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = IF 1=1 THEN skip \nELSIF 1=1 THEN RULE_SUCCESS ELSE skip END END";
+			getTreeAsString(testMachine);
+			fail("Expected exception");
+		} catch (BException e) {
+			assertEquals(
+					"Result value is not set in the THEN branch but set in ELSIF branch",
 					e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();

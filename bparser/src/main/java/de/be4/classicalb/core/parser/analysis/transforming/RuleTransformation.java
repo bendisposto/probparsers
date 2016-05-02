@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
@@ -538,17 +539,37 @@ public class RuleTransformation extends DepthFirstAdapter {
 										"Result value is set in the THEN branch but not in ELSE branch",
 										node));
 					}
-				} else {
-					// no result set in THEN
-					if (node.getElse() != null) {
-						if (resultIsSet(node.getElse())) {
+
+					final LinkedList<PSubstitution> elsifSubstitutions = node
+							.getElsifSubstitutions();
+					for (PSubstitution pSubstitution : elsifSubstitutions) {
+						if (!resultIsSet(pSubstitution)) {
 							errorlist
 									.add(new CheckException(
-											"Result value is not set in the THEN branch but set in the ELSE branch",
-											node));
+											"Result value is set in the THEN branch but not in ELSIF branch",
+											pSubstitution));
 						}
+					}
+				} else {
+					// no result set in THEN
+					if (node.getElse() != null && resultIsSet(node.getElse())) {
+						errorlist
+								.add(new CheckException(
+										"Result value is not set in the THEN branch but set in the ELSE branch",
+										node));
 
 					}
+					final LinkedList<PSubstitution> elsifSubstitutions = node
+							.getElsifSubstitutions();
+					for (PSubstitution pSubstitution : elsifSubstitutions) {
+						if (resultIsSet(pSubstitution)) {
+							errorlist
+									.add(new CheckException(
+											"Result value is not set in the THEN branch but set in ELSIF branch",
+											pSubstitution));
+						}
+					}
+
 				}
 				defaultOut(node);
 			}
