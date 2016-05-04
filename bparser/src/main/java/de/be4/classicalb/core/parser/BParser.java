@@ -27,7 +27,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
-import de.be4.classicalb.core.parser.analysis.transforming.Couples;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -440,7 +439,6 @@ public class BParser {
 	private void applyAstTransformations(final Start rootNode) throws CheckException {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
-		rootNode.apply(new Couples());
 		rootNode.apply(new SyntaxExtensionTranslator());
 
 		// TODO more AST transformations?

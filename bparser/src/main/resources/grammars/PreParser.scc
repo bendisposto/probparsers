@@ -112,7 +112,7 @@ Tokens
 	{definitions} comma = ',';
 
 	{definitions -> definitions_rhs} begin_def_body = '==';
-	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation all_chars_without_quote* double_quotation; 
+	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation; 
 	{definitions_rhs} begin_nesting =
 		'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
 		'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
@@ -123,7 +123,7 @@ Tokens
 	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
 	{definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = [all_chars - double_quotation] | double_quotation all_chars_without_quote* double_quotation;
+	{normal} something = [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
 
 	white_space = layout_char+;
 

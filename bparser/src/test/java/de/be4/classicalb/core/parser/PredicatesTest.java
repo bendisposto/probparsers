@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -38,8 +39,6 @@ public class PredicatesTest {
 				"Start(APredicateParseUnit(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([x]),AIdentifierExpression([ID])),AMemberPredicate(AIdentifierExpression([y]),AIdentifierExpression([ID])))))",
 				result);
 	}
-
-
 
 	@Test
 	public void testParallelBelongs2() {
@@ -80,22 +79,10 @@ public class PredicatesTest {
 				result);
 	}
 
-	@Test
-	public void testCoupleInExists1() throws Exception {
+	@Test(expected = BException.class)
+	public void testTooManyparentheses() throws Exception {
 		final String testMachine = "#PREDICATE # ((b,c,d)). ( b > c)";
-		final String result = getTreeAsString(testMachine);
-		assertEquals(
-				"Start(APredicateParseUnit(AExistsPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
-				result);
-	}
-
-	@Test
-	public void testCoupleInForall1() throws Exception {
-		final String testMachine = "#PREDICATE ! ((b,c,d)). ( b > c)";
-		final String result = getTreeAsString(testMachine);
-		assertEquals(
-				"Start(APredicateParseUnit(AForallPredicate([AIdentifierExpression([b]),AIdentifierExpression([c]),AIdentifierExpression([d])],AGreaterPredicate(AIdentifierExpression([b]),AIdentifierExpression([c])))))",
-				result);
+		getTreeAsString(testMachine);
 	}
 
 	@Test
@@ -133,6 +120,7 @@ public class PredicatesTest {
 				"Start(APredicateParseUnit(AImplicationPredicate(AEquivalencePredicate(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(2)),AEqualPredicate(AIntegerExpression(3),AIntegerExpression(4))),AEqualPredicate(AIntegerExpression(5),AIntegerExpression(6)))))",
 				result);
 	}
+
 	@Test
 	public void testEqualVsImplicationFormula() throws Exception {
 		final String testMachine = "#FORMULA 1=2 <=> 3=4 => 5=6";
@@ -165,11 +153,10 @@ public class PredicatesTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodes().length);
-			assertNotNull(cause.getNodes()[0]);
+			assertTrue(e.getCause() instanceof BParseException);
 		}
 	}
+
 	@Test
 	public void testNonIdentifiersInQuantificationFormula() {
 		final String testMachine = "#FORMULA ! a,5. (a=5 => a/=5 )";
@@ -177,9 +164,7 @@ public class PredicatesTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodes().length);
-			assertNotNull(cause.getNodes()[0]);
+			assertTrue(e.getCause() instanceof BParseException);
 		}
 	}
 
@@ -187,8 +172,10 @@ public class PredicatesTest {
 	public void testSubstitutionInPredicate() throws BException {
 		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		parser.getOptions().restrictProverExpressions = false;
-        final String astString = getTreeAsString(testMachine);
-        assertEquals("Start(APredicateParseUnit(AConjunctPredicate(AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10))))))", astString);
+		final String astString = getTreeAsString(testMachine);
+		assertEquals(
+				"Start(APredicateParseUnit(AConjunctPredicate(AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10))))))",
+				astString);
 	}
 
 	@Test
@@ -198,12 +185,10 @@ public class PredicatesTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodes().length);
-			assertNotNull(cause.getNodes()[0]);
+			assertTrue(e.getCause() instanceof BParseException);
 		}
 	}
-	
+
 	private String getPredicateAsString(final String expression)
 			throws BException {
 		final String machine = "#PREDICATE " + expression;

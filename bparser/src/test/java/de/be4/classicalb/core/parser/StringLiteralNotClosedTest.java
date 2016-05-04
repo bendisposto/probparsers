@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Random;
@@ -9,6 +10,8 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -33,7 +36,9 @@ public class StringLiteralNotClosedTest {
 			getTreeAsString(testMachine);
 			fail("Exception did not occur");
 		} catch (BException e) {
-			assertEquals("Parsing failed with an IOException: Pushback buffer overflow", e.getMessage());
+			System.out.println(e.getCause());
+			assertTrue(e.getCause() instanceof PreParseException);
+			assertTrue(e.getLocalizedMessage().contains("Unknown token:"));
 		}
 	}
 
