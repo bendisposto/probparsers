@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -19,6 +20,7 @@ import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADependsOnRulesPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
+import de.be4.classicalb.core.parser.node.AExpectCounterexampleSubstitution;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AForallSubSubstitution;
@@ -44,6 +46,7 @@ import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStringSetExpression;
 import de.be4.classicalb.core.parser.node.ATotalFunctionExpression;
+import de.be4.classicalb.core.parser.node.AUnionExpression;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
@@ -64,7 +67,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTER_EXAMPLE_SET = "#CT_SET";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
-	private IDefinitions definitions;
+	private final IDefinitions definitions;
+	private final Start start;
 	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	private AVariablesMachineClause variablesMachineClause = null;
 	private AInvariantMachineClause invariantMachineClause = null;
@@ -72,15 +76,17 @@ public class RuleTransformation extends DepthFirstAdapter {
 	private ArrayList<String> ruleNames = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
 
-	public void runTransformation(Start start, IDefinitions definitions)
-			throws CheckException {
-		this.definitions = definitions;
+	public RuleTransformation(Start start, BParser bParser) {
+		this.start = start;
+		this.definitions = bParser.getDefinitions();
+	}
+
+	public void runTransformation() throws CheckException {
 		CorrectRuleChecker correctRuleChecker = new CorrectRuleChecker();
 		start.apply(correctRuleChecker);
 		if (correctRuleChecker.errorlist.size() > 0) {
 			throw correctRuleChecker.errorlist.get(0);
 		}
-
 		start.apply(this);
 		DefinitionInjector.injectDefinitions(start, definitions);
 	}
@@ -292,7 +298,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		if (node.getExpression() != null) {
 			final AAssignSubstitution assign = createRuleFailAssignment(
 					node.getExpression(),
-					createSetOfPexpression(node.getExpression()));
+					createSetOfPExpression(node.getExpression()));
 			node.replaceBy(assign);
 		} else {
 			final AAssignSubstitution assign = createRuleFailAssignment(
@@ -304,7 +310,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 	}
 
-	private PExpression createSetOfPexpression(PExpression expression) {
+	private PExpression createSetOfPExpression(PExpression expression) {
 		final ArrayList<PExpression> list = new ArrayList<>();
 		list.add((PExpression) cloneNode(expression));
 		return new ASetExtensionExpression(list);
@@ -391,38 +397,68 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public void outAForallSubMessageSubstitution(
 			AForallSubMessageSubstitution node) {
 
-		final List<PExpression> list = new ArrayList<PExpression>();
-		for (PExpression id : node.getIdentifiers()) {
-			list.add((PExpression) cloneNode(id));
-		}
 
-		final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-		final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
 
 		final ALetSubstitution letSub = new ALetSubstitution();
 		final List<PExpression> letList = new ArrayList<PExpression>();
 		letList.add(createIdentifier(RULE_COUNTER_EXAMPLE_SET));
 		letSub.setIdentifiers(letList);
 
+		// mandatory union
 		final AQuantifiedUnionExpression union = new AQuantifiedUnionExpression();
-		union.setIdentifiers(list);
-		union.setPredicates(new AConjunctPredicate(where,
-				new ANegationPredicate(expect)));
+		{
+			final List<PExpression> list = new ArrayList<PExpression>();
+			for (PExpression id : node.getIdentifiers()) {
+				PExpression clonedId = (PExpression) cloneNode(id);
+				list.add(clonedId);
+			}
+			union.setIdentifiers(list);
+			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
+			final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
+			union.setPredicates(new AConjunctPredicate(where,
+					new ANegationPredicate(expect)));
+			final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
+			setElementsInUnionList.add(node.getMessage());
+			final ASetExtensionExpression set = new ASetExtensionExpression(
+					setElementsInUnionList);
+			union.setExpression(set);
+		}
+		List<PExpression> unionList = new ArrayList<>();
+		for (Node n : node.getExpects()) {
+			AExpectCounterexampleSubstitution ec = (AExpectCounterexampleSubstitution) n;
+			final List<PExpression> list = new ArrayList<PExpression>();
+			for (PExpression id : node.getIdentifiers()) {
+				PExpression clonedId = (PExpression) cloneNode(id);
+				list.add(clonedId);
+			}
+			final AQuantifiedUnionExpression u = new AQuantifiedUnionExpression();
+			u.setIdentifiers(list);
+			final PPredicate w = (PPredicate) cloneNode(node.getWhere());
+			final PPredicate e = (PPredicate) cloneNode(ec.getExpect());
+			u.setPredicates(new AConjunctPredicate(w, new ANegationPredicate(e)));
+			final List<PExpression> elementsList = new ArrayList<PExpression>();
+			elementsList.add(ec.getMessage());
 
-		final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
-		setElementsInUnionList.add(node.getMessage());
-		final ASetExtensionExpression set = new ASetExtensionExpression(
-				setElementsInUnionList);
-		union.setExpression(set);
+			u.setExpression(createSetOfPExpression((PExpression) ec
+					.getMessage()));
+			unionList.add(u);
+		}
+
+		PExpression all = union;
+		for (PExpression other : unionList) {
+			all = new AUnionExpression(all, other);
+		}
+
 		final AEqualPredicate letEqual = new AEqualPredicate(
-				createIdentifier(RULE_COUNTER_EXAMPLE_SET), union);
+				createIdentifier(RULE_COUNTER_EXAMPLE_SET), all);
 		letSub.setPredicate(letEqual);
 
 		final AEqualPredicate ifPred = new AEqualPredicate(
 				createIdentifier(RULE_COUNTER_EXAMPLE_SET),
 				new AEmptySetExpression());
 
-		injectToStringDefinition();
+		addToStringDefinition();
+		
 		ADefinitionExpression toStringCall = new ADefinitionExpression();
 		toStringCall.setDefLiteral(new TIdentifierLiteral("TO_STRING"));
 		ArrayList<PExpression> definitionParameters = new ArrayList<>();
@@ -437,7 +473,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		node.replaceBy(letSub);
 	}
 
-	private void injectToStringDefinition() {
+	private void addToStringDefinition() {
 		// TO_STRING(S) == "0";
 		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
 		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();

@@ -22,18 +22,18 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class RuleGrammar implements IGrammar {
 
-	
 	private static RuleGrammar ruleExtension;
-	public static RuleGrammar  getInstance(){
-		if(ruleExtension == null){
+
+	public static RuleGrammar getInstance() {
+		if (ruleExtension == null) {
 			ruleExtension = new RuleGrammar();
 		}
 		return ruleExtension;
 	}
-	
-	private RuleGrammar(){}
-	
-	
+
+	private RuleGrammar() {
+	}
+
 	private static final HashMap<String, Class<? extends Token>> map = new HashMap<>();
 	static {
 		add(TKwRule.class);
@@ -44,9 +44,9 @@ public class RuleGrammar implements IGrammar {
 		add(TKwExpect.class);
 		add(TKwCounterexample.class);
 		add(TKwRuleForAll.class);
-		map.put(new TKwRulesMachine().getText() ,TMachine.class);
+		map.put(new TKwRulesMachine().getText(), TMachine.class);
 	}
-	
+
 	private static void add(Class<? extends Token> clazz) {
 		try {
 			map.put(clazz.newInstance().getText(), clazz);
@@ -59,8 +59,8 @@ public class RuleGrammar implements IGrammar {
 					+ clazz.getName());
 		}
 	}
-	
-	public static String getModelType(){
+
+	public static String getModelType() {
 		return new TKwRulesMachine().getText();
 	}
 
@@ -89,7 +89,8 @@ public class RuleGrammar implements IGrammar {
 		}
 	}
 
-	public void applyAstTransformation(Start start, BParser bparser) throws CheckException {
-		new RuleTransformation().runTransformation(start, bparser.getDefinitions());
+	public void applyAstTransformation(Start start, BParser bparser)
+			throws CheckException {
+		new RuleTransformation(start, bparser).runTransformation();
 	}
 }

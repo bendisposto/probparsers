@@ -67,7 +67,7 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "src/test/resources/definitions/definitionFiles/";
 		String file = PATH + "MachineOverridingDefinition.mch";
 		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains("'DefinitionOfBar',[],integer(6,4)"));
+		assertTrue(result.contains("'DefinitionOfBar'"));
 	}
 	
 	@Test

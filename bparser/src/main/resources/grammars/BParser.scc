@@ -571,7 +571,6 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
 	{next_level} [pred]:predicate_x30 {-> pred.predicate} ;
-
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
@@ -580,13 +579,12 @@ predicate_p40 {-> predicate} =
 	{next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-       {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
-  {next_level} [pred]:predicate_x41 {-> pred.predicate};
+    {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
+  	{next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
-       {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
-  {next_level} [pred]:predicate_x42 {-> pred.predicate};
-
+  	{description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
+  	{next_level} [pred]:predicate_x42 {-> pred.predicate};
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
@@ -605,7 +603,8 @@ predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 */
 
 predicate_atomic {-> predicate} =
-	{subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic {-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } |
+	{subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic 
+		{-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } | //weakest precondition
     /* The following predicates have a priority in the AtelierB manual.
        But we (in contrast to AtelierB) distinguish between predicates and expression and
        can put the predicates of the form EXPR*EXPR -> PRED here.
@@ -640,8 +639,7 @@ predicate_atomic {-> predicate} =
 		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
 	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
 		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
-	{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])}; // extension for rules
-
+	{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])} ; // extension for rules
 
 /* Expressions */
 
@@ -751,10 +749,11 @@ expression_keyword {-> expression} =
 	{closure} closure1 left_par [expression]:expression_in_par right_par {-> New expression.closure(expression.expression)} |
 	{domain} dom left_par [expression]:expression_in_par right_par {-> New expression.domain(expression.expression)} |
 	{range} ran left_par [expression]:expression_in_par right_par {-> New expression.range(expression.expression)} |
-	{lambda} lambda [identifiers]:expression_list dot_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)} |
-  {symbolic_lambda} pragma_symbolic lambda [identifiers]:expression_list dot_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
-
-  {trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
+	{lambda} lambda [identifiers]:expression_list dot_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par 
+		{-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)} |
+  	{symbolic_lambda} pragma_symbolic lambda [identifiers]:expression_list dot_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par 
+  		{-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
+  	{trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
 	{trans_relation} rel left_par [expression]:expression_in_par right_par {-> New expression.trans_relation(expression.expression)} |
 	{seq} seq left_par [expression]:expression_in_par right_par {-> New expression.seq(expression.expression)} |
 	{seq1} seq1 left_par [expression]:expression_in_par right_par {-> New expression.seq1(expression.expression)} |
@@ -887,11 +886,13 @@ substitution_l3 {-> substitution} =
     // extensions for rules
 	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
-   	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top end
-    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression)} |	
+   	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
+    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |	
 	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
  	{rule_success} kw_rule_success {-> New substitution.rule_success()} ;
 
+expect_counterexample {-> substitution} = 
+	kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top {-> New substitution.expect_counterexample(expect_pred.predicate, message.expression)};
 
 parallel_subst_tail {-> substitution*} =
 	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
@@ -931,7 +932,6 @@ composed_identifier {-> identifier_literal*} =
 	{single} [name]:identifier_literal {-> [name]} |
 	{multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]} ;
 
-
 composed_identifier_list {-> expression*} =
 	{single} [identifier]:composed_identifier_file_pragma_expression {-> [identifier.expression]} |
 	{multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]} ;
@@ -947,7 +947,8 @@ identifier_list {-> expression*} =
 	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
 	{multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
 
-assign_list {-> expression*} =
+/* a,b,f(1),g(1)(2) := ... */
+assign_list {-> expression*} =	
 	{single} [name]:identifier_or_function {-> [name.expression]} |
 	{multi} [rest]:assign_list comma [name]:identifier_or_function {-> [rest.expression, name.expression]} ;
 
@@ -1139,7 +1140,6 @@ predicate =
 	{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*| /* Event-B only predicate - theory plugin */
 	{depends_on_rules} [identifiers]:expression* ; // extension for rules
 
-
 /* Expressions */
 expression =
 	{file} [identifier]:expression [content]:pragma_id_or_string |
@@ -1320,6 +1320,7 @@ substitution =
 	{parallel} [substitutions]:substitution* |
 	{definition} [def_literal]:def_literal_substitution [parameters]:expression* |
 	{forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
-	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression | //extension for rules
+	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
 	{rule_fail} [expression]:expression? | //extension for rules
-	{rule_success} ; // extension for rules
+	{rule_success} | // extension for rules
+	{expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules 

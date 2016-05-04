@@ -1,8 +1,6 @@
 package de.be4.classicalb.core.parser.languageextension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -34,6 +32,13 @@ public class RuleExtensionsTest {
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testDefinitionInjection() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 = RULE_FORALL r WHERE r : 1..3 EXPECT 1=2 COUNTEREXAMPLE \"foo\"  END END";
+		final String result = getTreeAsString(testMachine);
+		assertTrue(result.contains("AExpressionDefinitionDefinition(TO_STRING"));
 	}
 
 	@Test

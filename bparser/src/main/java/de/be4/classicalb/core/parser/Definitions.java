@@ -189,4 +189,9 @@ public class Definitions extends IDefinitions {
 	public Set<File> getDefinitionFiles() {
 		return definitionFiles;
 	}
+	
+	@Override
+	public String toString(){
+		return definitions.keySet().toString();
+	}
 }
