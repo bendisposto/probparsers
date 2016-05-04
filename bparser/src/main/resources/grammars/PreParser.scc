@@ -47,7 +47,7 @@ Helpers
 	invariant = 'INVARIANT';
 	local_operations = 'LOCAL_OPERATIONS';
 	machine = 'MACHINE' | 'MODEL' | 'SYSTEM';
-	operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS fuer Event-B */
+	operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS for Event-B */
 	promotes = 'PROMOTES';
 	properties = 'PROPERTIES';
 	refines = 'REFINES';
@@ -72,16 +72,15 @@ States
 	no_definitions,
 	comment;
 
-
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 
 Tokens
 
-	{normal, definitions, definitions_rhs} comment = comment_start ;
-	{comment} comment_end = comment_end ; 
-	{comment} comment_content = all_chars ;
+	{normal, definitions, definitions_rhs} comment = comment_start ;  // switch to comment state is done in PreLexer.java
+	{comment} comment_end = comment_end ; // switch back to previous state is done in PreLexer.java
+	{comment} comment_content = all_chars ;	
 	
 	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 		
@@ -113,7 +112,7 @@ Tokens
 	{definitions} comma = ',';
 
 	{definitions -> definitions_rhs} begin_def_body = '==';
-	{definitions_rhs} rhs_body = word_chars | double_quotation all_chars_without_quote* double_quotation;
+	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation all_chars_without_quote* double_quotation; 
 	{definitions_rhs} begin_nesting =
 		'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
 		'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
@@ -124,7 +123,7 @@ Tokens
 	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
 	{definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = all_chars | double_quotation all_chars_without_quote* double_quotation;
+	{normal} something = [all_chars - double_quotation] | double_quotation all_chars_without_quote* double_quotation;
 
 	white_space = layout_char+;
 
