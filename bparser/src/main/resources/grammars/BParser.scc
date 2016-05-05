@@ -41,7 +41,8 @@ Helpers
 
 States
 
-	normal,
+  section,
+  normal,
 	shebang,
 	comment,
 	pragma,
@@ -54,13 +55,13 @@ States
  *******************************************************************/
 
 Tokens
-	{normal -> shebang, shebang} shebang = '#!';
+	{section->shebang, normal -> shebang, shebang} shebang = '#!';
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
-  	{normal} line_comment = '//' [all_chars - line_break]* line_break?;
+  	{section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
-    {normal->pragma} pragma_start = '/*@';
+    {section->pragma,normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
     {pragma->unit} pragma_unit = 'unit';
     {pragma->unit} new_pragma_unit = 'new_unit';
@@ -78,7 +79,7 @@ Tokens
     {unit} unit_content = string_literal;
     {unit} unit_id = identifier_literal;
 
-	{normal -> comment} comment = comment_start ;
+	{section->comment, normal -> comment} comment = comment_start ;
 	{comment,description} comment_end = comment_end; // return to state 'normal' is done in Lexer
 	{comment} comment_body = [all_chars - ['*' + '/']]*;
 
@@ -155,7 +156,7 @@ Tokens
 	{normal} concrete_variables = 'CONCRETE_VARIABLES';
 	{normal} constants = 'CONSTANTS';
 	{normal} constraints = 'CONSTRAINTS';
-	{normal} definitions = 'DEFINITIONS';
+	{section->normal,normal} definitions = 'DEFINITIONS';
 	{normal} do = 'DO';
 	{normal} either = 'EITHER';
 	{normal} else = 'ELSE';
@@ -166,7 +167,7 @@ Tokens
 	{normal} fin = 'FIN';
 	{normal} fin1 = 'FIN1';  // add 'FIN'0x8321 ?
 	{normal} if = 'IF';
-	{normal} implementation = 'IMPLEMENTATION';
+	{section->normal,normal} implementation = 'IMPLEMENTATION';
 	{normal} imports = 'IMPORTS';
 	{normal} in = 'IN';
 	{normal} includes = 'INCLUDES';
@@ -177,9 +178,9 @@ Tokens
 	{normal} invariant = 'INVARIANT';
 	{normal} let = 'LET';
 	{normal} local_operations = 'LOCAL_OPERATIONS';
-	{normal} machine = 'MACHINE';
-	{normal} model = 'MODEL';
-	{normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
+	{section->normal,normal} machine = 'MACHINE';
+	{section->normal,normal} model = 'MODEL';
+	{section->normal,normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
 	{normal} max_int = 'MAXINT';
 	{normal} min_int = 'MININT';
 	{normal} nat = 'NAT';
@@ -196,7 +197,7 @@ Tokens
 	{normal} promotes = 'PROMOTES';
 	{normal} properties = 'PROPERTIES';
 	{normal} refines = 'REFINES';
-	{normal} refinement = 'REFINEMENT';
+	{section->normal,normal} refinement = 'REFINEMENT';
 	{normal} sees = 'SEES';
 	{normal} select = 'SELECT';
 	{normal} sets = 'SETS';
@@ -290,36 +291,36 @@ Tokens
 	{normal} kw_freetypes = 'FREETYPES';
 
 	// keywords for special parsing modes
-	{normal} kw_expression = '#EXPRESSION';
-	{normal} kw_predicate = '#PREDICATE';
-	{normal} kw_formula = '#FORMULA';
-	{normal} kw_substitution = '#SUBSTITUTION';
-	{normal} kw_abstract_constants = '#ABSTRACT_CONSTANTS';
-	{normal} kw_abstract_variables = '#ABSTRACT_VARIABLES';
-	{normal} kw_assertions = '#ASSERTIONS';
-	{normal} kw_concrete_constants = '#CONCRETE_CONSTANTS';
-	{normal} kw_concrete_variables = '#CONCRETE_VARIABLES';
-	{normal} kw_constants = '#CONSTANTS';
-	{normal} kw_constraints = '#CONSTRAINTS';
-	{normal} kw_definitions = '#DEFINITIONS';
-	{normal} kw_definition = '#DEFINITION';
-	{normal} kw_extends = '#EXTENDS';
-	{normal} kw_imports = '#IMPORTS';
-	{normal} kw_includes = '#INCLUDES';
-	{normal} kw_initialisation = '#INITIALISATION';
-	{normal} kw_invariant = '#INVARIANT';
-	{normal} kw_local_operations = '#LOCAL_OPERATIONS';
-	{normal} kw_operations = '#OPERATIONS';
-	{normal} kw_promotes = '#PROMOTES';
-	{normal} kw_properties = '#PROPERTIES';
-	{normal} kw_sees = '#SEES';
-	{normal} kw_sets = '#SETS';
-	{normal} kw_uses = '#USES';
-	{normal} kw_variables = '#VARIABLES';
-	{normal} kw_values = '#VALUES';
-	{normal} kw_oppattern = '#OPPATTERN';
+	{section->normal} kw_expression = '#EXPRESSION';
+	{section->normal} kw_predicate = '#PREDICATE';
+	{section->normal} kw_formula = '#FORMULA';
+	{section->normal} kw_substitution = '#SUBSTITUTION';
+	{section->normal} kw_abstract_constants = '#ABSTRACT_CONSTANTS';
+	{section->normal} kw_abstract_variables = '#ABSTRACT_VARIABLES';
+	{section->normal} kw_assertions = '#ASSERTIONS';
+	{section->normal} kw_concrete_constants = '#CONCRETE_CONSTANTS';
+	{section->normal} kw_concrete_variables = '#CONCRETE_VARIABLES';
+	{section->normal} kw_constants = '#CONSTANTS';
+	{section->normal} kw_constraints = '#CONSTRAINTS';
+	{section->normal} kw_definitions = '#DEFINITIONS';
+	{section->normal} kw_definition = '#DEFINITION';
+	{section->normal} kw_extends = '#EXTENDS';
+	{section->normal} kw_imports = '#IMPORTS';
+	{section->normal} kw_includes = '#INCLUDES';
+	{section->normal} kw_initialisation = '#INITIALISATION';
+	{section->normal} kw_invariant = '#INVARIANT';
+	{section->normal} kw_local_operations = '#LOCAL_OPERATIONS';
+	{section->normal} kw_operations = '#OPERATIONS';
+	{section->normal} kw_promotes = '#PROMOTES';
+	{section->normal} kw_properties = '#PROPERTIES';
+	{section->normal} kw_sees = '#SEES';
+	{section->normal} kw_sets = '#SETS';
+	{section->normal} kw_uses = '#USES';
+	{section->normal} kw_variables = '#VARIABLES';
+	{section->normal} kw_values = '#VALUES';
+	{section->normal} kw_oppattern = '#OPPATTERN';
 
-	{normal,pragma} identifier_literal = identifier_literal;
+	{section->normal,normal,pragma} identifier_literal = identifier_literal;
 	{normal} def_literal_substitution = '#literal_substitution' letter*;
 	{normal} def_literal_predicate = '#literal_predicate' letter*;
 	{normal} predicate_identifier = '#predicate_identifier' letter*;
@@ -343,7 +344,7 @@ Tokens
 	{normal} kw_rule_for_all = 'RULE_FORALL';
 	{normal} kw_expect = 'EXPECT';
 	{normal} kw_counterexample = 'COUNTEREXAMPLE';
-	
+
 
 
 /*******************************************************************
@@ -479,12 +480,12 @@ machine_ref_list {-> machine_reference*} =
 	{single} [ref]:machine_reference {-> [ref.machine_reference]} |
 	{multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]} ;
 
-machine_reference {-> machine_reference} = 
+machine_reference {-> machine_reference} =
 	{simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
 	{file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
 		{-> New machine_reference.file(machine_reference.machine_reference, file)} ;
 
-machine_reference2 {-> machine_reference} = 
+machine_reference2 {-> machine_reference} =
 	{simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
 variables_clause {-> machine_clause} =
@@ -603,7 +604,7 @@ predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 */
 
 predicate_atomic {-> predicate} =
-	{subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic 
+	{subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic
 		{-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } | //weakest precondition
     /* The following predicates have a priority in the AtelierB manual.
        But we (in contrast to AtelierB) distinguish between predicates and expression and
@@ -635,9 +636,9 @@ predicate_atomic {-> predicate} =
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
 	{identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
 	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
-	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end 
+	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
 		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
-	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
 		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
 	{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])} ; // extension for rules
 
@@ -749,9 +750,9 @@ expression_keyword {-> expression} =
 	{closure} closure1 left_par [expression]:expression_in_par right_par {-> New expression.closure(expression.expression)} |
 	{domain} dom left_par [expression]:expression_in_par right_par {-> New expression.domain(expression.expression)} |
 	{range} ran left_par [expression]:expression_in_par right_par {-> New expression.range(expression.expression)} |
-	{lambda} lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par 
+	{lambda} lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
 		{-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)} |
-  	{symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par 
+  	{symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
   		{-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
   	{trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
 	{trans_relation} rel left_par [expression]:expression_in_par right_par {-> New expression.trans_relation(expression.expression)} |
@@ -837,9 +838,9 @@ expression_atomic {-> expression} =
 	{nat1_set} nat1 {-> New expression.nat1_set()} |
 	{int_set} int {-> New expression.int_set()} |
 	{bool_set} bool {-> New expression.bool_set()} |
-	{if_expression} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end 
+	{if_expression} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end
 		{-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
-	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end 
+	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end
 		{-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{string_set} string {-> New expression.string_set()} ;
 
@@ -882,16 +883,16 @@ substitution_l3 {-> substitution} =
 	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
 	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
 	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
-    
+
     // extensions for rules
 	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
    	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
-    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |	
+    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |
 	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
  	{rule_success} kw_rule_success {-> New substitution.rule_success()} ;
 
-expect_counterexample {-> substitution} = 
+expect_counterexample {-> substitution} =
 	kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top {-> New substitution.expect_counterexample(expect_pred.predicate, message.expression)};
 
 parallel_subst_tail {-> substitution*} =
@@ -948,7 +949,7 @@ identifier_list {-> expression*} =
 	{multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
 
 /* a,b,f(1),g(1)(2) := ... */
-assign_list {-> expression*} =	
+assign_list {-> expression*} =
 	{single} [name]:identifier_or_function {-> [name.expression]} |
 	{multi} [rest]:assign_list comma [name]:identifier_or_function {-> [rest.expression, name.expression]} ;
 
@@ -956,7 +957,7 @@ identifier_or_function {-> expression} =
 	 {single} [name]:composed_identifier_expression {-> name.expression} |
 	 {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
 
-normal_identifier_expression {-> expression} = 
+normal_identifier_expression {-> expression} =
 	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 quantified_variables_list {-> expression*} =
@@ -973,14 +974,14 @@ identifier_declaration_expression {-> expression} =
 	{new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
 	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
 	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
-		
+
 
 identifier_expression {-> expression} =
 	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]} ;
 
-message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression}; 
+message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 
 
 /* Patterns for opertions */
@@ -1070,7 +1071,7 @@ machine_clause =
 	{local_operations} [operations]:operation* |
 	{operations} [operations]:operation* ;
 
-machine_reference = 
+machine_reference =
 	[machine_name]:identifier_literal* [parameters]:expression* |
 	{file} [reference]:machine_reference [file]:pragma_id_or_string  ;
 
@@ -1287,7 +1288,7 @@ expression =
 	{record_field} [record]:expression [identifier]:expression |
 	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
 	{typeof} [expression]:expression [type]:expression ; /* Has no concrete syntax, is only generated by the translation process */
-	
+
 rec_entry = [identifier]:expression [value]:expression;
 
 
@@ -1323,4 +1324,4 @@ substitution =
 	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
 	{rule_fail} [expression]:expression? | //extension for rules
 	{rule_success} | // extension for rules
-	{expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules 
+	{expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules
