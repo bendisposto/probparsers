@@ -269,7 +269,7 @@ public class RecursiveMachineLoader {
 				.getSetOfReferencedMachines();
 		checkForCycles(ancestors, referencesSet);
 
-		final Set<MachineReference> references = refMachines.getReferences();
+		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
 			try {
 				final String filePragma = refMachine.getPath();

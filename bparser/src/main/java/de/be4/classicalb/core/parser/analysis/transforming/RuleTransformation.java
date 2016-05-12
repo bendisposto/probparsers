@@ -36,6 +36,7 @@ import de.be4.classicalb.core.parser.node.AOperation;
 import de.be4.classicalb.core.parser.node.AParallelSubstitution;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.APowSubsetExpression;
+import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARuleFailSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
@@ -397,8 +398,6 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public void outAForallSubMessageSubstitution(
 			AForallSubMessageSubstitution node) {
 
-
-
 		final ALetSubstitution letSub = new ALetSubstitution();
 		final List<PExpression> letList = new ArrayList<PExpression>();
 		letList.add(createIdentifier(RULE_COUNTER_EXAMPLE_SET));
@@ -458,7 +457,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 				new AEmptySetExpression());
 
 		addToStringDefinition();
-		
+
 		ADefinitionExpression toStringCall = new ADefinitionExpression();
 		toStringCall.setDefLiteral(new TIdentifierLiteral("TO_STRING"));
 		ArrayList<PExpression> definitionParameters = new ArrayList<>();
@@ -499,6 +498,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 		return list;
 	}
 
+	@Override
+	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+		// skip properties clause
+	}
+
 	class CorrectRuleChecker extends DepthFirstAdapter {
 		ArrayList<CheckException> errorlist = new ArrayList<>();
 		final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
@@ -515,6 +519,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 			}
 		}
 
+		@Override
+		public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+			// skip properties clause
+		}
+		
 		public void inAChoiceSubstitution(AChoiceSubstitution node) {
 			if (inRule) {
 				errorlist

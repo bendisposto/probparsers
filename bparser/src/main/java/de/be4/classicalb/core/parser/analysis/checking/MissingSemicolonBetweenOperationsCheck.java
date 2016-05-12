@@ -5,6 +5,7 @@ import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AMissingSemicolonOperation;
+import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
@@ -23,6 +24,11 @@ public class MissingSemicolonBetweenOperationsCheck implements SemanticCheck {
 				AMissingSemicolonOperation node) {
 			semicolonMissing = true;
 			this.node = node.getOperation();
+		}
+		
+		@Override
+		public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+			// skip properties clause
 		}
 	}
 

@@ -1,12 +1,11 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -42,7 +41,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 public class ReferencedMachines extends DepthFirstAdapter {
 	private SortedSet<String> machines = new TreeSet<String>();
 	private String name;
-	private HashMap<String, MachineReference> referncesTable = new HashMap<>();
+	private LinkedHashMap<String, MachineReference> referncesTable = new LinkedHashMap<>();
 	private ArrayList<CheckException> exceptionList = new ArrayList<>();
 
 	/**
@@ -82,8 +81,12 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return new Hashtable<>(referncesTable);
 	}
 
-	public Set<MachineReference> getReferences() {
-		return new HashSet<>(referncesTable.values());
+	public List<MachineReference> getReferences() {
+		ArrayList<MachineReference> list = new ArrayList<>();
+		for (Entry<String, MachineReference> entry : referncesTable.entrySet()) {
+			list.add(entry.getValue());
+		}
+		return list;
 	}
 
 	@Override
