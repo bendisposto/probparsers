@@ -243,6 +243,37 @@ public class StructuralTest {
 	}
 
 	@Test
+	public void checkForInvalidSemicolon() throws Exception {
+		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n;\nEND";
+		try {
+			getTreeAsString(s);
+			fail("Invalid Semicolon was not detected");
+		} catch (BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			Node node = cause.getNodes()[0];
+			System.out.println(cause.getMessage());
+			assertEquals(4, node.getStartPos().getLine());
+			assertEquals(1, node.getStartPos().getPos());
+			assertTrue(e.getMessage().contains("Invalid semicolon after last operation"));
+		}
+	}
+	
+	@Test
+	public void checkForInvalidSemicolonBeforeENd() throws Exception {
+		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip\n; END\nEND";
+		try {
+			getTreeAsString(s);
+			fail("Invalid Semicolon was not detected");
+		} catch (BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			Node node = cause.getNodes()[0];
+			assertEquals(4, node.getStartPos().getLine());
+			assertEquals(1, node.getStartPos().getPos());
+			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
+		}
+	}
+	
+	@Test
 	public void testRepeatingClauses() {
 		final String testMachine = "MACHINE TestMachineX\n"
 				+ "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"

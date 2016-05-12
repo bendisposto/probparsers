@@ -349,8 +349,9 @@ public class PreParser {
 						definition, rhsToken, errorToken, e.getMessage());
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
-				throw new PreParseException(NewErrorMessageWithCorrectedPositionInformations(
-						definition, rhsToken, e3.getMessage()));
+				throw new PreParseException(
+						NewErrorMessageWithCorrectedPositionInformations(
+								definition, rhsToken, e3.getMessage()));
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
@@ -358,12 +359,12 @@ public class PreParser {
 					definition, rhsToken, errorToken, e.getMessage());
 			throw new PreParseException(newMessage);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			throw new PreParseException(e.getMessage());
+			throw new PreParseException(
+					NewErrorMessageWithCorrectedPositionInformations(
+							definition, rhsToken, e.getMessage()));
 		}
 
 	}
-
-
 
 	private String determineNewErrorMessageWithCorrectedPositionInformations(
 			Token definition, Token rhsToken,
@@ -382,8 +383,8 @@ public class PreParser {
 		return "[" + line + "," + pos + "]" + message;
 	}
 
-	private String NewErrorMessageWithCorrectedPositionInformations(Token definition, Token rhsToken,
-			String oldMessage) {
+	private String NewErrorMessageWithCorrectedPositionInformations(
+			Token definition, Token rhsToken, String oldMessage) {
 		Pattern pattern = Pattern.compile("\\d+");
 		Matcher m = pattern.matcher((CharSequence) oldMessage);
 		m.find();
@@ -396,8 +397,7 @@ public class PreParser {
 		String message = oldMessage.substring(index + 1);
 		return "[" + line + "," + pos + "]" + message;
 	}
-	
-	
+
 	private de.be4.classicalb.core.parser.node.Start tryParsing(
 			final String prefix, final String definitionRhs)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
