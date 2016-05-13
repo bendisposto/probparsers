@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,8 @@ import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
+import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.term.PrologTerm;
 
 public class BParser {
 
@@ -88,36 +91,40 @@ public class BParser {
 		return contentProvider;
 	}
 
-	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider) throws BException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
-				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(), parser.getDefinitions());
+	public static void printASTasProlog(final PrintStream out,
+			final BParser parser, final File bfile, final Start tree,
+			final ParsingBehaviour parsingBehaviour,
+			IDefinitionFileProvider contentProvider) throws BException {
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
+				bfile.getParent(), contentProvider, parsingBehaviour);
+		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(),
+				parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
-	// private static String getASTasFastProlog(final BParser parser,
-	// final File bfile, final Start tree) throws BException {
-	// final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-	// bfile.getParent());
-	// rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
-	// StructuredPrologOutput structuredPrologOutput = new
-	// StructuredPrologOutput();
-	// rml.printAsProlog(structuredPrologOutput);
-	// Collection<PrologTerm> sentences = structuredPrologOutput
-	// .getSentences();
-	// StructuredPrologOutput output = new StructuredPrologOutput();
-	//
-	// output.openList();
-	// for (PrologTerm term : sentences) {
-	// output.printTerm(term);
-	// }
-	// output.closeList();
-	// output.fullstop();
-	//
-	// FastReadTransformer transformer = new FastReadTransformer(output);
-	// return transformer.write();
-	// }
+	private static String getASTasFastProlog(final BParser parser,
+			final File bfile, final Start tree,
+			final ParsingBehaviour parsingBehaviour,
+			IDefinitionFileProvider contentProvider) throws BException {
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
+				bfile.getParent(), contentProvider, parsingBehaviour);
+		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
+		rml.printAsProlog(structuredPrologOutput);
+		Collection<PrologTerm> sentences = structuredPrologOutput
+				.getSentences();
+		StructuredPrologOutput output = new StructuredPrologOutput();
+
+		output.openList();
+		for (PrologTerm term : sentences) {
+			output.printTerm(term);
+		}
+		output.closeList();
+		output.fullstop();
+
+		FastReadTransformer transformer = new FastReadTransformer(output);
+		return transformer.write();
+	}
 
 	/**
 	 * Parses the input file.
@@ -526,28 +533,33 @@ public class BParser {
 			}
 
 			if (parsingBehaviour.fastPrologOutput) {
-				// try {
-				// String fp = getASTasFastProlog(this, bfile, tree);
-				// out.println(fp);
-				// } catch (Throwable e) {
-				// e.printStackTrace();
-				// }
+				try {
+					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour,
+							contentProvider);
+					out.println(fp);
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, bfile.getAbsolutePath());
+				PrologExceptionPrinter.printException(err, e,
+						bfile.getAbsolutePath());
 			} else {
 				err.println();
-				err.println("Error reading input file: " + e.getLocalizedMessage());
+				err.println("Error reading input file: "
+						+ e.getLocalizedMessage());
 			}
 			return -2;
 		} catch (final BException e) {
 			if (parsingBehaviour.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, parsingBehaviour.useIndention, false);
+				PrologExceptionPrinter.printException(err, e,
+						parsingBehaviour.useIndention, false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
-				err.println("Error parsing input file: " + e.getLocalizedMessage());
+				err.println("Error parsing input file: "
+						+ e.getLocalizedMessage());
 			}
 			return -3;
 		}
