@@ -458,7 +458,7 @@ definition {-> definition} =
 
 definition_x {-> definition} =
 	{predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
-	{substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l2 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
+	{substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
 	{expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
 	{file} [filename]:string_literal {-> New definition.file_definition(filename)};
 
@@ -535,18 +535,19 @@ values_entry = [identifier]:composed_identifier equal [value]:expression_top {->
 
 local_operations_clause {-> machine_clause} = local_operations [operation_list]:operation_list {-> New machine_clause.local_operations([operation_list.operation])} ;
 
-operations_clause {-> machine_clause} = operations [operation_list]:operation_list {-> New machine_clause.operations([operation_list.operation])} ;
-
+operations_clause {-> machine_clause} =
+	operations [operation_list]:operation_list {-> New machine_clause.operations([operation_list.operation])} |
+	{invalid_semicolon} operations [operation_list]:operation_list semicolon {-> New machine_clause.invalid_operations_clause(semicolon)} ;
+	
 operation_list {-> operation*} =
 	{single} [operation]:operation {-> [operation.operation]} |
 	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} |
 	{missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
-
 operation {-> operation} =
-  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
+  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l3
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
-  {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l2
+  {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l3
     {-> New operation.rule(rule_name, operation_body.substitution)};
 
 operation_return_values {-> expression*} =
@@ -855,37 +856,52 @@ expression_list {-> expression*} =
 
 /* Substitutions */
 
+
+
+substitution_l0 {-> substitution} =
+	{invalid} substitution_l2 semicolon {-> New substitution.invalid(semicolon)} |
+	{next_level} substitution_l1 {-> substitution_l1.substitution} ;
+
 substitution_l1 {-> substitution} =
 	{sequence} [first]:substitution_l2 semicolon [second]:substitution_l2 [rest]:sequence_subst_tail? {-> New substitution.sequence([first.substitution, second.substitution, rest.substitution])} |
-	{next_level} substitution_l2 {-> substitution_l2.substitution} ;
+	{next_level} [sub]:substitution_l2 {-> sub.substitution} ;
+
+sequence_subst_tail {-> substitution*} =
+	{single} semicolon [substitution]:substitution_l2 {-> [substitution.substitution]} |
+	{multi} semicolon [substitution]:substitution_l2 [rest]:sequence_subst_tail {-> [substitution.substitution, rest.substitution]} |
+	{invalid} semicolon {-> [New substitution.invalid(semicolon)]} ;
 
 substitution_l2 {-> substitution} =
 	{parallel} [first]:substitution_l3 double_vertical_bar [second]:substitution_l3 [rest]:parallel_subst_tail? {-> New substitution.parallel([first.substitution, second.substitution, rest.substitution])} |
-	{next_level} substitution_l3 {-> substitution_l3.substitution} ;
+	{next_level} [sub]:substitution_l3 {-> sub.substitution} ;
+	
+parallel_subst_tail {-> substitution*} =
+	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
+	{multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]} ;
 
 substitution_l3 {-> substitution} =
-	{block} begin [substitution]:substitution_l1 end {-> New substitution.block(substitution.substitution)} |
+	{block} begin [substitution]:substitution_l0 end {-> New substitution.block(substitution.substitution)} |
 	{skip} skip {-> New substitution.skip()} |
 	{assign} [lhs_expression]:assign_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
-	{precondition} pre [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
-	{assertion} assert [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
-	{choice} choice [first]:substitution_l1 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
-	{if} if [condition]:predicate_top then [then_subst]:substitution_l1 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
-	{select} select [condition]:predicate_top then [then_subst]:substitution_l1 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
-	{case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l1 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
-	{any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+	{precondition} pre [predicate]:predicate_top then [substitution]:substitution_l0 end {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
+	{assertion} assert [predicate]:predicate_top then [substitution]:substitution_l0 end {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
+	{choice} choice [first]:substitution_l0 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
+	{if} if [condition]:predicate_top then [then_subst]:substitution_l0 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
+	{select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
+	{case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
+	{any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
 	{becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
 	{becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
-	{var} var [identifiers]:identifier_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
+	{var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
 	//{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
 	{operation_call_without_parameter} [op]:identifier_or_function {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
 	{operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
-	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
-	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
+	{while} while [condition]:predicate_top do [do_subst]:substitution_l0 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
+	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l0 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
 	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
 
     // extensions for rules
-	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
+	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l0 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
    	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
     	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |
@@ -895,34 +911,26 @@ substitution_l3 {-> substitution} =
 expect_counterexample {-> substitution} =
 	kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top {-> New substitution.expect_counterexample(expect_pred.predicate, message.expression)};
 
-parallel_subst_tail {-> substitution*} =
-	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
-	{multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]} ;
-
-sequence_subst_tail {-> substitution*} =
-	{single} semicolon [substitution]:substitution_l2 {-> [substitution.substitution]} |
-	{multi} semicolon [substitution]:substitution_l2 [rest]:sequence_subst_tail {-> [substitution.substitution, rest.substitution]} ;
-
 choice_or {-> substitution} =
-	or [substitution]:substitution_l1 {-> New substitution.choice_or(substitution.substitution)} ;
+	or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)} ;
 
 if_elsif {-> substitution} =
-	elsif [condition]:predicate_top then [subst]:substitution_l1 {-> New substitution.if_elsif(condition.predicate, subst.substitution)};
+	elsif [condition]:predicate_top then [subst]:substitution_l0 {-> New substitution.if_elsif(condition.predicate, subst.substitution)};
 
 if_else {-> substitution} =
-	else [subst]:substitution_l1 {-> subst.substitution};
+	else [subst]:substitution_l0 {-> subst.substitution};
 
 select_when {-> substitution} =
-	when [condition]:predicate_top then [subst]:substitution_l1 {-> New substitution.select_when(condition.predicate, subst.substitution)};
+	when [condition]:predicate_top then [subst]:substitution_l0 {-> New substitution.select_when(condition.predicate, subst.substitution)};
 
 select_else {-> substitution} =
-	else [subst]:substitution_l1 {-> subst.substitution};
+	else [subst]:substitution_l0 {-> subst.substitution};
 
 case_or {-> substitution} =
-	or [expressions]:expression_list then [subst]:substitution_l1 {-> New substitution.case_or([expressions.expression], subst.substitution)};
+	or [expressions]:expression_list then [subst]:substitution_l0 {-> New substitution.case_or([expressions.expression], subst.substitution)};
 
 case_else {-> substitution} =
-	else [subst]:substitution_l1 {-> subst.substitution};
+	else [subst]:substitution_l0 {-> subst.substitution};
 
 op_params {-> expression*} =
 	left_par [parameters]:expression_list right_par {-> [parameters.expression]} ;
@@ -1069,7 +1077,8 @@ machine_clause =
 	{assertions} [predicates]:predicate* |
 	{values} [entries]:values_entry* |
 	{local_operations} [operations]:operation* |
-	{operations} [operations]:operation* ;
+	{operations} [operations]:operation* |
+	{invalid_operations_clause} semicolon ;
 
 machine_reference =
 	[machine_name]:identifier_literal* [parameters]:expression* |
@@ -1320,6 +1329,7 @@ substitution =
 	{while} [condition]:predicate [do_subst]:substitution [invariant]:predicate [variant]:expression |
 	{parallel} [substitutions]:substitution* |
 	{definition} [def_literal]:def_literal_substitution [parameters]:expression* |
+	{invalid} semicolon |
 	{forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
 	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
 	{rule_fail} [expression]:expression? | //extension for rules

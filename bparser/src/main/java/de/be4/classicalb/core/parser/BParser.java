@@ -22,7 +22,7 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.MissingSemicolonBetweenOperationsCheck;
+import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
@@ -453,7 +453,7 @@ public class BParser {
 	}
 
 	private void performSemanticChecks(final Start rootNode) throws CheckException {
-		final SemanticCheck[] checks = { new ClausesCheck(), new MissingSemicolonBetweenOperationsCheck(),
+		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(),
 				new IdentListCheck(), new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(),
 				new ProverExpressionsCheck() };
 		// TODO apply more checks?

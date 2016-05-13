@@ -101,9 +101,12 @@ public class Helpers {
 			BParser parser = new BParser(filename);
 			Start tree = parser.parseFile(machineFile, false);
 
+			final ParsingBehaviour behaviour = new ParsingBehaviour();
+			behaviour.verbose = true;
+			
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree,
-					new ParsingBehaviour(), parser.getContentProvider());
+					behaviour, parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename
