@@ -12,7 +12,7 @@ install: /bin/true
 
 sudo: false
 
-script: TERM=dumb gradle clean uploadArchives
+script: TERM=dumb gradle clean deploy uploadArchives
 
 after_success: curl -L $JENKINS_URL
 
