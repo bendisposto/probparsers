@@ -8,11 +8,13 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,8 +28,10 @@ import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateParseUnit;
+import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;
@@ -170,6 +174,8 @@ public class PreParser {
 			todoDefs.add(token.getText());
 		}
 
+		checkForCycles(definitions);
+
 		// use main parser for the rhs of each definition to determine type
 		// if a definition can not be typed this way, it may be due to another
 		// definition that is not yet parser (because it appears later in the
@@ -226,6 +232,101 @@ public class PreParser {
 		}
 	}
 
+	private void checkForCycles(Map<Token, Token> definitions)
+			throws PreParseException {
+		Set<String> definitionNames = new HashSet<String>();
+		for (Token token : definitions.keySet()) {
+			definitionNames.add(token.getText());
+		}
+		HashMap<String, Set<String>> dependencies = new HashMap<>();
+		for (Entry<Token, Token> entry : definitions.entrySet()) {
+			Token nameToken = entry.getKey();
+			Token rhsToken = entry.getValue();
+			final Reader reader = new StringReader(BParser.FORMULA_PREFIX
+					+ "\n" + rhsToken.getText());
+			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
+					types); // FIXME
+			lexer.setParseOptions(parseOptions);
+			Set<String> set = new HashSet<String>();
+			de.be4.classicalb.core.parser.node.Token next = null;
+			try {
+				next = lexer.next();
+				while (!(next instanceof EOF)) {
+					if (next instanceof TIdentifierLiteral) {
+						TIdentifierLiteral id = (TIdentifierLiteral) next;
+						String name = id.getText();
+						if (definitionNames.contains(name)) {
+							set.add(name);
+						}
+					}
+					next = lexer.next();
+				}
+			} catch (IOException e) {
+			} catch (BLexerException e) {
+				de.be4.classicalb.core.parser.node.Token errorToken = e
+						.getLastToken();
+				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
+						nameToken, rhsToken, errorToken, e.getMessage());
+				throw new PreParseException(newMessage);
+			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
+				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
+						nameToken, rhsToken, e.getMessage());
+				throw new PreParseException(newMessage);
+			}
+			dependencies.put(nameToken.getText(), set);
+		}
+		ArrayList<String> result = new ArrayList<>();
+
+		boolean newRun = true;
+		while (newRun) {
+			newRun = false;
+			ArrayList<String> todo = new ArrayList<>();
+			todo.addAll(definitionNames);
+			todo.removeAll(result);
+			for (String name : todo) {
+				Set<String> deps = new HashSet<>(dependencies.get(name));
+				deps.removeAll(result);
+				if (deps.isEmpty()) {
+					result.add(name);
+					newRun = true;
+				}
+			}
+		}
+		if (result.size() < definitionNames.size()) {
+			Set<String> remaining = new HashSet<>();
+			remaining.addAll(definitionNames);
+			remaining.removeAll(result);
+			ArrayList<String> cycle = new ArrayList<>();
+			Set<String> set = new HashSet<>();
+			set.addAll(remaining);
+			boolean run = true;
+			while (run) {
+				for (String next : set) {
+					if (cycle.contains(next)) {
+						run = false;
+						cycle.add(next);
+						break;
+					} else if (remaining.contains(next)) {
+						cycle.add(next);
+						set = new HashSet<>(dependencies.get(next));
+						break;
+					}
+				}
+			}
+			StringBuilder sb = new StringBuilder();
+			for (Iterator<String> iterator = cycle.iterator(); iterator
+					.hasNext();) {
+				sb.append(iterator.next());
+				if (iterator.hasNext()) {
+					sb.append(" -> ");
+				}
+			}
+			throw new PreParseException("Cyclic references in definitions: "
+					+ sb.toString());
+		}
+
+	}
+
 	private LinkedList<Token> sortDefinitions(
 			final Map<Token, Token> definitions) {
 		// LinkedList will be used as a queue later on!
@@ -238,6 +339,7 @@ public class PreParser {
 				.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
+
 		}
 
 		/*
@@ -292,29 +394,29 @@ public class PreParser {
 
 		final String definitionRhs = rhsToken.getText();
 
-		de.be4.classicalb.core.parser.node.Start expr;
+		de.be4.classicalb.core.parser.node.Start start;
 		de.be4.classicalb.core.parser.node.Token errorToken = null;
 		try {
-			expr = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
+			start = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
 			// Predicate?
-			PParseUnit parseunit = expr.getPParseUnit();
+			PParseUnit parseunit = start.getPParseUnit();
 			if (parseunit instanceof APredicateParseUnit) {
 				return new DefinitionType(IDefinitions.Type.Predicate);
 			}
 
 			// Expression or Expression/Substituion (e.g. f(x))?
-			AExpressionParseUnit unit = (AExpressionParseUnit) parseunit;
+			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
 
 			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(
 					definitions);
-			unit.apply(visitor);
+			expressionParseUnit.apply(visitor);
 
 			if (visitor.isKaboom()) {
 				// return null;
 				return new DefinitionType();
 			}
 
-			PExpression expression = unit.getExpression();
+			PExpression expression = expressionParseUnit.getExpression();
 			if ((expression instanceof AIdentifierExpression)
 					|| (expression instanceof AFunctionExpression)
 					|| (expression instanceof ADefinitionExpression)) {
@@ -350,7 +452,7 @@ public class PreParser {
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
 				throw new PreParseException(
-						NewErrorMessageWithCorrectedPositionInformations(
+						determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 								definition, rhsToken, e3.getMessage()));
 			}
 		} catch (BLexerException e) {
@@ -360,7 +462,7 @@ public class PreParser {
 			throw new PreParseException(newMessage);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 			throw new PreParseException(
-					NewErrorMessageWithCorrectedPositionInformations(
+					determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 							definition, rhsToken, e.getMessage()));
 		}
 
@@ -383,7 +485,7 @@ public class PreParser {
 		return "[" + line + "," + pos + "]" + message;
 	}
 
-	private String NewErrorMessageWithCorrectedPositionInformations(
+	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 			Token definition, Token rhsToken, String oldMessage) {
 		Pattern pattern = Pattern.compile("\\d+");
 		Matcher m = pattern.matcher((CharSequence) oldMessage);

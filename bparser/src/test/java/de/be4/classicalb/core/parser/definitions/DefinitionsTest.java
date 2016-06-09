@@ -7,13 +7,10 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.PlainFileContentProvider;
-import de.be4.classicalb.core.parser.analysis.Ast2String;
+import static util.Helpers.getTreeAsString;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Start;
 
 public class DefinitionsTest {
 
@@ -350,20 +347,17 @@ public class DefinitionsTest {
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(ABORT,[],AAssertionSubstitution(AEqualPredicate(ABooleanTrueExpression(),ABooleanFalseExpression()),ASkipSubstitution()))])]))",
 				result);
 	}
-
-	private String getTreeAsString(final String testMachine) throws BException {
-		// System.out.println();
-		// System.out.println();
-		// System.out.println("Parsing \"" + testMachine + "\":");
-		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false,
-				new PlainFileContentProvider());
-
-		// startNode.apply(new ASTPrinter());
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
+	
+	@Test (expected = BException.class)
+	public void testDetectCycleInDefinitions() throws BException {
+		final String testMachine = "MACHINE Test DEFINITIONS foo == 1=1 & foo END\n";
+		getTreeAsString(testMachine);
 	}
+	
+	@Test (expected = BException.class)
+	public void testDetectCycleInDefinitions2() throws BException {
+		final String testMachine = "MACHINE Test DEFINITIONS bar == foo; foo == 1=1 & bar END\n";
+		getTreeAsString(testMachine);
+	}
+
 }

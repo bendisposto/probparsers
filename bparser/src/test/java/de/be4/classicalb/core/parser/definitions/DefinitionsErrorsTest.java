@@ -26,7 +26,7 @@ public class DefinitionsErrorsTest {
 	}
 
 	@Test
-	public void checkAtSymbolInDefintions() throws Exception {
+	public void checkAtSymbolInDefinitions() throws Exception {
 		String s = "MACHINE Definitions \n DEFINITIONS \n foo == BEGIN\n @ END \nEND";
 		try {
 			getTreeAsString(s);
