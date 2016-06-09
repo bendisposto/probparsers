@@ -199,6 +199,10 @@ public class CliBParser {
 				theFormula = "#PREDICATE\n" + in.readLine();
 				parseFormula(theFormula, context, provider);
 				break;
+			case substitution:
+				theFormula = "#SUBSTITUTION\n" + in.readLine();
+				parseFormula(theFormula, context, provider);
+				break;
 			case extendedformula:
 				theFormula = "#FORMULA\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
@@ -209,6 +213,10 @@ public class CliBParser {
 				break;
 			case extendedpredicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
+				parseExtendedFormula(theFormula, context, provider);
+				break;
+			case extendedsubstitution:
+				theFormula = "#SUBSTITUTION\n" + in.readLine();
 				parseExtendedFormula(theFormula, context, provider);
 				break;
 			case ltl:
