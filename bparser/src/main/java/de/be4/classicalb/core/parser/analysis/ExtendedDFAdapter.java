@@ -3369,4 +3369,20 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		}
 		outADefinitionSubstitution(node);
 	}
+	
+    @Override
+    public void caseALabelPredicate(ALabelPredicate node)
+    {
+        inALabelPredicate(node);
+        if(node.getName() != null)
+        {
+            node.getName().apply(this);
+        }
+        betweenChildren(node);
+        if(node.getPredicate() != null)
+        {
+            node.getPredicate().apply(this);
+        }
+        outALabelPredicate(node);
+    }
 }

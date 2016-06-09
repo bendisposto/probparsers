@@ -259,8 +259,24 @@ public class StructuralTest {
 	}
 	
 	@Test
-	public void checkForInvalidSemicolonBeforeENd() throws Exception {
+	public void checkForInvalidSemicolonBeforeEnd() throws Exception {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip\n; END\nEND";
+		try {
+			getTreeAsString(s);
+			fail("Invalid Semicolon was not detected");
+		} catch (BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			Node node = cause.getNodes()[0];
+			assertEquals(4, node.getStartPos().getLine());
+			assertEquals(1, node.getStartPos().getPos());
+			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
+		}
+	}
+	
+	
+	@Test
+	public void checkForInvalidSemicolonBeforeEnd2() throws Exception {
+		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip;skip\n; END\nEND";
 		try {
 			getTreeAsString(s);
 			fail("Invalid Semicolon was not detected");

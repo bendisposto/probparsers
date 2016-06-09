@@ -34,6 +34,7 @@ Helpers
 	white_space = line_break | layout_char+;
 	string_literal = double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
 	identifier_literal = letter (letter | digit | underscore)*;
+	pragma_identifier_literal = letter (letter | digit | underscore | minus)*;
 
 /*******************************************************************
  * States                                                          *
@@ -41,8 +42,8 @@ Helpers
 
 States
 
-  section,
-  normal,
+	section,
+	normal,
 	shebang,
 	comment,
 	pragma,
@@ -73,7 +74,7 @@ Tokens
     {pragma} pragma_file = 'file';
     {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
-    {pragma} pragma_id_or_string = string_literal | identifier_literal;
+    {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
     {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
     {unit} unit_content = string_literal;
@@ -320,7 +321,8 @@ Tokens
 	{section->normal} kw_values = '#VALUES';
 	{section->normal} kw_oppattern = '#OPPATTERN';
 
-	{section->normal,normal,pragma} identifier_literal = identifier_literal;
+	{section->normal,normal} identifier_literal = identifier_literal;
+	{pragma} pragma_identifier_literal = pragma_identifier_literal;
 	{normal} def_literal_substitution = '#literal_substitution' letter*;
 	{normal} def_literal_predicate = '#literal_predicate' letter*;
 	{normal} predicate_identifier = '#predicate_identifier' letter*;
