@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,15 +13,6 @@ public class CachingDefinitionFileProvider extends PlainFileContentProvider
 	 */
 	public CachingDefinitionFileProvider() {
 		super();
-	}
-
-	/**
-	 * s. {@link PlainFileContentProvider#PlainFileContentProvider(File)}
-	 * 
-	 * @param parentFile
-	 */
-	public CachingDefinitionFileProvider(final File parentFile) {
-		super(parentFile);
 	}
 
 	public IDefinitions getDefinitions(final String filename) {

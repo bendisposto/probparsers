@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import test.PolySuite;
-import test.PolySuite.Config;
-import test.PolySuite.Configuration;
+import util.PolySuite;
+import util.PolySuite.Config;
+import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.exceptions.BException;
 
 @RunWith(PolySuite.class)

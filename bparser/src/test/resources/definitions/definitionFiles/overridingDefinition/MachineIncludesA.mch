@@ -1,0 +1,7 @@
+MACHINE MachineIncludesA
+DEFINITIONS
+ "A.def";
+ A1 == 1;
+CONSTANTS k
+PROPERTIES k = A2
+END

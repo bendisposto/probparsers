@@ -1,14 +1,22 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AFileExpression;
+import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
@@ -27,13 +35,15 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #getReferencedMachines()}.
+ * Use this class by calling the static method
+ * {@link #getSetOfReferencedMachines()}.
  * 
- * @author plagge
  */
 public class ReferencedMachines extends DepthFirstAdapter {
 	private SortedSet<String> machines = new TreeSet<String>();
 	private String name;
+	private HashMap<String, MachineReference> referncesTable = new HashMap<>();
+	private ArrayList<CheckException> exceptionList = new ArrayList<>();
 
 	/**
 	 * Searches the syntax tree of a machine for references to external
@@ -42,9 +52,13 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
+	 * @throws CheckException
 	 */
-	public ReferencedMachines(Node node) {
+	public ReferencedMachines(Node node) throws CheckException {
 		node.apply(this);
+		if (exceptionList.size() > 0) {
+			throw exceptionList.get(0);
+		}
 	}
 
 	/**
@@ -52,7 +66,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * 
 	 * @return a set of machine names, never <code>null</code>
 	 */
-	public SortedSet<String> getReferencedMachines() {
+	public SortedSet<String> getSetOfReferencedMachines() {
 		return machines;
 	}
 
@@ -64,6 +78,14 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return name;
 	}
 
+	public Hashtable<String, MachineReference> getReferencesTable() {
+		return new Hashtable<>(referncesTable);
+	}
+
+	public Set<MachineReference> getReferences() {
+		return new HashSet<>(referncesTable.values());
+	}
+
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
 		name = Utils.getIdentifierAsString(node.getName());
@@ -71,7 +93,21 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineReference(AMachineReference node) {
-		machines.add(getIdentifier(node.getMachineName()));
+		String name = getIdentifier(node.getMachineName());
+		machines.add(name);
+		if (node.parent() instanceof AFileMachineReference) {
+			final AFileMachineReference fileNode = (AFileMachineReference) node
+					.parent();
+			String file = fileNode.getFile().getText().replaceAll("\"", "");
+			try {
+				referncesTable
+						.put(name, new MachineReference(name, node, file));
+			} catch (CheckException e) {
+				exceptionList.add(e);
+			}
+		} else {
+			referncesTable.put(name, new MachineReference(name, node));
+		}
 	}
 
 	private String getIdentifier(LinkedList<TIdentifierLiteral> list) {
@@ -94,6 +130,9 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
+		String name = node.getRefMachine().getText();
+		referncesTable.put(name,
+				new MachineReference(name, node.getRefMachine()));
 		machines.add(node.getRefMachine().getText());
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -105,6 +144,9 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAImplementationMachineParseUnit(
 			AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
+		String name = node.getRefMachine().getText();
+		referncesTable.put(name,
+				new MachineReference(name, node.getRefMachine()));
 		machines.add(node.getRefMachine().getText());
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -115,7 +157,30 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		for (PExpression machineName : machineNames) {
 			if (machineName instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) machineName;
-				machines.add(getIdentifier(identifier.getIdentifier()));
+				String name = getIdentifier(identifier.getIdentifier());
+				machines.add(name);
+				referncesTable
+						.put(name, new MachineReference(name, identifier));
+			} else if (machineName instanceof AFileExpression) {
+				final AFileExpression fileNode = (AFileExpression) machineName;
+				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode
+						.getIdentifier();
+				String file = fileNode.getContent().getText()
+						.replaceAll("\"", "");
+				final String name = getIdentifier(identifier.getIdentifier());
+				machines.add(name);
+
+				MachineReference machineReference;
+				try {
+					machineReference = new MachineReference(name, identifier,
+							file);
+					referncesTable.put(name, machineReference);
+				} catch (CheckException e) {
+					this.exceptionList.add(e);
+				}
+			} else {
+				throw new RuntimeException("Not supported class: "
+						+ machineName.getClass());
 			}
 		}
 	}

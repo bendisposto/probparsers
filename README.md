@@ -54,7 +54,7 @@ Please report bugs and feature requests at https://probjira.atlassian.net
 
 ## Contributors
 The libraries contain contributions from (in alphabetical order)
-Jens Bendisposto, Marc Büngener, Fabian Fritz, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider
+Jens Bendisposto, Marc Büngener, Fabian Fritz, Dominik Hansen, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider
 
 ## Licence 
 
@@ -68,4 +68,4 @@ any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
 
-(c) 2011-2015 STUPS group, University of Düsseldorf
+(c) 2011-2016 STUPS group, University of Düsseldorf

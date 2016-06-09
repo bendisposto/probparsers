@@ -7,16 +7,16 @@ public interface IDefinitionFileProvider extends IFileContentProvider {
 	 * definitions are not available for other reasons, <code>null</code> is
 	 * returned.
 	 * 
-	 * @param filename
-	 * @return
+	 * @param filename	name of an input file
+	 * @return the already parsed definitions
 	 */
 	public IDefinitions getDefinitions(final String filename);
 
 	/**
 	 * Stores the definitions for this file name in chache.
 	 * 
-	 * @param filename
-	 * @param definitions
+	 * @param filename	name of an input file
+	 * @param definitions	the definitions to be stored
 	 */
 	public void storeDefinition(final String filename,
 			final IDefinitions definitions);

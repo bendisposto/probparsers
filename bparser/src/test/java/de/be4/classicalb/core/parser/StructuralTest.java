@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -199,15 +199,11 @@ public class StructuralTest {
 			getTreeAsString(emptyMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BException e) {
-			assertTrue(e.getCause() instanceof BLexerException);
 			final BLexerException ex = (BLexerException) e.getCause();
-
-			assertEquals("", ex.getLastText());
-			assertEquals(7, ex.getLastLine());
-			assertEquals(3, ex.getLastPos());
-			assertNotNull(ex.getLocalizedMessage());
-
-			assertTrue(ex.getLastToken() instanceof EOF);
+			// checking the start position of the comment
+			assertEquals(3, ex.getLastLine());
+			assertEquals(2, ex.getLastPos());
+			assertTrue(e.getMessage().contains("Comment not closed."));
 		}
 	}
 
@@ -229,6 +225,21 @@ public class StructuralTest {
 		assertEquals(
 				"Start(ASubstitutionParseUnit(AAssignSubstitution([AIdentifierExpression([a]),AIdentifierExpression([b])],[AIntegerExpression(1),AIntegerExpression(2)])))",
 				result);
+	}
+
+	@Test
+	public void checkForMissingSemicolon() throws Exception {
+		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n  BAR= BEGIN r := xx END\nEND";
+		try {
+			getTreeAsString(s);
+			fail("Missing Semicolon was not detected");
+		} catch (BException e) {
+			final CheckException cause = (CheckException) e.getCause();
+			Node node = cause.getNodes()[0];
+			assertEquals(4, node.getStartPos().getLine());
+			assertEquals(3, node.getStartPos().getPos());
+			assertTrue(e.getMessage().contains("Semicolon missing"));
+		}
 	}
 
 	@Test

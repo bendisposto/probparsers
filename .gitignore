@@ -20,3 +20,13 @@ config.groovy
 *.iml
 *.idea
 local.*
+answerparser/.gitignore
+eventbalg/.gitignore
+eventbstruct/.gitignore
+ltlparser/.gitignore
+parserbase/.gitignore
+prologlib/.gitignore
+theorymapping/.gitignore
+unicode/.gitignore
+.gitignore
+*.prob

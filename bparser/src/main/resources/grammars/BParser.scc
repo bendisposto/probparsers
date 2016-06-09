@@ -13,6 +13,12 @@ Helpers
     comment_start = '/*';
     comment_end = '*/';
 
+	minus = '-' | 0x2212;
+	plus = '+' | 0x002b;
+	gt = '>' | 0x003e;
+	lt = '<' | 0x003c;
+	eq = '=' | 0x003d;
+
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
@@ -52,16 +58,18 @@ Tokens
 	{shebang -> normal} shebang_end = line_break;
 	{shebang} shebang_char = all_chars;
 
-  {normal} line_comment = '//' [all_chars - line_break]* line_break;
+  	{normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
     {normal->pragma} pragma_start = '/*@';
     {pragma->normal, unit->normal} pragma_end = '*/';
     {pragma->unit} pragma_unit = 'unit';
+    {pragma->unit} new_pragma_unit = 'new_unit';
     {pragma->unit} ipragma_unit = 'inferred_unit';
     {pragma->unit} pragma_unit_alias = 'unit_alias';
     {pragma} pragma_generated = 'generated';
     {pragma} pragma_symbolic = 'symbolic';
     {pragma} pragma_label = 'label';
+    {pragma} pragma_file = 'file';
     {pragma->description} pragma_description = 'desc' | 'description';
     {pragma} pragma_conversion = 'conversion';
     {pragma} pragma_id_or_string = string_literal | identifier_literal;
@@ -88,14 +96,14 @@ Tokens
 	{normal} right_par = ')';
 	{normal} product = '*' | 0x00d7;
 	{normal} power_of = '**';
-	{normal} plus = '+' | 0x002b;
-	{normal} partial_function = '+->' | 0x21f8;
-	{normal} partial_surjection = '+->>' | 0x2900;
+	{normal} plus = plus;
+	{normal} partial_function = plus minus gt | 0x21f8;
+	{normal} partial_surjection = plus minus gt gt | 0x2900;
 	{normal} comma = ',';
-	{normal} minus = '-' | 0x2212;
-	{normal} total_function = '-->' | 0x2192;
-	{normal} total_surjection = '-->>' | 0x21a0;
-	{normal} insert_start_sequence = '->' | 0x21fe;
+	{normal} minus = minus;
+	{normal} total_function = minus minus gt | 0x2192;
+	{normal} total_surjection = minus minus gt gt | 0x21a0;
+	{normal} insert_start_sequence = minus gt | 0x21fe;
 	{normal} dot = '.';
 	{normal} interval = '..' | 0x2025;
 	{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
@@ -109,29 +117,29 @@ Tokens
 	{normal} restrict_head_sequence = '/|\' | 0x2191;
 	{normal} element_of = ':' | 0x2208;
 	{normal} double_colon = '::' | ':' 0x2208;  /* becomes_element_of */
-	{normal} assign = ':=';
+	{normal} assign = ':' eq;
 	{normal} semicolon = ';';
-	{normal} less = '<';
-	{normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
-	{normal} set_relation = '<->' | 0x2194;
+	{normal} less = lt;
+	{normal} overwrite_relation = lt plus | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
+	{normal} set_relation = lt minus gt | 0x2194;
 	{normal} insert_end_sequence = '<-' | 0x21fd;
 	{normal} output_parameters = '<--' | 0x2190;
 	{normal} inclusion = '<:' | 0x2286;
 	{normal} strict_inclusion = '<<:' | 0x2282;
 	{normal} domain_subtraction = '<<|' | 0x2a64 | 0x25c0;
-	{normal} less_equal = '<=' | 0x2264;
-	{normal} equivalence = '<=>' | 0x21d4;
-	{normal} domain_restriction = '<|' | 0x25c1;
-	{normal} equal = '=';
-	{normal} double_equal = '==';
-	{normal} implies = '=>' | 0x21d2;
-	{normal} greater = '>';
-	{normal} partial_injection = '>+>' | 0x2914;
-	{normal} total_injection = '>->' | 0x21a3;
-	{normal} partial_bijection = '>+>>';
-	{normal} total_bijection = '>->>' | 0x2916;
-	{normal} direct_product = '><' | 0x2297;
-	{normal} greater_equal = '>=' | 0x2265;
+	{normal} less_equal = lt eq | 0x2264;
+	{normal} equivalence = lt eq gt | 0x21d4;
+	{normal} domain_restriction = lt '|' | 0x25c1;
+	{normal} equal = eq;
+	{normal} double_equal = eq eq;
+	{normal} implies = eq gt | 0x21d2;
+	{normal} greater = gt;
+	{normal} partial_injection = gt plus gt | 0x2914;
+	{normal} total_injection = gt minus gt | 0x21a3;
+	{normal} partial_bijection = gt plus gt gt;
+	{normal} total_bijection = gt minus gt gt | 0x2916;
+	{normal} direct_product = gt lt | 0x2297;
+	{normal} greater_equal = gt eq | 0x2265;
 	{normal} abstract_constants = 'ABSTRACT_CONSTANTS';
 	{normal} abstract_variables = 'ABSTRACT_VARIABLES';
 	{normal} any = 'ANY';
@@ -206,7 +214,6 @@ Tokens
 	{normal} when = 'WHEN';
 	{normal} where = 'WHERE';
 	{normal} while = 'WHILE';
-	{normal} empty_sequence = '[' white_space* ']' | '<' white_space* '>';
 	{normal} left_bracket = '[';
 	{normal} right_bracket = ']';
 	{normal} union = '\/' | 0x222a;
@@ -266,7 +273,7 @@ Tokens
 	{normal} top = 'top';
 	{normal} tree = 'tree';
 	{normal} generalized_union = 'union';
-	{normal} empty_set = '{' white_space* '}' | 0x2205;
+	{normal} empty_set = 0x2205;
 	{normal} left_brace = '{';
 	{normal} right_brace = '}';
 	{normal} vertical_bar = '|';
@@ -277,9 +284,9 @@ Tokens
 	{normal} tilde = '~' | 0x223c | 0x207b 0xb9;
 
 	// Extensions
-	{normal} total_relation = '<<->' | 0xe100;
-	{normal} surjection_relation = '<->>' | 0xe101;
-	{normal} total_surjection_relation = '<<->>' | 0xe102;
+	{normal} total_relation = lt lt minus gt | 0xe100;
+	{normal} surjection_relation = lt minus gt gt | 0xe101;
+	{normal} total_surjection_relation = lt lt minus gt gt | 0xe102;
 	{normal} kw_freetypes = 'FREETYPES';
 
 	// keywords for special parsing modes
@@ -323,6 +330,20 @@ Tokens
 	{normal} underscore = underscore;
 
 	white_space = white_space;
+
+	// grammar extensions
+	// the following tokens are never recognized by the lexer because they declared below identifier_literal
+	// keywords should be synchronized with RuleGrammar.java
+	{normal} kw_rules_machine = 'RULES_MACHINE';
+	{normal} kw_rule = 'RULE';
+	{normal} kw_rule_fail = 'RULE_FAIL';
+	{normal} kw_rule_success = 'RULE_SUCCESS';
+	{normal} kw_depends_on_rules = 'DEPENDS_ON_RULES';
+	{normal} kw_for_all = 'FORALL';
+	{normal} kw_rule_for_all = 'RULE_FORALL';
+	{normal} kw_expect = 'EXPECT';
+	{normal} kw_counterexample = 'COUNTEREXAMPLE';
+	
 
 
 /*******************************************************************
@@ -373,7 +394,7 @@ parse_unit {-> parse_unit} =
 	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
 machine {-> parse_unit} =
-   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} | 
+   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
    {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} |
    machine_x {-> machine_x.parse_unit};
 
@@ -442,11 +463,11 @@ definition_x {-> definition} =
 
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
 
-sees_clause {-> machine_clause} = sees [machine_names]:identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
+sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
 
-promotes_clause {-> machine_clause} = promotes [machine_names]:identifier_list {-> New machine_clause.promotes([machine_names.expression])} ;
+promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])} ;
 
-uses_clause {-> machine_clause} = uses [machine_names]:identifier_list {-> New machine_clause.uses([machine_names.expression])} ;
+uses_clause {-> machine_clause} = uses [machine_names]:composed_identifier_list {-> New machine_clause.uses([machine_names.expression])} ;
 
 includes_clause {-> machine_clause} = includes [machine_references]:machine_ref_list {-> New machine_clause.includes([machine_references.machine_reference])} ;
 
@@ -458,19 +479,25 @@ machine_ref_list {-> machine_reference*} =
 	{single} [ref]:machine_reference {-> [ref.machine_reference]} |
 	{multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]} ;
 
-machine_reference {-> machine_reference} = [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
+machine_reference {-> machine_reference} = 
+	{simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
+	{file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
+		{-> New machine_reference.file(machine_reference.machine_reference, file)} ;
+
+machine_reference2 {-> machine_reference} = 
+	{simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
 
 variables_clause {-> machine_clause} =
-	{abstract} abstract_variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} |
-	variables [identifiers]:variables_list {-> New machine_clause.variables([identifiers.expression])} ;
+	{abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
+	variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
 
 constants_clause {-> machine_clause} =
-	{concrete} concrete_constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} |
-	constants [identifiers]:variables_list {-> New machine_clause.constants([identifiers.expression])} ;
+	{concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
+	constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} ;
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:variables_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:variables_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -511,9 +538,15 @@ operations_clause {-> machine_clause} = operations [operation_list]:operation_li
 
 operation_list {-> operation*} =
 	{single} [operation]:operation {-> [operation.operation]} |
-	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} ;
+	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} |
+	{missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
-operation {-> operation} = [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2 {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} ;
+
+operation {-> operation} =
+  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
+    {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
+  {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l2
+    {-> New operation.rule(rule_name, operation_body.substitution)};
 
 operation_return_values {-> expression*} =
 	[return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
@@ -537,7 +570,8 @@ predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
 	{implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-	{next_level} [pred]:predicate_x30 {-> pred.predicate};
+	{next_level} [pred]:predicate_x30 {-> pred.predicate} ;
+
 predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
@@ -601,13 +635,18 @@ predicate_atomic {-> predicate} =
 	{exists} exists [identifiers]:expression_list dot_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
 	{definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
 	{identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
-	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} ;
+	{function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
+	{if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end 
+		{-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
+	{let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end 
+		{-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
+	{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New predicate.depends_on_rules([parameters.expression])}; // extension for rules
 
 
 /* Expressions */
 
 /* expression_in_par contains the priority level 20, it is not considered as expression_top
-   because ; and || should only be used inside parenthesis */
+   because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
 	{composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
 	{parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
@@ -699,8 +738,8 @@ expression_keyword {-> expression} =
 	{max} max left_par [expression]:expression_in_par right_par {-> New expression.max(expression.expression)} |
 	{min} min left_par [expression]:expression_in_par right_par {-> New expression.min(expression.expression)} |
 	{card} card left_par [expression]:expression_in_par right_par {-> New expression.card(expression.expression)} |
-	{general_sum} sigma [identifiers]:expression_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_sum([identifiers.expression], predicates.predicate, expression.expression)} |
-	{general_product} pi [identifiers]:expression_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_product([identifiers.expression], predicates.predicate, expression.expression)} |
+	{general_sum} sigma [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_sum([identifiers.expression], predicates.predicate, expression.expression)} |
+	{general_product} pi [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_product([identifiers.expression], predicates.predicate, expression.expression)} |
 	{pow_subset} pow left_par [expression]:expression_in_par right_par {-> New expression.pow_subset(expression.expression)} |
 	{pow1_subset} pow1 left_par [expression]:expression_in_par right_par {-> New expression.pow1_subset(expression.expression)} |
 	{fin_subset} fin left_par [expression]:expression_in_par right_par {-> New expression.fin_subset(expression.expression)} |
@@ -722,7 +761,8 @@ expression_keyword {-> expression} =
 	{iseq} iseq left_par [expression]:expression_in_par right_par {-> New expression.iseq(expression.expression)} |
 	{iseq1} iseq1 left_par [expression]:expression_in_par right_par {-> New expression.iseq1(expression.expression)} |
 	{perm} perm left_par [expression]:expression_in_par right_par {-> New expression.perm(expression.expression)} |
-	{empty_sequence} empty_sequence {-> New expression.empty_sequence()} |
+	{empty_sequence1} left_bracket right_bracket {-> New expression.empty_sequence()} |
+	{empty_sequence2} less greater {-> New expression.empty_sequence()} |
 	{size} size left_par [expression]:expression_in_par right_par {-> New expression.size(expression.expression)} |
 	{first} first left_par [expression]:expression_in_par right_par {-> New expression.first(expression.expression)} |
 	{last} last left_par [expression]:expression_in_par right_par {-> New expression.last(expression.expression)} |
@@ -733,9 +773,9 @@ expression_keyword {-> expression} =
 	{second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
 	{iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)} |
 	{comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}  |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
-  {quantified_union} quantified_union [identifiers]:expression_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
-	{quantified_intersection} quantified_inter [identifiers]:expression_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
+	{symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
+	{quantified_union} quantified_union [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+	{quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
 	{quantified_set} quantified_set [identifiers]:expression_list dot_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}  |
 	{set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
 	{sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
@@ -789,7 +829,8 @@ expression_atomic {-> expression} =
 	{integer} [literal]:integer_literal {-> New expression.integer(literal)} |
 	{max_int} max_int {-> New expression.max_int()} |
 	{min_int} min_int {-> New expression.min_int()} |
-	{empty_set} empty_set {-> New expression.empty_set()} |
+	{empty_set_symbol} empty_set {-> New expression.empty_set()} |
+	{empty_set} left_brace right_brace {-> New expression.empty_set()} |
 	{integer_set} integer {-> New expression.integer_set()} |
 	{natural_set} natural {-> New expression.natural_set()} |
 	{natural1_set} natural1 {-> New expression.natural1_set()} |
@@ -797,6 +838,10 @@ expression_atomic {-> expression} =
 	{nat1_set} nat1 {-> New expression.nat1_set()} |
 	{int_set} int {-> New expression.int_set()} |
 	{bool_set} bool {-> New expression.bool_set()} |
+	{if_expression} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end 
+		{-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
+	{let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end 
+		{-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
 	{string_set} string {-> New expression.string_set()} ;
 
 expression_list {-> expression*} =
@@ -821,22 +866,32 @@ substitution_l2 {-> substitution} =
 substitution_l3 {-> substitution} =
 	{block} begin [substitution]:substitution_l1 end {-> New substitution.block(substitution.substitution)} |
 	{skip} skip {-> New substitution.skip()} |
-	{assign} [lhs_expression]:expression_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
+	{assign} [lhs_expression]:assign_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
 	{precondition} pre [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
 	{assertion} assert [predicate]:predicate_top then [substitution]:substitution_l1 end {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
 	{choice} choice [first]:substitution_l1 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
 	{if} if [condition]:predicate_top then [then_subst]:substitution_l1 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
 	{select} select [condition]:predicate_top then [then_subst]:substitution_l1 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
 	{case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l1 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
-	{any} any [identifiers]:expression_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
-	{becomes_element_of} [identifiers]:expression_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
-	{becomes_such} [identifiers]:expression_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
-	{var} var [identifiers]:expression_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
-	{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // check in semantic check if expression is a function
-	{operation_call} [return_values]:expression_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
+	{any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l1 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+	{becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
+	{becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
+	{var} var [identifiers]:identifier_list in [substitution]:substitution_l1 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
+	//{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
+	{operation_call_without_parameter} [op]:identifier_or_function {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
+	{operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
 	{while} while [condition]:predicate_top do [do_subst]:substitution_l1 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
-	{let} let [identifiers]:expression_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
-	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} ;
+	{let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l1 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
+	{definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
+    
+    // extensions for rules
+	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l1 [else]:if_else end
+    	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
+   	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top end
+    	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression)} |	
+	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
+ 	{rule_success} kw_rule_success {-> New substitution.rule_success()} ;
+
 
 parallel_subst_tail {-> substitution*} =
 	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
@@ -876,24 +931,55 @@ composed_identifier {-> identifier_literal*} =
 	{single} [name]:identifier_literal {-> [name]} |
 	{multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]} ;
 
-identifier_list {-> expression*} =
-	{single} [identifier]:composed_identifier_expression {-> [identifier.expression]} |
-	{multi} [rest]:identifier_list comma [identifier]:composed_identifier_expression {-> [rest.expression, identifier.expression]} ;
 
-variables_list {-> expression*} =
-	{single} [identifier]:identifier_expression {-> [identifier.expression]} |
-	{multi} [rest]:variables_list comma [identifier]:identifier_expression {-> [rest.expression, identifier.expression]} ;
+composed_identifier_list {-> expression*} =
+	{single} [identifier]:composed_identifier_file_pragma_expression {-> [identifier.expression]} |
+	{multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]} ;
 
-identifier_expression {-> expression} =
-    {description} [identifier]:composed_identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}| 
-	{unit} pragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.unit(content,identifier.expression)} |
-	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:composed_identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
-	[identifier]:identifier_literal {-> New expression.identifier([identifier])}  ;
+composed_identifier_file_pragma_expression {-> expression} =
+	{normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
+	{file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} ;
 
 composed_identifier_expression {-> expression} =
-	[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
+	{normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
+
+identifier_list {-> expression*} =
+	{single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
+	{multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
+
+assign_list {-> expression*} =
+	{single} [name]:identifier_or_function {-> [name.expression]} |
+	{multi} [rest]:assign_list comma [name]:identifier_or_function {-> [rest.expression, name.expression]} ;
+
+identifier_or_function {-> expression} =
+	 {single} [name]:composed_identifier_expression {-> name.expression} |
+	 {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
+
+normal_identifier_expression {-> expression} = 
+	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
+
+quantified_variables_list {-> expression*} =
+	{parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |
+	{no_parentheses} [id]:identifier_list {-> [id.expression]};
+
+/*
+Avoid the following transformation rule which would yield to an AIdentifierNode without a position information. Include an indirection!
+{unit} pragma_unit [content]:unit_content [identifier]:identifier_literal {-> New expression.unit(content,New expression.identifier([identifier]))}
+*/
+identifier_declaration_expression {-> expression} =
+    {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
+	{unit} pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.unit(content,identifier.expression)} |
+	{new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
+	{inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
+	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
+		
+
+identifier_expression {-> expression} =
+	{identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]} ;
+
+message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression}; 
 
 
 /* Patterns for opertions */
@@ -983,7 +1069,9 @@ machine_clause =
 	{local_operations} [operations]:operation* |
 	{operations} [operations]:operation* ;
 
-machine_reference = [machine_name]:identifier_literal* [parameters]:expression* ;
+machine_reference = 
+	[machine_name]:identifier_literal* [parameters]:expression* |
+	{file} [reference]:machine_reference [file]:pragma_id_or_string  ;
 
 definition =
     {conversion} definition |
@@ -1004,7 +1092,11 @@ freetype_constructor =
 
 values_entry = [identifier]:identifier_literal* [value]:expression ;
 
-operation = [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution ;
+operation =
+  [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
+  {missing_semicolon} operation |
+  {rule} [rule_name]:identifier_literal [rule_body]:substitution ;
+
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;
 
@@ -1013,9 +1105,9 @@ eventstatus = {ordinary} | {anticipated} | {convergent};
 /* Predicates */
 
 predicate =
-  {description} [content]:pragma_free_text [predicate]:predicate |
-  {label} [name]:pragma_id_or_string [predicate]:predicate |
-  {substitution} [substitution]:substitution [predicate]:predicate |
+	{description} [content]:pragma_free_text [predicate]:predicate |
+	{label} [name]:pragma_id_or_string [predicate]:predicate |
+	{substitution} [substitution]:substitution [predicate]:predicate |
 	{conjunct} [left]:predicate [right]:predicate |
 	{negation} [predicate]:predicate |
 	{disjunct} [left]:predicate [right]:predicate |
@@ -1040,17 +1132,20 @@ predicate =
 	{finite} [set]:expression |
 	{partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
 	{definition} [def_literal]:def_literal_predicate [parameters]:expression* |
-    {predicate_identifier} [identifier]:predicate_identifier |
-    {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
-    {let_predicate} [identifiers]:expression* [assignments]:expression* [pred]:predicate | /* has no concrete syntax, generated for example by TLA translation */
-    {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*; /* Event-B only predicate - theory plugin */
-
+	{predicate_identifier} [identifier]:predicate_identifier |
+	{predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
+	{let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
+	{if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
+	{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*| /* Event-B only predicate - theory plugin */
+	{depends_on_rules} [identifiers]:expression* ; // extension for rules
 
 
 /* Expressions */
 expression =
+	{file} [identifier]:expression [content]:pragma_id_or_string |
     {description} [content]:pragma_free_text [expression]:expression |
 	{unit} [content]:unit_content [identifier]:expression |
+	{new_unit} [content]:unit_content [identifier]:expression |
 	{inferredunit} [content]:unit_content [identifier]:expression |
 	{identifier} [identifier]:identifier_literal* |
 	{primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
@@ -1079,8 +1174,8 @@ expression =
 	{mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
 	{div} [left]:expression [right]:expression |
 	{floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
-	{if_then_else} [condition]:predicate [then]:expression [else]:expression | /* has no concrete syntax, generated for example by TLA translation */
-	{let_expression} [identifiers]:expression* [assignments]:expression* [expr]:expression | /* has no concrete syntax, generated for example by TLA translation */
+	{if_then_else} [condition]:predicate [then]:expression [else]:expression |
+	{let_expression} [identifiers]:expression* [assignment]:predicate [expr]:expression |
 	{modulo} [left]:expression [right]:expression |
 	{power_of} [left]:expression [right]:expression |
 	{successor} |
@@ -1092,8 +1187,8 @@ expression =
 	{general_product} [identifiers]:expression* [predicates]:predicate [expression]:expression |
 	{couple} [list]:expression* |
 	{comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {prover_comprehension_set} [identifiers]:expression* [predicates]:predicate | // todo: fix this special case
+	{symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
+	{prover_comprehension_set} [identifiers]:expression* [predicates]:predicate | // todo: fix this special case
 	{event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB only
 	{pow_subset} [expression]:expression |
 	{pow1_subset} [expression]:expression |
@@ -1191,8 +1286,8 @@ expression =
 	{rec} [entries]:rec_entry* |
 	{record_field} [record]:expression [identifier]:expression |
 	{extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
-	{typeof} [expression]:expression [type]:expression; /* Has no concrete syntax, is only generated by the translation process */
-
+	{typeof} [expression]:expression [type]:expression ; /* Has no concrete syntax, is only generated by the translation process */
+	
 rec_entry = [identifier]:expression [value]:expression;
 
 
@@ -1219,8 +1314,12 @@ substitution =
 	{var} [identifiers]:expression* [substitution]:substitution |
 	{sequence} [substitutions]:substitution* |
 	{func_op} [function]:expression |
-        {op} [name]:expression [parameters]:expression* |
+	{op} [name]:expression [parameters]:expression* |
 	{operation_call} [result_identifiers]:expression* [operation]:identifier_literal* [parameters]:expression* |
 	{while} [condition]:predicate [do_subst]:substitution [invariant]:predicate [variant]:expression |
 	{parallel} [substitutions]:substitution* |
-	{definition} [def_literal]:def_literal_substitution [parameters]:expression* ;
+	{definition} [def_literal]:def_literal_substitution [parameters]:expression* |
+	{forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
+	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression | //extension for rules
+	{rule_fail} [expression]:expression? | //extension for rules
+	{rule_success} ; // extension for rules

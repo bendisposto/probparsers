@@ -29,12 +29,16 @@ public class ASTProlog extends DepthFirstAdapter {
 	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
-	private static final List<String> SUM_TYPE = new LinkedList<String>(Arrays.asList("expression", "predicate",
-			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
-			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
+	private static final List<String> SUM_TYPE = new LinkedList<String>(
+			Arrays.asList("expression", "predicate", "machine_clause",
+					"substitution", "parse_unit", "model_clause",
+					"context_clause", "eventstatus", "argpattern", "set",
+					"machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(Arrays.asList("event", "freetype",
-			"machine_header", "machine_reference", "operation", "rec_entry", "values_entry", "witness", "unit"));
+	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(
+			Arrays.asList("event", "freetype", "machine_header",
+					"machine_reference", "operation", "rec_entry",
+					"values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -46,7 +50,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// helper object to print the prolog terms
 	private final IPrologTermOutput pout;
 
-	public ASTProlog(final IPrologTermOutput pout, final PositionPrinter positionPrinter) {
+	public ASTProlog(final IPrologTermOutput pout,
+			final PositionPrinter positionPrinter) {
 		this.positionPrinter = positionPrinter;
 		this.pout = pout;
 		if (positionPrinter != null) {
@@ -141,7 +146,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * @param list
 	 *            Like in {@link #printAsList(List)}
 	 */
-	private void printOCAsList(final Node node, @SuppressWarnings("rawtypes") final List list) {
+	private void printOCAsList(final Node node,
+			@SuppressWarnings("rawtypes") final List list) {
 		open(node);
 		printAsList(list);
 		close(node);
@@ -214,7 +220,8 @@ public class ASTProlog extends DepthFirstAdapter {
 				return camelName;
 			for (String checkend : SUM_TYPE)
 				if (camelName.endsWith(checkend)) {
-					String shortName = camelName.substring(0, camelName.length() - checkend.length() - 1);
+					String shortName = camelName.substring(0,
+							camelName.length() - checkend.length() - 1);
 					// hard-coded renamings
 					if (shortName.equals("prover_comprehension_set"))
 						return "comprehension_set";
@@ -274,7 +281,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAPrimedIdentifierExpression(final APrimedIdentifierExpression node) {
+	public void caseAPrimedIdentifierExpression(
+			final APrimedIdentifierExpression node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
 		pout.printNumber(Long.parseLong((node.getGrade().getText())));
@@ -287,7 +295,8 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	// Parse Units
 	@Override
-	public void caseAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
+	public void caseAAbstractMachineParseUnit(
+			final AAbstractMachineParseUnit node) {
 		open(node);
 		node.getVariant().apply(this);
 		node.getHeader().apply(this);
@@ -296,7 +305,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseARefinementMachineParseUnit(final ARefinementMachineParseUnit node) {
+	public void caseARefinementMachineParseUnit(
+			final ARefinementMachineParseUnit node) {
 		open(node);
 		node.getHeader().apply(this);
 		node.getRefMachine().apply(this);
@@ -305,7 +315,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAImplementationMachineParseUnit(final AImplementationMachineParseUnit node) {
+	public void caseAImplementationMachineParseUnit(
+			final AImplementationMachineParseUnit node) {
 		open(node);
 		node.getHeader().apply(this);
 		node.getRefMachine().apply(this);
@@ -344,7 +355,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// machine clauses
 
 	@Override
-	public void caseADefinitionsMachineClause(final ADefinitionsMachineClause node) {
+	public void caseADefinitionsMachineClause(
+			final ADefinitionsMachineClause node) {
 		printOCAsList(node, node.getDefinitions());
 	}
 
@@ -389,12 +401,14 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAConcreteVariablesMachineClause(final AConcreteVariablesMachineClause node) {
+	public void caseAConcreteVariablesMachineClause(
+			final AConcreteVariablesMachineClause node) {
 		printOCAsList(node, node.getIdentifiers());
 	}
 
 	@Override
-	public void caseAAbstractConstantsMachineClause(final AAbstractConstantsMachineClause node) {
+	public void caseAAbstractConstantsMachineClause(
+			final AAbstractConstantsMachineClause node) {
 		printOCAsList(node, node.getIdentifiers());
 	}
 
@@ -414,7 +428,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseALocalOperationsMachineClause(final ALocalOperationsMachineClause node) {
+	public void caseALocalOperationsMachineClause(
+			final ALocalOperationsMachineClause node) {
 		printOCAsList(node, node.getOperations());
 	}
 
@@ -436,7 +451,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	// definition
 
 	@Override
-	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+	public void caseAPredicateDefinitionDefinition(
+			final APredicateDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -445,7 +461,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+	public void caseASubstitutionDefinitionDefinition(
+			final ASubstitutionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -454,7 +471,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+	public void caseAExpressionDefinitionDefinition(
+			final AExpressionDefinitionDefinition node) {
 		open(node);
 		node.getName().apply(this);
 		printAsList(node.getParameters());
@@ -516,7 +534,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
-		printAsList(node.getAssignments());
+		node.getAssignment().apply(this);
 		node.getPred().apply(this);
 		close(node);
 	}
@@ -526,7 +544,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
-		printAsList(node.getAssignments());
+		node.getAssignment().apply(this);
 		node.getExpr().apply(this);
 		close(node);
 	}
@@ -550,7 +568,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAGeneralProductExpression(final AGeneralProductExpression node) {
+	public void caseAGeneralProductExpression(
+			final AGeneralProductExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -564,7 +583,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAComprehensionSetExpression(final AComprehensionSetExpression node) {
+	public void caseAComprehensionSetExpression(
+			final AComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -572,7 +592,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASymbolicComprehensionSetExpression(final ASymbolicComprehensionSetExpression node) {
+	public void caseASymbolicComprehensionSetExpression(
+			final ASymbolicComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -580,7 +601,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAProverComprehensionSetExpression(final AProverComprehensionSetExpression node) {
+	public void caseAProverComprehensionSetExpression(
+			final AProverComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -588,7 +610,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAEventBComprehensionSetExpression(final AEventBComprehensionSetExpression node) {
+	public void caseAEventBComprehensionSetExpression(
+			final AEventBComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getExpression().apply(this);
@@ -602,7 +625,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
+	public void caseAQuantifiedUnionExpression(
+			final AQuantifiedUnionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -611,7 +635,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
+	public void caseAQuantifiedIntersectionExpression(
+			final AQuantifiedIntersectionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -638,7 +663,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseASequenceExtensionExpression(final ASequenceExtensionExpression node) {
+	public void caseASequenceExtensionExpression(
+			final ASequenceExtensionExpression node) {
 		printOCAsList(node, node.getExpression());
 	}
 
@@ -756,7 +782,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseABecomesElementOfSubstitution(final ABecomesElementOfSubstitution node) {
+	public void caseABecomesElementOfSubstitution(
+			final ABecomesElementOfSubstitution node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getSet().apply(this);
@@ -794,7 +821,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOperationCallSubstitution(final AOperationCallSubstitution node) {
+	public void caseAOperationCallSubstitution(
+			final AOperationCallSubstitution node) {
 		open(node);
 		pout.openTerm("identifier");
 		printPosition(node);
@@ -942,7 +970,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAAbstractConstantsContextClause(final AAbstractConstantsContextClause node) {
+	public void caseAAbstractConstantsContextClause(
+			final AAbstractConstantsContextClause node) {
 		printOCAsList(node, node.getIdentifiers());
 	}
 
@@ -978,7 +1007,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAConstructorFreetypeConstructor(AConstructorFreetypeConstructor node) {
+	public void caseAConstructorFreetypeConstructor(
+			AConstructorFreetypeConstructor node) {
 		open(node);
 		pout.printAtom(node.getName().getText());
 		node.getArgument().apply(this);
@@ -991,4 +1021,17 @@ public class ASTProlog extends DepthFirstAdapter {
 		pout.printAtom(node.getName().getText());
 		close(node);
 	}
+
+	@Override
+	public void caseAFileExpression(AFileExpression node) {
+		node.getIdentifier().apply(this);
+		//node.getContent().apply(this);
+	}
+
+	@Override
+	public void caseAFileMachineReference(AFileMachineReference node) {
+		node.getReference().apply(this);
+		// node.getFile().apply(this);
+	}
+
 }

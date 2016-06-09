@@ -1,0 +1,3 @@
+MACHINE Foo
+DEFINITIONS "Defs.def"
+END

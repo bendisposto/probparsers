@@ -24,7 +24,7 @@ public class EventBParseException extends RuntimeException {
 	 * {@link Token} which caused the parse exception. May be <code>null</code>
 	 * if no special token was affected.
 	 * 
-	 * @return
+	 * @return	the token caused the parse exception
 	 */
 	public Token getToken() {
 		return token;
@@ -36,7 +36,7 @@ public class EventBParseException extends RuntimeException {
 	 * sourcecode ranges for the {@link Node}s of the AST have not yet been
 	 * evaluated then.
 	 * 
-	 * @return
+	 * @return 	the source code range
 	 */
 	public SourcecodeRange getRange() {
 		return range;

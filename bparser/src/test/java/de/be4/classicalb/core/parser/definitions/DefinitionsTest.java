@@ -341,12 +341,13 @@ public class DefinitionsTest {
 				asString);
 	}
 
+	@Test
 	public void testAssertInDefinition() throws BException {
 		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n"
 				+ "ABORT == ASSERT TRUE=FALSE THEN skip END\n" + "END\n";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(ABORT,[],AAssertionSubstitution(AEqualPredicate(ABooleanTrueExpression(),AFalseExpression()),ASkipSubstitution()))])]))",
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(ABORT,[],AAssertionSubstitution(AEqualPredicate(ABooleanTrueExpression(),ABooleanFalseExpression()),ASkipSubstitution()))])]))",
 				result);
 	}
 
@@ -355,7 +356,7 @@ public class DefinitionsTest {
 		// System.out.println();
 		// System.out.println("Parsing \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true,
+		final Start startNode = parser.parse(testMachine, false,
 				new PlainFileContentProvider());
 
 		// startNode.apply(new ASTPrinter());

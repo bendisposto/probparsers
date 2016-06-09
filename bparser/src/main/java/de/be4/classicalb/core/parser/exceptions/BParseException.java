@@ -32,7 +32,7 @@ public class BParseException extends RuntimeException {
 	 * {@link Token} which caused the parse exception. May be <code>null</code>
 	 * if no special token was affected.
 	 * 
-	 * @return
+	 * @return the token which caused the parse exception
 	 */
 	public Token getToken() {
 		return token;
@@ -44,7 +44,7 @@ public class BParseException extends RuntimeException {
 	 * sourcecode ranges for the {@link Node}s of the AST have not yet been
 	 * evaluated then.
 	 * 
-	 * @return
+	 * @return the range of the error node
 	 */
 	public SourcecodeRange getRange() {
 		return range;

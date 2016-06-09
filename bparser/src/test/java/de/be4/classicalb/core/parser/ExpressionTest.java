@@ -41,7 +41,7 @@ public class ExpressionTest {
 				"Start(AExpressionParseUnit(APowerOfExpression(AIntegerExpression(2),AReverseExpression(AIntegerExpression(3)))))",
 				result);
 	}
-
+	
 	@Test
 	public void testPred1() throws Exception {
 		final String testMachine = "#EXPRESSION pred(x)";
@@ -123,10 +123,12 @@ public class ExpressionTest {
 	@Test
 	public void testQuantifiedUnionExpression() throws Exception {
 		final String testMachine = "#EXPRESSION UNION x.y.(x=0 | x )";
-		final String result = getTreeAsString(testMachine);
-		assertEquals(
-				"Start(AExpressionParseUnit(AQuantifiedUnionExpression([AIdentifierExpression([x,y])],AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(0)),AIdentifierExpression([x]))))",
-				result);
+		try {
+			getTreeAsString(testMachine);
+			fail("Invalid renaming of identifier not detected");
+		} catch (BException e) {
+		}
+		
 	}
 
 	@Test

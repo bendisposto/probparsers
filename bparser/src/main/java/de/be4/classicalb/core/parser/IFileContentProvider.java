@@ -16,10 +16,12 @@ public interface IFileContentProvider {
 	 * implementing class is responsible to resolve its position.
 	 * </p>
 	 * 
-	 * @param filename
-	 * @return
+	 * @param directory the directory to search the file
+	 * @param fileName the name of file without file extension
+	 * @throws IOException	when the given file cannot be found
+	 * @return 	the content of the file
 	 */
-	public String getFileContent(final String filename) throws IOException;
+	public String getFileContent(final File directory, final String fileName) throws IOException;
 
-	public File getFile(String fileName);
+	public File getFile(final File directory, String fileName) throws IOException;
 }

@@ -6,12 +6,12 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
+import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -134,9 +134,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	@Test
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
-		URI uri = getClass().getClassLoader()
-				.getResource("parsable/DefinitionFileTest.mch").toURI();
-		File machine = new File(uri);
+		File machine = new File(
+				"src/test/resources/parsable/DefinitionFileTest.mch");
 		parser.parseFile(machine, false);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -181,6 +180,31 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		return defFileContents.get(filename);
 	}
 
+	@Override
+	public String getFileContent(File directory, String filename)
+			throws IOException {
+		return defFileContents.get(filename);
+	}
+
+	@Test
+	public void testErrorInDefinitions() throws IOException, BException {
+		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
+		String result = Helpers.fullParsing(file);
+		System.out.println(result);
+		assertTrue(result
+				.startsWith("preparse_exception([],'[2,23] "));
+	}
+
+	@Test
+	public void testErrorInIncludedDefinitionFile() throws IOException,
+			BException {
+		String file = "./src/test/resources/definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
+		String result = Helpers.fullParsing(file);
+		System.out.println(result);
+		assertTrue(result
+				.startsWith("preparse_exception([],'[3,1]"));
+	}
+
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {
 		int getStoredCounter = 0;
 		int storeCounter = 0;
@@ -198,7 +222,9 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			store.put(filename, definitions);
 		}
 
-		public String getFileContent(final String filename) throws IOException {
+		@Override
+		public String getFileContent(File directory, String filename)
+				throws IOException {
 			getContentCounter++;
 			if ("DefFile1".equals(filename)) {
 				return "DEFINITIONS \"DefFile2\"; def1 == 1";
@@ -209,12 +235,15 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			}
 		}
 
-		public File getFile(String fileName) {
+		@Override
+		public File getFile(File directory, String fileName) throws IOException {
 			return null;
 		}
 	}
 
-	public File getFile(String fileName) {
+	@Override
+	public File getFile(File directory, String fileName) throws IOException {
 		return null;
 	}
+
 }
