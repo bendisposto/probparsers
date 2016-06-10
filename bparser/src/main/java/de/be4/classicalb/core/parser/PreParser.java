@@ -96,7 +96,11 @@ public class PreParser {
 		rootNode.apply(collector);
 
 		evaluateDefinitionFiles(collector.getFileDefinitions());
-		evaluateTypes(collector.getDefinitions());
+
+		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(collector
+				.getDefinitions());
+
+		evaluateTypes(sortedDefinitionList, collector.getDefinitions());
 
 		return types;
 	}
@@ -164,18 +168,16 @@ public class PreParser {
 		}
 	}
 
-	private void evaluateTypes(final Map<Token, Token> definitions)
-			throws PreParseException {
+	private void evaluateTypes(final List<Token> sortedDefinitionList,
+			final Map<Token, Token> definitions) throws PreParseException {
 		// use linked list as we rely on pop() and push()
-		final LinkedList<Token> remainingDefinitions = sortDefinitions(definitions);
+		final LinkedList<Token> remainingDefinitions = new LinkedList<>(
+				sortedDefinitionList);
 		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<Token>();
 		Set<String> todoDefs = new HashSet<String>();
 		for (Token token : remainingDefinitions) {
 			todoDefs.add(token.getText());
 		}
-
-		checkForCycles(definitions);
-
 		// use main parser for the rhs of each definition to determine type
 		// if a definition can not be typed this way, it may be due to another
 		// definition that is not yet parser (because it appears later in the
@@ -232,16 +234,54 @@ public class PreParser {
 		}
 	}
 
-	private void checkForCycles(Map<Token, Token> definitions)
-			throws PreParseException {
-		Set<String> definitionNames = new HashSet<String>();
+	private List<Token> sortDefinitionsByTopologicalOrderAndCheckForCycles(
+			Map<Token, Token> definitions) throws PreParseException {
+		final Set<String> definitionNames = new HashSet<String>();
+		final Map<String, Token> definitionMap = new HashMap<String, Token>();
 		for (Token token : definitions.keySet()) {
-			definitionNames.add(token.getText());
+			final String definitionName = token.getText();
+			definitionNames.add(definitionName);
+			definitionMap.put(definitionName, token);
 		}
+		Map<String, Set<String>> dependencies = determineDependencies(
+				definitionNames, definitions);
+		List<String> sortedDefinitionNames = Utils
+				.sortByTopologicalOrder(dependencies);
+		if (sortedDefinitionNames.size() < definitionNames.size()) {
+			Set<String> remaining = new HashSet<String>(definitionNames);
+			remaining.removeAll(sortedDefinitionNames);
+			List<String> cycle = Utils.determineCycle(remaining, dependencies);
+			StringBuilder sb = new StringBuilder();
+			for (Iterator<String> iterator = cycle.iterator(); iterator
+					.hasNext();) {
+				sb.append(iterator.next());
+				if (iterator.hasNext()) {
+					sb.append(" -> ");
+				}
+			}
+			throw new PreParseException("Cyclic references in definitions: "
+					+ sb.toString());
+		} else {
+			List<Token> sortedDefinitionTokens = new ArrayList<>();
+			for (String name : sortedDefinitionNames) {
+				sortedDefinitionTokens.add(definitionMap.get(name));
+			}
+			return sortedDefinitionTokens;
+		}
+
+	}
+
+	private Map<String, Set<String>> determineDependencies(
+			Set<String> definitionNames, Map<Token, Token> definitions)
+			throws PreParseException {
 		HashMap<String, Set<String>> dependencies = new HashMap<>();
 		for (Entry<Token, Token> entry : definitions.entrySet()) {
 			Token nameToken = entry.getKey();
 			Token rhsToken = entry.getValue();
+			// The FORMULA_PREFIX is needed to switch the lexer state from
+			// section to normal. Note, that we do not parse the right hand side
+			// of the definition here. Hence FORMULA_PREFIX has no further
+			// meaning and substitutions can also be handled by the lexer.
 			final Reader reader = new StringReader(BParser.FORMULA_PREFIX
 					+ "\n" + rhsToken.getText());
 			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
@@ -275,73 +315,23 @@ public class PreParser {
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
-		ArrayList<String> result = new ArrayList<>();
-
-		boolean newRun = true;
-		while (newRun) {
-			newRun = false;
-			ArrayList<String> todo = new ArrayList<>();
-			todo.addAll(definitionNames);
-			todo.removeAll(result);
-			for (String name : todo) {
-				Set<String> deps = new HashSet<>(dependencies.get(name));
-				deps.removeAll(result);
-				if (deps.isEmpty()) {
-					result.add(name);
-					newRun = true;
-				}
-			}
-		}
-		if (result.size() < definitionNames.size()) {
-			Set<String> remaining = new HashSet<>();
-			remaining.addAll(definitionNames);
-			remaining.removeAll(result);
-			ArrayList<String> cycle = new ArrayList<>();
-			Set<String> set = new HashSet<>();
-			set.addAll(remaining);
-			boolean run = true;
-			while (run) {
-				for (String next : set) {
-					if (cycle.contains(next)) {
-						run = false;
-						cycle.add(next);
-						break;
-					} else if (remaining.contains(next)) {
-						cycle.add(next);
-						set = new HashSet<>(dependencies.get(next));
-						break;
-					}
-				}
-			}
-			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator
-					.hasNext();) {
-				sb.append(iterator.next());
-				if (iterator.hasNext()) {
-					sb.append(" -> ");
-				}
-			}
-			throw new PreParseException("Cyclic references in definitions: "
-					+ sb.toString());
-		}
-
+		return dependencies;
 	}
 
-	private LinkedList<Token> sortDefinitions(
+	@SuppressWarnings("unused")
+	private LinkedList<Token> sortDefinitionsByPosition(
 			final Map<Token, Token> definitions) {
 		// LinkedList will be used as a queue later on!
 		// however, the list is needed for collections.sort
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
 		final LinkedList<Token> list = new LinkedList<Token>();
-
 		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator
 				.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
 
 		}
-
 		/*
 		 * Sort the definitions in order of their appearance in the sourcecode.
 		 * Dependencies in between definitions are handled later when computing
