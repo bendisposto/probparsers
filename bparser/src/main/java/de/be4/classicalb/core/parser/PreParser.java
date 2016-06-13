@@ -284,8 +284,8 @@ public class PreParser {
 			// meaning and substitutions can also be handled by the lexer.
 			final Reader reader = new StringReader(BParser.FORMULA_PREFIX
 					+ "\n" + rhsToken.getText());
-			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
-					types); // FIXME
+			final BLexer lexer = new BLexer(new PushbackReader(reader,
+					BLexer.PUSHBACK_BUFFER_SIZE), types);
 			lexer.setParseOptions(parseOptions);
 			Set<String> set = new HashSet<String>();
 			de.be4.classicalb.core.parser.node.Token next = null;
@@ -496,9 +496,8 @@ public class PreParser {
 			de.be4.classicalb.core.parser.parser.ParserException {
 
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader, 99), types); // FIXME
-																				// Magic
-																				// number!!!!
+		final BLexer lexer = new BLexer(new PushbackReader(reader,
+				BLexer.PUSHBACK_BUFFER_SIZE), types);
 		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);

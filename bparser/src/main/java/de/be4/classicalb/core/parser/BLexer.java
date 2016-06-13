@@ -16,6 +16,9 @@ import de.be4.classicalb.core.parser.node.*;
 
 public class BLexer extends Lexer {
 
+	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
+	public static final int PUSHBACK_BUFFER_SIZE = 99;
+
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 
@@ -51,13 +54,6 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TEqual.class,
 				"You need to use /= for inequality and not \\=.");
 
-		/*
-		 * This is wrong! see testSemicolonAdEnd2 for an example where the
-		 * combination is valid addInvalid( TSemicolon.class, TEnd.class,
-		 * "A semicolon is not allowed before END. Remember: The last Operation must not end with a semicolon."
-		 * );
-		 */
-
 		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TAssertions.class);
 		clauseTokenClasses.add(TVariables.class);
@@ -82,7 +78,7 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
-	//private final List<IToken> dotList = new ArrayList<IToken>();
+	// private final List<IToken> dotList = new ArrayList<IToken>();
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions,
 			final int tokenCountPrediction) {
@@ -152,15 +148,16 @@ public class BLexer extends Lexer {
 
 	private void applyGrammarExtension() {
 		detectGrammarExtension();
-		if (parseOptions != null && this.parseOptions.grammar
-				.containsAlternativeDefinitionForToken(token)) {
+		if (parseOptions != null
+				&& this.parseOptions.grammar
+						.containsAlternativeDefinitionForToken(token)) {
 			token = this.parseOptions.grammar.createNewToken(token);
 		}
 	}
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-		
+
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();

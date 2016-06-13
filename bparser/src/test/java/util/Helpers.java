@@ -16,7 +16,6 @@ public class Helpers {
 
 	public static String getTreeAsString(final String testMachine)
 			throws BException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 

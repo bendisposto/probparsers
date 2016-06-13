@@ -53,7 +53,6 @@ import de.prob.prolog.term.PrologTerm;
 
 public class BParser {
 
-	private static final int APPROXIMATE_TOKEN_LENGTH = 2;
 	public static final String EXPRESSION_PREFIX = "#EXPRESSION";
 	public static final String PREDICATE_PREFIX = "#PREDICATE";
 	public static final String FORMULA_PREFIX = "#FORMULA";
@@ -140,7 +139,8 @@ public class BParser {
 	 * @throws BException
 	 *             if the file cannot be parsed
 	 */
-	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BException {
+	public Start parseFile(final File machineFile, final boolean verbose)
+			throws IOException, BException {
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
@@ -161,18 +161,22 @@ public class BParser {
 	 * @throws BException
 	 *             if the file cannot be parsed
 	 */
-	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
-			throws IOException, BException {
+	public Start parseFile(final File machineFile, final boolean verbose,
+			final IFileContentProvider contentProvider) throws IOException,
+			BException {
 		this.directory = machineFile.getParentFile();
 		if (verbose) {
-			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
+			DebugPrinter.println("Parsing file '"
+					+ machineFile.getCanonicalPath() + "'");
 		}
 		String content = readFile(machineFile);
 		return parse(content, verbose, contentProvider);
 	}
 
-	public final String readFile(final File machine) throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(machine));
+	public final String readFile(final File machine)
+			throws FileNotFoundException, IOException {
+		final InputStreamReader inputStreamReader = new InputStreamReader(
+				new FileInputStream(machine));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
@@ -192,7 +196,8 @@ public class BParser {
 			content = content.substring(1);
 		}
 		// while windows splits it up into three characters with the codes below
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 239 && Character.codePointAt(content, 1) == 187
+		if (!content.isEmpty() && Character.codePointAt(content, 0) == 239
+				&& Character.codePointAt(content, 1) == 187
 				&& Character.codePointAt(content, 2) == 191) {
 			content = content.substring(3);
 		}
@@ -216,7 +221,8 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start eparse(String input, IDefinitions context) throws BException, LexerException, IOException {
+	public Start eparse(String input, IDefinitions context) throws BException,
+			LexerException, IOException {
 		final Reader reader = new StringReader(input);
 
 		Start ast = null;
@@ -227,7 +233,8 @@ public class BParser {
 		final DefinitionTypes defTypes = new DefinitionTypes();
 		defTypes.addAll(context.getTypes());
 
-		BLexer bLexer = new BLexer(new PushbackReader(reader, 99), defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
+		BLexer bLexer = new BLexer(new PushbackReader(reader,
+				BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 		bLexer.setParseOptions(parseOptions);
 		Token t;
 		do {
@@ -239,7 +246,8 @@ public class BParser {
 			}
 		} while (!(t instanceof EOF));
 
-		Parser p = new Parser(new EBLexer(input, BigInteger.ZERO, ids, defTypes));
+		Parser p = new Parser(
+				new EBLexer(input, BigInteger.ZERO, ids, defTypes));
 		try {
 			ast = p.parse();
 			ok = true;
@@ -280,7 +288,8 @@ public class BParser {
 	 * @throws BException
 	 *             if the B machine cannot be parsed
 	 */
-	public Start parse(final String input, final boolean debugOutput) throws BException {
+	public Start parse(final String input, final boolean debugOutput)
+			throws BException {
 		return parse(input, debugOutput, new NoContentProvider());
 	}
 
@@ -331,8 +340,7 @@ public class BParser {
 	 *             single token is involved in the error. Otherwise a
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
-	 *             </li>
+	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
@@ -340,21 +348,22 @@ public class BParser {
 	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
 	 */
-	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
-			throws BException {
+	public Start parse(final String input, final boolean debugOutput,
+			final IFileContentProvider contentProvider) throws BException {
 		final Reader reader = new StringReader(input);
 
 		try {
 			// PreParsing
-			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
+			final DefinitionTypes defTypes = preParsing(debugOutput, reader,
+					contentProvider, directory);
 
 			defTypes.addAll(definitions.getTypes());
 
 			/*
 			 * Main parser
 			 */
-			final BLexer lexer = new BLexer(new PushbackReader(reader, 99), defTypes,
-					input.length() / APPROXIMATE_TOKEN_LENGTH);
+			final BLexer lexer = new BLexer(new PushbackReader(reader,
+					BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
@@ -363,16 +372,8 @@ public class BParser {
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			Map<PositionedNode, SourcecodeRange> positions;
-			// TODO adjust to new position aspects
-			// final de.hhu.stups.sablecc.patch.ParserAspect parserAspect =
-			// Aspects
-			// .aspectOf(de.hhu.stups.sablecc.patch.ParserAspect.class,
-			// parser);
-
-			positions = parser.getMapping();
-			// positions = parserAspect.getMapping();
-			// parserAspect.printCounting();
+			Map<PositionedNode, SourcecodeRange> positions = parser
+					.getMapping();
 
 			sourcePositions = new SourcePositions(tokenList, positions);
 
@@ -380,7 +381,8 @@ public class BParser {
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
 			 */
-			final DefinitionCollector collector = new DefinitionCollector(defTypes);
+			final DefinitionCollector collector = new DefinitionCollector(
+					defTypes);
 
 			rootNode.apply(collector);
 			getDefinitions().addAll(collector.getDefintions());
@@ -400,18 +402,22 @@ public class BParser {
 			throw new BException(fileName, e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			final SourcecodeRange range = sourcePositions == null ? null : sourcePositions.getSourcecodeRange(token);
+			final SourcecodeRange range = sourcePositions == null ? null
+					: sourcePositions.getSourcecodeRange(token);
 			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
 			if (msg == null) {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(fileName, new BParseException(token, range, msg, realMsg));
+			throw new BException(fileName, new BParseException(token, range,
+					msg, realMsg));
 		} catch (final BParseException e) {
 			throw new BException(fileName, e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
-			throw new BException(fileName, "Parsing failed with an IOException: ", e);
+			e.printStackTrace();
+			throw new BException(fileName,
+					"Parsing failed with an IOException: ", e);
 		} catch (final PreParseException e) {
 			throw new BException(fileName, e);
 		} catch (final CheckException e) {
@@ -429,9 +435,9 @@ public class BParser {
 	private DefinitionTypes preParsing(final boolean debugOutput,
 			final Reader reader, final IFileContentProvider contentProvider,
 			File directory) throws IOException, PreParseException, BException {
-		final PreParser preParser = new PreParser(
-				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.fileName, directory, parseOptions); // FIXME remove magic number
+		final PreParser preParser = new PreParser(new PushbackReader(reader,
+				BLexer.PUSHBACK_BUFFER_SIZE), contentProvider, doneDefFiles,
+				this.fileName, directory, parseOptions);
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
 		/*
@@ -443,20 +449,23 @@ public class BParser {
 		return definitionTypes;
 	}
 
-	private void applyAstTransformations(final Start rootNode) throws CheckException {
+	private void applyAstTransformations(final Start rootNode)
+			throws CheckException {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new SyntaxExtensionTranslator());
 
-		// TODO more AST transformations?
+		// more AST transformations?
 
 	}
 
-	private void performSemanticChecks(final Start rootNode) throws CheckException {
-		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(),
-				new IdentListCheck(), new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(),
-				new ProverExpressionsCheck() };
-		// TODO apply more checks?
+	private void performSemanticChecks(final Start rootNode)
+			throws CheckException {
+		final SemanticCheck[] checks = { new ClausesCheck(),
+				new SemicolonCheck(), new IdentListCheck(),
+				new DefinitionUsageCheck(getDefinitions()),
+				new PrimedIdentifierCheck(), new ProverExpressionsCheck() };
+		// apply more checks?
 
 		for (SemanticCheck check : checks) {
 			check.setOptions(parseOptions);
@@ -492,7 +501,8 @@ public class BParser {
 		return parseOptions;
 	}
 
-	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
+	public int fullParsing(final File bfile,
+			final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
 
 		try {
@@ -524,7 +534,8 @@ public class BParser {
 			final long start2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.prologOutput) {
-				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
+				printASTasProlog(out, this, bfile, tree, parsingBehaviour,
+						contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
 
@@ -534,8 +545,8 @@ public class BParser {
 
 			if (parsingBehaviour.fastPrologOutput) {
 				try {
-					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour,
-							contentProvider);
+					String fp = getASTasFastProlog(this, bfile, tree,
+							parsingBehaviour, contentProvider);
 					out.println(fp);
 				} catch (Throwable e) {
 					e.printStackTrace();

@@ -300,6 +300,13 @@ public class RuleExtensionsTest {
 			assertEquals(1, startPos.getPos());
 		}
 	}
+	
+	
+	@Test
+	public void testIfElseNoError() throws Exception {
+			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = SELECT 1=1 THEN IF 1=1 THEN skip ELSE skip END ; RULE_SUCCESS END END";
+			getTreeAsString(testMachine);
+	}
 
 	@Test
 	public void testElseIf2Error() throws Exception {
