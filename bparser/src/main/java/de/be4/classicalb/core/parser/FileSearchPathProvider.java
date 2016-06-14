@@ -7,9 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-/**
- * Created by David Schneider on 27.01.15.
- */
 public class FileSearchPathProvider implements Iterable<File> {
     private final String fileName;
     private ArrayList<String> searchPath = new ArrayList<String>();
