@@ -17,15 +17,36 @@ public class FileSearchPathProvider implements Iterable<File> {
 
     public FileSearchPathProvider(String prefix, String fileName) {
         this.fileName = fileName;
-
-        String probPath = System.getenv("PROBPATH");
         searchPath.add(prefix);
-        if(probPath != null) {
-            for(String p : probPath.split(":")) {
-                searchPath.add(p);
+
+        String[] stdlib = getLibraryPath();
+
+        if (stdlib == null) {
+            return;
+        }
+        for(String p : stdlib) {
+            searchPath.add(p);
+        }
+    }
+
+    private String[] getLibraryPath() {
+        // User provided stdlib serach path
+        String stdlib = System.getProperty("prob.stdlib");
+        // prob.home is set by prob 2.0 to the directory of the prob binary
+        String home = System.getProperty("prob.home");
+        if (stdlib == null) {
+            if (home != null) {
+                // if stdlib is not set we use prob.home to look for stdlib
+                stdlib = home + File.separator + "stdlib";
+            } else {
+                // if neither is available we try the current directory
+                stdlib = "." + File.separator + "stdlib";
             }
         }
-
+        if (stdlib != null) {
+            return stdlib.split(":");
+        }
+        return null;
     }
 
     @Override
