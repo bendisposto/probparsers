@@ -342,6 +342,7 @@ Tokens
 	{normal} kw_rule_fail = 'RULE_FAIL';
 	{normal} kw_rule_success = 'RULE_SUCCESS';
 	{normal} kw_depends_on_rules = 'DEPENDS_ON_RULES';
+	{normal} kw_for = 'FOR';
 	{normal} kw_for_all = 'FORALL';
 	{normal} kw_rule_for_all = 'RULE_FORALL';
 	{normal} kw_expect = 'EXPECT';
@@ -446,7 +447,7 @@ machine_clause {-> machine_clause} =
 	{operations} [clause]:operations_clause {-> clause.machine_clause} |
 	{values} [clause]:values_clause {-> clause.machine_clause} |
 	{invariant} [clause]:invariant_clause {-> clause.machine_clause} |
-	{freetypes} [clause]:freetypes_clause {-> clause.machine_clause};
+	{freetypes} [clause]:freetypes_clause {-> clause.machine_clause} ;
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
 
@@ -540,7 +541,7 @@ local_operations_clause {-> machine_clause} = local_operations [operation_list]:
 operations_clause {-> machine_clause} =
 	operations [operation_list]:operation_list {-> New machine_clause.operations([operation_list.operation])} |
 	{invalid_semicolon} operations [operation_list]:operation_list semicolon {-> New machine_clause.invalid_operations_clause(semicolon)} ;
-	
+
 operation_list {-> operation*} =
 	{single} [operation]:operation {-> [operation.operation]} |
 	{multi} [rest]:operation_list semicolon [operation]:operation {-> [rest.operation, operation.operation]} |
@@ -876,7 +877,7 @@ sequence_subst_tail {-> substitution*} =
 substitution_l2 {-> substitution} =
 	{parallel} [first]:substitution_l3 double_vertical_bar [second]:substitution_l3 [rest]:parallel_subst_tail? {-> New substitution.parallel([first.substitution, second.substitution, rest.substitution])} |
 	{next_level} [sub]:substitution_l3 {-> sub.substitution} ;
-	
+
 parallel_subst_tail {-> substitution*} =
 	{single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
 	{multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]} ;
@@ -905,6 +906,8 @@ substitution_l3 {-> substitution} =
     // extensions for rules
 	{forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l0 [else]:if_else end
     	{-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
+	{for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
+    	{-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
    	{forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
     	{-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |
 	{rule_fail} kw_rule_fail [msg]:message? {-> New substitution.rule_fail(msg.expression)} |
@@ -1334,6 +1337,7 @@ substitution =
 	{invalid} semicolon |
 	{forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
 	{forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
+	{for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
 	{rule_fail} [expression]:expression? | //extension for rules
 	{rule_success} | // extension for rules
 	{expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules
