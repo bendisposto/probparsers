@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 public class FileSearchPathProvider implements Iterable<File> {
     private final String fileName;
-    private ArrayList<String> searchPath = new ArrayList<String>();
+    private ArrayList<String> searchPath = new ArrayList<>();
 
     public FileSearchPathProvider(String fileName) {
         this(".", fileName);
@@ -17,36 +17,35 @@ public class FileSearchPathProvider implements Iterable<File> {
 
     public FileSearchPathProvider(String prefix, String fileName) {
         this.fileName = fileName;
+
         searchPath.add(prefix);
-
-        String[] stdlib = getLibraryPath();
-
-        if (stdlib == null) {
-            return;
-        }
-        for(String p : stdlib) {
-            searchPath.add(p);
-        }
+        searchPath.addAll(getLibraryPath());
     }
 
-    private String[] getLibraryPath() {
-        // User provided stdlib serach path
+    private ArrayList<String> getLibraryPath() {
+        ArrayList<String> result = new ArrayList<>();
+        // User provided stdlib search path
         String stdlib = System.getProperty("prob.stdlib");
         // prob.home is set by prob 2.0 to the directory of the prob binary
         String home = System.getProperty("prob.home");
-        if (stdlib == null) {
-            if (home != null) {
-                // if stdlib is not set we use prob.home to look for stdlib
-                stdlib = home + File.separator + "stdlib";
-            } else {
-                // if neither is available we try the current directory
-                stdlib = "." + File.separator + "stdlib";
+
+        if (stdlib != null) {
+            for (String p : stdlib.split(":")) {
+                result.add(p);
             }
         }
-        if (stdlib != null) {
-            return stdlib.split(":");
+        if (home != null) {
+            home = home + File.separator + "stdlib";
+            // Simple attempt to avoid adding home twice to the search path
+            if(!result.contains(home)) {
+                result.add(home);
+            }
         }
-        return null;
+
+        if (result.size() == 0) {
+            result.add("." + File.separator + "stdlib");
+        }
+        return result;
     }
 
     @Override
