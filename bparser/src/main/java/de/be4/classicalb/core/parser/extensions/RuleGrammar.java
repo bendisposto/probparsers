@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.node.TKwCounterexample;
 import de.be4.classicalb.core.parser.node.TKwDependsOnRules;
 //import de.be4.classicalb.core.parser.node.TKwDependsOnRule;
 import de.be4.classicalb.core.parser.node.TKwExpect;
+import de.be4.classicalb.core.parser.node.TKwFor;
 import de.be4.classicalb.core.parser.node.TKwForAll;
 import de.be4.classicalb.core.parser.node.TKwRule;
 import de.be4.classicalb.core.parser.node.TKwRuleFail;
@@ -44,6 +45,7 @@ public class RuleGrammar implements IGrammar {
 		add(TKwExpect.class);
 		add(TKwCounterexample.class);
 		add(TKwRuleForAll.class);
+		add(TKwFor.class);
 		map.put(new TKwRulesMachine().getText(), TMachine.class);
 	}
 

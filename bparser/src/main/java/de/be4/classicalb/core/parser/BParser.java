@@ -399,7 +399,7 @@ public class BParser {
 
 			return rootNode;
 		} catch (final LexerException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
@@ -409,19 +409,31 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(fileName, new BParseException(token, range,
+			throw new BException(getFileName(), new BParseException(token, range,
 					msg, realMsg));
 		} catch (final BParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
-			e.printStackTrace();
-			throw new BException(fileName,
+			throw new BException(getFileName(),
 					"Parsing failed with an IOException: ", e);
 		} catch (final PreParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final CheckException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
+		}
+	}
+
+	private String getFileName() {
+		File f = new File(fileName);
+		if (f.exists()) {
+			try {
+				return f.getCanonicalFile().getAbsolutePath();
+			} catch (IOException e) {
+				return fileName;
+			}
+		} else {
+			return fileName;
 		}
 	}
 

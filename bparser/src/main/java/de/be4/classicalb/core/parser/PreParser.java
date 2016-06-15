@@ -158,6 +158,7 @@ public class PreParser {
 						directory, fileName));
 				types.addAll(definitions.getTypes());
 			} catch (final IOException e) {
+				e.printStackTrace();
 				throw new PreParseException(fileNameToken,
 						"Definition file cannot be read: "
 								+ e.getLocalizedMessage()

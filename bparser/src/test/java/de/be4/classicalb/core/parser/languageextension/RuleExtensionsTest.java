@@ -47,7 +47,7 @@ public class RuleExtensionsTest {
 		final String result = getTreeAsString(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])]),AInvariantMachineClause(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])),AMemberPredicate(AIdentifierExpression([foo_Counterexamples]),APowSubsetExpression(AStringSetExpression())))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(NOT_CHECKED),AEmptySetExpression()])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[AStringExpression(SUCCESS),AStringExpression(SUCCESS),AStringExpression()])),[],))])]))",
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])]),AInvariantMachineClause(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])),AMemberPredicate(AIdentifierExpression([foo_Counterexamples]),APowSubsetExpression(AStringSetExpression())))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(NOT_CHECKED),AEmptySetExpression()])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AConjunctPredicate(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AMemberPredicate(AIdentifierExpression([#COUNTEREXAMPLE]),APowSubsetExpression(AStringSetExpression()))),ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[AStringExpression(SUCCESS),AStringExpression(SUCCESS),AEmptySetExpression()])),[],))])]))",
 				result);
 	}
 
@@ -144,7 +144,7 @@ public class RuleExtensionsTest {
 		final String result = getTreeAsString(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])]),AInvariantMachineClause(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])),AMemberPredicate(AIdentifierExpression([foo_Counterexamples]),APowSubsetExpression(AStringSetExpression())))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(NOT_CHECKED),AEmptySetExpression()])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(FAIL),AStringExpression(FAIL),AStringExpression(),AEmptySetExpression()])),[],))])]))",
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[AVariablesMachineClause([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])]),AInvariantMachineClause(AConjunctPredicate(AMemberPredicate(AIdentifierExpression([foo]),ASetExtensionExpression([AStringExpression(FAIL),AStringExpression(SUCCESS),AStringExpression(NOT_CHECKED)])),AMemberPredicate(AIdentifierExpression([foo_Counterexamples]),APowSubsetExpression(AStringSetExpression())))),AInitialisationMachineClause(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(NOT_CHECKED),AEmptySetExpression()])),AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])],[foo],[],ASelectSubstitution(AConjunctPredicate(AEqualPredicate(AIdentifierExpression([foo]),AStringExpression(NOT_CHECKED)),AMemberPredicate(AIdentifierExpression([#COUNTEREXAMPLE]),APowSubsetExpression(AStringSetExpression()))),ABlockSubstitution(AAssignSubstitution([AIdentifierExpression([foo]),AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE]),AIdentifierExpression([foo_Counterexamples])],[AStringExpression(FAIL),AStringExpression(FAIL),AEmptySetExpression(),AEmptySetExpression()])),[],))])]))",
 				result);
 	}
 
@@ -172,6 +172,13 @@ public class RuleExtensionsTest {
 		getTreeAsString(testMachine);
 		final String testMachine2 = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip;RULE_SUCCESS END END";
 		getTreeAsString(testMachine2);
+	}
+
+	@Test
+	public void testForLoop() throws Exception {
+		final String testMachine = "MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO skip END END";
+		String treeAsString = getTreeAsString(testMachine);
+		System.out.println(treeAsString);
 	}
 
 	@Test
@@ -300,12 +307,11 @@ public class RuleExtensionsTest {
 			assertEquals(1, startPos.getPos());
 		}
 	}
-	
-	
+
 	@Test
 	public void testIfElseNoError() throws Exception {
-			final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = SELECT 1=1 THEN IF 1=1 THEN skip ELSE skip END ; RULE_SUCCESS END END";
-			getTreeAsString(testMachine);
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = SELECT 1=1 THEN IF 1=1 THEN skip ELSE skip END ; RULE_SUCCESS END END";
+		getTreeAsString(testMachine);
 	}
 
 	@Test

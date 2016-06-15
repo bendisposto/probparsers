@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.ACardExpression;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
@@ -22,15 +23,20 @@ import de.be4.classicalb.core.parser.node.AEmptySetExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpectCounterexampleSubstitution;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AForLoopSubstitution;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AForallSubSubstitution;
+import de.be4.classicalb.core.parser.node.AGreaterPredicate;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIfSubstitution;
 import de.be4.classicalb.core.parser.node.AImplicationPredicate;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
+import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AMemberPredicate;
+import de.be4.classicalb.core.parser.node.AMinusOrSetSubtractExpression;
+import de.be4.classicalb.core.parser.node.ANaturalSetExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AOperation;
 import de.be4.classicalb.core.parser.node.AParallelSubstitution;
@@ -48,13 +54,16 @@ import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStringSetExpression;
 import de.be4.classicalb.core.parser.node.ATotalFunctionExpression;
 import de.be4.classicalb.core.parser.node.AUnionExpression;
+import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
+import de.be4.classicalb.core.parser.node.AWhileSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 
 public class RuleTransformation extends DepthFirstAdapter {
@@ -64,7 +73,6 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLE";
-	public static final String RULE_EMPTY_MESSAGE = "";
 	public static final String RULE_COUNTER_EXAMPLE_SET = "#CT_SET";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
@@ -198,10 +206,36 @@ public class RuleTransformation extends DepthFirstAdapter {
 		}
 	}
 
-	private AIdentifierExpression createIdentifier(String name) {
+	
+	@SuppressWarnings("unused")
+	private static List<PSubstitution> createSubstitutionList(
+			PSubstitution pSubstitution) {
+		List<PSubstitution> list = new ArrayList<>();
+		list.add(pSubstitution);
+		return list;
+	}
+
+	private static List<PExpression> createExpressionList(
+			PExpression pExpression) {
+		List<PExpression> list = new ArrayList<>();
+		list.add(pExpression);
+		return list;
+	}
+
+	private static AIdentifierExpression createIdentifier(String name) {
 		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
 		list.add(new TIdentifierLiteral(name));
 		return new AIdentifierExpression(list);
+	}
+
+	private static PExpression createIdentifier(String name,
+			PExpression positionNode) {
+		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
+		list.add(new TIdentifierLiteral(name));
+		AIdentifierExpression result = new AIdentifierExpression(list);
+		result.setStartPos(positionNode.getStartPos());
+		result.setEndPos(positionNode.getEndPos());
+		return result;
 	}
 
 	class ClauseFinder extends DepthFirstAdapter {
@@ -245,11 +279,16 @@ public class RuleTransformation extends DepthFirstAdapter {
 		nameList.add(node.getRuleName());
 		operation.setOpName(nameList);
 
-		// SELECT ruleName /= "NOT_CHECKED" THEN ... END
-		AEqualPredicate equal = new AEqualPredicate(createIdentifier(ruleName),
+		// SELECT ruleName /= "NOT_CHECKED" & $COUNTEREXAMPLE : POW(STRING) THEN ... END
+		AEqualPredicate grd1 = new AEqualPredicate(createIdentifier(ruleName),
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		ASelectSubstitution select = new ASelectSubstitution();
-		select.setCondition(equal);
+
+		AMemberPredicate grd2 = new AMemberPredicate(
+				createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
+				new APowSubsetExpression(new AStringSetExpression()));
+
+		select.setCondition(new AConjunctPredicate(grd1, grd2));
 
 		select.setThen(node.getRuleBody());
 		// select.setThen(node.getRuleBody());
@@ -288,8 +327,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
-		exprList.add(new AStringExpression(new TStringLiteral(
-				RULE_EMPTY_MESSAGE)));
+		exprList.add(new AEmptySetExpression());
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		return assign;
 	}
@@ -297,15 +335,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 	@Override
 	public void caseARuleFailSubstitution(ARuleFailSubstitution node) {
 		if (node.getExpression() != null) {
-			final AAssignSubstitution assign = createRuleFailAssignment(
-					node.getExpression(),
-					createSetOfPExpression(node.getExpression()));
+			final AAssignSubstitution assign = createRuleFailAssignment(node
+					.getExpression());
 			node.replaceBy(assign);
 		} else {
-			final AAssignSubstitution assign = createRuleFailAssignment(
-					new AStringExpression(
-							new TStringLiteral(RULE_EMPTY_MESSAGE)),
-					new AEmptySetExpression());
+			final AAssignSubstitution assign = createRuleFailAssignment(new AEmptySetExpression());
 			node.replaceBy(assign);
 		}
 
@@ -318,27 +352,24 @@ public class RuleTransformation extends DepthFirstAdapter {
 	}
 
 	private AAssignSubstitution createRuleFailAssignment(
-			PExpression resultValueAsString, PExpression setOfCounterexamples) {
+			PExpression setOfCounterexamples) {
 		String ctName = currentRuleLiteral.getText()
 				+ RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		ArrayList<PExpression> nameList = new ArrayList<>();
 		ArrayList<PExpression> exprList = new ArrayList<>();
+		
 		nameList.add(createRuleIdentifier(currentRuleLiteral));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
+		
 		nameList.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
+		
 		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
-
-		if (resultValueAsString != null) {
-			exprList.add(resultValueAsString);
-
-			// set counter example variable
-			nameList.add(createIdentifier(ctName));
-			exprList.add((PExpression) cloneNode(setOfCounterexamples));
-		} else {
-			exprList.add(new AStringExpression(new TStringLiteral(
-					RULE_EMPTY_MESSAGE)));
-		}
+		exprList.add((PExpression) cloneNode(setOfCounterexamples));
+		
+		nameList.add(createIdentifier(ctName));
+		exprList.add((PExpression) cloneNode(setOfCounterexamples));
+		
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		return assign;
 	}
@@ -358,9 +389,92 @@ public class RuleTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void outAForLoopSubstitution(AForLoopSubstitution node) {
+		/**
+		 * FOR x IN set DO sub END
+		 **/
+
+		final String localSetVariableName = "$SET";
+
+		// G_Set := set
+		final PSubstitution assignSetVariable = new AAssignSubstitution(
+				createExpressionList(createIdentifier(localSetVariableName,
+						node.getSet())),
+				createExpressionList((PExpression) cloneNode(node.getSet())));
+
+		final AWhileSubstitution whileSub = new AWhileSubstitution();
+		final List<PSubstitution> subList = new ArrayList<>();
+		subList.add(assignSetVariable);
+		subList.add(whileSub);
+		final AVarSubstitution varSub = new AVarSubstitution(
+				createExpressionList(createIdentifier(localSetVariableName,
+						node.getSet())), new ASequenceSubstitution(subList));
+
+		// WHILE card(set) > 0
+		final PPredicate whileCon = new AGreaterPredicate(new ACardExpression(
+				createIdentifier(localSetVariableName, node.getSet())),
+				new AIntegerExpression(new TIntegerLiteral("0")));
+		whileSub.setCondition(whileCon);
+		// INVARIANT card(set) : NATURAL
+		final PPredicate whileInvariant = new AMemberPredicate(
+				new ACardExpression(createIdentifier(localSetVariableName,
+						node.getSet())), new ANaturalSetExpression());
+		whileSub.setInvariant(whileInvariant);
+
+		// VARIANT card(set)
+		final PExpression whileVariant = new ACardExpression(createIdentifier(
+				localSetVariableName, node.getSet()));
+		whileSub.setVariant(whileVariant);
+
+		// VAR x IN ...
+		final AVarSubstitution varSub2 = new AVarSubstitution();
+		whileSub.setDoSubst(varSub2);
+		varSub2.setIdentifiers(createExpressionList((PExpression) cloneNode(node
+				.getIdentifier())));
+
+		// x := CHOOSE(set);
+		addChooseDefinition();
+		PExpression chooseCall = new ADefinitionExpression(
+				new TIdentifierLiteral("CHOOSE"),
+				createExpressionList(createIdentifier(localSetVariableName,
+						node.getSet())));
+		PSubstitution assignX = new AAssignSubstitution(
+				createExpressionList((PExpression) cloneNode(node
+						.getIdentifier())),
+				createExpressionList(chooseCall));
+
+		// G_Set := G_Set \ {CHOOSE(G_Set)}
+
+		PExpression chooseCall2 = new ADefinitionExpression(
+				new TIdentifierLiteral("CHOOSE"),
+				createExpressionList(createIdentifier(localSetVariableName,
+						node.getSet()))); // CHOOSE(G_Set)
+
+		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(
+				localSetVariableName, node.getSet()),
+				new ASetExtensionExpression(createExpressionList(chooseCall2))); // G_Set
+																					// \
+																					// {CHOOSE(G_Set)}
+
+		PSubstitution assignSetVariable2 = new AAssignSubstitution(
+				createExpressionList(createIdentifier(localSetVariableName,
+						node.getSet())), createExpressionList(rhs)); // G_Set :=
+																		// G_Set
+																		// \
+																		// {CHOOSE(G_Set)}
+		List<PSubstitution> var2List = new ArrayList<>();
+		var2List.add(assignX);
+		var2List.add(node.getDoSubst());
+		var2List.add(assignSetVariable2);
+		varSub2.setSubstitution(new ASequenceSubstitution(var2List));
+
+		node.replaceBy(varSub);
+	}
+
+	@Override
 	public void outAForallSubSubstitution(AForallSubSubstitution node) {
 		/**
-		 * FORALL x,y WHERE P(x,y) ASSERT F(x,y) THEN Substitution ELSE
+		 * FORALL x,y WHERE P(x,y) EXPECT F(x,y) THEN Substitution ELSE
 		 * Substitution(x,y) END
 		 * 
 		 * 
@@ -463,10 +577,11 @@ public class RuleTransformation extends DepthFirstAdapter {
 		ArrayList<PExpression> definitionParameters = new ArrayList<>();
 		definitionParameters.add(createIdentifier(RULE_COUNTER_EXAMPLE_SET));
 		toStringCall.setParameters(definitionParameters);
-		final AIfSubstitution ifElseSub = new AIfSubstitution(ifPred,
-				createRuleSuccessAssignment(), new ArrayList<PSubstitution>(),
-				createRuleFailAssignment(toStringCall,
-						createIdentifier(RULE_COUNTER_EXAMPLE_SET)));
+		final AIfSubstitution ifElseSub = new AIfSubstitution(
+				ifPred,
+				createRuleSuccessAssignment(),
+				new ArrayList<PSubstitution>(),
+				createRuleFailAssignment(createIdentifier(RULE_COUNTER_EXAMPLE_SET)));
 		letSub.setSubstitution(ifElseSub);
 
 		node.replaceBy(letSub);
@@ -489,7 +604,26 @@ public class RuleTransformation extends DepthFirstAdapter {
 				createIdentifier("X"), new AStringSetExpression()));
 		definitions
 				.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
+	}
 
+	private void addChooseDefinition() {
+		// TO_STRING(S) == "0";
+		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		AExpressionDefinitionDefinition ChooseDef = new AExpressionDefinitionDefinition();
+		ChooseDef.setName(new TIdentifierLiteral("CHOOSE"));
+		ChooseDef.setParameters(createIdentifierList("X"));
+		ChooseDef.setRhs(new AStringExpression(new TStringLiteral(
+				"a member of X")));
+		definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
+
+		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
+		chooseDefType
+				.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_CHOOSE"));
+		chooseDefType.setParameters(createIdentifierList("T"));
+		chooseDefType.setRhs(new ATotalFunctionExpression(
+				new APowSubsetExpression(createIdentifier("T")),
+				createIdentifier("T")));
+		definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
 	}
 
 	private List<PExpression> createIdentifierList(String string) {
@@ -523,7 +657,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
 			// skip properties clause
 		}
-		
+
 		public void inAChoiceSubstitution(AChoiceSubstitution node) {
 			if (inRule) {
 				errorlist
