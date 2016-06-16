@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -42,17 +43,18 @@ public class PrimedIdentifierTest {
 			getTreeAsString(testMachine);
 			fail("exception expected");
 		} catch (BException e) {
-			assertTrue(e.getCause() instanceof CheckException);
+			assertTrue(e.getCause() instanceof BParseException);
 			// ok
 		}
 	}
 
-	@Test
+	@Test(expected = BException.class)
 	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse()
 			throws BException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
 		parser.getOptions().restrictPrimedIdentifiers = false;
 		getTreeAsString(testMachine);
+		// this mode is no longer supported 
 	}
 
 	@Test
@@ -62,14 +64,14 @@ public class PrimedIdentifierTest {
 			getTreeAsString(testMachine);
 			fail("exception expected");
 		} catch (BException e) {
-			assertTrue(e.getCause() instanceof CheckException);
+			assertTrue(e.getCause() instanceof BParseException);
 			// ok
 		}
 	}
 
 	@Before
 	public void before() {
-		//resetting static variable to default value
+		// resetting static variable to default value
 		parser.getOptions().restrictPrimedIdentifiers = true;
 	}
 

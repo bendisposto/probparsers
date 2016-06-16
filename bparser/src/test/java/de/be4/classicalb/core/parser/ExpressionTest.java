@@ -41,7 +41,7 @@ public class ExpressionTest {
 				"Start(AExpressionParseUnit(APowerOfExpression(AIntegerExpression(2),AReverseExpression(AIntegerExpression(3)))))",
 				result);
 	}
-	
+
 	@Test
 	public void testPred1() throws Exception {
 		final String testMachine = "#EXPRESSION pred(x)";
@@ -128,7 +128,7 @@ public class ExpressionTest {
 			fail("Invalid renaming of identifier not detected");
 		} catch (BException e) {
 		}
-		
+
 	}
 
 	@Test
@@ -150,13 +150,10 @@ public class ExpressionTest {
 				result);
 	}
 
-	@Test
+	@Test(expected = BException.class)
 	public void testLambdaExpression2() throws Exception {
 		final String testMachine = "#EXPRESSION % x.y.z.(x.y.z=0 | x.y.z )";
-		final String result = getTreeAsString(testMachine);
-		assertEquals(
-				"Start(AExpressionParseUnit(ALambdaExpression([AIdentifierExpression([x,y,z])],AEqualPredicate(AIdentifierExpression([x,y,z]),AIntegerExpression(0)),AIdentifierExpression([x,y,z]))))",
-				result);
+		getTreeAsString(testMachine);
 	}
 
 	@Test

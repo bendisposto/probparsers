@@ -16,7 +16,6 @@ public class Helpers {
 
 	public static String getTreeAsString(final String testMachine)
 			throws BException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
@@ -101,9 +100,12 @@ public class Helpers {
 			BParser parser = new BParser(filename);
 			Start tree = parser.parseFile(machineFile, false);
 
+			final ParsingBehaviour behaviour = new ParsingBehaviour();
+			behaviour.verbose = true;
+			
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree,
-					new ParsingBehaviour(), parser.getContentProvider());
+					behaviour, parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename

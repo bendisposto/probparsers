@@ -199,10 +199,11 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	/**
 	 * The translation from the names in the SableCC grammar to prolog functors
-	 * must be systematic Otherwise it will not be possible to reuse the grammar
-	 * for non-Java front-ends. Two magic cases here: "prover_comprehension_set"
-	 * -> "comprehension_set" "op" -> "operation_call" Todo: do remove magic
-	 * special cases DO NOT add extra special cases here !!
+	 * must be systematic. Otherwise it will not be possible to reuse the
+	 * grammar for non-Java front-ends. Two magic cases here:
+	 * "prover_comprehension_set" -> "comprehension_set", "op" ->
+	 * "operation_call" Todo: do remove magic special cases DO NOT add extra
+	 * special cases here !!
 	 * 
 	 * @param Java
 	 *            class name
@@ -1025,7 +1026,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAFileExpression(AFileExpression node) {
 		node.getIdentifier().apply(this);
-		//node.getContent().apply(this);
+		// node.getContent().apply(this);
 	}
 
 	@Override

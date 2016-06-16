@@ -7,12 +7,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-/**
- * Created by David Schneider on 27.01.15.
- */
 public class FileSearchPathProvider implements Iterable<File> {
     private final String fileName;
-    private ArrayList<String> searchPath = new ArrayList<String>();
+    private ArrayList<String> searchPath = new ArrayList<>();
 
     public FileSearchPathProvider(String fileName) {
         this(".", fileName);
@@ -21,14 +18,34 @@ public class FileSearchPathProvider implements Iterable<File> {
     public FileSearchPathProvider(String prefix, String fileName) {
         this.fileName = fileName;
 
-        String probPath = System.getenv("PROBPATH");
         searchPath.add(prefix);
-        if(probPath != null) {
-            for(String p : probPath.split(":")) {
-                searchPath.add(p);
+        searchPath.addAll(getLibraryPath());
+    }
+
+    private ArrayList<String> getLibraryPath() {
+        ArrayList<String> result = new ArrayList<>();
+        // User provided stdlib search path
+        String stdlib = System.getProperty("prob.stdlib");
+        // prob.home is set by prob 2.0 to the directory of the prob binary
+        String home = System.getProperty("prob.home");
+
+        if (stdlib != null) {
+            for (String p : stdlib.split(":")) {
+                result.add(p);
+            }
+        }
+        if (home != null) {
+            home = home + File.separator + "stdlib";
+            // Simple attempt to avoid adding home twice to the search path
+            if(!result.contains(home)) {
+                result.add(home);
             }
         }
 
+        if (result.size() == 0) {
+            result.add("." + File.separator + "stdlib");
+        }
+        return result;
     }
 
     @Override

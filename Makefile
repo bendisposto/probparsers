@@ -5,6 +5,9 @@
 deploy:
 	echo "Building ProB parsers"
 	gradle deploy
+uberjar:
+	echo "Building Uberjar"
+	gradle clean uberjar
 clean:
 	echo "Cleaning; useful if you encounter weird syntax errors during building"
 	gradle clean

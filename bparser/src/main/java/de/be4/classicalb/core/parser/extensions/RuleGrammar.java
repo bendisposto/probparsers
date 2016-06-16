@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.node.TKwCounterexample;
 import de.be4.classicalb.core.parser.node.TKwDependsOnRules;
 //import de.be4.classicalb.core.parser.node.TKwDependsOnRule;
 import de.be4.classicalb.core.parser.node.TKwExpect;
+import de.be4.classicalb.core.parser.node.TKwFor;
 import de.be4.classicalb.core.parser.node.TKwForAll;
 import de.be4.classicalb.core.parser.node.TKwRule;
 import de.be4.classicalb.core.parser.node.TKwRuleFail;
@@ -22,18 +23,18 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class RuleGrammar implements IGrammar {
 
-	
 	private static RuleGrammar ruleExtension;
-	public static RuleGrammar  getInstance(){
-		if(ruleExtension == null){
+
+	public static RuleGrammar getInstance() {
+		if (ruleExtension == null) {
 			ruleExtension = new RuleGrammar();
 		}
 		return ruleExtension;
 	}
-	
-	private RuleGrammar(){}
-	
-	
+
+	private RuleGrammar() {
+	}
+
 	private static final HashMap<String, Class<? extends Token>> map = new HashMap<>();
 	static {
 		add(TKwRule.class);
@@ -44,9 +45,10 @@ public class RuleGrammar implements IGrammar {
 		add(TKwExpect.class);
 		add(TKwCounterexample.class);
 		add(TKwRuleForAll.class);
-		map.put(new TKwRulesMachine().getText() ,TMachine.class);
+		add(TKwFor.class);
+		map.put(new TKwRulesMachine().getText(), TMachine.class);
 	}
-	
+
 	private static void add(Class<? extends Token> clazz) {
 		try {
 			map.put(clazz.newInstance().getText(), clazz);
@@ -59,8 +61,8 @@ public class RuleGrammar implements IGrammar {
 					+ clazz.getName());
 		}
 	}
-	
-	public static String getModelType(){
+
+	public static String getModelType() {
 		return new TKwRulesMachine().getText();
 	}
 
@@ -89,7 +91,8 @@ public class RuleGrammar implements IGrammar {
 		}
 	}
 
-	public void applyAstTransformation(Start start, BParser bparser) throws CheckException {
-		new RuleTransformation().runTransformation(start, bparser.getDefinitions());
+	public void applyAstTransformation(Start start, BParser bparser)
+			throws CheckException {
+		new RuleTransformation(start, bparser).runTransformation();
 	}
 }

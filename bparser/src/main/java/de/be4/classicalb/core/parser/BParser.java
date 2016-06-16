@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +22,12 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.MissingSemicolonBetweenOperationsCheck;
+import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
-import de.be4.classicalb.core.parser.analysis.transforming.Couples;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -48,10 +48,11 @@ import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
+import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.term.PrologTerm;
 
 public class BParser {
 
-	private static final int APPROXIMATE_TOKEN_LENGTH = 2;
 	public static final String EXPRESSION_PREFIX = "#EXPRESSION";
 	public static final String PREDICATE_PREFIX = "#PREDICATE";
 	public static final String FORMULA_PREFIX = "#FORMULA";
@@ -62,7 +63,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions = new ParseOptions();
+	private final ParseOptions parseOptions;
 
 	private List<String> doneDefFiles = new ArrayList<String>();
 
@@ -77,6 +78,12 @@ public class BParser {
 
 	public BParser(final String fileName) {
 		this.fileName = fileName;
+		this.parseOptions = new ParseOptions();
+	}
+
+	public BParser(final String fileName, ParseOptions parseOptions) {
+		this.fileName = fileName;
+		this.parseOptions = parseOptions;
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -94,28 +101,29 @@ public class BParser {
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
-	// private static String getASTasFastProlog(final BParser parser,
-	// final File bfile, final Start tree) throws BException {
-	// final RecursiveMachineLoader rml = new RecursiveMachineLoader(
-	// bfile.getParent());
-	// rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
-	// StructuredPrologOutput structuredPrologOutput = new
-	// StructuredPrologOutput();
-	// rml.printAsProlog(structuredPrologOutput);
-	// Collection<PrologTerm> sentences = structuredPrologOutput
-	// .getSentences();
-	// StructuredPrologOutput output = new StructuredPrologOutput();
-	//
-	// output.openList();
-	// for (PrologTerm term : sentences) {
-	// output.printTerm(term);
-	// }
-	// output.closeList();
-	// output.fullstop();
-	//
-	// FastReadTransformer transformer = new FastReadTransformer(output);
-	// return transformer.write();
-	// }
+	private static String getASTasFastProlog(final BParser parser,
+			final File bfile, final Start tree,
+			final ParsingBehaviour parsingBehaviour,
+			IDefinitionFileProvider contentProvider) throws BException {
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(
+				bfile.getParent(), contentProvider, parsingBehaviour);
+		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
+		rml.printAsProlog(structuredPrologOutput);
+		Collection<PrologTerm> sentences = structuredPrologOutput
+				.getSentences();
+		StructuredPrologOutput output = new StructuredPrologOutput();
+
+		output.openList();
+		for (PrologTerm term : sentences) {
+			output.printTerm(term);
+		}
+		output.closeList();
+		output.fullstop();
+
+		FastReadTransformer transformer = new FastReadTransformer(output);
+		return transformer.write();
+	}
 
 	/**
 	 * Parses the input file.
@@ -225,8 +233,8 @@ public class BParser {
 		final DefinitionTypes defTypes = new DefinitionTypes();
 		defTypes.addAll(context.getTypes());
 
-		BLexer bLexer = new BLexer(new PushbackReader(reader, 99), defTypes,
-				input.length() / APPROXIMATE_TOKEN_LENGTH);
+		BLexer bLexer = new BLexer(new PushbackReader(reader,
+				BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 		bLexer.setParseOptions(parseOptions);
 		Token t;
 		do {
@@ -310,10 +318,10 @@ public class BParser {
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li> {@link PreParseException}: This exception contains errors
+	 *             <li>{@link PreParseException}: This exception contains errors
 	 *             that occur during the preparsing. If possible it supplies a
 	 *             token, where the error occured.</li>
-	 *             <li> {@link BLexerException}: If any error occurs in the
+	 *             <li>{@link BLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
 	 *             {@link LexerException}. But this class unfortunately does not
@@ -323,7 +331,7 @@ public class BParser {
 	 *             replace them by our own exception. In our own exception we
 	 *             provide the sourcecode position of the last characters that
 	 *             were read from the input.</li>
-	 *             <li> {@link BParseException}: This exception is thrown in two
+	 *             <li>{@link BParseException}: This exception is thrown in two
 	 *             situations. On the one hand if the parser throws a
 	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
@@ -333,7 +341,7 @@ public class BParser {
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
 	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
-	 *             <li> {@link CheckException}: If any problem occurs while
+	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
 	 *             problem. For example, if we find dublicate machine clauses,
@@ -354,10 +362,9 @@ public class BParser {
 			/*
 			 * Main parser
 			 */
-			final BLexer lexer = new BLexer(new PushbackReader(reader, 99),
-					defTypes, input.length() / APPROXIMATE_TOKEN_LENGTH);
+			final BLexer lexer = new BLexer(new PushbackReader(reader,
+					BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
-
 			parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
@@ -365,16 +372,8 @@ public class BParser {
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			Map<PositionedNode, SourcecodeRange> positions;
-			// TODO adjust to new position aspects
-			// final de.hhu.stups.sablecc.patch.ParserAspect parserAspect =
-			// Aspects
-			// .aspectOf(de.hhu.stups.sablecc.patch.ParserAspect.class,
-			// parser);
-
-			positions = parser.getMapping();
-			// positions = parserAspect.getMapping();
-			// parserAspect.printCounting();
+			Map<PositionedNode, SourcecodeRange> positions = parser
+					.getMapping();
 
 			sourcePositions = new SourcePositions(tokenList, positions);
 
@@ -394,11 +393,13 @@ public class BParser {
 			// perform some semantic checks which are not done in the parser
 			performSemanticChecks(rootNode);
 
+			this.parseOptions.grammar.applyAstTransformation(rootNode, this);
+
 			// locate the pragmas
 
 			return rootNode;
 		} catch (final LexerException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null
@@ -408,17 +409,31 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(fileName, new BParseException(token, range,
+			throw new BException(getFileName(), new BParseException(token, range,
 					msg, realMsg));
 		} catch (final BParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
-			throw new Error("Using Reader failed", e);
+			throw new BException(getFileName(),
+					"Parsing failed with an IOException: ", e);
 		} catch (final PreParseException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
 		} catch (final CheckException e) {
-			throw new BException(fileName, e);
+			throw new BException(getFileName(), e);
+		}
+	}
+
+	private String getFileName() {
+		File f = new File(fileName);
+		if (f.exists()) {
+			try {
+				return f.getCanonicalFile().getAbsolutePath();
+			} catch (IOException e) {
+				return fileName;
+			}
+		} else {
+			return fileName;
 		}
 	}
 
@@ -432,12 +447,11 @@ public class BParser {
 	private DefinitionTypes preParsing(final boolean debugOutput,
 			final Reader reader, final IFileContentProvider contentProvider,
 			File directory) throws IOException, PreParseException, BException {
-		final PreParser preParser = new PreParser(
-				new PushbackReader(reader, 99), contentProvider, doneDefFiles,
-				this.fileName, directory); // FIXME remove magic number
+		final PreParser preParser = new PreParser(new PushbackReader(reader,
+				BLexer.PUSHBACK_BUFFER_SIZE), contentProvider, doneDefFiles,
+				this.fileName, directory, parseOptions);
 		preParser.setDebugOutput(debugOutput);
 		final DefinitionTypes definitionTypes = preParser.parse();
-
 		/*
 		 * Collect the definitions of all referenced definition files and add
 		 * them to the internal definitions
@@ -451,23 +465,19 @@ public class BParser {
 			throws CheckException {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
-		rootNode.apply(new Couples());
 		rootNode.apply(new SyntaxExtensionTranslator());
 
-		this.parseOptions.grammar.applyAstTransformation(rootNode, this);
-
-		// TODO more AST transformations?
+		// more AST transformations?
 
 	}
 
 	private void performSemanticChecks(final Start rootNode)
 			throws CheckException {
 		final SemanticCheck[] checks = { new ClausesCheck(),
-				new MissingSemicolonBetweenOperationsCheck(),
-				new IdentListCheck(),
+				new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()),
 				new PrimedIdentifierCheck(), new ProverExpressionsCheck() };
-		// TODO apply more checks?
+		// apply more checks?
 
 		for (SemanticCheck check : checks) {
 			check.setOptions(parseOptions);
@@ -546,12 +556,13 @@ public class BParser {
 			}
 
 			if (parsingBehaviour.fastPrologOutput) {
-				// try {
-				// String fp = getASTasFastProlog(this, bfile, tree);
-				// out.println(fp);
-				// } catch (Throwable e) {
-				// e.printStackTrace();
-				// }
+				try {
+					String fp = getASTasFastProlog(this, bfile, tree,
+							parsingBehaviour, contentProvider);
+					out.println(fp);
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.prologOutput) {

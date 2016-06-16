@@ -54,7 +54,14 @@ public class PreLexer extends Lexer {
 				// end of rhs reached?
 				if (nextState != null) {
 					// push current token back into reader
-					unread(token);
+					try {
+						unread(token);
+					} catch (IOException e) {
+
+						throw new IOException(
+								"Pushback buffer overflow on Token: "
+										+ token.getText());
+					}
 
 					// prepare rhs_body token to be the current one
 					((Token) rhsToken).setText(rhsBuffer.toString());

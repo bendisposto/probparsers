@@ -2,7 +2,7 @@ language: java
 
 jdk:
   - oraclejdk7
-    
+
 before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg -d
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg -d
@@ -12,8 +12,11 @@ install: /bin/true
 
 sudo: false
 
-script: TERM=dumb gradle clean uploadArchives
+script: TERM=dumb gradle clean deploy uploadArchives
+
+after_success: curl -L $JENKINS_URL
 
 env:
   global:
-    secure: laGlF46pirAFs3xrBTm+7AFi0CubtBj0PRLqhAe2q9wEhyUvU+LOhJZiqeyuc2FBzGOSlfevGhVOgmWxph6g2EP/bxhwiFywXD/CCzjDhca2JahMdYW925006jGIfh+QmWnxb7hoXUb+DvOoDQdHoiTPmVom2oTEGTctjLB4BhI=
+  - secure: laGlF46pirAFs3xrBTm+7AFi0CubtBj0PRLqhAe2q9wEhyUvU+LOhJZiqeyuc2FBzGOSlfevGhVOgmWxph6g2EP/bxhwiFywXD/CCzjDhca2JahMdYW925006jGIfh+QmWnxb7hoXUb+DvOoDQdHoiTPmVom2oTEGTctjLB4BhI=
+  - secure: tWYKjEfXvz2c4sYc6UjsaZBy0PwSBgle4U67C6IkfI1ps64yyi9f7Aj2vLqo2prXSWOOg4FF2o13BdqjqSk0H/4+WprxEKTjqLHc09F+G5/31XbhEqvL9rZ2mWAktNnFKS+dQQ+p7n0askM/hNfZYYpBra7Sz4IWP7qM2igTZgQ=
