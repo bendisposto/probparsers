@@ -548,7 +548,7 @@ operation_list {-> operation*} =
 	{missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 operation {-> operation} =
-  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l3
+  {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
   {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l3
     {-> New operation.rule(rule_name, operation_body.substitution)};

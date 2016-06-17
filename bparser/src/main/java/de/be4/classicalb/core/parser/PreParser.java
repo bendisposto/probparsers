@@ -260,8 +260,9 @@ public class PreParser {
 					sb.append(" -> ");
 				}
 			}
-			throw new PreParseException("Cyclic references in definitions: "
-					+ sb.toString());
+			final Token firstDefinitionToken = definitionMap.get(cycle.get(0));
+			throw new PreParseException(firstDefinitionToken,
+					"Cyclic references in definitions: " + sb.toString());
 		} else {
 			List<Token> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
