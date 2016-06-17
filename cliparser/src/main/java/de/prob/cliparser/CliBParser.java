@@ -289,12 +289,20 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			print("EXCEPTION NullPointerException" + System.lineSeparator());
+			//print("EXCEPTION NullPointerException" + System.lineSeparator());
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
+			strOutput.fullstop();
+			strOutput.flush();
+			print(strOutput.toString());
 		} catch (BException e) {
 			PrologExceptionPrinter.printException(System.out, e, false, true);
 		} catch (LexerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
+			strOutput.fullstop();
+			strOutput.flush();
+			print(strOutput.toString());
 		} catch (IOException e) {
 			PrologExceptionPrinter.printException(System.out, e, theFormula, false, true);
 		}
@@ -327,7 +335,13 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			print("EXCEPTION NullPointerException" + System.lineSeparator());
+			//print("EXCEPTION NullPointerException" + System.lineSeparator());
+			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
+			strOutput.fullstop();
+			strOutput.flush();
+			String output = strOutput.toString();
+			print(output);
 		} catch (BException e) {
 			PrologExceptionPrinter.printException(System.out, e, false, true);
 

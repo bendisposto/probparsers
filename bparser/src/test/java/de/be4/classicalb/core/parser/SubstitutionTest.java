@@ -21,6 +21,16 @@ public class SubstitutionTest {
 	}
 
 	@Test
+	public void testSimultaneousSubstitution() throws Exception {
+		final String testMachine = "MACHINE test OPERATIONS foo = skip || skip END";
+		final String result = getTreeAsString(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([test],[]),[AOperationsMachineClause([AOperation([],[foo],[],AParallelSubstitution([ASkipSubstitution(),ASkipSubstitution()]))])]))",
+				result);
+	}
+
+	@Test
 	public void testParallelAssignWithNonIdentifier() throws BException {
 		final String testMachine = "#SUBSTITUTION xx,yy,5  := 5, 3, zz";
 		try {

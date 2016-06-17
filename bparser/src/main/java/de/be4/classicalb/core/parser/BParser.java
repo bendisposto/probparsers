@@ -425,6 +425,9 @@ public class BParser {
 	}
 
 	private String getFileName() {
+		if(fileName==null){
+			return null;
+		}
 		File f = new File(fileName);
 		if (f.exists()) {
 			try {
