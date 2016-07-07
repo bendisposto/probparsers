@@ -13,6 +13,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
 		// IF P THE P2 ELSE P3 END
+		// will be translated into
 		// (p => p2) & (not(p) => p3)
 		;
 		AImplicationPredicate imp1 = new AImplicationPredicate(

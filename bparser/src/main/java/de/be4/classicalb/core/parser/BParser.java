@@ -409,8 +409,8 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(getFileName(), new BParseException(token, range,
-					msg, realMsg));
+			throw new BException(getFileName(), new BParseException(token,
+					range, msg, realMsg));
 		} catch (final BParseException e) {
 			throw new BException(getFileName(), e);
 		} catch (final IOException e) {
@@ -425,7 +425,7 @@ public class BParser {
 	}
 
 	private String getFileName() {
-		if(fileName==null){
+		if (fileName == null) {
 			return null;
 		}
 		File f = new File(fileName);
