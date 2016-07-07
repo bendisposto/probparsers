@@ -30,3 +30,4 @@ theorymapping/.gitignore
 unicode/.gitignore
 .gitignore
 *.prob
+.settings

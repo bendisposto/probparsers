@@ -8,9 +8,14 @@ import java.io.PrintStream;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
+import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 public class Helpers {
 
@@ -86,8 +91,54 @@ public class Helpers {
 		PrintStream printStream = new PrintStream(output);
 		// int fullParsing =
 		parser.fullParsing(machineFile, behaviour, printStream, printStream);
-		// printStream.close();
+		printStream.flush();
+		printStream.close();
 		return output.toString();
+	}
+
+	public static String getMachineAsPrologTerm(String input) throws BException {
+		final BParser parser = new BParser("Test");
+		Start start = parser.parse(input, true);
+		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.prologOutput = true;
+		parsingBehaviour.useIndention = false;
+		parsingBehaviour.addLineNumbers = false;
+		parsingBehaviour.verbose = true;
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		final IPrologTermOutput pout = new PrologTermOutput(output,
+				parsingBehaviour.useIndention);
+		printAsProlog(start, pout);
+		return output.toString();
+	}
+
+	public static void printAsProlog(final Start start,
+			final IPrologTermOutput pout) {
+		final NodeIdAssignment nodeIds = new NodeIdAssignment();
+		nodeIds.assignIdentifiers(1, start);
+		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
+				nodeIds);
+		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+
+		pout.openTerm("machine");
+		// if (lineNumbers) {
+		// final SourcePositions src = positions.get(entry.getKey());
+		// pprinter.setSourcePositions(src);
+		// }
+		start.apply(prolog);
+		pout.closeTerm();
+		pout.fullstop();
+		pout.flush();
 	}
 
 	public static void parseFile(final String filename) throws IOException,
@@ -102,7 +153,7 @@ public class Helpers {
 
 			final ParsingBehaviour behaviour = new ParsingBehaviour();
 			behaviour.verbose = true;
-			
+
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree,
 					behaviour, parser.getContentProvider());
