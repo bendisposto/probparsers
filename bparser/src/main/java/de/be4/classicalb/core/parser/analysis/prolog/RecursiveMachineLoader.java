@@ -295,7 +295,14 @@ public class RecursiveMachineLoader {
 									+ file.getAbsoluteFile(), null);
 				}
 				if (!getParsedMachines().containsKey(refMachine.getName())) {
-					loadMachine(ancestors, file);
+					try {
+						loadMachine(ancestors, file);
+					} catch (IOException e) {
+						throw new BException(machineFile.getCanonicalPath(),
+								new CheckException(e.getMessage(),
+										refMachine.getNode()));
+					}
+
 				}
 			} catch (final BException e) {
 				// throw new BException(machineFile.getName(), e);
