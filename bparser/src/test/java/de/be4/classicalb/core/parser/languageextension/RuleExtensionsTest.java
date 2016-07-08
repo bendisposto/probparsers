@@ -2,10 +2,14 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.junit.Test;
 
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -13,6 +17,8 @@ import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 public class RuleExtensionsTest {
 
@@ -45,12 +51,10 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(
-				"Checking variables",
+		assertTrue("Checking variables",
 				result.contains("[variables(4,[identifier(5,foo),identifier(6,foo_Counterexamples)])"));
-		assertTrue(
-				"Checking invariant",
-				result.contains("invariant(7,conjunct(8,member(9,identifier(10,foo),set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])),member(16,identifier(17,foo_Counterexamples),pow_subset(18,string_set(19)))))"));
+		assertTrue("Checking invariant", result.contains(
+				"invariant(7,conjunct(8,member(9,identifier(10,foo),set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])),member(16,identifier(17,foo_Counterexamples),pow_subset(18,string_set(19)))))"));
 	}
 
 	@Test
@@ -58,12 +62,10 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo = SELECT \nCONSTANT_DEPENDENCIES\n(k = TRUE) THEN RULE_SUCCESS END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(
-				"Checking Invariant",
-				result.contains("set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])"));
-		assertTrue(
-				"Checking Initialisation",
-				result.contains("if_then_else(24,equal(25,identifier(26,k),boolean_true(27)),string(28,'NOT_CHECKED'),string(29,'DISABLED'))"));
+		assertTrue("Checking Invariant", result.contains(
+				"set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])"));
+		assertTrue("Checking Initialisation", result.contains(
+				"if_then_else(24,equal(25,identifier(26,k),boolean_true(27)),string(28,'NOT_CHECKED'),string(29,'DISABLED'))"));
 	}
 
 	@Test
@@ -73,8 +75,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Missing exception.");
 		} catch (BException e) {
-			assertEquals("No result value assigned in rule operation",
-					e.getMessage());
+			assertEquals("No result value assigned in rule operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			Node node = check.getFirstNode();
 			assertEquals(2, node.getStartPos().getLine());
@@ -83,8 +84,7 @@ public class RuleExtensionsTest {
 	}
 
 	@Test
-	public void testRuleFailAsAnOrdinaryIdentifierInANormalMachine()
-			throws Exception {
+	public void testRuleFailAsAnOrdinaryIdentifierInANormalMachine() throws Exception {
 		final String testMachine = "MACHINE Test CONSTANTS RULE_FAI PROPERTIES RULE_FAI = 1 END";
 		String result = getTreeAsString(testMachine);
 		assertEquals(
@@ -99,9 +99,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals(
-					"Result value of rule operation is assigned more than once",
-					e.getMessage());
+			assertEquals("Result value of rule operation is assigned more than once", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -128,8 +126,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals("RULE_SUCCESS used outside of a RULE operation",
-					e.getMessage());
+			assertEquals("RULE_SUCCESS used outside of a RULE operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(1, startPos.getLine());
@@ -144,8 +141,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals("RULE_FAIL used outside of a RULE operation",
-					e.getMessage());
+			assertEquals("RULE_FAIL used outside of a RULE operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(1, startPos.getLine());
@@ -158,9 +154,8 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(
-				"Checking substitution",
-				result.contains("assign(40,[identifier(41,foo),identifier(42,'#RESULT'),identifier(43,'#COUNTEREXAMPLE'),identifier(44,foo_Counterexamples)],[string(45,'FAIL'),string(46,'FAIL'),empty_set(47),empty_set(48)]))"));
+		assertTrue("Checking substitution", result.contains(
+				"assign(40,[identifier(41,foo),identifier(42,'#RESULT'),identifier(43,'#COUNTEREXAMPLE'),identifier(44,foo_Counterexamples)],[string(45,'FAIL'),string(46,'FAIL'),empty_set(47),empty_set(48)]))"));
 	}
 
 	@Test
@@ -203,8 +198,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals("RULE_FAIL used outside of a RULE operation",
-					e.getMessage());
+			assertEquals("RULE_FAIL used outside of a RULE operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(1, startPos.getLine());
@@ -225,8 +219,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals("No result value assigned in rule operation",
-					e.getMessage());
+			assertEquals("No result value assigned in rule operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -241,9 +234,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Exception expected");
 		} catch (BException e) {
-			assertEquals(
-					"Result value is not set in the THEN branch but set in the ELSE branch",
-					e.getMessage());
+			assertEquals("Result value is not set in the THEN branch but set in the ELSE branch", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -258,8 +249,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (BException e) {
-			assertEquals("No result value assigned in rule operation",
-					e.getMessage());
+			assertEquals("No result value assigned in rule operation", e.getMessage());
 			final CheckException check = (CheckException) e.getCause();
 			final SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -280,8 +270,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (BException e) {
-			assertEquals("RULE_FAIL used outside of a RULE operation",
-					e.getMessage());
+			assertEquals("RULE_FAIL used outside of a RULE operation", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -296,9 +285,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (BException e) {
-			assertEquals(
-					"Result value is set in the THEN branch but not in ELSE branch",
-					e.getMessage());
+			assertEquals("Result value is set in the THEN branch but not in ELSE branch", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -313,9 +300,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (BException e) {
-			assertEquals(
-					"Result value is set in the THEN branch but not in ELSIF branch",
-					e.getMessage());
+			assertEquals("Result value is set in the THEN branch but not in ELSIF branch", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -336,9 +321,7 @@ public class RuleExtensionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (BException e) {
-			assertEquals(
-					"Result value is not set in the THEN branch but set in ELSIF branch",
-					e.getMessage());
+			assertEquals("Result value is not set in the THEN branch but set in ELSIF branch", e.getMessage());
 			CheckException check = (CheckException) e.getCause();
 			SourcePosition startPos = check.getFirstNode().getStartPos();
 			assertEquals(2, startPos.getLine());
@@ -353,7 +336,14 @@ public class RuleExtensionsTest {
 		getTreeAsString(testMachine);
 
 	}
-	
+
+	@Test
+	public void testGoal() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULES(rule1) & 1=1 OPERATIONS RULE rule1 = BEGIN RULE_SUCCESS END END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+	}
+
 	@Test
 	public void testSucceededRules() throws Exception {
 		final String testMachine = "MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS END;"
@@ -369,9 +359,8 @@ public class RuleExtensionsTest {
 		getTreeAsString(testMachine);
 
 	}
-	
-	public static String getTreeAsString(final String testMachine)
-			throws BException {
+
+	public static String getTreeAsString(final String testMachine) throws BException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().grammar = RuleGrammar.getInstance();

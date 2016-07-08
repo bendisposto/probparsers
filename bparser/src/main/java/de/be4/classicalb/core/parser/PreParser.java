@@ -51,10 +51,9 @@ public class PreParser {
 	private final String modelFileName;
 	private final File directory;
 
-	public PreParser(final PushbackReader pushbackReader,
-			final IFileContentProvider contentProvider,
-			final List<String> doneDefFiles, final String modelFileName,
-			final File directory, ParseOptions parseOptions) {
+	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
+			final List<String> doneDefFiles, final String modelFileName, final File directory,
+			ParseOptions parseOptions) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
@@ -67,12 +66,12 @@ public class PreParser {
 		this.debugOutput = debugOutput;
 	}
 
-	public DefinitionTypes parse() throws PreParseException, IOException,
-			BException {
+	public DefinitionTypes parse() throws PreParseException, IOException, BException {
 		types = new DefinitionTypes();
 
 		final PreLexer preLexer = new PreLexer(pushbackReader);
-
+		preLexer.setParseOptions(parseOptions);
+		
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
 		try {
@@ -80,13 +79,11 @@ public class PreParser {
 		} catch (final ParserException e) {
 			if (e.getToken() instanceof de.be4.classicalb.core.preparser.node.TDefinitions) {
 				final Token errorToken = e.getToken();
-				final String message = "[" + errorToken.getLine() + ","
-						+ errorToken.getPos() + "] "
+				final String message = "[" + errorToken.getLine() + "," + errorToken.getPos() + "] "
 						+ "Clause 'DEFINITIONS' is used more than once";
 				throw new PreParseException(e.getToken(), message);
 			} else {
-				throw new PreParseException(e.getToken(),
-						e.getLocalizedMessage());
+				throw new PreParseException(e.getToken(), e.getLocalizedMessage());
 			}
 		} catch (final LexerException e) {
 			throw new PreParseException(e.getLocalizedMessage());
@@ -97,16 +94,15 @@ public class PreParser {
 
 		evaluateDefinitionFiles(collector.getFileDefinitions());
 
-		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(collector
-				.getDefinitions());
+		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(
+				collector.getDefinitions());
 
 		evaluateTypes(sortedDefinitionList, collector.getDefinitions());
 
 		return types;
 	}
 
-	private void evaluateDefinitionFiles(final List<Token> list)
-			throws PreParseException, BException {
+	private void evaluateDefinitionFiles(final List<Token> list) throws PreParseException, BException {
 
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
@@ -124,19 +120,16 @@ public class PreParser {
 					}
 					sb.append(fileName);
 					throw new PreParseException(fileNameToken,
-							"Cyclic references in definition files: "
-									+ sb.toString());
+							"Cyclic references in definition files: " + sb.toString());
 				}
 
 				IDefinitions definitions;
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					final String content = contentProvider.getFileContent(
-							directory, fileName);
+					final String content = contentProvider.getFileContent(directory, fileName);
 					newDoneList.add(fileName);
-					final File file = contentProvider.getFile(directory,
-							fileName);
+					final File file = contentProvider.getFile(directory, fileName);
 					String filePath = fileName;
 					if (file != null) {
 						filePath = file.getCanonicalPath();
@@ -154,14 +147,11 @@ public class PreParser {
 				}
 
 				defFileDefinitions.addAll(definitions);
-				defFileDefinitions.addDefinitionFile(contentProvider.getFile(
-						directory, fileName));
+				defFileDefinitions.addDefinitionFile(contentProvider.getFile(directory, fileName));
 				types.addAll(definitions.getTypes());
 			} catch (final IOException e) {
 				e.printStackTrace();
-				throw new PreParseException(fileNameToken,
-						"Definition file cannot be read: "
-								+ e.getLocalizedMessage()
+				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
 				// + " used in " + modelFileName
 				);
 			} finally {
@@ -169,11 +159,10 @@ public class PreParser {
 		}
 	}
 
-	private void evaluateTypes(final List<Token> sortedDefinitionList,
-			final Map<Token, Token> definitions) throws PreParseException {
+	private void evaluateTypes(final List<Token> sortedDefinitionList, final Map<Token, Token> definitions)
+			throws PreParseException {
 		// use linked list as we rely on pop() and push()
-		final LinkedList<Token> remainingDefinitions = new LinkedList<>(
-				sortedDefinitionList);
+		final LinkedList<Token> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
 		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<Token>();
 		Set<String> todoDefs = new HashSet<String>();
 		for (Token token : remainingDefinitions) {
@@ -195,8 +184,7 @@ public class PreParser {
 
 				final Token defRhs = definitions.get(definition);
 				Definitions.Type type = null;
-				DefinitionType definitionType = determineType(definition,
-						defRhs, todoDefs);
+				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 				type = definitionType.type;
 				if (type != null) {
 					todoDefs.remove(definition.getText());
@@ -214,29 +202,22 @@ public class PreParser {
 		if (!remainingDefinitions.isEmpty()) {
 			final Token definition = remainingDefinitions.pop();
 			final Token defRhs = definitions.get(definition);
-			DefinitionType definitionType = determineType(definition, defRhs,
-					todoDefs);
+			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
-				throw new PreParseException(definitionType.errorMessage
-						+ " in file: " + modelFileName);
+				throw new PreParseException(definitionType.errorMessage + " in file: " + modelFileName);
 				// throw new BParseException(definitionType.errorToken,
 				// definitionType.errorMessage + " in file: "
 				// + modelFileName);
 			} else {
 				// fall back message
-				throw new PreParseException(
-						definition,
-						"["
-								+ definition.getLine()
-								+ ","
-								+ definition.getPos()
-								+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
+				throw new PreParseException(definition, "[" + definition.getLine() + "," + definition.getPos()
+						+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
 			}
 		}
 	}
 
-	private List<Token> sortDefinitionsByTopologicalOrderAndCheckForCycles(
-			Map<Token, Token> definitions) throws PreParseException {
+	private List<Token> sortDefinitionsByTopologicalOrderAndCheckForCycles(Map<Token, Token> definitions)
+			throws PreParseException {
 		final Set<String> definitionNames = new HashSet<String>();
 		final Map<String, Token> definitionMap = new HashMap<String, Token>();
 		for (Token token : definitions.keySet()) {
@@ -244,25 +225,21 @@ public class PreParser {
 			definitionNames.add(definitionName);
 			definitionMap.put(definitionName, token);
 		}
-		Map<String, Set<String>> dependencies = determineDependencies(
-				definitionNames, definitions);
-		List<String> sortedDefinitionNames = Utils
-				.sortByTopologicalOrder(dependencies);
+		Map<String, Set<String>> dependencies = determineDependencies(definitionNames, definitions);
+		List<String> sortedDefinitionNames = Utils.sortByTopologicalOrder(dependencies);
 		if (sortedDefinitionNames.size() < definitionNames.size()) {
 			Set<String> remaining = new HashSet<String>(definitionNames);
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
 			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator
-					.hasNext();) {
+			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
 				if (iterator.hasNext()) {
 					sb.append(" -> ");
 				}
 			}
 			final Token firstDefinitionToken = definitionMap.get(cycle.get(0));
-			throw new PreParseException(firstDefinitionToken,
-					"Cyclic references in definitions: " + sb.toString());
+			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb.toString());
 		} else {
 			List<Token> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
@@ -273,8 +250,7 @@ public class PreParser {
 
 	}
 
-	private Map<String, Set<String>> determineDependencies(
-			Set<String> definitionNames, Map<Token, Token> definitions)
+	private Map<String, Set<String>> determineDependencies(Set<String> definitionNames, Map<Token, Token> definitions)
 			throws PreParseException {
 		HashMap<String, Set<String>> dependencies = new HashMap<>();
 		for (Entry<Token, Token> entry : definitions.entrySet()) {
@@ -284,10 +260,8 @@ public class PreParser {
 			// section to normal. Note, that we do not parse the right hand side
 			// of the definition here. Hence FORMULA_PREFIX has no further
 			// meaning and substitutions can also be handled by the lexer.
-			final Reader reader = new StringReader(BParser.FORMULA_PREFIX
-					+ "\n" + rhsToken.getText());
-			final BLexer lexer = new BLexer(new PushbackReader(reader,
-					BLexer.PUSHBACK_BUFFER_SIZE), types);
+			final Reader reader = new StringReader(BParser.FORMULA_PREFIX + "\n" + rhsToken.getText());
+			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), types);
 			lexer.setParseOptions(parseOptions);
 			Set<String> set = new HashSet<String>();
 			de.be4.classicalb.core.parser.node.Token next = null;
@@ -305,10 +279,9 @@ public class PreParser {
 				}
 			} catch (IOException e) {
 			} catch (BLexerException e) {
-				de.be4.classicalb.core.parser.node.Token errorToken = e
-						.getLastToken();
-				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
-						nameToken, rhsToken, errorToken, e.getMessage());
+				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
+				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(nameToken, rhsToken,
+						errorToken, e.getMessage());
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
@@ -321,15 +294,13 @@ public class PreParser {
 	}
 
 	@SuppressWarnings("unused")
-	private LinkedList<Token> sortDefinitionsByPosition(
-			final Map<Token, Token> definitions) {
+	private LinkedList<Token> sortDefinitionsByPosition(final Map<Token, Token> definitions) {
 		// LinkedList will be used as a queue later on!
 		// however, the list is needed for collections.sort
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
 		final LinkedList<Token> list = new LinkedList<Token>();
-		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator
-				.hasNext();) {
+		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
 
@@ -362,8 +333,7 @@ public class PreParser {
 
 		}
 
-		DefinitionType(Definitions.Type t,
-				de.be4.classicalb.core.parser.node.Token n) {
+		DefinitionType(Definitions.Type t, de.be4.classicalb.core.parser.node.Token n) {
 			this.type = t;
 			this.errorToken = n;
 		}
@@ -372,17 +342,15 @@ public class PreParser {
 			this.type = t;
 		}
 
-		DefinitionType(String errorMessage,
-				de.be4.classicalb.core.parser.node.Token t) {
+		DefinitionType(String errorMessage, de.be4.classicalb.core.parser.node.Token t) {
 			this.errorMessage = errorMessage;
 			this.errorToken = t;
 		}
 	}
 
 	private DefinitionType determineType(final Token definition,
-	// private Definitions.Type determineType(final Token definition,
-			final Token rhsToken, Set<String> definitions)
-			throws PreParseException {
+			// private Definitions.Type determineType(final Token definition,
+			final Token rhsToken, Set<String> definitions) throws PreParseException {
 
 		final String definitionRhs = rhsToken.getText();
 
@@ -399,8 +367,7 @@ public class PreParser {
 			// Expression or Expression/Substituion (e.g. f(x))?
 			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
 
-			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(
-					definitions);
+			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(definitions);
 			expressionParseUnit.apply(visitor);
 
 			if (visitor.isKaboom()) {
@@ -409,8 +376,7 @@ public class PreParser {
 			}
 
 			PExpression expression = expressionParseUnit.getExpression();
-			if ((expression instanceof AIdentifierExpression)
-					|| (expression instanceof AFunctionExpression)
+			if ((expression instanceof AIdentifierExpression) || (expression instanceof AFunctionExpression)
 					|| (expression instanceof ADefinitionExpression)) {
 				return new DefinitionType(IDefinitions.Type.ExprOrSubst);
 			}
@@ -421,49 +387,42 @@ public class PreParser {
 			errorToken = e.getToken();
 			try {
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
-				return new DefinitionType(IDefinitions.Type.Substitution,
-						errorToken);
+				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
-				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex
-						.getToken();
-				if (errorToken.getLine() > errorToken2.getLine()
-						|| (errorToken.getLine() == errorToken2.getLine() && errorToken
-								.getPos() >= errorToken2.getPos())) {
-					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
-							definition, rhsToken, errorToken, e.getMessage());
+				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex.getToken();
+				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
+						&& errorToken.getPos() >= errorToken2.getPos())) {
+					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
+							rhsToken, errorToken, e.getMessage());
 					return new DefinitionType(newMessage, errorToken);
 				} else {
-					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
-							definition, rhsToken, errorToken2, ex.getMessage());
+					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
+							rhsToken, errorToken2, ex.getMessage());
 					return new DefinitionType(newMessage, errorToken2);
 				}
 			} catch (BLexerException e1) {
 				errorToken = e1.getLastToken();
-				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
-						definition, rhsToken, errorToken, e.getMessage());
+				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
+						rhsToken, errorToken, e.getMessage());
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
-				throw new PreParseException(
-						determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-								definition, rhsToken, e3.getMessage()));
+				throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
+						definition, rhsToken, e3.getMessage()));
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
-			final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(
-					definition, rhsToken, errorToken, e.getMessage());
+			final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition, rhsToken,
+					errorToken, e.getMessage());
 			throw new PreParseException(newMessage);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			throw new PreParseException(
-					determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-							definition, rhsToken, e.getMessage()));
+			throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
+					definition, rhsToken, e.getMessage()));
 		}
 
 	}
 
-	private String determineNewErrorMessageWithCorrectedPositionInformations(
-			Token definition, Token rhsToken,
-			de.be4.classicalb.core.parser.node.Token errorToken,
-			String oldMessage) {
+	private String determineNewErrorMessageWithCorrectedPositionInformations(Token definition, Token rhsToken,
+			de.be4.classicalb.core.parser.node.Token errorToken, String oldMessage) {
 		// the parsed string starts in the second line, e.g. #formula\n ...
 		int line = errorToken.getLine();
 		int pos = errorToken.getPos();
@@ -477,8 +436,8 @@ public class PreParser {
 		return "[" + line + "," + pos + "]" + message;
 	}
 
-	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-			Token definition, Token rhsToken, String oldMessage) {
+	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,
+			Token rhsToken, String oldMessage) {
 		Pattern pattern = Pattern.compile("\\d+");
 		Matcher m = pattern.matcher((CharSequence) oldMessage);
 		m.find();
@@ -492,14 +451,12 @@ public class PreParser {
 		return "[" + line + "," + pos + "]" + message;
 	}
 
-	private de.be4.classicalb.core.parser.node.Start tryParsing(
-			final String prefix, final String definitionRhs)
+	private de.be4.classicalb.core.parser.node.Start tryParsing(final String prefix, final String definitionRhs)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
 			de.be4.classicalb.core.parser.parser.ParserException {
 
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader,
-				BLexer.PUSHBACK_BUFFER_SIZE), types);
+		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), types);
 		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);

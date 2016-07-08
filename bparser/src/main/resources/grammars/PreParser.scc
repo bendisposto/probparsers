@@ -8,18 +8,18 @@ Helpers
 	line_comment_start = '//';
 	comment_start = '/*';
     comment_end = '*/';
-    
+
 	underscore = '_';
-	semicolon = ';'; 
+	semicolon = ';';
 	star = '*';
 	slash = '/';
 	hash = '#';
 	double_quotation = '"';
     lf = 10;
     cr = 13;
-        
+
     line_break = [lf + cr];
-    
+
     small_letter =  ['a'..'z'];
     capital_letter = ['A' .. 'Z'];
     letter = small_letter | capital_letter;
@@ -30,7 +30,7 @@ Helpers
 	all_chars_without_quote = [all_chars - double_quotation];
 	word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
 	comment_char = [[all_chars - star] - slash];
-	
+
 	abstract_constants = 'ABSTRACT_CONSTANTS';
 	abstract_variables = 'ABSTRACT_VARIABLES';
 	assertions = 'ASSERTIONS';
@@ -46,7 +46,7 @@ Helpers
 	initialisation = 'INITIALISATION' | 'INITIALIZATION';
 	invariant = 'INVARIANT';
 	local_operations = 'LOCAL_OPERATIONS';
-	machine = 'MACHINE' | 'MODEL' | 'SYSTEM';
+	machine = 'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE';
 	operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS for Event-B */
 	promotes = 'PROMOTES';
 	properties = 'PROPERTIES';
@@ -57,7 +57,7 @@ Helpers
 	uses = 'USES';
 	values = 'VALUES';
 	variables = 'VARIABLES';
-	
+
 
 /*******************************************************************
  * States                                                          *
@@ -80,10 +80,10 @@ Tokens
 
 	{normal, definitions, definitions_rhs} comment = comment_start ;  // switch to comment state is done in PreLexer.java
 	{comment} comment_end = comment_end ; // switch back to previous state is done in PreLexer.java
-	{comment} comment_content = all_chars ;	
-	
+	{comment} comment_content = all_chars ;
+
 	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
-		
+
 	{normal -> definitions} definitions = 'DEFINITIONS';
 	{normal, definitions -> normal, definitions_rhs} other_clause_begin =
 		abstract_constants | abstract_variables | assertions | concrete_constants |
@@ -93,7 +93,7 @@ Tokens
 		sees | sets | uses | values | variables ;
 
 	{normal, definitions -> normal} end_machine = end ;
-	
+
 	{normal} kw_definitions = '#DEFINITIONS';
 	{normal -> no_definitions} kw_prefix =
 		'#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' |
@@ -112,18 +112,18 @@ Tokens
 	{definitions} comma = ',';
 
 	{definitions -> definitions_rhs} begin_def_body = '==';
-	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation; 
+	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
 	{definitions_rhs} begin_nesting =
 		'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
 		'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
 	{definitions_rhs} end_nesting = end ;
 	{definitions_rhs} rhs_identifier = letter (letter | digit | underscore)* ; // lex identifiers as complete words to ignore keywords within identifiers
 	{definitions, definitions_rhs} semicolon = semicolon; // returning to state definitions is done by PreLexer
-	
+
 	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
 	{definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+	{normal} something = letter (letter | digit | underscore)* | [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
 
 	white_space = layout_char+;
 
@@ -170,7 +170,7 @@ def_parameters {-> identifier_literal*} = left_par [parameters]:identifier_list 
 identifier_list {-> identifier_literal*} =
 	{single} [parameter]:identifier_literal {-> [parameter]} |
 	{multi} [rest]:identifier_list comma [parameter]:identifier_literal {-> [rest.identifier_literal, parameter]} ;
-	
+
 
 
 /*******************************************************************

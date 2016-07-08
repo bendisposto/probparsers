@@ -96,6 +96,7 @@ public class Helpers {
 		return output.toString();
 	}
 
+
 	public static String getMachineAsPrologTerm(String input) throws BException {
 		final BParser parser = new BParser("Test");
 		Start start = parser.parse(input, true);
@@ -121,7 +122,7 @@ public class Helpers {
 		printAsProlog(start, pout);
 		return output.toString();
 	}
-
+	
 	public static void printAsProlog(final Start start,
 			final IPrologTermOutput pout) {
 		final NodeIdAssignment nodeIds = new NodeIdAssignment();
