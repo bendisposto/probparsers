@@ -3,6 +3,8 @@ package de.be4.classicalb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 
+import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
+import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.preparser.lexer.Lexer;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.EOF;
@@ -21,12 +23,14 @@ import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
 
+	private boolean isFirstToken = true;
 	private TRhsBody rhsToken = null;
 	private StringBuilder rhsBuffer = null;
 	private int otherNestingLevel = 0;
 	private int parenNestingLevel = 0;
 
 	private State stateBeforeComment;
+	private ParseOptions parseOptions = null;
 
 	public PreLexer(final PushbackReader in) {
 		super(in);
@@ -34,6 +38,7 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+		detectGrammarExtension();
 		checkComment();
 
 		if (token != null) {
@@ -58,9 +63,7 @@ public class PreLexer extends Lexer {
 						unread(token);
 					} catch (IOException e) {
 
-						throw new IOException(
-								"Pushback buffer overflow on Token: "
-										+ token.getText());
+						throw new IOException("Pushback buffer overflow on Token: " + token.getText());
 					}
 
 					// prepare rhs_body token to be the current one
@@ -99,8 +102,7 @@ public class PreLexer extends Lexer {
 			otherNestingLevel += changeNesting();
 		}
 
-		if (otherNestingLevel == 0 && parenNestingLevel == 0
-				&& token instanceof TSemicolon) {
+		if (otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon) {
 			return State.DEFINITIONS;
 		}
 
@@ -147,6 +149,22 @@ public class PreLexer extends Lexer {
 		} else if (token instanceof TLineComment) {
 			token = null;
 		}
+	}
+	private void detectGrammarExtension() {
+		if (parseOptions != null && parseOptions.grammar instanceof DefaultGrammar && isFirstToken) {
+			isFirstToken = false;
+			if (token.getText().equals("RULES_MACHINE")) {
+				this.parseOptions.grammar = RuleGrammar.getInstance();
+			}
+		}
+	}
+
+	public ParseOptions getParseOptions() {
+		return parseOptions;
+	}
+
+	public void setParseOptions(ParseOptions parseOptions) {
+		this.parseOptions = parseOptions;
 	}
 
 }

@@ -412,6 +412,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 		final List<PPredicate> predList = new ArrayList<>();
 		for (PExpression e : copy) {
 			final AEqualPredicate equal = new AEqualPredicate(e, new AStringExpression(new TStringLiteral(ruleState)));
+			equal.setStartPos(e.getStartPos());
+			equal.setEndPos(e.getEndPos());
 			predList.add(equal);
 		}
 		final PPredicate conjunction = createConjunction(predList);
