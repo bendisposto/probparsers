@@ -138,7 +138,12 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		packageName = text.replaceAll("\"", "");
 
 		final String[] packageNameArray = packageName.split("\\.");
-		File file = mainFile;
+		File file;
+		try {
+			file = mainFile.getCanonicalFile();
+		} catch (IOException e) {
+			throw new VisitorException(null, e.getMessage());
+		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
 			final String name1 = packageNameArray[i];
 			file = file.getParentFile();
