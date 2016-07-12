@@ -72,13 +72,14 @@ Tokens
   {pragma} pragma_symbolic = 'symbolic';
   {pragma} pragma_label = 'label';
   {pragma} pragma_file = 'file';
-    {pragma->description} pragma_description = 'desc' | 'description';
-    {pragma} pragma_conversion = 'conversion';
-    {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
-    {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
+  {pragma} pragma_package = 'package';
+  {pragma->description} pragma_description = 'desc' | 'description';
+  {pragma} pragma_conversion = 'conversion';
+  {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
-    {unit} unit_content = string_literal;
-    {unit} unit_id = identifier_literal;
+  {unit} unit_content = string_literal;
+  {unit} unit_id = identifier_literal;
 
   {section->comment, normal -> comment} comment = comment_start ;
   {comment,description} comment_end = comment_end; // return to state 'normal' is done in Lexer
@@ -412,7 +413,10 @@ machine_variant {-> machine_variant}
         | {model} T.model   {-> New machine_variant.model()}
         | {system} T.system  {-> New machine_variant.system()};
 
-machine_header {-> machine_header} = [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal],[parameters.expression])};
+machine_header {-> machine_header} =
+  [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal],[parameters.expression])} |
+  {package} [name]:composed_identifier [parameters]:machine_params? pragma_package [package]:pragma_id_or_string
+    {-> New machine_header.package_pragma(New machine_header([name.identifier_literal],[parameters.expression]), package)} ;
 
 machine_params {-> expression*} = left_par [param_list]:machine_param_list right_par {-> [param_list.expression]};
 
@@ -486,7 +490,9 @@ machine_ref_list {-> machine_reference*} =
 machine_reference {-> machine_reference} =
   {simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
   {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
-    {-> New machine_reference.file(machine_reference.machine_reference, file)} ;
+    {-> New machine_reference.file(machine_reference.machine_reference, file)} |
+  {package_pragma} [machine_reference]:machine_reference2 pragma_package [package]:pragma_id_or_string
+    {-> New machine_reference.package_pragma(machine_reference.machine_reference, package)};
 
 machine_reference2 {-> machine_reference} =
   {simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
@@ -955,7 +961,8 @@ composed_identifier_list {-> expression*} =
 
 composed_identifier_file_pragma_expression {-> expression} =
   {normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
-  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} ;
+  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} |
+  {package_pragma} [identifier]:composed_identifier_expression pragma_package [package]:pragma_id_or_string {-> New expression.package_pragma(identifier.expression, package)} ;
 
 composed_identifier_expression {-> expression} =
   {normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
@@ -1038,7 +1045,9 @@ argpattern = {undef} | {def} expression;
 
 machine_variant = {machine} | {model} | {system};
 
-machine_header = [name]:identifier_literal* [parameters]:expression*;
+machine_header =
+  [name]:identifier_literal* [parameters]:expression* |
+  {package_pragma} [machine_header]:machine_header [package]:pragma_id_or_string ;
 
 context_clause =
   {extends} [extends]:identifier_literal* |
@@ -1088,7 +1097,8 @@ machine_clause =
 
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |
-  {file} [reference]:machine_reference [file]:pragma_id_or_string  ;
+  {file} [reference]:machine_reference [file]:pragma_id_or_string  |
+  {package_pragma} [reference]:machine_reference [package]:pragma_id_or_string ;
 
 definition =
     {conversion} definition |
@@ -1161,6 +1171,7 @@ predicate =
 /* Expressions */
 expression =
   {file} [identifier]:expression [content]:pragma_id_or_string |
+  {package_pragma} [identifier]:expression [package]:pragma_id_or_string |
   {description} [content]:pragma_free_text [expression]:expression |
   {unit} [content]:unit_content [identifier]:expression |
   {new_unit} [content]:unit_content [identifier]:expression |

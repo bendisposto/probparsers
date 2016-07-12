@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -216,16 +215,9 @@ public class RecursiveMachineLoader {
 			throw new IllegalStateException("machine file is not registered");
 		}
 
-		ReferencedMachines refMachines;
-		try {
-			refMachines = new ReferencedMachines(current);
-		} catch (CheckException e) {
-			try {
-				throw new BException(machineFile.getCanonicalPath(), e);
-			} catch (IOException e1) {
-				throw new BException(machineFile.getAbsolutePath(), e);
-			}
-		}
+		ReferencedMachines refMachines = new ReferencedMachines(machineFile, current);
+		refMachines.findReferencedMachines();
+
 		final String name = refMachines.getName();
 		if (name == null) {
 			/*
@@ -247,7 +239,7 @@ public class RecursiveMachineLoader {
 		}
 		positions.put(name, sourcePositions);
 
-		final SortedSet<String> referencesSet = refMachines.getSetOfReferencedMachines();
+		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
 		checkForCycles(ancestors, referencesSet);
 
 		final List<MachineReference> references = refMachines.getReferences();

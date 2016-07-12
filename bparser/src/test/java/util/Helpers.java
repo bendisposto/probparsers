@@ -56,16 +56,10 @@ public class Helpers {
 					new ParsingBehaviour(), parser.getContentProvider());
 			return output.toString();
 		} catch (BException e) {
+			e.printStackTrace();
 			PrologExceptionPrinter.printException(output, e);
 			return output.toString();
 		}
-
-		//
-
-		// int fullParsing = parser.fullParsing(machineFile, behaviour,
-		// System.out,
-		// System.err);
-		// System.out.println(fullParsing);
 	}
 
 	public static String fullParsing(String filename) {

@@ -2,14 +2,10 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.junit.Test;
 
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -17,8 +13,6 @@ import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
-import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
 
 public class RuleExtensionsTest {
 
