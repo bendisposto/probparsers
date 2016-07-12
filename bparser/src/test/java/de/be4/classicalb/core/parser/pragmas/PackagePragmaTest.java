@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 
 public class PackagePragmaTest {
 
+
 	@Test
 	public void testPackagePragma() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/packagePragma/foo/";
@@ -26,7 +27,6 @@ public class PackagePragmaTest {
 		String PATH = "src/test/resources/pragmas/packagePragma/foo/bar/";
 		String file = PATH + "BarM2.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains(
 				"machine(abstract_machine(1,machine(2),machine_header(4,'BarM2',[]),[sees(5,[identifier(7,'FooM1')])]))."));
 	}
@@ -36,7 +36,6 @@ public class PackagePragmaTest {
 		String PATH = "src/test/resources/pragmas/packagePragma/foo/";
 		String file = PATH + "InvalidPackage1.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("Package declaration does not match the folder structure"));
 	}
 
@@ -45,7 +44,6 @@ public class PackagePragmaTest {
 		String PATH = "src/test/resources/pragmas/packagePragma/foo/";
 		String file = PATH + "ReferencedFileDoesNotExist.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("foo/bar/bazz/M1.mch (No such file or directory)"));
 	}
 
