@@ -9,19 +9,19 @@ public class MachineReference {
 
 	private final String name;
 	private final Node node;
-	private final String pragmaPath;
+	private final String filePath;
 
 	public MachineReference(String name, Node node) {
 		this.name = name;
 		this.node = node;
-		this.pragmaPath = null;
+		this.filePath = null;
 	}
 
 	public MachineReference(String name, Node node, String path)
 			throws CheckException {
 		this.name = name;
 		this.node = node;
-		this.pragmaPath = path;
+		this.filePath = path;
 
 		File file = new File(path);
 		if (file.isDirectory()) {
@@ -44,7 +44,7 @@ public class MachineReference {
 	}
 
 	public String getPath() {
-		return pragmaPath;
+		return filePath;
 	}
 
 	public Node getNode() {
