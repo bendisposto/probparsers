@@ -73,6 +73,7 @@ Tokens
   {pragma} pragma_label = 'label';
   {pragma} pragma_file = 'file';
   {pragma} pragma_package = 'package';
+  {pragma} pragma_import = 'import';
   {pragma->description} pragma_description = 'desc' | 'description';
   {pragma} pragma_conversion = 'conversion';
   {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
@@ -321,6 +322,7 @@ Tokens
   {section->normal} kw_variables = '#VARIABLES';
   {section->normal} kw_values = '#VALUES';
   {section->normal} kw_oppattern = '#OPPATTERN';
+  {section->normal} kw_machine_clause = '#MACHINECLAUSE';
 
   {section->normal,normal} identifier_literal = identifier_literal;
   {pragma} pragma_identifier_literal = pragma_identifier_literal;
@@ -373,35 +375,21 @@ parse_unit {-> parse_unit} =
   {predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
   {exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
   {substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
-  {abstract_constants} kw_abstract_constants [clause]:abstract_constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {abstract_variables} kw_abstract_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {assertions} kw_assertions [clause]:assertions_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {concrete_constants} kw_concrete_constants [clause]:constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {concrete_variables} kw_concrete_variables [clause]:concrete_variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {constants} kw_constants [clause]:constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {constraints} kw_constraints [clause]:constraints_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {definitions} kw_definitions [clause]:definitions_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {extends} kw_extends [clause]:extends_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {imports} kw_imports [clause]:imports_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {includes} kw_includes [clause]:includes_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {initialisation} kw_initialisation [clause]:initialisation_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {invariant} kw_invariant [clause]:invariant_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {local_operations} kw_local_operations [clause]:operations_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {operations} kw_operations [clause]:operations_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {promotes} kw_promotes [clause]:promotes_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {properties} kw_properties [clause]:properties_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {sees} kw_sees [clause]:sees_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {sets} kw_sets [clause]:sets_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {uses} kw_uses [clause]:uses_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {values} kw_values [clause]:values_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
-  {variables} kw_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
   {oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
-  {definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
+  {definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)} |
+  {machine_clause} kw_machine_clause [clause]:machine_clause {-> New parse_unit.machine_clause(clause.machine_clause)}; // used to single machine clauses
 
 machine {-> parse_unit} =
+  machine_x {-> machine_x.parse_unit} |
   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} |
-  machine_x {-> machine_x.parse_unit};
+  {package} pragma_package [package]:pragma_id_or_string [imports]:import_list? [parse_unit]:P.machine
+    {-> New parse_unit.package(package, [imports.import], parse_unit.parse_unit)} |
+  {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} ;
+
+import_list {-> import*} =
+  {single} pragma_import [package_or_machine]:pragma_id_or_string {-> [New import(package_or_machine)]} |
+  {multiple} [rest]:import_list pragma_import [package_or_machine]:pragma_id_or_string {-> [rest.import,New import(package_or_machine)]} ;
+
 
 machine_x {-> parse_unit} =
   {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
@@ -414,9 +402,7 @@ machine_variant {-> machine_variant}
         | {system} T.system  {-> New machine_variant.system()};
 
 machine_header {-> machine_header} =
-  [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal],[parameters.expression])} |
-  {package} [name]:composed_identifier [parameters]:machine_params? pragma_package [package]:pragma_id_or_string
-    {-> New machine_header.package_pragma(New machine_header([name.identifier_literal],[parameters.expression]), package)} ;
+  [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal],[parameters.expression])} ;
 
 machine_params {-> expression*} = left_par [param_list]:machine_param_list right_par {-> [param_list.expression]};
 
@@ -490,9 +476,7 @@ machine_ref_list {-> machine_reference*} =
 machine_reference {-> machine_reference} =
   {simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
   {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
-    {-> New machine_reference.file(machine_reference.machine_reference, file)} |
-  {package_pragma} [machine_reference]:machine_reference2 pragma_package [package]:pragma_id_or_string
-    {-> New machine_reference.package_pragma(machine_reference.machine_reference, package)};
+    {-> New machine_reference.file(machine_reference.machine_reference, file)} ;
 
 machine_reference2 {-> machine_reference} =
   {simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
@@ -961,8 +945,7 @@ composed_identifier_list {-> expression*} =
 
 composed_identifier_file_pragma_expression {-> expression} =
   {normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
-  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} |
-  {package_pragma} [identifier]:composed_identifier_expression pragma_package [package]:pragma_id_or_string {-> New expression.package_pragma(identifier.expression, package)} ;
+  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} ;
 
 composed_identifier_expression {-> expression} =
   {normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
@@ -1025,6 +1008,7 @@ Abstract Syntax Tree
 
 parse_unit =
   {generated} parse_unit |
+  {package} [package]:pragma_id_or_string [imports]:import* parse_unit  |
   {unit_alias} [name]:unit_id [content]:unit_content parse_unit |
   {abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
   {refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
@@ -1039,6 +1023,8 @@ parse_unit =
   {oppattern} [name]:identifier_literal* [parameters]:argpattern* |
   {parse_unit_definition} definition;
 
+import = [import]:pragma_id_or_string; // importing a package or machine using import pragma (e.g. /*@import "foo" */ )
+
 argpattern = {undef} | {def} expression;
 /* csppattern = argtype argpattern; */
 /* argtype = {join} | {in} | {out}; */
@@ -1046,8 +1032,7 @@ argpattern = {undef} | {def} expression;
 machine_variant = {machine} | {model} | {system};
 
 machine_header =
-  [name]:identifier_literal* [parameters]:expression* |
-  {package_pragma} [machine_header]:machine_header [package]:pragma_id_or_string ;
+  [name]:identifier_literal* [parameters]:expression* ;
 
 context_clause =
   {extends} [extends]:identifier_literal* |
@@ -1097,8 +1082,8 @@ machine_clause =
 
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |
-  {file} [reference]:machine_reference [file]:pragma_id_or_string  |
-  {package_pragma} [reference]:machine_reference [package]:pragma_id_or_string ;
+  {file} [reference]:machine_reference [file]:pragma_id_or_string ;
+
 
 definition =
     {conversion} definition |
@@ -1170,8 +1155,7 @@ predicate =
 
 /* Expressions */
 expression =
-  {file} [identifier]:expression [content]:pragma_id_or_string |
-  {package_pragma} [identifier]:expression [package]:pragma_id_or_string |
+  {file} [identifier]:expression [content]:pragma_id_or_string | // file pragma
   {description} [content]:pragma_free_text [expression]:expression |
   {unit} [content]:unit_content [identifier]:expression |
   {new_unit} [content]:unit_content [identifier]:expression |

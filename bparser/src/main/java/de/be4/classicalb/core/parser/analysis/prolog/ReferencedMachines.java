@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -22,21 +23,21 @@ import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AImport;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
 import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
 import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
-import de.be4.classicalb.core.parser.node.APackagePragmaExpression;
-import de.be4.classicalb.core.parser.node.APackagePragmaMachineHeader;
-import de.be4.classicalb.core.parser.node.APackagePragmaMachineReference;
+import de.be4.classicalb.core.parser.node.APackageParseUnit;
 import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
+import de.be4.classicalb.core.parser.node.PImport;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 
@@ -49,9 +50,10 @@ import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 public class ReferencedMachines extends DepthFirstAdapter {
 	private final File mainFile;
 	private final Node start;
+	private final List<String> pathList = new ArrayList<String>();
+	private final Hashtable<String, String> filePathTable = new Hashtable<>();
 	private String name;
 	private String packageName;
-	private String[] packageNameArray;
 	private File rootDirectory;
 	private final LinkedHashMap<String, MachineReference> referncesTable;
 
@@ -96,6 +98,10 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return set;
 	}
 
+	public List<String> getPathList() {
+		return this.pathList;
+	}
+
 	/**
 	 * 
 	 * @return the name of the machine, <code>null</code> if no name was found
@@ -122,22 +128,33 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAPackagePragmaMachineHeader(APackagePragmaMachineHeader node) {
-		node.getMachineHeader().apply(this);
-		determinePackageName(node.getPackage(), node);
-		node.replaceBy(node.getMachineHeader()); // remove the package node
+	public void caseAPackageParseUnit(APackageParseUnit node) {
+		determineRootDirectory(node.getPackage(), node);
+		List<PImport> copy = new ArrayList<PImport>(node.getImports());
+		for (PImport e : copy) {
+			e.apply(this);
+		}
+		node.getParseUnit().apply(this);
+		//delete this node
+		node.replaceBy(node.getParseUnit());
 	}
 
-	private void determinePackageName(final TPragmaIdOrString packageTerminal, final Node node) {
-		final String text = packageTerminal.getText();
-		// "foo.bar"
-		if (!(text.startsWith("\"") && text.endsWith("\""))) {
-			throw new VisitorException(node,
-					"The package pragma should be followed by a string, e.g. /*@package \"foo.bar\" */.");
+	@Override
+	public void caseAImport(AImport node) {
+		final String[] packageArray = determinePackage(node.getImport(), node);
+		final String last = packageArray[packageArray.length - 1];
+		final String[] array = Arrays.copyOf(packageArray, packageArray.length - 1);
+		if (last.equals("*")) {
+			File file = getFileStartingAtRootDirectory(array);
+			this.pathList.add(file.getAbsolutePath());
+		} else {
+			File file = getFileStartingAtRootDirectory(array);
+			this.filePathTable.put(last, file.getAbsolutePath());
 		}
-		packageName = text.replaceAll("\"", "");
+	}
 
-		final String[] packageNameArray = packageName.split("\\.");
+	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
+		final String[] packageNameArray = determinePackage(packageTerminal, node);
 		File file;
 		try {
 			file = mainFile.getCanonicalFile();
@@ -154,7 +171,19 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			}
 		}
 		rootDirectory = file.getParentFile();
-		this.packageNameArray = packageNameArray;
+	}
+
+	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
+		final String text = packageTerminal.getText();
+		// "foo.bar"
+		if (!(text.startsWith("\"") && text.endsWith("\""))) {
+			throw new VisitorException(node,
+					"The package pragma should be followed by a string, e.g. /*@package \"foo.bar\" */.");
+		}
+		packageName = text.replaceAll("\"", "");
+
+		final String[] packageNameArray = packageName.split("\\.");
+		return packageNameArray;
 	}
 
 	/**
@@ -162,7 +191,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 */
 	@Override
 	public void caseAMachineReference(AMachineReference node) {
-
 		String name = getIdentifier(node.getMachineName());
 		if (node.parent() instanceof AFileMachineReference) {
 			final AFileMachineReference fileNode = (AFileMachineReference) node.parent();
@@ -172,33 +200,12 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				throw new VisitorException(e.getFirstNode(), e.getMessage());
 			}
-		} else if (node.parent() instanceof APackagePragmaMachineReference) {
-			APackagePragmaMachineReference parent = (APackagePragmaMachineReference) node.parent();
-			registerPackageReference(node, name, parent.getPackage());
-			parent.replaceBy(parent.getReference());
 		} else {
 			referncesTable.put(name, new MachineReference(name, node));
 		}
 	}
 
-	private void registerPackageReference(Node node, String machineName, TPragmaIdOrString tPragmaIdOrString) {
-		if (packageNameArray == null) {
-			String message = "There is no package declaration of machine " + machineName
-					+ "\n. Hence, it is not allowed to use a package declaration for a referenced machine";
-			throw new VisitorException(node, message);
-		} else {
-			String text = tPragmaIdOrString.getText().replaceAll("\"", "");
-			String[] split = text.split("\\.");
-			final File file = new File(getFile(split), machineName + ".mch");
-			try {
-				referncesTable.put(machineName, new MachineReference(machineName, node, file.getAbsolutePath()));
-			} catch (CheckException e) {
-				throw new VisitorException(e.getFirstNode(), e.getMessage());
-			}
-		}
-	}
-
-	private File getFile(String[] array) {
+	private File getFileStartingAtRootDirectory(String[] array) {
 		File f = rootDirectory;
 		for (String folder : array) {
 			f = new File(f, folder);
@@ -249,7 +256,11 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			if (machineExpression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 				String name = getIdentifier(identifier.getIdentifier());
-				referncesTable.put(name, new MachineReference(name, identifier));
+				final MachineReference machineReference = new MachineReference(name, identifier);
+				if (this.filePathTable.containsKey(name)) {
+					machineReference.setDirectoryPath(filePathTable.get(name));
+				}
+				referncesTable.put(name, machineReference);
 			} else if (machineExpression instanceof AFileExpression) {
 				final AFileExpression fileNode = (AFileExpression) machineExpression;
 				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
@@ -262,12 +273,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				} catch (CheckException e) {
 					throw new VisitorException(e.getFirstNode(), e.getMessage());
 				}
-			} else if (machineExpression instanceof APackagePragmaExpression) {
-				final APackagePragmaExpression packagePragma = (APackagePragmaExpression) machineExpression;
-				final AIdentifierExpression identifier = (AIdentifierExpression) packagePragma.getIdentifier();
-				final String name = getIdentifier(identifier.getIdentifier());
-				registerPackageReference(machineExpression, name, packagePragma.getPackage());
-				packagePragma.replaceBy(packagePragma.getIdentifier());
 			} else {
 				throw new RuntimeException("Not supported class: " + machineExpression.getClass());
 			}

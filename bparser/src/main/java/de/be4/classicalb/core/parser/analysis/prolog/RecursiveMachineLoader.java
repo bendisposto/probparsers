@@ -170,16 +170,20 @@ public class RecursiveMachineLoader {
 	 * 
 	 * @param machineName
 	 *            Name of the machine to include, never <code>null</code>
+	 * @param paths
+	 * 
 	 * @return reference to a file containing the machine, may be non-existent
 	 *         but never <code>null</code>.
 	 * @throws CheckException
 	 *             if the file cannot be found
 	 */
-	private File lookupFile(final File directory, final MachineReference machineRef, List<String> ancestors)
-			throws CheckException {
+	private File lookupFile(final File directory, final MachineReference machineRef, List<String> ancestors,
+			List<String> paths) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				File file = new FileSearchPathProvider(directory.getAbsolutePath(), machineRef.getName() + suffix)
+				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
+						: directory.getAbsolutePath();
+				final File file = new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
 						.resolve();
 				return file;
 			} catch (FileNotFoundException e) {
@@ -208,13 +212,6 @@ public class RecursiveMachineLoader {
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
-		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
-		if (fileNumber > 0) {
-			getNodeIdMapping().assignIdentifiers(fileNumber, current);
-		} else {
-			throw new IllegalStateException("machine file is not registered");
-		}
-
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, current);
 		refMachines.findReferencedMachines();
 
@@ -227,6 +224,14 @@ public class RecursiveMachineLoader {
 			throw new BException(machineFile.getName(),
 					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null);
 		}
+		
+		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
+		if (fileNumber > 0) {
+			getNodeIdMapping().assignIdentifiers(fileNumber, current);
+		} else {
+			throw new IllegalStateException("machine file is not registered");
+		}
+
 
 		getParsedMachines().put(name, current);
 		parsedFiles.put(name, machineFile);
@@ -248,7 +253,7 @@ public class RecursiveMachineLoader {
 				final String filePragma = refMachine.getPath();
 				File file = null;
 				if (filePragma == null) {
-					file = lookupFile(directory, refMachine, ancestors);
+					file = lookupFile(directory, refMachine, ancestors, refMachines.getPathList());
 				} else {
 					File p = new File(filePragma);
 					if (p.isAbsolute()) {
