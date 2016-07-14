@@ -29,22 +29,16 @@ public class StructuralTest {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 
-		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) startNode
-				.getPParseUnit();
+		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) startNode.getPParseUnit();
 
 		final AMachineHeader header = (AMachineHeader) machine.getHeader();
-		assertEquals("Machine name not as expected", "SimplyStructure", header
-				.getName().get(0).getText());
-		assertNotNull("Machine header parameter list is null",
-				header.getParameters());
-		assertTrue("More machine header parameters than expected", header
-				.getParameters().size() == 0);
+		assertEquals("Machine name not as expected", "SimplyStructure", header.getName().get(0).getText());
+		assertNotNull("Machine header parameter list is null", header.getParameters());
+		assertTrue("More machine header parameters than expected", header.getParameters().size() == 0);
 
-		final LinkedList<PMachineClause> machineClauses = machine
-				.getMachineClauses();
+		final LinkedList<PMachineClause> machineClauses = machine.getMachineClauses();
 		assertNotNull("Machine clause list is null", machineClauses);
-		assertTrue("More machine clauses than expected",
-				machineClauses.size() == 0);
+		assertTrue("More machine clauses than expected", machineClauses.size() == 0);
 	}
 
 	@Test
@@ -66,9 +60,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE \tSimplyStructure END";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([SimplyStructure],[]),[]))",
-				result);
+		assertEquals("Start(AAbstractMachineParseUnit(AMachineHeader([SimplyStructure],[]),[]))", result);
 	}
 
 	@Test
@@ -131,14 +123,14 @@ public class StructuralTest {
 
 	@Test
 	public void testClause2() throws Exception {
-		final String testMachine = "#VARIABLES VARIABLES xx, Ab, cD";
+		final String testMachine = "#MACHINECLAUSE VARIABLES xx, Ab, cD";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
 				"Start(AMachineClauseParseUnit(AVariablesMachineClause([AIdentifierExpression([xx]),AIdentifierExpression([Ab]),AIdentifierExpression([cD])])))",
 				result);
 
-		final String testMachine2 = "#VARIABLES ABSTRACT_VARIABLES xx, Ab, cD";
+		final String testMachine2 = "#MACHINECLAUSE ABSTRACT_VARIABLES xx, Ab, cD";
 		final String result2 = getTreeAsString(testMachine2);
 
 		assertEquals(result, result2);
@@ -146,7 +138,7 @@ public class StructuralTest {
 
 	@Test
 	public void testClause3() throws Exception {
-		final String testMachine = "#INCLUDES INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd))";
+		final String testMachine = "#MACHINECLAUSE INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd))";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
@@ -156,12 +148,8 @@ public class StructuralTest {
 
 	@Test
 	public void testClausesStructure() throws Exception {
-		final String testMachine = "MACHINE SimplyStructure\n"
-				+ "VARIABLES aa, b, Cc\n"
-				+ "INVARIANT aa : NAT\n"
-				+ "INITIALISATION aa:=1\n"
-				+ "CONSTANTS dd, e, Ff\n"
-				+ "PROPERTIES dd : NAT\n"
+		final String testMachine = "MACHINE SimplyStructure\n" + "VARIABLES aa, b, Cc\n" + "INVARIANT aa : NAT\n"
+				+ "INITIALISATION aa:=1\n" + "CONSTANTS dd, e, Ff\n" + "PROPERTIES dd : NAT\n"
 				+ "SETS GGG; Hhh; JJ = {dada, dudu, TUTUT}; iII; kkk = {LLL}\nEND";
 
 		// System.out.println("Parsing: \"" + testMachine + "\":");
@@ -177,9 +165,7 @@ public class StructuralTest {
 		final String emptyMachine = "REFINEMENT RefinementMachine \nREFINES Machine \nEND";
 		final String result = getTreeAsString(emptyMachine);
 
-		assertEquals(
-				"Start(ARefinementMachineParseUnit(AMachineHeader([RefinementMachine],[]),Machine,[]))",
-				result);
+		assertEquals("Start(ARefinementMachineParseUnit(AMachineHeader([RefinementMachine],[]),Machine,[]))", result);
 	}
 
 	@Test
@@ -187,9 +173,7 @@ public class StructuralTest {
 		final String emptyMachine = "IMPLEMENTATION ImplMachine \nREFINES Machine \nEND";
 		final String result = getTreeAsString(emptyMachine);
 
-		assertEquals(
-				"Start(AImplementationMachineParseUnit(AMachineHeader([ImplMachine],[]),Machine,[]))",
-				result);
+		assertEquals("Start(AImplementationMachineParseUnit(AMachineHeader([ImplMachine],[]),Machine,[]))", result);
 	}
 
 	@Test
@@ -257,7 +241,7 @@ public class StructuralTest {
 			assertTrue(e.getMessage().contains("Invalid semicolon after last operation"));
 		}
 	}
-	
+
 	@Test
 	public void checkForInvalidSemicolonBeforeEnd() throws Exception {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip\n; END\nEND";
@@ -272,8 +256,7 @@ public class StructuralTest {
 			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
 		}
 	}
-	
-	
+
 	@Test
 	public void checkForInvalidSemicolonBeforeEnd2() throws Exception {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip;skip\n; END\nEND";
@@ -288,11 +271,10 @@ public class StructuralTest {
 			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
 		}
 	}
-	
+
 	@Test
 	public void testRepeatingClauses() {
-		final String testMachine = "MACHINE TestMachineX\n"
-				+ "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"
+		final String testMachine = "MACHINE TestMachineX\n" + "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"
 				+ "VARIABLES x,y,z\n" + "END";
 		try {
 			getTreeAsString(testMachine);
@@ -306,8 +288,7 @@ public class StructuralTest {
 
 	@Test
 	public void testMissingProperties() {
-		final String testMachine = "MACHINE TestMachineX\n"
-				+ "CONSTANTS X,Y,Z\n" + "END";
+		final String testMachine = "MACHINE TestMachineX\n" + "CONSTANTS X,Y,Z\n" + "END";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expecting exception");
@@ -338,7 +319,6 @@ public class StructuralTest {
 		final String testMachine = "#EXPRESSION 0x12";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals("Start(AExpressionParseUnit(AIntegerExpression(18)))",
-				result);
+		assertEquals("Start(AExpressionParseUnit(AIntegerExpression(18)))", result);
 	}
 }

@@ -129,7 +129,7 @@ public class DefinitionsTest {
 
 	@Test
 	public void testDefClause() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS def2 == y;\ndef1 == xx";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS def2 == y;\ndef1 == xx";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
@@ -139,7 +139,7 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef1() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS def1 == (f;g); def2 == skip";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS def1 == (f;g); def2 == skip";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
@@ -149,7 +149,7 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef2() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
@@ -159,31 +159,31 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef3() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
 		getTreeAsString(testMachine);
 	}
 
 	@Test
 	public void testDefWithNesting1() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
 		getTreeAsString(testMachine);
 	}
 
 	@Test
 	public void testDefWithNesting2() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to); FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to); FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
 		getTreeAsString(testMachine);
 	}
 
 	@Test
 	public void testDefWithNesting3() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
 		getTreeAsString(testMachine);
 	}
 
 	@Test
 	public void testDefWithNesting4() throws Exception {
-		final String testMachine = "#DEFINITIONS DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
 		getTreeAsString(testMachine);
 	}
 
