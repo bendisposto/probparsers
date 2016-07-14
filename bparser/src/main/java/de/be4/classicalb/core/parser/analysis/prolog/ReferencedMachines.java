@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -181,8 +182,21 @@ public class ReferencedMachines extends DepthFirstAdapter {
 					"The package pragma should be followed by a string, e.g. /*@package \"foo.bar\" */.");
 		}
 		packageName = text.replaceAll("\"", "");
-
 		final String[] packageNameArray = packageName.split("\\.");
+		final Pattern VALID_IDENTIFIER = Pattern
+	            .compile("([\\p{L}][\\p{L}\\p{N}_]*)");
+		for (int i = 0; i < packageNameArray.length-1; i++) {
+			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
+			if(!matches){
+				throw new VisitorException(node,
+						"Invalid package pragma :" + text);
+			}
+		}
+		final String last = packageNameArray[packageNameArray.length-1];
+		if(!(last.equals("*") || VALID_IDENTIFIER.matcher(last).matches())){
+			throw new VisitorException(node,
+					"Invalid package pragma :" + text);
+		}
 		return packageNameArray;
 	}
 

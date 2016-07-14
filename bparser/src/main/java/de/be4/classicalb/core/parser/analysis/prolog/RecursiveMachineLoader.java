@@ -206,13 +206,13 @@ public class RecursiveMachineLoader {
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
-	private void recursivlyLoadMachine(final File machineFile, final Start current, List<String> ancestors,
+	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, List<String> ancestors,
 			final boolean isMain, final SourcePositions sourcePositions, File directory) throws BException {
 
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
-		ReferencedMachines refMachines = new ReferencedMachines(machineFile, current);
+		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst);
 		refMachines.findReferencedMachines();
 
 		final String name = refMachines.getName();
@@ -227,13 +227,13 @@ public class RecursiveMachineLoader {
 		
 		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
-			getNodeIdMapping().assignIdentifiers(fileNumber, current);
+			getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
 		} else {
 			throw new IllegalStateException("machine file is not registered");
 		}
 
 
-		getParsedMachines().put(name, current);
+		getParsedMachines().put(name, currentAst);
 		parsedFiles.put(name, machineFile);
 
 		if (name != null) {
