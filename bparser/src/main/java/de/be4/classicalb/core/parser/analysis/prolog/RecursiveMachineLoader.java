@@ -177,12 +177,12 @@ public class RecursiveMachineLoader {
 	 * @throws CheckException
 	 *             if the file cannot be found
 	 */
-	private File lookupFile(final File directory, final MachineReference machineRef, List<String> ancestors,
+	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef, List<String> ancestors,
 			List<String> paths) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
 				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
-						: directory.getAbsolutePath();
+						: parentMachineDirectory.getAbsolutePath();
 				final File file = new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
 						.resolve();
 				return file;
@@ -224,14 +224,13 @@ public class RecursiveMachineLoader {
 			throw new BException(machineFile.getName(),
 					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null);
 		}
-		
+
 		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
 		if (fileNumber > 0) {
 			getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
 		} else {
 			throw new IllegalStateException("machine file is not registered");
 		}
-
 
 		getParsedMachines().put(name, currentAst);
 		parsedFiles.put(name, machineFile);

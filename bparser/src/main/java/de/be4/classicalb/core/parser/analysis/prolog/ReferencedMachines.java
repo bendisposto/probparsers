@@ -224,7 +224,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			if (this.filePathTable.containsKey(name)) {
 				machineReference.setDirectoryPath(filePathTable.get(name));
 			}
-			referncesTable.put(name, new MachineReference(name, node));
+			referncesTable.put(name, machineReference);
 		}
 	}
 
