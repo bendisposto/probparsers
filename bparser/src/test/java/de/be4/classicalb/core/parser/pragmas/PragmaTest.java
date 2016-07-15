@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.pragmas;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.PrintWriter;
 import java.io.PushbackReader;
@@ -40,7 +40,8 @@ public class PragmaTest {
 		// + "SETS A;B={a,b} /*@ desc trololo !!! */;C END";
 
 		// String input =
-		// "MACHINE foo  PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z| y < z }  END";
+		// "MACHINE foo PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z|
+		// y < z } END";
 
 		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
 
@@ -74,6 +75,15 @@ public class PragmaTest {
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([test],[]),[AAssertionsMachineClause([ALabelPredicate(foo-bar,AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)))])]))",
 				result);
+	}
+
+	@Test
+	public void testSymbolicSetComprehension() throws Exception {
+		final String testMachine = "MACHINE test CONSTANTS c PROPERTIES c = /*@symbolic*/ {x | x : NATURAL}  END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains(
+				"machine(abstract_machine(1,machine(2),machine_header(3,test,[]),[constants(4,[identifier(5,c)]),properties(6,equal(7,identifier(8,c),symbolic_comprehension_set(9,[identifier(10,x)],member(11,identifier(12,x),natural_set(13)))))]))."));
 	}
 
 	private String printAST(final Node node) {

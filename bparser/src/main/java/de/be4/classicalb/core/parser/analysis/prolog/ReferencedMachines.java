@@ -53,7 +53,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	private final Node start;
 	private final List<String> pathList = new ArrayList<String>();
 	private final Hashtable<String, String> filePathTable = new Hashtable<>();
-	private String name;
+	private String machineName;
 	private String packageName;
 	private File rootDirectory;
 	private final LinkedHashMap<String, MachineReference> referncesTable;
@@ -108,7 +108,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @return the name of the machine, <code>null</code> if no name was found
 	 */
 	public String getName() {
-		return name;
+		return machineName;
 	}
 
 	public Hashtable<String, MachineReference> getReferencesTable() {
@@ -125,7 +125,12 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		name = Utils.getIdentifierAsString(node.getName());
+		machineName = Utils.getIdentifierAsString(node.getName());
+		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
+		if (!machineName.equals(fileNameWithoutExtension)) {
+			throw new VisitorException(node, String.format("Machine name does not match the file name: '%s' vs '%s'",
+					machineName, fileNameWithoutExtension));
+		}
 	}
 
 	@Override
@@ -145,38 +150,37 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		final String[] packageArray = determinePackage(node.getImport(), node);
 		final String last = packageArray[packageArray.length - 1];
 		final String[] array = Arrays.copyOf(packageArray, packageArray.length - 1);
+		final File pathFile = getFileStartingAtRootDirectory(array);
+		final String path = pathFile.getAbsolutePath();
 		if (last.equals("*")) {
-			final File file = getFileStartingAtRootDirectory(array);
-			final String path = file.getAbsolutePath();
 			if (this.pathList.contains(path)) {
 				throw new VisitorException(node, String
 						.format("Duplicate import statement: %s", node.getImport().getText()));
 			}
-			this.pathList.add(file.getAbsolutePath());
+			this.pathList.add(path);
 		} else {
-			File file = getFileStartingAtRootDirectory(array);
-			this.filePathTable.put(last, file.getAbsolutePath());
+			this.filePathTable.put(last, path);
 		}
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
 		final String[] packageNameArray = determinePackage(packageTerminal, node);
-		File file;
+		File dir;
 		try {
-			file = mainFile.getCanonicalFile();
+			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
 			throw new VisitorException(null, e.getMessage());
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
 			final String name1 = packageNameArray[i];
-			file = file.getParentFile();
-			final String name2 = file.getName();
+			dir = dir.getParentFile();
+			final String name2 = dir.getName();
 			if (!name1.equals(name2)) {
 				throw new VisitorException(node, String
 						.format("Package declaration does not match the folder structure: %s vs %s", name1, name2));
 			}
 		}
-		rootDirectory = file.getParentFile();
+		rootDirectory = dir.getParentFile();
 	}
 
 	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
