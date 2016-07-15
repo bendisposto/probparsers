@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
@@ -134,20 +132,7 @@ public class BLexer extends Lexer {
 
 	}
 
-	private void detectGrammarExtension() {
-		if (parseOptions != null
-				&& parseOptions.grammar instanceof DefaultGrammar
-				&& lastToken == null) {
-			// first token
-			if (token instanceof TIdentifierLiteral
-					&& token.getText().equals(RuleGrammar.getModelType())) {
-				this.parseOptions.grammar = RuleGrammar.getInstance();
-			}
-		}
-	}
-
 	private void applyGrammarExtension() {
-		detectGrammarExtension();
 		if (parseOptions != null
 				&& this.parseOptions.grammar
 						.containsAlternativeDefinitionForToken(token)) {

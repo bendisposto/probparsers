@@ -23,7 +23,7 @@ import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
 
-	private boolean isFirstToken = true;
+	private boolean isFirstTOtherClauseBegin = true;
 	private TRhsBody rhsToken = null;
 	private StringBuilder rhsBuffer = null;
 	private int otherNestingLevel = 0;
@@ -150,9 +150,13 @@ public class PreLexer extends Lexer {
 			token = null;
 		}
 	}
+
 	private void detectGrammarExtension() {
-		if (parseOptions != null && parseOptions.grammar instanceof DefaultGrammar && isFirstToken) {
-			isFirstToken = false;
+		if (isFirstTOtherClauseBegin
+				&& parseOptions != null
+				&& parseOptions.grammar instanceof DefaultGrammar
+				&& token instanceof TOtherClauseBegin) {
+			isFirstTOtherClauseBegin = false;
 			if (token.getText().equals("RULES_MACHINE")) {
 				this.parseOptions.grammar = RuleGrammar.getInstance();
 			}

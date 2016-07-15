@@ -2,7 +2,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
 
-import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.Node;
 
 public class MachineReference {
@@ -16,25 +16,22 @@ public class MachineReference {
 		this.name = name;
 		this.node = node;
 	}
-	
-	
-	
-	public MachineReference(String name, Node node, String path) throws CheckException {
+
+	public MachineReference(String name, Node node, String path) throws VisitorException {
 		this.name = name;
 		this.node = node;
 		this.filePath = path;
 
 		File file = new File(path);
 		if (file.isDirectory()) {
-			throw new CheckException("Declared path in file pragma is an directory and not a file: " + path, node);
+			throw new VisitorException(node, "Declared path in file pragma is an directory and not a file: " + path);
 		} else {
 			String fileName = file.getName();
 			String baseName = fileName.substring(0, fileName.lastIndexOf("."));
 			if (!baseName.equals(name)) {
-				throw new CheckException(
+				throw new VisitorException(node,
 						"Declared name in file pragma does not match with the name of the machine referenced: " + name
-								+ " vs. " + baseName,
-						node);
+								+ " vs. " + baseName);
 			}
 		}
 	}
@@ -56,10 +53,10 @@ public class MachineReference {
 		return this.name;
 	}
 
-	public void setDirectoryPath(String directoryPath){
+	public void setDirectoryPath(String directoryPath) {
 		this.directoryPath = directoryPath;
 	}
-	
+
 	public String getDirectoryPath() {
 		return this.directoryPath;
 	}

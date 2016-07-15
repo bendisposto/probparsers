@@ -5,58 +5,58 @@ Package de.be4.classicalb.core.preparser;
  *******************************************************************/
 
 Helpers
-	line_comment_start = '//';
-	comment_start = '/*';
-    comment_end = '*/';
+  line_comment_start = '//';
+  comment_start = '/*';
+  comment_end = '*/';
 
-	underscore = '_';
-	semicolon = ';';
-	star = '*';
-	slash = '/';
-	hash = '#';
-	double_quotation = '"';
-    lf = 10;
-    cr = 13;
+  underscore = '_';
+  semicolon = ';';
+  star = '*';
+  slash = '/';
+  hash = '#';
+  double_quotation = '"';
+  lf = 10;
+  cr = 13;
 
-    line_break = [lf + cr];
+  line_break = [lf + cr];
 
-    small_letter =  ['a'..'z'];
-    capital_letter = ['A' .. 'Z'];
-    letter = small_letter | capital_letter;
-    digit = ['0' .. '9'] ;
+  small_letter =  ['a'..'z'];
+  capital_letter = ['A' .. 'Z'];
+  letter = small_letter | capital_letter;
+  digit = ['0' .. '9'] ;
 
-	all_chars = [0 .. 0xffff];
-	layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
-	all_chars_without_quote = [all_chars - double_quotation];
-	word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
-	comment_char = [[all_chars - star] - slash];
+  all_chars = [0 .. 0xffff];
+  layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  all_chars_without_quote = [all_chars - double_quotation];
+  word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
+  comment_char = [[all_chars - star] - slash];
 
-	abstract_constants = 'ABSTRACT_CONSTANTS';
-	abstract_variables = 'ABSTRACT_VARIABLES';
-	assertions = 'ASSERTIONS';
-	concrete_constants = 'CONCRETE_CONSTANTS';
-	concrete_variables = 'CONCRETE_VARIABLES';
-	constants = 'CONSTANTS';
-	constraints = 'CONSTRAINTS';
-	end = 'END';
-	implementation = 'IMPLEMENTATION';
-	imports = 'IMPORTS';
-	extends = 'EXTENDS';
-	includes = 'INCLUDES';
-	initialisation = 'INITIALISATION' | 'INITIALIZATION';
-	invariant = 'INVARIANT';
-	local_operations = 'LOCAL_OPERATIONS';
-	machine = 'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE';
-	operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS for Event-B */
-	promotes = 'PROMOTES';
-	properties = 'PROPERTIES';
-	refines = 'REFINES';
-	refinement = 'REFINEMENT';
-	sees = 'SEES';
-	sets = 'SETS';
-	uses = 'USES';
-	values = 'VALUES';
-	variables = 'VARIABLES';
+  abstract_constants = 'ABSTRACT_CONSTANTS';
+  abstract_variables = 'ABSTRACT_VARIABLES';
+  assertions = 'ASSERTIONS';
+  concrete_constants = 'CONCRETE_CONSTANTS';
+  concrete_variables = 'CONCRETE_VARIABLES';
+  constants = 'CONSTANTS';
+  constraints = 'CONSTRAINTS';
+  end = 'END';
+  implementation = 'IMPLEMENTATION';
+  imports = 'IMPORTS';
+  extends = 'EXTENDS';
+  includes = 'INCLUDES';
+  initialisation = 'INITIALISATION' | 'INITIALIZATION';
+  invariant = 'INVARIANT';
+  local_operations = 'LOCAL_OPERATIONS';
+  machine = 'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE';
+  operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS for Event-B */
+  promotes = 'PROMOTES';
+  properties = 'PROPERTIES';
+  refines = 'REFINES';
+  refinement = 'REFINEMENT';
+  sees = 'SEES';
+  sets = 'SETS';
+  uses = 'USES';
+  values = 'VALUES';
+  variables = 'VARIABLES';
 
 
 /*******************************************************************
@@ -65,12 +65,12 @@ Helpers
 
 States
 
-	normal,
-	definitions,
-	definitions_rhs,
-	definition_file,
-	no_definitions,
-	comment;
+normal,
+  definitions,
+  definitions_rhs,
+  definition_file,
+  no_definitions,
+  comment;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -78,54 +78,48 @@ States
 
 Tokens
 
-	{normal, definitions, definitions_rhs} comment = comment_start ;  // switch to comment state is done in PreLexer.java
-	{comment} comment_end = comment_end ; // switch back to previous state is done in PreLexer.java
-	{comment} comment_content = all_chars ;
+  {normal, definitions, definitions_rhs} comment = comment_start ;  // switch to comment state is done in PreLexer.java
+  {comment} comment_end = comment_end ; // switch back to previous state is done in PreLexer.java
+  {comment} comment_content = all_chars ;
 
-	{normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
+  {normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 
-	{normal -> definitions} definitions = 'DEFINITIONS';
-	{normal, definitions -> normal, definitions_rhs} other_clause_begin =
-		abstract_constants | abstract_variables | assertions | concrete_constants |
-		concrete_variables | constants | constraints | implementation |
-		imports | includes | initialisation | invariant | local_operations |
-		machine | operations | promotes | properties | refines | refinement | extends |
-		sees | sets | uses | values | variables ;
+  {normal -> definitions} definitions = 'DEFINITIONS';
+  {normal, definitions -> normal, definitions_rhs} other_clause_begin =
+    machine |
+    abstract_constants | abstract_variables | assertions | concrete_constants |
+    concrete_variables | constants | constraints | implementation |
+    imports | includes | initialisation | invariant | local_operations |
+    operations | promotes | properties | refines | refinement | extends |
+    sees | sets | uses | values | variables ;
 
-	{normal, definitions -> normal} end_machine = end ;
+  {normal, definitions -> normal} end_machine = end ;
 
-	{normal} kw_definitions = '#DEFINITIONS';
-	{normal -> no_definitions} kw_prefix =
-		'#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' |
-		hash abstract_constants | hash abstract_variables | hash assertions |
-		hash concrete_constants | hash concrete_variables | hash constants |
-		hash constraints | hash implementation | hash imports | hash includes |
-		hash initialisation | hash invariant | hash local_operations |
-		hash operations | hash promotes | hash properties | hash refines |
-		hash sees | hash sets | hash uses | hash values | hash variables ;
-	{no_definitions} no_def_something = all_chars*;
+  {normal} kw_definitions = '#DEFINITIONS';
+  {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ;
+  {no_definitions} no_def_something = all_chars*;
 
-	{definitions} identifier_literal = letter (letter | digit | underscore)* ;
-	{definitions, definitions_rhs} left_par = '(';
-	{definitions, definitions_rhs} right_par = ')';
-	{definitions, definitions_rhs} slash = slash;
-	{definitions} comma = ',';
+  {definitions} identifier_literal = letter (letter | digit | underscore)* ;
+  {definitions, definitions_rhs} left_par = '(';
+  {definitions, definitions_rhs} right_par = ')';
+  {definitions, definitions_rhs} slash = slash;
+  {definitions} comma = ',';
 
-	{definitions -> definitions_rhs} begin_def_body = '==';
-	{definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
-	{definitions_rhs} begin_nesting =
-		'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
-		'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
-	{definitions_rhs} end_nesting = end ;
-	{definitions_rhs} rhs_identifier = letter (letter | digit | underscore)* ; // lex identifiers as complete words to ignore keywords within identifiers
-	{definitions, definitions_rhs} semicolon = semicolon; // returning to state definitions is done by PreLexer
+  {definitions -> definitions_rhs} begin_def_body = '==';
+  {definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  {definitions_rhs} begin_nesting =
+  'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
+  'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
+  {definitions_rhs} end_nesting = end ;
+  {definitions_rhs} rhs_identifier = letter (letter | digit | underscore)* ; // lex identifiers as complete words to ignore keywords within identifiers
+  {definitions, definitions_rhs} semicolon = semicolon; // returning to state definitions is done by PreLexer
 
-	{definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
-	{definition_file} filename = all_chars_without_quote*;
+  {definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
+  {definition_file} filename = all_chars_without_quote*;
 
-	{normal} something = letter (letter | digit | underscore)* | [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  {normal} something = letter (letter | digit | underscore)* | [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
 
-	white_space = layout_char+;
+  white_space = layout_char+;
 
 
 /*******************************************************************
@@ -133,8 +127,8 @@ Tokens
  *******************************************************************/
 Ignored Tokens
 
-	white_space, other_clause_begin, end_machine, something,
-	comment, comment_content, comment_end, line_comment;
+  white_space, other_clause_begin, end_machine, something,
+  comment, comment_content, comment_end, line_comment;
 
 
 /*******************************************************************
@@ -143,33 +137,33 @@ Ignored Tokens
 Productions
 
 parse_unit {-> parse_unit} =
-	{defs_clause} [def_clause]:def_clause {-> New parse_unit.defs([def_clause.definition])} |
-	{kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
-	{something} kw_prefix no_def_something {-> New parse_unit.no_defs()} |
-	{nothing} {-> New parse_unit.no_defs()} ;
+  {defs_clause} [def_clause]:def_clause {-> New parse_unit.defs([def_clause.definition])} |
+  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
+  {something} kw_prefix no_def_something {-> New parse_unit.no_defs()} |
+  {nothing} {-> New parse_unit.no_defs()} ;
 
 /*
 parse_unit {-> parse_unit} =
-	{defs_clause} [def_clause]:def_clause? {-> New parse_unit.defs([def_clause.definition])} |
-	{kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
-	{no_defs} kw_prefix no_def_something {-> New parse_unit.no_defs()} ;
+  {defs_clause} [def_clause]:def_clause? {-> New parse_unit.defs([def_clause.definition])} |
+  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
+  {no_defs} kw_prefix no_def_something {-> New parse_unit.no_defs()} ;
 */
 
 def_clause {-> definition*} = definitions [list]:definition_list semicolon? {-> [list.definition]} ;
 
 definition_list {-> definition*} =
-	{single} [def]:definition {-> [def.definition]} |
-	{multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
+  {single} [def]:definition {-> [def.definition]} |
+  {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
 
 definition {-> definition} =
-	[def_name]:identifier_literal [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New definition(def_name, [parameters.identifier_literal], rhs)} |
-	{file} [q1]:double_quotation [filename]:filename [q2]:double_quotation {-> New definition.file(filename)} ;
+  [def_name]:identifier_literal [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New definition(def_name, [parameters.identifier_literal], rhs)} |
+  {file} [q1]:double_quotation [filename]:filename [q2]:double_quotation {-> New definition.file(filename)} ;
 
 def_parameters {-> identifier_literal*} = left_par [parameters]:identifier_list right_par {-> [parameters.identifier_literal]} ;
 
 identifier_list {-> identifier_literal*} =
-	{single} [parameter]:identifier_literal {-> [parameter]} |
-	{multi} [rest]:identifier_list comma [parameter]:identifier_literal {-> [rest.identifier_literal, parameter]} ;
+  {single} [parameter]:identifier_literal {-> [parameter]} |
+  {multi} [rest]:identifier_list comma [parameter]:identifier_literal {-> [rest.identifier_literal, parameter]} ;
 
 
 
@@ -179,9 +173,9 @@ identifier_list {-> identifier_literal*} =
 Abstract Syntax Tree
 
 parse_unit =
-	{defs} definition* |
-	{no_defs} ;
+  {defs} definition* |
+  {no_defs} ;
 
 definition =
-	[def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
-	{file} [filename]:filename;
+  [def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
+  {file} [filename]:filename;
