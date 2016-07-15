@@ -73,7 +73,7 @@ public class FilePragmaTest {
 	public void testFilePragmaDefinitionsFiles() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/filePragma/";
 		String file = PATH + "Main3.mch";
-		parseFile(file);
+		Helpers.parseFile(file);
 	}
 
 	@Test(expected = BException.class)
