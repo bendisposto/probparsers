@@ -51,6 +51,7 @@ import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 public class ReferencedMachines extends DepthFirstAdapter {
 	private final File mainFile;
 	private final Node start;
+	private final boolean isMachineNameMustMatchFileName;
 	private final List<String> pathList = new ArrayList<String>();
 	private final Hashtable<String, String> filePathTable = new Hashtable<>();
 	private String machineName;
@@ -67,12 +68,14 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
+	 * @param isMachineNameMustMatchFileName 
 	 * @throws CheckException
 	 */
-	public ReferencedMachines(File machineFile, Node node) {
+	public ReferencedMachines(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
 		this.referncesTable = new LinkedHashMap<>();
 		this.mainFile = machineFile;
 		this.start = node;
+		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
 	}
 
 	public void findReferencedMachines() throws BException {
@@ -127,7 +130,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAMachineHeader(AMachineHeader node) {
 		machineName = Utils.getIdentifierAsString(node.getName());
 		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
-		if (!machineName.equals(fileNameWithoutExtension)) {
+		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
 			throw new VisitorException(node, String.format("Machine name does not match the file name: '%s' vs '%s'",
 					machineName, fileNameWithoutExtension));
 		}
