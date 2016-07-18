@@ -212,7 +212,7 @@ public class RecursiveMachineLoader {
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
-		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst);
+		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst, parsingBehaviour.machineNameMustMatchFileName);
 		refMachines.findReferencedMachines();
 
 		final String name = refMachines.getName();

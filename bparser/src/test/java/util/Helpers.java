@@ -19,8 +19,7 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class Helpers {
 
-	public static String getTreeAsString(final String testMachine)
-			throws BException {
+	public static String getTreeAsString(final String testMachine) throws BException {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
@@ -52,8 +51,8 @@ public class Helpers {
 		try {
 			tree = parser.parseFile(machineFile, false);
 			PrintStream printStream = new PrintStream(output);
-			BParser.printASTasProlog(printStream, parser, machineFile, tree,
-					new ParsingBehaviour(), parser.getContentProvider());
+			BParser.printASTasProlog(printStream, parser, machineFile, tree, new ParsingBehaviour(),
+					parser.getContentProvider());
 			return output.toString();
 		} catch (BException e) {
 			e.printStackTrace();
@@ -70,6 +69,7 @@ public class Helpers {
 		behaviour.useIndention = false;
 		behaviour.addLineNumbers = false;
 		behaviour.verbose = true;
+		behaviour.machineNameMustMatchFileName = true;
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -89,7 +89,6 @@ public class Helpers {
 		printStream.close();
 		return output.toString();
 	}
-
 
 	public static String getMachineAsPrologTerm(String input) throws BException {
 		final BParser parser = new BParser("Test");
@@ -111,18 +110,15 @@ public class Helpers {
 				return this.string.toString();
 			}
 		};
-		final IPrologTermOutput pout = new PrologTermOutput(output,
-				parsingBehaviour.useIndention);
+		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.useIndention);
 		printAsProlog(start, pout);
 		return output.toString();
 	}
-	
-	public static void printAsProlog(final Start start,
-			final IPrologTermOutput pout) {
+
+	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
 		final NodeIdAssignment nodeIds = new NodeIdAssignment();
 		nodeIds.assignIdentifiers(1, start);
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(
-				nodeIds);
+		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		pout.openTerm("machine");
@@ -136,8 +132,7 @@ public class Helpers {
 		pout.flush();
 	}
 
-	public static void parseFile(final String filename) throws IOException,
-			BException {
+	public static void parseFile(final String filename) throws IOException, BException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
 			final File machineFile = new File(filename);
@@ -150,12 +145,10 @@ public class Helpers {
 			behaviour.verbose = true;
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree,
-					behaviour, parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree, behaviour, parser.getContentProvider());
 			output.close();
 		} else
-			throw new IllegalArgumentException("Filename '" + filename
-					+ "' has no extension");
+			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
 	}
 
 }

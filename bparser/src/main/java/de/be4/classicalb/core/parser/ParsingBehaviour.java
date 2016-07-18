@@ -21,4 +21,6 @@ public class ParsingBehaviour {
 	public boolean printAST;
 	public boolean fastPrologOutput;
 	public File outputFile;
+	public boolean machineNameMustMatchFileName;
+	
 }

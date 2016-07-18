@@ -45,6 +45,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_OUTPUT = "-out";
 	private static final String CLI_SWITCH_INDENTION = "-indent";
 	private static final String CLI_SWITCH_PREPL = "-prepl";
+	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
 
 	private static final String osEncoding = System.getProperty("file.encoding");
 	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"
@@ -100,6 +101,7 @@ public class CliBParser {
 		behaviour.printAST = options.isOptionSet(CLI_SWITCH_AST);
 		behaviour.verbose = options.isOptionSet(CLI_SWITCH_VERBOSE);
 		behaviour.fastPrologOutput = options.isOptionSet(CLI_SWITCH_FASTPROLOG);
+		behaviour.machineNameMustMatchFileName = options.isOptionSet(CLI_SWITCH_NAME_CHECK);
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);
@@ -289,7 +291,7 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			//print("EXCEPTION NullPointerException" + System.lineSeparator());
+			// print("EXCEPTION NullPointerException" + System.lineSeparator());
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
 			strOutput.fullstop();
@@ -335,7 +337,7 @@ public class CliBParser {
 			// NullPointerException in the catch statement. Therefore we need a
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
-			//print("EXCEPTION NullPointerException" + System.lineSeparator());
+			// print("EXCEPTION NullPointerException" + System.lineSeparator());
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
 			strOutput.fullstop();
@@ -389,6 +391,8 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");
+		options.addOption(CLI_SWITCH_NAME_CHECK,
+				"The name of a machine have to match file name (except for the file name extension)");
 		try {
 			options.parseOptions(args);
 		} catch (final IllegalArgumentException e) {
