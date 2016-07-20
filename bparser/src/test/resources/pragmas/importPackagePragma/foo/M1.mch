@@ -1,5 +1,5 @@
 /*@package "foo" */
-/*@import "foo.bar.M2" */
+/*@import-package "foo.bar" */
 MACHINE M1
 SEES M2
 END

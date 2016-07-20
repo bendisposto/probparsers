@@ -1,5 +1,5 @@
 /*@package "foo" */
-/*@import "foo.*.M2" */
+/*@import-package "foo.*.M2" */
 MACHINE InvalidImport
 SEES M2
 END

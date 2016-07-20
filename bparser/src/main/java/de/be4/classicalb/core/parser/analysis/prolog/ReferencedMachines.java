@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -24,7 +23,7 @@ import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AImport;
+import de.be4.classicalb.core.parser.node.AImportPackage;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
 import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
@@ -38,7 +37,7 @@ import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PImport;
+import de.be4.classicalb.core.parser.node.PImportPackage;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 
@@ -68,7 +67,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
-	 * @param isMachineNameMustMatchFileName 
+	 * @param isMachineNameMustMatchFileName
 	 * @throws CheckException
 	 */
 	public ReferencedMachines(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
@@ -139,8 +138,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	@Override
 	public void caseAPackageParseUnit(APackageParseUnit node) {
 		determineRootDirectory(node.getPackage(), node);
-		List<PImport> copy = new ArrayList<PImport>(node.getImports());
-		for (PImport e : copy) {
+		List<PImportPackage> copy = new ArrayList<PImportPackage>(node.getImports());
+		for (PImportPackage e : copy) {
 			e.apply(this);
 		}
 		node.getParseUnit().apply(this);
@@ -149,24 +148,31 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAImport(AImport node) {
-		final String[] packageArray = determinePackage(node.getImport(), node);
-		final String last = packageArray[packageArray.length - 1];
-		final String[] array = Arrays.copyOf(packageArray, packageArray.length - 1);
-		final File pathFile = getFileStartingAtRootDirectory(array);
+	public void caseAImportPackage(AImportPackage node) {
+		final String[] packageArray = determinePackage(node.getPackage(), node);
+		final File pathFile = getFileStartingAtRootDirectory(packageArray);
 		final String path = pathFile.getAbsolutePath();
-		if (last.equals("*")) {
-			if (this.pathList.contains(path)) {
-				throw new VisitorException(node, String
-						.format("Duplicate import statement: %s", node.getImport().getText()));
+		if (pathFile.exists()) {
+			if (!pathFile.isDirectory()) {
+				throw new VisitorException(node, String.format("Imported package is not a directory: %s", path));
 			}
-			this.pathList.add(path);
 		} else {
-			this.filePathTable.put(last, path);
+			throw new VisitorException(node, String.format("Imported package does not exist: %s", path));
 		}
+		if (this.pathList.contains(path)) {
+			throw new VisitorException(node,
+					String.format("Duplicate import statement: %s", node.getPackage().getText()));
+		}
+		this.pathList.add(path);
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
+		final String text = packageTerminal.getText();
+		if ((text.startsWith("\"") && text.endsWith("\""))) {
+			this.packageName = text.replaceAll("\"", "");
+		} else {
+			this.packageName = text;
+		}
 		final String[] packageNameArray = determinePackage(packageTerminal, node);
 		File dir;
 		try {
@@ -179,35 +185,27 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			dir = dir.getParentFile();
 			final String name2 = dir.getName();
 			if (!name1.equals(name2)) {
-				throw new VisitorException(node, String
-						.format("Package declaration does not match the folder structure: %s vs %s", name1, name2));
+				throw new VisitorException(node,
+						String.format("Package declaration '%s' does not match the folder structure: %s vs %s",
+								this.packageName, name1, name2));
 			}
 		}
 		rootDirectory = dir.getParentFile();
 	}
 
 	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
-		final String text = packageTerminal.getText();
-		// "foo.bar"
-		if (!(text.startsWith("\"") && text.endsWith("\""))) {
-			throw new VisitorException(node,
-					"The package pragma should be followed by a string, e.g. /*@package \"foo.bar\" */.");
+		String text = packageTerminal.getText();
+		// "foo.bar" or foo.bar
+		if ((text.startsWith("\"") && text.endsWith("\""))) {
+			text = text.replaceAll("\"", "");
 		}
-		packageName = text.replaceAll("\"", "");
-		final String[] packageNameArray = packageName.split("\\.");
-		final Pattern VALID_IDENTIFIER = Pattern
-				.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
-		for (int i = 0; i < packageNameArray.length - 1; i++) {
+		final String[] packageNameArray = text.split("\\.");
+		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
+		for (int i = 0; i < packageNameArray.length; i++) {
 			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
 			if (!matches) {
-				throw new VisitorException(node,
-						"Invalid package pragma :" + text);
+				throw new VisitorException(node, "Invalid package pragma: " + text);
 			}
-		}
-		final String last = packageNameArray[packageNameArray.length - 1];
-		if (!(last.equals("*") || VALID_IDENTIFIER.matcher(last).matches())) {
-			throw new VisitorException(node,
-					"Invalid package pragma :" + text);
 		}
 		return packageNameArray;
 	}
