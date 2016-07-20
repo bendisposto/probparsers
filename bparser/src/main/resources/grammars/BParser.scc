@@ -34,7 +34,7 @@ Helpers
   white_space = line_break | layout_char+;
   string_literal = double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
   identifier_literal = letter (letter | digit | underscore)*;
-  pragma_identifier_literal = letter (letter | digit | underscore | minus)*;
+  pragma_identifier_literal = letter (letter | digit | underscore | minus | '.')*;
 
 /*******************************************************************
  * States                                                          *
@@ -73,7 +73,7 @@ Tokens
   {pragma} pragma_label = 'label';
   {pragma} pragma_file = 'file';
   {pragma} pragma_package = 'package';
-  {pragma} pragma_import = 'import';
+  {pragma} pragma_import_package = 'import-package' | 'import_package';
   {pragma->description} pragma_description = 'desc' | 'description';
   {pragma} pragma_conversion = 'conversion';
   {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
@@ -382,13 +382,13 @@ parse_unit {-> parse_unit} =
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {package} pragma_package [package]:pragma_id_or_string [imports]:import_list? [parse_unit]:P.machine
-    {-> New parse_unit.package(package, [imports.import], parse_unit.parse_unit)} |
+  {package} pragma_package [package]:pragma_id_or_string [imports]:import_package_list? [parse_unit]:P.machine
+    {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)} |
   {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} ;
 
-import_list {-> import*} =
-  {single} pragma_import [package_or_machine]:pragma_id_or_string {-> [New import(package_or_machine)]} |
-  {multiple} [rest]:import_list pragma_import [package_or_machine]:pragma_id_or_string {-> [rest.import,New import(package_or_machine)]} ;
+import_package_list {-> import_package*} =
+  {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package,New import_package(package_or_machine)]} ;
 
 
 machine_x {-> parse_unit} =
@@ -1008,7 +1008,7 @@ Abstract Syntax Tree
 
 parse_unit =
   {generated} parse_unit |
-  {package} [package]:pragma_id_or_string [imports]:import* parse_unit  |
+  {package} [package]:pragma_id_or_string [imports]:import_package* parse_unit  |
   {unit_alias} [name]:unit_id [content]:unit_content parse_unit |
   {abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
   {refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
@@ -1023,7 +1023,7 @@ parse_unit =
   {oppattern} [name]:identifier_literal* [parameters]:argpattern* |
   {parse_unit_definition} definition;
 
-import = [import]:pragma_id_or_string; // importing a package or machine using import pragma (e.g. /*@import "foo" */ )
+import_package = [package]:pragma_id_or_string; // importing a package or machine using import pragma (e.g. /*@import-package "foo.bar" */ )
 
 argpattern = {undef} | {def} expression;
 /* csppattern = argtype argpattern; */
