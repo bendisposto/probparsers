@@ -1,22 +1,20 @@
-package de.be4.classicalb.core.parser.analysis.transforming;
+package de.be4.classicalb.core.parser.analysis.transforming.rules;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACardExpression;
-import de.be4.classicalb.core.parser.node.ACaseSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AConstantDependenciesPredicate;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
@@ -81,6 +79,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 	private final IDefinitions definitions;
 	private final Start start;
+	private final RulesMachineVisitor correctRuleChecker;
 	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	private AVariablesMachineClause variablesMachineClause = null;
 	private AInvariantMachineClause invariantMachineClause = null;
@@ -93,10 +92,10 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public RuleTransformation(Start start, BParser bParser) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
+		this.correctRuleChecker = new RulesMachineVisitor();
 	}
 
 	public void runTransformation() throws CheckException {
-		CorrectRuleChecker correctRuleChecker = new CorrectRuleChecker();
 		start.apply(correctRuleChecker);
 		if (correctRuleChecker.errorlist.size() > 0) {
 			throw correctRuleChecker.errorlist.get(0);
@@ -134,15 +133,13 @@ public class RuleTransformation extends DepthFirstAdapter {
 			for (TIdentifierLiteral ruleLiteral : ruleOperationLiteralList) {
 				// VARIABLES
 				variablesMachineClause.getIdentifiers().add(createRuleIdentifier(ruleLiteral));
-				String ctName = ruleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-				variablesMachineClause.getIdentifiers().add(createIdentifier(ctName));
 
 				AMemberPredicate member = new AMemberPredicate();
 				member.setLeft(createRuleIdentifier(ruleLiteral));
 				List<PExpression> list = new ArrayList<>();
-				list.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
-				list.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
-				list.add(new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
+				list.add(createStringExpression(RULE_FAIL));
+				list.add(createStringExpression(RULE_SUCCESS));
+				list.add(createStringExpression(RULE_NOT_CHECKED));
 				list.add(createStringExpression(RULE_DISABLED));
 				ASetExtensionExpression set = new ASetExtensionExpression(list);
 				member.setRight(set);
@@ -164,15 +161,21 @@ public class RuleTransformation extends DepthFirstAdapter {
 					initialisationExpressionList.add(createStringExpression(RULE_NOT_CHECKED));
 				}
 
-				// rule1#counterexamples : POW(STRING)
-				AMemberPredicate ctTypingPredicate = new AMemberPredicate();
-				ctTypingPredicate.setLeft(createIdentifier(ctName));
-				ctTypingPredicate.setRight(new APowSubsetExpression(new AStringSetExpression()));
-				invariantPredicateList.add(ctTypingPredicate);
+				if (correctRuleChecker.hasCounterExamples(ruleLiteral)) {
+					// VARIABLES ...
+					String ctName = ruleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+					variablesMachineClause.getIdentifiers().add(createIdentifier(ctName));
 
-				// rule1#counterexamples := {}
-				initialisationIdentifierList.add(createIdentifier(ctName));
-				initialisationExpressionList.add(new AEmptySetExpression());
+					// INVARIANT rule1#counterexamples : POW(STRING)
+					AMemberPredicate ctTypingPredicate = new AMemberPredicate();
+					ctTypingPredicate.setLeft(createIdentifier(ctName));
+					ctTypingPredicate.setRight(new APowSubsetExpression(new AStringSetExpression()));
+					invariantPredicateList.add(ctTypingPredicate);
+
+					// INITIALISATION rule1#counterexamples := {}
+					initialisationExpressionList.add(new AEmptySetExpression());
+					initialisationIdentifierList.add(createIdentifier(ctName));
+				}
 
 			}
 			PPredicate conjunction = createConjunction(invariantPredicateList);
@@ -288,17 +291,22 @@ public class RuleTransformation extends DepthFirstAdapter {
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		ASelectSubstitution select = new ASelectSubstitution();
 
-		AMemberPredicate grd2 = new AMemberPredicate(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
-				new APowSubsetExpression(new AStringSetExpression()));
-
-		select.setCondition(new AConjunctPredicate(grd1, grd2));
+		if (correctRuleChecker.hasCounterExamples(node.getRuleName())) {
+			AMemberPredicate grd2 = new AMemberPredicate(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
+					new APowSubsetExpression(new AStringSetExpression()));
+			select.setCondition(new AConjunctPredicate(grd1, grd2));
+		} else {
+			select.setCondition(grd1);
+		}
 
 		select.setThen(node.getRuleBody());
 		// select.setThen(node.getRuleBody());
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+		if (correctRuleChecker.hasCounterExamples(node.getRuleName())) {
+			returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+		}
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
 
@@ -377,11 +385,13 @@ public class RuleTransformation extends DepthFirstAdapter {
 		nameList.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 
-		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
-		exprList.add((PExpression) cloneNode(setOfCounterexamples));
+		if (correctRuleChecker.hasCounterExamples(currentRuleLiteral)) {
+			nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+			exprList.add((PExpression) cloneNode(setOfCounterexamples));
 
-		nameList.add(createIdentifier(ctName));
-		exprList.add((PExpression) cloneNode(setOfCounterexamples));
+			nameList.add(createIdentifier(ctName));
+			exprList.add((PExpression) cloneNode(setOfCounterexamples));
+		}
 
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		return assign;
@@ -640,145 +650,4 @@ public class RuleTransformation extends DepthFirstAdapter {
 		// skip properties clause
 	}
 
-	class CorrectRuleChecker extends DepthFirstAdapter {
-		ArrayList<CheckException> errorlist = new ArrayList<>();
-		final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
-		private boolean inRule = false;
-
-		@Override
-		public void caseARuleOperation(ARuleOperation node) {
-			inRule = true;
-			node.getRuleBody().apply(this);
-			inRule = false;
-			if (!ruleAssignmentTable.containsKey(node)) {
-				errorlist.add(new CheckException("No result value assigned in rule operation", node));
-			}
-		}
-
-		@Override
-		public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-			// skip properties clause
-		}
-
-		public void inAChoiceSubstitution(AChoiceSubstitution node) {
-			if (inRule) {
-				errorlist.add(new CheckException("A CHOICE substitution is not allowed in rule operations", node));
-			}
-		}
-
-		public void inACaseSubstitution(ACaseSubstitution node) {
-			if (inRule) {
-				errorlist.add(new CheckException("A CASE substitution is not allowed in rule operations", node));
-			}
-		}
-
-		@Override
-		public void defaultOut(Node node) {
-			if (inRule && ruleAssignmentTable.containsKey(node)) {
-				Node value = ruleAssignmentTable.get(node);
-				if (node.parent() != null) {
-					setParent(node.parent(), value);
-				}
-			}
-		}
-
-		private void setParent(Node parent, Node value) {
-			if (ruleAssignmentTable.containsKey(parent)) {
-				if (parent instanceof ASequenceSubstitution || parent instanceof AParallelSubstitution) {
-					errorlist.add(
-							new CheckException("Result value of rule operation is assigned more than once", value));
-				}
-			} else {
-				ruleAssignmentTable.put(parent, value);
-			}
-		}
-
-		private boolean resultIsSet(Node node) {
-			return ruleAssignmentTable.containsKey(node);
-		}
-
-		public void outAIfSubstitution(AIfSubstitution node) {
-			if (inRule) {
-				if (resultIsSet(node.getThen())) {
-					if (node.getElse() == null) {
-						errorlist.add(new CheckException(
-								"There must be an ELSE branch if a result value is set in the THEN branch", node));
-					} else if (!resultIsSet(node.getElse())) {
-						errorlist.add(new CheckException(
-								"Result value is set in the THEN branch but not in ELSE branch", node));
-					}
-
-					final LinkedList<PSubstitution> elsifSubstitutions = node.getElsifSubstitutions();
-					for (PSubstitution pSubstitution : elsifSubstitutions) {
-						if (!resultIsSet(pSubstitution)) {
-							errorlist.add(new CheckException(
-									"Result value is set in the THEN branch but not in ELSIF branch", pSubstitution));
-						}
-					}
-				} else {
-					// no result set in THEN
-					if (node.getElse() != null && resultIsSet(node.getElse())) {
-						errorlist.add(new CheckException(
-								"Result value is not set in the THEN branch but set in the ELSE branch", node));
-
-					}
-					final LinkedList<PSubstitution> elsifSubstitutions = node.getElsifSubstitutions();
-					for (PSubstitution pSubstitution : elsifSubstitutions) {
-						if (resultIsSet(pSubstitution)) {
-							errorlist.add(new CheckException(
-									"Result value is not set in the THEN branch but set in ELSIF branch",
-									pSubstitution));
-						}
-					}
-
-				}
-				defaultOut(node);
-			}
-
-		}
-
-		@Override
-		public void outAOperatorSubstitution(AOperatorSubstitution node) {
-			final String operatorName = node.getName().getText();
-			switch (operatorName) {
-			case RuleGrammar.RULE_SUCCESS: {
-				if (!inRule) {
-					errorlist.add(new CheckException("RULE_SUCCESS used outside of a RULE operation", node));
-				}
-				ruleAssignmentTable.put(node, node);
-				defaultOut(node);
-				return;
-			}
-			case RuleGrammar.RULE_FAIL: {
-				if (!inRule) {
-					errorlist.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
-				}
-				ruleAssignmentTable.put(node, node);
-				defaultOut(node);
-				return;
-			}
-			default:
-				throw new RuntimeException("should not happen: " + operatorName);
-			}
-		}
-
-		@Override
-		public void outAConstantDependenciesPredicate(AConstantDependenciesPredicate node) {
-
-			if (!inRule) {
-				errorlist.add(new CheckException("CONSTANT_DEPENDENCIES used outside of a RULE operation", node));
-			}
-			node.getCondition().apply(this);
-		}
-
-		@Override
-		public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-			if (!inRule) {
-				errorlist.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
-			}
-			ruleAssignmentTable.put(node, node);
-			defaultOut(node);
-		}
-
-	}
 }
