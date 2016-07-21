@@ -62,14 +62,19 @@ public class Helpers {
 	}
 
 	public static String fullParsing(String filename) {
+		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.prologOutput = true;
+		parsingBehaviour.useIndention = false;
+		parsingBehaviour.addLineNumbers = false;
+		parsingBehaviour.verbose = true;
+		parsingBehaviour.machineNameMustMatchFileName = true;
+		return fullParsing(filename, parsingBehaviour);
+	}
+
+	public static String fullParsing(String filename, ParsingBehaviour parsingBehaviour) {
 		final File machineFile = new File(filename);
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		final ParsingBehaviour behaviour = new ParsingBehaviour();
-		behaviour.prologOutput = true;
-		behaviour.useIndention = false;
-		behaviour.addLineNumbers = false;
-		behaviour.verbose = true;
-		behaviour.machineNameMustMatchFileName = true;
+
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -83,8 +88,7 @@ public class Helpers {
 			}
 		};
 		PrintStream printStream = new PrintStream(output);
-		// int fullParsing =
-		parser.fullParsing(machineFile, behaviour, printStream, printStream);
+		parser.fullParsing(machineFile, parsingBehaviour, printStream, printStream);
 		printStream.flush();
 		printStream.close();
 		return output.toString();

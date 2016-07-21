@@ -42,7 +42,7 @@ public class RuleExtensionsTest {
 
 	@Test
 	public void testRuleOperation() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL({}) END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue("Checking variables",
@@ -56,10 +56,8 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo = SELECT \nCONSTANT_DEPENDENCIES\n(k = TRUE) THEN RULE_SUCCESS END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Checking Invariant", result.contains(
-				"set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])"));
 		assertTrue("Checking Initialisation", result.contains(
-				"if_then_else(24,equal(25,identifier(26,k),boolean_true(27)),string(28,'NOT_CHECKED'),string(29,'DISABLED'))"));
+				"if_then_else(17,equal(18,identifier(19,k),boolean_true(20)),string(21,'NOT_CHECKED'),string(22,'DISABLED'))"));
 	}
 
 	@Test
@@ -148,8 +146,7 @@ public class RuleExtensionsTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Checking substitution", result.contains(
-				"assign(40,[identifier(41,foo),identifier(42,'#RESULT'),identifier(43,'#COUNTEREXAMPLE'),identifier(44,foo_Counterexamples)],[string(45,'FAIL'),string(46,'FAIL'),empty_set(47),empty_set(48)]))"));
+		assertTrue("Checking substitution", !result.contains("Counterexamples"));
 	}
 
 	@Test
