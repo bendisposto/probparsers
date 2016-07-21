@@ -276,13 +276,15 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public void caseARuleOperation(ARuleOperation node) {
 		final String ruleName = node.getRuleName().getText();
 		currentRuleLiteral = node.getRuleName();
+
 		ruleOperationLiteralList.add(node.getRuleName());
 		ruleNames.add(ruleName);
+
 		node.getRuleName().apply(this);
 		node.getRuleBody().apply(this);
 		AOperation operation = new AOperation();
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
-		nameList.add(node.getRuleName());
+		nameList.add((TIdentifierLiteral) cloneNode(node.getRuleName()));
 		operation.setOpName(nameList);
 
 		// SELECT ruleName /= "NOT_CHECKED" & $COUNTEREXAMPLE : POW(STRING) THEN
@@ -291,6 +293,8 @@ public class RuleTransformation extends DepthFirstAdapter {
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		ASelectSubstitution select = new ASelectSubstitution();
 
+		rulesMachineVisitor.hasCounterExamples(null);
+		rulesMachineVisitor.rulesWithCounterExamples.add(null);
 		if (rulesMachineVisitor.hasCounterExamples(node.getRuleName())) {
 			AMemberPredicate grd2 = new AMemberPredicate(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
 					new APowSubsetExpression(new AStringSetExpression()));
@@ -301,9 +305,9 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 		select.setThen(node.getRuleBody());
 		// select.setThen(node.getRuleBody());
-
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
+
 		if (rulesMachineVisitor.hasCounterExamples(node.getRuleName())) {
 			returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		}

@@ -2,6 +2,9 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.TreeSet;
+
 import org.junit.Test;
 
 import util.Helpers;
@@ -38,7 +41,9 @@ public class RuleExtensionsTest {
 	public void testDefinitionInjection() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 = RULE_FORALL r WHERE r : 1..3 EXPECT 1=2 COUNTEREXAMPLE \"foo\"  END END";
 		final String result = getTreeAsString(testMachine);
+		System.out.println(result);
 		assertTrue(result.contains("AExpressionDefinitionDefinition(TO_STRING"));
+		assertTrue(result.contains("AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])]"));
 	}
 
 	@Test
