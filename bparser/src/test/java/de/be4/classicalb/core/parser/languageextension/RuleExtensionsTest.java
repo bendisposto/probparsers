@@ -7,6 +7,7 @@ import org.junit.Test;
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
+import de.be4.classicalb.core.parser.analysis.transforming.rules.RuleTransformation;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
@@ -49,6 +50,15 @@ public class RuleExtensionsTest {
 				result.contains("[variables(4,[identifier(5,foo),identifier(6,foo_Counterexamples)])"));
 		assertTrue("Checking invariant", result.contains(
 				"invariant(7,conjunct(8,member(9,identifier(10,foo),set_extension(11,[string(12,'FAIL'),string(13,'SUCCESS'),string(14,'NOT_CHECKED'),string(15,'DISABLED')])),member(16,identifier(17,foo_Counterexamples),pow_subset(18,string_set(19)))))"));
+	}
+
+	@Test
+	public void testRuleSuccessNoCounterExample() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS END END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue("Checking variables",
+				!result.contains(RuleTransformation.RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 	}
 
 	@Test

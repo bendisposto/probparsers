@@ -79,7 +79,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 	private final IDefinitions definitions;
 	private final Start start;
-	private final RulesMachineVisitor correctRuleChecker;
+	private final RulesMachineVisitor rulesMachineVisitor;
 	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	private AVariablesMachineClause variablesMachineClause = null;
 	private AInvariantMachineClause invariantMachineClause = null;
@@ -92,13 +92,13 @@ public class RuleTransformation extends DepthFirstAdapter {
 	public RuleTransformation(Start start, BParser bParser) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
-		this.correctRuleChecker = new RulesMachineVisitor();
+		this.rulesMachineVisitor = new RulesMachineVisitor();
 	}
 
 	public void runTransformation() throws CheckException {
-		start.apply(correctRuleChecker);
-		if (correctRuleChecker.errorlist.size() > 0) {
-			throw correctRuleChecker.errorlist.get(0);
+		start.apply(rulesMachineVisitor);
+		if (rulesMachineVisitor.errorlist.size() > 0) {
+			throw rulesMachineVisitor.errorlist.get(0);
 		}
 		start.apply(this);
 		DefinitionInjector.injectDefinitions(start, definitions);
@@ -161,7 +161,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 					initialisationExpressionList.add(createStringExpression(RULE_NOT_CHECKED));
 				}
 
-				if (correctRuleChecker.hasCounterExamples(ruleLiteral)) {
+				if (rulesMachineVisitor.hasCounterExamples(ruleLiteral)) {
 					// VARIABLES ...
 					String ctName = ruleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 					variablesMachineClause.getIdentifiers().add(createIdentifier(ctName));
@@ -291,7 +291,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		ASelectSubstitution select = new ASelectSubstitution();
 
-		if (correctRuleChecker.hasCounterExamples(node.getRuleName())) {
+		if (rulesMachineVisitor.hasCounterExamples(node.getRuleName())) {
 			AMemberPredicate grd2 = new AMemberPredicate(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
 					new APowSubsetExpression(new AStringSetExpression()));
 			select.setCondition(new AConjunctPredicate(grd1, grd2));
@@ -304,7 +304,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-		if (correctRuleChecker.hasCounterExamples(node.getRuleName())) {
+		if (rulesMachineVisitor.hasCounterExamples(node.getRuleName())) {
 			returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		}
 		operation.setReturnValues(returnValues);
@@ -356,14 +356,17 @@ public class RuleTransformation extends DepthFirstAdapter {
 	}
 
 	private AAssignSubstitution createRuleSuccessAssignment() {
-		ArrayList<PExpression> nameList = new ArrayList<>();
-		ArrayList<PExpression> exprList = new ArrayList<>();
+		final ArrayList<PExpression> nameList = new ArrayList<>();
+		final ArrayList<PExpression> exprList = new ArrayList<>();
 		nameList.add(createRuleIdentifier(currentRuleLiteral));
 		nameList.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_SUCCESS)));
-		exprList.add(new AEmptySetExpression());
+
+		if (rulesMachineVisitor.hasCounterExamples(currentRuleLiteral)) {
+			nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+			exprList.add(new AEmptySetExpression());
+		}
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		return assign;
 	}
@@ -385,7 +388,7 @@ public class RuleTransformation extends DepthFirstAdapter {
 		nameList.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 
-		if (correctRuleChecker.hasCounterExamples(currentRuleLiteral)) {
+		if (rulesMachineVisitor.hasCounterExamples(currentRuleLiteral)) {
 			nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 			exprList.add((PExpression) cloneNode(setOfCounterexamples));
 
