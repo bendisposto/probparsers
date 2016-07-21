@@ -1,10 +1,10 @@
 package de.be4.classicalb.core.parser.analysis.transforming.rules;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.TreeSet;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -26,10 +26,10 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 
 	ArrayList<CheckException> errorlist = new ArrayList<>();
 	final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
-	private Set<TIdentifierLiteral> rulesWithCounterExamples = new HashSet<>();
+	public LinkedHashSet<TIdentifierLiteral> rulesWithCounterExamples = new LinkedHashSet<>();
 	private ARuleOperation currentRuleOperation = null;
 
-	public boolean hasCounterExamples(TIdentifierLiteral ruleIdentifier) {
+	public boolean hasCounterExamples(final TIdentifierLiteral ruleIdentifier) {
 		return rulesWithCounterExamples.contains(ruleIdentifier);
 	}
 
