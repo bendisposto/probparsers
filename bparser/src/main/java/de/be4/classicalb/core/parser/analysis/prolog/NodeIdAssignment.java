@@ -20,7 +20,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	private int currentIdentifier = 0;
 
 	private int current_file_number = -1;
-	private Map<Node, Integer> fileNumbers = new HashMap<Node, Integer>();
+	private Map<Node, Integer> nodeToFileNumber = new HashMap<Node, Integer>();
 
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
@@ -72,7 +72,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	}
 
 	public int lookupFileNumber(Node node) {
-		Integer fileNumber = fileNumbers.get(node);
+		Integer fileNumber = nodeToFileNumber.get(node);
 		return fileNumber == null ? -1 : fileNumber;
 	}
 
@@ -82,7 +82,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 			identifiers.put(node, currentIdentifier);
 			nodes.add(node);
 			if (current_file_number > 0) {
-				fileNumbers.put(node, current_file_number);
+				nodeToFileNumber.put(node, current_file_number);
 			}
 			currentIdentifier++;
 		}
