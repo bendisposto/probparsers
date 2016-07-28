@@ -71,7 +71,7 @@ public class PreParser {
 
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setParseOptions(parseOptions);
-		
+
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
 		try {
@@ -348,9 +348,8 @@ public class PreParser {
 		}
 	}
 
-	private DefinitionType determineType(final Token definition,
-			// private Definitions.Type determineType(final Token definition,
-			final Token rhsToken, Set<String> definitions) throws PreParseException {
+	private DefinitionType determineType(final Token definition, final Token rhsToken, Set<String> definitions)
+			throws PreParseException {
 
 		final String definitionRhs = rhsToken.getText();
 

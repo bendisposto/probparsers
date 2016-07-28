@@ -17,33 +17,17 @@ public class Definitions extends IDefinitions {
 	private final Map<String, Type> types = new HashMap<String, Type>();
 	private final Set<File> definitionFiles = new HashSet<File>();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#getDefinition(java.lang.String
-	 * )
-	 */
+	@Override
 	public PDefinition getDefinition(final String defName) {
 		return definitions.get(defName);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.be4.classicalb.core.parser.IDefinitions#getTypes()
-	 */
+	@Override
 	public Map<String, Type> getTypes() {
 		return types;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#getParameterCount(java.lang
-	 * .String)
-	 */
+	@Override
 	public int getParameterCount(final String defName) {
 		final PDefinition defNode = getDefinition(defName);
 		return getParameterCount(defNode);
@@ -67,11 +51,7 @@ public class Definitions extends IDefinitions {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.be4.classicalb.core.parser.IDefinitions#getType(java.lang.String)
-	 */
+	@Override
 	public Type getType(final String defName) {
 		final Type type = types.get(defName);
 
@@ -81,75 +61,37 @@ public class Definitions extends IDefinitions {
 		return type;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.be4.classicalb.core.parser.IDefinitions#getDefinitionNames()
-	 */
+	@Override
 	public Set<String> getDefinitionNames() {
 		return definitions.keySet();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addDefinition(de.be4.classicalb
-	 * .core.parser.node.APredicateDefinitionDefinition,
-	 * de.be4.classicalb.core.parser.Definitions.Type)
-	 */
+	@Override
 	public void addDefinition(final APredicateDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addDefinition(de.be4.classicalb
-	 * .core.parser.node.ASubstitutionDefinitionDefinition,
-	 * de.be4.classicalb.core.parser.Definitions.Type)
-	 */
+	@Override
 	public void addDefinition(final ASubstitutionDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addDefinition(de.be4.classicalb
-	 * .core.parser.node.AExpressionDefinitionDefinition,
-	 * de.be4.classicalb.core.parser.Definitions.Type)
-	 */
+	@Override
 	public void addDefinition(final AExpressionDefinitionDefinition defNode,
 			final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addDefinition(de.be4.classicalb
-	 * .core.parser.node.PDefinition,
-	 * de.be4.classicalb.core.parser.Definitions.Type, java.lang.String)
-	 */
+	@Override
 	public void addDefinition(final PDefinition defNode, final Type type,
 			final String key) {
 		definitions.put(key, defNode);
 		types.put(key, type);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addAll(de.be4.classicalb.core
-	 * .parser.IDefinitions)
-	 */
+	@Override
 	public void addAll(final IDefinitions defs) {
 		for (final String defName : defs.getDefinitionNames()) {
 			addDefinition(defs.getDefinition(defName), defs.getType(defName),
@@ -158,34 +100,18 @@ public class Definitions extends IDefinitions {
 		definitionFiles.addAll(defs.getDefinitionFiles());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#removeDefinition(java.lang
-	 * .String)
-	 */
+	@Override
 	public PDefinition removeDefinition(final String key) {
 		types.remove(key);
 		return definitions.remove(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.IDefinitions#addDefinitionFile(java.io.
-	 * File)
-	 */
+	@Override
 	public void addDefinitionFile(final File defFile) {
 		definitionFiles.add(defFile);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.be4.classicalb.core.parser.IDefinitions#getDefinitionFiles()
-	 */
+	@Override
 	public Set<File> getDefinitionFiles() {
 		return definitionFiles;
 	}
