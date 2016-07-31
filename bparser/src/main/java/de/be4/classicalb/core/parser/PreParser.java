@@ -42,9 +42,9 @@ public class PreParser {
 
 	private final PushbackReader pushbackReader;
 	private boolean debugOutput = false;
-	private DefinitionTypes types;
 
-	private final IDefinitions defFileDefinitions = new Definitions();
+	private final DefinitionTypes definitionTypes;
+	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
 	private final List<String> doneDefFiles;
@@ -53,22 +53,23 @@ public class PreParser {
 
 	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
 			final List<String> doneDefFiles, final String modelFileName, final File directory,
-			ParseOptions parseOptions) {
+			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
 		this.modelFileName = modelFileName;
 		this.directory = directory;
 		this.parseOptions = parseOptions;
+		this.defFileDefinitions = definitions;
+		this.definitionTypes = new DefinitionTypes();
+		definitionTypes.addAll(definitions.getTypes());
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
 		this.debugOutput = debugOutput;
 	}
 
-	public DefinitionTypes parse() throws PreParseException, IOException, BException {
-		types = new DefinitionTypes();
-
+	public void parse() throws PreParseException, IOException, BException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setParseOptions(parseOptions);
 
@@ -99,7 +100,6 @@ public class PreParser {
 
 		evaluateTypes(sortedDefinitionList, collector.getDefinitions());
 
-		return types;
 	}
 
 	private void evaluateDefinitionFiles(final List<Token> list) throws PreParseException, BException {
@@ -137,6 +137,7 @@ public class PreParser {
 					final BParser parser = new BParser(filePath, parseOptions);
 					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
+					parser.setDefinitions(new Definitions(file));
 					parser.parse(content, debugOutput, contentProvider);
 
 					definitions = parser.getDefinitions();
@@ -145,10 +146,8 @@ public class PreParser {
 						cache.storeDefinition(fileName, definitions);
 					}
 				}
-
-				defFileDefinitions.addAll(definitions);
-				defFileDefinitions.addDefinitionFile(contentProvider.getFile(directory, fileName));
-				types.addAll(definitions.getTypes());
+				defFileDefinitions.addDefinitions(definitions);
+				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
 				e.printStackTrace();
 				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
@@ -189,7 +188,8 @@ public class PreParser {
 				if (type != null) {
 					todoDefs.remove(definition.getText());
 					oneParsed = true;
-					types.addTyping(definition.getText(), type);
+					definitionTypes.addTyping(definition.getText(), type);
+					// types.addTyping(definition.getText(), type);
 				} else {
 					currentlyUnparseableDefinitions.push(definition);
 				}
@@ -261,7 +261,9 @@ public class PreParser {
 			// of the definition here. Hence FORMULA_PREFIX has no further
 			// meaning and substitutions can also be handled by the lexer.
 			final Reader reader = new StringReader(BParser.FORMULA_PREFIX + "\n" + rhsToken.getText());
-			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), types);
+
+			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
+					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
 			Set<String> set = new HashSet<String>();
 			de.be4.classicalb.core.parser.node.Token next = null;
@@ -348,8 +350,8 @@ public class PreParser {
 		}
 	}
 
-	private DefinitionType determineType(final Token definition, final Token rhsToken, Set<String> definitions)
-			throws PreParseException {
+	private DefinitionType determineType(final Token definition, final Token rhsToken,
+			final Set<String> untypedDefinitions) throws PreParseException {
 
 		final String definitionRhs = rhsToken.getText();
 
@@ -366,11 +368,10 @@ public class PreParser {
 			// Expression or Expression/Substituion (e.g. f(x))?
 			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
 
-			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(definitions);
+			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
 			expressionParseUnit.apply(visitor);
 
 			if (visitor.isKaboom()) {
-				// return null;
 				return new DefinitionType();
 			}
 
@@ -455,7 +456,7 @@ public class PreParser {
 			de.be4.classicalb.core.parser.parser.ParserException {
 
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), types);
+		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
 				lexer);
@@ -469,6 +470,10 @@ public class PreParser {
 
 	public IDefinitions getDefFileDefinitions() {
 		return defFileDefinitions;
+	}
+
+	public DefinitionTypes getDefinitionTypes() {
+		return this.definitionTypes;
 	}
 
 }

@@ -1,12 +1,12 @@
 REFINEMENT teg1ref REFINES teg1
 DEFINITIONS
   ASSERT_LTL == "G ({CardF2=bl} => F{CardF2=lb})";
-  ASSERT_LTL == "(GF [Eject] & GF({CardF2=bl} & [Csends]) & GF({ReaderF2=bl} & [Rsends])) => G ({CardF2=bl} => F{CardF2=lb})"
+  ASSERT_LTL_2 == "(GF [Eject] & GF({CardF2=bl} & [Csends]) & GF({ReaderF2=bl} & [Rsends])) => G ({CardF2=bl} => F{CardF2=lb})"
 /* LTL  0.019 secs, 15 nodes
   G ({CardF2=bl} => F{CardF2=lb})  --> FALSE in 0.01 sec (44 atoms)
-  (GF [Eject] & GF({CardF2=bl} & [Csends]) & GF({ReaderF2=bl} & [Rsends])) => G ({CardF2=bl} => F{CardF2=lb}) 
+  (GF [Eject] & GF({CardF2=bl} & [Csends]) & GF({ReaderF2=bl} & [Rsends])) => G ({CardF2=bl} => F{CardF2=lb})
     0.14 secs 6912 atoms
-  (GF [Eject] & (GF{CardF2=bl} => GF [Csends]) & (GF{ReaderF2=bl} =>  GF [Rsends])) => G ({CardF2=bl} => F{CardF2=lb}) 
+  (GF [Eject] & (GF{CardF2=bl} => GF [Csends]) & (GF{ReaderF2=bl} =>  GF [Rsends])) => G ({CardF2=bl} => F{CardF2=lb})
  115.74 secs, 110592 atoms
   not GF({CardF2=bl} & [Csends])
   GF({CardF2=bl} & [Csends])
@@ -36,7 +36,7 @@ OPERATIONS
      SenderF2 := reader || Cstatus2 := in || CardF2 := lb || ReaderF2 := lb
   END;
   Eject = SELECT ((SenderF2=tcard & ReaderF2=lb) or (SenderF2=reader & CardF2=lb)) &
-                 Cstatus2=in THEN 
+                 Cstatus2=in THEN
     Cstatus2 := out
   END;
   Rblocksends =  SELECT (SenderF2=reader & Cstatus2=in & (CardF2=ackb or CardF2=lb)) THEN

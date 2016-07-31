@@ -1,9 +1,14 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -14,7 +19,11 @@ public abstract class IDefinitions {
 		NoDefinition, Expression, Predicate, Substitution, ExprOrSubst
 	};
 
+	protected final List<IDefinitions> referencedDefinitions = new ArrayList<IDefinitions>();
+
 	public abstract PDefinition getDefinition(String defName);
+
+	public abstract boolean containsDefinition(String defName);
 
 	public abstract Map<String, Type> getTypes();
 
@@ -24,24 +33,22 @@ public abstract class IDefinitions {
 
 	public abstract Set<String> getDefinitionNames();
 
-	public abstract void addDefinition(APredicateDefinitionDefinition defNode,
-			Type type);
+	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type) throws CheckException, BException;
 
-	public abstract void addDefinition(
-			ASubstitutionDefinitionDefinition defNode, Type type);
+	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) throws CheckException, BException;
 
-	public abstract void addDefinition(AExpressionDefinitionDefinition defNode,
-			Type type);
+	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type) throws CheckException, BException;
 
-	public abstract void addDefinition(PDefinition defNode, Type type,
-			String key);
+	public abstract void addDefinition(PDefinition defNode, Type type, String key) throws CheckException, BException;
 
-	public abstract void addAll(IDefinitions defs);
+	public void addDefinitions(IDefinitions defs) {
+		referencedDefinitions.add(defs);
+	}
 
-	public abstract PDefinition removeDefinition(String key);
+	public abstract void replaceDefinition(final String key, final Type type, final PDefinition node);
 
-	public abstract void addDefinitionFile(File defFile);
+	public abstract void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded);
 
-	public abstract Set<File> getDefinitionFiles();
+	public abstract void setDefinitionType(String identifierString, Type expression);
 
 }

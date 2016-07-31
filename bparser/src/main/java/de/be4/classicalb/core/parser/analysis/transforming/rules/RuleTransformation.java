@@ -9,7 +9,9 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.extensions.RuleGrammar;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
@@ -95,12 +97,23 @@ public class RuleTransformation extends DepthFirstAdapter {
 		this.rulesMachineVisitor = new RulesMachineVisitor();
 	}
 
-	public void runTransformation() throws CheckException {
+	public void runTransformation() throws CheckException, BException {
 		start.apply(rulesMachineVisitor);
 		if (rulesMachineVisitor.errorlist.size() > 0) {
 			throw rulesMachineVisitor.errorlist.get(0);
 		}
-		start.apply(this);
+		try {
+			start.apply(this);
+		} catch (VisitorException e) {
+			if (e.getException() instanceof CheckException) {
+				throw (CheckException) e.getException();
+			} else if (e.getException() instanceof BException) {
+				throw (BException) e.getException();
+			} else {
+				new RuntimeException("Unexpected Exception: " + e.getMessage());
+			}
+		}
+
 		DefinitionInjector.injectDefinitions(start, definitions);
 	}
 
@@ -614,36 +627,60 @@ public class RuleTransformation extends DepthFirstAdapter {
 	}
 
 	private void addToStringDefinition() {
+		final String TO_STRING = "TO_STRING";
+		if (definitions.containsDefinition(TO_STRING)) {
+			return;
+		}
 		// TO_STRING(S) == "0";
 		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
 		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
-		toStringDef.setName(new TIdentifierLiteral("TO_STRING"));
+		toStringDef.setName(new TIdentifierLiteral(TO_STRING));
 		toStringDef.setParameters(createIdentifierList("S"));
 		toStringDef.setRhs(new AStringExpression(new TStringLiteral("0")));
-		definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
+		try {
+			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
 
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
 		toStringTypeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_TO_STRING"));
 		toStringTypeDef.setParameters(createIdentifierList("X"));
 		toStringTypeDef.setRhs(new ATotalFunctionExpression(createIdentifier("X"), new AStringSetExpression()));
-		definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
+		try {
+			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
 	}
 
 	private void addChooseDefinition() {
+		final String CHOOSE = "CHOOSE";
+		if (definitions.containsDefinition(CHOOSE)) {
+			return;
+		}
 		// TO_STRING(S) == "0";
 		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
 		AExpressionDefinitionDefinition ChooseDef = new AExpressionDefinitionDefinition();
-		ChooseDef.setName(new TIdentifierLiteral("CHOOSE"));
+		ChooseDef.setName(new TIdentifierLiteral(CHOOSE));
 		ChooseDef.setParameters(createIdentifierList("X"));
 		ChooseDef.setRhs(new AStringExpression(new TStringLiteral("a member of X")));
-		definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
+		try {
+			definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
 
 		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
 		chooseDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_CHOOSE"));
 		chooseDefType.setParameters(createIdentifierList("T"));
 		chooseDefType.setRhs(
 				new ATotalFunctionExpression(new APowSubsetExpression(createIdentifier("T")), createIdentifier("T")));
-		definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
+		try {
+			definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
 	}
 
 	private List<PExpression> createIdentifierList(String string) {

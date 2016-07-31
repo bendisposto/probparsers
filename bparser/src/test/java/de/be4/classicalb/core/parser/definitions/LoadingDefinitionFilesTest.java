@@ -67,7 +67,8 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "src/test/resources/definitions/definitionFiles/";
 		String file = PATH + "MachineOverridingDefinition.mch";
 		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains("'DefinitionOfBar'"));
+		System.out.println(result);
+		assertTrue(result.contains("Duplicate definition: DefinitionOfBar"));
 	}
 	
 	@Test
@@ -75,7 +76,8 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "src/test/resources/definitions/definitionFiles/overridingDefinition/";
 		String file = PATH + "MachineIncludesA.mch";
 		String result = Helpers.fullParsing(file);
-		assertFalse(result.contains("exception"));
+		System.out.println(result);
+		assertTrue(result.contains("Duplicate definition: A1"));
 	}
 	
 	@Test

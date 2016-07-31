@@ -15,12 +15,12 @@ import de.be4.classicalb.core.parser.node.Node;
  * @author plagge
  */
 public class NodeIdAssignment extends DepthFirstAdapter {
-	private Map<Node, Integer> identifiers = new HashMap<Node, Integer>();
+	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<Node, Integer>();
 	private ArrayList<Node> nodes = new ArrayList<Node>(1000);
 	private int currentIdentifier = 0;
 
 	private int current_file_number = -1;
-	private Map<Node, Integer> nodeToFileNumber = new HashMap<Node, Integer>();
+	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<Node, Integer>();
 
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
@@ -55,7 +55,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	 * @return The ID of the node, <code>null</code> if no ID can be found.
 	 */
 	public Integer lookup(Node node) {
-		return identifiers.get(node);
+		return nodeToIdentifierMap.get(node);
 	}
 
 	public Node lookupById(int id) {
@@ -72,17 +72,17 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	}
 
 	public int lookupFileNumber(Node node) {
-		Integer fileNumber = nodeToFileNumber.get(node);
+		Integer fileNumber = nodeToFileNumberMap.get(node);
 		return fileNumber == null ? -1 : fileNumber;
 	}
 
 	@Override
 	public void defaultIn(Node node) {
-		synchronized (identifiers) {
-			identifiers.put(node, currentIdentifier);
+		synchronized (nodeToIdentifierMap) {
+			nodeToIdentifierMap.put(node, currentIdentifier);
 			nodes.add(node);
 			if (current_file_number > 0) {
-				nodeToFileNumber.put(node, current_file_number);
+				nodeToFileNumberMap.put(node, current_file_number);
 			}
 			currentIdentifier++;
 		}
