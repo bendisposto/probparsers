@@ -87,7 +87,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			this.start.apply(this);
 		} catch (VisitorException e) {
-			throw new BException(fileName, new CheckException(e.getMessage(), e.getNode()));
+			throw new BException(fileName, (CheckException) e.getException());
 		}
 	}
 
@@ -130,8 +130,11 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		machineName = Utils.getIdentifierAsString(node.getName());
 		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
 		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
-			throw new VisitorException(node, String.format("Machine name does not match the file name: '%s' vs '%s'",
-					machineName, fileNameWithoutExtension));
+			CheckException ch = new CheckException(
+					String.format("Machine name does not match the file name: '%s' vs '%s'", machineName,
+							fileNameWithoutExtension),
+					node);
+			throw new VisitorException(ch);
 		}
 	}
 
@@ -154,14 +157,16 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		final String path = pathFile.getAbsolutePath();
 		if (pathFile.exists()) {
 			if (!pathFile.isDirectory()) {
-				throw new VisitorException(node, String.format("Imported package is not a directory: %s", path));
+				throw new VisitorException(
+						new CheckException(String.format("Imported package is not a directory: %s", path), node));
 			}
 		} else {
-			throw new VisitorException(node, String.format("Imported package does not exist: %s", path));
+			throw new VisitorException(
+					new CheckException(String.format("Imported package does not exist: %s", path), node));
 		}
 		if (this.pathList.contains(path)) {
-			throw new VisitorException(node,
-					String.format("Duplicate import statement: %s", node.getPackage().getText()));
+			throw new VisitorException(new CheckException(
+					String.format("Duplicate import statement: %s", node.getPackage().getText()), node));
 		}
 		this.pathList.add(path);
 	}
@@ -178,16 +183,17 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
-			throw new VisitorException(null, e.getMessage());
+			throw new VisitorException(new CheckException(e.getMessage(), (Node) null));
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
 			final String name1 = packageNameArray[i];
 			dir = dir.getParentFile();
 			final String name2 = dir.getName();
 			if (!name1.equals(name2)) {
-				throw new VisitorException(node,
+				throw new VisitorException(new CheckException(
 						String.format("Package declaration '%s' does not match the folder structure: %s vs %s",
-								this.packageName, name1, name2));
+								this.packageName, name1, name2),
+						node));
 			}
 		}
 		rootDirectory = dir.getParentFile();
@@ -204,7 +210,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		for (int i = 0; i < packageNameArray.length; i++) {
 			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
 			if (!matches) {
-				throw new VisitorException(node, "Invalid package pragma: " + text);
+				throw new VisitorException(new CheckException("Invalid package pragma: " + text, node));
 			}
 		}
 		return packageNameArray;
@@ -219,7 +225,14 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		if (node.parent() instanceof AFileMachineReference) {
 			final AFileMachineReference fileNode = (AFileMachineReference) node.parent();
 			String file = fileNode.getFile().getText().replaceAll("\"", "");
-			referncesTable.put(name, new MachineReference(name, node, file));
+
+			MachineReference ref;
+			try {
+				ref = new MachineReference(name, node, file);
+				referncesTable.put(name, ref);
+			} catch (CheckException e) {
+				throw new VisitorException(e);
+			}
 		} else {
 			MachineReference machineReference = new MachineReference(name, node);
 			if (this.filePathTable.containsKey(name)) {
@@ -291,8 +304,13 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				String file = fileNode.getContent().getText().replaceAll("\"", "");
 				String name = getIdentifier(identifier.getIdentifier());
 				MachineReference machineReference;
-				machineReference = new MachineReference(name, identifier, file);
-				referncesTable.put(name, machineReference);
+				try {
+					machineReference = new MachineReference(name, identifier, file);
+					referncesTable.put(name, machineReference);
+				} catch (CheckException e) {
+					throw new VisitorException(e);
+				}
+
 			} else {
 				throw new RuntimeException("Not supported class: " + machineExpression.getClass());
 			}

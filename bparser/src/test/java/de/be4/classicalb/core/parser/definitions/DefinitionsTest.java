@@ -171,7 +171,7 @@ public class DefinitionsTest {
 
 	@Test
 	public void testDefWithNesting2() throws Exception {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to); FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
+		final String testMachine = "#MACHINECLAUSE DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to);\n FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
 		getTreeAsString(testMachine);
 	}
 

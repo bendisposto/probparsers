@@ -2,7 +2,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
 
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
 
 public class MachineReference {
@@ -17,21 +17,22 @@ public class MachineReference {
 		this.node = node;
 	}
 
-	public MachineReference(String name, Node node, String path) throws VisitorException {
+	public MachineReference(String name, Node node, String path) throws CheckException {
 		this.name = name;
 		this.node = node;
 		this.filePath = path;
 
 		File file = new File(path);
 		if (file.isDirectory()) {
-			throw new VisitorException(node, "Declared path in file pragma is an directory and not a file: " + path);
+			throw new CheckException("Declared path in file pragma is an directory and not a file: " + path, node);
 		} else {
 			String fileName = file.getName();
 			String baseName = fileName.substring(0, fileName.lastIndexOf("."));
 			if (!baseName.equals(name)) {
-				throw new VisitorException(node,
+				throw new CheckException(
 						"Declared name in file pragma does not match with the name of the machine referenced: " + name
-								+ " vs. " + baseName);
+								+ " vs. " + baseName + path,
+						node);
 			}
 		}
 	}

@@ -1,23 +1,16 @@
 package de.be4.classicalb.core.parser.exceptions;
 
-import de.be4.classicalb.core.parser.node.Node;
 
 @SuppressWarnings("serial")
 public class VisitorException extends RuntimeException {
 
-	private final Node node;
-	private final String message;
+	private final Exception exception;
 
-	public VisitorException(final Node node, final String message) {
-		this.node = node;
-		this.message = message;
+	public VisitorException(Exception e) {
+		this.exception = e;
 	}
 
-	public Node getNode() {
-		return this.node;
-	}
-
-	public String getMessage() {
-		return this.message;
+	public Exception getException() {
+		return this.exception;
 	}
 }

@@ -30,4 +30,9 @@ public class DefinitionTypes {
 			return IDefinitions.Type.NoDefinition;
 		}
 	}
+	
+	@Override
+	public String toString(){
+		return types.toString();
+	}
 }

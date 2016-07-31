@@ -2,9 +2,11 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -14,8 +16,7 @@ public class MockedDefinitions extends IDefinitions {
 	public Map<String, Type> types = new HashMap<String, Type>();
 	public Map<String, Integer> arity = new HashMap<String, Integer>();
 
-	public void addMockedDefinition(String name, String type,
-			String parameterCount) {
+	public void addMockedDefinition(String name, String type, String parameterCount) {
 		if ("predicate".equals(type)) {
 			types.put(name, Type.Predicate);
 		}
@@ -67,8 +68,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(ASubstitutionDefinitionDefinition defNode,
-			Type type) {
+	public void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -83,24 +83,29 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void addAll(IDefinitions defs) {
+	public void addDefinitions(IDefinitions defs) {
 		for (String d : defs.getDefinitionNames()) {
 			addMockedDefinition(d, defs.getType(d), defs.getParameterCount(d));
 		}
 	}
 
 	@Override
-	public PDefinition removeDefinition(String key) {
+	public void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addDefinitionFile(File defFile) {
+	public boolean containsDefinition(String defName) {
+		return false;
+	}
+
+	@Override
+	public void setDefinitionType(String identifierString, Type expression) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Set<File> getDefinitionFiles() {
+	public void replaceDefinition(String key, Type type, PDefinition node) {
 		throw new UnsupportedOperationException();
 	}
 

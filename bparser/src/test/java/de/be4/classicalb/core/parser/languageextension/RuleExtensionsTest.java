@@ -2,8 +2,6 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
-import java.util.TreeSet;
 
 import org.junit.Test;
 

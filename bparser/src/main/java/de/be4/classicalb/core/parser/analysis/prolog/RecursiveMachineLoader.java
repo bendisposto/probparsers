@@ -79,16 +79,24 @@ public class RecursiveMachineLoader {
 	 * Loads all machines that are (recursively) included (seen,etc) by the
 	 * given main machine
 	 * 
-	 * @param main
+	 * @param start
 	 *            The main machine
 	 * @throws BException
 	 */
-	public void loadAllMachines(final File startfile, final Start main, final SourcePositions positions,
+	public void loadAllMachines(final File startfile, final Start start, final SourcePositions positions,
 			final IDefinitions definitions) throws BException {
-		injectDefinitions(main, definitions);
-		registerDefinitionFileUsage(definitions);
-		machineFilesLoaded.add(startfile);
-		recursivlyLoadMachine(startfile, main, new ArrayList<String>(), true, positions, rootDirectory);
+
+		recursivlyLoadMachine(startfile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
+	}
+
+	private void loadMachine(final List<String> ancestors, final File machineFile) throws BException, IOException {
+		if (machineFilesLoaded.contains(machineFile)) {
+			return;
+		}
+		final BParser parser = new BParser(machineFile.getAbsolutePath());
+		final Start tree = parser.parseFile(machineFile, parsingBehaviour.verbose, contentProvider);
+		recursivlyLoadMachine(machineFile, tree, ancestors, false, parser.getSourcePositions(),
+				machineFile.getParentFile(), parser.getDefinitions());
 	}
 
 	public void printAsProlog(final PrintWriter out) {
@@ -144,25 +152,6 @@ public class RecursiveMachineLoader {
 		pout.flush();
 	}
 
-	private void loadMachine(final List<String> ancestors, final File machineFile) throws BException, IOException {
-		if (machineFilesLoaded.contains(machineFile)) {
-			return;
-		}
-		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		final Start tree = parser.parseFile(machineFile, parsingBehaviour.verbose, contentProvider);
-
-		machineFilesLoaded.add(machineFile);
-
-		registerDefinitionFileUsage(parser.getDefinitions());
-		injectDefinitions(tree, parser.getDefinitions());
-		recursivlyLoadMachine(machineFile, tree, ancestors, false, parser.getSourcePositions(),
-				machineFile.getParentFile());
-	}
-
-	private void registerDefinitionFileUsage(final IDefinitions definitions) {
-		definitionFilesLoaded.addAll(definitions.getDefinitionFiles());
-	}
-
 	/**
 	 * Tries to find a file containing the machine with the given file name.
 	 * 
@@ -177,8 +166,8 @@ public class RecursiveMachineLoader {
 	 * @throws CheckException
 	 *             if the file cannot be found
 	 */
-	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef, List<String> ancestors,
-			List<String> paths) throws CheckException {
+	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef,
+			List<String> ancestors, List<String> paths) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
 				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
@@ -207,12 +196,14 @@ public class RecursiveMachineLoader {
 	}
 
 	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, List<String> ancestors,
-			final boolean isMain, final SourcePositions sourcePositions, File directory) throws BException {
+			final boolean isMain, final SourcePositions sourcePositions, File directory, final IDefinitions definitions)
+			throws BException {
 
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
-		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst, parsingBehaviour.machineNameMustMatchFileName);
+		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
+				parsingBehaviour.machineNameMustMatchFileName);
 		refMachines.findReferencedMachines();
 
 		final String name = refMachines.getName();
@@ -225,12 +216,13 @@ public class RecursiveMachineLoader {
 					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null);
 		}
 
+		machineFilesLoaded.add(machineFile);
 		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
-		if (fileNumber > 0) {
-			getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
-		} else {
-			throw new IllegalStateException("machine file is not registered");
-		}
+		getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
+
+		definitions.assignIdsToNodes(getNodeIdMapping(), machineFilesLoaded);
+
+		injectDefinitions(currentAst, definitions);
 
 		getParsedMachines().put(name, currentAst);
 		parsedFiles.put(name, machineFile);

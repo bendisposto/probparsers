@@ -7,11 +7,15 @@ import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
+import de.be4.classicalb.core.parser.node.Start;
 
 /**
  * Collects the
@@ -27,50 +31,65 @@ import de.be4.classicalb.core.parser.node.PDefinition;
  */
 public class DefinitionCollector extends DepthFirstAdapter {
 
-	private final IDefinitions defintions = new Definitions();
+	private final IDefinitions definitions;
 	private final DefinitionTypes defTypes;
 
-	public DefinitionCollector(final DefinitionTypes defTypes) {
+	public DefinitionCollector(final DefinitionTypes defTypes, IDefinitions definitions) {
 		this.defTypes = defTypes;
+		this.definitions = definitions;
 	}
 
-	@Override
-	public void inAPredicateDefinitionDefinition(
-			final APredicateDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		defintions.addDefinition(node, type);
-	}
-
-	@Override
-	public void inASubstitutionDefinitionDefinition(
-			final ASubstitutionDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		defintions.addDefinition(node, type);
-	}
-
-	@Override
-	public void inAExpressionDefinitionDefinition(
-			final AExpressionDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		defintions.addDefinition(node, type);
-	}
-
-	@Override
-	public void outAConversionDefinition(AConversionDefinition node) {
-		PDefinition target = node.getDefinition();
-		Set<String> definitionNames = defintions.getDefinitionNames();
-		for (String n : definitionNames) {
-			PDefinition d = defintions.getDefinition(n);
-			if (d == target) {
-				defintions.addDefinition(node, defintions.getType(n),n);
+	public void collectDefinitions(Start rootNode) throws CheckException, BException {
+		try {
+			rootNode.apply(this);
+		} catch (VisitorException e) {
+			if (e.getException() instanceof CheckException) {
+				throw (CheckException) e.getException();
+			} else if (e.getException() instanceof BException) {
+				throw (BException) e.getException();
+			} else {
+				throw new RuntimeException("Unsupported case");
 			}
+		}
+
+	}
+
+	@Override
+	public void inAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+		final String defName = node.getName().getText();
+		final Type type = defTypes.getType(defName);
+		try {
+			definitions.addDefinition(node, type);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
 		}
 	}
 
-	public IDefinitions getDefintions() {
-		return defintions;
+	@Override
+	public void inASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+		final String defName = node.getName().getText();
+		final Type type = defTypes.getType(defName);
+		try {
+			definitions.addDefinition(node, type);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
 	}
+
+	@Override
+	public void inAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+		final String defName = node.getName().getText();
+		final Type type = defTypes.getType(defName);
+		try {
+			definitions.addDefinition(node, type);
+		} catch (CheckException | BException e) {
+			throw new VisitorException(e);
+		}
+	}
+
+
+	public IDefinitions getDefinitions() {
+		return definitions;
+	}
+
 }

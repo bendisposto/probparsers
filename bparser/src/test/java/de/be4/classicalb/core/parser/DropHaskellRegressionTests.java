@@ -20,7 +20,8 @@ public class DropHaskellRegressionTests {
 
 		String code = "not(finite({x|x>2}))";
 		BParser parser2 = new BParser(name);
-		parser2.getDefinitions().addAll(parser.getDefinitions());
+		
+		parser2.getDefinitions().addDefinitions(parser.getDefinitions());
 		Start parse = parser2.parse(BParser.FORMULA_PREFIX + " " + code, false,
 				parser.getContentProvider());
 		assertNotNull(parse);

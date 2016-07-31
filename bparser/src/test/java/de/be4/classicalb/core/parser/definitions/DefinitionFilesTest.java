@@ -32,7 +32,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	static {
 		defFileContents.put("DefFile", "DEFINITIONS def2 == yy; def3 == zz");
 		defFileContents.put("DefFile1", "DEFINITIONS \"DefFile2\"; def3 == bb");
-		defFileContents.put("DefFile2", "DEFINITIONS def2 == yy; def3 == zz");
+		defFileContents.put("DefFile2", "DEFINITIONS def2 == yy; def4 == zz");
 		defFileContents.put("DefFile3", "DEFINITIONS \"DefFile4\"");
 		defFileContents.put("DefFile4", "DEFINITIONS \"DefFile3\"");
 		defFileContents.put("DefFile5", "DEFINITIONS \"DefFile6\"");
@@ -66,7 +66,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	 */
 	@Test
 	public void testRecursiveReference() throws Exception {
-		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile1\"; def1 == xx; def2 == aa\nEND";
+		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile1\"; def1 == xx; def02 == aa\nEND";
 		final BParser parser = new BParser("testcase");
 		parser.parse(testMachine, false, this);
 
@@ -88,8 +88,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertTrue(def2.getRhs() instanceof AIdentifierExpression);
 		ident = Utils.getIdentifierAsString(((AIdentifierExpression) def2
 				.getRhs()).getIdentifier());
-		// definition in machine file should overwrite the one in def file
-		assertEquals("aa", ident);
+
+		assertEquals("yy", ident);
 
 		final AExpressionDefinitionDefinition def3 = (AExpressionDefinitionDefinition) definitions
 				.getDefinition("def3");

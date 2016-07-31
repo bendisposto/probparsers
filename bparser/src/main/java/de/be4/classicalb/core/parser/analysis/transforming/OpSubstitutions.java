@@ -58,7 +58,7 @@ import de.hhu.stups.sablecc.patch.SourcePositions;
  * This visitor checks any {@link AFuncOpSubstitution} if the child of the node
  * is of type {@link AFunctionExpression} (i.e. operation call with parameters)
  * or {@link AIdentifierExpression} (i.e. operation call without parameters).
- * Then the {@link AFuncOpSubstitution} node is replaced by a coresponding
+ * Then the {@link AFuncOpSubstitution} node is replaced by a corresponding
  * {@link AOpSubstitution} node.
  * </p>
  * <p>
@@ -119,7 +119,6 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			} else {
 				type = Type.NoDefinition;
 			}
-
 			idExpr = function.getIdentifier();
 			parameters = new LinkedList<PExpression>(function.getParameters());
 		} else if (expression instanceof AIdentifierExpression) {
@@ -300,7 +299,6 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
-
 		final String identifierString = Utils.getIdentifierAsString(node
 				.getIdentifier());
 		final Integer number = scopedVariables.get(identifierString);
@@ -317,9 +315,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 				if (type == Type.ExprOrSubst) {
 					// type is determined now => set to Expression
-					final AExpressionDefinitionDefinition definition = (AExpressionDefinitionDefinition) definitions
-							.removeDefinition(identifierString);
-					definitions.addDefinition(definition, Type.Expression);
+					definitions.setDefinitionType(identifierString, Type.Expression);
 				}
 			} else {
 				// finding some other type here is an error!
@@ -442,9 +438,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 	private void setTypeSubstDef(final AFuncOpSubstitution node,
 			final String idString) {
-		final AExpressionDefinitionDefinition removedDef = (AExpressionDefinitionDefinition) definitions
-				.removeDefinition(idString);
-		final Node defRhs = removedDef.getRhs();
+		final AExpressionDefinitionDefinition oldDefinition = (AExpressionDefinitionDefinition) definitions.getDefinition(idString);
+		final Node defRhs = oldDefinition.getRhs();
 		final PSubstitution rhsSubst;
 
 		if (defRhs instanceof AFunctionExpression) {
@@ -466,15 +461,15 @@ public class OpSubstitutions extends DepthFirstAdapter {
 					"Expecting operation");
 		}
 
-		final TIdentifierLiteral oldDefId = removedDef.getName();
+		final TIdentifierLiteral oldDefId = oldDefinition.getName();
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(
 				oldDefId.getText(), oldDefId.getLine(), oldDefId.getPos());
 		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(
-				defId, new LinkedList<PExpression>(removedDef.getParameters()),
+				defId, new LinkedList<PExpression>(oldDefinition.getParameters()),
 				rhsSubst);
 
-		definitions.addDefinition(substDef, Type.Substitution);
-		sourcePositions.replaceMapping(removedDef, substDef);
-		removedDef.replaceBy(substDef);
+		definitions.replaceDefinition(idString, Type.Substitution, substDef);
+		sourcePositions.replaceMapping(oldDefinition, substDef);
+		oldDefinition.replaceBy(substDef);
 	}
 }
