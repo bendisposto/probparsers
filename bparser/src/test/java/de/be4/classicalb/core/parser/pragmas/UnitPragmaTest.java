@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.pragmas;
 
+import static org.junit.Assert.*;
 import static util.Helpers.getTreeAsString;
 
 import java.io.PrintWriter;
@@ -22,6 +23,7 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
+import util.Helpers;
 
 public class UnitPragmaTest {
 
@@ -78,7 +80,14 @@ public class UnitPragmaTest {
 		System.out.println(printAST(ast));
 
 	}
-
+	
+	@Test
+	public void testConversion() {
+		String file = "src/test/resources/pragmas/unitPragma/MultiplicationConversion.mch";
+		String result = Helpers.fullParsing(file);
+		System.out.println(result);
+		assertTrue(result.contains("conversion("));
+	}
 	private String printAST(final Node node) {
 		final StringWriter swriter = new StringWriter();
 		NodeIdAssignment nodeids = new NodeIdAssignment();

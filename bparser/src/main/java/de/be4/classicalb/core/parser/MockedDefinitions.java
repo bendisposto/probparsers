@@ -109,4 +109,9 @@ public class MockedDefinitions extends IDefinitions {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public File getFile(String defName) {
+		throw new UnsupportedOperationException();
+	}
+
 }
