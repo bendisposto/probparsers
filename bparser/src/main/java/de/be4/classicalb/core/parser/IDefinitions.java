@@ -33,11 +33,14 @@ public abstract class IDefinitions {
 
 	public abstract Set<String> getDefinitionNames();
 
-	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type) throws CheckException, BException;
+	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type)
+			throws CheckException, BException;
 
-	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) throws CheckException, BException;
+	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type)
+			throws CheckException, BException;
 
-	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type) throws CheckException, BException;
+	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type)
+			throws CheckException, BException;
 
 	public abstract void addDefinition(PDefinition defNode, Type type, String key) throws CheckException, BException;
 
@@ -50,5 +53,7 @@ public abstract class IDefinitions {
 	public abstract void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded);
 
 	public abstract void setDefinitionType(String identifierString, Type expression);
+
+	public abstract File getFile(String defName);
 
 }

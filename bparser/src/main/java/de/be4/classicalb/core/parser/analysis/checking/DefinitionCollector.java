@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
-import java.util.Set;
-
 import de.be4.classicalb.core.parser.DefinitionTypes;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -87,6 +85,23 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		}
 	}
 
+	@Override
+	public void caseAConversionDefinition(AConversionDefinition node) {
+		PDefinition def = node.getDefinition();
+		if (def instanceof AExpressionDefinitionDefinition) {
+			AExpressionDefinitionDefinition exprDef = (AExpressionDefinitionDefinition) def;
+			final String defName = exprDef.getName().getText();
+			final Type type = defTypes.getType(defName);
+			try {
+				definitions.addDefinition(node, type, defName);
+			} catch (CheckException | BException e) {
+				throw new VisitorException(e);
+			}
+		} else {
+			throw new VisitorException(new CheckException(
+					"Only an expression is allowed on the right hand side of a conversion definition.", node));
+		}
+	}
 
 	public IDefinitions getDefinitions() {
 		return definitions;

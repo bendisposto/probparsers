@@ -15,6 +15,7 @@ import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Definitions extends IDefinitions {
 	private final Map<String, PDefinition> definitions = new HashMap<String, PDefinition>();
@@ -99,6 +100,20 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
+	public File getFile(final String defName) {
+		if (definitions.containsKey(defName)) {
+			return this.file;
+		} else {
+			for (IDefinitions iDefinitions : referencedDefinitions) {
+				if (iDefinitions.containsDefinition(defName)) {
+					return iDefinitions.getFile(defName);
+				}
+			}
+		}
+		throw new RuntimeException("Definition " + defName + " does not exist.");
+	}
+
+	@Override
 	public boolean containsDefinition(String defName) {
 		if (definitions.containsKey(defName)) {
 			return true;
@@ -147,24 +162,38 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type) throws CheckException, BException {
+	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type)
+			throws CheckException, BException {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type) throws CheckException, BException {
+	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type)
+			throws CheckException, BException {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type) throws CheckException, BException {
+	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type)
+			throws CheckException, BException {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final PDefinition defNode, final Type type, final String key) throws CheckException, BException {
+	public void addDefinition(final PDefinition defNode, final Type type, final String key)
+			throws CheckException, BException {
 		if (this.containsDefinition(key)) {
-			CheckException e = new CheckException("Duplicate definition: " + key, defNode );
+
+			final PDefinition defNode2 = this.getDefinition(key);
+			final File file2 = this.getFile(key);
+			StringBuilder sb = new StringBuilder();
+			sb.append("Duplicate definition: " + key + ".\n");
+			sb.append("(First appearance: ").append(this.getPosition(defNode2.getStartPos()));
+			if (file2 != null) {
+				sb.append(" in ").append(file2.getAbsolutePath());
+			}
+			sb.append(")\n");
+			CheckException e = new CheckException(sb.toString(), defNode);
 			if (file != null) {
 				throw new BException(file.getAbsolutePath(), e);
 			} else {
@@ -173,6 +202,10 @@ public class Definitions extends IDefinitions {
 		}
 		definitions.put(key, defNode);
 		types.put(key, type);
+	}
+
+	private String getPosition(SourcePosition pos) {
+		return "[" + pos.getLine() + "," + pos.getPos() + "]";
 	}
 
 	@Override
