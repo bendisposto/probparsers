@@ -45,10 +45,9 @@ import de.prob.prolog.output.PrologTermOutput;
  * the error message is mapped to the uses/includes/etc. statement in the main
  * machine.
  * 
- * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys" };
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys", ".imp" };
 	private final File rootDirectory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
