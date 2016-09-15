@@ -49,6 +49,19 @@ public class DefinitionsErrorsTest {
 			assertTrue(e.getMessage().contains("[4,1]"));
 		}
 	}
+	
+	@Test
+	public void checkForErrorPositionInDefinitionWithMultilineComments() throws Exception {
+		String s = "MACHINE Definitions \n DEFINITIONS \n foo == 1=1\n /* \n comment\n comment2\n comment3 \n */\n&& 1=1 \nEND";
+		System.out.println(s);
+		try {
+			getTreeAsString(s);
+			fail("Invalid definition was not detected.");
+		} catch (BException e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("[9,2]"));
+		}
+	}
 
 	@Test
 	public void checkForInvalidDefinition() throws Exception {
