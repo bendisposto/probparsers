@@ -48,7 +48,8 @@ public class PreLexer extends Lexer {
 	}
 
 	private void collectRhs() throws LexerException, IOException {
-		if (state.equals(State.DEFINITIONS_RHS)) {
+		if (state.equals(State.DEFINITIONS_RHS)
+				|| (stateBeforeComment != null && stateBeforeComment.equals(State.DEFINITIONS_RHS))) {
 			if (rhsToken == null) {
 				// starting a new definition rhs
 				rhsToken = new TRhsBody("", -1, -1);
@@ -78,7 +79,6 @@ public class PreLexer extends Lexer {
 						rhsToken.setLine(token.getLine());
 						rhsToken.setPos(token.getPos());
 					}
-
 					rhsBuffer.append(token.getText());
 					token = null;
 				}
@@ -139,22 +139,14 @@ public class PreLexer extends Lexer {
 		if (token instanceof TComment) {
 			stateBeforeComment = state;
 			state = State.COMMENT;
-			token = null;
-		} else if (token instanceof TCommentContent) {
-			token = null;
-		} else if (token instanceof TCommentEnd) {
+		}  else if (token instanceof TCommentEnd) {
 			state = stateBeforeComment;
 			stateBeforeComment = null;
-			token = null;
-		} else if (token instanceof TLineComment) {
-			token = null;
 		}
 	}
 
 	private void detectGrammarExtension() {
-		if (isFirstTOtherClauseBegin
-				&& parseOptions != null
-				&& parseOptions.grammar instanceof DefaultGrammar
+		if (isFirstTOtherClauseBegin && parseOptions != null && parseOptions.grammar instanceof DefaultGrammar
 				&& token instanceof TOtherClauseBegin) {
 			isFirstTOtherClauseBegin = false;
 			if (token.getText().equals("RULES_MACHINE")) {
