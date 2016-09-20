@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.ParseOptions;
-import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.Utils;
 
 /**
  * This class checks several dependencies between machine clauses. Examples are:

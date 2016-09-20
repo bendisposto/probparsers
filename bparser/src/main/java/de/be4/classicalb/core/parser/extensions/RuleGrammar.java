@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.node.TKwForAll;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 import de.be4.classicalb.core.parser.node.TKwRule;
 import de.be4.classicalb.core.parser.node.TKwRuleForAll;
+import de.be4.classicalb.core.parser.node.TKwRuleId;
 import de.be4.classicalb.core.parser.node.TKwRulesMachine;
 import de.be4.classicalb.core.parser.node.TKwSubstitutionOperator;
 import de.be4.classicalb.core.parser.node.TMachine;
@@ -48,6 +49,7 @@ public class RuleGrammar implements IGrammar {
 	private static final HashMap<String, Class<? extends Token>> map = new HashMap<>();
 	static {
 		add(TKwRule.class);
+		add(TKwRuleId.class);
 		add(TKwForAll.class);
 		add(TKwExpect.class);
 		add(TKwCounterexample.class);

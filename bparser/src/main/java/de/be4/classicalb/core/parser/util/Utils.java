@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.util;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
-
 import org.junit.Test;
 
 import util.Helpers;
@@ -41,7 +40,8 @@ public class RuleExtensionsTest {
 		final String result = getTreeAsString(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("AExpressionDefinitionDefinition(TO_STRING"));
-		assertTrue(result.contains("AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLE])]"));
+		assertTrue(result.contains(
+				"AOperationsMachineClause([AOperation([AIdentifierExpression([#RESULT]),AIdentifierExpression([#COUNTEREXAMPLES])]"));
 	}
 
 	@Test
@@ -62,6 +62,13 @@ public class RuleExtensionsTest {
 		System.out.println(result);
 		assertTrue("Checking variables",
 				!result.contains(RuleTransformation.RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
+	}
+
+	@Test
+	public void testRuleId() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 = BEGIN RULE_FAIL({\"Rule violated\"}) END END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
 	}
 
 	@Test
