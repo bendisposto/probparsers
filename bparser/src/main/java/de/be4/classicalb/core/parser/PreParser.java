@@ -32,6 +32,7 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.Token;

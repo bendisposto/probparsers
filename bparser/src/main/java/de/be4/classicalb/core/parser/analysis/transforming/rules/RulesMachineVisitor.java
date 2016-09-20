@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AConstantDependenciesPredicate;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AIfSubstitution;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.AParallelSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
@@ -22,11 +23,17 @@ import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 public class RulesMachineVisitor extends DepthFirstAdapter {
+	@SuppressWarnings("unused") // TODO file name must match machine name
+	private final String fileName;
+	protected final ArrayList<CheckException> errorlist = new ArrayList<>();
+	protected final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
+	protected final LinkedHashSet<TIdentifierLiteral> rulesWithCounterExamples = new LinkedHashSet<>();
 
-	ArrayList<CheckException> errorlist = new ArrayList<>();
-	final Hashtable<Node, Node> ruleAssignmentTable = new Hashtable<>();
-	public LinkedHashSet<TIdentifierLiteral> rulesWithCounterExamples = new LinkedHashSet<>();
 	private ARuleOperation currentRuleOperation = null;
+
+	public RulesMachineVisitor(String fileName) {
+		this.fileName = fileName;
+	}
 
 	public boolean hasCounterExamples(final TIdentifierLiteral ruleIdentifier) {
 		return rulesWithCounterExamples.contains(ruleIdentifier);
@@ -64,6 +71,14 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 
 	private boolean resultIsSet(Node node) {
 		return ruleAssignmentTable.containsKey(node);
+	}
+
+	@Override
+	public void inAMachineHeader(AMachineHeader node) {
+		if (node.getParameters().size() > 0) {
+			errorlist.add(new CheckException("A RULES_MACHINE must not have any machine parameters", node));
+		}
+
 	}
 
 	@Override

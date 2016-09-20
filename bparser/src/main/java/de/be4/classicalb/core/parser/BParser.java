@@ -44,6 +44,7 @@ import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
+import de.be4.classicalb.core.parser.util.Utils;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -406,7 +407,7 @@ public class BParser {
 		}
 	}
 
-	private String getFileName() {
+	public String getFileName() {
 		if (fileName == null) {
 			return null;
 		}

@@ -8,9 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
 
 /**

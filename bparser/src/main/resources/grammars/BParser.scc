@@ -342,6 +342,7 @@ Tokens
   // keywords should be synchronized with RuleGrammar.java
   {normal} kw_rules_machine = 'RULES_MACHINE';
   {normal} kw_rule = 'RULE';
+  {normal} kw_rule_id = 'RULEID';
   {normal} kw_substitution_operator = identifier_literal;
   {normal} kw_predicate_operator = identifier_literal;
   {normal} kw_constant_dependencies = 'CONSTANT_DEPENDENCIES';
@@ -388,7 +389,7 @@ machine {-> parse_unit} =
 
 import_package_list {-> import_package*} =
   {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package,New import_package(package_or_machine)]} ;
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package, New import_package(package_or_machine)]} ;
 
 
 machine_x {-> parse_unit} =
@@ -540,8 +541,10 @@ operation_list {-> operation*} =
 operation {-> operation} =
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
-  {rule_operation} kw_rule [rule_name]:identifier_literal equal [operation_body]:substitution_l3
-    {-> New operation.rule(rule_name, operation_body.substitution)};
+  {rule_operation} kw_rule [rule_name]:identifier_literal rule_id?  equal [operation_body]:substitution_l3
+    {-> New operation.rule(rule_name, rule_id.identifier_literal, operation_body.substitution)};
+
+rule_id {-> identifier_literal} = kw_rule_id [name]:identifier_literal {-> name } ;
 
 operation_return_values {-> expression*} =
   [return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
@@ -1001,6 +1004,9 @@ op_pattern_param {-> argpattern} =
     {def}   [expression]:expression_in_par {-> New argpattern.def(expression.expression)} |
     {undef} underscore {-> New argpattern.undef()};
 
+
+
+
 /*******************************************************************
  * Abstract Syntax Tree                                            *
  *******************************************************************/
@@ -1086,7 +1092,7 @@ machine_reference =
 
 
 definition =
-    {conversion} definition |
+  {conversion} definition |
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
   {substitution_definition} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
   {expression_definition} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
@@ -1107,7 +1113,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression ;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
-  {rule} [rule_name]:identifier_literal [rule_body]:substitution ;
+  {rule} [rule_name]:identifier_literal [rule_id]:identifier_literal? [rule_body]:substitution ;
 
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;

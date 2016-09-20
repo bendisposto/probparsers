@@ -17,13 +17,13 @@ import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.PlainFileContentProvider;
-import de.be4.classicalb.core.parser.Utils;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.util.Utils;
 
 public class DefinitionFilesTest implements IFileContentProvider {
 
