@@ -13,6 +13,9 @@ Helpers
   comment_start = '/*';
   comment_end = '*/';
 
+  triple_quote = 39 39 39 ;
+  single_quate = 39 ;
+  
   minus = '-' | 0x2212;
   plus = '+' | 0x002b;
   gt = '>' | 0x003e;
@@ -28,11 +31,13 @@ Helpers
 
   all_chars = [0 .. 0xffff];
   all_chars_without_quote = [all_chars - double_quotation];
+  all_chars_without_single_quote = [all_chars - 39];
 
   line_break = [lf + cr];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
   string_literal = double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  multiline_string_literal = triple_quote (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' triple_quote)* triple_quote;
   identifier_literal = letter (letter | digit | underscore)*;
   pragma_identifier_literal = letter (letter | digit | underscore | minus | '.')*;
 
@@ -44,8 +49,8 @@ States
 
   section,
   normal,
-  shebang,
   comment,
+  shebang,
   pragma,
   description,
   unit;
@@ -89,7 +94,7 @@ Tokens
   {comment,description} star = '*';
   {comment,description} slash = '/';
 
-  {normal} string_literal = string_literal;
+  {normal} string_literal = string_literal | multiline_string_literal;
   {normal} for_any = '!' | 0x2200;
   {normal} exists = '#' | 0x2203;
   {normal} dollar = '$';

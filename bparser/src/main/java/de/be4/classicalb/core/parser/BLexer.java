@@ -166,7 +166,14 @@ public class BLexer extends Lexer {
 			// google for howto-unescape-a-java-string-literal-in-java
 			// quickfix: we do nothing just strip off the "
 			final String literal = token.getText();
-			token.setText(literal.substring(1, literal.length() - 1));
+			if(literal.startsWith("'''")){
+				/// '''foo'''
+				token.setText(literal.substring(3, literal.length() - 3));
+			}else{
+				/// "foo"
+				token.setText(literal.substring(1, literal.length() - 1));
+			}
+			
 		}
 		if (token instanceof THexLiteral) {
 			final String literal = token.getText().substring(2);
