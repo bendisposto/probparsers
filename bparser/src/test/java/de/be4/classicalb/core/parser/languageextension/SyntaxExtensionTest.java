@@ -2,12 +2,16 @@ package de.be4.classicalb.core.parser.languageextension;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.exceptions.BException;
 import util.Helpers;
 
 public class SyntaxExtensionTest {
 
+	
 	@Test
 	public void testMultiLineString() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES '''foo''' /= '''bar\nbazz''' END";
@@ -22,19 +26,17 @@ public class SyntaxExtensionTest {
 	}
 	
 	@Test
-	public void testMultiLineStringIncludingTwoSingleQuates() throws Exception {
-		final String testMachine = "MACHINE Test PROPERTIES ''''' ''' = \"b\" END";
-		Helpers.getMachineAsPrologTerm(testMachine);
+	public void testFile() throws IOException, BException {
+		String file = "src/test/resources/strings/MultiLineString.mch";
+		String result = Helpers.fullParsing(file);
+		System.out.println(result);
+		assertTrue(result.contains("'\\n\\'\\na\\n\\'\\'\\'\\n'"));
 	}
 	
 	@Test
-	public void testMultiLineStringIncludingEscapedThreeSingleQuates() throws Exception {
-		final String testMachine = "MACHINE Test PROPERTIES '''\\'''''' = \"b\" END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		String compare = "'\\\\\\'\\'\\''"; // '\\\'\'\''
-		System.out.println(compare);
-		assertTrue(result.contains(compare));
-		System.out.println(result);
+	public void testMultiLineStringIncludingTwoSingleQuates() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES ''''' ''' = \"b\" END";
+		Helpers.getMachineAsPrologTerm(testMachine);
 	}
 	
 	
