@@ -20,8 +20,7 @@ public class BLexer extends Lexer {
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 
-	private static void addInvalid(Class<? extends Token> f,
-			Class<? extends Token> s, String message) {
+	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
 		if (secs == null)
 			secs = new HashMap<Class<? extends Token>, String>();
@@ -30,27 +29,20 @@ public class BLexer extends Lexer {
 	}
 
 	static {
-		addInvalid(TSemicolon.class, TSemicolon.class,
-				"Two succeeding semicolons are not allowed.");
-		addInvalid(TConjunction.class, TConjunction.class,
-				"& & is not allowed (probably one & too many).");
+		addInvalid(TSemicolon.class, TSemicolon.class, "Two succeeding semicolons are not allowed.");
+		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
 		addInvalid(TConjunction.class, TLogicalOr.class, "& or is not allowed.");
 		addInvalid(TConjunction.class, TImplies.class, "& => is not allowed.");
-		addInvalid(TConjunction.class, TEquivalence.class,
-				"& <=> is not allowed.");
+		addInvalid(TConjunction.class, TEquivalence.class, "& <=> is not allowed.");
 		addInvalid(TImplies.class, TConjunction.class, "=> & is not allowed.");
 		addInvalid(TImplies.class, TImplies.class, "=> => is not allowed.");
-		addInvalid(TEquivalence.class, TConjunction.class,
-				"<=> & is not allowed.");
-		addInvalid(TEquivalence.class, TEquivalence.class,
-				"<=> <=> is not allowed.");
+		addInvalid(TEquivalence.class, TConjunction.class, "<=> & is not allowed.");
+		addInvalid(TEquivalence.class, TEquivalence.class, "<=> <=> is not allowed.");
 		addInvalid(TLogicalOr.class, TConjunction.class, "or & is not allowed.");
-		addInvalid(TLogicalOr.class, TLogicalOr.class,
-				"or or is not allowed (probably one or too many).");
+		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one or too many).");
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
 				"|| || is not allowed (probably one || too many).");
-		addInvalid(TSetSubtraction.class, TEqual.class,
-				"You need to use /= for inequality and not \\=.");
+		addInvalid(TSetSubtraction.class, TEqual.class, "You need to use /= for inequality and not \\=.");
 
 		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TAssertions.class);
@@ -62,10 +54,8 @@ public class BLexer extends Lexer {
 		// ...
 
 		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
-			String clauseName = clauseTokenClass.getSimpleName().substring(1)
-					.toUpperCase();
-			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName
-					+ " is not allowed.");
+			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
+			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 		}
 
 	}
@@ -78,8 +68,7 @@ public class BLexer extends Lexer {
 
 	// private final List<IToken> dotList = new ArrayList<IToken>();
 
-	public BLexer(final PushbackReader in, final DefinitionTypes definitions,
-			final int tokenCountPrediction) {
+	public BLexer(final PushbackReader in, final DefinitionTypes definitions, final int tokenCountPrediction) {
 		super(in);
 		this.definitions = definitions;
 
@@ -115,27 +104,22 @@ public class BLexer extends Lexer {
 		lastToken = token;
 	}
 
-	private void checkForInvalidCombinations(
-			Class<? extends Token> lastTokenClass,
-			Class<? extends Token> tokenClass) throws LexerException {
+	private void checkForInvalidCombinations(Class<? extends Token> lastTokenClass, Class<? extends Token> tokenClass)
+			throws LexerException {
 		Map<Class<? extends Token>, String> map = invalid.get(lastTokenClass);
 		if (map != null) {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				int l = token.getLine();
 				int c = token.getPos();
-				throw new BLexerException(token,
-						"Invalid combination of symbols: " + string + "\n",
-						string, l, c);
+				throw new BLexerException(token, "Invalid combination of symbols: " + string + "\n", string, l, c);
 			}
 		}
 
 	}
 
 	private void applyGrammarExtension() {
-		if (parseOptions != null
-				&& this.parseOptions.grammar
-						.containsAlternativeDefinitionForToken(token)) {
+		if (parseOptions != null && this.parseOptions.grammar.containsAlternativeDefinitionForToken(token)) {
 			token = this.parseOptions.grammar.createNewToken(token);
 		}
 	}
@@ -152,28 +136,33 @@ public class BLexer extends Lexer {
 			collectComment();
 		}
 
-		if (state.equals(State.DESCRIPTION)
-				&& !(token instanceof TPragmaDescription)) {
+		if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
 			collectComment();
 		}
 
 		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
-			throw new LexerException(
-					"#! only allowed in first line of the file");
+			throw new LexerException("#! only allowed in first line of the file");
 		}
 
 		if (token instanceof TStringLiteral) {
 			// google for howto-unescape-a-java-string-literal-in-java
 			// quickfix: we do nothing just strip off the "
-			final String literal = token.getText();
-			if(literal.startsWith("'''")){
+			String literal = token.getText();
+
+			if (literal.startsWith("'''")) {
 				/// '''foo'''
-				token.setText(literal.substring(3, literal.length() - 3));
-			}else{
+				literal = literal.substring(3, literal.length() - 3);
+				// delete all backslashes of escaped quotes e.g. a\'b -> a'b
+				literal = literal.replace("\\'", "'");
+				token.setText(literal);
+			} else {
 				/// "foo"
-				token.setText(literal.substring(1, literal.length() - 1));
+				literal = literal.substring(1, literal.length() - 1);
+				// delete all backslashes of escaped quotes e.g. a\"b -> a"b
+				literal = literal.replace("\\\"", "\"");
+				token.setText(literal);
 			}
-			
+
 		}
 		if (token instanceof THexLiteral) {
 			final String literal = token.getText().substring(2);
@@ -202,16 +191,14 @@ public class BLexer extends Lexer {
 			if (type != null) {
 				switch (type) {
 				case Predicate:
-					final Token predToken = new TDefLiteralPredicate(
-							token.getText());
+					final Token predToken = new TDefLiteralPredicate(token.getText());
 					predToken.setLine(token.getLine());
 					predToken.setPos(token.getPos());
 					token = predToken;
 					break;
 
 				case Substitution:
-					final Token substToken = new TDefLiteralSubstitution(
-							token.getText());
+					final Token substToken = new TDefLiteralSubstitution(token.getText());
 					substToken.setLine(token.getLine());
 					substToken.setPos(token.getPos());
 					token = substToken;
@@ -241,8 +228,8 @@ public class BLexer extends Lexer {
 			// final int line = token.getLine() - 1;
 			// final int pos = token.getPos() - 1;
 			final String text = token.getText();
-			throw new BLexerException(comment, "Comment not closed.",
-					text.toString(), comment.getLine(), comment.getPos());
+			throw new BLexerException(comment, "Comment not closed.", text.toString(), comment.getLine(),
+					comment.getPos());
 		}
 
 		// starting a new comment
