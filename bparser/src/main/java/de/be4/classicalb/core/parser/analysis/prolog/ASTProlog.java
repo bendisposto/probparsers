@@ -30,7 +30,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
 	private static final List<String> SUM_TYPE = new LinkedList<String>(
-			Arrays.asList("expression", "predicate", "machine_clause",
+			Arrays.asList("expression", "predicate", "formula", "machine_clause",
 					"substitution", "parse_unit", "model_clause",
 					"context_clause", "eventstatus", "argpattern", "set",
 					"machine_variant", "definition", "freetype_constructor"));

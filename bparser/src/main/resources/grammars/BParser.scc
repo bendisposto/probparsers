@@ -15,7 +15,7 @@ Helpers
 
   triple_quote = 39 39 39 ;
   single_quate = 39 ;
-  
+
   minus = '-' | 0x2212;
   plus = '+' | 0x002b;
   gt = '>' | 0x003e;
@@ -374,16 +374,40 @@ shebang, shebang_char, shebang_end,
 Productions
 
 parse_unit {-> parse_unit} =
-  {machine} P.machine {-> machine.parse_unit} |
-  {definition_file} [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
-  {predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
-  {expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
-  {predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
-  {exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
-  {substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
-  {oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
-  {definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)} |
-  {machine_clause} kw_machine_clause [clause]:machine_clause {-> New parse_unit.machine_clause(clause.machine_clause)}; // used to single machine clauses
+	{machine} P.machine {-> machine.parse_unit} |
+	{definition_file} [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
+	{predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
+	{expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
+
+  {formula} kw_formula [f]:formula_top {-> New parse_unit.formula(f.formula)} |
+
+  //{predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
+	//{exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
+	{substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
+	{abstract_constants} kw_abstract_constants [clause]:abstract_constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{abstract_variables} kw_abstract_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{assertions} kw_assertions [clause]:assertions_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{concrete_constants} kw_concrete_constants [clause]:constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{concrete_variables} kw_concrete_variables [clause]:concrete_variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{constants} kw_constants [clause]:constants_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{constraints} kw_constraints [clause]:constraints_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{definitions} kw_definitions [clause]:definitions_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{extends} kw_extends [clause]:extends_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{imports} kw_imports [clause]:imports_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{includes} kw_includes [clause]:includes_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{initialisation} kw_initialisation [clause]:initialisation_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{invariant} kw_invariant [clause]:invariant_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{local_operations} kw_local_operations [clause]:operations_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{operations} kw_operations [clause]:operations_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{promotes} kw_promotes [clause]:promotes_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{properties} kw_properties [clause]:properties_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{sees} kw_sees [clause]:sees_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{sets} kw_sets [clause]:sets_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{uses} kw_uses [clause]:uses_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{values} kw_values [clause]:values_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{variables} kw_variables [clause]:variables_clause {-> New parse_unit.machine_clause(clause.machine_clause)} |
+	{oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
+	{definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)};
 
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
@@ -912,8 +936,6 @@ substitution_l3 {-> substitution} =
 
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 
-
-
 expect_counterexample {-> substitution} =
   kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top {-> New substitution.expect_counterexample(expect_pred.predicate, message.expression)};
 
@@ -1012,6 +1034,303 @@ op_pattern_param {-> argpattern} =
 
 
 
+
+/*******************************************************************
+ * Formula                                                         *
+ *******************************************************************/
+
+formula_top {-> formula} =
+  [f]:formula_substitution_l0 {-> f.formula} ;
+
+  /* Formula Substitutions */
+formula_substitution_l0 {-> formula} =
+	{invalid} formula_substitution_l2 semicolon {-> New formula.invalid(semicolon)} |
+	{next_level} formula_substitution_l1 {-> formula_substitution_l1.formula} ;
+
+formula_substitution_l1 {-> formula} =
+	{sequence} [first]:formula_substitution_l2 semicolon [second]:formula_substitution_l2 [rest]:formula_sequence_subst_tail?
+    {-> New formula.sequence([first.formula, second.formula, rest.formula])} |
+	{next_level} [sub]:formula_substitution_l2 {-> sub.formula} ;
+
+formula_sequence_subst_tail {-> formula*} =
+	{single} semicolon [substitution]:formula_substitution_l2 {-> [substitution.formula]} |
+	{multi} semicolon [substitution]:formula_substitution_l2 [rest]:formula_sequence_subst_tail {-> [substitution.formula, rest.formula]} |
+	{invalid} semicolon {-> [New formula.invalid(semicolon)]} ;
+
+formula_substitution_l2 {-> formula} =
+	{parallel} [first]:formula_substitution_l3 double_vertical_bar [second]:formula_substitution_l3 [rest]:formula_parallel_subst_tail?
+    {-> New formula.parallel([first.formula, second.formula, rest.formula])} |
+	{next_level} [sub]:formula_substitution_l3 {-> sub.formula} ;
+
+formula_parallel_subst_tail {-> formula*} =
+	{single} double_vertical_bar [substitution]:formula_substitution_l3 {-> [substitution.formula]} |
+	{multi} double_vertical_bar [substitution]:formula_substitution_l3 [rest]:formula_parallel_subst_tail {-> [substitution.formula, rest.formula]} ;
+
+formula_substitution_l3 {-> formula} =
+	{block} begin [substitution]:formula_substitution_l0 end {-> New formula.block(substitution.formula)} |
+  {assign} [lhs_list]:formula_list assign [rhs_list]:formula_list {-> New formula.assign([lhs_list.formula], [rhs_list.formula])} |
+
+	{skip} skip {-> New formula.skip()} |
+  {predicate_top} [f]:formula_predicate_top {-> f.formula};
+
+
+
+
+/*******************************************************************
+ * Formula Predicates                                              *
+ *******************************************************************/
+
+formula_predicate_top {-> formula} =  [pred]:formula_predicate_p30 {-> pred.formula};
+
+formula_predicate_p30 {-> formula} =
+  {implication} [left]:formula_predicate_p30 implies [right]:formula_predicate_x30
+    {-> New formula.implication(left.formula, right.formula)} | // rechtsassoziativ?
+  {next_level} [pred]:formula_predicate_x30 {-> pred.formula} ;
+formula_predicate_x30 {-> formula} = [pred]:formula_predicate_p40 {-> pred.formula};
+
+formula_predicate_p40 {-> formula} =
+  {disjunct} [left]:formula_predicate_p40 logical_or [right]:formula_predicate_x40 {-> New formula.disjunct(left.formula, right.formula)} |
+  {conjunct} [left]:formula_predicate_p40 conjunction [right]:formula_predicate_x40 {-> New formula.conjunct(left.formula, right.formula)} |
+  {next_level} [pred]:formula_predicate_x40 {-> pred.formula};
+formula_predicate_x40 {-> formula} =
+  {label} pragma_label [name]:pragma_id_or_string [predicate]:formula_predicate_x40 {-> New formula.label(name,predicate.formula)} |
+  {next_level} [pred]:formula_predicate_x41 {-> pred.formula};
+
+formula_predicate_x41 {-> formula} =
+  {description} [predicate]:formula_predicate_x42 pragma_description [content]:pragma_free_text {-> New formula.description(content,predicate.formula)} |
+  {next_level} [pred]:formula_predicate_x42 {-> pred.formula};
+formula_predicate_x42 {-> formula} = [pred]:formula_predicate_p60 {-> pred.formula};
+
+formula_predicate_p60 {-> formula} =
+	{equivalence} [left]:formula_predicate_p60 equivalence [right]:formula_predicate_x60 {-> New formula.equivalence(left.formula, right.formula)} |
+	{next_level} [pred]:formula_predicate_x60 {-> pred.formula};
+formula_predicate_x60 {-> formula} = [pred]:formula_predicate_atomic {-> pred.formula};
+
+formula_predicate_atomic {-> formula} =
+    /* Original priority: 60 */
+	{equal} [left]:formula_expression_top equal [right]:formula_expression_top {-> New formula.equal(left.formula, right.formula)} |
+  {member} [left]:formula_expression_top element_of [right]:formula_expression_top {-> New formula.member(left.formula, right.formula)} |
+
+    /* Original priority: 110 */
+	{subset} [left]:formula_expression_top inclusion[right]:formula_expression_top {-> New formula.subset(left.formula, right.formula)} |
+	{subset_strict} [left]:formula_expression_top strict_inclusion [right]:formula_expression_top {-> New formula.subset_strict(left.formula, right.formula)} |
+	{not_subset} [left]:formula_expression_top non_inclusion [right]:formula_expression_top {-> New formula.not_subset(left.formula, right.formula)} |
+	{not_subset_strict} [left]:formula_expression_top strict_non_inclusion [right]:formula_expression_top {-> New formula.not_subset_strict(left.formula, right.formula)} |
+
+    /* Original priority: 160 */
+	{not_equal} [left]:formula_expression_top not_equal [right]:formula_expression_top {-> New formula.not_equal(left.formula, right.formula)} |
+	{not_member} [left]:formula_expression_top not_belonging [right]:formula_expression_top {-> New formula.not_member(left.formula, right.formula)} |
+	{less_equal} [left]:formula_expression_top less_equal [right]:formula_expression_top {-> New formula.less_equal(left.formula, right.formula)} |
+	{less} [left]:formula_expression_top less [right]:formula_expression_top {-> New formula.less(left.formula, right.formula)} |
+	{greater_equal} [left]:formula_expression_top greater_equal [right]:formula_expression_top {-> New formula.greater_equal(left.formula, right.formula)} |
+	{greater} [left]:formula_expression_top greater [right]:formula_expression_top {-> New formula.greater(left.formula, right.formula)} |
+
+	/* Now we continue with the real atomic predicates: */
+	{bfalse} bfalse {-> New formula.falsity()} |
+	{truth_predicate} truth_predicate {-> New formula.truth()} |
+	//{bracketed} left_par [predicate]:formula_predicate_top right_par {-> predicate.formula} |
+	{negation} not left_par [predicate]:formula_predicate_top right_par {-> New formula.negation(predicate.formula)} |
+	//{forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:formula_predicate_top right_par
+  //  {-> New formula.forall([identifiers.expression], implication.formula)} | // check in typechecker: predicate must be an implication predicate
+	//{exists} exists [identifiers]:quantified_variables_list dot left_par [predicate]:formula_predicate_top right_par
+  //  {-> New formula.exists([identifiers.expression], predicate.formula)} |
+	//{depends_on_rule} kw_depends_on_rules [parameters]:op_params {-> New formula.depends_on_rules([parameters.expression])} | // extension for rules
+
+  {next} [f]:formula_expression_top {-> f.formula} ;
+
+/*******************************************************************
+ * Formula Expressions                                             *
+ *******************************************************************/
+
+/* expression_in_par contains the priority level 20, it is not considered as expression_top
+   because ; and || should only be used inside parentheses */
+formula_in_par {-> formula} =
+	{composition} [left]:formula_in_par semicolon [right]:formula_expression_top {-> New formula.composition(left.formula, right.formula)} |
+	{parallel_product} [left]:formula_in_par double_vertical_bar [right]:formula_expression_top {-> New formula.parallel_product(left.formula, right.formula)} |
+	{next_level} [expr]:formula_expression_top {-> expr.formula};
+
+
+formula_expression_top {->formula} =
+  [expr]:formula_expression_p125 {-> expr.formula};
+
+formula_expression_p125 {-> formula} =
+	{relations} [left]:formula_expression_p125 set_relation [right]:formula_expression_x125 {-> New formula.relations(left.formula, right.formula)} |
+	{partial_function} [left]:formula_expression_p125 partial_function [right]:formula_expression_x125 {-> New formula.partial_function(left.formula, right.formula)} |
+	{total_function} [left]:formula_expression_p125 total_function [right]:formula_expression_x125 {-> New formula.total_function(left.formula, right.formula)} |
+	{partial_injection} [left]:formula_expression_p125 partial_injection [right]:formula_expression_x125 {-> New formula.partial_injection(left.formula, right.formula)} |
+	{total_injection} [left]:formula_expression_p125 total_injection [right]:formula_expression_x125 {-> New formula.total_injection(left.formula, right.formula)} |
+	{partial_surjection} [left]:formula_expression_p125 partial_surjection [right]:formula_expression_x125 {-> New formula.partial_surjection(left.formula, right.formula)} |
+	{total_surjection} [left]:formula_expression_p125 total_surjection [right]:formula_expression_x125 {-> New formula.total_surjection(left.formula, right.formula)} |
+	{partial_bijection} [left]:formula_expression_p125 partial_bijection [right]:formula_expression_x125 {-> New formula.partial_bijection(left.formula, right.formula)} |
+	{total_bijection} [left]:formula_expression_p125 total_bijection [right]:formula_expression_x125 {-> New formula.total_bijection(left.formula, right.formula)} |
+	{total_relation} [left]:formula_expression_p125 total_relation [right]:formula_expression_x125 {-> New formula.total_relation(left.formula, right.formula)} |
+	{surjection_relation} [left]:formula_expression_p125 surjection_relation [right]:formula_expression_x125 {-> New formula.surjection_relation(left.formula, right.formula)} |
+	{total_surjection_relation} [left]:formula_expression_p125 total_surjection_relation [right]:formula_expression_x125 {-> New formula.total_surjection_relation(left.formula, right.formula)} |
+  {next_level} [expr]:formula_expression_x125 {-> expr.formula} ;
+formula_expression_x125 {-> formula} = [expr]:formula_expression_p160 {-> expr.formula};
+
+formula_expression_p160 {-> formula} =
+	{overwrite} [left]:formula_expression_p160 overwrite_relation [right]:formula_expression_x160 {-> New formula.overwrite(left.formula, right.formula)} |
+	{direct_product} [left]:formula_expression_p160 direct_product [right]:formula_expression_x160 {-> New formula.direct_product(left.formula, right.formula)} |
+	{concat} [left]:formula_expression_p160 concat_sequence [right]:formula_expression_x160 {-> New formula.concat(left.formula, right.formula)} |
+	{domain_restriction} [left]:formula_expression_p160 domain_restriction [right]:formula_expression_x160 {-> New formula.domain_restriction(left.formula, right.formula)} |
+	{domain_subtraction} [left]:formula_expression_p160 domain_subtraction [right]:formula_expression_x160 {-> New formula.domain_subtraction(left.formula, right.formula)} |
+	{range_restriction} [left]:formula_expression_p160 range_restriction [right]:formula_expression_x160 {-> New formula.range_restriction(left.formula, right.formula)} |
+	{range_subtraction} [left]:formula_expression_p160 range_subtraction [right]:formula_expression_x160 {-> New formula.range_subtraction(left.formula, right.formula)} |
+	{insert_front} [left]:formula_expression_p160 insert_start_sequence [right]:formula_expression_x160 {-> New formula.insert_front(left.formula, right.formula)} |
+	{insert_tail} [left]:formula_expression_p160 insert_end_sequence [right]:formula_expression_x160 {-> New formula.insert_tail(left.formula, right.formula)} |
+	{union} [left]:formula_expression_p160 union [right]:formula_expression_x160 {-> New formula.union(left.formula, right.formula)} |
+	{intersection} [left]:formula_expression_p160 intersection [right]:formula_expression_x160 {-> New formula.intersection(left.formula, right.formula)} |
+	{restrict_front} [left]:formula_expression_p160 restrict_head_sequence [right]:formula_expression_x160 {-> New formula.restrict_front(left.formula, right.formula)} |
+	{restrict_tail} [left]:formula_expression_p160 restrict_tail_sequence [right]:formula_expression_x160 {-> New formula.restrict_tail(left.formula, right.formula)} |
+	{couple1} [left]:formula_expression_p160 maplet [right]:formula_expression_x160 {-> New formula.couple([left.formula, right.formula])} |
+	{next_level} [expr]:formula_expression_x160 {-> expr.formula} ;
+formula_expression_x160 {-> formula} = [expr]:formula_expression_p170 {-> expr.formula};
+
+formula_expression_p170 {-> formula} =
+	{interval} [left_border]:formula_expression_p170 interval [right_border]:formula_expression_x170 {-> New formula.interval(left_border.formula, right_border.formula)} |
+	{next_level} [expr]:formula_expression_x170 {-> expr.formula} ;
+formula_expression_x170 {-> formula} = [expr]:formula_expression_p180 {-> expr.formula};
+
+formula_expression_p180 {-> formula} =
+	{minus_or_set_subtract} [left]:formula_expression_p180 minus [right]:formula_expression_x180 {-> New formula.minus_or_set_subtract(left.formula, right.formula)} |
+	{add} [left]:formula_expression_p180 plus [right]:formula_expression_x180 {-> New formula.add(left.formula, right.formula)} |
+	{set_subtraction} [left]:formula_expression_p180 set_subtraction [right]:formula_expression_x180 {-> New formula.set_subtraction(left.formula, right.formula)} |
+	{next_level} [expr]:formula_expression_x180 {-> expr.formula} ;
+formula_expression_x180 {-> formula} = [expr]:formula_expression_p190 {-> expr.formula};
+
+formula_expression_p190 {-> formula} =
+	{mul} [left]:formula_expression_p190 product [right]:formula_expression_x190 {-> New formula.mult_or_cart(left.formula, right.formula)} |
+	{div} [left]:formula_expression_p190 division [right]:formula_expression_x190 {-> New formula.div(left.formula, right.formula)} |
+	{modulo} [left]:formula_expression_p190 mod [right]:formula_expression_x190 {-> New formula.modulo(left.formula, right.formula)} |
+	{next_level} [expr]:formula_expression_x190 {-> expr.formula} ;
+formula_expression_x190 {-> formula} = [expr]:formula_expression_p200 {-> expr.formula};
+
+/* Attention: power_of is right-assoziative! */
+formula_expression_p200 {-> formula} =
+	{power_of} [left]:formula_expression_x200 power_of [right]:formula_expression_p200 {-> New formula.power_of(left.formula, right.formula)} |  // right associative!
+	{next_level} [expr]:formula_expression_x200 {-> expr.formula} ;
+formula_expression_x200 {-> formula} = [expr]:formula_expression_p210 {-> expr.formula};
+
+formula_expression_p210 {-> formula} =
+	{unary_minus} minus [expression]:formula_expression_x210 {-> New formula.unary_minus(expression.formula)} |
+	{next_level} [expr]:formula_expression_x210 {-> expr.formula} ;
+formula_expression_x210 {-> formula} = [expr]:formula_expression_p230 {-> expr.formula};
+
+formula_expression_p230 {-> formula} =
+	{reverse} [expression]:formula_expression_x230 tilde {-> New formula.reverse(expression.formula)} |
+	{next_level} [expr]:formula_expression_x230 {-> expr.formula} ;
+formula_expression_x230 {-> formula} = [expr]:formula_expression_p231 {-> expr.formula};
+
+formula_expression_p231 {-> formula} =
+	//{image} [left]:formula_expression_p230 left_bracket [right]:formula_expression_in_par right_bracket {-> New formula.image(left.formula, right.formula)} |
+	{next_level} [expr]:formula_expression_x231 {-> expr.formula} ;
+formula_expression_x231 {-> formula} =
+  [expr]:formula_expression_keyword {-> expr.formula};
+
+
+formula_expression_keyword {-> formula} =
+	{convert_bool} bool_cast left_par [pred]:formula_predicate_top right_par {-> New formula.convert_bool(pred.formula)} |
+	{max} max left_par [expression]:formula_in_par right_par {-> New formula.max(expression.formula)} |
+	{min} min left_par [expression]:formula_in_par right_par {-> New formula.min(expression.formula)} |
+	{card} card left_par [expression]:formula_in_par right_par {-> New formula.card(expression.formula)} |
+	//{general_sum} sigma [identifiers]:quantified_variables_list dot left_par [pred]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par
+  //  {-> New formula.general_sum([identifiers.formula], pred.formula, expression.formula)} |
+	//{general_product} pi [identifiers]:quantified_variables_list dot left_par [predicates]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par {-> New formula.general_product([identifiers.formula], predicates.predicate, expression.formula)} |
+	{pow_subset} pow left_par [expression]:formula_in_par right_par {-> New formula.pow_subset(expression.formula)} |
+	{pow1_subset} pow1 left_par [expression]:formula_in_par right_par {-> New formula.pow1_subset(expression.formula)} |
+	{fin_subset} fin left_par [expression]:formula_in_par right_par {-> New formula.fin_subset(expression.formula)} |
+	{fin1_subset} fin1 left_par [expression]:formula_in_par right_par {-> New formula.fin1_subset(expression.formula)} |
+	{general_union} generalized_union left_par [expression]:formula_in_par right_par {-> New formula.general_union(expression.formula)} |
+	{general_intersection} generalized_inter left_par [expression]:formula_in_par right_par {-> New formula.general_intersection(expression.formula)} |
+	{identity} id left_par [expression]:formula_in_par right_par {-> New formula.identity(expression.formula)} |
+	{reflexive_closure} closure left_par [expression]:formula_in_par right_par {-> New formula.reflexive_closure(expression.formula)} |
+	{closure} closure1 left_par [expression]:formula_in_par right_par {-> New formula.closure(expression.formula)} |
+	{domain} dom left_par [expression]:formula_in_par right_par {-> New formula.domain(expression.formula)} |
+	{range} ran left_par [expression]:formula_in_par right_par {-> New formula.range(expression.formula)} |
+//	{lambda} lambda [identifiers]:quantified_variables_list dot left_par [predicate]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par
+//		{-> New formula.lambda([identifiers.formula], predicate.predicate, expression.formula)} |
+//  {symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par
+//  		{-> New formula.symbolic_lambda([identifiers.formula], predicate.predicate, expression.formula)} |
+  	{trans_function} fnc left_par [expression]:formula_in_par right_par {-> New formula.trans_function(expression.formula)} |
+	{trans_relation} rel left_par [expression]:formula_in_par right_par {-> New formula.trans_relation(expression.formula)} |
+	{seq} seq left_par [expression]:formula_in_par right_par {-> New formula.seq(expression.formula)} |
+	{seq1} seq1 left_par [expression]:formula_in_par right_par {-> New formula.seq1(expression.formula)} |
+	{iseq} iseq left_par [expression]:formula_in_par right_par {-> New formula.iseq(expression.formula)} |
+	{iseq1} iseq1 left_par [expression]:formula_in_par right_par {-> New formula.iseq1(expression.formula)} |
+	{perm} perm left_par [expression]:formula_in_par right_par {-> New formula.perm(expression.formula)} |
+	{empty_sequence1} left_bracket right_bracket {-> New formula.empty_sequence()} |
+	{empty_sequence2} less greater {-> New formula.empty_sequence()} |
+	{size} size left_par [expression]:formula_in_par right_par {-> New formula.size(expression.formula)} |
+	{first} first left_par [expression]:formula_in_par right_par {-> New formula.first(expression.formula)} |
+	{last} last left_par [expression]:formula_in_par right_par {-> New formula.last(expression.formula)} |
+	{front} front left_par [expression]:formula_in_par right_par {-> New formula.front(expression.formula)} |
+	{tail} tail left_par [expression]:formula_in_par right_par {-> New formula.tail(expression.formula)} |
+	{rev} rev left_par [expression]:formula_in_par right_par {-> New formula.rev(expression.formula)} |
+	{first_projection} prj1 left_par [exp1]:formula_in_par comma [exp2]:formula_in_par right_par {-> New formula.first_projection(exp1.formula, exp2.formula)} |
+	{second_projection} prj2 left_par [exp1]:formula_in_par comma [exp2]:formula_in_par right_par {-> New formula.second_projection(exp1.formula, exp2.formula)} |
+	{iteration} iterate left_par [left]:formula_in_par comma [right]:formula_in_par right_par {-> New formula.iteration(left.formula, right.formula)} |
+	//{comprehension_set} left_brace [identifiers]:formula_list vertical_bar [predicates]:formula_predicate_top right_brace {-> New formula.comprehension_set([identifiers.formula], predicates.predicate)}  |
+	//{symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:formula_list vertical_bar [predicates]:formula_predicate_top right_brace {-> New formula.symbolic_comprehension_set([identifiers.formula], predicates.predicate)}  |
+//	{quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par {-> New formula.quantified_union([identifiers.formula], predicates.predicate, expression.formula)} |
+//	{quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:formula_predicate_top vertical_bar [expression]:formula_in_par right_par {-> New formula.quantified_intersection([identifiers.formula], predicates.predicate, expression.formula)} |
+//	{quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:formula_predicate_top right_par {-> New formula.prover_comprehension_set([identifiers.formula], predicates.predicate)}  |
+	//{set_extension} left_brace [expressions]:formula_list right_brace {-> New formula.set_extension([expressions.formula])} |
+	//{sequence_extension} left_bracket [expressions]:formula_list right_bracket {-> New formula.sequence_extension([expressions.formula])} |
+	//{couple2} left_par [first]:formula_in_par comma [rest]:formula_list right_par {-> New formula.couple([first.formula, rest.formula])} | // Klammern notwendig
+	{general_concat} conc left_par [expression]:formula_in_par right_par {-> New formula.general_concat(expression.formula)} |
+	{tree} tree left_par [expression]:formula_in_par right_par {-> New formula.tree(expression.formula)} |
+	{btree} btree left_par [expression]:formula_in_par right_par {-> New formula.btree(expression.formula)} |
+	{const} const left_par [expr1]:formula_in_par comma [expr2]:formula_in_par right_par {-> New formula.const(expr1.formula, expr2.formula)} |
+	{top} top left_par [expression]:formula_in_par right_par {-> New formula.top(expression.formula)} |
+	{sons} sons left_par [expression]:formula_in_par right_par {-> New formula.sons(expression.formula)} |
+	{prefix} prefix left_par [expression]:formula_in_par right_par {-> New formula.prefix(expression.formula)} |
+	{postfix} postfix left_par [expression]:formula_in_par right_par {-> New formula.postfix(expression.formula)} |
+	{sizet} sizet left_par [expression]:formula_in_par right_par {-> New formula.sizet(expression.formula)} |
+	{mirror} mirror left_par [expression]:formula_in_par right_par {-> New formula.mirror(expression.formula)} |
+	{rank} rank left_par [expression1]:formula_in_par comma [expression2]:formula_in_par right_par {-> New formula.rank(expression1.formula, expression2.formula)} |
+	{father} father left_par [expression1]:formula_in_par comma [expression2]:formula_in_par right_par {-> New formula.father(expression1.formula, expression2.formula)} |
+	{son} son left_par [expression1]:formula_in_par [comma1]:comma [expression2]:formula_in_par [comma2]:comma [expression3]:formula_in_par right_par {-> New formula.son(expression1.formula, expression2.formula, expression3.formula)} |
+	{subtree} subtree left_par [expression1]:formula_in_par comma [expression2]:formula_in_par right_par {-> New formula.subtree(expression1.formula, expression2.formula)} |
+	{arity} arity left_par [expression1]:formula_in_par comma [expression2]:formula_in_par right_par {-> New formula.arity(expression1.formula, expression2.formula)} |
+	{bin1} bin left_par [expression]:formula_in_par right_par {-> New formula.bin(expression.formula, Null, Null)} |
+	{bin2} bin left_par [expression1]:formula_in_par [comma1]:comma [expression2]:formula_in_par [comma2]:comma [expression3]:formula_in_par right_par {-> New formula.bin(expression1.formula, expression2.formula, expression3.formula)} |
+	{left} left left_par [expression]:formula_in_par right_par {-> New formula.left(expression.formula)} |
+	{right} right left_par [expression]:formula_in_par right_par {-> New formula.right(expression.formula)} |
+	{infix} infix left_par [expression]:formula_in_par right_par {-> New formula.infix(expression.formula)} |
+	//{struct} struct left_par [entries]:rec_entry_list right_par {-> New formula.struct([entries.rec_entry])} |
+	//{rec} rec left_par [entries]:rec_entry_list right_par {-> New formula.rec([entries.rec_entry])} |
+	//{record_field} [record]:formula_p231 single_quotation [identifier]:formula_atomic
+  //  {-> New formula.record_field(record.formula, identifier.formula)} |
+  {next_level} [expr]:formula_expression_func {-> expr.formula} ;
+
+
+formula_expression_func {-> formula} =
+  {function} [function]:formula_expression_p230 left_par [parameters]:formula_list right_par {-> New formula.function(function.formula, [parameters.formula])} |
+  {next_level} [f]:formula_expression_atomic {-> f.formula} ;
+
+formula_expression_atomic {-> formula} =
+  {paren} left_par [f]:formula_in_par right_par {-> f.formula} |
+  {integer} [literal]:integer_literal {-> New formula.integer(literal)} |
+  {if_formula} if [condition]:formula_predicate_top then [then_formula]:formula_top else [else_formula]:formula_top end
+      {-> New formula.if(condition.formula, then_formula.formula, else_formula.formula)} |
+  {identifier} [identifier]:composed_identifier {-> New formula.identifier([identifier.identifier_literal])} ;
+
+
+/* Formula Basics */
+
+/* a,b,f(1),g(1)(2) := ... */
+/*
+formula_assign_list {-> formula*} =
+  {single} [f]:formula_expression_p230 {-> [f.formula]} |
+  {multi} [list]:formula_assign_list comma [f]:formula_expression_p230 {-> [list.formula, f.formula]} ;
+*/
+
+formula_list {-> formula*} =
+  {single} [f]:formula_expression_top {-> [f.formula]} |
+  {multiple} [list]:formula_list comma [last]:formula_expression_top {-> [list.formula, last.formula]} ;
+
+
 /*******************************************************************
  * Abstract Syntax Tree                                            *
  *******************************************************************/
@@ -1028,6 +1347,7 @@ parse_unit =
   {predicate} predicate |
   {expression} expression |
   {substitution} substitution |
+  {formula} formula |
   {machine_clause} machine_clause |
   {event_b_context} [name]:identifier_literal [context_clauses]:context_clause* |
   {event_b_model} [name]:identifier_literal [model_clauses]:model_clause* |
@@ -1035,6 +1355,216 @@ parse_unit =
   {parse_unit_definition} definition;
 
 import_package = [package]:pragma_id_or_string; // importing a package or machine using import pragma (e.g. /*@import-package "foo.bar" */ )
+
+
+formula =
+	/*	ambiguous */
+	{let} [identifiers]:formula* [predicate]:formula [substitution]:formula |
+	{if} [condition]:formula [then]:formula [else]:formula | //[elsif_substitutions]:formula* [else]:formula? |
+	{if_elsif} [condition]:formula [then_substitution]:formula |
+	{description} [content]:pragma_free_text [formula]:formula |
+	{label} [name]:pragma_id_or_string [formula]:formula |
+
+
+  {invalid} semicolon |
+
+	/* substitution */
+	{block} [substitution]:formula |
+	{skip} |
+	{assign} [lhs_expression]:formula* [rhs_expressions]:formula* |
+	{precondition} [predicate]:formula [substitution]:formula |
+	{assertion} [predicate]:formula [substitution]:formula |
+	{choice} [substitutions]:formula* |
+	{choice_or} [substitution]:formula |
+	{select} [condition]:formula [then]:formula [when_substitutions]:formula* [else]:formula? |
+	{select_when} [condition]:formula [substitution]:formula |
+	{case} formula [either_expr]:formula* [either_subst]:formula [or_substitutions]:formula* [else]:formula? |
+	{case_or} [expressions]:formula* [substitution]:formula |
+	{any} [identifiers]:formula* [where]:formula [then]:formula |
+	{becomes_element_of} [identifiers]:formula* [set]:formula|
+	{becomes_such} [identifiers]:formula* [predicate]:formula |
+	{var} [identifiers]:formula* [substitution]:formula |
+	{sequence} [substitutions]:formula* |
+	{func_op} [function]:formula |
+	{op} [name]:formula [parameters]:formula* |
+	{operation_call} [result_identifiers]:formula* [operation]:identifier_literal* [parameters]:formula* |
+	{while} [condition]:formula [do_subst]:formula [invariant]:formula [variant]:formula |
+	{parallel} [substitutions]:formula* |
+
+
+  /* predicates */
+	{substitution} [substitution]:formula [predicate]:formula | //before after predicate
+	{negation} [predicate]:formula |
+  {conjunct} [left]:formula [right]:formula |
+	{disjunct} [left]:formula [right]:formula |
+	{implication} [left]:formula [right]:formula |
+	{equivalence} [left]:formula [right]:formula |
+	{forall} [identifiers]:formula* [implication]:formula |
+	{exists} [identifiers]:formula* [predicate]:formula |
+	{equal} [left]:formula [right]:formula |
+	{not_equal} [left]:formula [right]:formula |
+	{member} [left]:formula [right]:formula |
+	{not_member} [left]:formula [right]:formula |
+	{subset} [left]:formula [right]:formula |
+	{subset_strict} [left]:formula [right]:formula |
+	{not_subset} [left]:formula [right]:formula |
+	{not_subset_strict} [left]:formula [right]:formula |
+	{less_equal} [left]:formula [right]:formula |
+	{less} [left]:formula [right]:formula |
+	{greater_equal} [left]:formula [right]:formula |
+	{greater} [left]:formula [right]:formula |
+	{truth} |
+	{falsity} |
+	{finite} [set]:formula |
+	{partition} [set]:formula [elements]:formula* |    /* Event-B only predicate */
+	//{extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate*| /* Event-B only predicate - theory plugin */
+	//{depends_on_rules} [identifiers]:expression* ; // extension for rules
+
+  /* expressions */
+  {identifier} [identifier]:identifier_literal* |
+  {file} [identifier]:formula [content]:pragma_id_or_string |
+	{unit} [content]:unit_content [identifier]:formula |
+	{new_unit} [content]:unit_content [identifier]:formula |
+	{inferredunit} [content]:unit_content [identifier]:formula |
+	{primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
+	{string} [content]:string_literal |
+	{boolean_true} |
+	{boolean_false} |
+	{integer} [literal]:integer_literal |
+	{max_int} |
+	{min_int} |
+	{empty_set} |
+	{integer_set} |
+	{natural_set} |
+	{natural1_set} |
+	{nat_set} |
+	{nat1_set} |
+	{int_set} |
+	{bool_set} |
+	{string_set} |
+	{convert_bool} [predicate]:formula |
+	{add} [left]:formula [right]:formula |
+	{minus} [left]:formula [right]:formula | // only used by EventB translator
+	{minus_or_set_subtract} [left]:formula [right]:formula | // used by this parser 'cause we cannot decide which one it is
+	{unary_minus} [formula]:formula |
+	{multiplication} [left]:formula [right]:formula | // only used by EventB translator
+	{cartesian_product} [left]:formula [right]:formula | // only used by EventB translator
+	{mult_or_cart} [left]:formula [right]:formula | // used by this parser 'cause we cannot decide which one it is
+	{div} [left]:formula [right]:formula |
+	{floored_div} [left]:formula [right]:formula | /* has no concrete syntax, generated for example by TLA translation */
+	{modulo} [left]:formula [right]:formula |
+	{power_of} [left]:formula [right]:formula |
+	{successor} |
+	{predecessor} |
+	{max} [formula]:formula |
+	{min} [formula]:formula |
+	{card} [formula]:formula |
+	{general_sum} [identifiers]:formula* [condition]:predicate [value]:formula |
+	{general_product} [identifiers]:formula* [condition]:predicate [value]:formula |
+	{couple} [list]:formula* |
+	{comprehension_set} [identifiers]:formula* [predicates]:predicate |
+	{symbolic_comprehension_set} [identifiers]:formula* [predicates]:predicate |
+	{prover_comprehension_set} [identifiers]:formula* [predicates]:predicate | // todo: fix this special case
+	{event_b_comprehension_set} [identifiers]:formula* [value]:formula [condition]:predicate | // EventB only
+	{pow_subset} [formula]:formula |
+	{pow1_subset} [formula]:formula |
+	{fin_subset} [formula]:formula |
+	{fin1_subset} [formula]:formula |
+	{set_extension} [formulas]:formula* |
+	{interval} [left_border]:formula [right_border]:formula |
+	{union} [left]:formula [right]:formula |
+	{intersection} [left]:formula [right]:formula |
+	{set_subtraction} [left]:formula [right]:formula |
+	{general_union} [formula]:formula |
+	{general_intersection} [formula]:formula |
+	{quantified_union} [identifiers]:formula* [predicates]:predicate [formula]:formula |
+	{quantified_intersection} [identifiers]:formula* [predicates]:predicate [formula]:formula |
+	{relations} [left]:formula [right]:formula |
+	{identity} [formula]:formula |
+	{event_b_identity}  | // EventB v 2.0 language only
+	{reverse} [formula]:formula |
+	{first_projection} [exp1]:formula [exp2]:formula |
+	{event_b_first_projection} [formula]:formula | // EventB only
+  {event_b_first_projection_v2} | // EventB v 2.0 language only
+	{second_projection} [exp1]:formula [exp2]:formula |
+	{event_b_second_projection}  [formula]:formula | // EventB only
+  {event_b_second_projection_v2} | // EventB v 2.0 language only
+	{composition} [left]:formula [right]:formula |
+	{ring} [left]:formula [right]:formula | // EventB only
+	{direct_product} [left]:formula [right]:formula |
+	{parallel_product} [left]:formula [right]:formula |
+	{iteration} [left]:formula [right]:formula |
+	{reflexive_closure} [formula]:formula |
+	{closure} [formula]:formula |
+	{domain} [formula]:formula |
+	{range} [formula]:formula |
+	{image} [left]:formula [right]:formula |
+	{domain_restriction} [left]:formula [right]:formula |
+	{domain_subtraction} [left]:formula [right]:formula |
+	{range_restriction} [left]:formula [right]:formula |
+	{range_subtraction} [left]:formula [right]:formula |
+	{overwrite} [left]:formula [right]:formula |
+	{partial_function} [left]:formula [right]:formula |
+	{total_function} [left]:formula [right]:formula |
+	{partial_injection} [left]:formula [right]:formula |
+	{total_injection} [left]:formula [right]:formula |
+	{partial_surjection} [left]:formula [right]:formula |
+	{total_surjection} [left]:formula [right]:formula |
+	{partial_bijection} [left]:formula [right]:formula |
+	{total_bijection} [left]:formula [right]:formula |
+	{total_relation} [left]:formula [right]:formula | // EventB only
+	{surjection_relation} [left]:formula [right]:formula | // EventB only
+	{total_surjection_relation} [left]:formula [right]:formula | // EventB only
+  {lambda} [identifiers]:formula* [predicate]:predicate [value]:formula |
+  {symbolic_lambda} [identifiers]:formula* [predicate]:predicate [value]:formula |
+	{trans_function} [formula]:formula |
+	{trans_relation} [formula]:formula |
+	{seq} [formula]:formula |
+	{seq1} [formula]:formula |
+	{iseq} [formula]:formula |
+	{iseq1} [formula]:formula |
+	{perm} [formula]:formula |
+	{empty_sequence} |
+	{sequence_extension} [formula]:formula* |
+	{size} [formula]:formula |
+	{first} [formula]:formula |
+	{last} [formula]:formula |
+	{front} [formula]:formula |
+	{tail} [formula]:formula |
+	{rev} [formula]:formula |
+	{concat} [left]:formula [right]:formula |
+	{insert_front} [left]:formula [right]:formula |
+	{insert_tail} [left]:formula [right]:formula |
+	{restrict_front} [left]:formula [right]:formula |
+	{restrict_tail} [left]:formula [right]:formula |
+	{general_concat} [formula]:formula |
+	{function} [identifier]:formula [parameters]:formula* |
+	{tree} [formula]:formula |
+	{btree} [formula]:formula |
+	{const} [formula1]:formula [formula2]:formula |
+	{top} [formula]:formula |
+	{sons} [formula]:formula |
+	{prefix} [formula]:formula |
+	{postfix} [formula]:formula |
+	{sizet} [formula]:formula |
+	{mirror} [formula]:formula |
+	{rank} [formula1]:formula [formula2]:formula |
+	{father} [formula1]:formula [formula2]:formula |
+	{son} [formula1]:formula [formula2]:formula [formula3]:formula |
+	{subtree} [formula1]:formula [formula2]:formula |
+	{arity} [formula1]:formula [formula2]:formula |
+	{bin} [formula1]:formula [formula2]:formula? [formula3]:formula? |
+	{left} [formula]:formula |
+	{right} [formula]:formula |
+	{infix} [formula]:formula |
+	{struct} [entries]:rec_entry* |
+	{rec} [entries]:rec_entry* |
+	{record_field} [record]:formula [identifier]:formula |
+	{extended_expr} [identifier]:identifier_literal [formulas]:formula* [predicates]:predicate* | /* Event-B only expression - theory plugin */
+	{typeof} [formula]:formula [type]:formula  /* Has no concrete syntax, is only generated by the translation process */
+
+  ; // end formula
+
 
 argpattern = {undef} | {def} expression;
 /* csppattern = argtype argpattern; */

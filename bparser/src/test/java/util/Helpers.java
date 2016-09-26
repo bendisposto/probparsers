@@ -125,14 +125,14 @@ public class Helpers {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
-		pout.openTerm("machine");
+		//pout.openTerm("machine");
 		// if (lineNumbers) {
 		// final SourcePositions src = positions.get(entry.getKey());
 		// pprinter.setSourcePositions(src);
 		// }
 		start.apply(prolog);
-		pout.closeTerm();
-		pout.fullstop();
+		//pout.closeTerm();
+		//pout.fullstop();
 		pout.flush();
 	}
 
