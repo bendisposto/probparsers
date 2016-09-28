@@ -1312,23 +1312,44 @@ formula_expression_func {-> formula} =
 formula_expression_atomic {-> formula} =
   {paren} left_par [f]:formula_in_par right_par {-> f.formula} |
   {integer} [literal]:integer_literal {-> New formula.integer(literal)} |
+  {identifier} [identifier]:composed_identifier {-> New formula.identifier([identifier.identifier_literal])} |
+  {primed_identifier} [identifier]:composed_identifier dollar [grade]:integer_literal
+    {-> New formula.primed_identifier([identifier.identifier_literal], grade)} |
+  {string} [content]:string_literal {-> New formula.string(content)} |
+  {boolean_true} true {-> New formula.boolean_true()} |
+  {boolean_false} false {-> New formula.boolean_false()} |
+  {successor} succ {-> New formula.successor()} |
+  {predecessor} pred {-> New formula.predecessor()} |
+  {max_int} max_int {-> New formula.max_int()} |
+  {min_int} min_int {-> New formula.min_int()} |
+  {empty_set_symbol} empty_set {-> New formula.empty_set()} |
+  {empty_set} left_brace right_brace {-> New formula.empty_set()} |
+  {integer_set} integer {-> New formula.integer_set()} |
+  {natural_set} natural {-> New formula.natural_set()} |
+  {natural1_set} natural1 {-> New formula.natural1_set()} |
+  {nat_set} nat {-> New formula.nat_set()} |
+  {nat1_set} nat1 {-> New formula.nat1_set()} |
+  {int_set} int {-> New formula.int_set()} |
+  {bool_set} bool {-> New formula.bool_set()} |
+  {string_set} string {-> New formula.string_set()} |
+
   {if_formula} if [condition]:formula_predicate_top then [then_formula]:formula_top else [else_formula]:formula_top end
       {-> New formula.if(condition.formula, then_formula.formula, else_formula.formula)} |
-  {identifier} [identifier]:composed_identifier {-> New formula.identifier([identifier.identifier_literal])} ;
+  {let_formula} let [identifiers]:formula_identifier_list be [definition]:formula_predicate_top in [f]:formula_top end
+    {-> New formula.let([identifiers.formula], definition.formula, f.formula)} ;
 
 
 /* Formula Basics */
 
-/* a,b,f(1),g(1)(2) := ... */
-/*
-formula_assign_list {-> formula*} =
-  {single} [f]:formula_expression_p230 {-> [f.formula]} |
-  {multi} [list]:formula_assign_list comma [f]:formula_expression_p230 {-> [list.formula, f.formula]} ;
-*/
 
 formula_list {-> formula*} =
   {single} [f]:formula_expression_top {-> [f.formula]} |
   {multiple} [list]:formula_list comma [last]:formula_expression_top {-> [list.formula, last.formula]} ;
+
+
+formula_identifier_list {-> formula*} =
+  {single} [identifier]:identifier_literal {-> [New formula.identifier([identifier])]} |
+  {multi} [list]:formula_identifier_list comma [identifier]:identifier_literal {-> [list.formula, New formula.identifier([identifier])]} ;
 
 
 /*******************************************************************
