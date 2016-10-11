@@ -1,6 +1,6 @@
 language: java
 jdk:
-- oraclejdk7
+- oraclejdk8
 before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg
   -d
@@ -17,7 +17,7 @@ sudo: false
 script:
   - TERM=dumb gradle clean deploy uploadArchives
   - sonar-scanner -Dsonar.login=$SONAR_TOKEN
-  
+
 after_success: curl -L $JENKINS_URL
 env:
   global:
