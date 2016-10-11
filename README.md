@@ -1,6 +1,8 @@
 # ProB Parsers Library
 
 [![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
+[![SonarQube Tech Debt](https://img.shields.io/sonar/http/sonarqube.com/probparsers/tech_debt.svg?maxAge=2592000)](https://sonarqube.com/overview?id=probparsers)
+
 
 ## Using
 Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
