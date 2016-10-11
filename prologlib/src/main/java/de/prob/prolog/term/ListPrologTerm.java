@@ -22,13 +22,11 @@ import de.prob.prolog.output.IPrologTermOutput;
  * 
  * @author plagge
  */
-public final class ListPrologTerm extends PrologTerm implements
-		List<PrologTerm> {
+public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
 
 	private static final long serialVersionUID = -629922806578121593L;
 
-	public static final ListPrologTerm EMPTY_LIST = new ListPrologTerm(
-			new PrologTerm[0]);
+	public static final ListPrologTerm EMPTY_LIST = new ListPrologTerm(new PrologTerm[0]);
 
 	private final PrologTerm[] elements;
 
@@ -36,10 +34,9 @@ public final class ListPrologTerm extends PrologTerm implements
 	private final int end;
 
 	public ListPrologTerm(final PrologTerm... elements) {
-		super(".",elements);
+		super(".", elements);
 		if (elements == null)
-			throw new IllegalStateException(
-					"elements of Prolog list must not be null");
+			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
@@ -50,8 +47,7 @@ public final class ListPrologTerm extends PrologTerm implements
 		this.start = start;
 		this.end = end;
 		if (org == null)
-			throw new IllegalStateException(
-					"elements of Prolog list must not be null");
+			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = org.elements;
 	}
 
@@ -153,8 +149,7 @@ public final class ListPrologTerm extends PrologTerm implements
 	public <T> T[] toArray(T[] a) {
 		int size = size();
 		if (a.length < size) {
-			a = (T[]) java.lang.reflect.Array.newInstance(a.getClass()
-					.getComponentType(), size);
+			a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
 		}
 		System.arraycopy(elements, 0, a, 0, size);
 		if (a.length > size) {
@@ -167,8 +162,7 @@ public final class ListPrologTerm extends PrologTerm implements
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean addAll(final int arg0,
-			final Collection<? extends PrologTerm> arg1) {
+	public boolean addAll(final int arg0, final Collection<? extends PrologTerm> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -181,7 +175,7 @@ public final class ListPrologTerm extends PrologTerm implements
 	}
 
 	public int lastIndexOf(final Object object) {
-		for (int i = end - 1; i >= start; i++) {
+		for (int i = end - 1; i >= start; i--) {
 			if (elements[i].equals(object))
 				return i;
 		}
@@ -209,9 +203,11 @@ public final class ListPrologTerm extends PrologTerm implements
 	}
 
 	public ListPrologTerm tail() {
-		if (isEmpty()) throw new IllegalStateException("Cannot call tail on an empty list");
-		if (size() == 1) return EMPTY_LIST;
-	   return new ListPrologTerm(start+1,end,this);
+		if (isEmpty())
+			throw new IllegalStateException("Cannot call tail on an empty list");
+		if (size() == 1)
+			return EMPTY_LIST;
+		return new ListPrologTerm(start + 1, end, this);
 	}
 
 	public PrologTerm head() {
