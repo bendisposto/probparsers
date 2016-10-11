@@ -20,10 +20,10 @@ public class NodeCloner extends DepthFirstAdapter {
 
 	/**
 	 * Clones a node including position information.
-	 * @param node 
-	 * 		the node to be cloned			
-	 * @return 	
-	 * 		the cloned node including position information.
+	 * 
+	 * @param node
+	 *            the node to be cloned
+	 * @return the cloned node including position information.
 	 */
 	public static Node cloneNode(Node node) {
 		NodeCloner cloner = new NodeCloner(node);
@@ -33,7 +33,7 @@ public class NodeCloner extends DepthFirstAdapter {
 	}
 
 	public void defaultIn(Node node) {
-		NodePosition nodePosition = nodeIdSetter.positionMap.get(nodeIdCounter);
+		NodePosition nodePosition = nodeIdSetter.getNodePosition(nodeIdCounter);
 		node.setStartPos(nodePosition.startPos);
 		node.setEndPos(nodePosition.endPos);
 		nodeIdCounter++;
@@ -43,11 +43,14 @@ public class NodeCloner extends DepthFirstAdapter {
 
 class NodePositionCollector extends DepthFirstAdapter {
 	private int nodeIdCounter;
-	public HashMap<Integer, NodePosition> positionMap;
+	private HashMap<Integer, NodePosition> positionMap;
+
+	public NodePosition getNodePosition(int nodeIdCounter) {
+		return positionMap.get(nodeIdCounter);
+	}
 
 	public void defaultIn(Node node) {
-		positionMap.put(nodeIdCounter, new NodePosition(node.getStartPos(),
-				node.getEndPos()));
+		positionMap.put(nodeIdCounter, new NodePosition(node.getStartPos(), node.getEndPos()));
 		nodeIdCounter++;
 	}
 
