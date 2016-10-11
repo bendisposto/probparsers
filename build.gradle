@@ -162,16 +162,6 @@ uploadArchives {
 
 }
 
-task globaljavadoc(type: Javadoc, dependsOn: subprojects.assemble) {
-    source subprojects.collect { project ->
-        project.sourceSets.main.allJava
-    }
-    destinationDir = new File(buildDir, 'javadoc')
-    classpath = files(subprojects.collect { project ->
-        project.sourceSets.main.compileClasspath
-    })
-}
-
 
 task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     baseName = 'probcliparser'
@@ -181,4 +171,4 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
-task deploy(dependsOn: [subprojects.deploy,globaljavadoc])
+task deploy(dependsOn: [subprojects.deploy])
