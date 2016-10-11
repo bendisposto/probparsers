@@ -23,7 +23,7 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 public class ASTPrinter extends ReversedDepthFirstAdapter {
 
 	// ---Constants------------------------------------------------
-	public static char ESC = 27;
+	public static final char ESC = 27;
 
 	// Text attributes
 	public static final int NORMAL = 0;
@@ -73,8 +73,7 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	 * The last node we visit. It prints out the entire text that we have built.
 	 */
 	public void outStart(Start node) {
-		out.println(treeColor() + "\n  >"
-				+ output.substring(3, output.length()) + "\n" + resetColor());
+		out.println(treeColor() + "\n  >" + output.substring(3, output.length()) + "\n" + resetColor());
 	}
 
 	/*
@@ -101,10 +100,8 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 		indent = indent.substring(0, indent.length() - 1) + indentchar.pop();
 
 		// prepend this line to the output.
-		output = indent + "- " + setColor(BOLD, FG_CYAN, BG_BLACK)
-				+ node.getClass().getSimpleName()
-				+ ((PositionedNode) node).getStartPos() + "-"
-				+ ((PositionedNode) node).getEndPos() + treeColor() + "\n"
+		output = indent + "- " + setColor(BOLD, FG_CYAN, BG_BLACK) + node.getClass().getSimpleName()
+				+ ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n"
 				+ output;
 
 		// replace any ` with a |
@@ -122,10 +119,8 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 			indent = indent.substring(0, indent.length() - 1) + '`';
 
 		// prepend this line to the output
-		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK)
-				+ ((Token) node).getText()
-				+ ((PositionedNode) node).getStartPos() + "-"
-				+ ((PositionedNode) node).getEndPos() + treeColor() + "\n"
+		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK) + ((Token) node).getText()
+				+ ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n"
 				+ output;
 
 		// replace any ` with a |
