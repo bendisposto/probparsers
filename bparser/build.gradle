@@ -3,9 +3,10 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
-
+apply plugin: 'antlr'
 
 dependencies {
+    antlr "org.antlr:antlr4:4.5.3" // use ANTLR version 4
     compile project(path: ":prologlib", configuration: "archives")
     compile project(path: ":parserbase", configuration: "archives")
 }
@@ -13,11 +14,16 @@ dependencies {
 sourceSets {
     main {
         java {
-          	srcDirs = ['build/temp','src/main/java']
+          	srcDirs = ['build/temp','src/main/java', 'build/generated-src/antlr/main']
         }
     }
 }
 
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages"]
+    outputDirectory = file('build/generated-src/antlr/main/files')
+}
 
 
 task genPreparser(type:JavaExec) {
@@ -32,7 +38,7 @@ task genPreparser(type:JavaExec) {
 }
 
 task genBParser(type:JavaExec) {
-	dependsOn = ['genPreparser']
+	dependsOn = ['genPreparser', 'generateGrammarSource']
 	inputs.dir new File('src/main/resources/grammars')
 	outputs.dir new File('build/temp')
 //	doFirst{ file('build/temp').mkdirs() }

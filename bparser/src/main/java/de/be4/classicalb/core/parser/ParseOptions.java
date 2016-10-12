@@ -21,6 +21,7 @@ public class ParseOptions {
 	 * This option can be set to false in order to parse PO files of AtelierB.
 	 */
 	public boolean restrictPrimedIdentifiers = true;
+	public boolean useAntlr4Parser = true;
 	
 	public IGrammar grammar = new DefaultGrammar();
 }

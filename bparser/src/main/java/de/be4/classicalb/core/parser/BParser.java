@@ -30,6 +30,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
+import de.be4.classicalb.core.parser.antlr.Antlr4Parser;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
@@ -358,7 +359,13 @@ public class BParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
 			parser = new Parser(lexer);
-			final Start rootNode = parser.parse();
+			Start rootNode = null;
+			if(parseOptions.useAntlr4Parser){
+				rootNode = (Start) Antlr4Parser.createSableCCAst(input);
+			}else{
+				rootNode = parser.parse();
+			}
+			
 			final List<IToken> tokenList = lexer.getTokenList();
 
 			/*

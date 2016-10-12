@@ -97,6 +97,7 @@ public class PredicatesTest {
 	public void testMultiCompositions() throws Exception {
 		final String testMachine = "#PREDICATE (p~;F;p) = G";
 		final String result = getTreeAsString(testMachine);
+		System.out.println(result);
 		assertEquals(
 				"Start(APredicateParseUnit(AEqualPredicate(ACompositionExpression(ACompositionExpression(AReverseExpression(AIdentifierExpression([p])),AIdentifierExpression([F])),AIdentifierExpression([p])),AIdentifierExpression([G]))))",
 				result);
