@@ -96,15 +96,6 @@ public class RuleExtensionsTest {
 	}
 
 	@Test
-	public void testOperationCall() throws Exception {
-		final String testMachine = "MACHINE Test PROPERTIES 4 = @Mult(2,2) OPERATIONS out <-- Mult(x,y) = PRE x : INT & y : INT THEN out := x * y END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result
-				.contains("properties(4,equal(5,integer(6,4),operation_call(7,identifier(7,'Mult'),[integer(8,2),integer(9,2)])))"));
-	}
-
-	@Test
 	public void testRuleFailAsAnOrdinaryIdentifierInANormalMachine() throws Exception {
 		final String testMachine = "MACHINE Test CONSTANTS RULE_FAI PROPERTIES RULE_FAI = 1 END";
 		String result = getTreeAsString(testMachine);

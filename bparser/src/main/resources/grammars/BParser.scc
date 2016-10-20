@@ -95,7 +95,6 @@ Tokens
   {comment,description} slash = '/';
 
   {normal} string_literal = string_literal | multiline_string_literal;
-  {normal} at = '@';
   {normal} for_any = '!' | 0x2200;
   {normal} exists = '#' | 0x2203;
   {normal} dollar = '$';
@@ -819,7 +818,6 @@ rec_entry_list {-> rec_entry*} =
 
 expression_func {-> expression} =
   {function} [function]:expression_p230 left_par [parameters]:expression_list right_par {-> New expression.function(function.expression, [parameters.expression])} |
-  {operation_call} at [op_name]:composed_identifier left_par [parameters]:expression_list? right_par {-> New expression.operation_call([op_name.identifier_literal], [parameters.expression])} |
   {next_level} expression_atomic {-> expression_atomic.expression} ;
 
 expression_atomic {-> expression} =
