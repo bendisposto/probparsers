@@ -39,6 +39,12 @@ public class SyntaxExtensionTest {
 		Helpers.getMachineAsPrologTerm(testMachine);
 	}
 	
+	@Test
+	public void testLocalOperations() throws Exception {
+		final String testMachine = "MACHINE Test LOCAL_OPERATIONS foo = skip END";
+		Helpers.getMachineAsPrologTerm(testMachine);
+	}
+	
 	
 	@Test
 	public void testIfThenElseExpression() throws Exception {
