@@ -22,9 +22,9 @@ public class ClausesCheck implements SemanticCheck {
 
 	private static final String NAME_LOCAL_OPERATIONS = ALocalOperationsMachineClause.class
 			.getSimpleName();
-	private static final String NAME_VALUES = ALocalOperationsMachineClause.class
+	private static final String NAME_VALUES = AValuesMachineClause.class
 			.getSimpleName();
-	private static final String NAME_IMPORTS = ALocalOperationsMachineClause.class
+	private static final String NAME_IMPORTS = AImportsMachineClause.class
 			.getSimpleName();
 	private static final String NAME_CONSTANTS = AConstantsMachineClause.class
 			.getSimpleName();
@@ -48,7 +48,7 @@ public class ClausesCheck implements SemanticCheck {
 			.getSimpleName();
 
 	private static final String[] MACHINE_FORBIDDEN_CLAUSES = new String[] {
-			NAME_LOCAL_OPERATIONS, NAME_IMPORTS, NAME_VALUES };
+			/*NAME_LOCAL_OPERATIONS,*/ NAME_IMPORTS, NAME_VALUES };
 	private static final String[] REFINEMENT_FORBIDDEN_CLAUSES = new String[] {
 			NAME_USES, NAME_CONSTRAINTS, NAME_LOCAL_OPERATIONS, NAME_IMPORTS,
 			NAME_VALUES };
