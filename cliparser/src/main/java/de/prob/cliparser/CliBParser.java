@@ -10,7 +10,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.MockedDefinitions;
@@ -130,7 +129,7 @@ public class CliBParser {
 		PrintStream out;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, encoding));
 		String line = "";
-		IDefinitions context = new MockedDefinitions();
+		MockedDefinitions context = new MockedDefinitions();
 		IFileContentProvider provider = new NoContentProvider();
 		boolean terminate = false;
 		while (!terminate) {
@@ -154,10 +153,7 @@ public class CliBParser {
 				String name = in.readLine();
 				String type = in.readLine();
 				String parameterCount = in.readLine();
-				if (context instanceof Definitions) {
-					context = new MockedDefinitions();
-				}
-				((MockedDefinitions) context).addMockedDefinition(name, type, parameterCount);
+				context.addMockedDefinition(name, type, parameterCount);
 				break;
 			case machine:
 				String filename = in.readLine();
@@ -171,8 +167,9 @@ public class CliBParser {
 				try {
 					final BParser parser = new BParser(bfile.getAbsolutePath());
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-					context = parser.getDefinitions();
 					provider = parser.getContentProvider();
+
+					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
 					returnValue = -4;
