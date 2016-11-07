@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.MockedDefinitions;
@@ -50,6 +52,9 @@ public class CliBParser {
 	private static final String osEncoding = System.getProperty("file.encoding");
 	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"
 			: osEncoding;
+
+	private static Socket socket;
+	private static OutputStream socketOutputStream;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
@@ -128,9 +133,16 @@ public class CliBParser {
 	private static void runPRepl(final ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
 
 		PrintStream out;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, encoding));
+
+		ServerSocket serverSocket = new ServerSocket(0);
+		// write port number as prolog term
+		System.out.println(serverSocket.getLocalPort() + ".");
+		socket = serverSocket.accept();
+		socketOutputStream = socket.getOutputStream();
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
 		String line = "";
-		IDefinitions context = new MockedDefinitions();
+		MockedDefinitions context = new MockedDefinitions();
 		IFileContentProvider provider = new NoContentProvider();
 		boolean terminate = false;
 		while (!terminate) {
@@ -154,10 +166,7 @@ public class CliBParser {
 				String name = in.readLine();
 				String type = in.readLine();
 				String parameterCount = in.readLine();
-				if (context instanceof Definitions) {
-					context = new MockedDefinitions();
-				}
-				((MockedDefinitions) context).addMockedDefinition(name, type, parameterCount);
+				context.addMockedDefinition(name, type, parameterCount);
 				break;
 			case machine:
 				String filename = in.readLine();
@@ -171,8 +180,9 @@ public class CliBParser {
 				try {
 					final BParser parser = new BParser(bfile.getAbsolutePath());
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-					context = parser.getDefinitions();
 					provider = parser.getContentProvider();
+
+					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
 					returnValue = -4;
@@ -237,6 +247,8 @@ public class CliBParser {
 				break;
 
 			case halt:
+				socket.close();
+				serverSocket.close();
 				terminate = true;
 				break;
 			default:
@@ -298,7 +310,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 		} catch (LexerException e) {
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
@@ -306,7 +318,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(System.out, e, theFormula, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, theFormula, false, true);
 		}
 	}
 
@@ -345,14 +357,14 @@ public class CliBParser {
 			String output = strOutput.toString();
 			print(output);
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 
 		}
 	}
 
 	private static void print(String output) {
 		try {
-			PrintStream out = new PrintStream(System.out, true, CliBParser.encoding);
+			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
 			out.print(output);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
