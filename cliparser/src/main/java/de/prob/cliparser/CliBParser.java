@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
@@ -51,7 +52,9 @@ public class CliBParser {
 	private static final String osEncoding = System.getProperty("file.encoding");
 	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"
 			: osEncoding;
+
 	private static Socket socket;
+	private static OutputStream socketOutputStream;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
@@ -135,6 +138,7 @@ public class CliBParser {
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
 		socket = serverSocket.accept();
+		socketOutputStream = socket.getOutputStream();
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
 		String line = "";
@@ -306,7 +310,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 		} catch (LexerException e) {
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
@@ -314,7 +318,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(System.out, e, theFormula, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, theFormula, false, true);
 		}
 	}
 
@@ -353,18 +357,16 @@ public class CliBParser {
 			String output = strOutput.toString();
 			print(output);
 		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 
 		}
 	}
 
 	private static void print(String output) {
 		try {
-			PrintStream out = new PrintStream(socket.getOutputStream(), true, CliBParser.encoding);
+			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
 			out.print(output);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
