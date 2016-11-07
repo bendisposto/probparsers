@@ -131,7 +131,7 @@ public class CliBParser {
 
 		PrintStream out;
 
-		ServerSocket serverSocket = new ServerSocket();
+		ServerSocket serverSocket = new ServerSocket(0);
 		System.out.println(serverSocket.getLocalPort());
 		socket = serverSocket.accept();
 
