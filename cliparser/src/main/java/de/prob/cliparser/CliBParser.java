@@ -132,7 +132,8 @@ public class CliBParser {
 		PrintStream out;
 
 		ServerSocket serverSocket = new ServerSocket(0);
-		System.out.println(serverSocket.getLocalPort());
+		// write port number as prolog term
+		System.out.println(serverSocket.getLocalPort() + ".");
 		socket = serverSocket.accept();
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
