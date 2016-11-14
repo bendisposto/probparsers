@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.analysis.transforming.rules;
+package de.be4.classicalb.core.rules.tranformation;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -22,6 +22,9 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
+/*
+ * This class checks that all extensions for the rules language are used in a correct way
+ */
 public class RulesMachineVisitor extends DepthFirstAdapter {
 	@SuppressWarnings("unused") // TODO file name must match machine name
 	private final String fileName;

@@ -26,6 +26,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.rules.project.RulesProject;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
@@ -178,10 +179,15 @@ public class CliBParser {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
 				try {
-					final BParser parser = new BParser(bfile.getAbsolutePath());
-					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-					provider = parser.getContentProvider();
-
+					final String fileName = bfile.getName();
+					final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+					if (extension.equals("rmch")) {
+						returnValue = RulesProject.parseProject(bfile, behaviour, out, ps);
+					} else {
+						final BParser parser = new BParser(bfile.getAbsolutePath());
+						returnValue = parser.fullParsing(bfile, behaviour, out, ps);
+						provider = parser.getContentProvider();
+					}
 					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -375,8 +381,14 @@ public class CliBParser {
 			final boolean closeStream, final File bfile) {
 		int returnValue;
 		try {
-			final BParser parser = new BParser(bfile.getAbsolutePath());
-			returnValue = parser.fullParsing(bfile, behaviour, out, err);
+			final String fileName = bfile.getName();
+			final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+			if (extension.equals("rmch")) {
+				returnValue = RulesProject.parseProject(bfile, behaviour, out, err);
+			} else {
+				final BParser parser = new BParser(bfile.getAbsolutePath());
+				returnValue = parser.fullParsing(bfile, behaviour, out, err);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			returnValue = -4;
