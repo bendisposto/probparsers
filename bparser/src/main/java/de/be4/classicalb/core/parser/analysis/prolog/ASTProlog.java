@@ -356,7 +356,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseAPromotesMachineClause(final APromotesMachineClause node) {
-		printOCAsList(node, node.getOperationNames());
+		printOCAsList(node, node.getMachineNames());
 	}
 
 	@Override
