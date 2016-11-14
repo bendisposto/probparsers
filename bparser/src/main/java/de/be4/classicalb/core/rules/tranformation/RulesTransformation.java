@@ -302,7 +302,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AEqualPredicate grd1 = new AEqualPredicate(createIdentifier(ruleName),
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		ASelectSubstitution select = new ASelectSubstitution();
-
 		rulesMachineVisitor.hasCounterExamples(null);
 		rulesMachineVisitor.rulesWithCounterExamples.add(null);
 		if (rulesMachineVisitor.hasCounterExamples(node.getRuleName())) {
@@ -312,9 +311,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		} else {
 			select.setCondition(grd1);
 		}
-
+		ArrayList<PSubstitution> subList = new ArrayList<>();
+		subList.add(node.getRuleBody());
+		// IF ruleName = "NOT_CHECKED" THEN RULE_SUCCESS END
+		PPredicate ifCondition = new AEqualPredicate(createIdentifier(ruleName),
+				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
+		AIfSubstitution ifSub = new AIfSubstitution(_condition_, _then_, _elsifSubstitutions_, _else_)
+		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(node.getRuleBody());
-		// select.setThen(node.getRuleBody());
+		
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
 
@@ -436,10 +441,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		case RuleGrammar.RULE_FAIL: {
 			if (node.getExpression() != null) {
-				final PSubstitution assign = createRuleFailSubstitution(node.getExpression());
+				final PSubstitution assign = createRuleFailSubstitution(1, node.getExpression());
 				node.replaceBy(assign);
 			} else {
-				final PSubstitution assign = createRuleFailSubstitution(new AEmptySetExpression());
+				final PSubstitution assign = createRuleFailSubstitution(1, new AEmptySetExpression());
 				node.replaceBy(assign);
 			}
 			return;
@@ -774,7 +779,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		definitionParameters.add(createIdentifier(RULE_COUNTER_EXAMPLE_SET));
 		toStringCall.setParameters(definitionParameters);
 		final AIfSubstitution ifElseSub = new AIfSubstitution(ifPred, createRuleSuccessAssignment(),
-				new ArrayList<PSubstitution>(), createRuleFailSubstitution(createIdentifier(RULE_COUNTER_EXAMPLE_SET)));
+				new ArrayList<PSubstitution>(),
+				createRuleFailSubstitution(1, createIdentifier(RULE_COUNTER_EXAMPLE_SET)));
 		letSub.setSubstitution(ifElseSub);
 
 		node.replaceBy(letSub);

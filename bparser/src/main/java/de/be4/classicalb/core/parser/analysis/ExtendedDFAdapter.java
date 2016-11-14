@@ -281,7 +281,8 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAPromotesMachineClause(final APromotesMachineClause node) {
 		inAPromotesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node.getOperationNames());
+			final List<PExpression> copy = new ArrayList<PExpression>(
+					node.getOperationNames());
 			beginList(node);
 			for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
 				final PExpression e = iterator.next();

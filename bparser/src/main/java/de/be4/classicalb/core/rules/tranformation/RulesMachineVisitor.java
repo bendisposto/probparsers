@@ -89,9 +89,9 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		currentRuleOperation = node;
 		node.getRuleBody().apply(this);
 		currentRuleOperation = null;
-		if (!ruleAssignmentTable.containsKey(node)) {
-			errorlist.add(new CheckException("No result value assigned in rule operation", node));
-		}
+//		if (!ruleAssignmentTable.containsKey(node)) {
+//			errorlist.add(new CheckException("No result value assigned in rule operation", node));
+//		}
 	}
 
 	@Override
@@ -108,35 +108,35 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	public void outAIfSubstitution(AIfSubstitution node) {
 		if (isInRule()) {
 			if (resultIsSet(node.getThen())) {
-				if (node.getElse() == null) {
-					errorlist.add(new CheckException(
-							"There must be an ELSE branch if a result value is set in the THEN branch", node));
-				} else if (!resultIsSet(node.getElse())) {
-					errorlist.add(
-							new CheckException("Result value is set in the THEN branch but not in ELSE branch", node));
-				}
+//				if (node.getElse() == null) {
+//					errorlist.add(new CheckException(
+//							"There must be an ELSE branch if a result value is set in the THEN branch", node));
+//				} else if (!resultIsSet(node.getElse())) {
+//					errorlist.add(
+//							new CheckException("Result value is set in the THEN branch but not in ELSE branch", node));
+//				}
 
 				final LinkedList<PSubstitution> elsifSubstitutions = node.getElsifSubstitutions();
 				for (PSubstitution pSubstitution : elsifSubstitutions) {
-					if (!resultIsSet(pSubstitution)) {
-						errorlist.add(new CheckException(
-								"Result value is set in the THEN branch but not in ELSIF branch", pSubstitution));
-					}
+//					if (!resultIsSet(pSubstitution)) {
+//						errorlist.add(new CheckException(
+//								"Result value is set in the THEN branch but not in ELSIF branch", pSubstitution));
+//					}
 				}
 			} else {
 				// no result set in THEN
-				if (node.getElse() != null && resultIsSet(node.getElse())) {
-					errorlist.add(new CheckException(
-							"Result value is not set in the THEN branch but set in the ELSE branch", node));
-
-				}
-				final LinkedList<PSubstitution> elsifSubstitutions = node.getElsifSubstitutions();
-				for (PSubstitution pSubstitution : elsifSubstitutions) {
-					if (resultIsSet(pSubstitution)) {
-						errorlist.add(new CheckException(
-								"Result value is not set in the THEN branch but set in ELSIF branch", pSubstitution));
-					}
-				}
+//				if (node.getElse() != null && resultIsSet(node.getElse())) {
+//					errorlist.add(new CheckException(
+//							"Result value is not set in the THEN branch but set in the ELSE branch", node));
+//
+//				}
+//				final LinkedList<PSubstitution> elsifSubstitutions = node.getElsifSubstitutions();
+//				for (PSubstitution pSubstitution : elsifSubstitutions) {
+//					if (resultIsSet(pSubstitution)) {
+//						errorlist.add(new CheckException(
+//								"Result value is not set in the THEN branch but set in ELSIF branch", pSubstitution));
+//					}
+//				}
 
 			}
 			defaultOut(node);
@@ -178,7 +178,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 
 	@Override
 	public void outAConstantDependenciesPredicate(AConstantDependenciesPredicate node) {
-
 		if (!isInRule()) {
 			errorlist.add(new CheckException("CONSTANT_DEPENDENCIES used outside of a RULE operation", node));
 		}

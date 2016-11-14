@@ -354,6 +354,8 @@ Tokens
   {normal} kw_constant_dependencies = 'CONSTANT_DEPENDENCIES';
   {normal} kw_for = 'FOR';
   {normal} kw_rule_for_all = 'RULE_FORALL';
+  {normal} kw_rule_error_types = 'ERROR_TYPES';
+  {normal} kw_rule_error_type = 'ERROR_TYPE';
   {normal} kw_expect = 'EXPECT';
   {normal} kw_computation = 'COMPUTATION';
   {normal} kw_define = 'DEFINE';
@@ -363,6 +365,7 @@ Tokens
   {normal} kw_counterexample = 'COUNTEREXAMPLE';
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
+
 
 
 /*******************************************************************
@@ -556,8 +559,8 @@ operation_list {-> operation*} =
 operation {-> operation} =
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
-  {rule_operation} kw_rule [rule_name]:identifier_literal rule_id?  equal [operation_body]:substitution_l3
-    {-> New operation.rule(rule_name, rule_id.identifier_literal, operation_body.substitution)} |
+  {rule_operation} kw_rule [rule_name]:identifier_literal rule_id? error_types?  equal [operation_body]:substitution_l3
+    {-> New operation.rule(rule_name, rule_id.identifier_literal, error_types.integer_literal, operation_body.substitution)}|
   {computation} kw_computation [name]:identifier_literal equal [body]:substitution_l3
     {-> New operation.computation(name, body.substitution)} |
   {function} kw_function [return_values]:operation_return_values [name]:identifier_literal [parameters]:op_params? equal [body]:substitution_l3
@@ -565,6 +568,7 @@ operation {-> operation} =
   ;
 
 rule_id {-> identifier_literal} = kw_rule_id [name]:identifier_literal {-> name } ;
+error_types {-> integer_literal} = kw_rule_error_types [id]:integer_literal {-> id } ;
 
 operation_return_values {-> expression*} =
   [return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
@@ -920,14 +924,14 @@ substitution_l3 {-> substitution} =
     // extensions for rules
   {for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
     {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
-  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
-    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |
+  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
+    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression, [expects.substitution])} |
+  {rule_any_message_sub} kw_rule_any [identifiers]:identifier_list where [where_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
+    {-> New substitution.rule_any_sub_message([identifiers.expression], where_pred.predicate, error_type.integer_literal, message.expression, [expects.substitution])} |
   {substitution_operator} [name]:kw_substitution_operator [msg]:message? {-> New substitution.operator(name, msg.expression)} |
   {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
   	{-> New substitution.define(name, type.expression, dummy.expression, value.expression)}
   ;
-
-
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 
@@ -1137,7 +1141,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression ;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
-  {rule} [rule_name]:identifier_literal [rule_id]:identifier_literal? [rule_body]:substitution |
+  {rule} [rule_name]:identifier_literal [rule_id]:identifier_literal? [error_types]:integer_literal? [rule_body]:substitution ;
   {computation} [name]:identifier_literal [body]:substitution |
   {function} [return_values]:expression* [name]:identifier_literal [parameters]:expression* [body]:substitution
   ;
@@ -1369,7 +1373,9 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
+  {forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
   {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
+  {rule_any_sub_message}  [identifiers]:expression* [where]:predicate [error_type]:integer_literal? [message]:expression [expects]:substitution* | //extension for rules
   {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [expression]:expression? | //extension for rules
   {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression | //extension for rules

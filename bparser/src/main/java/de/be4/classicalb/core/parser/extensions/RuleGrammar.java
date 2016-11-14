@@ -21,6 +21,9 @@ import de.be4.classicalb.core.parser.node.TKwFunction;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 import de.be4.classicalb.core.parser.node.TKwReferences;
 import de.be4.classicalb.core.parser.node.TKwRule;
+import de.be4.classicalb.core.parser.node.TKwRuleAny;
+import de.be4.classicalb.core.parser.node.TKwRuleErrorType;
+import de.be4.classicalb.core.parser.node.TKwRuleErrorTypes;
 import de.be4.classicalb.core.parser.node.TKwRuleForAll;
 import de.be4.classicalb.core.parser.node.TKwRuleId;
 import de.be4.classicalb.core.parser.node.TKwRulesMachine;
@@ -73,6 +76,9 @@ public class RuleGrammar implements IGrammar {
 		add(TKwDummyValue.class);
 		add(TKwFunction.class);
 		add(TKwReferences.class);
+		add(TKwRuleAny.class);
+		add(TKwRuleErrorType.class);
+		add(TKwRuleErrorTypes.class);
 
 		map.put(new TKwRulesMachine().getText(), TMachine.class);
 		map.put(SUCCEEDED_RULES, TKwPredicateOperator.class);
