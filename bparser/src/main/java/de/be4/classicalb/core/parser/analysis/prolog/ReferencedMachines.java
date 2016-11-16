@@ -68,7 +68,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
 	 * @param isMachineNameMustMatchFileName
-	 * @throws CheckException
 	 */
 	public ReferencedMachines(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
 		this.referncesTable = new LinkedHashMap<>();

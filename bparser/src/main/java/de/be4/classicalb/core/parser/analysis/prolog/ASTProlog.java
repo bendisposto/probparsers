@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
