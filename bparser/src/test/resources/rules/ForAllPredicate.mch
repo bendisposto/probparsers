@@ -1,17 +1,18 @@
 RULES_MACHINE ForAllPredicate
 OPERATIONS
- RULE rule1 =
-    SELECT 1=1
-    THEN
-      RULE_FORALL
-        a,b
-      WHERE
-        a : 8..10 & b : 1..10
-      EXPECT
-        a > b
-      COUNTEREXAMPLE
-        STRING_FORMAT("CT: a=~w, b=~w", a, b)
-      END
-    END
+
+RULE rule_1
+RULEID id1
+ACTIVATION 1=1
+BODY
+  RULE_FORALL x
+  WHERE
+     x : NATURAL
+  EXPECT
+    x > 0
+  COUNTEREXAMPLE
+    STRING_FORMAT("Value ~w is not greater than zero", x)
+  END
+END
 
 END
