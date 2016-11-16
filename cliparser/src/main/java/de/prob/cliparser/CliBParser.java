@@ -182,8 +182,6 @@ public class CliBParser {
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
 					provider = parser.getContentProvider();
 					context = new MockedDefinitions();
-					context.addDefinitions(parser.getDefinitions());
-					
 				} catch (Exception e) {
 					e.printStackTrace();
 					returnValue = -4;
