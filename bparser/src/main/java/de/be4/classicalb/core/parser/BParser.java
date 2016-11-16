@@ -295,7 +295,7 @@ public class BParser {
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
 	 *             an error message. If the tools needs to extract additional
-	 *             information, such as a sourcecode position or involved tokens
+	 *             information, such as a source code position or involved tokens
 	 *             respectively nodes, it needs to retrieve the delegate
 	 *             exception. The {@link BException} class offers a
 	 *             {@link BException#getCause()} method for this, which returns
@@ -305,16 +305,16 @@ public class BParser {
 	 *             <ul>
 	 *             <li>{@link PreParseException}: This exception contains errors
 	 *             that occur during the preparsing. If possible it supplies a
-	 *             token, where the error occured.</li>
+	 *             token, where the error occurred.</li>
 	 *             <li>{@link BLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
 	 *             {@link LexerException}. But this class unfortunately does not
-	 *             contain any explicit information about the sourcecode
-	 *             position where the error occured. Using aspect-oriented
+	 *             contain any explicit information about the source code
+	 *             position where the error occurred. Using aspect-oriented
 	 *             programming we intercept the throwing of these exceptions to
 	 *             replace them by our own exception. In our own exception we
-	 *             provide the sourcecode position of the last characters that
+	 *             provide the source code position of the last characters that
 	 *             were read from the input.</li>
 	 *             <li>{@link BParseException}: This exception is thrown in two
 	 *             situations. On the one hand if the parser throws a
@@ -330,8 +330,8 @@ public class BParser {
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
-	 *             problem. For example, if we find dublicate machine clauses,
-	 *             we will list all occurances in the exception.</li>
+	 *             problem. For example, if we find duplicate machine clauses,
+	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
 	 */
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
