@@ -24,7 +24,7 @@ public class MockedDefinitions extends IDefinitions {
 		} else if ("substitution".equals(type)) {
 			types.put(name, Type.Substitution);
 		} else {
-			throw new IllegalStateException("Unkown definition type:" + type);
+			throw new IllegalStateException("Unkown definition type: " + type);
 		}
 		arity.put(name, new Integer(parameterCount));
 	}
