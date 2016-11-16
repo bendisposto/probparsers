@@ -72,6 +72,7 @@ public class BParser {
 	private File directory;
 
 	private IDefinitionFileProvider contentProvider;
+	private Map<PositionedNode, SourcecodeRange> positions;
 
 	public BParser() {
 		this((String) null);
@@ -325,8 +326,8 @@ public class BParser {
 	 *             single token is involved in the error. Otherwise a
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s.
-	 *             {@link #getSourcePositions()}).</li>
+	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             </li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
@@ -364,9 +365,12 @@ public class BParser {
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			Map<PositionedNode, SourcecodeRange> positions = parser.getMapping();
-
-			sourcePositions = new SourcePositions(tokenList, positions);
+			/*
+			 * storing the positions in extra variable because the class
+			 * SourcePositions provides no access to the positions
+			 */
+			this.positions = parser.getMapping();
+			this.sourcePositions = new SourcePositions(tokenList, positions);
 
 			/*
 			 * Collect available definition declarations. Needs to be done now
@@ -381,7 +385,7 @@ public class BParser {
 			// perform some semantic checks which are not done in the parser
 			performSemanticChecks(rootNode);
 
-			this.parseOptions.grammar.applyAstTransformation(rootNode, this);
+			// this.parseOptions.grammar.applyAstTransformation(rootNode, this);
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -445,7 +449,6 @@ public class BParser {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new SyntaxExtensionTranslator());
-
 		// more AST transformations?
 
 	}
@@ -463,6 +466,10 @@ public class BParser {
 
 	public SourcePositions getSourcePositions() {
 		return sourcePositions;
+	}
+	
+	public Map<PositionedNode, SourcecodeRange> getPositions() {
+		return this.positions;
 	}
 
 	public IDefinitions getDefinitions() {

@@ -39,6 +39,8 @@ public class DefinitionInjector extends DepthFirstAdapter {
 				&& abstractMachineParseUnit == null) {
 			throw new RuntimeException(
 					"Only AAbstractMachineParseUnit are supported by the DefinitionsInjector.");
+		}else{
+			definitionsMachineClause.getDefinitions().clear();
 		}
 		LinkedList<PDefinition> existingDefintions = definitionsMachineClause
 				.getDefinitions();

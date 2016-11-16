@@ -488,7 +488,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
-
 	// predicate
 
 	@Override
@@ -817,7 +816,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getParameters());
 		close(node);
 	}
-	
+
 	@Override
 	public void caseAParallelSubstitution(final AParallelSubstitution node) {
 		printOCAsList(node, node.getSubstitutions());

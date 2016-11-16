@@ -350,13 +350,19 @@ Tokens
   {normal} kw_rule_id = 'RULEID';
   {normal} kw_substitution_operator = identifier_literal;
   {normal} kw_predicate_operator = identifier_literal;
+  {normal} kw_expression_operator = identifier_literal;
   {normal} kw_constant_dependencies = 'CONSTANT_DEPENDENCIES';
   {normal} kw_for = 'FOR';
-  {normal} kw_for_all = 'FORALL';
   {normal} kw_rule_for_all = 'RULE_FORALL';
   {normal} kw_expect = 'EXPECT';
+  {normal} kw_computation = 'COMPUTATION';
+  {normal} kw_define = 'DEFINE';
+  {normal} kw_type = 'TYPE';
+  {normal} kw_value = 'VALUE';
+  {normal} kw_dummy_value = 'DUMMY_VALUE';
   {normal} kw_counterexample = 'COUNTEREXAMPLE';
-
+  {normal} kw_function = 'FUNCTION';
+  {normal} kw_references = 'REFERENCES';
 
 
 /*******************************************************************
@@ -443,7 +449,9 @@ machine_clause {-> machine_clause} =
   {operations} [clause]:operations_clause {-> clause.machine_clause} |
   {values} [clause]:values_clause {-> clause.machine_clause} |
   {invariant} [clause]:invariant_clause {-> clause.machine_clause} |
-  {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} ;
+  {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} |
+  {references} [clause]:references_clause {-> clause.machine_clause}
+  ;
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
 
@@ -464,6 +472,8 @@ definition_x {-> definition} =
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
 
 sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
+
+references_clause {-> machine_clause} = kw_references [identifiers]:identifier_list {-> New machine_clause.references([identifiers.expression])} ;
 
 promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])} ;
 
@@ -547,7 +557,12 @@ operation {-> operation} =
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
   {rule_operation} kw_rule [rule_name]:identifier_literal rule_id?  equal [operation_body]:substitution_l3
-    {-> New operation.rule(rule_name, rule_id.identifier_literal, operation_body.substitution)};
+    {-> New operation.rule(rule_name, rule_id.identifier_literal, operation_body.substitution)} |
+  {computation} kw_computation [name]:identifier_literal equal [body]:substitution_l3
+    {-> New operation.computation(name, body.substitution)} |
+  {function} kw_function [return_values]:operation_return_values [name]:identifier_literal [parameters]:op_params? equal [body]:substitution_l3
+    {-> New	 operation.function([return_values.expression], name,  [parameters.expression], body.substitution)}
+  ;
 
 rule_id {-> identifier_literal} = kw_rule_id [name]:identifier_literal {-> name } ;
 
@@ -806,6 +821,7 @@ expression_keyword {-> expression} =
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
   {record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
+  {expression_operator} [name]:kw_expression_operator [parameters]:op_params {-> New expression.operator(name, [parameters.expression])} | // extension
   {next_level} [expr]:expression_func {-> expr.expression} ;
 
 rec_entry {-> rec_entry} =
@@ -902,16 +918,18 @@ substitution_l3 {-> substitution} =
   {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
 
     // extensions for rules
-  {forall_sub} kw_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top then [then_subst]:substitution_l0 [else]:if_else end
-    {-> New substitution.forall_sub([identifiers.expression], where_pred.predicate, expect_pred.predicate, then_subst.substitution, else.substitution)} |
   {for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
     {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
     {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, message.expression, [expects.substitution])} |
-  {substitution_operator} [name]:kw_substitution_operator [msg]:message? {-> New substitution.operator(name, msg.expression)} ;
+  {substitution_operator} [name]:kw_substitution_operator [msg]:message? {-> New substitution.operator(name, msg.expression)} |
+  {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
+  	{-> New substitution.define(name, type.expression, dummy.expression, value.expression)}
+  ;
+
 
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
-
+dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 
 
 expect_counterexample {-> substitution} =
@@ -1089,6 +1107,7 @@ machine_clause =
   {values} [entries]:values_entry* |
   {local_operations} [operations]:operation* |
   {operations} [operations]:operation* |
+  {references} [identifiers]:expression* |
   {invalid_operations_clause} semicolon ;
 
 machine_reference =
@@ -1118,7 +1137,10 @@ values_entry = [identifier]:identifier_literal* [value]:expression ;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
-  {rule} [rule_name]:identifier_literal [rule_id]:identifier_literal? [rule_body]:substitution ;
+  {rule} [rule_name]:identifier_literal [rule_id]:identifier_literal? [rule_body]:substitution |
+  {computation} [name]:identifier_literal [body]:substitution |
+  {function} [return_values]:expression* [name]:identifier_literal [parameters]:expression* [body]:substitution
+  ;
 
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;
@@ -1311,7 +1333,9 @@ expression =
   {record_field} [record]:expression [identifier]:expression |
   {extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
   {typeof} [expression]:expression [type]:expression | /* Has no concrete syntax, is only generated by the translation process */
-  {operation_call} [operation]:identifier_literal* [parameters]:expression* ;
+  {operation_call} [operation]:identifier_literal* [parameters]:expression* |
+  {operator} [name]:kw_expression_operator [identifiers]:expression* // extension for rules
+  ;
 
 rec_entry = [identifier]:expression [value]:expression;
 
@@ -1345,8 +1369,8 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
-  {forall_sub} [identifiers]:expression* [where]:predicate [expect]:predicate [then]:substitution [else]:substitution | //extension for rules
   {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [message]:expression [expects]:substitution* | //extension for rules
   {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [expression]:expression? | //extension for rules
+  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression | //extension for rules
   {expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules
