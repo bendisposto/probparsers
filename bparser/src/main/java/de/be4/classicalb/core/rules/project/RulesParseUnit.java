@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.rules.project;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -21,6 +20,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -42,8 +42,7 @@ public class RulesParseUnit implements IModel {
 	private BParser bParser;
 	private Start start;
 
-	private List<String> rulesList;
-	private List<String> compuationList;
+	private final List<AbstractOperation> operationList = new ArrayList<>();
 
 	public static RulesParseUnit createBParseUnit(String content) {
 		RulesParseUnit bParseUnit = new RulesParseUnit();
@@ -60,12 +59,8 @@ public class RulesParseUnit implements IModel {
 		return this.bParser.getPositions();
 	}
 
-	public List<String> getRules() {
-		return this.rulesList;
-	}
-
-	public List<String> getComputations() {
-		return this.compuationList;
+	public List<AbstractOperation> getOperations() {
+		return this.operationList;
 	}
 
 	public Start getStart() {
@@ -84,22 +79,23 @@ public class RulesParseUnit implements IModel {
 		this.parsingBehaviour = parsingBehaviour;
 	}
 
-	// public void setContentProvider(final IFileContentProvider
-	// contentProvider){
-	// this.contentProvider = contentProvider;
-	// }
-
-	public void readMachineFromFile(File file) throws FileNotFoundException, IOException {
+	public void readMachineFromFile(File file) {
 		this.machineFile = file;
-		content = Utils.readFile(file);
+		try {
+			content = Utils.readFile(file);
+		} catch (IOException e) {
+			bException = new BException(file.getPath(), e);
+		}
 	}
 
 	public void parse() {
-		assert content != null;
+		if (this.bException != null) {
+			return;
+		}
 		try {
 			bParser = null;
 			if (machineFile != null) {
-				bParser = new BParser(machineFile.getCanonicalPath());
+				bParser = new BParser(machineFile.getPath());
 				bParser.setDirectory(machineFile.getParentFile());
 			} else {
 				bParser = new BParser();
@@ -112,20 +108,15 @@ public class RulesParseUnit implements IModel {
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
 
-			RulesTransformation ruleTransformation = new RulesTransformation(start, bParser);
+			RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences);
 			ruleTransformation.runTransformation();
-			this.rulesList = ruleTransformation.getRules();
-			this.compuationList = ruleTransformation.getComputations();
+			this.operationList.addAll(ruleTransformation.getOperations());
 		} catch (BException e) {
 			// store parser exceptions
-			// System.out.println(e.getFilename());
 			bException = e;
-		} catch (IOException e) {
-			// should not happen
-			throw new RuntimeException();
 		} catch (CheckException e) {
 			if (machineFile != null) {
-				bException = new BException(machineFile.getAbsolutePath(), e);
+				bException = new BException(machineFile.getPath(), e);
 			} else {
 				bException = new BException("UnkownFile", e);
 			}

@@ -31,3 +31,5 @@ unicode/.gitignore
 .gitignore
 *.prob
 .settings
+build.xml
+Testing.java

@@ -27,6 +27,7 @@ import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 
 public class MachineInjector extends DepthFirstAdapter {
 	AAbstractMachineParseUnit abstractMachineParseUnit;
@@ -42,6 +43,7 @@ public class MachineInjector extends DepthFirstAdapter {
 	AOperationsMachineClause operationClause;
 	ADefinitionsMachineClause definitionsClause;
 	HashSet<String> definitionNames = new HashSet<>();
+	private PDefinition goalDefinition;
 
 	public MachineInjector(Start start) {
 		start.apply(this);
@@ -50,6 +52,10 @@ public class MachineInjector extends DepthFirstAdapter {
 	public void injectMachine(Start otherMachine) {
 		ClauseFinder finder = new ClauseFinder();
 		otherMachine.apply(finder);
+	}
+
+	public PDefinition getGoalDefinition() {
+		return this.goalDefinition;
 	}
 
 	@Override
@@ -123,6 +129,7 @@ public class MachineInjector extends DepthFirstAdapter {
 	}
 
 	class ClauseFinder extends DepthFirstAdapter {
+
 		public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 			node.setMachineClauses(new LinkedList<PMachineClause>());
 		}
@@ -233,6 +240,14 @@ public class MachineInjector extends DepthFirstAdapter {
 			}
 			for (PDefinition def : node.getDefinitions()) {
 				def.apply(this);
+				// using the first GOAL definition
+				if (def instanceof APredicateDefinitionDefinition & goalDefinition == null) {
+					TDefLiteralPredicate name = ((APredicateDefinitionDefinition) def).getName();
+					if (name.getText().equals("GOAL")) {
+						goalDefinition = def;
+					}
+
+				}
 			}
 		}
 

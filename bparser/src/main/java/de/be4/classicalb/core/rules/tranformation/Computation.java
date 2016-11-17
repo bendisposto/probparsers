@@ -1,21 +1,23 @@
 package de.be4.classicalb.core.rules.tranformation;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.rules.project.Reference;
 
 public class Computation extends AbstractOperation {
 
-	private Map<String, TIdentifierLiteral> defineMap = new HashMap<>();
-	private Map<String, AIdentifierExpression> readMap = new HashMap<>();
+	private final Map<String, TIdentifierLiteral> defineMap = new HashMap<>();
 
-	public Computation(TIdentifierLiteral computationName) {
-		super(computationName);
+	public Computation(TIdentifierLiteral computationName, String fileName, String machineName,
+			List<Reference> machineReferences) {
+		super(computationName, fileName, machineName, machineReferences);
 	}
 
 	public void addDefineVariable(TIdentifierLiteral identifierLiteral) throws CheckException {
@@ -31,9 +33,8 @@ public class Computation extends AbstractOperation {
 		defineMap.put(name, identifierLiteral);
 	}
 
-	public void addReadVariable(AIdentifierExpression identifier) {
-		LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
-		String name = list.get(0).getText();
-		readMap.put(name, identifier);
+	public Set<String> getDefineVariables() {
+		return new HashSet<>(defineMap.keySet());
 	}
+
 }

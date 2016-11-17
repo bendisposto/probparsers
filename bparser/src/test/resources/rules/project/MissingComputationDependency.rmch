@@ -1,0 +1,27 @@
+RULES_MACHINE MissingComputationDependency
+OPERATIONS
+
+COMPUTATION compute_xx
+BODY
+  DEFINE
+    set
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {x + x })
+  END//DEFINE
+END//COMPUTATION
+;
+RULE rule1
+BODY
+  RULE_FORALL x
+  WHERE
+     x : set
+  EXPECT
+    x > 3
+  COUNTEREXAMPLE
+    STRING_FORMAT("Value ~w is not greater than zero", x)
+  END//RULE_FORALL
+END
+
+END

@@ -3,10 +3,6 @@ package de.be4.classicalb.core.parser.extensions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TKwAttributeIdentifier;
 import de.be4.classicalb.core.parser.node.TKwBody;
@@ -31,13 +27,16 @@ import de.be4.classicalb.core.parser.node.TKwType;
 import de.be4.classicalb.core.parser.node.TKwValue;
 import de.be4.classicalb.core.parser.node.TMachine;
 import de.be4.classicalb.core.parser.node.Token;
-import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
 
-public class RuleGrammar implements IGrammar {
+public class RulesGrammar implements IGrammar {
 
-	public static final String SUCCEEDED_RULES = "SUCCEEDED_RULES";
-	public static final String FAILED_RULES = "FAILED_RULES";
-	public static final String NOT_CHECKED_RULES = "NOT_CHECKED_RULES";
+	public static final String SUCCEEDED_RULE = "SUCCEEDED_RULE";
+	public static final String SUCCEEDED_RULE_ERROR_TYPE = "SUCCEEDED_RULE_ERROR_TYPE";
+	public static final String FAILED_RULE = "FAILED_RULE";
+	public static final String FAILED_RULE_ERROR_TYPE = "FAILED_RULE_ERROR_TYPE";
+	//public static final String FAILED_RULE_ALL_ERROR_TYPES = "FAILED_RULE_ALL_ERROR_TYPES";
+	public static final String NOT_CHECKED_RULE = "NOT_CHECKED_RULE";
+	public static final String DISABLED_RULE = "DISABLED_RULE";
 	public static final String DEPENDS_ON_RULE = "DEPENDS_ON_RULE";
 	public static final String DEPENDS_ON_COMPUTATION = "DEPENDS_ON_COMPUTATION";
 	public static final String ERROR_TYPES = "ERROR_TYPES";
@@ -47,18 +46,17 @@ public class RuleGrammar implements IGrammar {
 	public static final String PRECONDITION = "PRECONDITION";
 
 	public static final String RULE_FAIL = "RULE_FAIL";
-	public static final String RULE_SUCCESS = "RULE_SUCCESS";
 
-	private static RuleGrammar ruleExtension;
+	private static RulesGrammar ruleExtension;
 
-	public static RuleGrammar getInstance() {
+	public static RulesGrammar getInstance() {
 		if (ruleExtension == null) {
-			ruleExtension = new RuleGrammar();
+			ruleExtension = new RulesGrammar();
 		}
 		return ruleExtension;
 	}
 
-	private RuleGrammar() {
+	private RulesGrammar() {
 		// singleton
 	}
 
@@ -81,10 +79,15 @@ public class RuleGrammar implements IGrammar {
 		add(TKwBody.class);
 
 		map.put(new TKwRulesMachine().getText(), TMachine.class);
-		map.put(SUCCEEDED_RULES, TKwPredicateOperator.class);
-		map.put(FAILED_RULES, TKwPredicateOperator.class);
-		map.put(NOT_CHECKED_RULES, TKwPredicateOperator.class);
-
+		map.put(SUCCEEDED_RULE, TKwPredicateOperator.class);
+		map.put(SUCCEEDED_RULE_ERROR_TYPE, TKwPredicateOperator.class);
+		map.put(FAILED_RULE, TKwPredicateOperator.class);
+		map.put(FAILED_RULE_ERROR_TYPE, TKwPredicateOperator.class);
+		//map.put(FAILED_RULE_ALL_ERROR_TYPES, TKwPredicateOperator.class);
+		map.put(NOT_CHECKED_RULE, TKwPredicateOperator.class);
+		map.put(DISABLED_RULE, TKwPredicateOperator.class);
+		
+		
 		map.put(DEPENDS_ON_RULE, TKwAttributeIdentifier.class);
 		map.put(DEPENDS_ON_COMPUTATION, TKwAttributeIdentifier.class);
 		map.put(RULEID, TKwAttributeIdentifier.class);
@@ -94,7 +97,6 @@ public class RuleGrammar implements IGrammar {
 		map.put(PRECONDITION, TKwPredicateAttribute.class);
 
 		map.put(RULE_FAIL, TKwSubstitutionOperator.class);
-		map.put(RULE_SUCCESS, TKwSubstitutionOperator.class);
 		map.put(STRING_FORMAT, TKwExpressionOperator.class);
 	}
 
@@ -152,8 +154,4 @@ public class RuleGrammar implements IGrammar {
 		}
 	}
 
-	public void applyAstTransformation(Start start, BParser bparser) throws CheckException, BException {
-
-		new RulesTransformation(start, bparser).runTransformation();
-	}
 }

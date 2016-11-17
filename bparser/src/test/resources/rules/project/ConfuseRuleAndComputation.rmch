@@ -1,0 +1,21 @@
+RULES_MACHINE ConfuseRuleAndComputation
+OPERATIONS
+
+RULE rule1
+BODY
+  skip
+END
+;
+COMPUTATION compute_x
+DEPENDS_ON_COMPUTATION rule1
+BODY
+  DEFINE
+    def
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {x + x })
+  END//DEFINE
+END//COMPUTATION
+
+END

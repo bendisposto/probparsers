@@ -934,8 +934,8 @@ substitution_l3 {-> substitution} =
     // extensions for rules
   {for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
     {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
-  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top [expects]:expect_counterexample* end
-    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression, [expects.substitution])} |
+  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
+    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression)} |
   {rule_any_message_sub} kw_rule_any [identifiers]:identifier_list where [where_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
     {-> New substitution.rule_any_sub_message([identifiers.expression], where_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
@@ -945,9 +945,6 @@ substitution_l3 {-> substitution} =
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id };
-
-expect_counterexample {-> substitution} =
-  kw_expect [expect_pred]:predicate_top kw_counterexample [message]:expression_top {-> New substitution.expect_counterexample(expect_pred.predicate, message.expression)};
 
 choice_or {-> substitution} =
   or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)} ;
@@ -1386,9 +1383,8 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
-  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression [expects]:substitution* | //extension for rules
+  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
   {rule_any_sub_message}  [identifiers]:expression* [where]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
   {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | //extension for rules
-  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression | //extension for rules
-  {expect_counterexample} [expect]:predicate [message]:expression ; // extension for rules
+  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression ; //extension for rules

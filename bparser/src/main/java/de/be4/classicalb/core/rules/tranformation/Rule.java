@@ -1,16 +1,18 @@
 package de.be4.classicalb.core.rules.tranformation;
 
+import java.util.List;
+
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.rules.project.Reference;
 
 public class Rule extends AbstractOperation {
 	private AIdentifierExpression ruleId;
 	private AIntegerExpression errorTypes;
-	private boolean hasCounterExamples = false;
 
-	public Rule(TIdentifierLiteral ruleName) {
-		super(ruleName);
+	public Rule(TIdentifierLiteral ruleName, String fileName, String machineName, List<Reference> machineReferences) {
+		super(ruleName, fileName, machineName, machineReferences);
 	}
 
 	public Integer getNumberOfErrorTypes() {
@@ -28,15 +30,6 @@ public class Rule extends AbstractOperation {
 
 	public void setErrrorTypes(AIntegerExpression aIntegerExpression) {
 		this.errorTypes = aIntegerExpression;
-
-	}
-
-	public void setHasCounterExamples() {
-		this.hasCounterExamples = true;
-	}
-
-	public boolean hasCounterExamples() {
-		return this.hasCounterExamples;
 	}
 
 	public String getRuleIdString() {

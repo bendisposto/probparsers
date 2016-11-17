@@ -21,7 +21,6 @@ public class Reference {
 		this.name = name;
 		this.node = node;
 		this.pathList.addAll(pathList);
-
 		if (filePath == null) {
 			file = lookupFile(parentDirectory, this, pathList);
 		} else {
@@ -42,7 +41,7 @@ public class Reference {
 		for (final String suffix : SUFFICES) {
 			try {
 				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
-						: parentMachineDirectory.getAbsolutePath();
+						: parentMachineDirectory.getPath();
 				final File file = new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
 						.resolve();
 				return file;

@@ -1,0 +1,40 @@
+RULES_MACHINE TransitiveDependency
+OPERATIONS
+
+COMPUTATION compute_x
+BODY
+  DEFINE
+    xx
+  TYPE
+    POW(INTEGER)
+  VALUE
+    {1}
+  END//DEFINE
+END//COMPUTATION
+;
+COMPUTATION compute_y
+DEPENDS_ON_COMPUTATION compute_x
+BODY
+  DEFINE
+    yy
+  TYPE
+    POW(INTEGER)
+  VALUE
+     xx \/ {2}
+  END//DEFINE
+END//COMPUTATION
+;
+COMPUTATION compute_z
+DEPENDS_ON_COMPUTATION compute_y
+BODY
+  DEFINE
+    zz
+  TYPE
+    POW(INTEGER)
+  VALUE
+    xx \/ yy \/ {3}
+  END//DEFINE
+END//COMPUTATION
+
+
+END

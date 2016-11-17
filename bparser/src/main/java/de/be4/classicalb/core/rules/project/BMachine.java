@@ -40,6 +40,7 @@ import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -278,6 +279,15 @@ public class BMachine implements IModel {
 			this.parseUnit.getMachineClauses().add(definitionsClause);
 		}
 		definitionsClause.getDefinitions().addAll(externalFunctionsList);
+	}
+
+	public void addDefinition(PDefinition goalDefinition) {
+		if (this.definitionsClause == null) {
+			definitionsClause = new ADefinitionsMachineClause(new ArrayList<PDefinition>());
+			this.parseUnit.getMachineClauses().add(definitionsClause);
+		}
+		PDefinition def = (PDefinition) NodeCloner.cloneNode(goalDefinition);
+		definitionsClause.getDefinitions().add(def);
 	}
 
 }

@@ -23,15 +23,23 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testForAllPredicate() throws FileNotFoundException, IOException {
-		String file = "src/test/resources/rules/ForAllPredicate.mch";
+		String file = "src/test/resources/rules/ForAllPredicate.rmch";
 		String result = getFileAsPrologTerm(file);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
+
+	@Test
+	public void testRuleForall() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
 	@Test
 	public void testRuleAny() throws FileNotFoundException, IOException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_ANY x WHERE x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_ANY x WHERE x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -98,7 +106,7 @@ public class RulesLanguageTest {
 		assertFalse(result.contains("exception"));
 		assertTrue(result.contains("precondition(none,member(none,identifier(none,x),integer_set(none))"));
 	}
-	
+
 	@Test
 	public void testRuleId() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL({\"Rule violated\"}) END END";
@@ -106,7 +114,7 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue("Missing rule id in counterexample message.", result.contains("string(none,'id2: ')"));
 	}
-	
+
 	@Test
 	public void testRuleFail() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
@@ -119,8 +127,28 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Invalid initialisation", result.contains(
-				"initialisation(none,assign(none,[identifier(none,foo)],[if_then_else(none,equal(none,identifier(none,k),boolean_true(none)),string(none,'NOT_CHECKED'),string(none,'DISABLED'))]))"));
+		String expected = "machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[variables(none,[identifier(none,foo),identifier(none,foo_Counterexamples)]),invariant(none,conjunct(none,member(none,identifier(none,foo),set_extension(none,[string(none,'FAIL'),string(none,'SUCCESS'),string(none,'NOT_CHECKED'),string(none,'DISABLED')])),member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none)))))),initialisation(none,sequence(none,[assign(none,[identifier(none,foo)],[if_then_else(none,equal(none,identifier(none,k),boolean_true(none)),string(none,'NOT_CHECKED'),string(none,'DISABLED'))]),assign(none,[identifier(none,foo_Counterexamples)],[empty_set(none)])])),constants(none,[identifier(none,k)]),properties(none,equal(none,identifier(none,k),boolean_false(none))),operations(none,[operation(none,identifier(none,foo),[identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[],select(none,conjunct(none,equal(none,identifier(none,foo),string(none,'NOT_CHECKED')),member(none,identifier(none,'#COUNTEREXAMPLES'),pow_subset(none,mult_or_cart(none,integer_set(none),string_set(none))))),sequence(none,[skip(none),if(none,equal(none,identifier(none,foo_Counterexamples),empty_set(none)),assign(none,[identifier(none,foo),identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[string(none,'SUCCESS'),string(none,'SUCCESS'),empty_set(none)]),[],assign(none,[identifier(none,foo),identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[string(none,'FAIL'),string(none,'FAIL'),identifier(none,foo_Counterexamples)]))]),[]))])])).\n";
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testRulePredicates() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == DISABLED_RULE(rule1)\n"
+				+ "& NOT_CHECKED_RULE(rule1) & \nFAILED_RULE(rule1) & \nFAILED_RULE_ERROR_TYPE(rule1,1) \n"
+				+ "& SUCCEEDED_RULE(rule1) & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)\n"
+				+ "OPERATIONS RULE rule1 BODY skip END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testActivationFunction() throws Exception {
+		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS FUNCTION out <-- foo ACTIVATION k = TRUE BODY skip END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		String expected = "parse_exception(pos(1,85,'UnkownFile'),'ACTIVATED is not a valid attribute of a FUNCTION operation.').\n";
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -202,7 +230,7 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
+
 	@Test
 	public void testDependsOnComputation() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute BODY skip END\n;"

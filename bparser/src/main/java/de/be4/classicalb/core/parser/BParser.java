@@ -414,17 +414,19 @@ public class BParser {
 	public String getFileName() {
 		if (fileName == null) {
 			return null;
-		}
-		File f = new File(fileName);
-		if (f.exists()) {
-			try {
-				return f.getCanonicalFile().getAbsolutePath();
-			} catch (IOException e) {
-				return fileName;
-			}
-		} else {
+		}else{
 			return fileName;
 		}
+//		File f = new File(fileName);
+//		if (f.exists()) {
+//			try {
+//				return f.getCanonicalFile().getAbsolutePath();
+//			} catch (IOException e) {
+//				return fileName;
+//			}
+//		} else {
+//			return fileName;
+//		}
 	}
 
 	private String getImprovedErrorMessageBasedOnTheErrorToken(Token token) {

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 
 import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.RuleGrammar;
+import de.be4.classicalb.core.parser.extensions.RulesGrammar;
 import de.be4.classicalb.core.preparser.lexer.Lexer;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.EOF;
@@ -148,7 +148,7 @@ public class PreLexer extends Lexer {
 				&& token instanceof TOtherClauseBegin) {
 			isFirstTOtherClauseBegin = false;
 			if (token.getText().equals("RULES_MACHINE")) {
-				this.parseOptions.grammar = RuleGrammar.getInstance();
+				this.parseOptions.grammar = RulesGrammar.getInstance();
 			}
 		}
 	}

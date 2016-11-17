@@ -1,0 +1,26 @@
+RULES_MACHINE Disabled
+CONSTANTS
+  k
+PROPERTIES
+  k = 1
+OPERATIONS
+
+RULE rule1
+ACTIVATION k = 2
+BODY
+  skip
+END
+;
+COMPUTATION compute_x
+ACTIVATION k = 3
+BODY
+  DEFINE
+    def
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {x + x })
+  END//DEFINE
+END//COMPUTATION
+
+END
