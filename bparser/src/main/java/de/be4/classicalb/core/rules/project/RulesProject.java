@@ -81,7 +81,9 @@ public class RulesProject {
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addIncludesClause(compositionName);
 		mainMachine.addPromotesClause(promotesList);
-		mainMachine.addDefinition(injector.getGoalDefinition());
+		if (injector.getGoalDefinition() != null) {
+			mainMachine.addDefinition(injector.getGoalDefinition());
+		}
 		bModels.add(mainMachine);
 	}
 
@@ -115,13 +117,13 @@ public class RulesProject {
 			List<AIdentifierExpression> dependsOnComputationList = operation.getDependsOnComputationList();
 			for (AIdentifierExpression aIdentifierExpression : dependsOnComputationList) {
 				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-				if(allOperations.containsKey(name)){
+				if (allOperations.containsKey(name)) {
 					AbstractOperation abstractOperation = allOperations.get(name);
-					if(!(abstractOperation instanceof Computation)){
-						this.bExceptionList.add(new BException(operation.getFileName(),
-								new CheckException("Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
+					if (!(abstractOperation instanceof Computation)) {
+						this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
+								"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
 					}
-				}else{
+				} else {
 					this.bExceptionList.add(new BException(operation.getFileName(),
 							new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 				}
@@ -129,20 +131,19 @@ public class RulesProject {
 			List<AIdentifierExpression> dependsOnRulesList = operation.getDependsOnRulesList();
 			for (AIdentifierExpression aIdentifierExpression : dependsOnRulesList) {
 				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-				if(allOperations.containsKey(name)){
+				if (allOperations.containsKey(name)) {
 					AbstractOperation abstractOperation = allOperations.get(name);
-					if(!(abstractOperation instanceof Rule)){
+					if (!(abstractOperation instanceof Rule)) {
 						this.bExceptionList.add(new BException(operation.getFileName(),
 								new CheckException("Identifier '" + name + "' is not a RULE.", aIdentifierExpression)));
 					}
-				}else{
+				} else {
 					this.bExceptionList.add(new BException(operation.getFileName(),
 							new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 				}
 			}
 		}
-		
-		
+
 		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
 		while (!todoList.isEmpty()) {
 			AbstractOperation operation = todoList.poll();
@@ -219,9 +220,9 @@ public class RulesProject {
 							&& otherOperation.getName().equals(opName)) {
 						AbstractOperation nextOperation = allOperations.get(opName);
 						operationsFound.add(nextOperation);
-						if(nextOperation.getDependencies()!=null){
+						if (nextOperation.getDependencies() != null) {
 							operationsFound.addAll(nextOperation.getDependencies());
-						}else{
+						} else {
 							Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
 							operationsFound.addAll(found);
 						}

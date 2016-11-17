@@ -252,7 +252,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testGoal() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULES(rule1) & 1=1 OPERATIONS RULE rule1 BODY RULE_SUCCESS END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY RULE_SUCCESS END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
