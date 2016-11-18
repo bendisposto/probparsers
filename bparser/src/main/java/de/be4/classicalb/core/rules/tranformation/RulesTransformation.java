@@ -233,14 +233,26 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseAComputationOperation(AComputationOperation node) {
-		Computation computation = this.rulesMachineVisitor.computationMap.get(node);
+		final Computation computation = this.rulesMachineVisitor.computationMap.get(node);
 		computationLiteralList.add(node.getName());
 		final String computationName = node.getName().getText();
 		node.getBody().apply(this);
 		AEqualPredicate grd1 = new AEqualPredicate(createIdentifier(computationName),
 				new AStringExpression(new TStringLiteral(COMPUTATION_NOT_EXECUTED)));
 		ASelectSubstitution select = new ASelectSubstitution();
-		select.setCondition(grd1);
+		final List<PPredicate> selectConditionList = new ArrayList<>();
+		selectConditionList.add(grd1);
+		if (computation.getDependsOnRulesList().size() > 0) {
+			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(computation.getDependsOnRulesList(),
+					RULE_SUCCESS);
+			selectConditionList.addAll(dependsOnRulesPredicates);
+		}
+		if (computation.getDependsOnComputationList().size() > 0) {
+			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+					computation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
+			selectConditionList.addAll(dependsOnComputationPredicates);
+		}
+		select.setCondition(createConjunction(selectConditionList));
 
 		final ArrayList<PExpression> varList = new ArrayList<>();
 		final ArrayList<PExpression> exprList = new ArrayList<>();
@@ -306,16 +318,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final AEqualPredicate grd1 = new AEqualPredicate(createIdentifier(ruleName),
 				new AStringExpression(new TStringLiteral(RULE_NOT_CHECKED)));
 		selectConditionList.add(grd1);
-
 		// typing predicate: $COUNTEREXAMPLE : POW(INTEGER*STRING)
 		final AMemberPredicate grd2 = new AMemberPredicate(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME),
 				new APowSubsetExpression(
 						new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression())));
 		selectConditionList.add(grd2);
-		if (currentRule.getDependsOnRulesList() != null) {
+		if (currentRule.getDependsOnRulesList().size() > 0) {
 			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(currentRule.getDependsOnRulesList(),
-					"RULE_SUCCESS");
+					RULE_SUCCESS);
 			selectConditionList.addAll(dependsOnRulesPredicates);
+		}
+		if (currentRule.getDependsOnComputationList().size() > 0) {
+			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+					currentRule.getDependsOnComputationList(), COMPUTATION_EXECUTED);
+			selectConditionList.addAll(dependsOnComputationPredicates);
 		}
 		final ASelectSubstitution select = new ASelectSubstitution();
 		select.setCondition(createConjunction(selectConditionList));
@@ -580,8 +596,22 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.getName().apply(this);
 		node.getBody().apply(this);
 		PSubstitution body = null;
+		final List<PPredicate> preConditionList = new ArrayList<>();
 		if (func.getPreconditionPredicate() != null) {
-			body = new APreconditionSubstitution(func.getPreconditionPredicate(), node.getBody());
+			preConditionList.add(func.getPreconditionPredicate());
+		}
+		if (func.getDependsOnRulesList().size() > 0) {
+			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(func.getDependsOnRulesList(),
+					RULE_SUCCESS);
+			preConditionList.addAll(dependsOnRulesPredicates);
+		}
+		if (func.getDependsOnComputationList().size() > 0) {
+			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+					func.getDependsOnComputationList(), COMPUTATION_EXECUTED);
+			preConditionList.addAll(dependsOnComputationPredicates);
+		}
+		if (preConditionList.size() > 0) {
+			body = new APreconditionSubstitution(createConjunction(preConditionList), node.getBody());
 		} else {
 			body = node.getBody();
 		}
