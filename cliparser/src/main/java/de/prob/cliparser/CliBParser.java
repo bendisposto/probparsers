@@ -14,9 +14,7 @@ import java.net.Socket;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.MockedDefinitions;
-import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -143,7 +141,6 @@ public class CliBParser {
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
 		String line = "";
 		MockedDefinitions context = new MockedDefinitions();
-		IFileContentProvider provider = new NoContentProvider();
 		boolean terminate = false;
 		while (!terminate) {
 			line = in.readLine();
@@ -180,7 +177,6 @@ public class CliBParser {
 				try {
 					final BParser parser = new BParser(bfile.getAbsolutePath());
 					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-					provider = parser.getContentProvider();
 					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -200,35 +196,35 @@ public class CliBParser {
 				break;
 			case formula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case expression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case predicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case substitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case extendedformula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedexpression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedpredicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedsubstitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -276,7 +272,7 @@ public class CliBParser {
 		print(strOutput.toString());
 	}
 
-	private static void parseExtendedFormula(String theFormula, IDefinitions context, IFileContentProvider provider) {
+	private static void parseExtendedFormula(String theFormula, IDefinitions context) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
@@ -321,11 +317,11 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseFormula(String theFormula, IDefinitions context, IFileContentProvider provider) {
+	private static void parseFormula(String theFormula, IDefinitions context) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false, provider);
+			Start start = parser.parse(theFormula, false);
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
 			NodeIdAssignment na = new NodeIdAssignment();
