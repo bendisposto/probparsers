@@ -1,0 +1,14 @@
+/*@package folder */
+/*@import-package folder.subfolder */
+RULES_MACHINE M1
+REFERENCES
+  M2
+OPERATIONS
+
+RULE rule1
+RULEID id1
+BODY
+  skip
+END
+
+END

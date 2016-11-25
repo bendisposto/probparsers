@@ -1,0 +1,16 @@
+RULES_MACHINE ComputationDependsOnItSelf
+OPERATIONS
+
+COMPUTATION compute_x
+DEPENDS_ON_COMPUTATION compute_x
+BODY
+  DEFINE
+    def
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {x + x })
+  END//DEFINE
+END//COMPUTATION
+
+END

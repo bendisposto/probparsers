@@ -1,0 +1,18 @@
+RULES_MACHINE ForAllPredicate
+OPERATIONS
+
+RULE rule_1
+RULEID id1
+ACTIVATION 1=1
+BODY
+  RULE_FORALL x
+  WHERE
+     x : NATURAL
+  EXPECT
+    x > 0
+  COUNTEREXAMPLE
+    STRING_FORMAT("Value ~w is not greater than zero", x)
+  END
+END
+
+END

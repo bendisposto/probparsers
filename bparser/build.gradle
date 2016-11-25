@@ -3,7 +3,7 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
-
+apply plugin: 'jacoco'
 
 dependencies {
     compile project(path: ":prologlib", configuration: "archives")
@@ -74,3 +74,24 @@ compileJava {
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+
+
+jacoco {
+    toolVersion = "0.7.1.201405082137"
+    reportsDir = file("$buildDir/JacocoReports")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+// type 'gradle build jacocoIntegrationTestReport' in order to run the jacoco code coverage analysis
+task jacocoIntegrationTestReport(type: JacocoReport) {
+	sourceSets sourceSets.main
+	//executionData files('build/jacoco/integrationTests.exec')
+	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+}

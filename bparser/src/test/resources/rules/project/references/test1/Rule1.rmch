@@ -1,0 +1,10 @@
+RULES_MACHINE Rule1
+REFERENCES
+  Rule2
+OPERATIONS
+  RULE rule1
+  RULEID id1
+  BODY
+      RULE_FAIL({"fail"})
+  END
+END

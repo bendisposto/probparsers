@@ -1,0 +1,11 @@
+RULES_MACHINE UnkownRule
+OPERATIONS
+
+RULE rule
+RULEID id1
+DEPENDS_ON_RULE otherRule
+BODY
+  skip
+END
+
+END

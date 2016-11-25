@@ -1,0 +1,15 @@
+RULES_MACHINE RuleSuccess
+OPERATIONS
+
+RULE rule1
+BODY
+  skip
+END
+;
+RULE rule2
+DEPENDS_ON_RULE rule1
+BODY
+  skip
+END
+
+END
