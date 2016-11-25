@@ -85,10 +85,14 @@ public final class PrologExceptionPrinter {
 
 	private static void printCompoundException(IPrologTermOutput pto, CompoundException cause, String filename,
 			boolean useIndentation, boolean lineOneOff) {
+		pto.openTerm("compound_exception", true);
+		pto.openList();
 		for (Exception e : cause.getExceptions()) {
 			printCheckException(pto, (CheckException) e, filename, useIndentation, lineOneOff);
-			pto.fullstop();
 		}
+		pto.closeList();
+		pto.closeTerm();
+		pto.fullstop();
 		pto.flush();
 	}
 
