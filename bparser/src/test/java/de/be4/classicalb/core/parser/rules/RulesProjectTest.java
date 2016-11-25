@@ -16,7 +16,7 @@ public class RulesProjectTest {
 
 	@Test
 	public void testProject2() throws Exception {
-		File file = new File("src/test/resources/rules/project/test1/Rule1.rmch");
+		File file = new File("src/test/resources/rules/project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.addLineNumbers = true;
 		parsingBehaviour.prologOutput = true;
@@ -36,7 +36,7 @@ public class RulesProjectTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
+
 	@Test
 	public void testDisabled() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/Disabled.rmch");
@@ -54,74 +54,92 @@ public class RulesProjectTest {
 	@Test
 	public void testMainFileDoesNotExist() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/FileDoesNotExist.rmch");
-		String expected = "exception('src/test/resources/rules/project/FileDoesNotExist.rmch (No such file or directory)').\n";
-		assertEquals(expected, result);
+		String expected = "(No such file or directory)";
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testUnkownRule() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnkownRule.rmch");
-		String expected = "parse_exception(pos(6,17,'src/test/resources/rules/project/UnkownRule.rmch'),'Unknown operation: \\'otherRule\\'.').\n";
+		String expected = "Unknown operation: ";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
+	}
+
+	@Test
+	public void testParseError() throws Exception {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ParseError.rmch");
+		String expected = "[4,1] expecting: ";
+		System.out.println(result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testFileNameDoesNotMatchMachineName() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/DifferentFileName.rmch");
-		String expected = "parse_exception(pos(1,15,'src/test/resources/rules/project/DifferentFileName.rmch'),'RULES_MACHINE name must match the file name: RulesMachine vs DifferentFileName').\n";
+		String expected = "'RULES_MACHINE name must match the file name: RulesMachine vs DifferentFileName').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 
 	}
-
+	
 	@Test
 	public void testRuleDependsOnItSelf() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/RuleDependsOnItSelf.rmch");
-		String expected = "parse_exception(pos(5,17,'src/test/resources/rules/project/RuleDependsOnItSelf.rmch'),'Cyclic dependencies between operations: rule1 -> rule1').\n";
+		String expected = "Cyclic dependencies between operations: rule1 -> rule1').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
+	}
+
+	@Test
+	public void testComputationDependsOnItSelf() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ComputationDependsOnItSelf.rmch");
+		String expected = "Cyclic dependencies between operations: compute_x -> compute_x').\n";
+		System.out.println(result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testMissingComputationDependency() {
 		String result = getRulesMachineAsPrologTerm(
 				"src/test/resources/rules/project/MissingComputationDependency.rmch");
-		String expected = "parse_exception(pos(19,10,'src/test/resources/rules/project/MissingComputationDependency.rmch'),'Missing dependency to computation \\'compute_xx\\' in order to use variable \\'set\\'.').\n";
+		String expected = "'Missing dependency to computation \\'compute_xx\\' in order to use variable \\'set\\'.').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testConfuseRuleAndComputation() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ConfuseRuleAndComputation.rmch");
-		String expected = "parse_exception(pos(10,24,'src/test/resources/rules/project/ConfuseRuleAndComputation.rmch'),'Identifier \\'rule1\\' is not a COMPUTATION.').\n";
+		String expected = "Identifier \\'rule1\\' is not a COMPUTATION.').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testCyclicRules() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/CyclicRules.rmch");
-		String expected = "parse_exception(pos(11,17,'src/test/resources/rules/project/CyclicRules.rmch'),'Cyclic dependencies between operations: rule1 -> rule2 -> rule1').\n";
+		String expected = "Cyclic dependencies between operations: rule1 -> rule2 -> rule1').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testInvisibleComputation() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/MissingReference/M1.rmch");
-		String expected = "parse_exception(pos(4,24,'src/test/resources/rules/project/references/MissingReference/M2.rmch'),'Operation \\'compute_xx\\' is not visible in RULES_MACHINE \\'M2\\'.').\n";
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/MissingReference/M1.rmch");
+		String expected = "Operation \\'compute_xx\\' is not visible in RULES_MACHINE \\'M2\\'.";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 	}
 
 	@Test
 	public void testUnknwonComputation() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/MissingReference/M2.rmch");
-		String expected = "parse_exception(pos(4,24,'src/test/resources/rules/project/references/MissingReference/M2.rmch'),'Unknown operation: \\'compute_xx\\'.').\n";
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/MissingReference/M2.rmch");
+		String expected = "Unknown operation: \\'compute_xx\\'.').\n";
 		System.out.println(result);
-		assertEquals(expected, result);
+		assertTrue(result.contains(expected));
 	}
 
 	private String getRulesMachineAsPrologTerm(String fileName) {

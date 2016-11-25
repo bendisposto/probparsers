@@ -24,8 +24,10 @@ public abstract class AbstractOperation {
 	private PPredicate activationPredicate;
 	private Set<AbstractOperation> dependencies;
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
+	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
-	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName, List<Reference> machineReferences2) {
+	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,
+			List<Reference> machineReferences2) {
 		this.name = name;
 		this.fileName = fileName;
 		this.machineName = machineName;
@@ -42,6 +44,10 @@ public abstract class AbstractOperation {
 
 	public List<AIdentifierExpression> getDependsOnComputationList() {
 		return this.dependsOnComputationList;
+	}
+
+	public List<TIdentifierLiteral> getFunctionCalls() {
+		return new ArrayList<>(this.functionCallMap.values());
 	}
 
 	public void addAllRuleDependencies(List<AIdentifierExpression> list) {
@@ -87,6 +93,14 @@ public abstract class AbstractOperation {
 		// storing the first occurrence an identifier read
 		if (!readMap.containsKey(name)) {
 			readMap.put(name, identifier);
+		}
+	}
+
+	public void addFunctionCall(TIdentifierLiteral identifier) {
+		String name = identifier.getText();
+		// storing the first occurrence an identifier read
+		if (!functionCallMap.containsKey(name)) {
+			functionCallMap.put(name, identifier);
 		}
 	}
 

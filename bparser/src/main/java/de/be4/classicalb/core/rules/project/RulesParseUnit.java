@@ -51,6 +51,13 @@ public class RulesParseUnit implements IModel {
 		return bParseUnit;
 	}
 
+	public RulesParseUnit() {
+	}
+	
+	public RulesParseUnit(String machineName) {
+		this.machineName = machineName;
+	}
+
 	public List<IToken> getTokenList() {
 		return this.bParser.getSourcePositions().getTokenList();
 	}
@@ -83,8 +90,9 @@ public class RulesParseUnit implements IModel {
 		this.machineFile = file;
 		try {
 			content = Utils.readFile(file);
+			this.machineFile = machineFile.getCanonicalFile();
 		} catch (IOException e) {
-			bException = new BException(file.getPath(), e);
+			bException = new BException(file.getAbsolutePath(), e);
 		}
 	}
 

@@ -116,6 +116,15 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testWritingDefineVariable() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		final String expected = "parse_exception(pos(1,95,'UnkownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
+		assertEquals(expected, result);
+	}
+	
+	@Test
 	public void testRuleFail() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
@@ -150,6 +159,16 @@ public class RulesLanguageTest {
 		String expected = "parse_exception(pos(1,85,'UnkownFile'),'ACTIVATED is not a valid attribute of a FUNCTION operation.').\n";
 		assertEquals(expected, result);
 	}
+	
+	
+	@Test
+	public void testDefineReadItself() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		String expected = "parse_exception(pos(1,86,'UnkownFile'),'Variable \\'xx\\' read before defined.').\n";
+		assertEquals(expected, result);
+	}
 
 	@Test
 	public void testVariableDefinedTwice() throws Exception {
@@ -178,10 +197,10 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleFailNoMessage() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_FAIL END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Checking substitution", !result.contains("counterexamples"));
+		assertEquals("parse_exception(pos(1,45,'UnkownFile'),'RULE_FAIL requires at least one argument.').\n", result);
 	}
 
 	@Test
@@ -189,14 +208,6 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-	}
-
-	@Test
-	public void testSequencingSubstitution() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN RULE_SUCCESS;skip END END";
-		getRulesMachineAsPrologTerm(testMachine);
-		final String testMachine2 = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN skip;RULE_SUCCESS END END";
-		getRulesMachineAsPrologTerm(testMachine2);
 	}
 
 	@Test
@@ -208,10 +219,11 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleSkip() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo = skip END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo BODY skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
-		// TODO assertFalse(result.contains("exception"));
 		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		
 	}
 
 	@Test

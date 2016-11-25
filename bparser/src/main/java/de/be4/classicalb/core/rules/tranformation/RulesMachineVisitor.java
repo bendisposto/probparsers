@@ -3,6 +3,7 @@ package de.be4.classicalb.core.rules.tranformation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,20 +11,25 @@ import java.util.Map;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionOperation;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
+import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.POperationAttribute;
 import de.be4.classicalb.core.parser.node.PPredicate;
@@ -42,6 +48,8 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	protected final Map<AComputationOperation, Computation> computationMap = new HashMap<>();
 	protected final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
 	protected final ArrayList<CheckException> errorList = new ArrayList<>();
+	protected final HashSet<AIdentifierExpression> assignedVariables = new HashSet<>();
+	private final HashSet<String> localVariablesScope = new HashSet<>();
 	private final List<Reference> machineReferences;
 
 	private AbstractOperation currentOperation;
@@ -255,8 +263,60 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAFunctionOperation(AFunctionOperation node) {
+		final HashSet<String> variables = new HashSet<>();
+		LinkedList<PExpression> identifiers = node.getReturnValues();
+		for (PExpression e : identifiers) {
+			if (e instanceof AIdentifierExpression) {
+				AIdentifierExpression id = (AIdentifierExpression) e;
+				String name = id.getIdentifier().get(0).getText();
+				variables.add(name);
+			} else {
+				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
+			}
+		}
+		localVariablesScope.addAll(variables);
+
+		inAFunctionOperation(node);
+		{
+			List<PExpression> copy = new ArrayList<PExpression>(node.getReturnValues());
+			for (PExpression e : copy) {
+				e.apply(this);
+			}
+		}
+		if (node.getName() != null) {
+			node.getName().apply(this);
+		}
+		{
+			List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
+			for (PExpression e : copy) {
+				e.apply(this);
+			}
+		}
+		{
+			List<POperationAttribute> copy = new ArrayList<POperationAttribute>(node.getAttributes());
+			for (POperationAttribute e : copy) {
+				e.apply(this);
+			}
+		}
+		if (node.getBody() != null) {
+			node.getBody().apply(this);
+		}
+		outAFunctionOperation(node);
+		localVariablesScope.removeAll(variables);
+	}
+
+	@Override
 	public void caseADefineSubstitution(ADefineSubstitution node) {
 		inADefineSubstitution(node);
+		node.getName().apply(this);
+		node.getType().apply(this);
+		if (node.getDummyValue() != null) {
+			node.getDummyValue().apply(this);
+		}
+		node.getValue().apply(this);
+		// the defined variable should not be used in the TYPE or the VALUE
+		// section
 		if (currentOperation != null && currentOperation instanceof Computation) {
 			Computation compute = (Computation) currentOperation;
 			try {
@@ -265,13 +325,82 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				this.errorList.add(e);
 			}
 		}
-		node.getName().apply(this);
-		node.getType().apply(this);
-		if (node.getDummyValue() != null) {
-			node.getDummyValue().apply(this);
-		}
-		node.getValue().apply(this);
 		outADefineSubstitution(node);
+	}
+
+	@Override
+	public void caseAVarSubstitution(AVarSubstitution node) {
+		final HashSet<String> variables = new HashSet<>();
+		LinkedList<PExpression> identifiers = node.getIdentifiers();
+		for (PExpression e : identifiers) {
+			if (e instanceof AIdentifierExpression) {
+				AIdentifierExpression id = (AIdentifierExpression) e;
+				String name = id.getIdentifier().get(0).getText();
+				variables.add(name);
+			} else {
+				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
+			}
+		}
+		localVariablesScope.addAll(variables);
+		inAVarSubstitution(node);
+		{
+			List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
+			for (PExpression e : copy) {
+				e.apply(this);
+			}
+		}
+		if (node.getSubstitution() != null) {
+			node.getSubstitution().apply(this);
+		}
+		outAVarSubstitution(node);
+		localVariablesScope.removeAll(variables);
+	}
+
+	@Override
+	public void caseAAssignSubstitution(AAssignSubstitution node) {
+		ArrayList<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
+		for (PExpression pExpression : righthand) {
+			pExpression.apply(this);
+		}
+		List<PExpression> copy = new ArrayList<PExpression>(node.getLhsExpression());
+		checkThatIdentifiersAreLocalVariables(copy);
+	}
+
+	@Override
+	public void caseAOperationCallSubstitution(AOperationCallSubstitution node) {
+		if (currentOperation != null) {
+			LinkedList<TIdentifierLiteral> opNameList = node.getOperation();
+			if (opNameList.size() > 1) {
+				errorList.add(new CheckException("Renaming of operations is not allowed.", node));
+			}
+			currentOperation.addFunctionCall(opNameList.get(0));
+		}
+
+		ArrayList<PExpression> parameters = new ArrayList<>(node.getParameters());
+		for (PExpression pExpression : parameters) {
+			pExpression.apply(this);
+		}
+		List<PExpression> copy = new ArrayList<PExpression>(node.getResultIdentifiers());
+		checkThatIdentifiersAreLocalVariables(copy);
+	}
+
+	private void checkThatIdentifiersAreLocalVariables(List<PExpression> copy) {
+		for (PExpression e : copy) {
+			if (e instanceof AIdentifierExpression) {
+				AIdentifierExpression id = (AIdentifierExpression) e;
+				String name = id.getIdentifier().get(0).getText();
+				if (!localVariablesScope.contains(name)) {
+					errorList
+							.add(new CheckException(
+									"Identifier '" + name
+											+ "' is not a local variable (VAR). Hence it can not be assigned here.",
+									id));
+				}
+			} else {
+				errorList.add(new CheckException(
+						"There must be an identifier on the left side of the assign substitution", e));
+			}
+		}
 	}
 
 	@Override
@@ -347,6 +476,22 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				errorList.add(new CheckException(
 						"The error type exceeded the number of error types specified for this rule operation.", node));
 			}
+		}
+	}
+
+	@Override
+	public void inAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
+		final String name = node.getName().getText();
+		if (name.equals("GOAL")) {
+			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
+		}
+	}
+
+	@Override
+	public void inASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
+		final String name = node.getName().getText();
+		if (name.equals("GOAL")) {
+			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 		}
 	}
 }

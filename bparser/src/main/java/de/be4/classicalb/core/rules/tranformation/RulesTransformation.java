@@ -21,6 +21,7 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_FAIL = "FAIL";
+	public static final String RULE_INTERRUPTION = "RULE_INTERRUPTION";
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
@@ -43,7 +44,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private ArrayList<String> ruleNames = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> computationLiteralList = new ArrayList<>();
-	private TIdentifierLiteral currentRuleLiteral = null;
 
 	private List<AIdentifierExpression> variablesList = new ArrayList<>();
 	private List<PPredicate> invariantList = new ArrayList<>();
@@ -232,23 +232,22 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAComputationOperation(AComputationOperation node) {
+	public void outAComputationOperation(AComputationOperation node) {
 		final Computation computation = this.rulesMachineVisitor.computationMap.get(node);
 		computationLiteralList.add(node.getName());
 		final String computationName = node.getName().getText();
-		node.getBody().apply(this);
 		AEqualPredicate grd1 = new AEqualPredicate(createIdentifier(computationName),
 				new AStringExpression(new TStringLiteral(COMPUTATION_NOT_EXECUTED)));
 		ASelectSubstitution select = new ASelectSubstitution();
 		final List<PPredicate> selectConditionList = new ArrayList<>();
 		selectConditionList.add(grd1);
 		if (computation.getDependsOnRulesList().size() > 0) {
-			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(computation.getDependsOnRulesList(),
+			final List<PPredicate> dependsOnRulesPredicates = createPredicateList(computation.getDependsOnRulesList(),
 					RULE_SUCCESS);
 			selectConditionList.addAll(dependsOnRulesPredicates);
 		}
 		if (computation.getDependsOnComputationList().size() > 0) {
-			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+			final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
 					computation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 			selectConditionList.addAll(dependsOnComputationPredicates);
 		}
@@ -296,17 +295,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 		initialisationList.add(initSub);
 	}
 
-	@Override
-	public void caseARuleOperation(ARuleOperation node) {
+	public void inARuleOperation(ARuleOperation node) {
+		// setting current rule
 		this.currentRule = this.rulesMachineVisitor.rulesMap.get(node);
+	}
+
+	@Override
+	public void outARuleOperation(ARuleOperation node) {
 		final String ruleName = currentRule.getName();
-		currentRuleLiteral = node.getRuleName();
 
 		ruleOperationLiteralList.add(node.getRuleName());
 		ruleNames.add(ruleName);
 
-		node.getRuleName().apply(this);
-		node.getRuleBody().apply(this);
 		AOperation operation = new AOperation();
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add((TIdentifierLiteral) cloneNode(node.getRuleName()));
@@ -323,23 +323,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 				new APowSubsetExpression(
 						new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression())));
 		selectConditionList.add(grd2);
+		final ASelectSubstitution select = new ASelectSubstitution();
 		if (currentRule.getDependsOnRulesList().size() > 0) {
-			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(currentRule.getDependsOnRulesList(),
+			final List<PPredicate> dependsOnRulesPredicates = createPredicateList(currentRule.getDependsOnRulesList(),
 					RULE_SUCCESS);
 			selectConditionList.addAll(dependsOnRulesPredicates);
 		}
 		if (currentRule.getDependsOnComputationList().size() > 0) {
-			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+			final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
 					currentRule.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 			selectConditionList.addAll(dependsOnComputationPredicates);
 		}
-		final ASelectSubstitution select = new ASelectSubstitution();
+
 		select.setCondition(createConjunction(selectConditionList));
 
 		ArrayList<PSubstitution> subList = new ArrayList<>();
 		subList.add(node.getRuleBody());
 		// IF rule_Counterexamples = {} THEN RULE_SUCCESS ELSE RULE_FAIL END
-		final String ctName = currentRuleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		final String ctName = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		PPredicate ifCondition = new AEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
 		AIfSubstitution ifSub = new AIfSubstitution(ifCondition,
 				createRuleSuccessAssignment(currentRule.getNameLiteral()), new ArrayList<PSubstitution>(),
@@ -347,6 +348,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		subList.add(ifSub);
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
+
+		// PrettyPrinter pp = new PrettyPrinter();
+		// select.apply(pp);
+		// System.out.println(pp.getPrettyPrint());
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
@@ -413,7 +418,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOperatorExpression(AOperatorExpression node) {
+	public void outAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
 		final LinkedList<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
@@ -455,7 +460,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOperatorSubstitution(AOperatorSubstitution node) {
+	public void outAOperatorSubstitution(AOperatorSubstitution node) {
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
 		case RulesGrammar.RULE_FAIL: {
@@ -510,7 +515,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
-		final String ctName = currentRuleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		exprList.add(createIdentifier(ctName));
 		AAssignSubstitution assign = new AAssignSubstitution(nameList, exprList);
 		return assign;
@@ -523,28 +528,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseADefineSubstitution(ADefineSubstitution node) {
+	public void outADefineSubstitution(ADefineSubstitution node) {
 
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
-		node.getType().apply(this);
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
 		invariantList.add(member);
 
 		if (node.getDummyValue() != null) {
-			node.getDummyValue().apply(this);
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), node.getDummyValue()));
-
 		} else {
 			// TODO store position information in empty set
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), new AEmptySetExpression()));
 		}
-		node.getValue().apply(this);
 		PSubstitution assign = createAssignNode(createRuleIdentifier(node.getName()), node.getValue());
 		node.replaceBy(assign);
 	}
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
-		final String ctName = currentRuleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		if (currentRule.getRuleIdString() != null) {
 			// RULEID
 			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*UNION(s).(s:#CT_SET|{STRING_APPEND("id1:
@@ -587,26 +588,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAFunctionOperation(AFunctionOperation node) {
+	public void outAFunctionOperation(AFunctionOperation node) {
 		FunctionOperation func = rulesMachineVisitor.getFunctionOperation(node);
-		List<PExpression> copy = new ArrayList<PExpression>(node.getReturnValues());
-		for (PExpression e : copy) {
-			e.apply(this);
-		}
-		node.getName().apply(this);
-		node.getBody().apply(this);
 		PSubstitution body = null;
 		final List<PPredicate> preConditionList = new ArrayList<>();
 		if (func.getPreconditionPredicate() != null) {
 			preConditionList.add(func.getPreconditionPredicate());
 		}
 		if (func.getDependsOnRulesList().size() > 0) {
-			final List<PPredicate> dependsOnRulesPredicates = createConjunctionList(func.getDependsOnRulesList(),
+			final List<PPredicate> dependsOnRulesPredicates = createPredicateList(func.getDependsOnRulesList(),
 					RULE_SUCCESS);
 			preConditionList.addAll(dependsOnRulesPredicates);
 		}
 		if (func.getDependsOnComputationList().size() > 0) {
-			final List<PPredicate> dependsOnComputationPredicates = createConjunctionList(
+			final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
 					func.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 			preConditionList.addAll(dependsOnComputationPredicates);
 		}
@@ -617,12 +612,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add(node.getName());
-		AOperation operation = new AOperation(node.getReturnValues(), nameList, node.getParameters(), body);
+		AOperation operation = new AOperation(node.getReturnValues(), nameList, new ArrayList<>(node.getParameters()),
+				body);
 		node.replaceBy(operation);
 	}
 
 	@Override
-	public void caseAOperatorPredicate(AOperatorPredicate node) {
+	public void outAOperatorPredicate(AOperatorPredicate node) {
 		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
@@ -695,9 +691,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 	}
 
-	private List<PPredicate> createConjunctionList(final List<AIdentifierExpression> identifiers, final String value) {
+	private List<PPredicate> createPredicateList(final List<AIdentifierExpression> identifiers, final String value) {
 		final List<PPredicate> predList = new ArrayList<>();
 		for (PExpression e : identifiers) {
+			e = (PExpression) NodeCloner.cloneNode(e);
 			final AEqualPredicate equal = new AEqualPredicate(e, new AStringExpression(new TStringLiteral(value)));
 			equal.setStartPos(e.getStartPos());
 			equal.setEndPos(e.getEndPos());

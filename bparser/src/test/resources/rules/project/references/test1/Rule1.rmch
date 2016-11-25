@@ -2,10 +2,9 @@ RULES_MACHINE Rule1
 REFERENCES
   Rule2
 OPERATIONS
-  RULE rule1 RULEID id1 =
-    SELECT
-      DEPENDS_ON_RULES(rule2)
-    THEN
-      RULE_FAIL
-    END
+  RULE rule1
+  RULEID id1
+  BODY
+      RULE_FAIL({"fail"})
+  END
 END

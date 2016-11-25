@@ -241,6 +241,55 @@ public class RulesProject {
 		return new HashSet<>(operationsFound);
 	}
 
+	private Set<AbstractOperation> findFunctionDependencies(final AbstractOperation operation,
+			final List<AbstractOperation> ancestors) {
+		// TODO find function dependencies
+		ancestors.add(operation);
+		List<AIdentifierExpression> dependencies = new ArrayList<>();
+		dependencies.addAll(operation.getDependsOnComputationList());
+		dependencies.addAll(operation.getDependsOnRulesList());
+		Set<AbstractOperation> operationsFound = new HashSet<>();
+		// check for cycle
+		boolean cycleDetected = checkForCycles(operation, dependencies, ancestors);
+		if (cycleDetected) {
+			operation.setDependencies(operationsFound);
+			return operationsFound;
+		}
+		for (AIdentifierExpression aIdentifierExpression : dependencies) {
+			String opName = aIdentifierExpression.getIdentifier().get(0).getText();
+			if (!allOperations.containsKey(opName)) {
+				this.bExceptionList.add(new BException(operation.getFileName(),
+						new CheckException("Unknown operation: '" + opName + "'.", aIdentifierExpression)));
+			} else {
+				List<String> machineReferences = operation.getMachineReferencesAsString();
+				boolean opFound = false;
+				for (AbstractOperation otherOperation : allOperations.values()) {
+					if ((otherOperation.getMachineName().equals(operation.getMachineName())
+							|| machineReferences.contains(otherOperation.getMachineName()))
+							&& otherOperation.getName().equals(opName)) {
+						AbstractOperation nextOperation = allOperations.get(opName);
+						operationsFound.add(nextOperation);
+						if (nextOperation.getDependencies() != null) {
+							operationsFound.addAll(nextOperation.getDependencies());
+						} else {
+							Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
+							operationsFound.addAll(found);
+						}
+						opFound = true;
+						break;
+					}
+				}
+				if (opFound == false) {
+					this.bExceptionList.add(new BException(operation.getFileName(),
+							new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
+									+ operation.getMachineName() + "'.", aIdentifierExpression)));
+				}
+			}
+		}
+		operation.setDependencies(operationsFound);
+		return new HashSet<>(operationsFound);
+	}
+
 	private boolean checkForCycles(AbstractOperation operation, List<AIdentifierExpression> list,
 			List<AbstractOperation> ancestors) {
 		List<String> ancestorsNames = new ArrayList<>();
@@ -268,7 +317,7 @@ public class RulesProject {
 
 	private IModel lookupReference(Reference reference) {
 		File file = reference.getFile();
-		RulesParseUnit unit = new RulesParseUnit();
+		RulesParseUnit unit = new RulesParseUnit(reference.getName());
 		unit.setParsingBehaviour(this.parsingBehaviour);
 		unit.readMachineFromFile(file);
 		unit.parse();
