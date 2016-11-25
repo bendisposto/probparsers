@@ -241,6 +241,8 @@ public class RulesProject {
 		return new HashSet<>(operationsFound);
 	}
 
+	
+	@SuppressWarnings("unused")
 	private Set<AbstractOperation> findFunctionDependencies(final AbstractOperation operation,
 			final List<AbstractOperation> ancestors) {
 		// TODO find function dependencies

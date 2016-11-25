@@ -14,9 +14,7 @@ import java.net.Socket;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.MockedDefinitions;
-import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -185,7 +183,6 @@ public class CliBParser {
 					} else {
 						final BParser parser = new BParser(bfile.getAbsolutePath());
 						returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-						provider = parser.getContentProvider();
 					}
 					context = new MockedDefinitions();
 				} catch (Exception e) {
