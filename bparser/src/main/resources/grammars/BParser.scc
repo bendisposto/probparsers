@@ -363,7 +363,6 @@ Tokens
   {normal} kw_value = 'VALUE';
   {normal} kw_body = 'BODY';
   {normal} kw_dummy_value = 'DUMMY_VALUE';
-  {normal} kw_postcondition = 'POSTCONDITION'
   {normal} kw_counterexample = 'COUNTEREXAMPLE';
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
