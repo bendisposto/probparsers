@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.prolog.output.IPrologTermOutput;
 
@@ -27,6 +28,6 @@ public interface IModel {
 
 	public boolean hasError();
 
-	public BException getBExeption();
+	public BCompoundException getBExeption();
 
 }

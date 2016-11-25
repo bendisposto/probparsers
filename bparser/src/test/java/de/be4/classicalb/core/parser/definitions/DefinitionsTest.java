@@ -8,7 +8,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import static util.Helpers.getTreeAsString;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
@@ -100,7 +100,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Was expecting BParseException");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			System.out.println(e.getLocalizedMessage());
 			// IGNORE is expected
 		}
@@ -122,7 +122,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			// IGNORE, is expected
 		}
 	}
@@ -229,7 +229,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(25, cause.getRange().getBeginIndex());
@@ -246,7 +246,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(24, cause.getRange().getBeginIndex());
@@ -283,7 +283,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(31, cause.getRange().getBeginIndex());
@@ -300,7 +300,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(30, cause.getRange().getBeginIndex());
@@ -317,7 +317,7 @@ public class DefinitionsTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(1, cause.getNodes().length);
 			assertNotNull(cause.getNodes()[0]);
@@ -329,7 +329,7 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	public void testDefOrder() throws BException {
+	public void testDefOrder() throws BCompoundException {
 		final String testMachine = "MACHINE Test  \n DEFINITIONS  \n bar(y) == foo(y);  \n foo(x)==x<3;  \n END";
 		String asString = getTreeAsString(testMachine);
 		System.out.println(asString);
@@ -339,7 +339,7 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	public void testAssertInDefinition() throws BException {
+	public void testAssertInDefinition() throws BCompoundException {
 		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n"
 				+ "ABORT == ASSERT TRUE=FALSE THEN skip END\n" + "END\n";
 		final String result = getTreeAsString(testMachine);
@@ -348,14 +348,14 @@ public class DefinitionsTest {
 				result);
 	}
 	
-	@Test (expected = BException.class)
-	public void testDetectCycleInDefinitions() throws BException {
+	@Test (expected = BCompoundException.class)
+	public void testDetectCycleInDefinitions() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS foo == 1=1 & foo END\n";
 		getTreeAsString(testMachine);
 	}
 	
-	@Test (expected = BException.class)
-	public void testDetectCycleInDefinitions2() throws BException {
+	@Test (expected = BCompoundException.class)
+	public void testDetectCycleInDefinitions2() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS bar == foo; foo == 1=1 & bar END\n";
 		getTreeAsString(testMachine);
 	}

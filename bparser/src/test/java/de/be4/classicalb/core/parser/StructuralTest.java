@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -48,7 +48,7 @@ public class StructuralTest {
 		assertNotNull(result);
 	}
 
-	@Test(expected = BException.class)
+	@Test(expected = BCompoundException.class)
 	public void testWrongPositionedShebang() throws Exception {
 		final String testMachine = "\n#! /Users/leuschel/git_root/prob_prolog/probcli \n MACHINE SheBang \n END";
 		final String result = getTreeAsString(testMachine);
@@ -182,7 +182,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(emptyMachine);
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final BLexerException ex = (BLexerException) e.getCause();
 			// checking the start position of the comment
 			assertEquals(3, ex.getLastLine());
@@ -217,7 +217,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			Node node = cause.getNodes()[0];
 			assertEquals(4, node.getStartPos().getLine());
@@ -232,7 +232,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid Semicolon was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			Node node = cause.getNodes()[0];
 			System.out.println(cause.getMessage());
@@ -248,7 +248,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid Semicolon was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			Node node = cause.getNodes()[0];
 			assertEquals(4, node.getStartPos().getLine());
@@ -263,7 +263,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid Semicolon was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			Node node = cause.getNodes()[0];
 			assertEquals(4, node.getStartPos().getLine());
@@ -279,7 +279,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expecting exception");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(2, cause.getNodes().length);
 			// IGNORE: is expected
@@ -292,7 +292,7 @@ public class StructuralTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expecting exception");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(1, cause.getNodes().length);
 			assertEquals("Clause(s) missing: PROPERTIES", cause.getMessage());
@@ -300,7 +300,7 @@ public class StructuralTest {
 		}
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);

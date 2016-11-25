@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -14,18 +16,17 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class DefinitionUsageCheck extends DepthFirstAdapter implements
-		SemanticCheck {
+public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private final IDefinitions definitions;
-
 	private final Set<Node> erroneousNodes = new HashSet<Node>();
+	private final List<CheckException> exceptions = new ArrayList<>();
 
 	public DefinitionUsageCheck(final IDefinitions definitions) {
 		this.definitions = definitions;
 	}
 
-	public void runChecks(final Start rootNode) throws CheckException {
+	public void runChecks(final Start rootNode) {
 		// only need to check complete machines
 		if (!Utils.isCompleteMachine(rootNode)) {
 			return;
@@ -35,9 +36,8 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements
 		rootNode.apply(this);
 
 		if (erroneousNodes.size() > 0) {
-			throw new CheckException(
-					"Number of parameters doesn't match declaration of definition",
-					erroneousNodes.toArray(new Node[erroneousNodes.size()]));
+			exceptions.add(new CheckException("Number of parameters doesn't match declaration of definition",
+					erroneousNodes.toArray(new Node[erroneousNodes.size()])));
 		}
 	}
 
@@ -55,8 +55,8 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements
 	public void inADefinitionExpression(final ADefinitionExpression node) {
 		check(node, node.getParameters().size(), node.getDefLiteral().getText());
 	}
-	
-	private void check(final Node node, final int paramCount, final String literal){
+
+	private void check(final Node node, final int paramCount, final String literal) {
 		final int expected = definitions.getParameterCount(literal);
 
 		if (paramCount != expected) {
@@ -65,5 +65,10 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements
 	}
 
 	public void setOptions(ParseOptions options) {
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+		return this.exceptions;
 	}
 }

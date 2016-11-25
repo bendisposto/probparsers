@@ -9,7 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.extensions.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
@@ -22,7 +22,7 @@ public class StringLiteralNotClosedTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Exception did not occur");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			assertEquals("[1,59] Unknown token: \"not closed END", e.getMessage());
 		}
 	}
@@ -34,14 +34,14 @@ public class StringLiteralNotClosedTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Exception did not occur");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getCause());
 			assertTrue(e.getCause() instanceof PreParseException);
 			assertTrue(e.getLocalizedMessage().contains("Unknown token:"));
 		}
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().grammar = RulesGrammar.getInstance();

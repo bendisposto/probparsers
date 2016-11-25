@@ -9,6 +9,7 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -41,7 +42,7 @@ public class BatchParser {
 	}
 
 	private static void parseFile(final String filename) throws IOException,
-			BException {
+			BCompoundException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
 			final File machineFile = new File(filename);

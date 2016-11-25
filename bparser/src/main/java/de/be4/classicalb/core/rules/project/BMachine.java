@@ -14,6 +14,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -51,7 +52,7 @@ import de.prob.prolog.output.PrologTermOutput;
 public class BMachine implements IModel {
 	private final String machineName;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-	private BException bException;
+	private BCompoundException bCompoundException;
 	private final Start start;
 	private final File file;
 
@@ -132,7 +133,7 @@ public class BMachine implements IModel {
 	}
 
 	public String getErrorAsPrologTerm() {
-		assert bException != null;
+		assert bCompoundException != null;
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -158,7 +159,7 @@ public class BMachine implements IModel {
 	}
 
 	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bException, parsingBehaviour.useIndention, false);
+		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.useIndention, false);
 	}
 
 	@Override
@@ -183,7 +184,7 @@ public class BMachine implements IModel {
 
 	@Override
 	public boolean hasError() {
-		if (this.bException == null) {
+		if (this.bCompoundException == null) {
 			return false;
 		} else {
 			return true;
@@ -191,8 +192,8 @@ public class BMachine implements IModel {
 	}
 
 	@Override
-	public BException getBExeption() {
-		return this.bException;
+	public BCompoundException getBExeption() {
+		return this.bCompoundException;
 	}
 
 	@Override

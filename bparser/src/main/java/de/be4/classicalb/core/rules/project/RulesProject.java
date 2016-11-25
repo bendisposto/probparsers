@@ -16,6 +16,7 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -208,40 +209,34 @@ public class RulesProject {
 		}
 		for (AIdentifierExpression aIdentifierExpression : dependencies) {
 			String opName = aIdentifierExpression.getIdentifier().get(0).getText();
-			if (!allOperations.containsKey(opName)) {
-				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Unknown operation: '" + opName + "'.", aIdentifierExpression)));
-			} else {
-				List<String> machineReferences = operation.getMachineReferencesAsString();
-				boolean opFound = false;
-				for (AbstractOperation otherOperation : allOperations.values()) {
-					if ((otherOperation.getMachineName().equals(operation.getMachineName())
-							|| machineReferences.contains(otherOperation.getMachineName()))
-							&& otherOperation.getName().equals(opName)) {
-						AbstractOperation nextOperation = allOperations.get(opName);
-						operationsFound.add(nextOperation);
-						if (nextOperation.getDependencies() != null) {
-							operationsFound.addAll(nextOperation.getDependencies());
-						} else {
-							Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
-							operationsFound.addAll(found);
-						}
-						opFound = true;
-						break;
+			List<String> machineReferences = operation.getMachineReferencesAsString();
+			boolean opFound = false;
+			for (AbstractOperation otherOperation : allOperations.values()) {
+				if ((otherOperation.getMachineName().equals(operation.getMachineName())
+						|| machineReferences.contains(otherOperation.getMachineName()))
+						&& otherOperation.getName().equals(opName)) {
+					AbstractOperation nextOperation = allOperations.get(opName);
+					operationsFound.add(nextOperation);
+					if (nextOperation.getDependencies() != null) {
+						operationsFound.addAll(nextOperation.getDependencies());
+					} else {
+						Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
+						operationsFound.addAll(found);
 					}
+					opFound = true;
+					break;
 				}
-				if (opFound == false) {
-					this.bExceptionList.add(new BException(operation.getFileName(),
-							new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
-									+ operation.getMachineName() + "'.", aIdentifierExpression)));
-				}
+			}
+			if (opFound == false) {
+				this.bExceptionList.add(new BException(operation.getFileName(),
+						new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
+								+ operation.getMachineName() + "'.", aIdentifierExpression)));
 			}
 		}
 		operation.setDependencies(operationsFound);
 		return new HashSet<>(operationsFound);
 	}
 
-	
 	@SuppressWarnings("unused")
 	private Set<AbstractOperation> findFunctionDependencies(final AbstractOperation operation,
 			final List<AbstractOperation> ancestors) {
@@ -371,7 +366,8 @@ public class RulesProject {
 
 	public int printPrologOutput(final PrintStream out, final PrintStream err) {
 		if (this.bExceptionList.size() > 0) {
-			PrologExceptionPrinter.printException(err, bExceptionList.get(0), parsingBehaviour.useIndention, false);
+			BCompoundException comp = new BCompoundException(bExceptionList);
+			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.useIndention, false);
 			return -2;
 		}
 		if (projectHasErrors()) {

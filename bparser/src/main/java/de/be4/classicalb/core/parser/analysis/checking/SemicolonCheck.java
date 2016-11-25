@@ -6,7 +6,6 @@ import java.util.List;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.CompoundException;
 import de.be4.classicalb.core.parser.node.AInvalidOperationsClauseMachineClause;
 import de.be4.classicalb.core.parser.node.AInvalidSubstitution;
 import de.be4.classicalb.core.parser.node.AMissingSemicolonOperation;
@@ -18,8 +17,9 @@ import de.be4.classicalb.core.parser.node.Start;
  */
 public class SemicolonCheck implements SemanticCheck {
 
+	private final List<CheckException> exceptions = new ArrayList<>();
+
 	private final class MissingSemicolonWalker extends DepthFirstAdapter {
-		List<CheckException> exceptions = new ArrayList<>();
 
 		@Override
 		public void inAMissingSemicolonOperation(AMissingSemicolonOperation node) {
@@ -48,17 +48,13 @@ public class SemicolonCheck implements SemanticCheck {
 	}
 
 	@Override
-	public void runChecks(Start rootNode) throws CompoundException, CheckException {
+	public void runChecks(Start rootNode) {
 		MissingSemicolonWalker adapter = new MissingSemicolonWalker();
 		rootNode.apply(adapter);
-		if (adapter.exceptions.size() == 1) {
-			throw adapter.exceptions.get(0);
-		} else if (adapter.exceptions.size() > 1) {
-			CompoundException compoundException = new CompoundException();
-			for (CheckException e : adapter.exceptions) {
-				compoundException.addException(e);
-			}
-			throw compoundException;
-		}
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+		return this.exceptions;
 	}
 }

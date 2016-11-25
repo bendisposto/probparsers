@@ -17,7 +17,7 @@ import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.PlainFileContentProvider;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -40,7 +40,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	}
 
 	@Test
-	public void testOneDefinitionFile() throws BException {
+	public void testOneDefinitionFile() throws BCompoundException {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile\"; def1 == xx\nINVARIANT def2 = def3\nEND";
 		final BParser parser = new BParser("testcase");
 		parser.parse(testMachine, true, this);
@@ -113,7 +113,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		try {
 			parser.parse(testMachine, false, this);
 			fail("Expected PreParseException missing");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			assertTrue(e.getCause() instanceof PreParseException);
 		}
 	}
@@ -159,7 +159,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			new BParser("testcase").parse(testMachine, false,
 					new PlainFileContentProvider());
 			fail("Expected exception was not thrown");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			// EXPECTED
 		}
 	}
@@ -187,7 +187,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	}
 
 	@Test
-	public void testErrorInDefinitions() throws IOException, BException {
+	public void testErrorInDefinitions() throws IOException, BCompoundException {
 		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -197,7 +197,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 
 	@Test
 	public void testErrorInIncludedDefinitionFile() throws IOException,
-			BException {
+			BCompoundException {
 		String file = "./src/test/resources/definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);

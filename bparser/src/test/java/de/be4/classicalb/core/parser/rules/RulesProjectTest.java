@@ -137,7 +137,7 @@ public class RulesProjectTest {
 	public void testUnknwonComputation() {
 		String result = getRulesMachineAsPrologTerm(
 				"src/test/resources/rules/project/references/MissingReference/M2.rmch");
-		String expected = "Unknown operation: \\'compute_xx\\'.').\n";
+		String expected = "Unknown operation: \\'compute_xx\\'.')";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
