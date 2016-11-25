@@ -34,6 +34,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.CompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -296,8 +297,8 @@ public class BParser {
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
 	 *             an error message. If the tools needs to extract additional
-	 *             information, such as a source code position or involved tokens
-	 *             respectively nodes, it needs to retrieve the delegate
+	 *             information, such as a source code position or involved
+	 *             tokens respectively nodes, it needs to retrieve the delegate
 	 *             exception. The {@link BException} class offers a
 	 *             {@link BException#getCause()} method for this, which returns
 	 *             the delegate exception.
@@ -408,6 +409,9 @@ public class BParser {
 			throw new BException(getFileName(), e);
 		} catch (final CheckException e) {
 			throw new BException(getFileName(), e);
+		} catch (CompoundException e) {
+			BException bException = new BException(getFileName(), e);
+			throw bException;
 		}
 	}
 
@@ -453,7 +457,7 @@ public class BParser {
 
 	}
 
-	private void performSemanticChecks(final Start rootNode) throws CheckException {
+	private void performSemanticChecks(final Start rootNode) throws CheckException, CompoundException {
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck() };
 		// apply more checks?
@@ -467,7 +471,7 @@ public class BParser {
 	public SourcePositions getSourcePositions() {
 		return sourcePositions;
 	}
-	
+
 	public Map<PositionedNode, SourcecodeRange> getPositions() {
 		return this.positions;
 	}
