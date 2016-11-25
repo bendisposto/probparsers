@@ -56,6 +56,9 @@ public final class PrologExceptionPrinter {
 		String filename = e.getFilename();
 		if (cause == null) {
 			printGeneralException(pto, e, filename, useIndentation, lineOneOff, true);
+		} else if (cause instanceof CompoundException) {
+			printCompoundException(pto, (CompoundException) cause, filename, useIndentation, lineOneOff);
+			return;
 		} else {
 			while (cause.getClass().equals(BException.class) && cause.getCause() != null) {
 				BException bex = (BException) cause;
@@ -72,8 +75,6 @@ public final class PrologExceptionPrinter {
 				printPreParseException(pto, (PreParseException) cause, filename, useIndentation, lineOneOff);
 			} else if (cause instanceof CheckException) {
 				printCheckException(pto, (CheckException) cause, filename, useIndentation, lineOneOff);
-			} else if (cause instanceof CompoundException) {
-				printCompoundException(pto, (CompoundException) cause, filename, useIndentation, lineOneOff);
 			} else {
 				printGeneralException(pto, cause, filename, useIndentation, lineOneOff, false);
 			}
@@ -86,7 +87,9 @@ public final class PrologExceptionPrinter {
 			boolean useIndentation, boolean lineOneOff) {
 		for (Exception e : cause.getExceptions()) {
 			printCheckException(pto, (CheckException) e, filename, useIndentation, lineOneOff);
+			pto.fullstop();
 		}
+		pto.flush();
 	}
 
 	private static void printLexerException(IPrologTermOutput pto, LexerException cause, String filename,
