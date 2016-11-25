@@ -48,10 +48,12 @@ public class SemicolonCheck implements SemanticCheck {
 	}
 
 	@Override
-	public void runChecks(Start rootNode) throws CompoundException {
+	public void runChecks(Start rootNode) throws CompoundException, CheckException {
 		MissingSemicolonWalker adapter = new MissingSemicolonWalker();
 		rootNode.apply(adapter);
-		if (adapter.exceptions.size() > 0) {
+		if (adapter.exceptions.size() == 1) {
+			throw adapter.exceptions.get(0);
+		} else if (adapter.exceptions.size() > 1) {
 			CompoundException compoundException = new CompoundException();
 			for (CheckException e : adapter.exceptions) {
 				compoundException.addException(e);
