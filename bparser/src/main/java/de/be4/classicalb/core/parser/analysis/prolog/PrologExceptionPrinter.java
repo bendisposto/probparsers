@@ -137,13 +137,16 @@ public final class PrologExceptionPrinter {
 	private static void printCheckException(final IPrologTermOutput pto, final CheckException cause,
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
 		final Node[] nodes = cause.getNodes();
-		final SourcePosition pos;
+		final SourcePosition startPos;
+		//final SourcePosition endPos;
 		if (nodes != null && nodes.length > 0) {
-			pos = nodes[0].getStartPos();
+			startPos = nodes[0].getStartPos();
+			//endPos = nodes[0].getEndPos();
 		} else {
-			pos = null;
+			startPos = null;
+			//endPos = null;
 		}
-		printExceptionWithSourcePosition(pto, cause, filename, pos, useIndentation, lineOneOff);
+		printExceptionWithSourcePosition(pto, cause, filename, startPos, useIndentation, lineOneOff);
 	}
 
 	private static void printGeneralException(final IPrologTermOutput pto, final Throwable cause, final String filename,
@@ -193,6 +196,33 @@ public final class PrologExceptionPrinter {
 		final Token token = e.getLastToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(token.getLine(), token.getPos());
 		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
+	}
+
+	private static void printExceptionWithSourceRange(final IPrologTermOutput pto, final Throwable e,
+			final String filename, final SourcePosition beginPos, final SourcePosition endPos,
+			final boolean useIndentation, final boolean lineOneOff) {
+		pto.openTerm("parse_exception");
+		if (beginPos == null) {
+			pto.printAtom("none");
+		} else {
+			pto.openTerm("pos");
+			if (lineOneOff) {
+				pto.printNumber(beginPos.getLine() - 1);
+			} else {
+				pto.printNumber(beginPos.getLine());
+			}
+			pto.printNumber(beginPos.getPos());
+			if (lineOneOff) {
+				pto.printNumber(endPos.getLine() - 1);
+			} else {
+				pto.printNumber(endPos.getLine());
+			}
+			pto.printNumber(endPos.getPos());
+			pto.printAtom(filename);
+			pto.closeTerm();
+		}
+		printMsg(pto, e, filename, useIndentation, lineOneOff, beginPos == null);
+		pto.closeTerm();
 	}
 
 	private static void printExceptionWithSourcePosition(final IPrologTermOutput pto, final Throwable e,
