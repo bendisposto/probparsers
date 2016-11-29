@@ -10,6 +10,7 @@ import de.be4.classicalb.core.rules.project.Reference;
 public class Rule extends AbstractOperation {
 	private AIdentifierExpression ruleId;
 	private AIntegerExpression errorTypes;
+	private String counterExampleVariableName;
 
 	public Rule(TIdentifierLiteral ruleName, String fileName, String machineName, List<Reference> machineReferences) {
 		super(ruleName, fileName, machineName, machineReferences);
@@ -38,5 +39,13 @@ public class Rule extends AbstractOperation {
 		} else {
 			return ruleId.getIdentifier().getFirst().getText();
 		}
+	}
+
+	public void setCounterExampleVariableName(String name) {
+		this.counterExampleVariableName = name;
+	}
+
+	public String getCounterExampleVariableName() {
+		return this.counterExampleVariableName;
 	}
 }

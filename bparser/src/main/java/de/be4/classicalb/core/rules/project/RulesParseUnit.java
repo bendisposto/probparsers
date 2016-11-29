@@ -22,6 +22,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
+import de.be4.classicalb.core.rules.tranformation.RulesMachineVisitor;
 import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -44,6 +45,7 @@ public class RulesParseUnit implements IModel {
 	private Start start;
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
+	private RulesMachineVisitor rulesMachineVisitor;
 
 	public static RulesParseUnit createBParseUnit(String content) {
 		RulesParseUnit bParseUnit = new RulesParseUnit();
@@ -116,10 +118,10 @@ public class RulesParseUnit implements IModel {
 			refFinder.findReferencedMachines();
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
+			this.rulesMachineVisitor = new RulesMachineVisitor(bParser.getFileName(), machineReferences, start);
+			rulesMachineVisitor.runChecks();
+			this.operationList.addAll(rulesMachineVisitor.getOperations());
 
-			RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences);
-			ruleTransformation.runTransformation();
-			this.operationList.addAll(ruleTransformation.getOperations());
 		} catch (BCompoundException e) {
 			// store parser exceptions
 			this.bCompoundException = e;
@@ -132,6 +134,32 @@ public class RulesParseUnit implements IModel {
 		} catch (BException e) {
 			bCompoundException = new BCompoundException(e);
 		}
+	}
+
+	public void translate() {
+		this.translate(null);
+	}
+
+	public void translate(List<AbstractOperation> sortedOperationsList) {
+		if (bCompoundException != null) {
+			return;
+		}
+
+		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
+				rulesMachineVisitor);
+		ruleTransformation.setSortedOperationList(sortedOperationsList);
+		try {
+			ruleTransformation.runTransformation();
+		} catch (CheckException e) {
+			if (machineFile != null) {
+				bCompoundException = new BCompoundException(new BException(machineFile.getPath(), e));
+			} else {
+				bCompoundException = new BCompoundException(new BException("UnkownFile", e));
+			}
+		} catch (BException e) {
+			bCompoundException = new BCompoundException(e);
+		}
+
 	}
 
 	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {

@@ -277,6 +277,7 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
+		unit.translate();
 		String result = unit.getResultAsPrologTerm();
 		return result;
 	}
@@ -288,6 +289,7 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
+		unit.translate();
 		String result = unit.getResultAsPrologTerm();
 		return result;
 	}

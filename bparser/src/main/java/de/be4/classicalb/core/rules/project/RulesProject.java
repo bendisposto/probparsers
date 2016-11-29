@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,8 +34,11 @@ public class RulesProject {
 	private ParsingBehaviour parsingBehaviour;
 	private final List<BException> bExceptionList = new ArrayList<>();
 
+	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
+
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
+	private List<AbstractOperation> sortedOperationsList;
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -49,8 +53,21 @@ public class RulesProject {
 		this.mainFile = mainFile;
 	}
 
+	public List<BException> getBExceptionList() {
+		for (IModel iModel : bModels) {
+			if (iModel.hasError()) {
+				this.bExceptionList.add(iModel.getBExeption().getFirstException());
+			}
+		}
+		return bExceptionList;
+	}
+
 	public void setParsingBehaviour(final ParsingBehaviour parsingBehaviour) {
 		this.parsingBehaviour = parsingBehaviour;
+	}
+
+	public HashMap<String, AbstractOperation> getOperationsMap() {
+		return new HashMap<>(this.allOperations);
 	}
 
 	public void flattenProject() {
@@ -65,6 +82,7 @@ public class RulesProject {
 		final List<String> promotesList = new ArrayList<>();
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
+			rulesParseUnit.translate(sortedOperationsList);
 			List<AbstractOperation> operations = rulesParseUnit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
 				if (abstractOperation instanceof FunctionOperation) {
@@ -103,8 +121,6 @@ public class RulesProject {
 
 		checkProject();
 	}
-
-	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
 
 	private void checkProject() {
 		for (IModel iModel : bModels) {
@@ -153,6 +169,29 @@ public class RulesProject {
 			}
 		}
 		checkReadWrite();
+		sortOperations(allOperations.values());
+	}
+
+	private void sortOperations(Collection<AbstractOperation> values) {
+		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
+		for (AbstractOperation abstractOperation : values) {
+			if (!(abstractOperation instanceof FunctionOperation)) {
+				dependenciesMap.put(abstractOperation, new HashSet<>(abstractOperation.getDependencies()));
+			}
+		}
+		List<AbstractOperation> resultList = new ArrayList<>();
+		List<AbstractOperation> todoList = new ArrayList<>(dependenciesMap.keySet());
+		while (!todoList.isEmpty()) {
+			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
+				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
+				deps.removeAll(resultList);
+				if (deps.isEmpty()) {
+					resultList.add(abstractOperation);
+					todoList.remove(abstractOperation);
+				}
+			}
+		}
+		this.sortedOperationsList = resultList;
 	}
 
 	private void checkReadWrite() {
@@ -227,7 +266,7 @@ public class RulesProject {
 					break;
 				}
 			}
-			if (opFound == false) {
+			if (opFound == false && allOperations.containsKey(opName)) {
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
 								+ operation.getMachineName() + "'.", aIdentifierExpression)));
@@ -241,50 +280,7 @@ public class RulesProject {
 	private Set<AbstractOperation> findFunctionDependencies(final AbstractOperation operation,
 			final List<AbstractOperation> ancestors) {
 		// TODO find function dependencies
-		ancestors.add(operation);
-		List<AIdentifierExpression> dependencies = new ArrayList<>();
-		dependencies.addAll(operation.getDependsOnComputationList());
-		dependencies.addAll(operation.getDependsOnRulesList());
-		Set<AbstractOperation> operationsFound = new HashSet<>();
-		// check for cycle
-		boolean cycleDetected = checkForCycles(operation, dependencies, ancestors);
-		if (cycleDetected) {
-			operation.setDependencies(operationsFound);
-			return operationsFound;
-		}
-		for (AIdentifierExpression aIdentifierExpression : dependencies) {
-			String opName = aIdentifierExpression.getIdentifier().get(0).getText();
-			if (!allOperations.containsKey(opName)) {
-				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Unknown operation: '" + opName + "'.", aIdentifierExpression)));
-			} else {
-				List<String> machineReferences = operation.getMachineReferencesAsString();
-				boolean opFound = false;
-				for (AbstractOperation otherOperation : allOperations.values()) {
-					if ((otherOperation.getMachineName().equals(operation.getMachineName())
-							|| machineReferences.contains(otherOperation.getMachineName()))
-							&& otherOperation.getName().equals(opName)) {
-						AbstractOperation nextOperation = allOperations.get(opName);
-						operationsFound.add(nextOperation);
-						if (nextOperation.getDependencies() != null) {
-							operationsFound.addAll(nextOperation.getDependencies());
-						} else {
-							Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
-							operationsFound.addAll(found);
-						}
-						opFound = true;
-						break;
-					}
-				}
-				if (opFound == false) {
-					this.bExceptionList.add(new BException(operation.getFileName(),
-							new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
-									+ operation.getMachineName() + "'.", aIdentifierExpression)));
-				}
-			}
-		}
-		operation.setDependencies(operationsFound);
-		return new HashSet<>(operationsFound);
+		return null;
 	}
 
 	private boolean checkForCycles(AbstractOperation operation, List<AIdentifierExpression> list,
@@ -393,7 +389,6 @@ public class RulesProject {
 			iModel.printAsProlog(prologTermOutput, nodeIds);
 		}
 		out.flush();
-		out.close();
 	}
 
 	public String getProjectAsPrologTerm() {

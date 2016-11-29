@@ -10,6 +10,7 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.extensions.RulesGrammar;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
@@ -24,15 +25,18 @@ import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
+import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
+import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.POperationAttribute;
 import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -53,10 +57,20 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	private final List<Reference> machineReferences;
 
 	private AbstractOperation currentOperation;
+	private final Start start;
+	private List<AbstractOperation> sortedOperationsList;
 
-	public RulesMachineVisitor(String fileName, List<Reference> machineReferences) {
+	public RulesMachineVisitor(String fileName, List<Reference> machineReferences, Start start) {
 		this.fileName = fileName;
 		this.machineReferences = machineReferences;
+		this.start = start;
+	}
+
+	public void runChecks() throws CheckException {
+		start.apply(this);
+		if (this.errorList.size() > 0) {
+			throw this.errorList.get(0);
+		}
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -356,6 +370,30 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		localVariablesScope.removeAll(variables);
 	}
 
+	public void inAOperatorExpression(AOperatorExpression node) {
+		final String operatorName = node.getName().getText();
+		final LinkedList<PExpression> parameters = node.getIdentifiers();
+		switch (operatorName) {
+		case RulesGrammar.STRING_FORMAT: {
+			PExpression stringValue = parameters.get(0);
+			if (stringValue instanceof AStringExpression) {
+				AStringExpression string = (AStringExpression) stringValue;
+				String content = string.getContent().getText();
+				int count = (content.length() - content.replace("~w", "").length()) / 2;
+				if (count != parameters.size() - 1) {
+					throw new VisitorException(new CheckException(
+							"The number of arguments (" + (parameters.size() - 1)
+									+ ") does not match the number of placeholders (" + count + " in the string.",
+							node));
+				}
+			}
+			return;
+		}
+		default:
+			throw new IllegalStateException("Unkown expression operator: " + operatorName);
+		}
+	}
+
 	@Override
 	public void caseAAssignSubstitution(AAssignSubstitution node) {
 		ArrayList<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
@@ -494,4 +532,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 		}
 	}
+
+	
 }
