@@ -117,6 +117,10 @@ public class RulesProject {
 			final Reference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
 				final IModel bModel = lookupReference(modelReference);
+				if (bModel.hasError()) {
+					BCompoundException compound = bModel.getBExeption();
+					this.bExceptionList.addAll(compound.getExceptions());
+				}
 				bModels.add(bModel);
 				fifo.addAll(bModel.getMachineReferences());
 			}
@@ -356,11 +360,11 @@ public class RulesProject {
 	}
 
 	public boolean projectHasErrors() {
-		for (IModel iModel : bModels) {
-			if (iModel.hasError())
-				return true;
+		if (this.bExceptionList.size() == 0) {
+			return false;
+		} else {
+			return true;
 		}
-		return false;
 	}
 
 	public int printPrologOutput(final PrintStream out, final PrintStream err) {
