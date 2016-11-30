@@ -39,6 +39,7 @@ public class RulesProject {
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private List<AbstractOperation> sortedOperationsList;
+	private HashMap<String, String> constantStringValues = new HashMap<>();
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -94,12 +95,14 @@ public class RulesProject {
 			injector.injectMachine(otherStart);
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
+
 		bModels.add(compositionMachine);
 		final String mainMachineName = "Main";
 		BMachine mainMachine = new BMachine(mainMachineName, new File(mainMachineName + ".mch"));
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addIncludesClause(compositionName);
 		mainMachine.addPromotesClause(promotesList);
+		mainMachine.addPropertiesPredicates(this.constantStringValues);
 		if (injector.getGoalDefinition() != null) {
 			mainMachine.addDefinition(injector.getGoalDefinition());
 		}
@@ -434,6 +437,10 @@ public class RulesProject {
 		for (IModel iModel : bModels) {
 			iModel.printAsProlog(pout, nodeIds);
 		}
+	}
+
+	public void addConstantValue(String constant, String value) {
+		this.constantStringValues.put(constant, value);
 	}
 
 }

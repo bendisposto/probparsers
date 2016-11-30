@@ -58,7 +58,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 
 	private AbstractOperation currentOperation;
 	private final Start start;
-	private List<AbstractOperation> sortedOperationsList;
 
 	public RulesMachineVisitor(String fileName, List<Reference> machineReferences, Start start) {
 		this.fileName = fileName;

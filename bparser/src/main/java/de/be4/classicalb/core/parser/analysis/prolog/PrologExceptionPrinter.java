@@ -138,13 +138,13 @@ public final class PrologExceptionPrinter {
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
 		final Node[] nodes = cause.getNodes();
 		final SourcePosition startPos;
-		//final SourcePosition endPos;
+		// final SourcePosition endPos;
 		if (nodes != null && nodes.length > 0) {
 			startPos = nodes[0].getStartPos();
-			//endPos = nodes[0].getEndPos();
+			// endPos = nodes[0].getEndPos();
 		} else {
 			startPos = null;
-			//endPos = null;
+			// endPos = null;
 		}
 		printExceptionWithSourcePosition(pto, cause, filename, startPos, useIndentation, lineOneOff);
 	}
@@ -198,6 +198,7 @@ public final class PrologExceptionPrinter {
 		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
 	}
 
+	@SuppressWarnings("unused")
 	private static void printExceptionWithSourceRange(final IPrologTermOutput pto, final Throwable e,
 			final String filename, final SourcePosition beginPos, final SourcePosition endPos,
 			final boolean useIndentation, final boolean lineOneOff) {

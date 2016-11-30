@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -19,6 +20,7 @@ import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
 import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
@@ -28,6 +30,7 @@ import de.be4.classicalb.core.parser.node.AMachineReference;
 import de.be4.classicalb.core.parser.node.AMultOrCartExpression;
 import de.be4.classicalb.core.parser.node.APowSubsetExpression;
 import de.be4.classicalb.core.parser.node.APromotesMachineClause;
+import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.ASeqExpression;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStringSetExpression;
@@ -37,10 +40,12 @@ import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
+import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.NodeCloner;
+import static de.be4.classicalb.core.rules.tranformation.ASTBuilder.*;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -288,6 +293,22 @@ public class BMachine implements IModel {
 		}
 		PDefinition def = (PDefinition) NodeCloner.cloneNode(goalDefinition);
 		definitionsClause.getDefinitions().add(def);
+	}
+
+	public void addPropertiesPredicates(HashMap<String, String> constantStringValues) {
+		if (constantStringValues.size() == 0) {
+			return;
+		}
+		APropertiesMachineClause clause = new APropertiesMachineClause();
+		this.parseUnit.getMachineClauses().add(clause);
+		List<PPredicate> predList = new ArrayList<>();
+		for (Entry<String, String> entry : constantStringValues.entrySet()) {
+			AIdentifierExpression identifier = createIdentifier(entry.getKey());
+			AStringExpression value = new AStringExpression(new TStringLiteral(entry.getValue()));
+			AEqualPredicate equal = new AEqualPredicate(identifier, value);
+			predList.add(equal);
+		}
+		clause.setPredicates(createConjunction(predList));
 	}
 
 }
