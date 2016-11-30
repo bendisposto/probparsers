@@ -17,15 +17,20 @@ import de.be4.classicalb.core.parser.node.ACaseSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
+import de.be4.classicalb.core.parser.node.ADomainRestrictionExpression;
+import de.be4.classicalb.core.parser.node.AEmptySetExpression;
+import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionOperation;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.ANotEqualPredicate;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
+import de.be4.classicalb.core.parser.node.AOperatorPredicate;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
@@ -453,6 +458,64 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		outAIdentifierExpression(node);
 	}
 
+	@Override
+	public void outAOperatorPredicate(AOperatorPredicate node) {
+		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
+		final String operatorName = node.getName().getText();
+		switch (operatorName) {
+		case RulesGrammar.SUCCEEDED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected one argument.", node));
+			}
+			return;
+		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
+			if (arguments.size() != 2) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected two arguments.", node));
+			}
+			PExpression pExpression = node.getIdentifiers().get(0);
+			if (!(pExpression instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
+			}
+			return;
+		}
+		case RulesGrammar.FAILED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected one argument.", node));
+			}
+			return;
+		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
+			if (arguments.size() != 2) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected two arguments.", node));
+			}
+			PExpression pExpression = node.getIdentifiers().get(0);
+			if (!(pExpression instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
+			}
+			return;
+		}
+		case RulesGrammar.NOT_CHECKED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected one argument.", node));
+			}
+			return;
+		case RulesGrammar.DISABLED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("Invalid number of arguments. Expected one argument.", node));
+			}
+			return;
+		default:
+			throw new IllegalStateException("should not happen: " + operatorName);
+		}
+	}
+	
 	@Override
 	public void outAOperatorSubstitution(AOperatorSubstitution node) {
 		final String operatorName = node.getName().getText();

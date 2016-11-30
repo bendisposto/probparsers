@@ -11,7 +11,6 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.extensions.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.NodeCloner;
@@ -59,18 +58,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		this.rulesMachineVisitor = rulesMachineVisitor;
 	}
 
-	public void runTransformation() throws CheckException, BException {
-		try {
-			start.apply(this);
-		} catch (VisitorException e) {
-			if (e.getException() instanceof CheckException) {
-				throw (CheckException) e.getException();
-			} else if (e.getException() instanceof BException) {
-				throw (BException) e.getException();
-			} else {
-				new RuntimeException("Unexpected Exception: " + e.getMessage());
-			}
-		}
+	public void runTransformation() {
+		start.apply(this);
 		DefinitionInjector.injectDefinitions(start, definitions);
 	}
 
@@ -495,9 +484,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final LinkedList<PExpression> arguments = node.getArguments();
 			// arguments is never null because a list in sablecc is empty
 			// if not provided
-			if (arguments.size() == 0) {
-				throw new VisitorException(new CheckException("RULE_FAIL requires at least one argument.", node));
-			} else if (arguments.size() == 1) {
+			if (arguments.size() == 1) {
 				final PSubstitution assign = createCounterExampleSubstitution(1, arguments.get(0));
 				node.replaceBy(assign);
 				return;
@@ -510,15 +497,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 					node.replaceBy(assign);
 					return;
 				} else {
-					throw new VisitorException(new CheckException(
-							"Invalid value for the first argument of RULE_FAILL: Expectet an integer value.", node));
+					throw new IllegalStateException();
 				}
-			} else {
-				throw new VisitorException(new CheckException("Invalid number of arguments for RULE_FAILL", node));
 			}
 		}
 		default:
-			throw new RuntimeException("should not happen");
+			throw new IllegalStateException();
 		}
 	}
 
@@ -651,22 +635,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
 		case RulesGrammar.SUCCEEDED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_SUCCESS);
 			return;
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
-			}
 			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				throw new VisitorException(new CheckException(
-						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
-			}
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
@@ -676,22 +648,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 			return;
 		}
 		case RulesGrammar.FAILED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_FAIL);
 			return;
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
-			}
 			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				throw new VisitorException(new CheckException(
-						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
-			}
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
@@ -701,21 +661,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 			return;
 		}
 		case RulesGrammar.NOT_CHECKED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_NOT_CHECKED);
 			return;
 		case RulesGrammar.DISABLED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_DISABLED);
 			return;
 		default:
-			throw new RuntimeException("should not happen: " + operatorName);
+			throw new IllegalStateException("should not happen: " + operatorName);
 		}
 	}
 
@@ -897,7 +849,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
@@ -908,7 +860,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -926,7 +878,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
@@ -936,7 +888,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -954,7 +906,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
@@ -965,7 +917,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 

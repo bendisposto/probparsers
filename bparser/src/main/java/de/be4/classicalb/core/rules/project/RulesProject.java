@@ -72,7 +72,7 @@ public class RulesProject {
 	}
 
 	public void flattenProject() {
-		if (projectHasErrors()) {
+		if (this.bExceptionList.size() > 0) {
 			return;
 		}
 
@@ -111,6 +111,10 @@ public class RulesProject {
 
 	public void parseProject() {
 		final IModel mainModel = parseMainFile();
+		if (mainModel.hasError()) {
+			final BCompoundException compound = mainModel.getBExeption();
+			this.bExceptionList.addAll(compound.getExceptions());
+		}
 		bModels.add(mainModel);
 		final LinkedList<Reference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
@@ -118,7 +122,7 @@ public class RulesProject {
 			if (isANewModel(modelReference)) {
 				final IModel bModel = lookupReference(modelReference);
 				if (bModel.hasError()) {
-					BCompoundException compound = bModel.getBExeption();
+					final BCompoundException compound = bModel.getBExeption();
 					this.bExceptionList.addAll(compound.getExceptions());
 				}
 				bModels.add(bModel);
@@ -371,15 +375,6 @@ public class RulesProject {
 		if (this.bExceptionList.size() > 0) {
 			BCompoundException comp = new BCompoundException(bExceptionList);
 			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.useIndention, false);
-			return -2;
-		}
-		if (projectHasErrors()) {
-			for (IModel iModel : bModels) {
-				if (iModel.hasError()) {
-					iModel.printExceptionAsProlog(err);
-					break;
-				}
-			}
 			return -2;
 		} else {
 			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);

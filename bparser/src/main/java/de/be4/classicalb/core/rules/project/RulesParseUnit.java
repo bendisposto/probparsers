@@ -148,18 +148,7 @@ public class RulesParseUnit implements IModel {
 		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
 				rulesMachineVisitor);
 		ruleTransformation.setSortedOperationList(sortedOperationsList);
-		try {
-			ruleTransformation.runTransformation();
-		} catch (CheckException e) {
-			if (machineFile != null) {
-				bCompoundException = new BCompoundException(new BException(machineFile.getPath(), e));
-			} else {
-				bCompoundException = new BCompoundException(new BException("UnkownFile", e));
-			}
-		} catch (BException e) {
-			bCompoundException = new BCompoundException(e);
-		}
-
+		ruleTransformation.runTransformation();
 	}
 
 	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {
