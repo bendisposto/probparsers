@@ -31,7 +31,8 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private final File mainFile;
-	final String mainMachineName = "$RULE_Main";
+	final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
+	final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour;
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
@@ -80,8 +81,7 @@ public class RulesProject {
 			return;
 		}
 
-		final String compositionName = "$RULE_Composition";
-		final BMachine compositionMachine = new BMachine(compositionName, new File(compositionName + ".mch"));
+		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME, new File(COMPOSITION_MACHINE_NAME + ".mch"));
 		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
 		final List<String> promotesList = new ArrayList<>();
@@ -106,10 +106,10 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
-		BMachine mainMachine = new BMachine(mainMachineName, new File(mainMachineName + ".mch"));
+		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME, new File(MAIN_MACHINE_NAME + ".mch"));
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
-		mainMachine.addIncludesClause(compositionName);
+		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(promotesList);
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
 		if (injector.getGoalDefinition() != null) {
@@ -437,7 +437,7 @@ public class RulesProject {
 
 		// machine
 		pout.openTerm("classical_b");
-		pout.printAtom(mainMachineName);
+		pout.printAtom(MAIN_MACHINE_NAME);
 		pout.openList();
 
 		for (IModel iModel : bModels) {
