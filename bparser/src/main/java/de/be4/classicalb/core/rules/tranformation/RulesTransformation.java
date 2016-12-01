@@ -20,14 +20,15 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_FAIL = "FAIL";
-	public static final String RULE_INTERRUPTION = "RULE_INTERRUPTION";
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
+	//public static final String RULE_BLOCKED = "RULE_BLOCKED";
 
 	public static final String COMPUTATION_EXECUTED = "EXECUTED";
 	public static final String COMPUTATION_NOT_EXECUTED = "NOT_EXECUTED";
 	public static final String COMPUTATION_DISABLED = "COMPUTATION_DISABLED";
+	//public static final String COMPUTATION_BLOCKED = "COMPUTATION_BLOCKED";
 
 	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLES";
@@ -324,9 +325,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 
 		selectConditionList.addAll(getOperationOrderPredicateList(currentRule));
-
 		select.setCondition(createConjunction(selectConditionList));
 
+		
 		ArrayList<PSubstitution> subList = new ArrayList<>();
 		subList.add(node.getRuleBody());
 		// IF rule_Counterexamples = {} THEN RULE_SUCCESS ELSE RULE_FAIL END

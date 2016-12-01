@@ -33,13 +33,12 @@ public class RulesProject {
 	private final File mainFile;
 	private ParsingBehaviour parsingBehaviour;
 	private final List<BException> bExceptionList = new ArrayList<>();
-
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
-
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private List<AbstractOperation> sortedOperationsList;
 	private HashMap<String, String> constantStringValues = new HashMap<>();
+	private boolean linearExecutionSequence = false;
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -69,6 +68,10 @@ public class RulesProject {
 
 	public HashMap<String, AbstractOperation> getOperationsMap() {
 		return new HashMap<>(this.allOperations);
+	}
+
+	public void setLinearExecutionSequence() {
+		this.linearExecutionSequence = true;
 	}
 
 	public void flattenProject() {
@@ -145,7 +148,9 @@ public class RulesProject {
 			}
 		}
 		checkReadWrite();
-		sortOperations(allOperations.values());
+		if (this.linearExecutionSequence) {
+			sortOperations(allOperations.values());
+		}
 	}
 
 	private void checkDependencies() {
