@@ -36,6 +36,15 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
+	
+	@Test
+	public void testDublicateRuleName() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception"));
+		assertTrue(result.contains("Duplicate operation name"));
+	}
 
 	@Test
 	public void testRuleAny() throws FileNotFoundException, IOException {

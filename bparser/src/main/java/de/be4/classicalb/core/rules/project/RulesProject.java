@@ -134,13 +134,21 @@ public class RulesProject {
 	}
 
 	private void checkProject() {
-		for (IModel iModel : bModels) {
-			RulesParseUnit unit = (RulesParseUnit) iModel;
-			List<AbstractOperation> operations = unit.getOperations();
-			for (AbstractOperation abstractOperation : operations) {
-				allOperations.put(abstractOperation.getName(), abstractOperation);
+		collectAllRules();
+		checkDependencies();
+
+		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
+		while (!todoList.isEmpty()) {
+			AbstractOperation operation = todoList.poll();
+			if (operation.getDependencies() == null) {
+				findDependencies(operation, new ArrayList<AbstractOperation>());
 			}
 		}
+		checkReadWrite();
+		sortOperations(allOperations.values());
+	}
+
+	private void checkDependencies() {
 		for (AbstractOperation operation : allOperations.values()) {
 			List<AIdentifierExpression> dependsOnComputationList = operation.getDependsOnComputationList();
 			for (AIdentifierExpression aIdentifierExpression : dependsOnComputationList) {
@@ -171,16 +179,21 @@ public class RulesProject {
 				}
 			}
 		}
+	}
 
-		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
-		while (!todoList.isEmpty()) {
-			AbstractOperation operation = todoList.poll();
-			if (operation.getDependencies() == null) {
-				findDependencies(operation, new ArrayList<AbstractOperation>());
+	private void collectAllRules() {
+		for (IModel iModel : bModels) {
+			final RulesParseUnit unit = (RulesParseUnit) iModel;
+			final List<AbstractOperation> operations = unit.getOperations();
+			for (AbstractOperation abstractOperation : operations) {
+				final String name = abstractOperation.getName();
+				if (allOperations.containsKey(name)) {
+					this.bExceptionList.add(new BException(abstractOperation.getFileName(), new CheckException(
+							"Duplicate operation name: '" + name + "'.", abstractOperation.getNameLiteral())));
+				}
+				allOperations.put(name, abstractOperation);
 			}
 		}
-		checkReadWrite();
-		sortOperations(allOperations.values());
 	}
 
 	private void sortOperations(Collection<AbstractOperation> values) {

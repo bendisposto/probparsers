@@ -253,9 +253,22 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 	}
 
+	private boolean containsRule(String name) {
+		for (Rule rule : this.rulesMap.values()) {
+			if (name.equals(rule.getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
 		currentOperation = new Rule(node.getRuleName(), this.fileName, this.machineName, machineReferences);
+		if (containsRule(currentOperation.getName())) {
+			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
+					node.getRuleName()));
+		}
 		rulesMap.put(node, (Rule) currentOperation);
 		visitOperationAttributes(node.getAttributes());
 		node.getRuleBody().apply(this);
@@ -465,14 +478,12 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		switch (operatorName) {
 		case RulesGrammar.SUCCEEDED_RULE:
 			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected one argument.", node));
 			}
 			return;
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
 			if (arguments.size() != 2) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected two arguments.", node));
 			}
 			PExpression pExpression = node.getIdentifiers().get(0);
 			if (!(pExpression instanceof AIdentifierExpression)) {
@@ -483,14 +494,12 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 		case RulesGrammar.FAILED_RULE:
 			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected one argument.", node));
 			}
 			return;
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
 			if (arguments.size() != 2) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected two arguments.", node));
 			}
 			PExpression pExpression = node.getIdentifiers().get(0);
 			if (!(pExpression instanceof AIdentifierExpression)) {
@@ -501,21 +510,19 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 		case RulesGrammar.NOT_CHECKED_RULE:
 			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected one argument.", node));
 			}
 			return;
 		case RulesGrammar.DISABLED_RULE:
 			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
+				this.errorList.add(new CheckException("Invalid number of arguments. Expected one argument.", node));
 			}
 			return;
 		default:
 			throw new IllegalStateException("should not happen: " + operatorName);
 		}
 	}
-	
+
 	@Override
 	public void outAOperatorSubstitution(AOperatorSubstitution node) {
 		final String operatorName = node.getName().getText();
@@ -595,5 +602,4 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 	}
 
-	
 }
