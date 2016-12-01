@@ -87,6 +87,11 @@ public class RulesProject {
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
 			rulesParseUnit.translate(sortedOperationsList);
+			if (!rulesParseUnit.hasError()) {
+				final int fileNumber = bModels.size() + 1;
+				Start start = rulesParseUnit.getStart();
+				nodeIds.assignIdentifiers(fileNumber, start);
+			}
 			List<AbstractOperation> operations = rulesParseUnit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
 				if (abstractOperation instanceof FunctionOperation) {
@@ -103,6 +108,7 @@ public class RulesProject {
 		final String mainMachineName = "Main";
 		BMachine mainMachine = new BMachine(mainMachineName, new File(mainMachineName + ".mch"));
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
 		mainMachine.addIncludesClause(compositionName);
 		mainMachine.addPromotesClause(promotesList);
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
@@ -343,11 +349,6 @@ public class RulesProject {
 		unit.setParsingBehaviour(this.parsingBehaviour);
 		unit.readMachineFromFile(file);
 		unit.parse();
-		if (!unit.hasError()) {
-			final int fileNumber = bModels.size() + 1;
-			Start start = unit.getStart();
-			nodeIds.assignIdentifiers(fileNumber, start);
-		}
 		return unit;
 	}
 

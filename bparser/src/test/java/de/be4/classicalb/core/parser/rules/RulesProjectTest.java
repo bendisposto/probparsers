@@ -31,6 +31,16 @@ public class RulesProjectTest {
 	}
 
 	@Test
+	public void testForAll() throws Exception {
+		String f = "src/test/resources/rules/ForAllPredicate.rmch";
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.addLineNumbers = true;
+		RulesProject.parseProject(new File(f), parsingBehaviour, System.out,  System.err);
+	}
+	
+	
+	
+	@Test
 	public void testTransitiveDependency() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/TransitiveDependency.rmch");
 		System.out.println(result);

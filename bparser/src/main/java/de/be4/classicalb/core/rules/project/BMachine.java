@@ -24,6 +24,7 @@ import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
+import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
 import de.be4.classicalb.core.parser.node.AMachineReference;
@@ -43,6 +44,7 @@ import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.NodeCloner;
 import static de.be4.classicalb.core.rules.tranformation.ASTBuilder.*;
@@ -212,6 +214,16 @@ public class BMachine implements IModel {
 		}
 		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
 				new ArrayList<PExpression>(), bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
+		definitionsClause.getDefinitions().add(def);
+	}
+
+	public void addPreferenceDefinition(String name, int value) {
+		if (this.definitionsClause == null) {
+			definitionsClause = new ADefinitionsMachineClause(new ArrayList<PDefinition>());
+			this.parseUnit.getMachineClauses().add(definitionsClause);
+		}
+		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
+				new ArrayList<PExpression>(), new AIntegerExpression(new TIntegerLiteral("" + value)));
 		definitionsClause.getDefinitions().add(def);
 	}
 
