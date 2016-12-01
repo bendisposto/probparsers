@@ -31,6 +31,7 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private final File mainFile;
+	final String mainMachineName = "$RULE_Main";
 	private ParsingBehaviour parsingBehaviour;
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
@@ -105,7 +106,6 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
-		final String mainMachineName = "$RULE_Main";
 		BMachine mainMachine = new BMachine(mainMachineName, new File(mainMachineName + ".mch"));
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
@@ -437,7 +437,7 @@ public class RulesProject {
 
 		// machine
 		pout.openTerm("classical_b");
-		pout.printAtom("Main");
+		pout.printAtom(mainMachineName);
 		pout.openList();
 
 		for (IModel iModel : bModels) {
