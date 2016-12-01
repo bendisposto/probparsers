@@ -79,7 +79,7 @@ public class RulesProject {
 			return;
 		}
 
-		final String compositionName = "Composition";
+		final String compositionName = "$RULE_Composition";
 		final BMachine compositionMachine = new BMachine(compositionName, new File(compositionName + ".mch"));
 		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
@@ -105,7 +105,7 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
-		final String mainMachineName = "Main";
+		final String mainMachineName = "$RULE_Main";
 		BMachine mainMachine = new BMachine(mainMachineName, new File(mainMachineName + ".mch"));
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
