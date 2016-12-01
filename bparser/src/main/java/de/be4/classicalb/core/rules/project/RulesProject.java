@@ -88,7 +88,7 @@ public class RulesProject {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
 			rulesParseUnit.translate(sortedOperationsList);
 			if (!rulesParseUnit.hasError()) {
-				final int fileNumber = bModels.size() + 1;
+				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
 				nodeIds.assignIdentifiers(fileNumber, start);
 			}
@@ -357,11 +357,6 @@ public class RulesProject {
 		bParseUnit.readMachineFromFile(mainFile);
 		bParseUnit.setParsingBehaviour(this.parsingBehaviour);
 		bParseUnit.parse();
-		Start start = bParseUnit.getStart();
-		if (start != null) {
-			final int fileNumber = bModels.size() + 1;
-			nodeIds.assignIdentifiers(fileNumber, start);
-		}
 		return bParseUnit;
 	};
 
