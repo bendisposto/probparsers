@@ -14,6 +14,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -29,6 +30,14 @@ public class Helpers {
 		final String string = ast2String.toString();
 		// System.out.println(string);
 		return string;
+	}
+
+	public static String getPrettyPrint(final String testMachine) throws BCompoundException {
+		final BParser parser = new BParser("testcase");
+		final Start startNode = parser.parse(testMachine, false);
+		PrettyPrinter pp = new PrettyPrinter();
+		startNode.apply(pp);
+		return pp.getPrettyPrint();
 	}
 
 	public static String parseFile2(String filename) throws IOException {
