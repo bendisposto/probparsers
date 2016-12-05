@@ -10,23 +10,18 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.extensions.RulesGrammar;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
-import de.be4.classicalb.core.parser.node.ADomainRestrictionExpression;
-import de.be4.classicalb.core.parser.node.AEmptySetExpression;
-import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionOperation;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.ANotEqualPredicate;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
@@ -398,9 +393,9 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				String content = string.getContent().getText();
 				int count = (content.length() - content.replace("~w", "").length()) / 2;
 				if (count != parameters.size() - 1) {
-					throw new VisitorException(new CheckException(
+					this.errorList.add(new CheckException(
 							"The number of arguments (" + (parameters.size() - 1)
-									+ ") does not match the number of placeholders (" + count + " in the string.",
+									+ ") does not match the number of placeholders (" + count + ") in the string.",
 							node));
 				}
 			}

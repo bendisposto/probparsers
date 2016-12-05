@@ -23,15 +23,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
-	//public static final String RULE_BLOCKED = "RULE_BLOCKED";
+	// public static final String RULE_BLOCKED = "RULE_BLOCKED";
 
 	public static final String COMPUTATION_EXECUTED = "EXECUTED";
 	public static final String COMPUTATION_NOT_EXECUTED = "NOT_EXECUTED";
 	public static final String COMPUTATION_DISABLED = "COMPUTATION_DISABLED";
-	//public static final String COMPUTATION_BLOCKED = "COMPUTATION_BLOCKED";
+	// public static final String COMPUTATION_BLOCKED = "COMPUTATION_BLOCKED";
 
-	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
-	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLES";
+	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "$RESULT";
+	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
 	private final IDefinitions definitions;
@@ -327,7 +327,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		selectConditionList.addAll(getOperationOrderPredicateList(currentRule));
 		select.setCondition(createConjunction(selectConditionList));
 
-		
 		ArrayList<PSubstitution> subList = new ArrayList<>();
 		subList.add(node.getRuleBody());
 		// IF rule_Counterexamples = {} THEN RULE_SUCCESS ELSE RULE_FAIL END
@@ -565,10 +564,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// ",s)})
 			addStringAppendDefinition();
 			final ALetSubstitution let = new ALetSubstitution();
-			let.setIdentifiers(createExpressionList(createIdentifier("#cts")));
-			let.setPredicate(
-					new AEqualPredicate(createIdentifier("#cts"), (PExpression) cloneNode(setOfCounterexamples)));
-			final PPredicate unionPredicate = new AMemberPredicate(createIdentifier("s"), createIdentifier("#cts"));
+			final String CTS = "$cts";
+			let.setIdentifiers(createExpressionList(createIdentifier(CTS)));
+			let.setPredicate(new AEqualPredicate(createIdentifier(CTS), (PExpression) cloneNode(setOfCounterexamples)));
+			final PPredicate unionPredicate = new AMemberPredicate(createIdentifier("s"), createIdentifier(CTS));
 			final PExpression expr = new ASetExtensionExpression(createExpressionList(
 					new ADefinitionExpression(new TIdentifierLiteral("STRING_APPEND"), createExpressionList(
 							createStringExpression(currentRule.getRuleIdString() + ": "), createIdentifier("s")))));
@@ -588,14 +587,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// Without RULEID
 			// LET #CT_SET BE #CT_SET=UNION(x).(x:1..3|{"fail"}) IN
 			// IF #CT_SET/={} THEN
-			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*STRING/\#CT_SET
+			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*(STRING/\#CT_SET)
 			// END END
+			// {RANGE_LAMBDA|#
+			// x.(x : 1 .. 10 & not(x > 0) & RANGE_LAMBDA =
+			// {FORMAT_TO_STRING("Value ~w is not greater than zero"
+			// ,[TO_STRING(x)])})}
+
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
 					new AMultOrCartExpression(
 							new ASetExtensionExpression(
 									createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
-							new AIntersectionExpression(new AStringSetExpression(),
-									(PExpression) cloneNode(setOfCounterexamples))));
+							// new AIntersectionExpression(new
+							// AStringSetExpression(),
+							(PExpression) cloneNode(setOfCounterexamples)));
 			return new AAssignSubstitution(createExpressionList(createIdentifier(ctName)), createExpressionList(union));
 		}
 	}
@@ -806,21 +811,59 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
 		// mandatory union
-		final AQuantifiedUnionExpression union = new AQuantifiedUnionExpression();
+		// final AQuantifiedUnionExpression union = new
+		// AQuantifiedUnionExpression();
+		// {
+		// final List<PExpression> list = new ArrayList<PExpression>();
+		// for (PExpression id : node.getIdentifiers()) {
+		// PExpression clonedId = (PExpression) cloneNode(id);
+		// list.add(clonedId);
+		// }
+		// union.setIdentifiers(list);
+		// final PPredicate where = (PPredicate) cloneNode(node.getWhere());
+		// final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
+		// union.setPredicates(new AConjunctPredicate(where, new
+		// ANegationPredicate(expect)));
+		// final List<PExpression> setElementsInUnionList = new
+		// ArrayList<PExpression>();
+		// setElementsInUnionList.add(node.getMessage());
+		// final ASetExtensionExpression set = new
+		// ASetExtensionExpression(setElementsInUnionList);
+		// union.setExpression(set);
+		// }
+
+		final AComprehensionSetExpression set = new AComprehensionSetExpression();
 		{
+			final String tupleName = "$TUPLE";
+			set.setIdentifiers(createExpressionList(createIdentifier(tupleName, node.getMessage())));
+			AExistsPredicate exists = new AExistsPredicate();
 			final List<PExpression> list = new ArrayList<PExpression>();
+			final List<PExpression> list2 = new ArrayList<PExpression>();
+			final List<PExpression> list3 = new ArrayList<PExpression>();
 			for (PExpression id : node.getIdentifiers()) {
 				PExpression clonedId = (PExpression) cloneNode(id);
 				list.add(clonedId);
+				PExpression clonedId2 = (PExpression) cloneNode(id);
+				list2.add(clonedId2);
+				PExpression clonedId3 = (PExpression) cloneNode(id);
+				list3.add(clonedId3);
 			}
-			union.setIdentifiers(list);
+			exists.setIdentifiers(list);
+			List<PPredicate> predList = new ArrayList<>();
 			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
 			final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
-			union.setPredicates(new AConjunctPredicate(where, new ANegationPredicate(expect)));
-			final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
-			setElementsInUnionList.add(node.getMessage());
-			final ASetExtensionExpression set = new ASetExtensionExpression(setElementsInUnionList);
-			union.setExpression(set);
+			PExpression couple;
+			if (list2.size() > 1) {
+				couple = new ACoupleExpression(list2);
+			} else {
+				couple = list2.get(0);
+			}
+			final AEqualPredicate equal = new AEqualPredicate(createIdentifier(tupleName, node.getMessage()), couple);
+			predList.add(where);
+			predList.add(new ANegationPredicate(expect));
+			predList.add(equal);
+			exists.setPredicate(createConjunction(predList));
+			set.setPredicates(exists);
 		}
 		addToStringDefinition();
 
@@ -831,8 +874,61 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// default value
 			errorType = 1;
 		}
-		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType, union);
-		node.replaceBy(counterExampleSubstitution);
+		AVarSubstitution var = new AVarSubstitution();
+		final String resultTuple = "$ResultTuple";
+		final String resultStrings = "$ResultSrings";
+		var.setIdentifiers(createExpressionList(createIdentifier(resultTuple), createIdentifier(resultStrings)));
+		List<PSubstitution> subList = new ArrayList<>();
+		{
+			AAssignSubstitution assign = new AAssignSubstitution();
+			assign.setLhsExpression(createExpressionList(createIdentifier(resultTuple)));
+			assign.setRhsExpressions(createExpressionList(set));
+			subList.add(assign);
+		}
+		{
+			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression();
+			final String stringParam = "$String";
+			stringSet.setIdentifiers(createExpressionList(createIdentifier(stringParam)));
+			final List<PExpression> list = new ArrayList<PExpression>();
+			final List<PExpression> list2 = new ArrayList<PExpression>();
+			for (PExpression id : node.getIdentifiers()) {
+				PExpression clonedId = (PExpression) cloneNode(id);
+				list.add(clonedId);
+				PExpression clonedId2 = (PExpression) cloneNode(id);
+				list2.add(clonedId2);
+			}
+			final AExistsPredicate exists = new AExistsPredicate();
+			exists.setIdentifiers(list);
+			PExpression couple;
+			if (list2.size() > 1) {
+				couple = new ACoupleExpression(list2);
+			} else {
+				couple = list2.get(0);
+			}
+			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(resultTuple));
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(stringParam), node.getMessage());
+			exists.setPredicate(new AConjunctPredicate(member, equal));
+			stringSet.setPredicates(exists);
+			AAssignSubstitution assign = new AAssignSubstitution();
+			assign.setLhsExpression(createExpressionList(createIdentifier(resultStrings)));
+			assign.setRhsExpressions(createExpressionList(stringSet));
+			subList.add(assign);
+		}
+
+		// ALetSubstitution letSub = new ALetSubstitution();
+		// letSub.setIdentifiers(createExpressionList(createIdentifier("$ResultTuple")));
+		// AEqualPredicate equal = new
+		// AEqualPredicate(createIdentifier("$ResultTuple"), set);
+		// letSub.setPredicate(equal);
+
+		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
+				createIdentifier(resultStrings));
+		subList.add(counterExampleSubstitution);
+		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
+		var.setSubstitution(seqSub);
+		node.replaceBy(var);
+		// letSub.setSubstitution(counterExampleSubstitution);
+		// node.replaceBy(letSub);
 	}
 
 	private void addStringAppendDefinition() {
@@ -856,7 +952,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
 		toStringTypeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
 		toStringTypeDef.setRhs(new ATotalFunctionExpression(
-				new ACartesianProductExpression(new AStringSetExpression(), new AStringSetExpression()),
+				new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
 				new AStringSetExpression()));
 		try {
 			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);

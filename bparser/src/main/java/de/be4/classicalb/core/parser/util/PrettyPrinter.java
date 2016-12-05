@@ -89,7 +89,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		for (PMachineClause e : copy) {
 			e.apply(this);
 		}
-		sb.append("\nEND");
+		sb.append("END");
 	}
 
 	@Override
@@ -106,6 +106,29 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		// for (PExpression e : copy) {
 		// e.apply(this);
 		// }
+	}
+
+	@Override
+	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
+		sb.append("DEFINITIONS\n");
+		List<PDefinition> copy = new ArrayList<PDefinition>(node.getDefinitions());
+		for (int i = 0; i < copy.size(); i++) {
+			copy.get(i).apply(this);
+			sb.append(";\n");
+		}
+	}
+
+	@Override
+	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
+		node.getName().apply(this);
+		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
+		if (copy.size() > 0) {
+			sb.append("(");
+			printExprList(copy);
+			sb.append(")");
+		}
+		sb.append(" == ");
+		node.getRhs().apply(this);
 	}
 
 	@Override
@@ -402,6 +425,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append(" END ");
 	}
 
+	@Override
+	public void caseAIfThenElseExpression(AIfThenElseExpression node) {
+		sb.append("IF ");
+		node.getCondition().apply(this);
+		sb.append(" THEN ");
+		node.getThen().apply(this);
+		sb.append(" ELSE ");
+		node.getElse().apply(this);
+		sb.append(" END");
+	}
+
 	private void commaSeparatedExpressionList(List<PExpression> list) {
 		list.get(0).apply(this);
 		for (int i = 1; i < list.size(); i++) {
@@ -622,6 +656,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
 		final List<PExpression> copy = new ArrayList<PExpression>(node.getList());
+		System.out.println(copy.size());
 		sb.append("(");
 		copy.get(0).apply(this);
 		sb.append(",");

@@ -20,6 +20,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.rules.tranformation.RulesMachineVisitor;
@@ -144,7 +145,6 @@ public class RulesParseUnit implements IModel {
 		if (bCompoundException != null) {
 			return;
 		}
-
 		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
 				rulesMachineVisitor);
 		ruleTransformation.setSortedOperationList(sortedOperationsList);
