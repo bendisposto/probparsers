@@ -46,6 +46,8 @@ public class RulesLanguageTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
 	}
 
 	@Test

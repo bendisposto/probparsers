@@ -810,33 +810,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		// mandatory union
-		// final AQuantifiedUnionExpression union = new
-		// AQuantifiedUnionExpression();
-		// {
-		// final List<PExpression> list = new ArrayList<PExpression>();
-		// for (PExpression id : node.getIdentifiers()) {
-		// PExpression clonedId = (PExpression) cloneNode(id);
-		// list.add(clonedId);
-		// }
-		// union.setIdentifiers(list);
-		// final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-		// final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
-		// union.setPredicates(new AConjunctPredicate(where, new
-		// ANegationPredicate(expect)));
-		// final List<PExpression> setElementsInUnionList = new
-		// ArrayList<PExpression>();
-		// setElementsInUnionList.add(node.getMessage());
-		// final ASetExtensionExpression set = new
-		// ASetExtensionExpression(setElementsInUnionList);
-		// union.setExpression(set);
-		// }
-
 		final AComprehensionSetExpression set = new AComprehensionSetExpression();
 		{
-			final String tupleName = "$TUPLE";
-			set.setIdentifiers(createExpressionList(createIdentifier(tupleName, node.getMessage())));
-			AExistsPredicate exists = new AExistsPredicate();
 			final List<PExpression> list = new ArrayList<PExpression>();
 			final List<PExpression> list2 = new ArrayList<PExpression>();
 			final List<PExpression> list3 = new ArrayList<PExpression>();
@@ -848,22 +823,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 				PExpression clonedId3 = (PExpression) cloneNode(id);
 				list3.add(clonedId3);
 			}
-			exists.setIdentifiers(list);
-			List<PPredicate> predList = new ArrayList<>();
+			set.setIdentifiers(list);
 			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
 			final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
-			PExpression couple;
-			if (list2.size() > 1) {
-				couple = new ACoupleExpression(list2);
-			} else {
-				couple = list2.get(0);
-			}
-			final AEqualPredicate equal = new AEqualPredicate(createIdentifier(tupleName, node.getMessage()), couple);
-			predList.add(where);
-			predList.add(new ANegationPredicate(expect));
-			predList.add(equal);
-			exists.setPredicate(createConjunction(predList));
-			set.setPredicates(exists);
+			set.setPredicates(new AConjunctPredicate(where, new ANegationPredicate(expect)));
 		}
 		addToStringDefinition();
 
