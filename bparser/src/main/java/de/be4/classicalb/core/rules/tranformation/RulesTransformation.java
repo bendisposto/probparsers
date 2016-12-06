@@ -778,61 +778,36 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
-		// mandatory union
-		final AQuantifiedUnionExpression union = new AQuantifiedUnionExpression();
-		{
-			final List<PExpression> list = new ArrayList<PExpression>();
-			for (PExpression id : node.getIdentifiers()) {
-				PExpression clonedId = (PExpression) cloneNode(id);
-				list.add(clonedId);
-			}
-			union.setIdentifiers(list);
-			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-			union.setPredicates(where);
-			final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
-			setElementsInUnionList.add(node.getMessage());
-			final ASetExtensionExpression set = new ASetExtensionExpression(setElementsInUnionList);
-			union.setExpression(set);
-		}
-
-		addToStringDefinition();
-
-		Integer errorType = null;
-		if (node.getErrorType() != null) {
-			errorType = Integer.parseInt(node.getErrorType().getText());
-		} else {
-			// default value
-			errorType = 1;
-		}
-		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType, union);
-		node.replaceBy(counterExampleSubstitution);
+		final PSubstitution newNode = createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhere(), null,
+				node.getMessage(), node.getErrorType());
+		node.replaceBy(newNode);
 	}
 
-	@Override
-	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
+	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
+			PPredicate wherePredicate, PPredicate expectPredicate, PExpression message, TIntegerLiteral errorTypeNode) {
+
 		final AComprehensionSetExpression set = new AComprehensionSetExpression();
 		{
 			final List<PExpression> list = new ArrayList<PExpression>();
-			final List<PExpression> list2 = new ArrayList<PExpression>();
-			final List<PExpression> list3 = new ArrayList<PExpression>();
-			for (PExpression id : node.getIdentifiers()) {
+			for (PExpression id : identifiers) {
 				PExpression clonedId = (PExpression) cloneNode(id);
 				list.add(clonedId);
-				PExpression clonedId2 = (PExpression) cloneNode(id);
-				list2.add(clonedId2);
-				PExpression clonedId3 = (PExpression) cloneNode(id);
-				list3.add(clonedId3);
 			}
 			set.setIdentifiers(list);
-			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-			final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
-			set.setPredicates(new AConjunctPredicate(where, new ANegationPredicate(expect)));
+			PPredicate condition = null;
+			final PPredicate where = (PPredicate) cloneNode(wherePredicate);
+			if (expectPredicate != null) {
+				final PPredicate expect = (PPredicate) cloneNode(expectPredicate);
+				condition = new AConjunctPredicate(where, new ANegationPredicate(expect));
+			} else {
+				condition = where;
+			}
+			set.setPredicates(condition);
 		}
 		addToStringDefinition();
-
 		Integer errorType = null;
-		if (node.getErrorType() != null) {
-			errorType = Integer.parseInt(node.getErrorType().getText());
+		if (errorTypeNode != null) {
+			errorType = Integer.parseInt(errorTypeNode.getText());
 		} else {
 			// default value
 			errorType = 1;
@@ -854,7 +829,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			stringSet.setIdentifiers(createExpressionList(createIdentifier(stringParam)));
 			final List<PExpression> list = new ArrayList<PExpression>();
 			final List<PExpression> list2 = new ArrayList<PExpression>();
-			for (PExpression id : node.getIdentifiers()) {
+			for (PExpression id : identifiers) {
 				PExpression clonedId = (PExpression) cloneNode(id);
 				list.add(clonedId);
 				PExpression clonedId2 = (PExpression) cloneNode(id);
@@ -869,7 +844,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				couple = list2.get(0);
 			}
 			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(resultTuple));
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(stringParam), node.getMessage());
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(stringParam), message);
 			exists.setPredicate(new AConjunctPredicate(member, equal));
 			stringSet.setPredicates(exists);
 			AAssignSubstitution assign = new AAssignSubstitution();
@@ -878,20 +853,19 @@ public class RulesTransformation extends DepthFirstAdapter {
 			subList.add(assign);
 		}
 
-		// ALetSubstitution letSub = new ALetSubstitution();
-		// letSub.setIdentifiers(createExpressionList(createIdentifier("$ResultTuple")));
-		// AEqualPredicate equal = new
-		// AEqualPredicate(createIdentifier("$ResultTuple"), set);
-		// letSub.setPredicate(equal);
-
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
 				createIdentifier(resultStrings));
 		subList.add(counterExampleSubstitution);
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);
-		node.replaceBy(var);
-		// letSub.setSubstitution(counterExampleSubstitution);
-		// node.replaceBy(letSub);
+		return var;
+	}
+
+	@Override
+	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
+		PSubstitution newNode = createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhere(),
+				node.getExpect(), node.getMessage(), node.getErrorType());
+		node.replaceBy(newNode);
 	}
 
 	private void addStringAppendDefinition() {
