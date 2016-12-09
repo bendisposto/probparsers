@@ -115,11 +115,13 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleFailErrorType() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(1, {}) END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(1, \"fail\") END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains(
 				"member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none))))"));
 		System.out.println(result);
+		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
+		System.out.println(rulesMachineAsBMachine);
 	}
 
 	@Test

@@ -62,6 +62,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void runTransformation() {
 		start.apply(this);
 		DefinitionInjector.injectDefinitions(start, definitions);
+		MissingPositionsAdder.injectPositions(start);
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -346,7 +347,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-
 		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
@@ -364,7 +364,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(createStringExpression(RULE_NOT_CHECKED));
 		list.add(createStringExpression(RULE_DISABLED));
 		ASetExtensionExpression set = new ASetExtensionExpression(list);
-		AMemberPredicate member = new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set);
+		AMemberPredicate member = createPositinedNode(new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set), node);
+		
 		invariantList.add(member);
 
 		/*
@@ -391,7 +392,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		ctTypingPredicate.setLeft(createIdentifier(ctName));
 		ctTypingPredicate.setRight(new APowSubsetExpression(
 				new AMultOrCartExpression(new ANaturalSetExpression(), new AStringSetExpression())));
-		invariantList.add(ctTypingPredicate);
+		invariantList.add(createPositinedNode(ctTypingPredicate, node));
 
 		// INITIALISATION rule1#counterexamples := {}
 		final AAssignSubstitution assign = createAssignNode(createIdentifier(ctName, node.getRuleName()),
@@ -485,7 +486,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// arguments is never null because a list in sablecc is empty
 			// if not provided
 			if (arguments.size() == 1) {
-				final PSubstitution assign = createCounterExampleSubstitution(1, arguments.get(0));
+				final PSubstitution assign = createCounterExampleSubstitution(1,
+						createSetOfPExpression(arguments.get(0), node));
 				node.replaceBy(assign);
 				return;
 			} else if (arguments.size() == 2) {
@@ -493,7 +495,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 				if (pExpression instanceof AIntegerExpression) {
 					AIntegerExpression intExpr = (AIntegerExpression) pExpression;
 					final int errorIndex = Integer.parseInt(intExpr.getLiteral().getText());
-					final PSubstitution assign = createCounterExampleSubstitution(errorIndex, arguments.get(1));
+					final PSubstitution assign = createCounterExampleSubstitution(errorIndex,
+							createSetOfPExpression(arguments.get(1), node));
 					node.replaceBy(assign);
 					return;
 				} else {
@@ -533,15 +536,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return assign;
 	}
 
-	private PExpression createSetOfPExpression(PExpression expression) {
+	private PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add((PExpression) cloneNode(expression));
-		return new ASetExtensionExpression(list);
+		list.add((PExpression) cloneNode(pExpression));
+		return createPositinedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
-
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
 		invariantList.add(member);
@@ -559,9 +561,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		if (currentRule.getRuleIdString() != null) {
-			// RULEID
-			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*UNION(s).(s:#CT_SET|{STRING_APPEND("id1:
-			// ",s)})
 			addStringAppendDefinition();
 			final ALetSubstitution let = new ALetSubstitution();
 			final String CTS = "$cts";
@@ -577,6 +576,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 					new ASetExtensionExpression(
 							createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
 					quantifiedUnion);
+			setPosition(res, setOfCounterexamples);
 			// LET cts2 BE cts2 = CTS \/ res IN ... END
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName), res);
 			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
@@ -584,25 +584,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 			let.setSubstitution(assign);
 			return let;
 		} else {
-			// Without RULEID
-			// LET #CT_SET BE #CT_SET=UNION(x).(x:1..3|{"fail"}) IN
-			// IF #CT_SET/={} THEN
-			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*(STRING/\#CT_SET)
-			// END END
-			// {RANGE_LAMBDA|#
-			// x.(x : 1 .. 10 & not(x > 0) & RANGE_LAMBDA =
-			// {FORMAT_TO_STRING("Value ~w is not greater than zero"
-			// ,[TO_STRING(x)])})}
-
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
-					new AMultOrCartExpression(
+					createPositinedNode(new AMultOrCartExpression(
 							new ASetExtensionExpression(
 									createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
-							// new AIntersectionExpression(new
-							// AStringSetExpression(),
-							(PExpression) cloneNode(setOfCounterexamples)));
+							(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
 			return new AAssignSubstitution(createExpressionList(createIdentifier(ctName)), createExpressionList(union));
 		}
+	}
+
+	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
+		node.setStartPos(pos.getStartPos());
+		node.setEndPos(pos.getEndPos());
+		return node;
+	}
+
+	public static void setPosition(PositionedNode node, PositionedNode pos) {
+		node.setStartPos(pos.getStartPos());
+		node.setEndPos(pos.getEndPos());
 	}
 
 	@Override
@@ -648,7 +647,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
-					createSetOfPExpression(node.getIdentifiers().get(1)), createIdentifier(name, pExpression));
+					createSetOfPExpression(node.getIdentifiers().get(1), node), createIdentifier(name, pExpression));
 			AEqualPredicate equal = new AEqualPredicate(domRes, new AEmptySetExpression());
 			node.replaceBy(equal);
 			return;
@@ -661,7 +660,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
-					createSetOfPExpression(node.getIdentifiers().get(1)), createIdentifier(name, pExpression));
+					createSetOfPExpression(node.getIdentifiers().get(1), node), createIdentifier(name, pExpression));
 			ANotEqualPredicate notEqual = new ANotEqualPredicate(domRes, new AEmptySetExpression());
 			node.replaceBy(notEqual);
 			return;
