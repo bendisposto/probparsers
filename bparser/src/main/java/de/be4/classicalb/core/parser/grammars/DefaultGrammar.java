@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.extensions;
+package de.be4.classicalb.core.parser.grammars;
 
 import de.be4.classicalb.core.parser.node.Token;
 

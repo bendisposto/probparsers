@@ -24,6 +24,15 @@ public class RulesProjectTest {
 	}
 
 	@Test
+	public void testRulesMachineNameDoesNotMatchFileName() throws Exception {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/RulesMachineNameDoesNotMatchFileName.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception(pos(1,15"));
+		assertTrue(result.contains("RULES_MACHINE name must match the file name"));
+	}
+
+	@Test
 	public void testPackage() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/folder/M1.rmch");
 		System.out.println(result);
@@ -35,11 +44,9 @@ public class RulesProjectTest {
 		String f = "src/test/resources/rules/ForAllPredicate.rmch";
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.addLineNumbers = true;
-		RulesProject.parseProject(new File(f), parsingBehaviour, System.out,  System.err);
+		RulesProject.parseProject(new File(f), parsingBehaviour, System.out, System.err);
 	}
-	
-	
-	
+
 	@Test
 	public void testTransitiveDependency() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/TransitiveDependency.rmch");
@@ -92,7 +99,7 @@ public class RulesProjectTest {
 		assertTrue(result.contains(expected));
 
 	}
-	
+
 	@Test
 	public void testRuleDependsOnItSelf() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/RuleDependsOnItSelf.rmch");

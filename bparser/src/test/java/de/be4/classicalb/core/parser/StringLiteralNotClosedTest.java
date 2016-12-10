@@ -11,7 +11,7 @@ import org.junit.Test;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class StringLiteralNotClosedTest {

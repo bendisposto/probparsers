@@ -115,10 +115,17 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleFailErrorType() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(1, \"fail\") END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
+		String result = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("foo_Counterexamples:=foo_Counterexamples\\/{2}*{\"fail\"}"));
+		
+	}
+	
+	@Test
+	public void testRuleCounterexmples() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL( \"fail\") END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains(
-				"member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none))))"));
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
@@ -292,6 +299,14 @@ public class RulesLanguageTest {
 	@Test
 	public void testGoal() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY RULE_SUCCESS END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+	
+	@Test
+	public void testVarSubstitution() throws Exception {
+		final String testMachine = "RULES_MACHINE Test INITIALISATION VAR a,b IN a := 1; b:=1 END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));

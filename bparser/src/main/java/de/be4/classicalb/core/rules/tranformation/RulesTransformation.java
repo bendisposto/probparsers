@@ -11,7 +11,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.rules.project.Reference;
@@ -364,8 +364,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(createStringExpression(RULE_NOT_CHECKED));
 		list.add(createStringExpression(RULE_DISABLED));
 		ASetExtensionExpression set = new ASetExtensionExpression(list);
-		AMemberPredicate member = createPositinedNode(new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set), node);
-		
+		AMemberPredicate member = createPositinedNode(
+				new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set), node);
+
 		invariantList.add(member);
 
 		/*
@@ -472,8 +473,25 @@ public class RulesTransformation extends DepthFirstAdapter {
 			node.replaceBy(def);
 			return;
 		}
+		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
+			PExpression pExpression = node.getIdentifiers().get(0);
+			AIdentifierExpression id = (AIdentifierExpression) pExpression;
+			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+			if (node.getIdentifiers().size() == 1) {
+				final AIdentifierExpression ctVariable = createIdentifier(name, pExpression);
+				final ARangeExpression range = createPositinedNode(new ARangeExpression(ctVariable), node);
+				node.replaceBy(range);
+			} else {
+				final ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
+						createSetOfPExpression(node.getIdentifiers().get(1), node),
+						createIdentifier(name, pExpression));
+				final ARangeExpression range = createPositinedNode(new ARangeExpression(domRes), node);
+				node.replaceBy(range);
+			}
+			return;
+		}
 		default:
-			throw new IllegalStateException("Unkown expression operator: " + operatorName);
+			throw new AssertionError("unkwon operator name" + operatorName);
 		}
 	}
 
