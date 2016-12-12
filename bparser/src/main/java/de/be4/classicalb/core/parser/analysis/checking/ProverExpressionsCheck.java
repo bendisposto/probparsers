@@ -3,6 +3,9 @@
  */
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -17,19 +20,14 @@ import de.be4.classicalb.core.parser.node.Start;
  * 
  * @author plagge
  */
-public class ProverExpressionsCheck extends DepthFirstAdapter implements
-		SemanticCheck {
+public class ProverExpressionsCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private ParseOptions options;
-	private CheckException error;
+	private final List<CheckException> exceptions = new ArrayList<>();
 
-	public void runChecks(Start rootNode) throws CheckException {
+	public void runChecks(Start rootNode) {
 		if (options.restrictProverExpressions) {
-			error = null;
 			rootNode.apply(this);
-			if (error != null) {
-				throw error;
-			}
 		}
 	}
 
@@ -39,29 +37,28 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements
 
 	@Override
 	public void caseAFalsityPredicate(AFalsityPredicate node) {
-		if (error == null) {
-			error = new CheckException(
-					"bfalse is not allowed in ordenary B files", node);
-		}
+		exceptions.add(new CheckException("bfalse is not allowed in ordenary B files", node));
 	}
 
-    /* todo: ask Jens */
+	/* todo: ask Jens */
 	@Override
-	public void caseAProverComprehensionSetExpression(
-			AProverComprehensionSetExpression node) {
-		if (error == null) {
-			error = new CheckException("SET not allowed in ordenary B files",
-					node);
-		}
+	public void caseAProverComprehensionSetExpression(AProverComprehensionSetExpression node) {
+		exceptions.add(new CheckException("SET not allowed in ordenary B files", node));
 	}
 
 	@Override
 	public void caseASubstitutionPredicate(ASubstitutionPredicate node) {
 		// if (error == null) {
 		// error = new
-		// CheckException("Substitution in Predicates are not supported in ordinary B files",
+		// CheckException("Substitution in Predicates are not supported in
+		// ordinary B files",
 		// node);
 		// }
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+		return this.exceptions;
 	}
 
 }

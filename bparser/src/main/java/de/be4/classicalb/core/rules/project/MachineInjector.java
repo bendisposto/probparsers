@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.rules.project;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,6 +184,13 @@ public class MachineInjector extends DepthFirstAdapter {
 					identifiers.add(id);
 				}
 			}
+
+			Collections.sort(variablesClause.getIdentifiers(), new Comparator<PExpression>() {
+				@Override
+				public int compare(PExpression o1, PExpression o2) {
+					return o1.toString().compareTo(o2.toString());
+				}
+			});
 		}
 
 		@Override

@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 public class OpPatternTest {
 	BParser parser;
@@ -17,18 +17,18 @@ public class OpPatternTest {
 	}
 
 	@Test
-	public void testNoArgs() throws BException {
+	public void testNoArgs() throws BCompoundException {
 		checkParser("no arguments", "operation1", "operation1");
 	}
 
 	@Test
-	public void testSimpleArgument() throws BException {
+	public void testSimpleArgument() throws BCompoundException {
 		checkParser("simple argument", "operation1(5)",
 				"operation1ADefArgpattern(AIntegerExpression(5))");
 	}
 
 	@Test
-	public void testSimpleArguments() throws BException {
+	public void testSimpleArguments() throws BCompoundException {
 		checkParser(
 				"simple argument",
 				"operation1(5,7)",
@@ -36,13 +36,13 @@ public class OpPatternTest {
 	}
 
 	@Test
-	public void testEmptyArguments() throws BException {
+	public void testEmptyArguments() throws BCompoundException {
 		checkParser("simple argument", "operation1(5,_)",
 				"operation1ADefArgpattern(AIntegerExpression(5))AUndefArgpattern()");
 	}
 
 	private void checkParser(final String description, final String oppattern,
-			final String expected) throws BException {
+			final String expected) throws BCompoundException {
 		final Start ast = parser.parse(BParser.OPERATION_PATTERN_PREFIX
 				+ oppattern, false);
 		final Ast2String ast2String = new Ast2String();

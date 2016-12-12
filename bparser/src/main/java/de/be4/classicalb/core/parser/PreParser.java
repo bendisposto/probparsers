@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -70,7 +71,7 @@ public class PreParser {
 		this.debugOutput = debugOutput;
 	}
 
-	public void parse() throws PreParseException, IOException, BException {
+	public void parse() throws PreParseException, IOException, BException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setParseOptions(parseOptions);
 
@@ -103,7 +104,7 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(final List<Token> list) throws PreParseException, BException {
+	private void evaluateDefinitionFiles(final List<Token> list) throws PreParseException, BException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
@@ -150,7 +151,6 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				e.printStackTrace();
 				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
 				// + " used in " + modelFileName
 				);

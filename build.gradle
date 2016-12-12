@@ -7,8 +7,10 @@ project.group = 'de.hhu.stups'
 defaultTasks 'remind', 'clean', 'deploy'
 
 
-task remind << {
-  println "You did not specify a task. Assuming you mean gradle clean deploy."
+task remind {
+    doLast {
+        println "You did not specify a task. Assuming you mean gradle clean deploy."
+    }
 }
 
 // // The real configuration

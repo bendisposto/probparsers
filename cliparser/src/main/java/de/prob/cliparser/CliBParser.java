@@ -20,7 +20,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.OffsetPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -311,7 +311,7 @@ public class CliBParser {
 			strOutput.fullstop();
 			strOutput.flush();
 			print(strOutput.toString());
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 		} catch (LexerException e) {
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
@@ -358,7 +358,7 @@ public class CliBParser {
 			strOutput.flush();
 			String output = strOutput.toString();
 			print(output);
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 
 		}

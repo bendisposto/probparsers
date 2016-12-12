@@ -10,9 +10,10 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ACaseSubstitution;
+import de.be4.classicalb.core.parser.node.AChoiceOrSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
@@ -24,15 +25,19 @@ import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
+import de.be4.classicalb.core.parser.node.AOperatorExpression;
+import de.be4.classicalb.core.parser.node.AOperatorPredicate;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
+import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.POperationAttribute;
 import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -53,10 +58,19 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	private final List<Reference> machineReferences;
 
 	private AbstractOperation currentOperation;
+	private final Start start;
 
-	public RulesMachineVisitor(String fileName, List<Reference> machineReferences) {
+	public RulesMachineVisitor(String fileName, List<Reference> machineReferences, Start start) {
 		this.fileName = fileName;
 		this.machineReferences = machineReferences;
+		this.start = start;
+	}
+
+	public void runChecks() throws CheckException {
+		start.apply(this);
+		if (this.errorList.size() > 0) {
+			throw this.errorList.get(0);
+		}
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -73,12 +87,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 
 	public FunctionOperation getFunctionOperation(AFunctionOperation funcOp) {
 		return this.functionMap.get(funcOp);
-	}
-
-	public void inAChoiceSubstitution(AChoiceSubstitution node) {
-		if (isInRule()) {
-			errorList.add(new CheckException("A CHOICE substitution is not allowed in rule operations", node));
-		}
 	}
 
 	public void inACaseSubstitution(ACaseSubstitution node) {
@@ -124,8 +132,8 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 						if (currentOperation.getActivationPredicate() == null) {
 							currentOperation.setActivationPredicate(predicate);
 						} else {
-							errorList.add(new CheckException(
-									"ACTIVATED clause of rule operation is used more than once", pOperationAttribute));
+							errorList.add(new CheckException("ACTIVATION clause is used more than once in operation '"
+									+ currentOperation.getName() + "'.", pOperationAttribute));
 						}
 					}
 				} else {
@@ -235,9 +243,22 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 	}
 
+	private boolean containsRule(String name) {
+		for (Rule rule : this.rulesMap.values()) {
+			if (name.equals(rule.getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
 		currentOperation = new Rule(node.getRuleName(), this.fileName, this.machineName, machineReferences);
+		if (containsRule(currentOperation.getName())) {
+			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
+					node.getRuleName()));
+		}
 		rulesMap.put(node, (Rule) currentOperation);
 		visitOperationAttributes(node.getAttributes());
 		node.getRuleBody().apply(this);
@@ -329,7 +350,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAVarSubstitution(AVarSubstitution node) {
+	public void inAVarSubstitution(AVarSubstitution node) {
 		final HashSet<String> variables = new HashSet<>();
 		LinkedList<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression e : identifiers) {
@@ -341,23 +362,53 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		localVariablesScope.addAll(variables);
-		inAVarSubstitution(node);
-		{
-			List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
-			for (PExpression e : copy) {
-				e.apply(this);
-			}
-		}
-		if (node.getSubstitution() != null) {
-			node.getSubstitution().apply(this);
-		}
-		outAVarSubstitution(node);
-		localVariablesScope.removeAll(variables);
+		localVariablesScope.addAll(variables);// TODO do not add strings here
 	}
 
 	@Override
-	public void caseAAssignSubstitution(AAssignSubstitution node) {
+	public void outAVarSubstitution(AVarSubstitution node) {
+		final HashSet<String> variables = new HashSet<>();
+		localVariablesScope.removeAll(variables);
+	}
+
+	public void inAOperatorExpression(AOperatorExpression node) {
+		final String operatorName = node.getName().getText();
+		final LinkedList<PExpression> parameters = node.getIdentifiers();
+		switch (operatorName) {
+		case RulesGrammar.STRING_FORMAT: {
+			PExpression stringValue = parameters.get(0);
+			if (stringValue instanceof AStringExpression) {
+				AStringExpression string = (AStringExpression) stringValue;
+				String content = string.getContent().getText();
+				int count = (content.length() - content.replace("~w", "").length()) / 2;
+				if (count != parameters.size() - 1) {
+					this.errorList.add(new CheckException(
+							"The number of arguments (" + (parameters.size() - 1)
+									+ ") does not match the number of placeholders (" + count + ") in the string.",
+							node));
+				}
+			}
+			return;
+		}
+		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
+			if (parameters.size() == 0 || parameters.size() > 2) {
+				this.errorList
+						.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
+			}
+			PExpression pExpression = node.getIdentifiers().get(0);
+			if (!(pExpression instanceof AIdentifierExpression)) {
+				this.errorList.add(
+						new CheckException("The first argument of RULE_COUNTEREXAMPLES must be an identifier.", node));
+			}
+			return;
+		}
+		default:
+			throw new AssertionError("Unkown expression operator: " + operatorName);
+		}
+	}
+
+	@Override
+	public void inAAssignSubstitution(AAssignSubstitution node) {
 		ArrayList<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
 		for (PExpression pExpression : righthand) {
 			pExpression.apply(this);
@@ -367,21 +418,16 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOperationCallSubstitution(AOperationCallSubstitution node) {
-		if (currentOperation != null) {
-			LinkedList<TIdentifierLiteral> opNameList = node.getOperation();
-			if (opNameList.size() > 1) {
-				errorList.add(new CheckException("Renaming of operations is not allowed.", node));
-			}
-			currentOperation.addFunctionCall(opNameList.get(0));
-		}
-
-		ArrayList<PExpression> parameters = new ArrayList<>(node.getParameters());
-		for (PExpression pExpression : parameters) {
-			pExpression.apply(this);
+	public void inAOperationCallSubstitution(AOperationCallSubstitution node) {
+		LinkedList<TIdentifierLiteral> opNameList = node.getOperation();
+		if (opNameList.size() > 1) {
+			errorList.add(new CheckException("Renaming of operation names is not allowed.", node));
 		}
 		List<PExpression> copy = new ArrayList<PExpression>(node.getResultIdentifiers());
 		checkThatIdentifiersAreLocalVariables(copy);
+		if (currentOperation != null) {
+			currentOperation.addFunctionCall(opNameList.get(0));
+		}
 	}
 
 	private void checkThatIdentifiersAreLocalVariables(List<PExpression> copy) {
@@ -398,7 +444,8 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				}
 			} else {
 				errorList.add(new CheckException(
-						"There must be an identifier on the left side of the assign substitution", e));
+						"There must be an identifier on the left side of the assign substitution. A function assignment 'f(1) := 1' is also not permitted.",
+						e));
 			}
 		}
 	}
@@ -408,7 +455,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		inAIdentifierExpression(node);
 		List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
 		if (copy.size() > 1) {
-			this.errorList.add(new CheckException("Variable renaming is not allowed.", node));
+			this.errorList.add(new CheckException("Identifier renaming is not allowed in a RULES_MACHINE.", node));
 		}
 		if (currentOperation != null) {
 			currentOperation.addReadVariable(node);
@@ -417,7 +464,65 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outAOperatorSubstitution(AOperatorSubstitution node) {
+	public void outAOperatorPredicate(AOperatorPredicate node) {
+		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
+		final String operatorName = node.getName().getText();
+		switch (operatorName) {
+		case RulesGrammar.SUCCEEDED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(new CheckException(
+						"The SUCCEEDED_RULE predicate operator expects exactly one argument.", node));
+			}
+			return;
+		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
+			if (arguments.size() != 2) {
+				this.errorList.add(new CheckException(
+						"The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+			}
+			PExpression pExpression = node.getIdentifiers().get(0);
+			if (!(pExpression instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
+			}
+			return;
+		}
+		case RulesGrammar.FAILED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("The FAILED_RULE predicate operator expects exactly one argument.", node));
+			}
+			return;
+		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
+			if (arguments.size() != 2) {
+				this.errorList.add(new CheckException(
+						"The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+			}
+			PExpression pExpression = node.getIdentifiers().get(0);
+			if (!(pExpression instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
+			}
+			return;
+		}
+		case RulesGrammar.NOT_CHECKED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(new CheckException(
+						"The NOT_CHECKED_RULE predicate operator expects exactly one argument.", node));
+			}
+			return;
+		case RulesGrammar.DISABLED_RULE:
+			if (arguments.size() != 1) {
+				this.errorList.add(
+						new CheckException("The DISABLED_RULE predicate operator expects exactly one argument.", node));
+			}
+			return;
+		default:
+			throw new AssertionError("Unkown predicate operator: " + operatorName);
+		}
+	}
+
+	@Override
+	public void inAOperatorSubstitution(AOperatorSubstitution node) {
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
 		case RulesGrammar.RULE_FAIL: {
@@ -435,21 +540,19 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 					errorList.add(new CheckException("The first argument of RULE_FAIL must be an integer.", node));
 				}
 			} else if (node.getArguments().size() > 2) {
-				errorList.add(new CheckException("RULE_FAIL at most two argument.", node));
+				errorList.add(new CheckException("RULE_FAIL has at most two argument.", node));
 			}
-
-			defaultOut(node);
 			return;
 		}
 		default:
-			throw new RuntimeException("should not happen: " + operatorName);
+			throw new AssertionError("Unkown substitution operator: " + operatorName);
 		}
 	}
 
 	@Override
 	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_ANY used outside of a RULE operation", node));
 		}
 		checkErrorType(node.getErrorType());
 		defaultOut(node);
@@ -461,18 +564,16 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
 		}
 		checkErrorType(node.getErrorType());
-
 		defaultOut(node);
 	}
 
 	private void checkErrorType(TIntegerLiteral node) {
-		if (node != null) {
+		if (node != null && currentOperation instanceof Rule) {
+			final Rule rule = (Rule) currentOperation;
 			int errorType = Integer.parseInt(node.getText());
-			Rule rule = (Rule) currentOperation;
-			if (rule.getNumberOfErrorTypes() == null && errorType > 1) {
+			if (rule.getNumberOfErrorTypes() == null) {
 				errorList.add(new CheckException("Define the number of error types of the rule operation.", node));
-			}
-			if (rule.getNumberOfErrorTypes() != null && errorType > rule.getNumberOfErrorTypes()) {
+			} else if (errorType > rule.getNumberOfErrorTypes()) {
 				errorList.add(new CheckException(
 						"The error type exceeded the number of error types specified for this rule operation.", node));
 			}
@@ -494,4 +595,10 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 		}
 	}
+
+	@Override
+	public void inAChoiceSubstitution(AChoiceSubstitution node) {
+		errorList.add(new CheckException("A CHOICE substitution is not allowed in a RULES_MACHINE.", node));
+	}
+
 }

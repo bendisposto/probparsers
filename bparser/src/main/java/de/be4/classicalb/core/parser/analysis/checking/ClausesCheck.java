@@ -1,7 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +45,8 @@ public class ClausesCheck implements SemanticCheck {
 
 	private Map<String, Set<Node>> clauses;
 
+	private final List<CheckException> exceptions = new ArrayList<>();
+
 	/**
 	 * The following requirements for the machine clauses are checked:
 	 * <ul>
@@ -58,7 +62,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * @throws CheckException
 	 *             the exception if a check fails
 	 */
-	public void runChecks(final Start rootNode) throws CheckException {
+	public void runChecks(final Start rootNode) {
 		// only need to check complete machines
 		if (!Utils.isCompleteMachine(rootNode)) {
 			return;
@@ -79,10 +83,12 @@ public class ClausesCheck implements SemanticCheck {
 		}
 	}
 
-	private void checkConstraintExistance(Start rootNode) throws CheckException {
+	private void checkConstraintExistance(Start rootNode) {
 
-		if (!clauses.containsKey(NAME_CONSTRAINTS))
-			throw new CheckException("Specification has formal scalar parameter and no CONSTRAINTS clause.", rootNode);
+		if (!clauses.containsKey(NAME_CONSTRAINTS)) {
+			exceptions.add(new CheckException("Specification has formal scalar parameter and no CONSTRAINTS clause.",
+					rootNode));
+		}
 	}
 
 	/**
@@ -92,7 +98,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * 
 	 * @throws CheckException
 	 */
-	private void checkImplementationClauses(final Start rootNode) throws CheckException {
+	private void checkImplementationClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof AImplementationMachineParseUnit)) {
 			return;
 		}
@@ -106,7 +112,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * 
 	 * @throws CheckException
 	 */
-	private void checkRefinementClauses(final Start rootNode) throws CheckException {
+	private void checkRefinementClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof ARefinementMachineParseUnit)) {
 			return;
 		}
@@ -120,7 +126,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * 
 	 * @throws CheckException
 	 */
-	private void checkMachineClauses(final Start rootNode) throws CheckException {
+	private void checkMachineClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof AAbstractMachineParseUnit)) {
 			return;
 		}
@@ -128,7 +134,7 @@ public class ClausesCheck implements SemanticCheck {
 		findForbidden(MACHINE_FORBIDDEN_CLAUSES);
 	}
 
-	private void checkVariablesClauses() throws CheckException {
+	private void checkVariablesClauses() {
 		/*
 		 * CONCRETE_VARIABLES || VARIABLES || ABSTRACT_VARIABLES => INVARIANT &&
 		 * INITIALISATION
@@ -156,12 +162,11 @@ public class ClausesCheck implements SemanticCheck {
 				}
 				message.append("INITIALISATION");
 			}
-
-			throw new CheckException(message.toString(), nodes.toArray(new Node[nodes.size()]));
+			exceptions.add(new CheckException(message.toString(), nodes.toArray(new Node[nodes.size()])));
 		}
 	}
 
-	private void checkConstantsClause() throws CheckException {
+	private void checkConstantsClause() {
 		/*
 		 * CONCRETE_CONSTANTS || CONSTANTS || ABSTRACT_CONSTANTS => PROPERTIES
 		 */
@@ -175,12 +180,11 @@ public class ClausesCheck implements SemanticCheck {
 			if (clauses.containsKey(NAME_ABSTRACT_CONSTANTS)) {
 				nodes.addAll(clauses.get(NAME_ABSTRACT_CONSTANTS));
 			}
-
-			throw new CheckException("Clause(s) missing: PROPERTIES", nodes.toArray(new Node[nodes.size()]));
+			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", nodes.toArray(new Node[nodes.size()])));
 		}
 	}
 
-	private void findForbidden(final String[] forbiddenClassNames) throws CheckException {
+	private void findForbidden(final String[] forbiddenClassNames) {
 		final Set<String> clauseClasses = clauses.keySet();
 
 		final Set<Set<Node>> wrongClauses = new HashSet<Set<Node>>();
@@ -198,8 +202,8 @@ public class ClausesCheck implements SemanticCheck {
 				final Set<Node> nodeSet = iterator.next();
 				nodes.addAll(nodeSet);
 			}
-
-			throw new CheckException("Clause not allowed in abstract machine", nodes.toArray(new Node[nodes.size()]));
+			exceptions.add(new CheckException("Clause not allowed in abstract machine",
+					nodes.toArray(new Node[nodes.size()])));
 		}
 	}
 
@@ -208,7 +212,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * 
 	 * @throws CheckException
 	 */
-	private void checkDoubleClauses() throws CheckException {
+	private void checkDoubleClauses() {
 		for (final Iterator<Set<Node>> iterator = clauses.values().iterator(); iterator.hasNext();) {
 			final Set<Node> nodesforClause = iterator.next();
 
@@ -218,12 +222,18 @@ public class ClausesCheck implements SemanticCheck {
 				final int endIndex = simpleClassName.indexOf("MachineClause");
 				final String clauseName = simpleClassName.substring(1, endIndex).toUpperCase();
 
-				throw new CheckException("Clause '" + clauseName + "' is used more than once",
-						nodesforClause.toArray(new Node[nodesforClause.size()]));
+				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
+						nodesforClause.toArray(new Node[nodesforClause.size()])));
 			}
 		}
 	}
 
 	public void setOptions(ParseOptions options) {
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+
+		return exceptions;
 	}
 }

@@ -11,8 +11,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.rules.project.Reference;
@@ -21,17 +20,18 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_FAIL = "FAIL";
-	public static final String RULE_INTERRUPTION = "RULE_INTERRUPTION";
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
+	// public static final String RULE_BLOCKED = "RULE_BLOCKED";
 
 	public static final String COMPUTATION_EXECUTED = "EXECUTED";
 	public static final String COMPUTATION_NOT_EXECUTED = "NOT_EXECUTED";
 	public static final String COMPUTATION_DISABLED = "COMPUTATION_DISABLED";
+	// public static final String COMPUTATION_BLOCKED = "COMPUTATION_BLOCKED";
 
-	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "#RESULT";
-	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "#COUNTEREXAMPLES";
+	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "$RESULT";
+	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
 	private final IDefinitions definitions;
@@ -50,31 +50,19 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private List<PSubstitution> initialisationList = new ArrayList<>();
 
 	private Rule currentRule;
+	private List<AbstractOperation> sortedOperationsList;
 
-	public RulesTransformation(Start start, BParser bParser, List<Reference> machineReferences) {
+	public RulesTransformation(Start start, BParser bParser, List<Reference> machineReferences,
+			RulesMachineVisitor rulesMachineVisitor) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
-		this.rulesMachineVisitor = new RulesMachineVisitor(bParser.getFileName(), machineReferences);
+		this.rulesMachineVisitor = rulesMachineVisitor;
 	}
 
-	public void runTransformation() throws CheckException, BException {
-		start.apply(rulesMachineVisitor);
-		if (rulesMachineVisitor.errorList.size() > 0) {
-			throw rulesMachineVisitor.errorList.get(0);
-		}
-		try {
-			start.apply(this);
-		} catch (VisitorException e) {
-			if (e.getException() instanceof CheckException) {
-				throw (CheckException) e.getException();
-			} else if (e.getException() instanceof BException) {
-				throw (BException) e.getException();
-			} else {
-				new RuntimeException("Unexpected Exception: " + e.getMessage());
-			}
-		}
-
+	public void runTransformation() {
+		start.apply(this);
 		DefinitionInjector.injectDefinitions(start, definitions);
+		MissingPositionsAdder.injectPositions(start);
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -251,6 +239,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 					computation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 			selectConditionList.addAll(dependsOnComputationPredicates);
 		}
+
+		selectConditionList.addAll(getOperationOrderPredicateList(computation));
 		select.setCondition(createConjunction(selectConditionList));
 
 		final ArrayList<PExpression> varList = new ArrayList<>();
@@ -335,12 +325,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 			selectConditionList.addAll(dependsOnComputationPredicates);
 		}
 
+		selectConditionList.addAll(getOperationOrderPredicateList(currentRule));
 		select.setCondition(createConjunction(selectConditionList));
 
 		ArrayList<PSubstitution> subList = new ArrayList<>();
 		subList.add(node.getRuleBody());
 		// IF rule_Counterexamples = {} THEN RULE_SUCCESS ELSE RULE_FAIL END
 		final String ctName = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		currentRule.setCounterExampleVariableName(ctName);
 		PPredicate ifCondition = new AEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
 		AIfSubstitution ifSub = new AIfSubstitution(ifCondition,
 				createRuleSuccessAssignment(currentRule.getNameLiteral()), new ArrayList<PSubstitution>(),
@@ -355,7 +347,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
-
 		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
@@ -373,7 +364,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(createStringExpression(RULE_NOT_CHECKED));
 		list.add(createStringExpression(RULE_DISABLED));
 		ASetExtensionExpression set = new ASetExtensionExpression(list);
-		AMemberPredicate member = new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set);
+		AMemberPredicate member = createPositinedNode(
+				new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set), node);
+
 		invariantList.add(member);
 
 		/*
@@ -400,13 +393,51 @@ public class RulesTransformation extends DepthFirstAdapter {
 		ctTypingPredicate.setLeft(createIdentifier(ctName));
 		ctTypingPredicate.setRight(new APowSubsetExpression(
 				new AMultOrCartExpression(new ANaturalSetExpression(), new AStringSetExpression())));
-		invariantList.add(ctTypingPredicate);
+		invariantList.add(createPositinedNode(ctTypingPredicate, node));
 
 		// INITIALISATION rule1#counterexamples := {}
 		final AAssignSubstitution assign = createAssignNode(createIdentifier(ctName, node.getRuleName()),
 				new AEmptySetExpression());
 		initialisationList.add(assign);
 
+	}
+
+	private List<PPredicate> getOperationOrderPredicateList(AbstractOperation op) {
+		List<PPredicate> result = new ArrayList<>();
+		if (this.sortedOperationsList != null) {
+			int index = sortedOperationsList.indexOf(op);
+			if (index > 0) {
+				// AbstractOperation prevOperation =
+				// sortedOperationsList.get(index - 1);
+				// AIdentifierExpression prevIdentifier =
+				// createIdentifier(prevOperation.getName(),
+				// prevOperation.getNameLiteral());
+				// String value;
+				// if (prevOperation instanceof Computation) {
+				// value = COMPUTATION_NOT_EXECUTED;
+				// } else {
+				// value = RULE_NOT_CHECKED;
+				// }
+				// ANotEqualPredicate notEqual = new
+				// ANotEqualPredicate(prevIdentifier,
+				// new AStringExpression(new TStringLiteral(value)));
+				// result.add(notEqual);
+				List<PExpression> list = new ArrayList<>();
+				for (int i = 0; i <= index - 1; i++) {
+					final AbstractOperation prevOperation = sortedOperationsList.get(i);
+					AIdentifierExpression prevIdentifier = createIdentifier(prevOperation.getName(),
+							prevOperation.getNameLiteral());
+					list.add(prevIdentifier);
+				}
+				AIntersectionExpression inter = new AIntersectionExpression(new ASetExtensionExpression(
+						createExpressionList(createStringExpression(COMPUTATION_NOT_EXECUTED),
+								createStringExpression(RULE_NOT_CHECKED))),
+						new ASetExtensionExpression(list));
+				AEqualPredicate equal = new AEqualPredicate(inter, new AEmptySetExpression());
+				result.add(equal);
+			}
+		}
+		return result;
 	}
 
 	private AAssignSubstitution createAssignNode(PExpression id, PExpression value) {
@@ -426,19 +457,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final TIdentifierLiteral format = new TIdentifierLiteral("FORMAT_TO_STRING");
 			format.setStartPos(node.getName().getStartPos());
 			format.setEndPos(node.getName().getEndPos());
-
 			PExpression stringValue = parameters.get(0);
-			if (stringValue instanceof AStringExpression) {
-				AStringExpression string = (AStringExpression) stringValue;
-				String content = string.getContent().getText();
-				int count = (content.length() - content.replace("~w", "").length()) / 2;
-				if (count != parameters.size() - 1) {
-					throw new VisitorException(new CheckException(
-							"The number of arguments (" + (parameters.size() - 1)
-									+ ") does not match the number of placeholders (" + count + " in the string.",
-							node));
-				}
-			}
 
 			final List<PExpression> list = new ArrayList<>();
 			list.add(stringValue);
@@ -454,8 +473,25 @@ public class RulesTransformation extends DepthFirstAdapter {
 			node.replaceBy(def);
 			return;
 		}
+		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
+			PExpression pExpression = node.getIdentifiers().get(0);
+			AIdentifierExpression id = (AIdentifierExpression) pExpression;
+			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+			if (node.getIdentifiers().size() == 1) {
+				final AIdentifierExpression ctVariable = createIdentifier(name, pExpression);
+				final ARangeExpression range = createPositinedNode(new ARangeExpression(ctVariable), node);
+				node.replaceBy(range);
+			} else {
+				final ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
+						createSetOfPExpression(node.getIdentifiers().get(1), node),
+						createIdentifier(name, pExpression));
+				final ARangeExpression range = createPositinedNode(new ARangeExpression(domRes), node);
+				node.replaceBy(range);
+			}
+			return;
+		}
 		default:
-			throw new RuntimeException("should not happen");
+			throw new AssertionError("unkwon operator name" + operatorName);
 		}
 	}
 
@@ -467,10 +503,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final LinkedList<PExpression> arguments = node.getArguments();
 			// arguments is never null because a list in sablecc is empty
 			// if not provided
-			if (arguments.size() == 0) {
-				throw new VisitorException(new CheckException("RULE_FAIL requires at least one argument.", node));
-			} else if (arguments.size() == 1) {
-				final PSubstitution assign = createCounterExampleSubstitution(1, arguments.get(0));
+			if (arguments.size() == 1) {
+				final PSubstitution assign = createCounterExampleSubstitution(1,
+						createSetOfPExpression(arguments.get(0), node));
 				node.replaceBy(assign);
 				return;
 			} else if (arguments.size() == 2) {
@@ -478,19 +513,17 @@ public class RulesTransformation extends DepthFirstAdapter {
 				if (pExpression instanceof AIntegerExpression) {
 					AIntegerExpression intExpr = (AIntegerExpression) pExpression;
 					final int errorIndex = Integer.parseInt(intExpr.getLiteral().getText());
-					final PSubstitution assign = createCounterExampleSubstitution(errorIndex, arguments.get(1));
+					final PSubstitution assign = createCounterExampleSubstitution(errorIndex,
+							createSetOfPExpression(arguments.get(1), node));
 					node.replaceBy(assign);
 					return;
 				} else {
-					throw new VisitorException(new CheckException(
-							"Invalid value for the first argument of RULE_FAILL: Expectet an integer value.", node));
+					throw new IllegalStateException();
 				}
-			} else {
-				throw new VisitorException(new CheckException("Invalid number of arguments for RULE_FAILL", node));
 			}
 		}
 		default:
-			throw new RuntimeException("should not happen");
+			throw new IllegalStateException();
 		}
 	}
 
@@ -521,15 +554,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return assign;
 	}
 
-	private PExpression createSetOfPExpression(PExpression expression) {
+	private PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add((PExpression) cloneNode(expression));
-		return new ASetExtensionExpression(list);
+		list.add((PExpression) cloneNode(pExpression));
+		return createPositinedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
-
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
 		invariantList.add(member);
@@ -547,15 +579,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		if (currentRule.getRuleIdString() != null) {
-			// RULEID
-			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*UNION(s).(s:#CT_SET|{STRING_APPEND("id1:
-			// ",s)})
 			addStringAppendDefinition();
 			final ALetSubstitution let = new ALetSubstitution();
-			let.setIdentifiers(createExpressionList(createIdentifier("#cts")));
-			let.setPredicate(
-					new AEqualPredicate(createIdentifier("#cts"), (PExpression) cloneNode(setOfCounterexamples)));
-			final PPredicate unionPredicate = new AMemberPredicate(createIdentifier("s"), createIdentifier("#cts"));
+			final String CTS = "$cts";
+			let.setIdentifiers(createExpressionList(createIdentifier(CTS)));
+			let.setPredicate(new AEqualPredicate(createIdentifier(CTS), (PExpression) cloneNode(setOfCounterexamples)));
+			final PPredicate unionPredicate = new AMemberPredicate(createIdentifier("s"), createIdentifier(CTS));
 			final PExpression expr = new ASetExtensionExpression(createExpressionList(
 					new ADefinitionExpression(new TIdentifierLiteral("STRING_APPEND"), createExpressionList(
 							createStringExpression(currentRule.getRuleIdString() + ": "), createIdentifier("s")))));
@@ -565,6 +594,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 					new ASetExtensionExpression(
 							createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
 					quantifiedUnion);
+			setPosition(res, setOfCounterexamples);
 			// LET cts2 BE cts2 = CTS \/ res IN ... END
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName), res);
 			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
@@ -572,19 +602,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 			let.setSubstitution(assign);
 			return let;
 		} else {
-			// Without RULEID
-			// LET #CT_SET BE #CT_SET=UNION(x).(x:1..3|{"fail"}) IN
-			// IF #CT_SET/={} THEN
-			// rule1_Counterexamples:=rule1_Counterexamples\/{1}*STRING/\#CT_SET
-			// END END
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
-					new AMultOrCartExpression(
+					createPositinedNode(new AMultOrCartExpression(
 							new ASetExtensionExpression(
 									createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
-							new AIntersectionExpression(new AStringSetExpression(),
-									(PExpression) cloneNode(setOfCounterexamples))));
+							(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
 			return new AAssignSubstitution(createExpressionList(createIdentifier(ctName)), createExpressionList(union));
 		}
+	}
+
+	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
+		node.setStartPos(pos.getStartPos());
+		node.setEndPos(pos.getEndPos());
+		return node;
+	}
+
+	public static void setPosition(PositionedNode node, PositionedNode pos) {
+		node.setStartPos(pos.getStartPos());
+		node.setEndPos(pos.getEndPos());
 	}
 
 	@Override
@@ -623,71 +658,39 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
 		case RulesGrammar.SUCCEEDED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_SUCCESS);
 			return;
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
-			}
 			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				throw new VisitorException(new CheckException(
-						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
-			}
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
-					createSetOfPExpression(node.getIdentifiers().get(1)), createIdentifier(name, pExpression));
+					createSetOfPExpression(node.getIdentifiers().get(1), node), createIdentifier(name, pExpression));
 			AEqualPredicate equal = new AEqualPredicate(domRes, new AEmptySetExpression());
 			node.replaceBy(equal);
 			return;
 		}
 		case RulesGrammar.FAILED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_FAIL);
 			return;
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected two arguments.", node));
-			}
 			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				throw new VisitorException(new CheckException(
-						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
-			}
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;
 			String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 			ADomainRestrictionExpression domRes = new ADomainRestrictionExpression(
-					createSetOfPExpression(node.getIdentifiers().get(1)), createIdentifier(name, pExpression));
+					createSetOfPExpression(node.getIdentifiers().get(1), node), createIdentifier(name, pExpression));
 			ANotEqualPredicate notEqual = new ANotEqualPredicate(domRes, new AEmptySetExpression());
 			node.replaceBy(notEqual);
 			return;
 		}
 		case RulesGrammar.NOT_CHECKED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_NOT_CHECKED);
 			return;
 		case RulesGrammar.DISABLED_RULE:
-			if (arguments.size() != 1) {
-				throw new VisitorException(
-						new CheckException("Invalid number of arguments. Expected one argument.", node));
-			}
 			replacePredicateOperator(node, arguments, RULE_DISABLED);
 			return;
 		default:
-			throw new RuntimeException("should not happen: " + operatorName);
+			throw new IllegalStateException("should not happen: " + operatorName);
 		}
 	}
 
@@ -792,66 +795,94 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
-		// mandatory union
-		final AQuantifiedUnionExpression union = new AQuantifiedUnionExpression();
+		final PSubstitution newNode = createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhere(), null,
+				node.getMessage(), node.getErrorType());
+		node.replaceBy(newNode);
+	}
+
+	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
+			PPredicate wherePredicate, PPredicate expectPredicate, PExpression message, TIntegerLiteral errorTypeNode) {
+
+		final AComprehensionSetExpression set = new AComprehensionSetExpression();
 		{
 			final List<PExpression> list = new ArrayList<PExpression>();
-			for (PExpression id : node.getIdentifiers()) {
+			for (PExpression id : identifiers) {
 				PExpression clonedId = (PExpression) cloneNode(id);
 				list.add(clonedId);
 			}
-			union.setIdentifiers(list);
-			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-			union.setPredicates(where);
-			final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
-			setElementsInUnionList.add(node.getMessage());
-			final ASetExtensionExpression set = new ASetExtensionExpression(setElementsInUnionList);
-			union.setExpression(set);
+			set.setIdentifiers(list);
+			PPredicate condition = null;
+			final PPredicate where = (PPredicate) cloneNode(wherePredicate);
+			if (expectPredicate != null) {
+				final PPredicate expect = (PPredicate) cloneNode(expectPredicate);
+				condition = new AConjunctPredicate(where, new ANegationPredicate(expect));
+			} else {
+				condition = where;
+			}
+			set.setPredicates(condition);
 		}
-
 		addToStringDefinition();
-
 		Integer errorType = null;
-		if (node.getErrorType() != null) {
-			errorType = Integer.parseInt(node.getErrorType().getText());
+		if (errorTypeNode != null) {
+			errorType = Integer.parseInt(errorTypeNode.getText());
 		} else {
 			// default value
 			errorType = 1;
 		}
-		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType, union);
-		node.replaceBy(counterExampleSubstitution);
+		AVarSubstitution var = new AVarSubstitution();
+		final String resultTuple = "$ResultTuple";
+		final String resultStrings = "$ResultSrings";
+		var.setIdentifiers(createExpressionList(createIdentifier(resultTuple), createIdentifier(resultStrings)));
+		List<PSubstitution> subList = new ArrayList<>();
+		{
+			AAssignSubstitution assign = new AAssignSubstitution();
+			assign.setLhsExpression(createExpressionList(createIdentifier(resultTuple)));
+			assign.setRhsExpressions(createExpressionList(set));
+			subList.add(assign);
+		}
+		{
+			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression();
+			final String stringParam = "$String";
+			stringSet.setIdentifiers(createExpressionList(createIdentifier(stringParam)));
+			final List<PExpression> list = new ArrayList<PExpression>();
+			final List<PExpression> list2 = new ArrayList<PExpression>();
+			for (PExpression id : identifiers) {
+				PExpression clonedId = (PExpression) cloneNode(id);
+				list.add(clonedId);
+				PExpression clonedId2 = (PExpression) cloneNode(id);
+				list2.add(clonedId2);
+			}
+			final AExistsPredicate exists = new AExistsPredicate();
+			exists.setIdentifiers(list);
+			PExpression couple;
+			if (list2.size() > 1) {
+				couple = new ACoupleExpression(list2);
+			} else {
+				couple = list2.get(0);
+			}
+			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(resultTuple));
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(stringParam), message);
+			exists.setPredicate(new AConjunctPredicate(member, equal));
+			stringSet.setPredicates(exists);
+			AAssignSubstitution assign = new AAssignSubstitution();
+			assign.setLhsExpression(createExpressionList(createIdentifier(resultStrings)));
+			assign.setRhsExpressions(createExpressionList(stringSet));
+			subList.add(assign);
+		}
+
+		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
+				createIdentifier(resultStrings));
+		subList.add(counterExampleSubstitution);
+		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
+		var.setSubstitution(seqSub);
+		return var;
 	}
 
 	@Override
 	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		// mandatory union
-		final AQuantifiedUnionExpression union = new AQuantifiedUnionExpression();
-		{
-			final List<PExpression> list = new ArrayList<PExpression>();
-			for (PExpression id : node.getIdentifiers()) {
-				PExpression clonedId = (PExpression) cloneNode(id);
-				list.add(clonedId);
-			}
-			union.setIdentifiers(list);
-			final PPredicate where = (PPredicate) cloneNode(node.getWhere());
-			final PPredicate expect = (PPredicate) cloneNode(node.getExpect());
-			union.setPredicates(new AConjunctPredicate(where, new ANegationPredicate(expect)));
-			final List<PExpression> setElementsInUnionList = new ArrayList<PExpression>();
-			setElementsInUnionList.add(node.getMessage());
-			final ASetExtensionExpression set = new ASetExtensionExpression(setElementsInUnionList);
-			union.setExpression(set);
-		}
-		addToStringDefinition();
-
-		Integer errorType = null;
-		if (node.getErrorType() != null) {
-			errorType = Integer.parseInt(node.getErrorType().getText());
-		} else {
-			// default value
-			errorType = 1;
-		}
-		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType, union);
-		node.replaceBy(counterExampleSubstitution);
+		PSubstitution newNode = createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhere(),
+				node.getExpect(), node.getMessage(), node.getErrorType());
+		node.replaceBy(newNode);
 	}
 
 	private void addStringAppendDefinition() {
@@ -869,18 +900,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
 		toStringTypeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
 		toStringTypeDef.setRhs(new ATotalFunctionExpression(
-				new ACartesianProductExpression(new AStringSetExpression(), new AStringSetExpression()),
+				new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
 				new AStringSetExpression()));
 		try {
 			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -898,7 +929,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
@@ -908,7 +939,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -926,7 +957,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 
 		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
@@ -937,7 +968,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -952,6 +983,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
 		// skip properties clause
+	}
+
+	public void setSortedOperationList(List<AbstractOperation> sortedOperationsList) {
+		this.sortedOperationsList = sortedOperationsList;
 	}
 
 }

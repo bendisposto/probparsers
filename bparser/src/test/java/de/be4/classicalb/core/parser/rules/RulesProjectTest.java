@@ -24,10 +24,27 @@ public class RulesProjectTest {
 	}
 
 	@Test
+	public void testRulesMachineNameDoesNotMatchFileName() throws Exception {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/RulesMachineNameDoesNotMatchFileName.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception(pos(1,15"));
+		assertTrue(result.contains("RULES_MACHINE name must match the file name"));
+	}
+
+	@Test
 	public void testPackage() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/folder/M1.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testForAll() throws Exception {
+		String f = "src/test/resources/rules/ForAllPredicate.rmch";
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.addLineNumbers = true;
+		RulesProject.parseProject(new File(f), parsingBehaviour, System.out, System.err);
 	}
 
 	@Test
@@ -82,7 +99,7 @@ public class RulesProjectTest {
 		assertTrue(result.contains(expected));
 
 	}
-	
+
 	@Test
 	public void testRuleDependsOnItSelf() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/RuleDependsOnItSelf.rmch");
@@ -137,7 +154,7 @@ public class RulesProjectTest {
 	public void testUnknwonComputation() {
 		String result = getRulesMachineAsPrologTerm(
 				"src/test/resources/rules/project/references/MissingReference/M2.rmch");
-		String expected = "Unknown operation: \\'compute_xx\\'.').\n";
+		String expected = "Unknown operation: \\'compute_xx\\'.')";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}

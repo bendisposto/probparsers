@@ -7,13 +7,13 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class AtelierBCompatibilityTest {
 
 	@Test
-	public void testSysExtension() throws IOException, BException {
+	public void testSysExtension() throws IOException, BCompoundException {
 		String PATH = "src/test/resources/atelierb/sys_extension/";
 		String file = PATH + "main.sys";
 		File f = new File(file);

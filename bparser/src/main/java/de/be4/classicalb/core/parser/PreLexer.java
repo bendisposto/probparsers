@@ -3,8 +3,8 @@ package de.be4.classicalb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 
-import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.RulesGrammar;
+import de.be4.classicalb.core.parser.grammars.DefaultGrammar;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.preparser.lexer.Lexer;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.EOF;

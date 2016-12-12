@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.rules.project.RulesParseUnit;
 
 public class RulesLanguageTest {
@@ -30,11 +31,32 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testStringFormat() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test PROPERTIES STRING_FORMAT(\" ~w ~w \", 1) = \" 1 2 \" END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,31,'UnkownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.').\n",
+				result);
+	}
+
+	@Test
 	public void testRuleForall() throws FileNotFoundException, IOException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id11 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testDublicateRuleName() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception"));
+		assertTrue(result.contains("Duplicate operation name"));
 	}
 
 	@Test
@@ -43,6 +65,8 @@ public class RulesLanguageTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
 	}
 
 	@Test
@@ -91,11 +115,20 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleFailErrorType() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(1, {}) END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains(
-				"member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none))))"));
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
+		String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
+		assertTrue(result.contains("foo_Counterexamples:=foo_Counterexamples\\/{2}*{\"fail\"}"));
+		
+	}
+	
+	@Test
+	public void testRuleCounterexmples() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL( \"fail\") END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
+		System.out.println(rulesMachineAsBMachine);
 	}
 
 	@Test
@@ -123,7 +156,7 @@ public class RulesLanguageTest {
 		final String expected = "parse_exception(pos(1,95,'UnkownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
 		assertEquals(expected, result);
 	}
-	
+
 	@Test
 	public void testRuleFail() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
@@ -136,8 +169,10 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		String expected = "machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[variables(none,[identifier(none,foo),identifier(none,foo_Counterexamples)]),invariant(none,conjunct(none,member(none,identifier(none,foo),set_extension(none,[string(none,'FAIL'),string(none,'SUCCESS'),string(none,'NOT_CHECKED'),string(none,'DISABLED')])),member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none)))))),initialisation(none,sequence(none,[assign(none,[identifier(none,foo)],[if_then_else(none,equal(none,identifier(none,k),boolean_true(none)),string(none,'NOT_CHECKED'),string(none,'DISABLED'))]),assign(none,[identifier(none,foo_Counterexamples)],[empty_set(none)])])),constants(none,[identifier(none,k)]),properties(none,equal(none,identifier(none,k),boolean_false(none))),operations(none,[operation(none,identifier(none,foo),[identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[],select(none,conjunct(none,equal(none,identifier(none,foo),string(none,'NOT_CHECKED')),member(none,identifier(none,'#COUNTEREXAMPLES'),pow_subset(none,mult_or_cart(none,integer_set(none),string_set(none))))),sequence(none,[skip(none),if(none,equal(none,identifier(none,foo_Counterexamples),empty_set(none)),assign(none,[identifier(none,foo),identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[string(none,'SUCCESS'),string(none,'SUCCESS'),empty_set(none)]),[],assign(none,[identifier(none,foo),identifier(none,'#RESULT'),identifier(none,'#COUNTEREXAMPLES')],[string(none,'FAIL'),string(none,'FAIL'),identifier(none,foo_Counterexamples)]))]),[]))])])).\n";
-		assertEquals(expected, result);
+		assertTrue(!result.contains("exception"));
+		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
+		assertTrue(rulesMachineAsBMachine.contains("foo:=IF k=TRUE THEN \"NOT_CHECKED\" ELSE \"DISABLED\" END"));
+		System.out.println(rulesMachineAsBMachine);
 	}
 
 	@Test
@@ -159,8 +194,7 @@ public class RulesLanguageTest {
 		String expected = "parse_exception(pos(1,85,'UnkownFile'),'ACTIVATED is not a valid attribute of a FUNCTION operation.').\n";
 		assertEquals(expected, result);
 	}
-	
-	
+
 	@Test
 	public void testDefineReadItself() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
@@ -223,7 +257,7 @@ public class RulesLanguageTest {
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
-		
+
 	}
 
 	@Test
@@ -269,6 +303,14 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
+	
+	@Test
+	public void testVarSubstitution() throws Exception {
+		final String testMachine = "RULES_MACHINE Test INITIALISATION VAR a,b IN a := 1; b:=1 END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
 
 	public static String getFileAsPrologTerm(final String file) throws FileNotFoundException, IOException {
 		RulesParseUnit unit = new RulesParseUnit();
@@ -277,6 +319,7 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
+		unit.translate();
 		String result = unit.getResultAsPrologTerm();
 		return result;
 	}
@@ -288,8 +331,22 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
+		unit.translate();
 		String result = unit.getResultAsPrologTerm();
 		return result;
+	}
+
+	public static String getRulesMachineAsBMachine(final String content) {
+		RulesParseUnit unit = new RulesParseUnit();
+		unit.setMachineAsString(content);
+		ParsingBehaviour pb = new ParsingBehaviour();
+		pb.addLineNumbers = false;
+		unit.setParsingBehaviour(pb);
+		unit.parse();
+		unit.translate();
+		PrettyPrinter pp = new PrettyPrinter();
+		unit.getStart().apply(pp);
+		return pp.getPrettyPrint();
 	}
 
 }

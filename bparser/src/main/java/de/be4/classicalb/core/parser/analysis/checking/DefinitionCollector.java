@@ -1,5 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.be4.classicalb.core.parser.DefinitionTypes;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -7,7 +10,6 @@ import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
@@ -31,25 +33,16 @@ public class DefinitionCollector extends DepthFirstAdapter {
 
 	private final IDefinitions definitions;
 	private final DefinitionTypes defTypes;
+	private List<Exception> exceptions = new ArrayList<>();
 
 	public DefinitionCollector(final DefinitionTypes defTypes, IDefinitions definitions) {
 		this.defTypes = defTypes;
 		this.definitions = definitions;
 	}
 
-	public void collectDefinitions(Start rootNode) throws CheckException, BException {
-		try {
-			rootNode.apply(this);
-		} catch (VisitorException e) {
-			if (e.getException() instanceof CheckException) {
-				throw (CheckException) e.getException();
-			} else if (e.getException() instanceof BException) {
-				throw (BException) e.getException();
-			} else {
-				throw new RuntimeException("Unsupported case");
-			}
-		}
-
+	public List<Exception> collectDefinitions(Start rootNode) {
+		rootNode.apply(this);
+		return this.exceptions;
 	}
 
 	@Override
@@ -59,7 +52,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(node, type);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			this.exceptions.add(e);
 		}
 	}
 
@@ -70,7 +63,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(node, type);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			this.exceptions.add(e);
 		}
 	}
 
@@ -81,7 +74,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		try {
 			definitions.addDefinition(node, type);
 		} catch (CheckException | BException e) {
-			throw new VisitorException(e);
+			this.exceptions.add(e);
 		}
 	}
 
@@ -95,10 +88,10 @@ public class DefinitionCollector extends DepthFirstAdapter {
 			try {
 				definitions.addDefinition(node, type, defName);
 			} catch (CheckException | BException e) {
-				throw new VisitorException(e);
+				this.exceptions.add(e);
 			}
 		} else {
-			throw new VisitorException(new CheckException(
+			this.exceptions.add(new CheckException(
 					"Only an expression is allowed on the right hand side of a conversion definition.", node));
 		}
 	}

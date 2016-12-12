@@ -3,6 +3,8 @@
  */
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.List;
+
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -15,5 +17,7 @@ import de.be4.classicalb.core.parser.node.Start;
 public interface SemanticCheck {
 	void setOptions(ParseOptions options);
 
-	void runChecks(Start rootNode) throws CheckException;
+	void runChecks(Start rootNode);
+
+	List<CheckException> getCheckExceptions();
 }

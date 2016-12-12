@@ -10,7 +10,7 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 /**
  * The English manual of AtelierB (version 1.8.6) has wrong priorities. This
@@ -22,7 +22,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 public class EnglishVsFrenchManual {
 
 	@Test
-	public void testImplicationVsEquivalence() throws BException {
+	public void testImplicationVsEquivalence() throws BCompoundException {
 		// <=> has 30 in the English, and 60 in the French version
 		// => has 30 in both
 		final String pred = "(z:g) => (x:g) <=> (y:g)";
@@ -42,7 +42,7 @@ public class EnglishVsFrenchManual {
 	}
 
 	private void checkPred(final String pred, final String english,
-			final String french) throws BException {
+			final String french) throws BCompoundException {
 		final String parsedPred = parsePred(pred);
 		final String parsedEnglish = parsePred(english);
 		final String parsedFrench = parsePred(french);
@@ -52,7 +52,7 @@ public class EnglishVsFrenchManual {
 	}
 
 	@Test
-	public void testOverrideExpression() throws BException {
+	public void testOverrideExpression() throws BCompoundException {
 		// <+ has 90 in the English, and 160 in the French version
 		// <-> has 125 in both
 		final String expr = "A <+ B <-> B";

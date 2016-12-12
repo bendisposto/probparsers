@@ -16,11 +16,13 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
+import de.be4.classicalb.core.rules.tranformation.RulesMachineVisitor;
 import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -35,7 +37,7 @@ public class RulesParseUnit implements IModel {
 
 	private String content;
 	private File machineFile;
-	private BException bException;
+	private BCompoundException bCompoundException;
 	private boolean debugOuput;
 	// private IFileContentProvider contentProvider = new NoContentProvider();
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -43,6 +45,7 @@ public class RulesParseUnit implements IModel {
 	private Start start;
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
+	private RulesMachineVisitor rulesMachineVisitor;
 
 	public static RulesParseUnit createBParseUnit(String content) {
 		RulesParseUnit bParseUnit = new RulesParseUnit();
@@ -53,7 +56,7 @@ public class RulesParseUnit implements IModel {
 
 	public RulesParseUnit() {
 	}
-	
+
 	public RulesParseUnit(String machineName) {
 		this.machineName = machineName;
 	}
@@ -92,12 +95,12 @@ public class RulesParseUnit implements IModel {
 			content = Utils.readFile(file);
 			this.machineFile = machineFile.getCanonicalFile();
 		} catch (IOException e) {
-			bException = new BException(file.getAbsolutePath(), e);
+			bCompoundException = new BCompoundException(new BException(file.getAbsolutePath(), e));
 		}
 	}
 
 	public void parse() {
-		if (this.bException != null) {
+		if (this.bCompoundException != null) {
 			return;
 		}
 		try {
@@ -115,21 +118,36 @@ public class RulesParseUnit implements IModel {
 			refFinder.findReferencedMachines();
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
+			this.rulesMachineVisitor = new RulesMachineVisitor(bParser.getFileName(), machineReferences, start);
+			rulesMachineVisitor.runChecks();
+			this.operationList.addAll(rulesMachineVisitor.getOperations());
 
-			RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences);
-			ruleTransformation.runTransformation();
-			this.operationList.addAll(ruleTransformation.getOperations());
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			// store parser exceptions
-			bException = e;
+			this.bCompoundException = e;
 		} catch (CheckException e) {
 			if (machineFile != null) {
-				bException = new BException(machineFile.getPath(), e);
+				bCompoundException = new BCompoundException(new BException(machineFile.getPath(), e));
 			} else {
-				bException = new BException("UnkownFile", e);
+				bCompoundException = new BCompoundException(new BException("UnkownFile", e));
 			}
-
+		} catch (BException e) {
+			bCompoundException = new BCompoundException(e);
 		}
+	}
+
+	public void translate() {
+		this.translate(null);
+	}
+
+	public void translate(List<AbstractOperation> sortedOperationsList) {
+		if (bCompoundException != null) {
+			return;
+		}
+		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
+				rulesMachineVisitor);
+		ruleTransformation.setSortedOperationList(sortedOperationsList);
+		ruleTransformation.runTransformation();
 	}
 
 	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {
@@ -152,7 +170,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public String getResultAsPrologTerm() {
-		if (bException == null) {
+		if (bCompoundException == null) {
 			return this.getModelAsPrologTerm(new NodeIdAssignment());
 		} else {
 			return this.getErrorAsPrologTerm();
@@ -174,7 +192,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public String getErrorAsPrologTerm() {
-		assert bException != null;
+		assert bCompoundException != null;
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -199,7 +217,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bException, parsingBehaviour.useIndention, false);
+		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.useIndention, false);
 	}
 
 	@Override
@@ -224,7 +242,7 @@ public class RulesParseUnit implements IModel {
 
 	@Override
 	public boolean hasError() {
-		if (this.bException == null) {
+		if (this.bCompoundException == null) {
 			return false;
 		} else {
 			return true;
@@ -232,8 +250,8 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public BException getBExeption() {
-		return this.bException;
+	public BCompoundException getBExeption() {
+		return this.bCompoundException;
 	}
 
 }

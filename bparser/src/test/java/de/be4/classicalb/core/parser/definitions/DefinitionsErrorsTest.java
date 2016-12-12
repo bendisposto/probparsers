@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class DefinitionsErrorsTest {
@@ -18,7 +18,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid substitution was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,3]"));
@@ -31,7 +31,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid substitution was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,2]"));
@@ -44,7 +44,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid definition was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[4,1]"));
 		}
@@ -57,7 +57,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid definition was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[9,2]"));
 		}
@@ -69,7 +69,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid substitution was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,15]"));
@@ -83,7 +83,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid formula was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,4]"));
@@ -96,7 +96,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid formula was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,4]"));
@@ -109,7 +109,7 @@ public class DefinitionsErrorsTest {
 		try {
 			getTreeAsString(s);
 			fail("Invalid formula was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,1]"));
@@ -117,7 +117,7 @@ public class DefinitionsErrorsTest {
 		}
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);

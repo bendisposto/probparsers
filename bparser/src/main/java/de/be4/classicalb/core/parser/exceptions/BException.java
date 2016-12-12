@@ -11,8 +11,7 @@ public class BException extends Exception {
 		this(filename, null, e);
 	}
 
-	public BException(final String filename, final String message,
-			final Throwable cause) {
+	public BException(final String filename, final String message, final Throwable cause) {
 		this.filename = filename;
 		this.message = message;
 		this.cause = cause;
@@ -20,7 +19,7 @@ public class BException extends Exception {
 
 	@Override
 	public Throwable getCause() {
-		return cause;
+		return this.cause;
 	}
 
 	@Override
@@ -38,23 +37,23 @@ public class BException extends Exception {
 			if (cause instanceof BException) {
 				final BException other = (BException) cause;
 				other.writeMessage(sb);
-				//printFileRef(sb, filename, other.filename != null);
+				// printFileRef(sb, filename, other.filename != null);
 			} else {
 				sb.append(cause.getMessage());
-				//printFileRef(sb, filename, false);
+				// printFileRef(sb, filename, false);
 			}
 		} else {
-			//printFileRef(sb, filename, false);
+			// printFileRef(sb, filename, false);
 		}
 	}
 
-//	private void printFileRef(final StringBuilder sb, final String filename,
-//			final boolean loaded) {
-//		if (filename != null) {
-//			sb.append(" ").append(loaded ? "loaded by" : "in file");
-//			sb.append(": ").append(filename);
-//		}
-//	}
+	// private void printFileRef(final StringBuilder sb, final String filename,
+	// final boolean loaded) {
+	// if (filename != null) {
+	// sb.append(" ").append(loaded ? "loaded by" : "in file");
+	// sb.append(": ").append(filename);
+	// }
+	// }
 
 	public String getFilename() {
 		return filename;
