@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import de.be4.classicalb.core.parser.analysis.ASTDisplay;
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
@@ -22,10 +23,10 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
+import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
@@ -74,6 +75,13 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 	private Map<PositionedNode, SourcecodeRange> positions;
 
+	
+	public static String getVersion() throws IOException {
+			Properties p = new Properties();
+			p.load(BParser.class.getResourceAsStream("/build.properties"));
+			return p.getProperty("version");
+	}
+	
 	public BParser() {
 		this((String) null);
 	}

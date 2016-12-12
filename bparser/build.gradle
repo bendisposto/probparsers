@@ -18,6 +18,16 @@ sourceSets {
     }
 }
 
+task createBuildConstants  {
+  doFirst {
+    def buildconstants_class = """
+version=${project.version}"""
+    File f = file("src/main/resources/build.properties")
+    f.delete()
+    f.getParentFile().mkdirs()
+    f <<  buildconstants_class
+  }
+}
 
 
 task genPreparser(type:JavaExec) {
@@ -64,7 +74,7 @@ task patches << {
 }
 
 compileJava {
- dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
+ dependsOn = ['createBuildConstants','genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")
