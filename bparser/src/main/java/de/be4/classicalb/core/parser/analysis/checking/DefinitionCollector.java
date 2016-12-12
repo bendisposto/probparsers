@@ -40,8 +40,11 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		this.definitions = definitions;
 	}
 
-	public List<Exception> collectDefinitions(Start rootNode) {
+	public void collectDefinitions(Start rootNode) {
 		rootNode.apply(this);
+	}
+
+	public List<Exception> getExceptions() {
 		return this.exceptions;
 	}
 
