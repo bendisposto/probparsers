@@ -78,7 +78,7 @@ public class BParser {
 			return p.getProperty("version");
 	}
 
-	public static String getVersion() throws IOException {
+	public static String getGitSha() throws IOException {
 			Properties p = new Properties();
 			p.load(BParser.class.getResourceAsStream("/build.properties"));
 			return p.getProperty("git");
