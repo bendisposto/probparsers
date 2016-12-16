@@ -101,12 +101,6 @@ compileJava {
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 
 
-jacoco {
-    toolVersion = "0.7.1.201405082137"
-    reportsDir = file("$buildDir/JacocoReports")
-}
-
-
 // type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
   reports {
