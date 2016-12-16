@@ -199,6 +199,9 @@ public class RulesProject {
 		}
 	}
 
+	
+	
+	@SuppressWarnings("unused")
 	private List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
 		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
 		for (AbstractOperation abstractOperation : values) {

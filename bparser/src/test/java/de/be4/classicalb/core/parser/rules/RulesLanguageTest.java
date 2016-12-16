@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.management.RuntimeErrorException;
-
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -321,7 +319,7 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={};"));
 	}
-	
+
 	@Test
 	public void testFailedRuleErrorType() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
