@@ -112,10 +112,17 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
             fileTree(dir: it,
-                    exclude: ['**/parser/node/**'
-                      , '**/parser/analysis/**'
+                    exclude: [
+                        '**/parser/node/**'
+                      , '**/parser/parser/**'
+                      , '**/parser/lexer/**'
                       , '**/preparser/**'
-                      , '**/lexer/**'
+                      , '**/parser/analysis/Analysis.class'
+                      , '**/parser/analysis/AnalysisAdapter.class'
+                      , '**/parser/analysis/DepthFirstAdapter.class'
+                      , '**/parser/analysis/ReversedDepthFirstAdapter.class'
+                      , '**/parser/analysis/ExtendedDFAdapter.class'
+                      , '**/parser/analysis/PreParserASTPrinter.class'
                     ])
         })
     }
