@@ -97,7 +97,6 @@ public class RulesProjectTest {
 		String expected = "'RULES_MACHINE name must match the file name: RulesMachine vs DifferentFileName').\n";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
-
 	}
 
 	@Test

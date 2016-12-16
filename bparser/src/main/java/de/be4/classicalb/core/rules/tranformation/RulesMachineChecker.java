@@ -12,8 +12,6 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
-import de.be4.classicalb.core.parser.node.ACaseSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceOrSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
@@ -46,10 +44,10 @@ import de.be4.classicalb.core.rules.project.Reference;
 /*
  * This class checks that all extensions for the rules language are used in a correct way
  */
-public class RulesMachineVisitor extends DepthFirstAdapter {
+public class RulesMachineChecker extends DepthFirstAdapter {
 	private final String fileName;
 	private String machineName;
-	protected final Map<ARuleOperation, Rule> rulesMap = new HashMap<>();
+	protected final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
 	protected final Map<AComputationOperation, Computation> computationMap = new HashMap<>();
 	protected final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
 	protected final ArrayList<CheckException> errorList = new ArrayList<>();
@@ -60,7 +58,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	private AbstractOperation currentOperation;
 	private final Start start;
 
-	public RulesMachineVisitor(String fileName, List<Reference> machineReferences, Start start) {
+	public RulesMachineChecker(String fileName, List<Reference> machineReferences, Start start) {
 		this.fileName = fileName;
 		this.machineReferences = machineReferences;
 		this.start = start;
@@ -73,6 +71,10 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		}
 	}
 
+	public String getFileName() {
+		return this.fileName;
+	}
+
 	public List<AbstractOperation> getOperations() {
 		List<AbstractOperation> list = new ArrayList<>();
 		list.addAll(rulesMap.values());
@@ -82,17 +84,11 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	private boolean isInRule() {
-		return currentOperation != null;
+		return currentOperation != null && currentOperation instanceof RuleOperation;
 	}
 
 	public FunctionOperation getFunctionOperation(AFunctionOperation funcOp) {
 		return this.functionMap.get(funcOp);
-	}
-
-	public void inACaseSubstitution(ACaseSubstitution node) {
-		if (isInRule()) {
-			errorList.add(new CheckException("A CASE substitution is not allowed in rule operations", node));
-		}
 	}
 
 	@Override
@@ -126,7 +122,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				PPredicate predicate = attr.getPredicate();
 				if (attr.getName().getText().equals(RulesGrammar.ACTIVATION)) {
 					if (currentOperation instanceof FunctionOperation) {
-						errorList.add(new CheckException("ACTIVATED is not a valid attribute of a FUNCTION operation.",
+						errorList.add(new CheckException("ACTIVATION is not a valid attribute of a FUNCTION operation.",
 								pOperationAttribute));
 					} else {
 						if (currentOperation.getActivationPredicate() == null) {
@@ -143,8 +139,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 						if (func.getPreconditionPredicate() == null) {
 							func.setPreconditionPredicate(predicate);
 						} else {
-							errorList.add(new CheckException(
-									"PRECONDITION clause of function operation is used more than once",
+							errorList.add(new CheckException("PRECONDITION clause is used more than once",
 									pOperationAttribute));
 						}
 					} else {
@@ -161,16 +156,15 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				switch (name) {
 				case RulesGrammar.DEPENDS_ON_RULE: {
 					if (currentOperation.getDependsOnRulesList().size() > 0) {
-						errorList.add(
-								new CheckException("DEPENDS_ON_RULE clause of rule operation is used more than once",
-										pOperationAttribute));
+						errorList.add(new CheckException("DEPENDS_ON_RULE clause is used more than once",
+								pOperationAttribute));
 					}
 					List<AIdentifierExpression> list = new ArrayList<>();
 					for (PExpression pExpression : arguments) {
 						if (pExpression instanceof AIdentifierExpression) {
 							list.add((AIdentifierExpression) pExpression);
 						} else {
-							errorList.add(new CheckException("Expected a list of identifiers behind DEPENDS_ON_RULES.",
+							errorList.add(new CheckException("Expected a list of identifiers after DEPENDS_ON_RULE.",
 									pOperationAttribute));
 						}
 					}
@@ -179,8 +173,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				}
 				case RulesGrammar.DEPENDS_ON_COMPUTATION: {
 					if (currentOperation.getDependsOnComputationList().size() > 0) {
-						errorList.add(new CheckException(
-								"DEPENDS_ON_COMPUTATION clause of rule operation is used more than once",
+						errorList.add(new CheckException("DEPENDS_ON_COMPUTATION clause is used more than once",
 								pOperationAttribute));
 					}
 					List<AIdentifierExpression> list = new ArrayList<>();
@@ -189,7 +182,7 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 							list.add((AIdentifierExpression) pExpression);
 						} else {
 							errorList.add(
-									new CheckException("Expected a list of identifiers behind DEPENDS_ON_COMPUTATIONS.",
+									new CheckException("Expected a list of identifiers after DEPENDS_ON_COMPUTATION.",
 											pOperationAttribute));
 						}
 					}
@@ -198,16 +191,16 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				}
 				case RulesGrammar.RULEID: {
 					{
-						if (currentOperation instanceof Rule) {
-							final Rule rule = (Rule) currentOperation;
+						if (currentOperation instanceof RuleOperation) {
+							final RuleOperation rule = (RuleOperation) currentOperation;
 							if (rule.getRuleIdString() != null) {
-								errorList.add(new CheckException(
-										"RULEID clause of rule operation is used more than once", pOperationAttribute));
+								errorList.add(new CheckException("RULEID attribute is used more than once.",
+										pOperationAttribute));
 							}
 							if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 								rule.setRuleId((AIdentifierExpression) arguments.get(0));
 							} else {
-								errorList.add(new CheckException("Expected one identifier behind RULEID",
+								errorList.add(new CheckException("Expected exactly one identifier behind RULEID",
 										pOperationAttribute));
 							}
 						} else {
@@ -219,32 +212,31 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 					break;
 				}
 				case RulesGrammar.ERROR_TYPES: {
-					if (currentOperation instanceof Rule) {
-						final Rule rule = (Rule) currentOperation;
+					if (currentOperation instanceof RuleOperation) {
+						final RuleOperation rule = (RuleOperation) currentOperation;
 						if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
 							AIntegerExpression intExpr = (AIntegerExpression) arguments.get(0);
 							rule.setErrrorTypes(intExpr);
 						} else {
-							errorList.add(new CheckException("Expected one integer behind ERROR_TYPES.",
+							errorList.add(new CheckException("Expected exactly one integer after ERROR_TYPES.",
 									pOperationAttribute));
 						}
 					} else {
 						errorList.add(new CheckException(
-								"ERROR_TYPES is not an attribute of a FUNCTION or Computation operation",
+								"ERROR_TYPES is not an attribute of a FUNCTION or Computation operation.",
 								pOperationAttribute));
 					}
 					break;
 				}
-
 				default:
-					throw new IllegalStateException("Unexpected operation attribute: " + name);
+					throw new AssertionError("Unexpected operation attribute: " + name);
 				}
 			}
 		}
 	}
 
 	private boolean containsRule(String name) {
-		for (Rule rule : this.rulesMap.values()) {
+		for (RuleOperation rule : this.rulesMap.values()) {
 			if (name.equals(rule.getName())) {
 				return true;
 			}
@@ -253,15 +245,18 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseARuleOperation(ARuleOperation node) {
-		currentOperation = new Rule(node.getRuleName(), this.fileName, this.machineName, machineReferences);
+	public void inARuleOperation(ARuleOperation node) {
+		currentOperation = new RuleOperation(node.getRuleName(), this.fileName, this.machineName, machineReferences);
 		if (containsRule(currentOperation.getName())) {
 			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
 					node.getRuleName()));
 		}
-		rulesMap.put(node, (Rule) currentOperation);
+		rulesMap.put(node, (RuleOperation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
-		node.getRuleBody().apply(this);
+	}
+
+	@Override
+	public void outARuleOperation(ARuleOperation node) {
 		currentOperation = null;
 	}
 
@@ -270,7 +265,10 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 		currentOperation = new Computation(node.getName(), this.fileName, this.machineName, machineReferences);
 		computationMap.put(node, (Computation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
-		node.getBody().apply(this);
+	}
+
+	@Override
+	public void outAComputationOperation(AComputationOperation node) {
 		currentOperation = null;
 	}
 
@@ -278,13 +276,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	public void inAFunctionOperation(AFunctionOperation node) {
 		currentOperation = new FunctionOperation(node.getName(), this.fileName, this.machineName, machineReferences);
 		functionMap.put(node, (FunctionOperation) currentOperation);
-		visitOperationAttributes(node.getAttributes());
-		node.getBody().apply(this);
-		currentOperation = null;
-	}
-
-	@Override
-	public void caseAFunctionOperation(AFunctionOperation node) {
 		final HashSet<String> variables = new HashSet<>();
 		LinkedList<PExpression> identifiers = node.getReturnValues();
 		for (PExpression e : identifiers) {
@@ -293,49 +284,20 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				String name = id.getIdentifier().get(0).getText();
 				variables.add(name);
 			} else {
-				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
+				errorList.add(new CheckException("Each return value must be an identifier.", node));
 			}
 		}
 		localVariablesScope.addAll(variables);
-
-		inAFunctionOperation(node);
-		{
-			List<PExpression> copy = new ArrayList<PExpression>(node.getReturnValues());
-			for (PExpression e : copy) {
-				e.apply(this);
-			}
-		}
-		if (node.getName() != null) {
-			node.getName().apply(this);
-		}
-		{
-			List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
-			for (PExpression e : copy) {
-				e.apply(this);
-			}
-		}
-		{
-			List<POperationAttribute> copy = new ArrayList<POperationAttribute>(node.getAttributes());
-			for (POperationAttribute e : copy) {
-				e.apply(this);
-			}
-		}
-		if (node.getBody() != null) {
-			node.getBody().apply(this);
-		}
-		outAFunctionOperation(node);
-		localVariablesScope.removeAll(variables);
+		visitOperationAttributes(node.getAttributes());
 	}
 
 	@Override
-	public void caseADefineSubstitution(ADefineSubstitution node) {
-		inADefineSubstitution(node);
-		node.getName().apply(this);
-		node.getType().apply(this);
-		if (node.getDummyValue() != null) {
-			node.getDummyValue().apply(this);
-		}
-		node.getValue().apply(this);
+	public void outAFunctionOperation(AFunctionOperation node) {
+		currentOperation = null;
+	}
+
+	@Override
+	public void outADefineSubstitution(ADefineSubstitution node) {
 		// the defined variable should not be used in the TYPE or the VALUE
 		// section
 		if (currentOperation != null && currentOperation instanceof Computation) {
@@ -346,7 +308,6 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 				this.errorList.add(e);
 			}
 		}
-		outADefineSubstitution(node);
 	}
 
 	@Override
@@ -391,14 +352,15 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 			return;
 		}
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
-			if (parameters.size() == 0 || parameters.size() > 2) {
+			// the grammar ensures at least one argument
+			if (parameters.size() > 2) {
 				this.errorList
 						.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
 			}
 			PExpression pExpression = node.getIdentifiers().get(0);
 			if (!(pExpression instanceof AIdentifierExpression)) {
-				this.errorList.add(
-						new CheckException("The first argument of RULE_COUNTEREXAMPLES must be an identifier.", node));
+				this.errorList.add(new CheckException(
+						"The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.", node));
 			}
 			return;
 		}
@@ -568,14 +530,16 @@ public class RulesMachineVisitor extends DepthFirstAdapter {
 	}
 
 	private void checkErrorType(TIntegerLiteral node) {
-		if (node != null && currentOperation instanceof Rule) {
-			final Rule rule = (Rule) currentOperation;
+		if (node != null && currentOperation instanceof RuleOperation) {
+			final RuleOperation rule = (RuleOperation) currentOperation;
 			int errorType = Integer.parseInt(node.getText());
 			if (rule.getNumberOfErrorTypes() == null) {
 				errorList.add(new CheckException("Define the number of error types of the rule operation.", node));
 			} else if (errorType > rule.getNumberOfErrorTypes()) {
 				errorList.add(new CheckException(
 						"The error type exceeded the number of error types specified for this rule operation.", node));
+			} else if (errorType < 1) {
+				errorList.add(new CheckException("The ERROR_TYPE must be a natural number greater than zero.", node));
 			}
 		}
 	}

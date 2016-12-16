@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.management.RuntimeErrorException;
+
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -99,6 +101,15 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testDefine2() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION computeM1 BODY DEFINE foo TYPE INTEGER DUMMY_VALUE 1 VALUE 2 END END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		assertTrue("Missing DEFINE variable",
+				result.contains("variables(none,[identifier(none,foo),identifier(none,computeM1)])"));
+		System.out.println(result);
+	}
+
+	@Test
 	public void testRuleOperation() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({}) END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
@@ -119,9 +130,9 @@ public class RulesLanguageTest {
 		String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("foo_Counterexamples:=foo_Counterexamples\\/{2}*{\"fail\"}"));
-		
+
 	}
-	
+
 	@Test
 	public void testRuleCounterexmples() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL( \"fail\") END END";
@@ -184,15 +195,6 @@ public class RulesLanguageTest {
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
-	}
-
-	@Test
-	public void testActivationFunction() throws Exception {
-		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS FUNCTION out <-- foo ACTIVATION k = TRUE BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		String expected = "parse_exception(pos(1,85,'UnkownFile'),'ACTIVATED is not a valid attribute of a FUNCTION operation.').\n";
-		assertEquals(expected, result);
 	}
 
 	@Test
@@ -303,7 +305,31 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
+
+	@Test
+	public void testGetCounterexamples() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1,2) = {} OPERATIONS RULE rule1 BODY skip END END";
+		final String result = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={}"));
+	}
+
+	@Test
+	public void testSucceededRuleErrorType() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
+		final String result = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={};"));
+	}
 	
+	@Test
+	public void testFailedRuleErrorType() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
+		final String result = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)/={};"));
+	}
+
 	@Test
 	public void testVarSubstitution() throws Exception {
 		final String testMachine = "RULES_MACHINE Test INITIALISATION VAR a,b IN a := 1; b:=1 END END";
@@ -343,7 +369,13 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
+		if (unit.getBExeption() != null) {
+			throw new RuntimeException(unit.getBExeption());
+		}
 		unit.translate();
+		if (unit.getBExeption() != null) {
+			throw new RuntimeException(unit.getBExeption());
+		}
 		PrettyPrinter pp = new PrettyPrinter();
 		unit.getStart().apply(pp);
 		return pp.getPrettyPrint();
