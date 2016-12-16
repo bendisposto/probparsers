@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.prolog.output.PrologTermStringOutput;
 
 public class ConsoleTest {
 
 	@Test
-	public void testFormulaOutput() throws BException {
+	public void testFormulaOutput() throws BCompoundException {
 		Start start = BParser.parse("#FORMULA 1+1");
 		PrologTermStringOutput strOutput = new PrologTermStringOutput();
 		ASTProlog printer = new ASTProlog(strOutput, null);

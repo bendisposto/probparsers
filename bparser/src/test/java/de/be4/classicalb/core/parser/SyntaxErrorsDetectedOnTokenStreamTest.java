@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -19,7 +19,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("Two succeeding"));
 		}
@@ -32,7 +32,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("& VARIABLES was not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("& VARIABLES"));
 		}
@@ -44,7 +44,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			final BLexerException ex = (BLexerException) e.getCause();
 			// checking the position of the second &
@@ -59,7 +59,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("& &"));
 			final BLexerException ex = (BLexerException) e.getCause();
@@ -75,7 +75,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("& &"));
 		}
@@ -87,7 +87,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,14]"));
@@ -101,7 +101,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[6,6]"));
@@ -116,7 +116,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		try {
 			getTreeAsString(s);
 			fail("Duplicate 'DEFINITION' clause was not detected.");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[5,2] Clause 'DEFINITIONS' is used more than once"));
 		}
@@ -126,7 +126,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	
 	
 	
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);

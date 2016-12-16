@@ -3,8 +3,8 @@
  */
 package de.be4.classicalb.core.parser;
 
-import de.be4.classicalb.core.parser.extensions.DefaultGrammar;
-import de.be4.classicalb.core.parser.extensions.IGrammar;
+import de.be4.classicalb.core.parser.grammars.DefaultGrammar;
+import de.be4.classicalb.core.parser.grammars.IGrammar;
 
 public class ParseOptions {
 	

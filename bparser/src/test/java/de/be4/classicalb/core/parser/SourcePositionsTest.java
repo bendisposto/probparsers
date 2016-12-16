@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAddExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -387,7 +387,7 @@ public class SourcePositionsTest {
 		parser = null;
 	}
 
-	private Start getAst(final String testMachine) throws BException {
+	private Start getAst(final String testMachine) throws BCompoundException {
 		// System.out.println("Testing \"" + testMachine + "\"");
 		final Start startNode = parser.parse(testMachine, false);
 

@@ -11,7 +11,7 @@ import util.AbstractParseMachineTest;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 @RunWith(PolySuite.class)
@@ -25,7 +25,7 @@ public class UnparsableMachineTest extends AbstractParseMachineTest {
 		this.machine = machine;
 	}
 
-	@Test(expected = BException.class)
+	@Test(expected = BCompoundException.class)
 	public void testParsable() throws Exception {
 		final BParser parser = new BParser(machine.getName());
 		Start start = parser.parseFile(machine, false);

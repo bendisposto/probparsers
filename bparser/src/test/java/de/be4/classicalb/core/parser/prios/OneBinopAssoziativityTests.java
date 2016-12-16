@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 @RunWith(PolySuite.class)
 public class OneBinopAssoziativityTests {
@@ -52,7 +52,7 @@ public class OneBinopAssoziativityTests {
 	}
 
 	@Test
-	public void testAssociativity() throws BException {
+	public void testAssociativity() throws BCompoundException {
 		final String expr = createTripleExpr(op1, op2);
 		final String left = createTripleExprLeft(op1, op2);
 		final String right = createTripleExprRight(op1, op2);

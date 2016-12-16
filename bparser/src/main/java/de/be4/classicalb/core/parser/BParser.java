@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import de.be4.classicalb.core.parser.analysis.ASTDisplay;
 import de.be4.classicalb.core.parser.analysis.ASTPrinter;
@@ -22,19 +23,15 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
+import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.exceptions.*;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -72,6 +69,19 @@ public class BParser {
 	private File directory;
 
 	private IDefinitionFileProvider contentProvider;
+	private Map<PositionedNode, SourcecodeRange> positions;
+
+	public static String getVersion() throws IOException {
+		Properties p = new Properties();
+		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		return p.getProperty("version");
+	}
+
+	public static String getGitSha() throws IOException {
+		Properties p = new Properties();
+		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		return p.getProperty("git");
+	}
 
 	public BParser() {
 		this((String) null);
@@ -92,7 +102,8 @@ public class BParser {
 	}
 
 	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider) throws BException {
+			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
+			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(), parser.getDefinitions());
@@ -100,7 +111,8 @@ public class BParser {
 	}
 
 	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider) throws BException {
+			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
+			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
@@ -133,8 +145,9 @@ public class BParser {
 	 *             if the file cannot be read
 	 * @throws BException
 	 *             if the file cannot be parsed
+	 * @throws BCompoundException
 	 */
-	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BException {
+	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
@@ -154,9 +167,10 @@ public class BParser {
 	 *             if the file cannot be read
 	 * @throws BException
 	 *             if the file cannot be parsed
+	 * @throws BCompoundException
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
-			throws IOException, BException {
+			throws IOException, BCompoundException {
 		this.directory = machineFile.getParentFile();
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
@@ -204,13 +218,14 @@ public class BParser {
 	 * @return AST of the input
 	 * @throws BException
 	 *             if the B machine can not be parsed
+	 * @throws BCompoundException
 	 */
-	public static Start parse(final String input) throws BException {
+	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start eparse(String input, IDefinitions context) throws BException, LexerException, IOException {
+	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
 		final Reader reader = new StringReader(input);
 
 		Start ast = null;
@@ -273,8 +288,9 @@ public class BParser {
 	 * @return the AST node
 	 * @throws BException
 	 *             if the B machine cannot be parsed
+	 * @throws BCompoundException
 	 */
-	public Start parse(final String input, final boolean debugOutput) throws BException {
+	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
 		return parse(input, debugOutput, new NoContentProvider());
 	}
 
@@ -295,8 +311,8 @@ public class BParser {
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
 	 *             an error message. If the tools needs to extract additional
-	 *             information, such as a sourcecode position or involved tokens
-	 *             respectively nodes, it needs to retrieve the delegate
+	 *             information, such as a source code position or involved
+	 *             tokens respectively nodes, it needs to retrieve the delegate
 	 *             exception. The {@link BException} class offers a
 	 *             {@link BException#getCause()} method for this, which returns
 	 *             the delegate exception.
@@ -305,16 +321,16 @@ public class BParser {
 	 *             <ul>
 	 *             <li>{@link PreParseException}: This exception contains errors
 	 *             that occur during the preparsing. If possible it supplies a
-	 *             token, where the error occured.</li>
+	 *             token, where the error occurred.</li>
 	 *             <li>{@link BLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
 	 *             {@link LexerException}. But this class unfortunately does not
-	 *             contain any explicit information about the sourcecode
-	 *             position where the error occured. Using aspect-oriented
+	 *             contain any explicit information about the source code
+	 *             position where the error occurred. Using aspect-oriented
 	 *             programming we intercept the throwing of these exceptions to
 	 *             replace them by our own exception. In our own exception we
-	 *             provide the sourcecode position of the last characters that
+	 *             provide the source code position of the last characters that
 	 *             were read from the input.</li>
 	 *             <li>{@link BParseException}: This exception is thrown in two
 	 *             situations. On the one hand if the parser throws a
@@ -325,17 +341,18 @@ public class BParser {
 	 *             single token is involved in the error. Otherwise a
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s.
-	 *             {@link #getSourcePositions()}).</li>
+	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             </li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
-	 *             problem. For example, if we find dublicate machine clauses,
-	 *             we will list all occurances in the exception.</li>
+	 *             problem. For example, if we find duplicate machine clauses,
+	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
+	 * @throws BCompoundException
 	 */
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
-			throws BException {
+			throws BCompoundException {
 		final Reader reader = new StringReader(input);
 		try {
 			// PreParsing
@@ -364,28 +381,44 @@ public class BParser {
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			Map<PositionedNode, SourcecodeRange> positions = parser.getMapping();
+			/*
+			 * storing the positions in extra variable because the class
+			 * SourcePositions provides no access to the positions
+			 */
+			this.positions = parser.getMapping();
+			this.sourcePositions = new SourcePositions(tokenList, positions);
 
-			sourcePositions = new SourcePositions(tokenList, positions);
-
+			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
 			 */
 			final DefinitionCollector collector = new DefinitionCollector(defTypes, this.definitions);
 			collector.collectDefinitions(rootNode);
+			List<Exception> definitionsCollectorExceptions = collector.getExceptions();
+			for (Exception exception : definitionsCollectorExceptions) {
+				if (exception instanceof BException) {
+					bExceptionList.add((BException) exception);
+				} else {
+					bExceptionList.add(new BException(getFileName(), exception));
+				}
+			}
 
 			// perfom AST transformations that can't be done by SableCC
 			applyAstTransformations(rootNode);
 
 			// perform some semantic checks which are not done in the parser
-			performSemanticChecks(rootNode);
-
-			this.parseOptions.grammar.applyAstTransformation(rootNode, this);
-
+			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
+			for (CheckException checkException : checkExceptions) {
+				bExceptionList.add(new BException(getFileName(), checkException));
+			}
+			if (bExceptionList.size() > 0) {
+				BCompoundException comp = new BCompoundException(bExceptionList);
+				throw comp;
+			}
 			return rootNode;
-		} catch (final LexerException e) {
-			throw new BException(getFileName(), e);
+		} catch (final LexerException | BParseException | IOException | PreParseException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final SourcecodeRange range = sourcePositions == null ? null : sourcePositions.getSourcecodeRange(token);
@@ -394,16 +427,10 @@ public class BParser {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BException(getFileName(), new BParseException(token, range, msg, realMsg));
-		} catch (final BParseException e) {
-			throw new BException(getFileName(), e);
-		} catch (final IOException e) {
-			// shouldn't happen and if, we cannot handle it
-			throw new BException(getFileName(), "Parsing failed with an IOException: ", e);
-		} catch (final PreParseException e) {
-			throw new BException(getFileName(), e);
-		} catch (final CheckException e) {
-			throw new BException(getFileName(), e);
+			throw new BCompoundException(
+					new BException(getFileName(), new BParseException(token, range, msg, realMsg)));
+		} catch (BException e) {
+			throw new BCompoundException(e);
 		}
 	}
 
@@ -432,7 +459,7 @@ public class BParser {
 
 	private DefinitionTypes preParsing(final boolean debugOutput, final Reader reader,
 			final IFileContentProvider contentProvider, File directory)
-			throws IOException, PreParseException, BException {
+			throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		preParser.setDebugOutput(debugOutput);
@@ -441,16 +468,16 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private void applyAstTransformations(final Start rootNode) throws CheckException {
+	private void applyAstTransformations(final Start rootNode) {
 		// default transformations
 		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
 		rootNode.apply(new SyntaxExtensionTranslator());
-
 		// more AST transformations?
 
 	}
 
-	private void performSemanticChecks(final Start rootNode) throws CheckException {
+	private List<CheckException> performSemanticChecks(final Start rootNode) {
+		final List<CheckException> list = new ArrayList<>();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck() };
 		// apply more checks?
@@ -458,11 +485,18 @@ public class BParser {
 		for (SemanticCheck check : checks) {
 			check.setOptions(parseOptions);
 			check.runChecks(rootNode);
+			list.addAll(check.getCheckExceptions());
 		}
+
+		return list;
 	}
 
 	public SourcePositions getSourcePositions() {
 		return sourcePositions;
+	}
+
+	public Map<PositionedNode, SourcecodeRange> getPositions() {
+		return this.positions;
 	}
 
 	public IDefinitions getDefinitions() {
@@ -545,7 +579,7 @@ public class BParser {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -2;
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			if (parsingBehaviour.prologOutput) {
 				PrologExceptionPrinter.printException(err, e, parsingBehaviour.useIndention, false);
 				// PrologExceptionPrinter.printException(err, e);

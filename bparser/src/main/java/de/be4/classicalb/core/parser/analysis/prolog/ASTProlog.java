@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -489,7 +488,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
-
 	// predicate
 
 	@Override
@@ -818,7 +816,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getParameters());
 		close(node);
 	}
-	
+
 	@Override
 	public void caseAParallelSubstitution(final AParallelSubstitution node) {
 		printOCAsList(node, node.getSubstitutions());

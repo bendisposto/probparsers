@@ -1,4 +1,4 @@
-def global_version = '2.7.0'
+def global_version = '2.8.0'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
@@ -7,8 +7,10 @@ project.group = 'de.hhu.stups'
 defaultTasks 'remind', 'clean', 'deploy'
 
 
-task remind << {
-  println "You did not specify a task. Assuming you mean gradle clean deploy."
+task remind {
+    doLast {
+        println "You did not specify a task. Assuming you mean gradle clean deploy."
+    }
 }
 
 // // The real configuration

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -17,7 +17,7 @@ public class PrimedIdentifierTest {
 	private BParser parser = new BParser("testcase");
 
 	@Test
-	public void testBecomeSuchSubstitution() throws BException {
+	public void testBecomeSuchSubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION x : (x$0 = x)";
 		final String expected = "Start(ASubstitutionParseUnit(ABecomesSuchSubstitution([AIdentifierExpression([x])],AEqualPredicate(APrimedIdentifierExpression([x]0),AIdentifierExpression([x])))))";
 		final String actual = getTreeAsString(testMachine);
@@ -30,8 +30,8 @@ public class PrimedIdentifierTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("exception expected");
-		} catch (BException e) {
-			assertTrue(e.getCause() instanceof CheckException);
+		} catch (BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof CheckException);
 			// ok
 		}
 	}
@@ -42,15 +42,15 @@ public class PrimedIdentifierTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("exception expected");
-		} catch (BException e) {
-			assertTrue(e.getCause() instanceof BParseException);
+		} catch (BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof BParseException);
 			// ok
 		}
 	}
 
-	@Test(expected = BException.class)
+	@Test(expected = BCompoundException.class)
 	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse()
-			throws BException {
+			throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
 		parser.getOptions().restrictPrimedIdentifiers = false;
 		getTreeAsString(testMachine);
@@ -58,12 +58,12 @@ public class PrimedIdentifierTest {
 	}
 
 	@Test
-	public void testPrimedIdentifiersInQuantifiers() throws BException {
+	public void testPrimedIdentifiersInQuantifiers() throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
 		try {
 			getTreeAsString(testMachine);
 			fail("exception expected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			assertTrue(e.getCause() instanceof BParseException);
 			// ok
 		}
@@ -75,7 +75,7 @@ public class PrimedIdentifierTest {
 		parser.getOptions().restrictPrimedIdentifiers = true;
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		final Start startNode = parser.parse(testMachine, false);
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);

@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class DefinitionsOrderTest {
@@ -18,7 +18,7 @@ public class DefinitionsOrderTest {
 	private File machine;
 
 	@Test
-	public void testLinearOrder() throws IOException, BException {
+	public void testLinearOrder() throws IOException, BCompoundException {
 		machine = new File(PATH + "DefinitionsOccurInLinearOrder.mch");
 
 		final BParser parser = new BParser(machine.getName());
@@ -27,7 +27,7 @@ public class DefinitionsOrderTest {
 	}
 
 	@Test
-	public void testReordered() throws IOException, BException {
+	public void testReordered() throws IOException, BCompoundException {
 		machine = new File(PATH + "DefinitionsOccurReordered.mch");
 
 		final BParser parser = new BParser(machine.getName());

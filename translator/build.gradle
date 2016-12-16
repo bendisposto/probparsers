@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'jacoco'
 
 dependencies {
     compile project(path: ":prologlib", configuration: "archives")
@@ -7,3 +8,25 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile 'org.codehaus.groovy:groovy-all:2.3.6'
 }
+
+
+// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
+jacocoTestReport {
+  reports {
+      xml.enabled false
+      csv.enabled false
+      html.destination "${buildDir}/jacocoHtml"
+  }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['**/parser/node/**'
+                      , '**/parser/analysis/**'
+                      , '**/preparser/**'
+                      , '**/lexer/**'
+                    ])
+        })
+    }
+}
+deploy.dependsOn jacocoTestReport

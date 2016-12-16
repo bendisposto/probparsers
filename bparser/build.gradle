@@ -3,6 +3,8 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
+apply plugin: 'jacoco'
+apply plugin: 'java'
 
 
 dependencies {
@@ -18,6 +20,29 @@ sourceSets {
     }
 }
 
+def getCheckedOutGitCommitHash() {
+    def gitFolder = "$projectDir/../.git/"
+    def takeFromHash = 40
+    try{
+     def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
+     def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+     if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+     def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+     refHead.text.trim().take takeFromHash
+    } catch (Exception e) { "unknown" }
+}
+
+task createBuildConstants  {
+  doFirst {
+    def buildconstants_class = """
+version=${project.version}
+git=${getCheckedOutGitCommitHash()}"""
+    File f = file("src/main/resources/build.properties")
+    f.delete()
+    f.getParentFile().mkdirs()
+    f <<  buildconstants_class
+  }
+}
 
 
 task genPreparser(type:JavaExec) {
@@ -64,7 +89,7 @@ task patches << {
 }
 
 compileJava {
- dependsOn = ['genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
+ dependsOn = ['createBuildConstants','genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")
@@ -74,3 +99,32 @@ compileJava {
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+
+
+// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
+jacocoTestReport {
+  reports {
+      xml.enabled false
+      csv.enabled false
+      html.destination "${buildDir}/jacocoHtml"
+  }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: [
+                        '**/parser/node/**'
+                      , '**/parser/parser/**'
+                      , '**/parser/lexer/**'
+                      , '**/preparser/**'
+                      , '**/parser/analysis/Analysis.class'
+                      , '**/parser/analysis/AnalysisAdapter.class'
+                      , '**/parser/analysis/DepthFirstAdapter.class'
+                      , '**/parser/analysis/ReversedDepthFirstAdapter.class'
+                      , '**/parser/analysis/ExtendedDFAdapter.class'
+                      , '**/parser/analysis/PreParserASTPrinter.class'
+                    ])
+        })
+    }
+}
+deploy.dependsOn jacocoTestReport

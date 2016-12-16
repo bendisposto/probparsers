@@ -1,0 +1,16 @@
+RULES_MACHINE M2
+OPERATIONS
+RULE rule1
+DEPENDS_ON_COMPUTATION compute_xx
+BODY
+  RULE_FORALL x
+  WHERE
+     x : set
+  EXPECT
+    x > 3
+  COUNTEREXAMPLE
+    STRING_FORMAT("Value ~w is not greater than zero", x)
+  END//RULE_FORALL
+END
+
+END
