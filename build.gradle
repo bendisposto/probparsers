@@ -173,4 +173,30 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
+task copyCoverage(){
+  dependsOn = ['deploy']
+  copy {
+    from fileTree(dir: 'bparser/build/jacocoHtml')
+    into "${project.buildDir}/parser_coverage/bparser"
+  }
+  copy{
+    from fileTree(dir: 'answerparser/build/jacocoHtml')
+    into "${project.buildDir}/parser_coverage/answerparser"
+  }
+  copy{
+    from fileTree(dir: 'parserbase/build/jacocoHtml')
+    into "${project.buildDir}/parser_coverage/parserbase"
+  }
+  copy{
+    from fileTree(dir: 'translator/build/jacocoHtml')
+    into "${project.buildDir}/parser_coverage/translator"
+  }
+  copy{
+    from fileTree(dir: 'prologlib/build/jacocoHtml')
+    into "${project.buildDir}/parser_coverage/prologlib"
+  }
+
+}
+
+
 task deploy(dependsOn: [subprojects.deploy])
