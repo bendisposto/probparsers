@@ -1,18 +1,18 @@
-package de.be4.classicalb.core.rules.tranformation;
+package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.util.List;
 
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.rules.project.Reference;
+import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public class RuleOperation extends AbstractOperation {
 	private AIdentifierExpression ruleId;
 	private AIntegerExpression errorTypes;
 	private String counterExampleVariableName;
 
-	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName, List<Reference> machineReferences) {
+	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName, List<RulesMachineReference> machineReferences) {
 		super(ruleName, fileName, machineName, machineReferences);
 	}
 

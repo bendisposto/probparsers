@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.rules.tranformation;
+package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
@@ -29,8 +31,10 @@ import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
+import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.POperationAttribute;
@@ -38,8 +42,7 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.rules.project.Reference;
+import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 /*
  * This class checks that all extensions for the rules language are used in a correct way
@@ -47,27 +50,36 @@ import de.be4.classicalb.core.rules.project.Reference;
 public class RulesMachineChecker extends DepthFirstAdapter {
 	private final String fileName;
 	private String machineName;
+	private final File file;
 	protected final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
 	protected final Map<AComputationOperation, Computation> computationMap = new HashMap<>();
 	protected final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
 	protected final ArrayList<CheckException> errorList = new ArrayList<>();
 	protected final HashSet<AIdentifierExpression> assignedVariables = new HashSet<>();
 	private final HashSet<String> localVariablesScope = new HashSet<>();
-	private final List<Reference> machineReferences;
+	private final List<RulesMachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
 	private final Start start;
 
-	public RulesMachineChecker(String fileName, List<Reference> machineReferences, Start start) {
+	public RulesMachineChecker(final File file, final String fileName, List<RulesMachineReference> machineReferences,
+			Start start) {
+		this.file = file;
 		this.fileName = fileName;
 		this.machineReferences = machineReferences;
 		this.start = start;
 	}
 
-	public void runChecks() throws CheckException {
+	public void runChecks() throws BCompoundException {
 		start.apply(this);
-		if (this.errorList.size() > 0) {
-			throw this.errorList.get(0);
+		if (errorList.size() > 0) {
+			final List<BException> bExceptionList = new ArrayList<>();
+			final String filePath = file == null ? "UnknownFile" : file.getAbsolutePath();
+			for (CheckException checkException : errorList) {
+				final BException bException = new BException(filePath, checkException);
+				bExceptionList.add(bException);
+			}
+			throw new BCompoundException(bExceptionList);
 		}
 	}
 
@@ -102,16 +114,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		final TIdentifierLiteral nameLiteral = nameList.get(0);
 		this.machineName = nameLiteral.getText();
-
-		if (fileName != null) {
-			File f = new File(fileName);
-			final String fileNameWithOutExtension = Utils.getFileWithoutExtension(f.getName());
-			if (!nameLiteral.getText().equals(fileNameWithOutExtension)) {
-				errorList.add(new CheckException("RULES_MACHINE name must match the file name: " + this.machineName
-						+ " vs " + fileNameWithOutExtension, node));
-			}
-		}
-
 	}
 
 	private void visitOperationAttributes(final LinkedList<POperationAttribute> attributes) {
@@ -563,6 +565,16 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void inAChoiceSubstitution(AChoiceSubstitution node) {
 		errorList.add(new CheckException("A CHOICE substitution is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseASeesMachineClause(ASeesMachineClause node) {
+		errorList.add(new CheckException("The SEES clause is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseAUsesMachineClause(AUsesMachineClause node) {
+		errorList.add(new CheckException("The USES clause is not allowed in a RULES_MACHINE.", node));
 	}
 
 }

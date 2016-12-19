@@ -12,7 +12,6 @@ import org.junit.Test;
 import util.Helpers;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -21,6 +20,7 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
+import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 

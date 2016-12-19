@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import de.be4.classicalb.core.parser.analysis.ASTDisplay;
-import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
@@ -42,6 +40,8 @@ import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
+import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -387,7 +387,6 @@ public class BParser {
 			 */
 			this.positions = parser.getMapping();
 			this.sourcePositions = new SourcePositions(tokenList, positions);
-
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now

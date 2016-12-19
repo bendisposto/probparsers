@@ -1,14 +1,12 @@
-package de.be4.classicalb.core.rules.project;
+package de.be4.classicalb.core.parser.rules.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
@@ -19,55 +17,35 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
+import de.be4.classicalb.core.parser.rules.tranformation.RulesTransformation;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.rules.tranformation.RulesMachineChecker;
-import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesParseUnit implements IModel {
 	private String machineName;
-	private List<Reference> machineReferences;
+	private List<RulesMachineReference> machineReferences;
 
 	private String content;
 	private File machineFile;
 	private BCompoundException bCompoundException;
 	private boolean debugOuput;
-	// private IFileContentProvider contentProvider = new NoContentProvider();
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private BParser bParser;
 	private Start start;
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
-	private RulesMachineChecker rulesMachineVisitor;
-
-	public static RulesParseUnit createBParseUnit(String content) {
-		RulesParseUnit bParseUnit = new RulesParseUnit();
-		bParseUnit.setMachineAsString(content);
-		bParseUnit.parse();
-		return bParseUnit;
-	}
+	private RulesMachineChecker rulesMachineChecker;
 
 	public RulesParseUnit() {
 	}
 
 	public RulesParseUnit(String machineName) {
 		this.machineName = machineName;
-	}
-
-	public List<IToken> getTokenList() {
-		return this.bParser.getSourcePositions().getTokenList();
-	}
-
-	public Map<PositionedNode, SourcecodeRange> getPositions() {
-		return this.bParser.getPositions();
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -113,27 +91,19 @@ public class RulesParseUnit implements IModel {
 				bParser = new BParser();
 			}
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
-
-			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start,
-					parsingBehaviour.machineNameMustMatchFileName);
+			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();
+
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
-			this.rulesMachineVisitor = new RulesMachineChecker(bParser.getFileName(), machineReferences, start);
-			rulesMachineVisitor.runChecks();
-			this.operationList.addAll(rulesMachineVisitor.getOperations());
+			this.rulesMachineChecker = new RulesMachineChecker(machineFile, bParser.getFileName(), machineReferences,
+					start);
+			rulesMachineChecker.runChecks();
+			this.operationList.addAll(rulesMachineChecker.getOperations());
 
 		} catch (BCompoundException e) {
 			// store parser exceptions
 			this.bCompoundException = e;
-		} catch (CheckException e) {
-			if (machineFile != null) {
-				bCompoundException = new BCompoundException(new BException(machineFile.getPath(), e));
-			} else {
-				bCompoundException = new BCompoundException(new BException("UnkownFile", e));
-			}
-		} catch (BException e) {
-			bCompoundException = new BCompoundException(e);
 		}
 	}
 
@@ -150,38 +120,11 @@ public class RulesParseUnit implements IModel {
 			return;
 		}
 		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
-				rulesMachineVisitor, allOperations);
+				rulesMachineChecker, allOperations);
 		try {
 			ruleTransformation.runTransformation();
 		} catch (BCompoundException e) {
 			bCompoundException = e;
-		}
-	}
-
-	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.useIndention);
-		printAsProlog(pout, nodeIdMapping);
-		pout.flush();
-		return output.toString();
-	}
-
-	public String getResultAsPrologTerm() {
-		if (bCompoundException == null) {
-			return this.getModelAsPrologTerm(new NodeIdAssignment());
-		} else {
-			return this.getErrorAsPrologTerm();
 		}
 	}
 
@@ -191,7 +134,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public List<Reference> getMachineReferences() {
+	public List<RulesMachineReference> getMachineReferences() {
 		if (this.machineReferences == null) {
 			return new ArrayList<>();
 		} else {
@@ -199,27 +142,13 @@ public class RulesParseUnit implements IModel {
 		}
 	}
 
-	public String getErrorAsPrologTerm() {
-		assert bCompoundException != null;
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		printExceptionAsProlog(new PrintStream(output));
-		try {
-			output.flush();
-			output.close();
-			return output.toString();
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to close output stream");
+	public void printPrologOutput(final PrintStream out, final PrintStream err) {
+		if (this.bCompoundException != null) {
+			this.printExceptionAsProlog(err);
+		} else {
+			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
+			this.printAsProlog(pout, new NodeIdAssignment());
+			pout.flush();
 		}
 
 	}
@@ -229,11 +158,6 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public void printAsProlog(PrintWriter out, NodeIdAssignment nodeIdMapping) {
-		final IPrologTermOutput pout = new PrologTermOutput(out, false);
-		printAsProlog(pout, nodeIdMapping);
-	}
-
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
@@ -258,7 +182,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public BCompoundException getBExeption() {
+	public BCompoundException getCompoundException() {
 		return this.bCompoundException;
 	}
 

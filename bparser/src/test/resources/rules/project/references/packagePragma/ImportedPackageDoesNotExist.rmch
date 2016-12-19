@@ -1,0 +1,4 @@
+/*@package packagePragma*/
+/*@import-package packagePragma.foo.bar */
+RULES_MACHINE ImportedPackageDoesNotExist
+END

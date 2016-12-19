@@ -1,17 +1,17 @@
-package de.be4.classicalb.core.rules.tranformation;
+package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.util.List;
 
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.rules.project.Reference;
+import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public class FunctionOperation extends AbstractOperation {
 
 	private PPredicate preconditionPredicate;
 
 	public FunctionOperation(TIdentifierLiteral name, String fileName, String machineName,
-			List<Reference> machineReferences) {
+			List<RulesMachineReference> machineReferences) {
 		super(name, fileName, machineName, machineReferences);
 	}
 

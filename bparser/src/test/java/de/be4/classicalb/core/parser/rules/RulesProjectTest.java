@@ -10,7 +10,7 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.rules.project.RulesProject;
+import de.be4.classicalb.core.parser.rules.project.RulesProject;
 
 public class RulesProjectTest {
 
@@ -94,7 +94,7 @@ public class RulesProjectTest {
 	@Test
 	public void testFileNameDoesNotMatchMachineName() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/DifferentFileName.rmch");
-		String expected = "'RULES_MACHINE name must match the file name: RulesMachine vs DifferentFileName').\n";
+		String expected = "RULES_MACHINE name must match the file name";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
@@ -105,6 +105,80 @@ public class RulesProjectTest {
 		String expected = "Cyclic dependencies between operations: rule1 -> rule1').\n";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
+	}
+
+	@Test
+	public void testFilePragma() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/FilePragma.rmch");
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testInvalidFilePragma() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/DirectoryInFilePragma.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("is a directory"));
+	}
+
+	@Test
+	public void testFileDoesNotExistInFilePragma() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/FileDoesNotExistInFilePragma.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception"));
+		assertTrue(result.contains("does not exist"));
+	}
+
+	@Test
+	public void testReferencedMachineNotFound() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/ReferencedMachineNotFound.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception"));
+		assertTrue(result.contains("Machine not found"));
+	}
+
+	@Test
+	public void testPackagePragma() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/PackagePragma.rmch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testImportedPackageDoesNotExist() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains("Imported package does not exist"));
+		
+	}
+
+	@Test
+	public void testDuplicatePackageImport() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/packagePragma/DuplicatePackageImport.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains("Duplicate package import"));
+		
+	}
+	
+	@Test
+	public void testInvalidPackagePragma() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/InvalidPackagePragma.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("does not match the folder structure"));
+	}
+
+	@Test
+	public void testInvalidPackagePragma2() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/InvalidPackagePragma2.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("Invalid folder name"));
 	}
 
 	@Test

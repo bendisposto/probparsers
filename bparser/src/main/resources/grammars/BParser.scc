@@ -480,7 +480,7 @@ def_parameters {-> expression*} = left_par [parameters]:identifier_list right_pa
 
 sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
 
-references_clause {-> machine_clause} = kw_references [identifiers]:identifier_list {-> New machine_clause.references([identifiers.expression])} ;
+references_clause {-> machine_clause} = kw_references [machine_references]:machine_ref_list {-> New machine_clause.references([machine_references.machine_reference])} ;
 
 promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])} ;
 
@@ -1118,7 +1118,7 @@ machine_clause =
   {values} [entries]:values_entry* |
   {local_operations} [operations]:operation* |
   {operations} [operations]:operation* |
-  {references} [identifiers]:expression* |
+  {references} [machine_references]:machine_reference* |
   {invalid_operations_clause} semicolon ;
 
 machine_reference =

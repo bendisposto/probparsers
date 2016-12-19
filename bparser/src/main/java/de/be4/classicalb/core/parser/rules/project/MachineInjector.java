@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.rules.project;
+package de.be4.classicalb.core.parser.rules.project;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,6 @@ import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
-import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
@@ -64,11 +63,6 @@ public class MachineInjector extends DepthFirstAdapter {
 	public void inAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		this.abstractMachineParseUnit = node;
 		this.clausesList = node.getMachineClauses();
-	}
-
-	@Override
-	public void inASeesMachineClause(ASeesMachineClause node) {
-		node.replaceBy(null);
 	}
 
 	@Override

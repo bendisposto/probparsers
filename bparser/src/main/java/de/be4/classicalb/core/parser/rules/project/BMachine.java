@@ -1,10 +1,8 @@
-package de.be4.classicalb.core.rules.project;
+package de.be4.classicalb.core.parser.rules.project;
+
+import static de.be4.classicalb.core.parser.rules.tranformation.ASTBuilder.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +12,6 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -47,18 +44,15 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.NodeCloner;
-import static de.be4.classicalb.core.rules.tranformation.ASTBuilder.*;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
 
 public class BMachine implements IModel {
 	private final String machineName;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-	private BCompoundException bCompoundException;
 	private final Start start;
 	private final File file;
 
@@ -109,69 +103,14 @@ public class BMachine implements IModel {
 
 	}
 
-	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, false);
-		printAsProlog(pout, nodeIdMapping);
-		pout.flush();
-		return output.toString();
-	}
-
 	@Override
 	public String getMachineName() {
 		return machineName;
 	}
 
 	@Override
-	public List<Reference> getMachineReferences() {
-		return new ArrayList<Reference>();
-	}
-
-	public String getErrorAsPrologTerm() {
-		assert bCompoundException != null;
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-
-		printExceptionAsProlog(new PrintStream(output));
-		try {
-			output.flush();
-			output.close();
-			return output.toString();
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to close output stream");
-		}
-
-	}
-
-	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.useIndention, false);
-	}
-
-	@Override
-	public void printAsProlog(PrintWriter out, NodeIdAssignment nodeIdMapping) {
-		final IPrologTermOutput pout = new PrologTermOutput(out, false);
-		printAsProlog(pout, nodeIdMapping);
+	public List<RulesMachineReference> getMachineReferences() {
+		return new ArrayList<RulesMachineReference>();
 	}
 
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
@@ -190,16 +129,12 @@ public class BMachine implements IModel {
 
 	@Override
 	public boolean hasError() {
-		if (this.bCompoundException == null) {
-			return false;
-		} else {
-			return true;
-		}
+		return false;
 	}
 
 	@Override
-	public BCompoundException getBExeption() {
-		return this.bCompoundException;
+	public BCompoundException getCompoundException() {
+		throw new AssertionError();
 	}
 
 	@Override

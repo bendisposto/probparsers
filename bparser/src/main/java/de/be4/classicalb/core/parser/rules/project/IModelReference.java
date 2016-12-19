@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.rules.project;
+package de.be4.classicalb.core.parser.rules.project;
 
 public interface IModelReference {
 

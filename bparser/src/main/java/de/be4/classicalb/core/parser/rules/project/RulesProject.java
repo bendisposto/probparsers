@@ -1,12 +1,9 @@
-package de.be4.classicalb.core.rules.project;
+package de.be4.classicalb.core.parser.rules.project;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,10 +19,10 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.rules.tranformation.Computation;
-import de.be4.classicalb.core.rules.tranformation.FunctionOperation;
-import de.be4.classicalb.core.rules.tranformation.RuleOperation;
+import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.tranformation.Computation;
+import de.be4.classicalb.core.parser.rules.tranformation.FunctionOperation;
+import de.be4.classicalb.core.parser.rules.tranformation.RuleOperation;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -45,6 +42,7 @@ public class RulesProject {
 		RulesProject project = new RulesProject(mainFile);
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject();
+		project.checkProject();
 		project.flattenProject();
 		return project.printPrologOutput(out, err);
 	}
@@ -56,7 +54,7 @@ public class RulesProject {
 	public List<BException> getBExceptionList() {
 		for (IModel iModel : bModels) {
 			if (iModel.hasError()) {
-				this.bExceptionList.add(iModel.getBExeption().getFirstException());
+				this.bExceptionList.add(iModel.getCompoundException().getFirstException());
 			}
 		}
 		return bExceptionList;
@@ -70,7 +68,7 @@ public class RulesProject {
 		return new HashMap<>(this.allOperations);
 	}
 
-	public void flattenProject() {
+	private void flattenProject() {
 		if (this.bExceptionList.size() > 0) {
 			return;
 		}
@@ -87,6 +85,8 @@ public class RulesProject {
 				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
 				nodeIds.assignIdentifiers(fileNumber, start);
+			} else {
+				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
 			List<AbstractOperation> operations = rulesParseUnit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
@@ -113,34 +113,50 @@ public class RulesProject {
 		bModels.add(mainMachine);
 	}
 
-	public void parseProject() {
+	private void checkProject() {
+		collectAllOperations();
+		checkDependencies();
+		findDependencies();
+		checkReadWrite();
+	}
+
+	private void parseProject() {
 		final IModel mainModel = parseMainFile();
 		if (mainModel.hasError()) {
-			final BCompoundException compound = mainModel.getBExeption();
-			this.bExceptionList.addAll(compound.getExceptions());
+			final BCompoundException compound = mainModel.getCompoundException();
+			this.bExceptionList.addAll(compound.getBExceptions());
 		}
 		bModels.add(mainModel);
-		final LinkedList<Reference> fifo = new LinkedList<>(mainModel.getMachineReferences());
+		final LinkedList<RulesMachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
-			final Reference modelReference = fifo.pollFirst();
+			final RulesMachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
-				final IModel bModel = lookupReference(modelReference);
+				final IModel bModel = parseRulesMachine(modelReference);
 				if (bModel.hasError()) {
-					final BCompoundException compound = bModel.getBExeption();
-					this.bExceptionList.addAll(compound.getExceptions());
+					this.bExceptionList.addAll(bModel.getCompoundException().getBExceptions());
 				}
 				bModels.add(bModel);
 				fifo.addAll(bModel.getMachineReferences());
 			}
 		}
-
-		checkProject();
 	}
 
-	private void checkProject() {
-		collectAllRules();
-		checkDependencies();
+	private void collectAllOperations() {
+		for (IModel iModel : bModels) {
+			final RulesParseUnit unit = (RulesParseUnit) iModel;
+			final List<AbstractOperation> operations = unit.getOperations();
+			for (AbstractOperation abstractOperation : operations) {
+				final String name = abstractOperation.getName();
+				if (allOperations.containsKey(name)) {
+					this.bExceptionList.add(new BException(abstractOperation.getFileName(), new CheckException(
+							"Duplicate operation name: '" + name + "'.", abstractOperation.getNameLiteral())));
+				}
+				allOperations.put(name, abstractOperation);
+			}
+		}
+	}
 
+	private void findDependencies() {
 		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
 		while (!todoList.isEmpty()) {
 			AbstractOperation operation = todoList.poll();
@@ -148,7 +164,7 @@ public class RulesProject {
 				findDependencies(operation, new ArrayList<AbstractOperation>());
 			}
 		}
-		checkReadWrite();
+
 	}
 
 	private void checkDependencies() {
@@ -173,8 +189,8 @@ public class RulesProject {
 				if (allOperations.containsKey(name)) {
 					AbstractOperation abstractOperation = allOperations.get(name);
 					if (!(abstractOperation instanceof RuleOperation)) {
-						this.bExceptionList.add(new BException(operation.getFileName(),
-								new CheckException("Identifier '" + name + "' is not a RULE.", aIdentifierExpression)));
+						this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
+								"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
 					}
 				} else {
 					this.bExceptionList.add(new BException(operation.getFileName(),
@@ -184,45 +200,32 @@ public class RulesProject {
 		}
 	}
 
-	private void collectAllRules() {
-		for (IModel iModel : bModels) {
-			final RulesParseUnit unit = (RulesParseUnit) iModel;
-			final List<AbstractOperation> operations = unit.getOperations();
-			for (AbstractOperation abstractOperation : operations) {
-				final String name = abstractOperation.getName();
-				if (allOperations.containsKey(name)) {
-					this.bExceptionList.add(new BException(abstractOperation.getFileName(), new CheckException(
-							"Duplicate operation name: '" + name + "'.", abstractOperation.getNameLiteral())));
-				}
-				allOperations.put(name, abstractOperation);
-			}
-		}
-	}
-
-	
-	
-	@SuppressWarnings("unused")
-	private List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
-		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
-		for (AbstractOperation abstractOperation : values) {
-			if (!(abstractOperation instanceof FunctionOperation)) {
-				dependenciesMap.put(abstractOperation, new HashSet<>(abstractOperation.getDependencies()));
-			}
-		}
-		List<AbstractOperation> resultList = new ArrayList<>();
-		List<AbstractOperation> todoList = new ArrayList<>(dependenciesMap.keySet());
-		while (!todoList.isEmpty()) {
-			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
-				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
-				deps.removeAll(resultList);
-				if (deps.isEmpty()) {
-					resultList.add(abstractOperation);
-					todoList.remove(abstractOperation);
-				}
-			}
-		}
-		return resultList;
-	}
+	// public List<AbstractOperation>
+	// sortOperations(Collection<AbstractOperation> values) {
+	// HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new
+	// HashMap<>();
+	// for (AbstractOperation abstractOperation : values) {
+	// if (!(abstractOperation instanceof FunctionOperation)) {
+	// dependenciesMap.put(abstractOperation, new
+	// HashSet<>(abstractOperation.getDependencies()));
+	// }
+	// }
+	// List<AbstractOperation> resultList = new ArrayList<>();
+	// List<AbstractOperation> todoList = new
+	// ArrayList<>(dependenciesMap.keySet());
+	// while (!todoList.isEmpty()) {
+	// for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
+	// final Set<AbstractOperation> deps =
+	// dependenciesMap.get(abstractOperation);
+	// deps.removeAll(resultList);
+	// if (deps.isEmpty()) {
+	// resultList.add(abstractOperation);
+	// todoList.remove(abstractOperation);
+	// }
+	// }
+	// }
+	// return resultList;
+	// }
 
 	private void checkReadWrite() {
 		HashMap<String, Computation> allDefineVariables = new HashMap<>();
@@ -338,7 +341,7 @@ public class RulesProject {
 		return false;
 	}
 
-	private IModel lookupReference(Reference reference) {
+	private IModel parseRulesMachine(RulesMachineReference reference) {
 		File file = reference.getFile();
 		RulesParseUnit unit = new RulesParseUnit(reference.getName());
 		unit.setParsingBehaviour(this.parsingBehaviour);
@@ -355,7 +358,7 @@ public class RulesProject {
 		return bParseUnit;
 	};
 
-	protected boolean isANewModel(Reference reference) {
+	protected boolean isANewModel(RulesMachineReference reference) {
 		for (IModel iModel : bModels) {
 			if (iModel.getMachineName().equals(reference.getName())) {
 				return false;
@@ -368,11 +371,7 @@ public class RulesProject {
 		return bModels;
 	}
 
-	public void addModel(IModel model) {
-		bModels.add(model);
-	}
-
-	public boolean projectHasErrors() {
+	public boolean hasErrors() {
 		if (this.bExceptionList.size() == 0) {
 			return false;
 		} else {
@@ -380,7 +379,7 @@ public class RulesProject {
 		}
 	}
 
-	public int printPrologOutput(final PrintStream out, final PrintStream err) {
+	private int printPrologOutput(final PrintStream out, final PrintStream err) {
 		if (this.bExceptionList.size() > 0) {
 			BCompoundException comp = new BCompoundException(bExceptionList);
 			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.useIndention, false);
@@ -391,35 +390,6 @@ public class RulesProject {
 			pout.flush();
 			return 0;
 		}
-
-	}
-
-	public void printProjectAsPrologTerm(final PrintStream out) {
-		PrologTermOutput prologTermOutput = new PrologTermOutput(new PrintWriter(out), false);
-		for (IModel iModel : bModels) {
-			iModel.printAsProlog(prologTermOutput, nodeIds);
-		}
-		out.flush();
-	}
-
-	public String getProjectAsPrologTerm() {
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			@Override
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, false);
-		printProjectAsPrologTerm(pout);
-		pout.flush();
-		return output.toString();
 
 	}
 

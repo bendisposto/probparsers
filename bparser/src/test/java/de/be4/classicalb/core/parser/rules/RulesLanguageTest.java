@@ -5,12 +5,14 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
-import de.be4.classicalb.core.rules.project.RulesParseUnit;
 
 public class RulesLanguageTest {
 
@@ -35,9 +37,8 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test PROPERTIES STRING_FORMAT(\" ~w ~w \", 1) = \" 1 2 \" END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals(
-				"parse_exception(pos(1,31,'UnkownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.').\n",
-				result);
+		assertTrue(result.contains(
+				"parse_exception(pos(1,31,'UnknownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.')"));
 	}
 
 	@Test
@@ -162,7 +163,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		final String expected = "parse_exception(pos(1,95,'UnkownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
+		final String expected = "parse_exception(pos(1,95,'UnknownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
 		assertEquals(expected, result);
 	}
 
@@ -200,7 +201,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		String expected = "parse_exception(pos(1,86,'UnkownFile'),'Variable \\'xx\\' read before defined.').\n";
+		String expected = "parse_exception(pos(1,86,'UnknownFile'),'Variable \\'xx\\' read before defined.').\n";
 		assertEquals(expected, result);
 	}
 
@@ -222,19 +223,11 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testOrdinaryOperationInRulesMachine() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = BEGIN skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		// TODO should not work
-	}
-
-	@Test
 	public void testRuleFailNoMessage() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,45,'UnkownFile'),'RULE_FAIL requires at least one argument.').\n", result);
+		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL requires at least one argument.').\n", result);
 	}
 
 	@Test
@@ -344,8 +337,20 @@ public class RulesLanguageTest {
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
-		String result = unit.getResultAsPrologTerm();
-		return result;
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
+		return output.toString();
 	}
 
 	public static String getRulesMachineAsPrologTerm(final String content) {
@@ -356,8 +361,21 @@ public class RulesLanguageTest {
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
-		String result = unit.getResultAsPrologTerm();
-		return result;
+
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
+		return output.toString();
 	}
 
 	public static String getRulesMachineAsBMachine(final String content) {
@@ -367,12 +385,12 @@ public class RulesLanguageTest {
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
-		if (unit.getBExeption() != null) {
-			throw new RuntimeException(unit.getBExeption());
+		if (unit.getCompoundException() != null) {
+			throw new RuntimeException(unit.getCompoundException());
 		}
 		unit.translate();
-		if (unit.getBExeption() != null) {
-			throw new RuntimeException(unit.getBExeption());
+		if (unit.getCompoundException() != null) {
+			throw new RuntimeException(unit.getCompoundException());
 		}
 		PrettyPrinter pp = new PrettyPrinter();
 		unit.getStart().apply(pp);

@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.rules.tranformation;
+package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 import de.be4.classicalb.core.parser.util.NodeCloner;
-import de.be4.classicalb.core.rules.project.Reference;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class RulesTransformation extends DepthFirstAdapter {
@@ -55,7 +55,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private RuleOperation currentRule;
 	private HashMap<String, AbstractOperation> allOperations;
 
-	public RulesTransformation(Start start, BParser bParser, List<Reference> machineReferences,
+	public RulesTransformation(Start start, BParser bParser, List<RulesMachineReference> machineReferences,
 			RulesMachineChecker rulesMachineVisitor, HashMap<String, AbstractOperation> allOperations) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
@@ -451,7 +451,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final String ruleName = id.getIdentifier().get(0).getText();
 			final AbstractOperation operation = allOperations.get(ruleName);
 			if (operation == null || !(operation instanceof RuleOperation)) {
-				errorList.add(new CheckException(ruleName + " is not an existing rule name", node));
+				errorList.add(new CheckException(String.format("'%s' does not match any rule.", ruleName), node));
 				return;
 			}
 			final RuleOperation rule = (RuleOperation) operation;
@@ -658,7 +658,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String ruleName = ruleIdentifier.getIdentifier().get(0).getText();
 		AbstractOperation operation = allOperations.get(ruleName);
 		if (operation == null || !(operation instanceof RuleOperation)) {
-			errorList.add(new CheckException(ruleName + " is not an existing rule name", node));
+			errorList.add(new CheckException(String.format("'%s' does not match any rule.", ruleName), node));
 			return;
 		}
 		final RuleOperation rule = (RuleOperation) operation;

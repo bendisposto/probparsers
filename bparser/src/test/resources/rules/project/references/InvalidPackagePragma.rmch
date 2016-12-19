@@ -1,0 +1,3 @@
+/*@package "references2" */
+RULES_MACHINE InvalidPackagePragma
+END

@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.rules.tranformation;
+package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,14 +11,14 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.rules.project.Reference;
+import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public abstract class AbstractOperation {
 
 	private final TIdentifierLiteral name;
 	private final String fileName; // can be null
 	private final String machineName;
-	private final List<Reference> machineReferences;
+	private final List<RulesMachineReference> machineReferences;
 	private final List<AIdentifierExpression> dependsOnRuleList = new ArrayList<>();
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
 	private PPredicate activationPredicate;
@@ -27,7 +27,7 @@ public abstract class AbstractOperation {
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
 	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,
-			List<Reference> machineReferences2) {
+			List<RulesMachineReference> machineReferences2) {
 		this.name = name;
 		this.fileName = fileName;
 		this.machineName = machineName;
@@ -114,7 +114,7 @@ public abstract class AbstractOperation {
 
 	public List<String> getMachineReferencesAsString() {
 		List<String> list = new ArrayList<>();
-		for (Reference reference : this.machineReferences) {
+		for (RulesMachineReference reference : this.machineReferences) {
 			list.add(reference.getName());
 		}
 		return list;

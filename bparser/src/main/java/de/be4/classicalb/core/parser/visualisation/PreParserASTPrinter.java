@@ -1,15 +1,14 @@
-package de.be4.classicalb.core.parser.analysis;
+package de.be4.classicalb.core.parser.visualisation;
 
 /* -*- jde -*- ASTPrinter.java.in */
 
-import java.io.PrintStream;
 import java.util.Stack;
 
-import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.Token;
-import de.hhu.stups.sablecc.patch.PositionedNode;
+import de.be4.classicalb.core.preparser.analysis.ReversedDepthFirstAdapter;
+import de.be4.classicalb.core.preparser.node.EOF;
+import de.be4.classicalb.core.preparser.node.Node;
+import de.be4.classicalb.core.preparser.node.Start;
+import de.be4.classicalb.core.preparser.node.Token;
 
 /**
  * Text display of the AST, with (optionally) color output.
@@ -20,10 +19,10 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
  * 
  * @author Roger Keays
  */
-public class ASTPrinter extends ReversedDepthFirstAdapter {
+public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 
 	// ---Constants------------------------------------------------
-	public static final char ESC = 27;
+	public static char ESC = 27;
 
 	// Text attributes
 	public static final int NORMAL = 0;
@@ -56,35 +55,29 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	// variables. We use a stack to push on indent tokens...
 	private String indent = "", output = "";
 	private boolean last = false;
-	private Stack<String> indentchar = new Stack<String>();
+	private final Stack<String> indentchar = new Stack<String>();
 	private boolean color = false;
-
-	private final PrintStream out;
-
-	public ASTPrinter(PrintStream out) {
-		this.out = out;
-	}
-
-	public ASTPrinter() {
-		this(System.out);
-	}
 
 	/*
 	 * The last node we visit. It prints out the entire text that we have built.
 	 */
-	public void outStart(Start node) {
-		out.println(treeColor() + "\n  >" + output.substring(3, output.length()) + "\n" + resetColor());
+	@Override
+	public void outStart(final Start node) {
+		System.out.println(treeColor() + "\n  >"
+				+ output.substring(3, output.length()) + "\n" + resetColor());
 	}
 
 	/*
 	 * As we visit each non-terminal node push on the indent we need for this
 	 * node. The next node we visit will always be the last child of this node.
 	 */
-	public void defaultIn(Node node) {
-		if (last)
+	@Override
+	public void defaultIn(final Node node) {
+		if (last) {
 			indentchar.push("`");
-		else
+		} else {
 			indentchar.push("|");
+		}
 
 		indent = indent + "   ";
 		last = true;
@@ -94,15 +87,21 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	 * As we leave a non-terminal node, we pull off the indent character and
 	 * prepend this nodes line to the output text.
 	 */
-	public void defaultOut(Node node) {
+	@Override
+	public void defaultOut(final Node node) {
 		// replace the current indent with the one from the stack
 		indent = indent.substring(0, indent.length() - 3);
 		indent = indent.substring(0, indent.length() - 1) + indentchar.pop();
 
 		// prepend this line to the output.
-		output = indent + "- " + setColor(BOLD, FG_CYAN, BG_BLACK) + node.getClass().getSimpleName()
-				+ ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n"
-				+ output;
+		output = indent
+				+ "- "
+				+ setColor(BOLD, FG_CYAN, BG_BLACK)
+				+ node.getClass()
+						.getName()
+						.substring(
+								node.getClass().getName().lastIndexOf('.') + 1)
+				+ treeColor() + "\n" + output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';
@@ -113,22 +112,24 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	 * false after this because the next node we visit will never be the last
 	 * sibling.
 	 */
-	public void defaultCase(Node node) {
+	@Override
+	public void defaultCase(final Node node) {
 		// last sibling has a ` instead of a |
-		if (last)
+		if (last) {
 			indent = indent.substring(0, indent.length() - 1) + '`';
+		}
 
 		// prepend this line to the output
-		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK) + ((Token) node).getText()
-				+ ((PositionedNode) node).getStartPos() + "-" + ((PositionedNode) node).getEndPos() + treeColor() + "\n"
-				+ output;
+		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK)
+				+ ((Token) node).getText() + treeColor() + "\n" + output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';
 		last = false;
 	}
 
-	public void caseEOF(EOF node) {
+	@Override
+	public void caseEOF(final EOF node) {
 		last = false;
 	}
 
@@ -138,25 +139,26 @@ public class ASTPrinter extends ReversedDepthFirstAdapter {
 	 * config.sys or c:\winnt\system32\config.nt (NT/win2k). ANSI.sys only works
 	 * under Win2k in DOS mode. In UNIX, you need an ansi-enabled terminal...
 	 */
-	public String setColor(int style, int fgColor, int bgColor) {
-		if (color)
+	public String setColor(final int style, final int fgColor, final int bgColor) {
+		if (color) {
 			return ESC + "[" + style + ";" + fgColor + ";" + bgColor + "m";
-		else
+		} else {
 			return "";
+		}
 	}
 
 	public String resetColor() {
-		return (setColor(NORMAL, FG_WHITE, BG_BLACK));
+		return setColor(NORMAL, FG_WHITE, BG_BLACK);
 	}
 
 	public String treeColor() {
-		return (setColor(NORMAL, FG_YELLOW, BG_BLACK));
+		return setColor(NORMAL, FG_YELLOW, BG_BLACK);
 	}
 
 	/*
 	 * Not everyone wants color. It is disabled by default
 	 */
-	public void setColor(boolean b) {
+	public void setColor(final boolean b) {
 		color = b;
 	}
 }

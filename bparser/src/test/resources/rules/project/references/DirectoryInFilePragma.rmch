@@ -1,0 +1,4 @@
+RULES_MACHINE DirectoryInFilePragma
+REFERENCES
+  Rule1 /*@file "./test1" */
+END
