@@ -33,3 +33,4 @@ unicode/.gitignore
 .settings
 build.xml
 bparser/src/test/java/Testing.java
+build.properties

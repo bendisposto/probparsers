@@ -7,18 +7,18 @@ import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.rules.project.Reference;
 
-public class Rule extends AbstractOperation {
+public class RuleOperation extends AbstractOperation {
 	private AIdentifierExpression ruleId;
 	private AIntegerExpression errorTypes;
 	private String counterExampleVariableName;
 
-	public Rule(TIdentifierLiteral ruleName, String fileName, String machineName, List<Reference> machineReferences) {
+	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName, List<Reference> machineReferences) {
 		super(ruleName, fileName, machineName, machineReferences);
 	}
 
 	public Integer getNumberOfErrorTypes() {
 		if (this.errorTypes == null) {
-			return null;
+			return 1;
 		} else {
 			final String text = errorTypes.getLiteral().getText();
 			return Integer.parseInt(text);
@@ -48,4 +48,5 @@ public class Rule extends AbstractOperation {
 	public String getCounterExampleVariableName() {
 		return this.counterExampleVariableName;
 	}
+
 }

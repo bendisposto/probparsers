@@ -4,6 +4,8 @@
 //dependsOn(':parserbase')
 
 apply plugin: 'jacoco'
+apply plugin: 'java'
+
 
 dependencies {
     compile project(path: ":prologlib", configuration: "archives")
@@ -99,22 +101,30 @@ compileJava {
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 
 
-jacoco {
-    toolVersion = "0.7.1.201405082137"
-    reportsDir = file("$buildDir/JacocoReports")
-}
-
+// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination "${buildDir}/jacocoHtml"
+  reports {
+      xml.enabled false
+      csv.enabled false
+      html.destination "${buildDir}/jacocoHtml"
+  }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: [
+                        '**/parser/node/**'
+                      , '**/parser/parser/**'
+                      , '**/parser/lexer/**'
+                      , '**/preparser/**'
+                      , '**/parser/analysis/Analysis.class'
+                      , '**/parser/analysis/AnalysisAdapter.class'
+                      , '**/parser/analysis/DepthFirstAdapter.class'
+                      , '**/parser/analysis/ReversedDepthFirstAdapter.class'
+                      , '**/parser/analysis/ExtendedDFAdapter.class'
+                      , '**/parser/analysis/PreParserASTPrinter.class'
+                    ])
+        })
     }
 }
-
-// type 'gradle build jacocoIntegrationTestReport' in order to run the jacoco code coverage analysis
-task jacocoIntegrationTestReport(type: JacocoReport) {
-	sourceSets sourceSets.main
-	//executionData files('build/jacoco/integrationTests.exec')
-	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-}
+deploy.dependsOn jacocoTestReport

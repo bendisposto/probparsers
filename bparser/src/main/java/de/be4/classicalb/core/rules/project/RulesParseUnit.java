@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.rules.tranformation.RulesMachineVisitor;
+import de.be4.classicalb.core.rules.tranformation.RulesMachineChecker;
 import de.be4.classicalb.core.rules.tranformation.RulesTransformation;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -45,7 +46,7 @@ public class RulesParseUnit implements IModel {
 	private Start start;
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
-	private RulesMachineVisitor rulesMachineVisitor;
+	private RulesMachineChecker rulesMachineVisitor;
 
 	public static RulesParseUnit createBParseUnit(String content) {
 		RulesParseUnit bParseUnit = new RulesParseUnit();
@@ -113,12 +114,12 @@ public class RulesParseUnit implements IModel {
 			}
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
 
-			ReferenceFinder refFinder = new ReferenceFinder(machineFile, start,
+			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start,
 					parsingBehaviour.machineNameMustMatchFileName);
 			refFinder.findReferencedMachines();
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
-			this.rulesMachineVisitor = new RulesMachineVisitor(bParser.getFileName(), machineReferences, start);
+			this.rulesMachineVisitor = new RulesMachineChecker(bParser.getFileName(), machineReferences, start);
 			rulesMachineVisitor.runChecks();
 			this.operationList.addAll(rulesMachineVisitor.getOperations());
 
@@ -137,17 +138,24 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public void translate() {
-		this.translate(null);
+		final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
+		for (AbstractOperation op : operationList) {
+			allOperations.put(op.getName(), op);
+		}
+		this.translate(allOperations);
 	}
 
-	public void translate(List<AbstractOperation> sortedOperationsList) {
+	public void translate(HashMap<String, AbstractOperation> allOperations) {
 		if (bCompoundException != null) {
 			return;
 		}
 		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
-				rulesMachineVisitor);
-		ruleTransformation.setSortedOperationList(sortedOperationsList);
-		ruleTransformation.runTransformation();
+				rulesMachineVisitor, allOperations);
+		try {
+			ruleTransformation.runTransformation();
+		} catch (BCompoundException e) {
+			bCompoundException = e;
+		}
 	}
 
 	public String getModelAsPrologTerm(NodeIdAssignment nodeIdMapping) {

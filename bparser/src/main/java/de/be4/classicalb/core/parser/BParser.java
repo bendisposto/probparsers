@@ -71,19 +71,18 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 	private Map<PositionedNode, SourcecodeRange> positions;
 
-	
 	public static String getVersion() throws IOException {
-			Properties p = new Properties();
-			p.load(BParser.class.getResourceAsStream("/build.properties"));
-			return p.getProperty("version");
+		Properties p = new Properties();
+		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		return p.getProperty("version");
 	}
 
-	public static String getVersion() throws IOException {
-			Properties p = new Properties();
-			p.load(BParser.class.getResourceAsStream("/build.properties"));
-			return p.getProperty("git");
+	public static String getGitSha() throws IOException {
+		Properties p = new Properties();
+		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		return p.getProperty("git");
 	}
-	
+
 	public BParser() {
 		this((String) null);
 	}
@@ -103,7 +102,8 @@ public class BParser {
 	}
 
 	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider) throws BCompoundException {
+			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
+			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(), parser.getDefinitions());
@@ -111,7 +111,8 @@ public class BParser {
 	}
 
 	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider) throws BCompoundException {
+			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
+			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
@@ -146,8 +147,7 @@ public class BParser {
 	 *             if the file cannot be parsed
 	 * @throws BCompoundException
 	 */
-	public Start parseFile(final File machineFile, final boolean verbose)
-			throws IOException, BCompoundException {
+	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
@@ -394,8 +394,9 @@ public class BParser {
 			 * cause they are needed by the following transformations.
 			 */
 			final DefinitionCollector collector = new DefinitionCollector(defTypes, this.definitions);
-			List<Exception> collectDefinitions = collector.collectDefinitions(rootNode);
-			for (Exception exception : collectDefinitions) {
+			collector.collectDefinitions(rootNode);
+			List<Exception> definitionsCollectorExceptions = collector.getExceptions();
+			for (Exception exception : definitionsCollectorExceptions) {
 				if (exception instanceof BException) {
 					bExceptionList.add((BException) exception);
 				} else {

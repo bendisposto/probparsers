@@ -120,7 +120,20 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-		node.getName().apply(this);
+		sb.append(node.getName().getText());
+		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
+		if (copy.size() > 0) {
+			sb.append("(");
+			printExprList(copy);
+			sb.append(")");
+		}
+		sb.append(" == ");
+		node.getRhs().apply(this);
+	}
+
+	@Override
+	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
+		sb.append(node.getName().getText());
 		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
 		if (copy.size() > 0) {
 			sb.append("(");

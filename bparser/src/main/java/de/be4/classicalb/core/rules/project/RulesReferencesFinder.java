@@ -40,7 +40,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class ReferenceFinder extends DepthFirstAdapter {
+public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	private final File mainFile;
 	private final Node start;
@@ -64,7 +64,7 @@ public class ReferenceFinder extends DepthFirstAdapter {
 	 * @param isMachineNameMustMatchFileName
 	 * @throws CheckException
 	 */
-	public ReferenceFinder(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
+	public RulesReferencesFinder(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
 		this.referncesTable = new LinkedHashMap<>();
 		this.mainFile = machineFile;
 		this.start = node;

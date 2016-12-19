@@ -25,7 +25,7 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.rules.tranformation.Computation;
 import de.be4.classicalb.core.rules.tranformation.FunctionOperation;
-import de.be4.classicalb.core.rules.tranformation.Rule;
+import de.be4.classicalb.core.rules.tranformation.RuleOperation;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -38,9 +38,7 @@ public class RulesProject {
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
-	private List<AbstractOperation> sortedOperationsList;
 	private HashMap<String, String> constantStringValues = new HashMap<>();
-	private boolean linearExecutionSequence = false;
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -72,22 +70,19 @@ public class RulesProject {
 		return new HashMap<>(this.allOperations);
 	}
 
-	public void setLinearExecutionSequence() {
-		this.linearExecutionSequence = true;
-	}
-
 	public void flattenProject() {
 		if (this.bExceptionList.size() > 0) {
 			return;
 		}
 
-		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME, new File(COMPOSITION_MACHINE_NAME + ".mch"));
+		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME,
+				new File(COMPOSITION_MACHINE_NAME + ".mch"));
 		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
 		final List<String> promotesList = new ArrayList<>();
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
-			rulesParseUnit.translate(sortedOperationsList);
+			rulesParseUnit.translate(allOperations);
 			if (!rulesParseUnit.hasError()) {
 				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
@@ -154,9 +149,6 @@ public class RulesProject {
 			}
 		}
 		checkReadWrite();
-		if (this.linearExecutionSequence) {
-			sortOperations(allOperations.values());
-		}
 	}
 
 	private void checkDependencies() {
@@ -180,7 +172,7 @@ public class RulesProject {
 				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 				if (allOperations.containsKey(name)) {
 					AbstractOperation abstractOperation = allOperations.get(name);
-					if (!(abstractOperation instanceof Rule)) {
+					if (!(abstractOperation instanceof RuleOperation)) {
 						this.bExceptionList.add(new BException(operation.getFileName(),
 								new CheckException("Identifier '" + name + "' is not a RULE.", aIdentifierExpression)));
 					}
@@ -207,7 +199,10 @@ public class RulesProject {
 		}
 	}
 
-	private void sortOperations(Collection<AbstractOperation> values) {
+	
+	
+	@SuppressWarnings("unused")
+	private List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
 		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
 		for (AbstractOperation abstractOperation : values) {
 			if (!(abstractOperation instanceof FunctionOperation)) {
@@ -226,7 +221,7 @@ public class RulesProject {
 				}
 			}
 		}
-		this.sortedOperationsList = resultList;
+		return resultList;
 	}
 
 	private void checkReadWrite() {
