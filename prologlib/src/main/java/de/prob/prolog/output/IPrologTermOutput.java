@@ -17,6 +17,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param functor
 	 *            the functor, never <code>null</code>.
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput openTerm(final String functor);
 
@@ -36,9 +37,9 @@ public interface IPrologTermOutput {
 	 * @param ignoreIndention
 	 *            if this is set to true, the arguments of this term are not
 	 *            subject to indent.
+	 * @return the IPrologTermOutput
 	 */
-	IPrologTermOutput openTerm(final String functor,
-			final boolean ignoreIndention);
+	IPrologTermOutput openTerm(final String functor, final boolean ignoreIndention);
 
 	/**
 	 * Finish a term that was started with {@link #openTerm(String)}. This
@@ -53,7 +54,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param content
 	 *            the name of the atom, never <code>null</code>
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput printAtom(final String content);
 
@@ -62,7 +63,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param content
 	 *            the name of the atom, never <code>null</code>
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput printAtomOrNumber(final String content);
 
@@ -71,7 +72,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param content
 	 *            the string content, never <code>null</code>
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput printString(final String content);
 
@@ -80,7 +81,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param number
 	 *            the number to print
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput printNumber(final long number);
 
@@ -89,7 +90,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param number
 	 *            the number to print
-	 * @return
+	 * @return IPrologTermOutput, <code>this</code>
 	 */
 	IPrologTermOutput printNumber(final BigInteger number);
 
@@ -98,7 +99,7 @@ public interface IPrologTermOutput {
 	 * next call of {@link #closeList()} are put into the list. All opened lists
 	 * should be closed. Basically this method prints the opening bracket.
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput openList();
 
@@ -106,14 +107,14 @@ public interface IPrologTermOutput {
 	 * Finish a list that was started with {@link #openList()}. Basically this
 	 * method prints the closing bracket.
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput closeList();
 
 	/**
 	 * Print an empty list.
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput emptyList();
 
@@ -124,7 +125,7 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param var
 	 *            the name of the variable, never <code>null</code>
-	 * @return
+	 * @return the IPrologTermOutput
 	 * @throws IllegalArgumentException
 	 *             if the variable is not a syntactically valid Prolog variable.
 	 */
@@ -135,21 +136,21 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param term
 	 *            the term, never <code>null</code>
-	 * @return
+	 * @return IPrologTermOutput, <code>this</code>
 	 */
 	IPrologTermOutput printTerm(final PrologTerm term);
 
 	/**
 	 * flush the underlying output stream
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput flush();
 
 	/**
 	 * print a Prolog full stop.
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput fullstop();
 
