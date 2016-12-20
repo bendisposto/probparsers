@@ -1,7 +1,6 @@
 package de.prob.translator.types;
 
-public abstract class Number extends java.lang.Number implements
-		Comparable<Number>, BObject {
+public abstract class Number extends java.lang.Number implements Comparable<Number>, BObject {
 
 	private static final long serialVersionUID = 7702079048348822936L;
 
@@ -39,9 +38,9 @@ public abstract class Number extends java.lang.Number implements
 
 	public abstract Number xor(Number o);
 
-	public abstract Number next(Number o);
+	public abstract Number next();
 
-	public abstract Number previous(Number o);
+	public abstract Number previous();
 
 	public abstract Number leftShift(Number o);
 
@@ -49,9 +48,7 @@ public abstract class Number extends java.lang.Number implements
 
 	public abstract boolean isCase(Number o);
 
-	public abstract Number bitwiseNegate(Number o);
+	public abstract Number negative();
 
-	public abstract Number negative(Number o);
-
-	public abstract Number positive(Number o);
+	public abstract Number positive();
 }
