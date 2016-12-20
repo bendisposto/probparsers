@@ -106,4 +106,16 @@ public class NumberTest {
 		def a = Translator.translate("-1")
 		assert -1 == a
 	}
+	
+	
+	@Test
+	void testNumbersEquals() {
+		def a = Translator.translate("1")
+		def b = Translator.translate("2")
+		def boolValue =  Translator.translate("TRUE")
+		assert !a.equals(null)
+		assert !a.equals(boolValue)
+		assert !a.equals(b)
+	}
+	
 }
