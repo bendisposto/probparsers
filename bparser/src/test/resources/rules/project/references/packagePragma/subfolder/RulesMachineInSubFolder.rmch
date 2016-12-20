@@ -1,0 +1,3 @@
+/*@package packagePragma.subfolder*/
+RULES_MACHINE RulesMachineInSubFolder
+END
