@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -11,6 +12,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.rules.project.IModel;
 import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
@@ -42,6 +44,31 @@ public class RulesProjectExceptionTest {
 		assertTrue(result.contains("does not match any rule"));
 	}
 
+	@Test
+	public void testRulesMachineInOrdinaryMachineFileException() throws Exception {
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			@Override
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		PrintStream pStream = new PrintStream(output);
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.prologOutput = true;
+		BParser bParser = new BParser("RulesMachineInOrdinaryMachineFile.mch");
+		bParser.fullParsing(new File("src/test/resources/rules/project/RulesMachineInOrdinaryMachineFile.mch"),
+				parsingBehaviour, pStream, pStream);
+		System.out.println(output.toString());
+		assertTrue(output.toString().contains("parse_exception"));
+	}
+
 	public static String parseRulesPrologAndGetExceptionAsPrologTerm(final String content) throws Exception {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
@@ -61,13 +88,13 @@ public class RulesProjectExceptionTest {
 			method.setAccessible(true);
 			method.invoke(project);
 		}
-		
+
 		if (!project.hasErrors()) {
 			Method method = RulesProject.class.getDeclaredMethod("flattenProject");
 			method.setAccessible(true);
 			method.invoke(project);
 		}
-		
+
 		assertTrue(project.hasErrors());
 
 		OutputStream output = new OutputStream() {

@@ -3,8 +3,6 @@ package de.be4.classicalb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 
-import de.be4.classicalb.core.parser.grammars.DefaultGrammar;
-import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.preparser.lexer.Lexer;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.EOF;
@@ -21,14 +19,12 @@ import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
 
-	private boolean isFirstTOtherClauseBegin = true;
 	private TRhsBody rhsToken = null;
 	private StringBuilder rhsBuffer = null;
 	private int otherNestingLevel = 0;
 	private int parenNestingLevel = 0;
 
 	private State stateBeforeComment;
-	private ParseOptions parseOptions = null;
 
 	public PreLexer(final PushbackReader in) {
 		super(in);
@@ -36,7 +32,6 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-		detectGrammarExtension();
 		checkComment();
 
 		if (token != null) {
@@ -137,28 +132,9 @@ public class PreLexer extends Lexer {
 		if (token instanceof TComment) {
 			stateBeforeComment = state;
 			state = State.COMMENT;
-		}  else if (token instanceof TCommentEnd) {
+		} else if (token instanceof TCommentEnd) {
 			state = stateBeforeComment;
 			stateBeforeComment = null;
 		}
 	}
-
-	private void detectGrammarExtension() {
-		if (isFirstTOtherClauseBegin && parseOptions != null && parseOptions.grammar instanceof DefaultGrammar
-				&& token instanceof TOtherClauseBegin) {
-			isFirstTOtherClauseBegin = false;
-			if (token.getText().equals("RULES_MACHINE")) {
-				this.parseOptions.grammar = RulesGrammar.getInstance();
-			}
-		}
-	}
-
-	public ParseOptions getParseOptions() {
-		return parseOptions;
-	}
-
-	public void setParseOptions(ParseOptions parseOptions) {
-		this.parseOptions = parseOptions;
-	}
-
 }

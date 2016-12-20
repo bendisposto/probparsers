@@ -10,6 +10,7 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
+import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
@@ -17,6 +18,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
@@ -90,6 +92,9 @@ public class RulesParseUnit implements IModel {
 			} else {
 				bParser = new BParser();
 			}
+			ParseOptions parseOptions = new ParseOptions();
+			parseOptions.grammar = RulesGrammar.getInstance();
+			bParser.setParseOptions(parseOptions);
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
 			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();

@@ -56,17 +56,6 @@ public class PackagePragmaTest {
 	}
 
 	@Test
-	public void testPackageAndRulesMachine() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
-		String file = PATH + "RulesMachine.mch";
-		String result = Helpers.fullParsing(file);
-		System.out.println(result);
-		assertTrue(result.contains(
-				"machine(abstract_machine(1,machine(2),machine_header(3,'RulesMachine',[]),[]))."));
-
-	}
-
-	@Test
 	public void testInvalidPackage() throws IOException, BException {
 		String PATH = "src/test/resources/pragmas/importPackagePragma/";
 		String file = PATH + "InvalidPackage1.mch";

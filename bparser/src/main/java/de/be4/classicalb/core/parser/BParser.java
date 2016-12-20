@@ -61,7 +61,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions;
+	private  ParseOptions parseOptions;
 
 	private List<String> doneDefFiles = new ArrayList<String>();
 
@@ -520,6 +520,10 @@ public class BParser {
 
 	public ParseOptions getOptions() {
 		return parseOptions;
+	}
+
+	public void setParseOptions(ParseOptions options) {
+		this.parseOptions = options;
 	}
 
 	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out,

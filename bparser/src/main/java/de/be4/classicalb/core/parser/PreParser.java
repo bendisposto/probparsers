@@ -73,7 +73,6 @@ public class PreParser {
 
 	public void parse() throws PreParseException, IOException, BException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
-		preLexer.setParseOptions(parseOptions);
 
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
