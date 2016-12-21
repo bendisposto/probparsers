@@ -132,6 +132,15 @@ public class RulesProjectTest {
 	}
 
 	@Test
+	public void testFunctionDependencies() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/FunctionDependencies.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp1"));
+		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp2"));
+	}
+
+	@Test
 	public void testReferencedMachineNotFound() {
 		String result = getRulesMachineAsPrologTerm(
 				"src/test/resources/rules/project/references/ReferencedMachineNotFound.rmch");
@@ -149,22 +158,24 @@ public class RulesProjectTest {
 
 	@Test
 	public void testImportedPackageDoesNotExist() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 		assertTrue(result.contains("Imported package does not exist"));
-		
+
 	}
 
 	@Test
 	public void testDuplicatePackageImport() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/packagePragma/DuplicatePackageImport.rmch");
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/packagePragma/DuplicatePackageImport.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 		assertTrue(result.contains("Duplicate package import"));
-		
+
 	}
-	
+
 	@Test
 	public void testInvalidPackagePragma() {
 		String result = getRulesMachineAsPrologTerm(

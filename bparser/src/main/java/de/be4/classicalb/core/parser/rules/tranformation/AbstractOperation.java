@@ -22,7 +22,7 @@ public abstract class AbstractOperation {
 	private final List<AIdentifierExpression> dependsOnRuleList = new ArrayList<>();
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
 	private PPredicate activationPredicate;
-	private Set<AbstractOperation> dependencies;
+	private Set<AbstractOperation> transitiveDependencies;
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
@@ -75,11 +75,11 @@ public abstract class AbstractOperation {
 	}
 
 	public void setDependencies(Set<AbstractOperation> dependencies) {
-		this.dependencies = dependencies;
+		this.transitiveDependencies = dependencies;
 	}
 
-	public Set<AbstractOperation> getDependencies() {
-		return this.dependencies;
+	public Set<AbstractOperation> getTransitiveDependencies() {
+		return this.transitiveDependencies;
 	}
 
 	@Override

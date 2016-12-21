@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.tranformation.Computation;
 import de.be4.classicalb.core.parser.rules.tranformation.FunctionOperation;
@@ -116,8 +118,36 @@ public class RulesProject {
 	private void checkProject() {
 		collectAllOperations();
 		checkDependencies();
-		findDependencies();
+		findTransitiveDependencies();
 		checkReadWrite();
+		checkFunctionDependencies();
+	}
+
+	private void checkFunctionDependencies() {
+		for (AbstractOperation abstractOperation : allOperations.values()) {
+			final Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
+			List<TIdentifierLiteral> functionCalls = abstractOperation.getFunctionCalls();
+			for (TIdentifierLiteral tIdentifierLiteral : functionCalls) {
+				final String functionName = tIdentifierLiteral.getText();
+				final FunctionOperation functionOperation = (FunctionOperation) allOperations.get(functionName);
+				Set<AbstractOperation> transDeps = new HashSet<>(functionOperation.getTransitiveDependencies());
+				transDeps.removeAll(transitiveDependencies);
+				if (transDeps.size() > 0) {
+					StringBuilder sb = new StringBuilder();
+					sb.append("Missing dependencies due to FUNCTION call: ");
+					Iterator<AbstractOperation> iterator = transDeps.iterator();
+					while (iterator.hasNext()) {
+						AbstractOperation next = iterator.next();
+						sb.append(next.getName());
+						if (iterator.hasNext()) {
+							sb.append(", ");
+						}
+					}
+					this.bExceptionList.add(new BException(abstractOperation.getFileName(),
+							new CheckException(sb.toString(), tIdentifierLiteral)));
+				}
+			}
+		}
 	}
 
 	private void parseProject() {
@@ -156,15 +186,14 @@ public class RulesProject {
 		}
 	}
 
-	private void findDependencies() {
+	private void findTransitiveDependencies() {
 		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
 		while (!todoList.isEmpty()) {
 			AbstractOperation operation = todoList.poll();
-			if (operation.getDependencies() == null) {
+			if (operation.getTransitiveDependencies() == null) {
 				findDependencies(operation, new ArrayList<AbstractOperation>());
 			}
 		}
-
 	}
 
 	private void checkDependencies() {
@@ -246,7 +275,7 @@ public class RulesProject {
 			if (operation instanceof Computation) {
 				variablesInScope.addAll(((Computation) operation).getDefineVariables());
 			}
-			for (AbstractOperation op : operation.getDependencies()) {
+			for (AbstractOperation op : operation.getTransitiveDependencies()) {
 				if (op instanceof Computation) {
 					variablesInScope.addAll(((Computation) op).getDefineVariables());
 				}
@@ -289,8 +318,8 @@ public class RulesProject {
 						&& otherOperation.getName().equals(opName)) {
 					AbstractOperation nextOperation = allOperations.get(opName);
 					operationsFound.add(nextOperation);
-					if (nextOperation.getDependencies() != null) {
-						operationsFound.addAll(nextOperation.getDependencies());
+					if (nextOperation.getTransitiveDependencies() != null) {
+						operationsFound.addAll(nextOperation.getTransitiveDependencies());
 					} else {
 						Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
 						operationsFound.addAll(found);
