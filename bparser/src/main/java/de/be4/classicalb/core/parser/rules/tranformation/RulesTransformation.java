@@ -517,7 +517,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return assign;
 	}
 
+	private PSubstitution createConditionalFailAssignment(TIdentifierLiteral ruleLiteral) {
+		final String ctName = ruleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
+		AIfSubstitution ifSub = new AIfSubstitution(ifCondition, createRuleFailAssignment(currentRule.getNameLiteral()),
+				new ArrayList<PSubstitution>(), null);
+		return ifSub;
+	}
+
 	private AAssignSubstitution createRuleFailAssignment(final TIdentifierLiteral ruleLiteral) {
+		/*
+		 * rule1, out_rule1 := fail, fail
+		 */
 		final ArrayList<PExpression> nameList = new ArrayList<>();
 		final ArrayList<PExpression> exprList = new ArrayList<>();
 		nameList.add(createRuleIdentifier(ruleLiteral));
@@ -585,15 +596,30 @@ public class RulesTransformation extends DepthFirstAdapter {
 			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 					createExpressionList(union));
 			let.setSubstitution(assign);
-			return let;
+
+			return createSequenceSubstitution(let, createConditionalFailAssignment(currentRule.getNameLiteral()));
 		} else {
+			// rule_cts := {1} * Counterexamples ; IF rule_cts /= {} THEN rule
+			// := fail END
 			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
 					createPositinedNode(new AMultOrCartExpression(
 							new ASetExtensionExpression(
 									createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
 							(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
-			return new AAssignSubstitution(createExpressionList(createIdentifier(ctName)), createExpressionList(union));
+			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
+					createExpressionList(union));
+			return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
 		}
+	}
+
+	private PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2, PSubstitution... subs) {
+		List<PSubstitution> subList = new ArrayList<>();
+		subList.add(sub1);
+		subList.add(sub2);
+		for (PSubstitution pSubstitution : subs) {
+			subList.add(pSubstitution);
+		}
+		return new ASequenceSubstitution(subList);
 	}
 
 	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
@@ -809,7 +835,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
-			PPredicate wherePredicate, PPredicate expectPredicate, PExpression message, TIntegerLiteral errorTypeNode) {
+			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression message,
+			final TIntegerLiteral errorTypeNode) {
 
 		final AComprehensionSetExpression set = new AComprehensionSetExpression();
 		{
