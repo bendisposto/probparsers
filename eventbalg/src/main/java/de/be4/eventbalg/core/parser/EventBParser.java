@@ -41,12 +41,9 @@ public class EventBParser {
 			System.err.println("usage: BParser [options] <BMachine file>");
 			System.err.println();
 			System.err.println("Available options are:");
-			System.err.println(CLI_SWITCH_VERBOSE
-					+ "\t\tVerbose output during lexing and parsing");
-			System.err.println(CLI_SWITCH_TIME
-					+ "\t\tOutput time used for complete parsing process.");
-			System.err.println(CLI_SWITCH_AST
-					+ "\t\tPrint AST on standard output.");
+			System.err.println(CLI_SWITCH_VERBOSE + "\t\tVerbose output during lexing and parsing");
+			System.err.println(CLI_SWITCH_TIME + "\t\tOutput time used for complete parsing process.");
+			System.err.println(CLI_SWITCH_AST + "\t\tPrint AST on standard output.");
 			System.err.println(CLI_SWITCH_UI + "\t\tShow AST as Swing UI.");
 			System.exit(-1);
 		}
@@ -54,8 +51,7 @@ public class EventBParser {
 		try {
 			final long start = System.currentTimeMillis();
 			final EventBParser parser = new EventBParser();
-			final Start tree = parser.parseFile(
-					new File(args[args.length - 1]),
+			final Start tree = parser.parseFile(new File(args[args.length - 1]),
 					isCliSwitchSet(args, CLI_SWITCH_VERBOSE));
 			final long end = System.currentTimeMillis();
 			System.out.println();
@@ -74,13 +70,11 @@ public class EventBParser {
 			}
 		} catch (final IOException e) {
 			System.err.println();
-			System.err.println("Error reading input file: "
-					+ e.getLocalizedMessage());
+			System.err.println("Error reading input file: " + e.getLocalizedMessage());
 			System.exit(-2);
 		} catch (final BException e) {
 			System.err.println();
-			System.err.println("Error parsing input file: "
-					+ e.getLocalizedMessage());
+			System.err.println("Error parsing input file: " + e.getLocalizedMessage());
 			System.exit(-3);
 		}
 	}
@@ -90,15 +84,17 @@ public class EventBParser {
 	 * 
 	 * @see #parse(String, boolean)
 	 * @param machine
+	 *            the machine file
 	 * @param verbose
-	 * @return
+	 *            print debug information
+	 * @return the generated AST
 	 * @throws IOException
+	 *             if stream cannot be written to or closed
 	 * @throws BException
+	 *             if parsing fails
 	 */
-	public Start parseFile(final File machine, final boolean verbose)
-			throws IOException, BException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(
-				new FileInputStream(machine));
+	public Start parseFile(final File machine, final boolean verbose) throws IOException, BException {
+		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(machine));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
@@ -132,7 +128,7 @@ public class EventBParser {
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li> {@link EventBLexerException}: If any error occurs in the
+	 *             <li>{@link EventBLexerException}: If any error occurs in the
 	 *             generated or customized lexer a {@link LexerException} is
 	 *             thrown. Usually the lexer classes just throw a
 	 *             {@link LexerException}. But this class unfortunately does not
@@ -142,7 +138,7 @@ public class EventBParser {
 	 *             replace them by our own exception. In our own exception we
 	 *             provide the sourcecode position of the last characters that
 	 *             were read from the input.</li>
-	 *             <li> {@link EventBParseException}: This exception is thrown in
+	 *             <li>{@link EventBParseException}: This exception is thrown in
 	 *             two situations. On the one hand if the parser throws a
 	 *             {@link ParserException} we convert it into a
 	 *             {@link EventBParseException}. On the other hand it can be
@@ -151,36 +147,33 @@ public class EventBParser {
 	 *             single token is involved in the error. Otherwise a
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
-	 *             <li> {@link CheckException}: If any problem occurs while
+	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             </li>
+	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
 	 *             problem. For example, if we find dublicate machine clauses,
 	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
 	 */
-	public Start parse(final String input, final boolean debugOutput)
-			throws BException {
+	public Start parse(final String input, final boolean debugOutput) throws BException {
 		final Reader reader = new StringReader(input);
 
 		try {
 			/*
 			 * Main parser
 			 */
-			final EventBLexer lexer = new EventBLexer(new PushbackReader(
-					reader, 99));
+			final EventBLexer lexer = new EventBLexer(new PushbackReader(reader, 99));
 			lexer.setDebugOutput(debugOutput);
 
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = ((ITokenListContainer) lexer)
-					.getTokenList();
+			final List<IToken> tokenList = ((ITokenListContainer) lexer).getTokenList();
 
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			final Map<PositionedNode, SourcecodeRange> positions = ((IParser) parser)
-					.getMapping();
+			final Map<PositionedNode, SourcecodeRange> positions = ((IParser) parser).getMapping();
 
 			sourcePositions = new SourcePositions(tokenList, positions);
 			parser = null;
@@ -203,8 +196,7 @@ public class EventBParser {
 		}
 	}
 
-	private EventBParseException createEventBParseException(
-			final ParserException e) {
+	private EventBParseException createEventBParseException(final ParserException e) {
 		final Token token = e.getToken();
 		String message = e.getMessage();
 		final boolean expectingFound = message.indexOf("expecting") >= 0;
@@ -224,8 +216,7 @@ public class EventBParser {
 		return new EventBParseException(token, message);
 	}
 
-	private static boolean isCliSwitchSet(final String[] args,
-			final String cliSwitch) {
+	private static boolean isCliSwitchSet(final String[] args, final String cliSwitch) {
 		for (int i = 0; i < args.length; i++) {
 			if (cliSwitch.equals(args[i])) {
 				return true;
