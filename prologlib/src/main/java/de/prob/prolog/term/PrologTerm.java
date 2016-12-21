@@ -87,6 +87,7 @@ public abstract class PrologTerm implements Serializable {
 	 * Gets an argument by its index. Note, that numbering starts with 1
 	 * 
 	 * @param index
+	 *            the index of the argument
 	 * @return the PrologTerm
 	 */
 	public PrologTerm getArgument(final int index) {

@@ -35,6 +35,9 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
 	 * 
+	 * @param fileNumber
+	 *            the file number which will be assigned to <code>node</code>
+	 *            and its child nodes
 	 * @param node
 	 *            The root node of the machine.
 	 */

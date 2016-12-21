@@ -61,7 +61,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private  ParseOptions parseOptions;
+	private ParseOptions parseOptions;
 
 	private List<String> doneDefFiles = new ArrayList<String>();
 
@@ -143,9 +143,8 @@ public class BParser {
 	 * @return the start AST node
 	 * @throws IOException
 	 *             if the file cannot be read
-	 * @throws BException
-	 *             if the file cannot be parsed
 	 * @throws BCompoundException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
 		contentProvider = new CachingDefinitionFileProvider();
@@ -165,9 +164,8 @@ public class BParser {
 	 * @return the AST node
 	 * @throws IOException
 	 *             if the file cannot be read
-	 * @throws BException
-	 *             if the file cannot be parsed
 	 * @throws BCompoundException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
 			throws IOException, BCompoundException {
@@ -216,9 +214,8 @@ public class BParser {
 	 * @param input
 	 *            the B machine as input string
 	 * @return AST of the input
-	 * @throws BException
-	 *             if the B machine can not be parsed
 	 * @throws BCompoundException
+	 *             if the B machine can not be parsed
 	 */
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
@@ -286,9 +283,8 @@ public class BParser {
 	 * @param debugOutput
 	 *            print debug information
 	 * @return the AST node
-	 * @throws BException
-	 *             if the B machine cannot be parsed
 	 * @throws BCompoundException
+	 *             if the B machine cannot be parsed
 	 */
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
 		return parse(input, debugOutput, new NoContentProvider());
@@ -306,8 +302,10 @@ public class BParser {
 	 *            referenced files during the parsing process. The content
 	 *            provider is used for referenced definition files for example.
 	 * @return the root node of the AST
-	 * @throws BException
-	 *             The {@link BException} class stores the actual exception as
+	 * @throws BCompoundException
+	 *             The {@link BCompoundException} class stores all
+	 *             {@link BException}s occurred during the parsing process. The
+	 *             {@link BException} class stores the actual exception as
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
 	 *             an error message. If the tools needs to extract additional
@@ -349,7 +347,6 @@ public class BParser {
 	 *             problem. For example, if we find duplicate machine clauses,
 	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
-	 * @throws BCompoundException
 	 */
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
 			throws BCompoundException {

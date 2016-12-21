@@ -45,7 +45,7 @@ public interface IPrologTermOutput {
 	 * Finish a term that was started with {@link #openTerm(String)}. This
 	 * method basically prints the closing parenthesis.
 	 * 
-	 * @return
+	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput closeTerm();
 

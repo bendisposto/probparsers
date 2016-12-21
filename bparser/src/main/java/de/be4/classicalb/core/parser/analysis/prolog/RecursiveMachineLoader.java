@@ -76,17 +76,9 @@ public class RecursiveMachineLoader {
 		this(path, contentProvider, new ParsingBehaviour());
 	}
 
-	/**
-	 * Loads all machines that are (recursively) included (seen,etc) by the
-	 * given main machine
-	 * 
-	 * @param start
-	 *            The main machine
-	 * @throws BException
-	 */
-	public void loadAllMachines(final File startfile, final Start start, final SourcePositions positions,
+	public void loadAllMachines(final File startFile, final Start start, final SourcePositions positions,
 			final IDefinitions definitions) throws BCompoundException {
-		recursivlyLoadMachine(startfile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
+		recursivlyLoadMachine(startFile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
 	}
 
 	private void loadMachine(final List<String> ancestors, final File machineFile)
@@ -106,12 +98,6 @@ public class RecursiveMachineLoader {
 		printAsProlog(pout);
 	}
 
-	/**
-	 * Prints the machines loaded by
-	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions)}.
-	 * 
-	 * @param pout
-	 */
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
@@ -309,7 +295,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void intersect(final Set<String> a, final Set<String> b) {
-		for (final Iterator<String> it = a.iterator(); it.hasNext();) {
+		for (final Iterator< String>it = a.iterator(); it.hasNext();) {
 			final String elem = it.next();
 			if (elem != null && !b.contains(elem)) {
 				it.remove();

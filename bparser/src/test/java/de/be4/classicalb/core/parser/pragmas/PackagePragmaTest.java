@@ -70,7 +70,7 @@ public class PackagePragmaTest {
 		String file = PATH + "PackageNotFound.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
-		assertTrue(result.contains("Imported package does not exist:"));
+		assertTrue(result.contains("Imported package does not exist"));
 	}
 
 
