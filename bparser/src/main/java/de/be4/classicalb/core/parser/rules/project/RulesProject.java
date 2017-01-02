@@ -43,14 +43,18 @@ public class RulesProject {
 			final PrintStream err) {
 		RulesProject project = new RulesProject(mainFile);
 		project.setParsingBehaviour(parsingBehaviour);
-		project.parseProject();
-		project.checkProject();
-		project.flattenProject();
+		project.translateProject();
 		return project.printPrologOutput(out, err);
 	}
 
 	public RulesProject(File mainFile) {
 		this.mainFile = mainFile;
+	}
+
+	public void translateProject() {
+		this.parseProject();
+		this.checkProject();
+		this.flattenProject();
 	}
 
 	public List<BException> getBExceptionList() {
