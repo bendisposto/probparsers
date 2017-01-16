@@ -1,0 +1,12 @@
+apply plugin: 'jacoco'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+
+dependencies {
+  compile project(path: ":prologlib", configuration: "archives")
+  compile project(path: ":bparser", configuration: "archives")
+  compile project(path: ":ltlparser", configuration: "archives")
+
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+}
