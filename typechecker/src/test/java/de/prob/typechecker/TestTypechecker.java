@@ -3,7 +3,6 @@ package de.prob.typechecker;
 import java.util.Hashtable;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.typechecker.MachineContext;
@@ -23,9 +22,6 @@ public class TestTypechecker {
 
 		BParser parser = new BParser("Test");
 		Start start = parser.parse(machine, false);
-		final Ast2String ast2String2 = new Ast2String();
-		start.apply(ast2String2);
-		// System.out.println(ast2String2.toString());
 		MachineContext c = new MachineContext(null, start);
 		c.analyseMachine();
 		Typechecker t = new Typechecker(c);
