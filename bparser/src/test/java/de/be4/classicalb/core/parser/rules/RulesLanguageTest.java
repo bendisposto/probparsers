@@ -23,6 +23,14 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
+	
+	@Test
+	public void testRuleClassification() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
 
 	@Test
 	public void testForAllPredicate() throws FileNotFoundException, IOException {
@@ -31,6 +39,8 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
+	
+	
 
 	@Test
 	public void testStringFormat() throws FileNotFoundException, IOException {
@@ -153,10 +163,13 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleId() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL({\"Rule violated\"}) END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL(\"Rule violated\") END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Missing rule id in counterexample message.", result.contains("string(none,'id2: ')"));
+		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
+		System.out.println(rulesMachineAsBMachine);
+		assertTrue(!result.contains("exception"));
+		assertTrue("RULEID should not appear in the translated B machine.", !result.contains("id2"));
 	}
 
 	@Test

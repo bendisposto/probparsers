@@ -276,7 +276,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION out <-- foo PRECONDITION 1=1 PRECONDITION 1=1 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,69,'UnknownFile'),'PRECONDITION clause is used more than once').\n",
+		assertEquals(
+				"parse_exception(pos(1,69,'UnknownFile'),'PRECONDITION clause is used more than once in operation \\'foo\\'.').\n",
 				result);
 	}
 
@@ -285,7 +286,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar DEPENDS_ON_RULE bazz BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,60,'UnknownFile'),'DEPENDS_ON_RULE clause is used more than once').\n",
+		assertEquals(
+				"parse_exception(pos(1,60,'UnknownFile'),'DEPENDS_ON_RULE clause is used more than once in operation \\'foo\\'.').\n",
 				result);
 	}
 
@@ -314,7 +316,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,67,'UnknownFile'),'DEPENDS_ON_COMPUTATION clause is used more than once').\n",
+				"parse_exception(pos(1,67,'UnknownFile'),'DEPENDS_ON_COMPUTATION clause is used more than once in operation \\'foo\\'.').\n",
 				result);
 	}
 
@@ -333,7 +335,9 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1 RULEID req2 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,52,'UnknownFile'),'RULEID attribute is used more than once.').\n", result);
+		assertEquals(
+				"parse_exception(pos(1,52,'UnknownFile'),'RULEID clause is used more than once in operation \\'foo\\'.').\n",
+				result);
 	}
 
 	@Test
@@ -388,7 +392,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,47,'UnknownFile'),'ERROR_TYPES is not an attribute of a FUNCTION or Computation operation.').\n",
+				"parse_exception(pos(1,47,'UnknownFile'),'ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.').\n",
 				result);
 	}
 
@@ -434,7 +438,7 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION a /*@desc dd */ <-- foo BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,31,'UnknownFile'),'Each return value must be an identifier.').\n", result);
+		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Identifier expected.').\n", result);
 	}
 
 	public static String getRulesMachineAsPrologTerm(final String content) {

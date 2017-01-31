@@ -1,0 +1,6 @@
+RULES_MACHINE UnknownIdentifier
+
+PROPERTIES
+  k = 1
+
+END

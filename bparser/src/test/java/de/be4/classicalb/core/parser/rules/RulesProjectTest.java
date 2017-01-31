@@ -76,9 +76,17 @@ public class RulesProjectTest {
 	}
 
 	@Test
-	public void testUnkownRule() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnkownRule.rmch");
+	public void testUnknownRule() throws Exception {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnknownRule.rmch");
 		String expected = "Unknown operation: ";
+		System.out.println(result);
+		assertTrue(result.contains(expected));
+	}
+	
+	@Test
+	public void testUnknownIdentifier() throws Exception {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnknownIdentifier.rmch");
+		String expected = "Unknown identifier ";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}

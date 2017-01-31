@@ -7,21 +7,38 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
+import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
+import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
+import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
+import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
+import de.be4.classicalb.core.parser.node.ADeferredSetSet;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
+import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
+import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AForLoopSubstitution;
+import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionOperation;
+import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
+import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
+import de.be4.classicalb.core.parser.node.ALambdaExpression;
+import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
+import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
+import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
@@ -29,11 +46,19 @@ import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
 import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
+import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
+import de.be4.classicalb.core.parser.node.ARecEntry;
+import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
+import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
 import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
@@ -42,7 +67,9 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
+import de.be4.classicalb.core.parser.util.Utils;
 
 /*
  * This class checks that all extensions for the rules language are used in a correct way
@@ -56,7 +83,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	protected final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
 	protected final ArrayList<CheckException> errorList = new ArrayList<>();
 	protected final HashSet<AIdentifierExpression> assignedVariables = new HashSet<>();
-	private final HashSet<String> localVariablesScope = new HashSet<>();
+
+	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
+	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
+	private final HashSet<String> definitions = new HashSet<>();
+	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
 	private final List<RulesMachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
@@ -103,8 +134,22 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.functionMap.get(funcOp);
 	}
 
+	public HashMap<String, HashSet<Node>> getUnknownIdentifier() {
+		HashMap<String, HashSet<Node>> result = new HashMap<>();
+		for (String name : readIdentifier.keySet()) {
+			if (!this.knownIdentifier.getKnownIdentifier().contains(name) && !this.definitions.contains(name)) {
+				result.put(name, readIdentifier.get(name));
+			}
+		}
+		return result;
+	}
+
+	public Set<String> getGlobalIdentifiers() {
+		return this.knownIdentifier.getKnownIdentifier();
+	}
+
 	@Override
-	public void inAMachineHeader(AMachineHeader node) {
+	public void caseAMachineHeader(AMachineHeader node) {
 		if (node.getParameters().size() > 0) {
 			errorList.add(new CheckException("A RULES_MACHINE must not have any machine parameters", node));
 		}
@@ -116,51 +161,88 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.machineName = nameLiteral.getText();
 	}
 
+	@Override
+	public void caseAReferencesMachineClause(AReferencesMachineClause node) {
+	}
+
+	@Override
+	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
+		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+	}
+
+	@Override
+	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
+		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+	}
+
+	@Override
+	public void caseARecordFieldExpression(ARecordFieldExpression node) {
+		node.getRecord().apply(this);
+		// do not visit the field identifier
+	}
+
+	@Override
+	public void caseARecEntry(ARecEntry node) {
+		// do not visit the field identifier
+		node.getValue().apply(this);
+	}
+
+	@Override
+	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
+		{
+			List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
+			this.knownIdentifier.addTIdentifier(copy.get(0));
+		}
+		this.knownIdentifier.addIdentifier(new ArrayList<PExpression>(node.getElements()));
+	}
+
 	private void visitOperationAttributes(final LinkedList<POperationAttribute> attributes) {
+		class OccurredAttributes {
+			final HashMap<String, POperationAttribute> map = new HashMap<>();
+
+			public void add(String attrName, POperationAttribute node) {
+				if (map.containsKey(attrName)) {
+					errorList
+							.add(new CheckException(String.format("%s clause is used more than once in operation '%s'.",
+									attrName, currentOperation.getName()), node));
+				}
+				map.put(attrName, node);
+			}
+		}
+		OccurredAttributes occurredAttributes = new OccurredAttributes();
 		// set operation attributes
 		for (POperationAttribute pOperationAttribute : attributes) {
 			if (pOperationAttribute instanceof APredicateAttributeOperationAttribute) {
 				APredicateAttributeOperationAttribute attr = (APredicateAttributeOperationAttribute) pOperationAttribute;
 				PPredicate predicate = attr.getPredicate();
-				if (attr.getName().getText().equals(RulesGrammar.ACTIVATION)) {
+				final String attrName = attr.getName().getText();
+				occurredAttributes.add(attrName, pOperationAttribute);
+				if (attrName.equals(RulesGrammar.ACTIVATION)) {
 					if (currentOperation instanceof FunctionOperation) {
 						errorList.add(new CheckException("ACTIVATION is not a valid attribute of a FUNCTION operation.",
 								pOperationAttribute));
 					} else {
-						if (currentOperation.getActivationPredicate() == null) {
-							currentOperation.setActivationPredicate(predicate);
-						} else {
-							errorList.add(new CheckException("ACTIVATION clause is used more than once in operation '"
-									+ currentOperation.getName() + "'.", pOperationAttribute));
-						}
+						currentOperation.setActivationPredicate(predicate);
 					}
 				} else {
 					// PRECONDITION
 					if (currentOperation instanceof FunctionOperation) {
 						FunctionOperation func = (FunctionOperation) currentOperation;
-						if (func.getPreconditionPredicate() == null) {
-							func.setPreconditionPredicate(predicate);
-						} else {
-							errorList.add(new CheckException("PRECONDITION clause is used more than once",
-									pOperationAttribute));
-						}
+						func.setPreconditionPredicate(predicate);
 					} else {
 						errorList.add(new CheckException(
 								"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation",
 								pOperationAttribute));
 					}
-
 				}
+				predicate.apply(this);
 			} else {
 				AOperationAttribute attribute = (AOperationAttribute) pOperationAttribute;
 				LinkedList<PExpression> arguments = attribute.getArguments();
 				String name = attribute.getName().getText();
+				occurredAttributes.add(name, pOperationAttribute);
 				switch (name) {
 				case RulesGrammar.DEPENDS_ON_RULE: {
-					if (currentOperation.getDependsOnRulesList().size() > 0) {
-						errorList.add(new CheckException("DEPENDS_ON_RULE clause is used more than once",
-								pOperationAttribute));
-					}
 					List<AIdentifierExpression> list = new ArrayList<>();
 					for (PExpression pExpression : arguments) {
 						if (pExpression instanceof AIdentifierExpression) {
@@ -174,10 +256,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					break;
 				}
 				case RulesGrammar.DEPENDS_ON_COMPUTATION: {
-					if (currentOperation.getDependsOnComputationList().size() > 0) {
-						errorList.add(new CheckException("DEPENDS_ON_COMPUTATION clause is used more than once",
-								pOperationAttribute));
-					}
 					List<AIdentifierExpression> list = new ArrayList<>();
 					for (PExpression pExpression : arguments) {
 						if (pExpression instanceof AIdentifierExpression) {
@@ -195,10 +273,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					{
 						if (currentOperation instanceof RuleOperation) {
 							final RuleOperation rule = (RuleOperation) currentOperation;
-							if (rule.getRuleIdString() != null) {
-								errorList.add(new CheckException("RULEID attribute is used more than once.",
-										pOperationAttribute));
-							}
 							if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 								rule.setRuleId((AIdentifierExpression) arguments.get(0));
 							} else {
@@ -225,7 +299,25 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 						}
 					} else {
 						errorList.add(new CheckException(
-								"ERROR_TYPES is not an attribute of a FUNCTION or Computation operation.",
+								"ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
+								pOperationAttribute));
+					}
+					break;
+				}
+				case RulesGrammar.CLASSIFICATION: {
+					if (currentOperation instanceof RuleOperation) {
+						final RuleOperation rule = (RuleOperation) currentOperation;
+						if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
+							AIdentifierExpression identifier = (AIdentifierExpression) arguments.get(0);
+							String identifierString = Utils.getIdentifierAsString(identifier.getIdentifier());
+							rule.setClassification(identifierString);
+						} else {
+							errorList.add(new CheckException("Expected exactly one identifier after CLASSIFICATION.",
+									pOperationAttribute));
+						}
+					} else {
+						errorList.add(new CheckException(
+								"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.",
 								pOperationAttribute));
 					}
 					break;
@@ -247,7 +339,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inARuleOperation(ARuleOperation node) {
+	public void caseARuleOperation(ARuleOperation node) {
 		currentOperation = new RuleOperation(node.getRuleName(), this.fileName, this.machineName, machineReferences);
 		if (containsRule(currentOperation.getName())) {
 			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
@@ -255,47 +347,33 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		rulesMap.put(node, (RuleOperation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
-	}
-
-	@Override
-	public void outARuleOperation(ARuleOperation node) {
+		node.getRuleBody().apply(this);
 		currentOperation = null;
 	}
 
 	@Override
-	public void inAComputationOperation(AComputationOperation node) {
+	public void caseAComputationOperation(AComputationOperation node) {
 		currentOperation = new Computation(node.getName(), this.fileName, this.machineName, machineReferences);
 		computationMap.put(node, (Computation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
-	}
-
-	@Override
-	public void outAComputationOperation(AComputationOperation node) {
+		node.getBody().apply(this);
 		currentOperation = null;
 	}
 
 	@Override
-	public void inAFunctionOperation(AFunctionOperation node) {
+	public void caseAFunctionOperation(AFunctionOperation node) {
 		currentOperation = new FunctionOperation(node.getName(), this.fileName, this.machineName, machineReferences);
 		functionMap.put(node, (FunctionOperation) currentOperation);
-		final HashSet<String> variables = new HashSet<>();
-		LinkedList<PExpression> identifiers = node.getReturnValues();
-		for (PExpression e : identifiers) {
-			if (e instanceof AIdentifierExpression) {
-				AIdentifierExpression id = (AIdentifierExpression) e;
-				String name = id.getIdentifier().get(0).getText();
-				variables.add(name);
-			} else {
-				errorList.add(new CheckException("Each return value must be an identifier.", node));
-			}
-		}
-		localVariablesScope.addAll(variables);
-		visitOperationAttributes(node.getAttributes());
-	}
 
-	@Override
-	public void outAFunctionOperation(AFunctionOperation node) {
+		final LinkedList<PExpression> localVariables = new LinkedList<>();
+		localVariables.addAll(node.getReturnValues());
+		localVariables.addAll(node.getParameters());
+
+		this.identifierScope.createNewScope(localVariables);
+		visitOperationAttributes(node.getAttributes());
+		node.getBody().apply(this);
 		currentOperation = null;
+		this.identifierScope.removeScope();
 	}
 
 	@Override
@@ -303,9 +381,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		// the defined variable should not be used in the TYPE or the VALUE
 		// section
 		if (currentOperation != null && currentOperation instanceof Computation) {
-			Computation compute = (Computation) currentOperation;
+			Computation computation = (Computation) currentOperation;
 			try {
-				compute.addDefineVariable(node.getName());
+				computation.addDefineVariable(node.getName());
+				this.knownIdentifier.addTIdentifier(node.getName());
 			} catch (CheckException e) {
 				this.errorList.add(e);
 			}
@@ -313,7 +392,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAVarSubstitution(AVarSubstitution node) {
+	public void caseAVarSubstitution(AVarSubstitution node) {
 		final HashSet<String> variables = new HashSet<>();
 		LinkedList<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression e : identifiers) {
@@ -325,13 +404,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		localVariablesScope.addAll(variables);// TODO do not add strings here
-	}
-
-	@Override
-	public void outAVarSubstitution(AVarSubstitution node) {
-		final HashSet<String> variables = new HashSet<>();
-		localVariablesScope.removeAll(variables);
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getSubstitution().apply(this);
+		this.identifierScope.removeScope();
 	}
 
 	public void inAOperatorExpression(AOperatorExpression node) {
@@ -399,7 +474,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (e instanceof AIdentifierExpression) {
 				AIdentifierExpression id = (AIdentifierExpression) e;
 				String name = id.getIdentifier().get(0).getText();
-				if (!localVariablesScope.contains(name)) {
+				if (!this.identifierScope.contains(name)) {
 					errorList
 							.add(new CheckException(
 									"Identifier '" + name
@@ -421,14 +496,33 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (copy.size() > 1) {
 			this.errorList.add(new CheckException("Identifier renaming is not allowed in a RULES_MACHINE.", node));
 		}
+		final String name = copy.get(0).getText();
 		if (currentOperation != null) {
 			currentOperation.addReadVariable(node);
 		}
+		if (!this.identifierScope.contains(name)) {
+
+			addReadIdentifier(node);
+		}
+
 		outAIdentifierExpression(node);
 	}
 
+	private void addReadIdentifier(AIdentifierExpression node) {
+		LinkedList<TIdentifierLiteral> list = node.getIdentifier();
+		String name = list.get(0).getText();
+		if (this.readIdentifier.containsKey(name)) {
+			HashSet<Node> hashSet = readIdentifier.get(name);
+			hashSet.add(node);
+		} else {
+			HashSet<Node> hashSet = new HashSet<>();
+			hashSet.add(node);
+			readIdentifier.put(name, hashSet);
+		}
+	}
+
 	@Override
-	public void outAOperatorPredicate(AOperatorPredicate node) {
+	public void caseAOperatorPredicate(AOperatorPredicate node) {
 		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
@@ -514,21 +608,30 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
+	public void caseARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
 		if (!isInRule()) {
 			errorList.add(new CheckException("RULE_ANY used outside of a RULE operation", node));
+			return;
 		}
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getWhere().apply(this);
+		node.getMessage().apply(this);
+		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
-		defaultOut(node);
 	}
 
 	@Override
-	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
+	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
 		if (!isInRule()) {
 			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
+			return;
 		}
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getWhere().apply(this);
+		node.getExpect().apply(this);
+		node.getMessage().apply(this);
+		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
-		defaultOut(node);
 	}
 
 	private void checkErrorType(TIntegerLiteral node) {
@@ -546,24 +649,160 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
+	// local identifier
+
 	@Override
-	public void inAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-		final String name = node.getName().getText();
-		if (name.equals("GOAL")) {
-			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
-		}
+	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
+		node.getSet().apply(this);
+		LinkedList<PExpression> linkedList = new LinkedList<PExpression>();
+		linkedList.add(node.getIdentifier());
+		this.identifierScope.createNewScope(linkedList);
+		node.getDoSubst().apply(this);
+		this.identifierScope.removeScope();
 	}
 
 	@Override
-	public void inASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
-		final String name = node.getName().getText();
-		if (name.equals("GOAL")) {
-			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
-		}
+	public void caseALetSubstitution(ALetSubstitution node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicate().apply(this);
+		node.getSubstitution().apply(this);
+		this.identifierScope.removeScope();
 	}
 
 	@Override
-	public void inAChoiceSubstitution(AChoiceSubstitution node) {
+	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getAssignment().apply(this);
+		node.getPred().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseALetExpressionExpression(ALetExpressionExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getAssignment().apply(this);
+		node.getExpr().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAGeneralProductExpression(AGeneralProductExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAGeneralSumExpression(AGeneralSumExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicate().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseALambdaExpression(ALambdaExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicate().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAExistsPredicate(AExistsPredicate node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getPredicate().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAForallPredicate(AForallPredicate node) {
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		node.getImplication().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	// definitions
+	@Override
+	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
+		final String name = node.getName().getText();
+		this.definitions.add(name);
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		node.getRhs().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
+		final String name = node.getName().getText();
+		this.definitions.add(name);
+		if (name.equals("GOAL")) {
+			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
+			return;
+		}
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		node.getRhs().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
+		final String name = node.getName().getText();
+		this.definitions.add(name);
+		if (name.equals("GOAL")) {
+			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
+			return;
+		}
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		node.getRhs().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	/*
+	 * nodes not allowed in a rules machine
+	 */
+
+	@Override
+	public void caseAChoiceSubstitution(AChoiceSubstitution node) {
 		errorList.add(new CheckException("A CHOICE substitution is not allowed in a RULES_MACHINE.", node));
 	}
 
@@ -577,4 +816,97 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		errorList.add(new CheckException("The USES clause is not allowed in a RULES_MACHINE.", node));
 	}
 
+	@Override
+	public void caseAAnySubstitution(AAnySubstitution node) {
+		errorList.add(new CheckException("The ANY substitution is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseABecomesElementOfSubstitution(ABecomesElementOfSubstitution node) {
+		errorList.add(new CheckException(
+				"The BecomesElementOf substitution (a,b:(P)) is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseADeferredSetSet(ADeferredSetSet node) {
+		errorList.add(new CheckException("The DeferredSet clause not allowed in a RULES_MACHINE.", node));
+	}
+
+	class KnownIdentifier {
+		Set<String> knownIdentifier = new HashSet<>();
+
+		public void addIdentifier(List<PExpression> parameters) {
+			for (PExpression pExpression : parameters) {
+				this.addPExpression(pExpression);
+			}
+		}
+
+		public void addTIdentifier(TIdentifierLiteral identifier) {
+			knownIdentifier.add(identifier.getText());
+		}
+
+		public Set<String> getKnownIdentifier() {
+			return this.knownIdentifier;
+		}
+
+		public void addPExpression(PExpression expression) {
+			if (expression instanceof AIdentifierExpression) {
+				AIdentifierExpression identifier = (AIdentifierExpression) expression;
+				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
+				if (list.size() > 1) {
+					errorList.add(new CheckException("Renaming of constants is not allowed.", expression));
+					return;
+				}
+				TIdentifierLiteral tIdentifierLiteral = list.get(0);
+				String constantName = tIdentifierLiteral.getText();
+				if (this.knownIdentifier.contains(constantName)) {
+					errorList.add(new CheckException("Constant already exists.", expression));
+					return;
+				}
+				knownIdentifier.add(constantName);
+			} else {
+				errorList.add(new CheckException("Identifier expected.", expression));
+			}
+		}
+	}
+
+	class LocalIdentifierScope {
+		private final LinkedList<Set<String>> localVariablesScope = new LinkedList<>();
+
+		public void createNewScope(final Set<String> identifiers) {
+			this.localVariablesScope.add(identifiers);
+		}
+
+		public void createNewScope(final LinkedList<PExpression> parameters) {
+			final HashSet<String> set = new HashSet<>();
+			for (PExpression expression : parameters) {
+				if (expression instanceof AIdentifierExpression) {
+					AIdentifierExpression identifier = (AIdentifierExpression) expression;
+					if (identifier.getIdentifier().size() > 1) {
+						errorList.add(new CheckException("Renaming of identifier is not allowed.", expression));
+					}
+					TIdentifierLiteral tIdentifierLiteral = identifier.getIdentifier().getFirst();
+					String identifierName = tIdentifierLiteral.getText();
+					set.add(identifierName);
+				} else {
+					errorList.add(new CheckException("Identifier expected.", expression));
+				}
+			}
+			localVariablesScope.add(set);
+		}
+
+		public void removeScope() {
+			this.localVariablesScope.removeLast();
+		}
+
+		public boolean contains(String identifier) {
+			for (int i = localVariablesScope.size() - 1; i >= 0; i--) {
+				Set<String> ids = localVariablesScope.get(i);
+				if (ids.contains(identifier)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }

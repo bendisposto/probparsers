@@ -11,8 +11,10 @@ public class RuleOperation extends AbstractOperation {
 	private AIdentifierExpression ruleId;
 	private AIntegerExpression errorTypes;
 	private String counterExampleVariableName;
+	private String classification;
 
-	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName, List<RulesMachineReference> machineReferences) {
+	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName,
+			List<RulesMachineReference> machineReferences) {
 		super(ruleName, fileName, machineName, machineReferences);
 	}
 
@@ -47,6 +49,14 @@ public class RuleOperation extends AbstractOperation {
 
 	public String getCounterExampleVariableName() {
 		return this.counterExampleVariableName;
+	}
+
+	public void setClassification(String string) {
+		this.classification = string;
+	}
+
+	public String getClassification() {
+		return this.classification;
 	}
 
 }

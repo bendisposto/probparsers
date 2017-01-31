@@ -19,12 +19,14 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.tranformation.Computation;
 import de.be4.classicalb.core.parser.rules.tranformation.FunctionOperation;
 import de.be4.classicalb.core.parser.rules.tranformation.RuleOperation;
+import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -125,6 +127,7 @@ public class RulesProject {
 		findTransitiveDependencies();
 		checkReadWrite();
 		checkFunctionDependencies();
+		checkIdentifier();
 	}
 
 	private void checkFunctionDependencies() {
@@ -295,6 +298,42 @@ public class RulesProject {
 				}
 			}
 
+		}
+
+	}
+
+	private void checkIdentifier() {
+		final HashMap<String, RulesParseUnit> map = new HashMap<>();
+		for (IModel model : bModels) {
+			RulesParseUnit parseUnit = (RulesParseUnit) model;
+			map.put(parseUnit.getMachineName(), parseUnit);
+		}
+		for (IModel model : bModels) {
+			RulesParseUnit parseUnit = (RulesParseUnit) model;
+			HashSet<String> knownIdentifiers = new HashSet<>();
+			List<RulesMachineReference> machineReferences = parseUnit.getMachineReferences();
+			for (RulesMachineReference rulesMachineReference : machineReferences) {
+				String referenceName = rulesMachineReference.getName();
+				RulesParseUnit rulesParseUnit = map.get(referenceName);
+				RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
+				if (checker == null) {
+					return;
+				}
+				knownIdentifiers.addAll(rulesParseUnit.getRulesMachineChecker().getGlobalIdentifiers());
+			}
+			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
+			if (checker == null) {
+				return;
+			}
+			HashMap<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
+			HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
+			unknownIdentifiers.removeAll(knownIdentifiers);
+			for (String name : unknownIdentifiers) {
+				HashSet<Node> hashSet = unknownIdentifierMap.get(name);
+				Node node = hashSet.iterator().next();
+				this.bExceptionList.add(new BException(parseUnit.getFile().getAbsolutePath(),
+						new CheckException("Unknown identifier '" + name + "'.", node)));
+			}
 		}
 
 	}

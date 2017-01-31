@@ -574,42 +574,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-		if (currentRule.getRuleIdString() != null) {
-			addStringAppendDefinition();
-			final ALetSubstitution let = new ALetSubstitution();
-			final String CTS = "$cts";
-			let.setIdentifiers(createExpressionList(createIdentifier(CTS)));
-			let.setPredicate(new AEqualPredicate(createIdentifier(CTS), (PExpression) cloneNode(setOfCounterexamples)));
-			final PPredicate unionPredicate = new AMemberPredicate(createIdentifier("s"), createIdentifier(CTS));
-			final PExpression expr = new ASetExtensionExpression(createExpressionList(
-					new ADefinitionExpression(new TIdentifierLiteral("STRING_APPEND"), createExpressionList(
-							createStringExpression(currentRule.getRuleIdString() + ": "), createIdentifier("s")))));
-			final PExpression quantifiedUnion = new AQuantifiedUnionExpression(createIdentifierList("s"),
-					unionPredicate, expr);
-			final PExpression res = new AMultOrCartExpression(
-					new ASetExtensionExpression(
-							createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
-					quantifiedUnion);
-			setPosition(res, setOfCounterexamples);
-			// LET cts2 BE cts2 = CTS \/ res IN ... END
-			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName), res);
-			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
-					createExpressionList(union));
-			let.setSubstitution(assign);
-
-			return createSequenceSubstitution(let, createConditionalFailAssignment(currentRule.getNameLiteral()));
-		} else {
-			// rule_cts := {1} * Counterexamples ; IF rule_cts /= {} THEN rule
-			// := fail END
-			final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
-					createPositinedNode(new AMultOrCartExpression(
-							new ASetExtensionExpression(
-									createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
-							(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
-			AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
-					createExpressionList(union));
-			return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
-		}
+		
+		final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
+				createPositinedNode(new AMultOrCartExpression(
+						new ASetExtensionExpression(
+								createExpressionList(new AIntegerExpression(new TIntegerLiteral("" + errorIndex)))),
+						(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
+		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
+				createExpressionList(union));
+		return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
 	}
 
 	private PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2, PSubstitution... subs) {

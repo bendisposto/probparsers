@@ -66,6 +66,10 @@ public class RulesParseUnit implements IModel {
 		return machineFile;
 	}
 
+	public RulesMachineChecker getRulesMachineChecker() {
+		return this.rulesMachineChecker;
+	}
+
 	public void setParsingBehaviour(final ParsingBehaviour parsingBehaviour) {
 		this.parsingBehaviour = parsingBehaviour;
 	}
