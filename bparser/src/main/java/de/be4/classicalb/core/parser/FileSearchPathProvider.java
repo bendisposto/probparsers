@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,14 +35,12 @@ public class FileSearchPathProvider implements Iterable<File> {
 	private ArrayList<String> getLibraryPath() {
 		ArrayList<String> result = new ArrayList<>();
 		// User provided stdlib search path
-		String stdlib = System.getProperty("prob.stdlib");
+		final String stdlib = System.getProperty("prob.stdlib");
 		// prob.home is set by prob 2.0 to the directory of the prob binary
 		String home = System.getProperty("prob.home");
 
 		if (stdlib != null) {
-			for (String p : stdlib.split(":")) {
-				result.add(p);
-			}
+			Collections.addAll(result, stdlib.split(":"));
 		}
 		if (home != null) {
 			home = home + File.separator + "stdlib";
@@ -51,7 +50,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 			}
 		}
 
-		if (result.size() == 0) {
+		if (result.isEmpty()) {
 			result.add("." + File.separator + "stdlib");
 		}
 		return result;
