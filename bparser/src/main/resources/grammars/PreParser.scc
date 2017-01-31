@@ -15,6 +15,9 @@ Helpers
   slash = '/';
   hash = '#';
   double_quotation = '"';
+  triple_quote = 39 39 39 ;
+  single_quate = 39 ;
+
   lf = 10;
   cr = 13;
 
@@ -28,6 +31,7 @@ Helpers
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   all_chars_without_quote = [all_chars - double_quotation];
+  all_chars_without_single_quote = [all_chars - 39];
   word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
   comment_char = [[all_chars - star] - slash];
 
@@ -117,7 +121,11 @@ Tokens
   {definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
   {definition_file} filename = all_chars_without_quote*;
 
-  {normal} something = letter (letter | digit | underscore)* | [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  {normal} something = letter (letter | digit | underscore)*
+                       | [all_chars - double_quotation]
+                       | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation
+                       | triple_quote (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' triple_quote)* triple_quote
+                       ;
 
   white_space = layout_char+;
 
