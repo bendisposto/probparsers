@@ -70,4 +70,4 @@ any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
 
-(c) 2011-2016 STUPS group, University of Düsseldorf
+(c) 2011-2017 STUPS group, University of Düsseldorf
