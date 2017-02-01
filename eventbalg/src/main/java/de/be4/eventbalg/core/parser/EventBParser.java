@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -94,7 +95,8 @@ public class EventBParser {
 	 *             if parsing fails
 	 */
 	public Start parseFile(final File machine, final boolean verbose) throws IOException, BException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(machine));
+		final InputStreamReader inputStreamReader
+            = new InputStreamReader(new FileInputStream(machine), Charset.forName("UTF-8"));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
