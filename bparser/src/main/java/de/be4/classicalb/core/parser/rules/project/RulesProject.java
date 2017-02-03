@@ -136,6 +136,12 @@ public class RulesProject {
 			List<TIdentifierLiteral> functionCalls = abstractOperation.getFunctionCalls();
 			for (TIdentifierLiteral tIdentifierLiteral : functionCalls) {
 				final String functionName = tIdentifierLiteral.getText();
+				if (!allOperations.containsKey(functionName)
+						|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
+					this.bExceptionList.add(new BException(abstractOperation.getFileName(),
+							new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
+					return;
+				}
 				final FunctionOperation functionOperation = (FunctionOperation) allOperations.get(functionName);
 				Set<AbstractOperation> transDeps = new HashSet<>(functionOperation.getTransitiveDependencies());
 				transDeps.removeAll(transitiveDependencies);

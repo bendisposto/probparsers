@@ -44,6 +44,15 @@ public class RulesProjectExceptionTest {
 		assertTrue(result.contains("does not match any rule"));
 	}
 
+	
+	@Test
+	public void testUnknownFunction() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END END END";
+		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals("parse_exception(pos(1,59,null),'Unknown FUNCTION name \\'Foo\\'').\n", result);
+	}
+	
 	@Test
 	public void testRulesMachineInOrdinaryMachineFileException() throws Exception {
 		OutputStream output = new OutputStream() {
