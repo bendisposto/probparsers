@@ -122,6 +122,9 @@ public class RulesProject {
 	}
 
 	private void checkProject() {
+		if (this.bExceptionList.size() > 0) {
+			return;
+		}
 		collectAllOperations();
 		checkDependencies();
 		findTransitiveDependencies();
@@ -321,16 +324,13 @@ public class RulesProject {
 			for (RulesMachineReference rulesMachineReference : machineReferences) {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
-				RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
+				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
 				if (checker == null) {
 					return;
 				}
-				knownIdentifiers.addAll(rulesParseUnit.getRulesMachineChecker().getGlobalIdentifiers());
+				knownIdentifiers.addAll(checker.getGlobalIdentifiers());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
-			if (checker == null) {
-				return;
-			}
 			HashMap<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
 			HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
 			unknownIdentifiers.removeAll(knownIdentifiers);
