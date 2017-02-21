@@ -893,6 +893,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(newNode);
 	}
 
+	@SuppressWarnings("unused")
 	private void addStringAppendDefinition() {
 		final String STRING_APPEND = "STRING_APPEND";
 		if (definitions.containsDefinition(STRING_APPEND)) {
