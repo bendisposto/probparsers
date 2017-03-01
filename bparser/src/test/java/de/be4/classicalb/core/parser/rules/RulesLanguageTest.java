@@ -257,7 +257,7 @@ public class RulesLanguageTest {
 	public void testForLoop() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("var(none,[identifier(none,'$SET')"));
+		assertTrue(result.contains("var(none,[identifier(none,'$SET0')"));
 	}
 
 	@Test

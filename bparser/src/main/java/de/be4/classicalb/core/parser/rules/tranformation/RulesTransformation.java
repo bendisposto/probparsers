@@ -54,6 +54,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private RuleOperation currentRule;
 	private HashMap<String, AbstractOperation> allOperations;
+	private int nestedForLoopCount = 0; // used to provide unique identifiers for generated variables of FOR loops 
 
 	public RulesTransformation(Start start, BParser bParser, List<RulesMachineReference> machineReferences,
 			RulesMachineChecker rulesMachineVisitor, HashMap<String, AbstractOperation> allOperations) {
@@ -739,13 +740,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AIntegerExpression(new TIntegerLiteral("" + i));
 	}
 
+
 	@Override
 	public void outAForLoopSubstitution(AForLoopSubstitution node) {
 		/**
 		 * FOR x IN set DO sub END
 		 **/
 
-		final String localSetVariableName = "$SET";
+		final String localSetVariableName = "$SET" + nestedForLoopCount;
+		nestedForLoopCount++;
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
@@ -810,6 +813,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		varSub2.setSubstitution(new ASequenceSubstitution(var2List));
 
 		node.replaceBy(varSub);
+		nestedForLoopCount--;
 	}
 
 	@Override
