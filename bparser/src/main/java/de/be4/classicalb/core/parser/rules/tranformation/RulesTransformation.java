@@ -798,7 +798,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createExpressionList((PExpression) cloneNode(node.getIdentifier())), createExpressionList(chooseCall));
 
 		// G_Set := G_Set \ {CHOOSE(G_Set)}
-
 		PExpression chooseCall2 = new ADefinitionExpression(new TIdentifierLiteral("CHOOSE"),
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet()))); // CHOOSE(G_Set)
 

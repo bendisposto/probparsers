@@ -255,9 +255,10 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testForLoop() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO FOR y IN 1..3 \nDO skip END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("var(none,[identifier(none,'$SET0')"));
+		assertTrue(result.contains("var(none,[identifier(none,'$SET1')"));
 	}
 
 	@Test
