@@ -741,14 +741,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 
+	
+	@Override
+	public void inAForLoopSubstitution(AForLoopSubstitution node) {
+		nestedForLoopCount++;
+	}
+	
 	@Override
 	public void outAForLoopSubstitution(AForLoopSubstitution node) {
 		/**
 		 * FOR x IN set DO sub END
 		 **/
 
+		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
-		nestedForLoopCount++;
+		
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
@@ -795,17 +802,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression chooseCall2 = new ADefinitionExpression(new TIdentifierLiteral("CHOOSE"),
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet()))); // CHOOSE(G_Set)
 
+		// G_Set \ {CHOOSE(G_Set)}
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
-				new ASetExtensionExpression(createExpressionList(chooseCall2))); // G_Set
-																					// \
-																					// {CHOOSE(G_Set)}
-
+				new ASetExtensionExpression(createExpressionList(chooseCall2))); 
+		
+		// G_Set := G_Set \ {CHOOSE(G_Set)}
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs)); // G_Set
-																															// :=
-																															// G_Set
-																															// \
-																															// {CHOOSE(G_Set)}
+				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs)); 
 		List<PSubstitution> var2List = new ArrayList<>();
 		var2List.add(assignX);
 		var2List.add(node.getDoSubst());
@@ -813,7 +816,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		varSub2.setSubstitution(new ASequenceSubstitution(var2List));
 
 		node.replaceBy(varSub);
-		nestedForLoopCount--;
 	}
 
 	@Override
