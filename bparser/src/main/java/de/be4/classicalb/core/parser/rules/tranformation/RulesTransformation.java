@@ -565,16 +565,28 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (node.getDummyValue() != null) {
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), node.getDummyValue()));
 		} else {
-			// TODO store position information in empty set
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), new AEmptySetExpression()));
 		}
-		PSubstitution assign = createAssignNode(createRuleIdentifier(node.getName()), node.getValue());
+
+		PExpression value = null;
+		if (node.getValue() instanceof ASymbolicLambdaExpression
+				|| node.getValue() instanceof ASymbolicComprehensionSetExpression) {
+			value = node.getValue();
+		} else {
+			// value = node.getValue();
+			addForceDefinition();
+			value = new ADefinitionExpression(new TIdentifierLiteral("FORCE"), createExpressionList(node.getValue()));
+			value.setStartPos(node.getValue().getStartPos());
+			value.setEndPos(node.getValue().getEndPos());
+		}
+
+		PSubstitution assign = createAssignNode(createRuleIdentifier(node.getName()), value);
 		node.replaceBy(assign);
 	}
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-		
+
 		final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
 				createPositinedNode(new AMultOrCartExpression(
 						new ASetExtensionExpression(
@@ -845,7 +857,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(resultTuple)));
-			assign.setRhsExpressions(createExpressionList(set));
+			assign.setRhsExpressions(createExpressionList(
+					new ADefinitionExpression(new TIdentifierLiteral("FORCE"), createExpressionList(set))));
+			// assign.setRhsExpressions(createExpressionList(set));
 			subList.add(assign);
 		}
 		{
@@ -976,6 +990,35 @@ public class RulesTransformation extends DepthFirstAdapter {
 				new ATotalFunctionExpression(new APowSubsetExpression(createIdentifier("T")), createIdentifier("T")));
 		try {
 			definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new AssertionError(e);
+		}
+	}
+
+	private void addForceDefinition() {
+		final String FORCE = "FORCE";
+		if (definitions.containsDefinition(FORCE)) {
+			return;
+		}
+		// TO_STRING(S) == "0";
+		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		AExpressionDefinitionDefinition forceDef = new AExpressionDefinitionDefinition();
+		forceDef.setName(new TIdentifierLiteral(FORCE));
+		forceDef.setParameters(createIdentifierList("X"));
+		forceDef.setRhs(createIdentifier("X"));
+		try {
+			definitions.addDefinition(forceDef, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new AssertionError(e);
+		}
+
+		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
+		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + FORCE));
+		forceDefType.setParameters(createIdentifierList("T"));
+		forceDefType.setRhs(
+				new ATotalFunctionExpression(createIdentifier("T"), createIdentifier("T")));
+		try {
+			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
 			throw new AssertionError(e);
 		}

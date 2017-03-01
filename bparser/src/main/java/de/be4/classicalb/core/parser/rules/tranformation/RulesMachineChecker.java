@@ -409,7 +409,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.removeScope();
 	}
 
-	public void inAOperatorExpression(AOperatorExpression node) {
+	public void caseAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
 		final LinkedList<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
@@ -425,6 +425,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 									+ ") does not match the number of placeholders (" + count + ") in the string.",
 							node));
 				}
+			}
+			LinkedList<PExpression> identifiers = node.getIdentifiers();
+			for (PExpression pExpression : identifiers) {
+				pExpression.apply(this);
 			}
 			return;
 		}
