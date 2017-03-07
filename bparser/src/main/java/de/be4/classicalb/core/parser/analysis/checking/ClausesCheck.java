@@ -17,6 +17,9 @@ import de.be4.classicalb.core.parser.util.Utils;
  * Which clauses are valid for an abstract machine? Is a PROPERTIES clause
  * present, if a CONSTANTS clause is used?
  * 
+ * All violations of checks are collected in <code>exceptions</code> and can be
+ * retrieved by {@link #getCheckExceptions()}.
+ * 
  * @author Fabian
  * 
  */
@@ -59,8 +62,6 @@ public class ClausesCheck implements SemanticCheck {
 	 * present.</li>
 	 * </ul>
 	 * 
-	 * @throws CheckException
-	 *             the exception if a check fails
 	 */
 	public void runChecks(final Start rootNode) {
 		// only need to check complete machines
@@ -198,7 +199,7 @@ public class ClausesCheck implements SemanticCheck {
 		if (wrongClauses.size() > 0) {
 			final Set<Node> nodes = new HashSet<Node>();
 
-			for (final Iterator<Set<Node>> iterator = wrongClauses.iterator(); iterator.hasNext();) {
+			for (final Iterator< Set<Node>>iterator = wrongClauses.iterator(); iterator.hasNext();) {
 				final Set<Node> nodeSet = iterator.next();
 				nodes.addAll(nodeSet);
 			}
@@ -213,7 +214,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * @throws CheckException
 	 */
 	private void checkDoubleClauses() {
-		for (final Iterator<Set<Node>> iterator = clauses.values().iterator(); iterator.hasNext();) {
+		for (final Iterator< Set<Node>>iterator = clauses.values().iterator(); iterator.hasNext();) {
 			final Set<Node> nodesforClause = iterator.next();
 
 			if (nodesforClause.size() > 1) {

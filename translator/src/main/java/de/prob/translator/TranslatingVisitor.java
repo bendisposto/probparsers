@@ -45,8 +45,7 @@ public class TranslatingVisitor extends DepthFirstAdapter {
 
 	public void setResult(BObject result) {
 		if (this.result != null) {
-			throw new IllegalStateException(
-					"Trying to overwrite an intermediate result before reading it.");
+			throw new IllegalStateException("Trying to overwrite an intermediate result before reading it.");
 		}
 		this.result = result;
 	}
@@ -116,21 +115,16 @@ public class TranslatingVisitor extends DepthFirstAdapter {
 	public void caseARecEntry(ARecEntry node) {
 		Atom key = null;
 		BObject value = null;
-		if (node.getIdentifier() != null) {
-			node.getIdentifier().apply(this);
-			key = (Atom) this.getResult();
-		}
+		node.getIdentifier().apply(this);
+		key = (Atom) this.getResult();
 
-		if (node.getValue() != null) {
-			node.getValue().apply(this);
-			value = this.getResult();
-		}
+		node.getValue().apply(this);
+		value = this.getResult();
 		this.setResult(new RecordEntry(key, value));
 	}
 
 	@Override
-	public void caseASequenceExtensionExpression(
-			ASequenceExtensionExpression node) {
+	public void caseASequenceExtensionExpression(ASequenceExtensionExpression node) {
 		List<BObject> s = new ArrayList<BObject>();
 		for (PExpression e : node.getExpression()) {
 			e.apply(this);

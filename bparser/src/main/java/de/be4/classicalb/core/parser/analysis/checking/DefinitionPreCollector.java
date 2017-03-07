@@ -34,9 +34,10 @@ public class DefinitionPreCollector extends DepthFirstAdapter {
 
 	/**
 	 * Returns the result of this DFS visitor, i.e. a mapping "definition
-	 * identifer" -&gt; "rhs of definition"
+	 * identifier" -&gt; "rhs of definition"
 	 * 
 	 * @return
+	 * 		a mapping "definition identifier" to "right hand side of definition"
 	 */
 	public Map<Token, Token> getDefinitions() {
 		return definitions;

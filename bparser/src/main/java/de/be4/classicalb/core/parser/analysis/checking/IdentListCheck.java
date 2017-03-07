@@ -78,10 +78,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 * </p>
 	 * 
 	 * @param rootNode
-	 * @throws CheckException
-	 *             : Erroneous {@link AAssignSubstitution} and
-	 *             {@link AOperationCallSubstitution} nodes are collected in one
-	 *             exception and all other nodes in another one.
+	 *            the start node of the AST
 	 */
 	public void runChecks(final Start rootNode) {
 		nonIdentifiers.clear();
@@ -206,7 +203,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
+		for (final Iterator< PExpression>iterator = identifiers.iterator(); iterator.hasNext();) {
 			final PExpression expression = iterator.next();
 
 			if (!(isIdentifierExpression(expression))) {
@@ -234,7 +231,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		}
 
 		private void checkList(final List<PExpression> list) {
-			for (final Iterator<PExpression> iterator = list.iterator(); iterator.hasNext();) {
+			for (final Iterator< PExpression>iterator = list.iterator(); iterator.hasNext();) {
 				final PExpression expression = iterator.next();
 
 				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression)) {

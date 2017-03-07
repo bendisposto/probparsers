@@ -52,11 +52,11 @@ public final class PrologExceptionPrinter {
 	static public void printException(final OutputStream out, final BCompoundException e, boolean useIndentation,
 			boolean lineOneOff) {
 		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
-		if (e.getExceptions().size() > 1) {
+		if (e.getBExceptions().size() > 1) {
 			pto.openTerm("compound_exception", true);
 			pto.openList();
 			BCompoundException comp = (BCompoundException) e;
-			for (Exception ex : comp.getExceptions()) {
+			for (Exception ex : comp.getBExceptions()) {
 				try {
 					printBException(out, pto, (BException) ex, useIndentation, lineOneOff);
 				} catch (ClassCastException e2) {
@@ -70,9 +70,9 @@ public final class PrologExceptionPrinter {
 			pto.fullstop();
 			pto.flush();
 			return;
-		} else if (e.getExceptions().size() == 1) {
+		} else if (e.getBExceptions().size() == 1) {
 			// single BException
-			printBException(out, pto, e.getExceptions().get(0), useIndentation, lineOneOff);
+			printBException(out, pto, e.getBExceptions().get(0), useIndentation, lineOneOff);
 			pto.fullstop();
 			pto.flush();
 		} else {

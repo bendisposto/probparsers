@@ -217,14 +217,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAAssignSubstitution(AAssignSubstitution node) {
 		LinkedList<PExpression> lhs = node.getLhsExpression();
 		commaSeparatedExpressionList(lhs);
-		sb.append(":=");
+		sb.append(" := ");
 		LinkedList<PExpression> rhs = node.getRhsExpressions();
 		commaSeparatedExpressionList(rhs);
 	}
 
 	@Override
 	public void caseASkipSubstitution(ASkipSubstitution node) {
-		sb.append(" skip ");
+		sb.append("skip");
 	}
 
 	@Override
@@ -238,7 +238,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseABecomesSuchSubstitution(ABecomesSuchSubstitution node) {
 		commaSeparatedExpressionList(node.getIdentifiers());
-		sb.append(" : (");
+		sb.append(" :(");
 
 		node.getPredicate().apply(this);
 		sb.append(") ");

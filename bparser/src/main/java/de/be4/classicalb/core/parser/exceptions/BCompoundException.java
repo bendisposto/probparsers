@@ -17,7 +17,7 @@ public class BCompoundException extends Exception {
 		this.exceptions.add(bException);
 	}
 
-	public List<BException> getExceptions() {
+	public List<BException> getBExceptions() {
 		return this.exceptions;
 	}
 

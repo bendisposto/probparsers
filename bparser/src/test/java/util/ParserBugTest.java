@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 
 public class ParserBugTest {
 	String s = "MACHINE ParserDefBug\n DEFINITIONS\n D(y) == f\n "

@@ -1,4 +1,4 @@
-def global_version = '2.8.0'
+def global_version = '2.9.0'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
@@ -63,7 +63,7 @@ configurations.all {
 }
 
 dependencies {
-    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.10')
+    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.11')
     compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
  }
@@ -173,4 +173,30 @@ task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
-task deploy(dependsOn: [subprojects.deploy])
+task copyCoverage(){
+  dependsOn = [subprojects.deploy]
+  copy {
+    from fileTree(dir: 'bparser/build/jacocoHtml')
+    into "build/parser_coverage/bparser"
+  }
+  copy{
+    from fileTree(dir: 'answerparser/build/jacocoHtml')
+    into "build/parser_coverage/answerparser"
+  }
+  copy{
+    from fileTree(dir: 'parserbase/build/jacocoHtml')
+    into "build/parser_coverage/parserbase"
+  }
+  copy{
+    from fileTree(dir: 'translator/build/jacocoHtml')
+    into "build/parser_coverage/translator"
+  }
+  copy{
+    from fileTree(dir: 'prologlib/build/jacocoHtml')
+    into "build/parser_coverage/prologlib"
+  }
+
+}
+
+
+task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])

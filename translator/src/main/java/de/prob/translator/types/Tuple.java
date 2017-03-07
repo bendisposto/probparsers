@@ -10,13 +10,16 @@ public class Tuple implements BObject, List<BObject> {
 	private final List<BObject> elements;
 
 	public Tuple(List<BObject> s) {
-		if (s.size() != 2) {
-			throw new IllegalArgumentException("");
+		if (s == null || s.size() != 2) {
+			throw new IllegalArgumentException();
 		}
 		this.elements = s;
 	}
 
 	public Tuple(BObject first, BObject second) {
+		if (first == null || second == null) {
+			throw new IllegalArgumentException();
+		}
 		List<BObject> s = new ArrayList<BObject>(2);
 		s.add(first);
 		s.add(second);
@@ -72,7 +75,7 @@ public class Tuple implements BObject, List<BObject> {
 	}
 
 	public boolean retainAll(Collection<?> c) {
-		return elements.retainAll(c);
+		throw new UnsupportedOperationException();
 	}
 
 	public void clear() {
@@ -80,18 +83,16 @@ public class Tuple implements BObject, List<BObject> {
 	}
 
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 
 		Tuple bObjects = (Tuple) o;
-
-		if (elements != null ? !elements.equals(bObjects.elements)
-				: bObjects.elements != null)
-			return false;
-
-		return true;
+		// elements is never null
+		return elements.equals(bObjects.elements);
 	}
 
 	public int hashCode() {
@@ -123,15 +124,15 @@ public class Tuple implements BObject, List<BObject> {
 	}
 
 	public ListIterator<BObject> listIterator() {
-		return elements.listIterator();
+		return new ArrayList<BObject>(elements).listIterator();
 	}
 
 	public ListIterator<BObject> listIterator(int index) {
-		return elements.listIterator(index);
+		return new ArrayList<BObject>(elements).listIterator(index);
 	}
 
 	public List<BObject> subList(int fromIndex, int toIndex) {
-		return elements.subList(fromIndex, toIndex);
+		return new ArrayList<BObject>(elements).subList(fromIndex, toIndex);
 	}
 
 	public BObject getFirst() {

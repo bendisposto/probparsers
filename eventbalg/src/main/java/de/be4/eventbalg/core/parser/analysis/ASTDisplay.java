@@ -105,7 +105,7 @@ public class ASTDisplay extends DepthFirstAdapter {
 		}
 	}
 
-	/**
+	/*
 	 * The "extremal paths" of the tree model's subtree starting at path. The
 	 * extremal paths are those paths that a) are non-leaves and b) have only
 	 * leaf children, if any. It suffices to know these to know all non-leaf

@@ -1,0 +1,5 @@
+/*@package packagePragma*/
+/*@import-package packagePragma.subfolder */
+/*@import-package packagePragma.subfolder */
+RULES_MACHINE DuplicatePackageImport
+END

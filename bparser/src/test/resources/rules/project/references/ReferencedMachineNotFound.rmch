@@ -1,0 +1,4 @@
+RULES_MACHINE ReferencedMachineNotFound
+REFERENCES
+  RuleABC
+END

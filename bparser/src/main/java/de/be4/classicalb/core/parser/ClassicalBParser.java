@@ -40,7 +40,7 @@ public class ClassicalBParser implements ProBParserBase {
 		try {
 			ast = BParser.parse(formula);
 		} catch (BCompoundException e) {
-			throw new ProBParseException(e.getExceptions().get(0).getLocalizedMessage());
+			throw new ProBParseException(e.getBExceptions().get(0).getLocalizedMessage());
 		}
 		final ASTProlog prologPrinter = new ASTProlog(pto, null);
 		if (wrap) {

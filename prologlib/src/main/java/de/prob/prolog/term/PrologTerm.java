@@ -70,8 +70,7 @@ public abstract class PrologTerm implements Serializable {
 	@Override
 	public String toString() {
 		StringWriter sWriter = new StringWriter();
-		PrologTermOutput pto = new PrologTermOutput(new PrintWriter(sWriter),
-				false);
+		PrologTermOutput pto = new PrologTermOutput(new PrintWriter(sWriter), false);
 		toTermOutput(pto);
 		return sWriter.toString();
 	}
@@ -88,21 +87,21 @@ public abstract class PrologTerm implements Serializable {
 	 * Gets an argument by its index. Note, that numbering starts with 1
 	 * 
 	 * @param index
-	 * @return
+	 *            the index of the argument
+	 * @return the PrologTerm
 	 */
 	public PrologTerm getArgument(final int index) {
-		if (arguments == null) throw new IndexOutOfBoundsException(
-				"Atom has no arguments");
+		if (arguments == null)
+			throw new IndexOutOfBoundsException("Atom has no arguments");
 		else
 			return arguments[index - 1];
 	}
 
 	public static String atomicString(final PrologTerm term) {
-		if (term.isAtom()) return term.getFunctor();
+		if (term.isAtom())
+			return term.getFunctor();
 		else
-			throw new IllegalArgumentException(
-					"Expected an atomic prolog term, but was "
-							+ term.toString());
+			throw new IllegalArgumentException("Expected an atomic prolog term, but was " + term.toString());
 	}
 
 	public static List<String> atomicStrings(final Iterable<PrologTerm> terms) {

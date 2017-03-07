@@ -63,11 +63,14 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * machines, like in SEES, INCLUDES, etc.
 	 * 
 	 * @param machineFile
-	 * 
+	 *            the file of the parsed B machine. The file will be mainly used
+	 *            to report helpful error messages including source code
+	 *            positions.
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
 	 * @param isMachineNameMustMatchFileName
+	 *            indicates if the corresponding check will be performed or not
 	 */
 	public ReferencedMachines(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
 		this.referncesTable = new LinkedHashMap<>();

@@ -1,10 +1,7 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.PushbackReader;
@@ -17,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import de.be4.classicalb.core.parser.analysis.ASTDisplay;
-import de.be4.classicalb.core.parser.analysis.ASTPrinter;
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
@@ -42,6 +37,8 @@ import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
+import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
@@ -61,7 +58,7 @@ public class BParser {
 	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
-	private final ParseOptions parseOptions;
+	private ParseOptions parseOptions;
 
 	private List<String> doneDefFiles = new ArrayList<String>();
 
@@ -143,9 +140,8 @@ public class BParser {
 	 * @return the start AST node
 	 * @throws IOException
 	 *             if the file cannot be read
-	 * @throws BException
-	 *             if the file cannot be parsed
 	 * @throws BCompoundException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
 		contentProvider = new CachingDefinitionFileProvider();
@@ -165,9 +161,8 @@ public class BParser {
 	 * @return the AST node
 	 * @throws IOException
 	 *             if the file cannot be read
-	 * @throws BException
-	 *             if the file cannot be parsed
 	 * @throws BCompoundException
+	 *             if the file cannot be parsed
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
 			throws IOException, BCompoundException {
@@ -175,37 +170,8 @@ public class BParser {
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
-		String content = readFile(machineFile);
+		String content = Utils.readFile(machineFile);
 		return parse(content, verbose, contentProvider);
-	}
-
-	public final String readFile(final File machine) throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(machine));
-
-		final StringBuilder builder = new StringBuilder();
-		final char[] buffer = new char[1024];
-		int read;
-		while ((read = inputStreamReader.read(buffer)) >= 0) {
-			builder.append(String.valueOf(buffer, 0, read));
-		}
-		String content = builder.toString();
-
-		inputStreamReader.close();
-
-		// remove utf-8 byte order mark
-		// replaceAll \uFEFF did not work for some reason
-		// apparently, unix like systems report a single character with the code
-		// below
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 65279) {
-			content = content.substring(1);
-		}
-		// while windows splits it up into three characters with the codes below
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 239 && Character.codePointAt(content, 1) == 187
-				&& Character.codePointAt(content, 2) == 191) {
-			content = content.substring(3);
-		}
-
-		return content.replaceAll("\r\n", "\n");
 	}
 
 	/**
@@ -216,9 +182,8 @@ public class BParser {
 	 * @param input
 	 *            the B machine as input string
 	 * @return AST of the input
-	 * @throws BException
-	 *             if the B machine can not be parsed
 	 * @throws BCompoundException
+	 *             if the B machine can not be parsed
 	 */
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
@@ -286,9 +251,8 @@ public class BParser {
 	 * @param debugOutput
 	 *            print debug information
 	 * @return the AST node
-	 * @throws BException
-	 *             if the B machine cannot be parsed
 	 * @throws BCompoundException
+	 *             if the B machine cannot be parsed
 	 */
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
 		return parse(input, debugOutput, new NoContentProvider());
@@ -306,8 +270,10 @@ public class BParser {
 	 *            referenced files during the parsing process. The content
 	 *            provider is used for referenced definition files for example.
 	 * @return the root node of the AST
-	 * @throws BException
-	 *             The {@link BException} class stores the actual exception as
+	 * @throws BCompoundException
+	 *             The {@link BCompoundException} class stores all
+	 *             {@link BException}s occurred during the parsing process. The
+	 *             {@link BException} class stores the actual exception as
 	 *             delegate and forwards all method calls to it. So it is save
 	 *             for tools to just use this exception if they want to extract
 	 *             an error message. If the tools needs to extract additional
@@ -349,7 +315,6 @@ public class BParser {
 	 *             problem. For example, if we find duplicate machine clauses,
 	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
-	 * @throws BCompoundException
 	 */
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
 			throws BCompoundException {
@@ -387,7 +352,6 @@ public class BParser {
 			 */
 			this.positions = parser.getMapping();
 			this.sourcePositions = new SourcePositions(tokenList, positions);
-
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now
@@ -521,6 +485,10 @@ public class BParser {
 
 	public ParseOptions getOptions() {
 		return parseOptions;
+	}
+
+	public void setParseOptions(ParseOptions options) {
+		this.parseOptions = options;
 	}
 
 	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out,

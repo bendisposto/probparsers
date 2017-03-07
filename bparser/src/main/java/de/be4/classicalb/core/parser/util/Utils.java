@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -132,7 +133,8 @@ public class Utils {
 	
 	
 	public static final String readFile(final File filePath) throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(filePath));
+		final InputStreamReader inputStreamReader
+            = new InputStreamReader(new FileInputStream(filePath), Charset.forName("UTF-8"));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
