@@ -145,6 +145,51 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASetsMachineClause(ASetsMachineClause node) {
+		sb.append("SETS ");
+		List<PSet> list = new ArrayList<PSet>(node.getSetDefinitions());
+		for (int i = 0; i < list.size(); i++) {
+			list.get(i).apply(this);
+			if (i < list.size() - 1) {
+				sb.append("; ");
+			}
+		}
+		sb.append("\n");
+	}
+
+	private void printCommaSeparatedlist(List<? extends Node> list) {
+		for (int i = 0; i < list.size(); i++) {
+			list.get(i).apply(this);
+			if (i < list.size() - 1) {
+				sb.append(", ");
+			}
+		}
+	}
+
+	@Override
+	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+		sb.append("PROPERTIES\n");
+		node.getPredicates().apply(this);
+		sb.append("\n");
+	}
+
+	@Override
+	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
+		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
+		sb.append("ABSTRACT_CONSTANTS ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+
+	@Override
+	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
+		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
+		sb.append("CONSTANTS ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+
+	@Override
 	public void caseAVariablesMachineClause(AVariablesMachineClause node) {
 		sb.append("VARIABLES ");
 		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
@@ -152,6 +197,19 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			copy.get(i).apply(this);
 			if (i < copy.size() - 1) {
 				sb.append(", ");
+			}
+		}
+		sb.append("\n");
+	}
+
+	@Override
+	public void caseAAssertionsMachineClause(AAssertionsMachineClause node) {
+		sb.append("ASSERTIONS\n");
+		List<PPredicate> copy = new ArrayList<PPredicate>(node.getPredicates());
+		for (int i = 0; i < copy.size(); i++) {
+			copy.get(i).apply(this);
+			if (i < copy.size() - 1) {
+				sb.append("; ");
 			}
 		}
 		sb.append("\n");
@@ -861,7 +919,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAConjunctPredicate(final AConjunctPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), "&");
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " & ");
 	}
 
 	@Override

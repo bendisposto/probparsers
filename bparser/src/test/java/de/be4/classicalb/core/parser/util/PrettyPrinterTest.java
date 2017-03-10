@@ -2,6 +2,8 @@ package de.be4.classicalb.core.parser.util;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import util.Helpers;
@@ -15,6 +17,16 @@ public class PrettyPrinterTest {
 		final String result2 = Helpers.getPrettyPrint(result1);
 		System.out.println(result1);
 		assertEquals(result1, result2);
-		
+	}
+
+	@Test
+	public void testPrettyPrint2() throws Exception {
+		final String filePath = "src/test/resources/prettyprinter/PrettyPrinter.mch";
+		final String testMachine = Utils.readFile(new File(filePath));
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+		System.out.println(result1);
+		final String result2 = Helpers.getPrettyPrint(result1);
+		System.out.println(result1);
+		assertEquals(result1, result2);
 	}
 }
