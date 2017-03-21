@@ -31,6 +31,14 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
+	
+	@Test
+	public void testRuleTags() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
 
 	@Test
 	public void testForAllPredicate() throws FileNotFoundException, IOException {

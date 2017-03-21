@@ -77,6 +77,16 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
+	public void testInvalidRuleTag() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS 1 BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,40,'UnknownFile'),'Expected identifier or string after the TAGS attribute.').\n",
+				result);
+	}
+
+	@Test
 	public void testErrorTypeZeroException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(0, \"abc\") END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
