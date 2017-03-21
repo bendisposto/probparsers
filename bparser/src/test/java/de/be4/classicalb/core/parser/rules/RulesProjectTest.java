@@ -173,6 +173,16 @@ public class RulesProjectTest {
 		assertTrue(result.contains("Imported package does not exist"));
 
 	}
+	@Test
+	public void testImportedPackageDoesNotExist2() {
+		String result = getRulesMachineAsPrologTerm(
+				"src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist2.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception(pos(3,19,"));
+		assertTrue(result.contains("Imported package does not exist"));
+
+	}
+	
 
 	@Test
 	public void testDuplicatePackageImport() {

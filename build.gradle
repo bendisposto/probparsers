@@ -1,4 +1,4 @@
-def global_version = '2.9.0'
+def global_version = '2.9.1'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
@@ -63,7 +63,7 @@ configurations.all {
 }
 
 dependencies {
-    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.11')
+    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
     compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
  }

@@ -106,7 +106,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 		final File pathFile = getFileStartingAtRootDirectory(packageArray);
 		final String path = pathFile.getAbsolutePath();
 		if (!pathFile.exists()) {
-			errorList.add(new CheckException(String.format("Imported package does not exist: %s", path), node));
+			errorList.add(new CheckException(String.format("Imported package does not exist: %s", path), node.getPackage()));
 			return;
 		}
 		if (this.pathList.contains(path)) {

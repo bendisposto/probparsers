@@ -11,6 +11,8 @@ import de.be4.classicalb.core.preparser.node.TComment;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
+import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
+import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
@@ -24,7 +26,7 @@ public class PreLexer extends Lexer {
 	private int otherNestingLevel = 0;
 	private int parenNestingLevel = 0;
 
-	private State stateBeforeComment;
+	private State previousState;
 
 	public PreLexer(final PushbackReader in) {
 		super(in);
@@ -33,6 +35,7 @@ public class PreLexer extends Lexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
 		checkComment();
+		checkMultiLineString();
 
 		if (token != null) {
 			collectRhs();
@@ -42,7 +45,7 @@ public class PreLexer extends Lexer {
 
 	private void collectRhs() throws LexerException, IOException {
 		if (state.equals(State.DEFINITIONS_RHS)
-				|| (stateBeforeComment != null && stateBeforeComment.equals(State.DEFINITIONS_RHS))) {
+				|| (previousState != null && previousState.equals(State.DEFINITIONS_RHS))) {
 			if (rhsToken == null) {
 				// starting a new definition rhs
 				rhsToken = new TRhsBody("", -1, -1);
@@ -130,11 +133,22 @@ public class PreLexer extends Lexer {
 
 	private void checkComment() {
 		if (token instanceof TComment) {
-			stateBeforeComment = state;
+			previousState = state;
 			state = State.COMMENT;
 		} else if (token instanceof TCommentEnd) {
-			state = stateBeforeComment;
-			stateBeforeComment = null;
+			state = previousState;
+			previousState = null;
 		}
 	}
+	
+	private void checkMultiLineString() {
+		if (token instanceof TMultilineStringStart) {
+			previousState = state;
+			state = State.MULTILINE_STRING_STATE;
+		} else if (token instanceof TMultilineStringEnd) {
+			state = previousState;
+			previousState = null;
+		}
+	}
+	
 }

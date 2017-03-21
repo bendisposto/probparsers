@@ -339,7 +339,7 @@ public class BParser {
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
-			parser = new Parser(lexer);
+			parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
 

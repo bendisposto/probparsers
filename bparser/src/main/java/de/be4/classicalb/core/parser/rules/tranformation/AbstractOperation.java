@@ -21,6 +21,7 @@ public abstract class AbstractOperation {
 	private final List<RulesMachineReference> machineReferences;
 	private final List<AIdentifierExpression> dependsOnRuleList = new ArrayList<>();
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
+	private final List<String> tags = new ArrayList<>();
 	private PPredicate activationPredicate;
 	private Set<AbstractOperation> transitiveDependencies;
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
@@ -68,6 +69,14 @@ public abstract class AbstractOperation {
 
 	public String getName() {
 		return this.name.getText();
+	}
+
+	public void addTags(List<String> list) {
+		this.tags.addAll(list);
+	}
+
+	public List<String> getTags() {
+		return this.tags;
 	}
 
 	public TIdentifierLiteral getNameLiteral() {

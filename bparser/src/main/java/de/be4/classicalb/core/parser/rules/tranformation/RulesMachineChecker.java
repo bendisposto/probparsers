@@ -322,6 +322,24 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					}
 					break;
 				}
+				case RulesGrammar.TAGS: {
+					final List<String> tags = new ArrayList<>();
+					for (PExpression pExpression : arguments) {
+						if (pExpression instanceof AIdentifierExpression) {
+							final AIdentifierExpression ident = (AIdentifierExpression) pExpression;
+							final String identifierAsString = Utils.getIdentifierAsString(ident.getIdentifier());
+							tags.add(identifierAsString);
+						} else if (pExpression instanceof AStringExpression) {
+							final AStringExpression stringExpr = (AStringExpression) pExpression;
+							tags.add(stringExpr.getContent().getText());
+						} else {
+							errorList.add(new CheckException("Expected identifier or string after the TAGS attribute.",
+									pOperationAttribute));
+						}
+					}
+					currentOperation.addTags(tags);
+					break;
+				}
 				default:
 					throw new AssertionError("Unexpected operation attribute: " + name);
 				}

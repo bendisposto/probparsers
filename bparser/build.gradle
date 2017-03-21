@@ -79,17 +79,8 @@ jar {
  include '**/*.java'
 }
 
-
-task patches << {
-	ant.patch(patchfile: 'patches/parserPerformance.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true' )
-	ant.patch(patchfile: 'patches/parserSlurp.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/parser/Parser.java', failonerror:'true'  )
-	ant.patch(patchfile: 'patches/deprecationpromotes.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/node/APromotesMachineClause.java', failonerror:'true'  )
-	ant.patch(patchfile: 'patches/fix_deprecation_DFA.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/analysis/DepthFirstAdapter.java', failonerror:'true'  )
-	ant.patch(patchfile: 'patches/fix_deprecation_RDFA.patch', originalfile: 'build/temp/de/be4/classicalb/core/parser/analysis/ReversedDepthFirstAdapter.java', failonerror:'true'  )
-}
-
 compileJava {
- dependsOn = ['createBuildConstants','genPreparser','genBParser', 'patches',':prologlib:deploy',':parserbase:deploy']
+ dependsOn = ['createBuildConstants','genPreparser','genBParser',':prologlib:deploy',':parserbase:deploy']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")

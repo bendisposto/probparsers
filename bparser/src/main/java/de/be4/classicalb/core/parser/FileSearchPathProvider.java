@@ -40,7 +40,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 		String home = System.getProperty("prob.home");
 
 		if (stdlib != null) {
-			Collections.addAll(result, stdlib.split(":"));
+			Collections.addAll(result, stdlib.split(File.pathSeparator));
 		}
 		if (home != null) {
 			home = home + File.separator + "stdlib";

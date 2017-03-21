@@ -98,7 +98,7 @@ public class BMachine implements IModel {
 			AIdentifierExpression idExpr = new AIdentifierExpression(idList);
 			opList.add(idExpr);
 		}
-		promotes.setMachineNames(opList);
+		promotes.setOperationNames(opList);
 		this.parseUnit.getMachineClauses().add(promotes);
 
 	}

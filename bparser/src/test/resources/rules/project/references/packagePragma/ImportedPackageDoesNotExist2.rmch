@@ -1,0 +1,5 @@
+/*@package packagePragma*/
+/*@import-package packagePragma.subfolder*/
+/*@import-package packagePragma.foo*/
+RULES_MACHINE ImportedPackageDoesNotExist2
+END
