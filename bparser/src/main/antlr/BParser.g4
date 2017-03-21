@@ -13,16 +13,28 @@ start
   ;
 
 parse_unit
-  : machine_x                                                                                               # MachineParserUnit
-  | FORMULA_KEYWORD formula                                                                                 # FormulaParseUnit
-  | EXPRESSION_KEYWORD expression                                                                           # ExpressionParseUnit
-  | PREDICATE_KEYWORD predicate                                                                             # PredicateParseUnit
-  | SUBSTITUTION_KEYWORD substitution                                                                       # SubstitutionParseUnit
+  : machine_x                           # MachineParserUnit
+  | FORMULA_KEYWORD formula             # FormulaParseUnit
+  | EXPRESSION_KEYWORD expression       # ExpressionParseUnit
+  | PREDICATE_KEYWORD predicate         # PredicateParseUnit
+  | SUBSTITUTION_KEYWORD substitution   # SubstitutionParseUnit
+  | OPPATTERN_KEYWORD operation_pattern  # OpPatternParseUnit
   ;
+
+operation_pattern
+  : name=composed_identifier
+    ('(' parameter_list+=op_pattern_param (COMMA parameter_list+=op_pattern_param)* ')')? # OpPattern
+  ;
+
+op_pattern_param
+  : expression_in_par # OpPatternExpression
+  | UNDERSCORE        # OpPatternUnderscore
+  ;
+
 
 machine_x
     : variant=(MACHINE|MODEL|SYSTEM|RULES_MACHINE) machine_header (clauses+=machine_clauses)* 'END'       # Machine
-    | REFINEMENT Identifier machine_header REFINES Identifier (clauses+=machine_clauses)* 'END'           # Refinement
+    | REFINEMENT machine_header REFINES Identifier (clauses+=machine_clauses)* 'END'                      # Refinement
     | IMPLEMENTATION Identifier machine_header REFINES Identifier (clauses+=machine_clauses)* 'END'       # Implementation
     ;
 
@@ -31,10 +43,10 @@ machine_header
   ;
 
 machine_clauses
-  : DEFINITIONS defs+=definition (';' defs+=definition)* ';'?     # DefinitionClause
+  : DEFINITIONS defs+=definition (SEMICOLON defs+=definition)* SEMICOLON?   # DefinitionClause
   | name=(CONSTRAINTS|PROPERTIES|INVARIANT) pred=predicate        # PredicateClause
-  | name=(INCLUDES|EXTENDS|IMPORTS)
-      (instances+=machine_instantiation)+                         # InstanceClause
+  | name=(INCLUDES|EXTENDS|IMPORTS) instances+=machine_instantiation
+      (COMMA instances+=machine_instantiation)*               # InstanceClause
   | name=(SEES|USES|PROMOTES)
       composed_identifier_list                                    # ReferenceClause
   | name=(CONSTANTS|ABSTRACT_CONSTANTS|CONCRETE_CONSTANTS|
@@ -42,9 +54,9 @@ machine_clauses
           identifier_list                                         # DeclarationClause
   | INITIALISATION substitution                                   # InitialisationClause
   | name=('OPERATIONS'|'LOCAL_OPERATIONS')
-      ops+=operation (';' ops+=operation)*                        # OperationsClause
-  | VALUES values+=value_entry (';' values+=value_entry)*         # ValuesClause
-  | ASSERTIONS preds+=predicate (';' pred+=predicate)*            # AssertionClause
+      ops+=operation (SEMICOLON ops+=operation)*                  # OperationsClause
+  | VALUES values+=value_entry (SEMICOLON values+=value_entry)*   # ValuesClause
+  | ASSERTIONS preds+=predicate (SEMICOLON pred+=predicate)*      # AssertionClause
   | SETS set_definition (SEMICOLON set_definition)*               # SetsClause
   ;
 
@@ -105,7 +117,7 @@ substitution
   | ANY identifier_list WHERE predicate THEN substitution END                           #AnySubstitution
   | LET identifier_list BE predicate IN substitution END                                #LetSubstitution
   | identifier_list DOUBLE_COLON expression                                             #BecomesElementOfSubstitution
-  | identifier_list ELEMENT_OF LEFT_PAR predicate RIGHT_PAR                             #BecomesSuchThatSubstitution
+  | identifier_list (ELEMENT_OF|COLON) LEFT_PAR predicate RIGHT_PAR                     #BecomesSuchThatSubstitution
   | VAR identifier_list IN substitution END                                             #VarSubstitution
   | IF pred=predicate THEN thenSub=substitution
       (ELSIF elsifPred+=predicate THEN elsifSub+=substitution)*
@@ -116,7 +128,7 @@ substitution
       (',' identifier_or_function_or_record)*
       ':=' expression_list                                                              #AssignSubstitution
   | composed_identifier ('(' expression_list ')')?                                      #SubstitutionIdentifierCall
-  | identifier_list OUTPUT_PRAMETERS composed_identifier ('(' expression_list ')')?     #SubstitutionOperationCall
+  | output=identifier_list OUTPUT_PRAMETERS composed_identifier ('(' expression_list ')')?     #SubstitutionOperationCall
   | left=substitution operator=(SEMICOLON | DOUBLE_VERTICAL_BAR) right=substitution     #SubstitutionCompositionOrParallel //P20
   | substitution_extension_point                                                        #SubstitutionExtensionPoint
   ;
@@ -147,24 +159,25 @@ predicate_p40
 
 predicate_atomic
   : '(' predicate ')'                                                                     # PredicateParenthesis
+  | keyword=(BTRUE|BFALSE)                                                                # PredicateKeyword
   | composed_identifier ('(' arguments+=expression (',' arguments+=expression)* ')')?     # PredicateIdentifierCall
-
   | 'IF' conditionPred=predicate 'THEN' thenPred=predicate
       'ELSE' elsePred=predicate 'END'                                                     # PredicateIf
   | NOT '(' predicate ')'                                                                 # PredicateNot
   | operator=(FOR_ANY|EXITS) quantified_variables_list
-      DOT LEFT_PAR predicate RIGHT_PAR                                    # QuantifiedPredicate
+      DOT LEFT_PAR predicate RIGHT_PAR                                                    # QuantifiedPredicate
   | left=expression
       predicate_expression_operator
-    right=expression                                                      # PredicateBinExpression
+    right=expression                                                                      # PredicateBinExpression
   | left=predicate_atomic operator=EQUIVALENCE right=predicate_atomic                     # PredicateBinPredicateOperator //p60
-  | LEFT_BRACKET identifier_list ASSIGN expression_list RIGHT_BRACKET predicate_atomic          # WeakestPreconditionPredicate
+  | LEFT_BRACKET identifier_list ASSIGN expression_list RIGHT_BRACKET predicate_atomic    # WeakestPreconditionPredicate
   ;
 
 predicate_expression_operator
   : operator=
   ( EQUAL
   | ELEMENT_OF
+  | COLON
   | INCLUSION
   | STRICT_INCLUSION
   | NON_INCLUSION
@@ -187,20 +200,26 @@ expression_in_par
 
 expression
   : Number                                                                  # Number
+  | value=(TRUE|FALSE)                                                      # BooleanValue
+  | STRING_LITERAL                                                          # String
   | LEFT_PAR expression_in_par RIGHT_PAR                                    # Parenthesis
-  | LEFT_PAR expression_in_par (MAPLET expression_in_par)+ RIGHT_PAR        # Tuple
+  | LEFT_PAR expression_in_par (COMMA expression_in_par)+ RIGHT_PAR         # Tuple
   | LEFT_BRACE expression_list RIGHT_BRACE                                  # SetEnumeration
   | LEFT_BRACE RIGHT_BRACE                                                  # EmptySet
   | LESS GREATER                                                            # EmptySequence
   | LEFT_BRACKET RIGHT_BRACKET                                              # EmptySequence
+  | operator=(REC|STRUCT) LEFT_PAR entries+=rec_entry
+      (COMMA entries+=rec_entry)* RIGHT_PAR                                 # Record
   | composed_identifier DOLLAR_ZERO                                         # PrimedIdentifierExpression
   | composed_identifier                                                     # ExpressionIdentifier
-  | expression_prefix_operator '(' expr=expression ')'                      # ExpressionPrefixOperator
+  | expression_prefix_operator '(' expr=expression_in_par ')'               # ExpressionPrefixOperator
   | expression_keyword                                                      # ExpressionKeyword
   | LAMBDA quantified_variables_list
-      DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR                   # LambdaExpression
-  | operator=(GENERALIZED_UNION|GENERALIZED_INTER) LEFT_PAR identifier_list
-      RIGHT_PAR DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR         # QuantifiedExpression
+      DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # LambdaExpression
+  | operator=(QUANTIFIED_UNION|QUANTIFIED_INTER|SIGMA|PI)  quantified_variables_list
+      DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # QuantifiedExpression
+  | QUANTIFIED_SET quantified_variables_list DOT LEFT_PAR predicate RIGHT_PAR          # QuantifiedSet
+  | '{' identifier_list  VERTICAL_BAR predicate '}'                         #SetComprehension
 
   // operators with precedences
   | left=expression LEFT_BRACKET right=expression_in_par RIGHT_BRACKET                  # ImageExpression
@@ -209,11 +228,15 @@ expression
       (',' arguments+=expression_in_par)* ')'                                           # ExpressionFunctionCall //?
   | MINUS expression                                                                    # UnaryMinus  //P210
   | <assoc=right> left=expression operator=POWER_OF right=expression                    # BinOperator //p200
-  | left=expression operator=(MULT|DIVIDE) right=expression                             # BinOperator //p190
+  | left=expression operator=(MULT|DIVIDE|MOD) right=expression                         # BinOperator //p190
   | left=expression operator=(PLUS|MINUS) right=expression                              # BinOperator //p180
   | left=expression operator=INTERVAL right=expression                                  # BinOperator //p170
   | left=expression expressionOperatorP160 right=expression                             # BinOperatorP160 //p160
   | left=expression expression_bin_operator_p125 right=expression                       # ExpressionBinOperatorP125 //p125
+  ;
+
+rec_entry
+  : identifier COLON expression_in_par
   ;
 
 expression_bin_operator_p125
@@ -232,7 +255,9 @@ expression_bin_operator_p125
 
 expression_prefix_operator
   : operator=(
-    BTREE
+    GENERALIZED_UNION
+  | GENERALIZED_INTER
+  | BTREE
   | CARD
   | CLOSURE
   | CLOSURE1

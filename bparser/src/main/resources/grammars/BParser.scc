@@ -1034,7 +1034,7 @@ identifier_expression {-> expression} =
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]} ;
 
 
-/* Patterns for opertions */
+/* Patterns for operations, e.g. used in LTL formulas */
 operation_pattern {-> parse_unit }=
   [op_name]:composed_identifier [parameters]:op_pattern_params? {-> New parse_unit.oppattern([op_name.identifier_literal], [parameters.argpattern])} ;
 

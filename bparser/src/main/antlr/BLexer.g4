@@ -111,8 +111,6 @@ COMMA: ',';
 REC: 'rec';
 STRUCT: 'struct';
 
-
-
 //predicate prefix operators
 NOT: 'not' | '\u00ac';
 BOOl_CAST: 'bool';
@@ -122,22 +120,22 @@ AND: '&';
 OR: 'or';
 
 //expression_p125
-SET_RELATION: '<->' | '\u2194';
-PARTIAL_FUNCTION: '+->';
-TOTAL_FUNCTION: '-->';
-TOTAL_INJECTION: '>->';
-PARTIAL_INJECTION: '>+>';
-TOTAL_SURJECTION: '-->>';
-PARTIAL_SURJECTION: '+->>';
-TOTAL_BIJECTION: '>->>';
-PARTIAL_BIJECTION: '>+>>';
+SET_RELATION: '<->' | '↔';//'\u2194';
+PARTIAL_FUNCTION: '+->'| '⇸';//'\u21f8';
+TOTAL_FUNCTION: '-->' | '→'; //'\u2192';
+TOTAL_INJECTION: '>->' | '↣'; //'\u21a3';
+PARTIAL_INJECTION: '>+>' | '⤔'; //'\u2914';
+TOTAL_SURJECTION: '-->>' | '↠'; //'\u21a0';
+PARTIAL_SURJECTION: '+->>' | '⤀'; //'\u2900';
+TOTAL_BIJECTION: '>->>' | '⤖'; //'\u2916';
+PARTIAL_BIJECTION: '>+>>' ;
 
 // Extensions
 TOTAL_RELATION: '<<->';
 
 // expression infix operators P160
 OVERWRITE_RELATION: '<+';
-DIRECT_PRODUCT: '<>'| '\u2297';//?
+DIRECT_PRODUCT: '><'| '⊗' ; //'\u2297'; ?
 CONCAT: '^';
 DOMAIN_RESTRICTION: '<|';
 DOMAIN_SUBSTRACTION: '<<|';
@@ -145,8 +143,6 @@ RANGE_RESTRICTION:  '|>';
 RANGE_SUBSTRATION:  '|>>';
 INSERT_FRONT: '->'| '\u21fe';
 INSERT_TAIL:  '<-' | '\u21fd';
-GENERALIZED_UNION: 'UNION' | '\u22c3';
-GENERALIZED_INTER: 'inter';
 
 INTERSECTION: '/\\' | '\u2229';
 RESTRICT_FRONT: '/|\\' | '\u2191';
@@ -156,6 +152,8 @@ UNION: '\\/' | '\u222a';
 
 
 DOLLAR_ZERO: '$0';
+
+UNDERSCORE: '_';
 
 //expression infix operators
 
@@ -169,7 +167,8 @@ INTERVAL: '..' | '\u2025';
 // predicate infix opertors
 EQUAL: '=' | '\u003d';
 NOT_EQUAL: '/=' | '\u2260';
-ELEMENT_OF: ':' | '\u2208';
+COLON: ':' ;
+ELEMENT_OF: '\u2208';
 INCLUSION: '<:' | '\u2286';
 STRICT_INCLUSION: '<<:' | '\u2282';
 NON_INCLUSION: '/<:' | '\u2288';
@@ -180,8 +179,18 @@ LESS_EQUAL: LESS EQUAL | '\u2264';
 GREATER: '>' | '\u003e';
 GREATER_EQUAL: GREATER EQUAL | '\u2265';
 
+TRUE: 'TRUE';
+FALSE: 'FALSE';
+
+BTRUE: 'btrue';
+BFALSE: 'bfalse';
+
+
 
 // expression prefix operators with one parameter
+
+GENERALIZED_UNION: 'union' | '⋃';//'\u22c3';
+GENERALIZED_INTER: 'inter'; //TODO unicode missing
 
 BTREE: 'btree';
 CARD: 'card';
@@ -244,6 +253,16 @@ INTEGER: 'INTEGER' | '\u2124';
 BOOL: 'BOOL';
 PRED: 'pred';
 SUCC: 'succ';
+
+
+//special
+SIGMA: 'SIGMA' | '∑'; //0x2211;
+PI: 'PI' | '∏'; //0x220f;
+QUANTIFIED_UNION: 'UNION';
+QUANTIFIED_INTER: 'INTER';
+QUANTIFIED_SET: 'SET';
+
+STRING_LITERAL: '"' (~["] .*?)? '"';
 // other
 
 
@@ -251,11 +270,13 @@ EXPRESSION_KEYWORD: '#EXPRESSION';
 PREDICATE_KEYWORD: '#PREDICATE';
 SUBSTITUTION_KEYWORD: '#SUBSTITUTION';
 FORMULA_KEYWORD: '#FORMULA';
+OPPATTERN_KEYWORD: '#OPPATTERN';
 
 
 Identifier
   : LETTER (LETTER | DIGIT | '_')*
   ;
+
 
 NOT_REACHABLE: 'NOT_REACHABLE';
 

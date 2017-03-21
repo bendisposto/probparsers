@@ -15,6 +15,9 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 import files.*;
 import files.BParser.Expression_in_parContext;
+import files.BParser.Op_pattern_paramContext;
+import files.BParser.PredicateContext;
+import files.BParser.Rec_entryContext;
 import files.BParser.Set_definitionContext;
 import files.BParser.SubstitutionContext;
 
@@ -55,6 +58,33 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitOpPatternParseUnit(OpPatternParseUnitContext ctx) {
+		return ctx.operation_pattern().accept(this);
+	}
+
+	@Override
+	public Node visitOpPattern(BParser.OpPatternContext ctx) {
+		List<TIdentifierLiteral> list = createTIdentifierListFromComposedIdentifierContext(ctx.composed_identifier());
+		List<PArgpattern> parameters = new ArrayList<>();
+		for (Op_pattern_paramContext pArgpattern : ctx.parameter_list) {
+			PArgpattern param = (PArgpattern) pArgpattern.accept(this);
+			parameters.add(param);
+		}
+		return createPositionedNode(new AOppatternParseUnit(list, parameters), ctx);
+	}
+
+	@Override
+	public Node visitOpPatternExpression(BParser.OpPatternExpressionContext ctx) {
+		PExpression expression = (PExpression) ctx.expression_in_par().accept(this);
+		return createPositionedNode(new ADefArgpattern(expression), ctx);
+	}
+
+	@Override
+	public Node visitOpPatternUnderscore(BParser.OpPatternUnderscoreContext ctx) {
+		return createPositionedNode(new AUndefArgpattern(), ctx);
+	}
+
+	@Override
 	public Node visitFormulaParseUnit(FormulaParseUnitContext ctx) {
 		Node formula = ctx.formula().accept(this);
 		if (formula instanceof PPredicate) {
@@ -88,6 +118,20 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 			throw new RuntimeException("unexpected");
 		}
 		return createPositionedNode(new AAbstractMachineParseUnit(variant, header, list), ctx);
+	}
+
+	@Override
+	public Node visitRefinement(RefinementContext ctx) {
+		final AMachineHeader header = (AMachineHeader) ctx.machine_header().accept(this);
+		final List<PMachineClause> list = new ArrayList<>();
+		final List<Machine_clausesContext> clauses = ctx.clauses;
+		for (Machine_clausesContext clause : clauses) {
+			final PMachineClause clauseNode = (PMachineClause) clause.accept(this);
+			list.add(clauseNode);
+		}
+		final TIdentifierLiteral identifierLiteral = new TIdentifierLiteral(ctx.Identifier().getText(),
+				ctx.Identifier().getSymbol().getLine(), ctx.Identifier().getSymbol().getCharPositionInLine());
+		return createPositionedNode(new ARefinementMachineParseUnit(header, identifierLiteral, list), ctx);
 	}
 
 	@Override
@@ -178,6 +222,16 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		default:
 			throw new RuntimeException("unexpected");
 		}
+	}
+
+	@Override
+	public PMachineClause visitAssertionClause(BParser.AssertionClauseContext ctx) {
+		List<PPredicate> list = new ArrayList<>();
+		for (PredicateContext predicateContext : ctx.preds) {
+			PPredicate pred = (PPredicate) predicateContext.accept(this);
+			list.add(pred);
+		}
+		return createPositionedNode(new AAssertionsMachineClause(list), ctx);
 	}
 
 	@Override
@@ -592,14 +646,19 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		return temp;
 	}
 
-//	@Override
-//	public Node visitWeakestPreconditionPredicate(BParser.WeakestPreconditionPredicateContext ctx) {
-//		List<PExpression> leftList = createPExpressionListFromIdentifierList(ctx.identifier_list());
-//		List<PExpression> rightList = createPExpressionList(ctx.expression_list());
-//		AAssignSubstitution sub = createPositionedNode(new AAssignSubstitution(leftList, rightList), ctx);
-//		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
-//		return new ASubstitutionPredicate(sub, predicate);
-//	}
+	// @Override
+	// public Node
+	// visitWeakestPreconditionPredicate(BParser.WeakestPreconditionPredicateContext
+	// ctx) {
+	// List<PExpression> leftList =
+	// createPExpressionListFromIdentifierList(ctx.identifier_list());
+	// List<PExpression> rightList =
+	// createPExpressionList(ctx.expression_list());
+	// AAssignSubstitution sub = createPositionedNode(new
+	// AAssignSubstitution(leftList, rightList), ctx);
+	// PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
+	// return new ASubstitutionPredicate(sub, predicate);
+	// }
 
 	@Override
 	public Node visitPredicateNot(PredicateNotContext ctx) {
@@ -615,6 +674,18 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public PPredicate visitPredicateBinPredicateOperator(PredicateBinPredicateOperatorContext ctx) {
+		final PPredicate left = (PPredicate) ctx.left.accept(this);
+		final PPredicate right = (PPredicate) ctx.right.accept(this);
+		switch (ctx.operator.getType()) {
+		case EQUIVALENCE:
+			return createPositionedNode(new AEquivalencePredicate(left, right), ctx);
+		default:
+			throw new RuntimeException("unexpected exception: " + ctx.operator.getText());
+		}
+	}
+
+	@Override
 	public Node visitPredicateBinExpression(PredicateBinExpressionContext ctx) {
 		final PExpression left = (PExpression) ctx.left.accept(this);
 		final PExpression right = (PExpression) ctx.right.accept(this);
@@ -622,6 +693,7 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		case EQUAL:
 			return createPositionedNode(new AEqualPredicate(left, right), ctx);
 		case ELEMENT_OF:
+		case COLON:
 			return createPositionedNode(new AMemberPredicate(left, right), ctx);
 		case INCLUSION:
 			return createPositionedNode(new ASubsetPredicate(left, right), ctx);
@@ -644,7 +716,7 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		case GREATER:
 			return createPositionedNode(new AGreaterPredicate(left, right), ctx);
 		default:
-			throw new RuntimeException("unexpected exception:");
+			throw new RuntimeException("unexpected exception: " + ctx.predicate_expression_operator().getText());
 		}
 	}
 
@@ -655,23 +727,37 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		final List<TerminalNode> identifiers = subNode.Identifier();
 		final TerminalNode id = identifiers.get(0);
 		if (identifiers.size() == 1 && definitionsAnalyser.isDefinition(id.getText())) {
-
 			TDefLiteralSubstitution predLiteral = new TDefLiteralSubstitution(id.getText(), id.getSymbol().getLine(),
 					id.getSymbol().getCharPositionInLine());
 			return new ADefinitionSubstitution(predLiteral, argumentList);
 		} else {
-
 			final List<TIdentifierLiteral> list = new ArrayList<>();
 			for (TerminalNode terminalNode : identifiers) {
 				final TIdentifierLiteral tIdentifier = new TIdentifierLiteral(terminalNode.getText(),
 						terminalNode.getSymbol().getLine(), terminalNode.getSymbol().getCharPositionInLine());
 				list.add(tIdentifier);
 			}
-			AOperationCallSubstitution opCall = new AOperationCallSubstitution(new ArrayList<PExpression>(), list,
-					argumentList);
-			return createPositionedNode(opCall, ctx);
+			AIdentifierExpression idExpr = createPositionedNode(new AIdentifierExpression(list), subNode);
+			final AOpSubstitution opSubst = new AOpSubstitution(idExpr, argumentList);
+			return createPositionedNode(opSubst, ctx);
 		}
 
+	}
+
+	@Override
+	public Node visitSubstitutionOperationCall(BParser.SubstitutionOperationCallContext ctx) {
+		final ComposedIdentifierContext subNode = (ComposedIdentifierContext) ctx.composed_identifier();
+		final List<PExpression> argumentList = createPExpressionList(ctx.expression_list());
+		final List<TerminalNode> identifiers = subNode.Identifier();
+		final List<PExpression> output = createPExpressionListFromIdentifierList(ctx.output);
+		final List<TIdentifierLiteral> list = new ArrayList<>();
+		for (TerminalNode terminalNode : identifiers) {
+			final TIdentifierLiteral tIdentifier = new TIdentifierLiteral(terminalNode.getText(),
+					terminalNode.getSymbol().getLine(), terminalNode.getSymbol().getCharPositionInLine());
+			list.add(tIdentifier);
+		}
+		final AOperationCallSubstitution opSubst = new AOperationCallSubstitution(output, list, argumentList);
+		return createPositionedNode(opSubst, ctx);
 	}
 
 	@Override
@@ -905,7 +991,8 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitQuantifiedExpression(BParser.QuantifiedExpressionContext ctx) {
-		List<PExpression> identifierList = createPExpressionListFromIdentifierList(ctx.identifier_list());
+		List<PExpression> identifierList = createPExpressionListFromIdentifierList(
+				ctx.quantified_variables_list().identifier_list());
 		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
 		PExpression expression = (PExpression) ctx.expression_in_par().accept(this);
 		final int type = ctx.operator.getType();
@@ -915,8 +1002,64 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 		case GENERALIZED_INTER:
 			return createPositionedNode(new AQuantifiedIntersectionExpression(identifierList, predicate, expression),
 					ctx);
+		case SIGMA:
+			return createPositionedNode(new AGeneralSumExpression(identifierList, predicate, expression), ctx);
+		case PI:
+			return createPositionedNode(new AGeneralProductExpression(identifierList, predicate, expression), ctx);
 		default:
 			throw new RuntimeException("unexpected");
+		}
+	}
+
+	@Override
+	public Node visitRecord(BParser.RecordContext ctx) {
+		final int type = ctx.operator.getType();
+		final List<PRecEntry> list = new ArrayList<>();
+		for (Rec_entryContext rec_entryContext : ctx.entries) {
+			PRecEntry entry = (PRecEntry) rec_entryContext.accept(this);
+			list.add(entry);
+		}
+		switch (type) {
+		case REC:
+			return createPositionedNode(new ARecExpression(list), ctx);
+		case STRUCT:
+			return createPositionedNode(new AStructExpression(list), ctx);
+		default:
+			throw new RuntimeException("unexpected");
+		}
+	}
+
+	@Override
+	public PRecEntry visitRec_entry(BParser.Rec_entryContext ctx) {
+		PExpression name = (PExpression) ctx.identifier().accept(this);
+		PExpression value = (PExpression) ctx.expression_in_par().accept(this);
+		return createPositionedNode(new ARecEntry(name, value), ctx);
+	}
+
+	@Override
+	public Node visitQuantifiedSet(BParser.QuantifiedSetContext ctx) {
+		List<PExpression> identifierList = createPExpressionListFromIdentifierList(
+				ctx.quantified_variables_list().identifier_list());
+		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
+		return createPositionedNode(new AProverComprehensionSetExpression(identifierList, predicate), ctx);
+	}
+
+	@Override
+	public Node visitSetComprehension(BParser.SetComprehensionContext ctx) {
+		List<PExpression> identifierList = createPExpressionListFromIdentifierList(ctx.identifier_list());
+		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
+		return createPositionedNode(new AComprehensionSetExpression(identifierList, predicate), ctx);
+	}
+
+	@Override
+	public Node visitPredicateKeyword(BParser.PredicateKeywordContext ctx) {
+		switch (ctx.keyword.getType()) {
+		case BTRUE:
+			return createPositionedNode(new ATruthPredicate(), ctx);
+		case BFALSE:
+			return createPositionedNode(new AFalsityPredicate(), ctx);
+		default:
+			throw new RuntimeException("unsupported operator");
 		}
 	}
 
@@ -1022,6 +1165,12 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitUnaryMinus(BParser.UnaryMinusContext ctx) {
+		PExpression expression = (PExpression) ctx.expression().accept(this);
+		return createPositionedNode(new AUnaryMinusExpression(expression), ctx);
+	}
+
+	@Override
 	public Node visitBinOperator(BinOperatorContext ctx) {
 		final String symbolicName = VOCABULARY.getSymbolicName(ctx.operator.getType());
 		final PExpression left = (PExpression) ctx.left.accept(this);
@@ -1039,9 +1188,33 @@ public class SableCCAstBuilder extends BParserBaseVisitor<Node> {
 			return createPositionedNode(new AIntervalExpression(left, right), ctx);
 		case POWER_OF:
 			return createPositionedNode(new APowerOfExpression(left, right), ctx);
+		case MOD:
+			return createPositionedNode(new AModuloExpression(left, right), ctx);
 		default:
 			throw new RuntimeException("unsupported operator:" + symbolicName);
 		}
+	}
+
+	@Override
+	public Node visitBooleanValue(BParser.BooleanValueContext ctx) {
+		final String symbolicName = VOCABULARY.getSymbolicName(ctx.value.getType());
+		switch (ctx.value.getType()) {
+		case TRUE:
+			return createPositionedNode(new ABooleanTrueExpression(), ctx);
+		case FALSE:
+			return createPositionedNode(new ABooleanFalseExpression(), ctx);
+		default:
+			throw new RuntimeException("unsupported operator:" + symbolicName);
+		}
+	}
+
+	@Override
+	public Node visitString(BParser.StringContext ctx) {
+		String string = ctx.STRING_LITERAL().getText();
+		string = string.substring(1, string.length() - 1);
+		final TStringLiteral stringLiteral = new TStringLiteral(string, ctx.getStart().getLine(),
+				ctx.getStart().getCharPositionInLine());
+		return createPositionedNode(new AStringExpression(stringLiteral), ctx);
 	}
 
 	@Override
