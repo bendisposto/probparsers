@@ -183,7 +183,6 @@ public class Definitions extends IDefinitions {
 	public void addDefinition(final PDefinition defNode, final Type type, final String key)
 			throws CheckException, BException {
 		if (this.containsDefinition(key)) {
-
 			final PDefinition defNode2 = this.getDefinition(key);
 			final File file2 = this.getFile(key);
 			StringBuilder sb = new StringBuilder();

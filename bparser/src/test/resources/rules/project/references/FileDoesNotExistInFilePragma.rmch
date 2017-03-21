@@ -1,0 +1,4 @@
+RULES_MACHINE FileDoesNotExistInFilePragma
+REFERENCES
+  Rule1 /*@file "./test1/Foo.rmch" */
+END

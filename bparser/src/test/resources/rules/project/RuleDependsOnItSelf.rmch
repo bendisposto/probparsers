@@ -1,0 +1,10 @@
+RULES_MACHINE RuleDependsOnItSelf
+OPERATIONS
+
+RULE rule1
+DEPENDS_ON_RULE rule1
+BODY
+  skip
+END
+
+END

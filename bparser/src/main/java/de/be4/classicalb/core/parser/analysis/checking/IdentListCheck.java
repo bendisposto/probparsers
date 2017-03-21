@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +57,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private final Set<Node> nonIdentifiers = new HashSet<Node>();
 	private ParseOptions options;
+	private final List<CheckException> exceptions = new ArrayList<>();
 
 	/**
 	 * <p>
@@ -76,12 +78,9 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 * </p>
 	 * 
 	 * @param rootNode
-	 * @throws CheckException
-	 *             : Erroneous {@link AAssignSubstitution} and
-	 *             {@link AOperationCallSubstitution} nodes are collected in one
-	 *             exception and all other nodes in another one.
+	 *            the start node of the AST
 	 */
-	public void runChecks(final Start rootNode) throws CheckException {
+	public void runChecks(final Start rootNode) {
 		nonIdentifiers.clear();
 
 		/*
@@ -93,8 +92,8 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 		final Set<Node> assignErrorNodes = assignCheck.nonIdentifiers;
 		if (assignErrorNodes.size() > 0) {
-			throw new CheckException("Identifier or function expected",
-					assignErrorNodes.toArray(new Node[assignErrorNodes.size()]));
+			exceptions.add(new CheckException("Identifier or function expected",
+					assignErrorNodes.toArray(new Node[assignErrorNodes.size()])));
 		}
 
 		/*
@@ -105,8 +104,8 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 		if (nonIdentifiers.size() > 0) {
 			// at least one error was found
-			throw new CheckException("Identifier expected",
-					nonIdentifiers.toArray(new Node[nonIdentifiers.size()]));
+			exceptions.add(
+					new CheckException("Identifier expected", nonIdentifiers.toArray(new Node[nonIdentifiers.size()])));
 		}
 	}
 
@@ -136,26 +135,22 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	}
 
 	@Override
-	public void inAQuantifiedUnionExpression(
-			final AQuantifiedUnionExpression node) {
+	public void inAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAQuantifiedIntersectionExpression(
-			final AQuantifiedIntersectionExpression node) {
+	public void inAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAComprehensionSetExpression(
-			final AComprehensionSetExpression node) {
+	public void inAComprehensionSetExpression(final AComprehensionSetExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
-	public void inAEventBComprehensionSetExpression(
-			AEventBComprehensionSetExpression node) {
+	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
@@ -173,7 +168,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	public void inAVarSubstitution(final AVarSubstitution node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
-	
+
 	@Override
 	public void inARecordFieldExpression(ARecordFieldExpression node) {
 		PExpression identifier = node.getIdentifier();
@@ -181,7 +176,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 			nonIdentifiers.add(identifier);
 		}
 	}
-	
+
 	@Override
 	public void inARecEntry(ARecEntry node) {
 		PExpression identifier = node.getIdentifier();
@@ -189,7 +184,6 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 			nonIdentifiers.add(identifier);
 		}
 	}
-	
 
 	@Override
 	public void inABecomesSuchSubstitution(final ABecomesSuchSubstitution node) {
@@ -197,8 +191,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	}
 
 	@Override
-	public void inABecomesElementOfSubstitution(
-			final ABecomesElementOfSubstitution node) {
+	public void inABecomesElementOfSubstitution(final ABecomesElementOfSubstitution node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
@@ -210,8 +203,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator
-				.hasNext();) {
+		for (final Iterator< PExpression>iterator = identifiers.iterator(); iterator.hasNext();) {
 			final PExpression expression = iterator.next();
 
 			if (!(isIdentifierExpression(expression))) {
@@ -234,14 +226,12 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		}
 
 		@Override
-		public void inAOperationCallSubstitution(
-				final AOperationCallSubstitution node) {
+		public void inAOperationCallSubstitution(final AOperationCallSubstitution node) {
 			checkList(node.getResultIdentifiers());
 		}
 
 		private void checkList(final List<PExpression> list) {
-			for (final Iterator<PExpression> iterator = list.iterator(); iterator
-					.hasNext();) {
+			for (final Iterator< PExpression>iterator = list.iterator(); iterator.hasNext();) {
 				final PExpression expression = iterator.next();
 
 				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression)) {
@@ -253,5 +243,10 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	public void setOptions(ParseOptions options) {
 		this.options = options;
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+		return this.exceptions;
 	}
 }

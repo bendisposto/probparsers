@@ -19,6 +19,7 @@ public class BLexer extends Lexer {
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
+	private static Map<Character, Character> stringReplacements = new HashMap<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -58,7 +59,16 @@ public class BLexer extends Lexer {
 			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 		}
 
+		// replacements in strings '\' + ..
+		// e.g. '\' + 'n' is replaced by '\n'
+		stringReplacements.put('"', '"');
+		stringReplacements.put('\'', '\'');
+		stringReplacements.put('n', '\n');
+		stringReplacements.put('r', '\r');
+		stringReplacements.put('t', '\t');
+		stringReplacements.put('\\', '\\');
 	}
+
 	private ParseOptions parseOptions = null;
 
 	private Token comment = null;
@@ -126,7 +136,6 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
@@ -144,26 +153,39 @@ public class BLexer extends Lexer {
 			throw new LexerException("#! only allowed in first line of the file");
 		}
 
-		if (token instanceof TStringLiteral) {
+		if (token instanceof TStringLiteral || token instanceof TMultilineStringContent) {
 			// google for howto-unescape-a-java-string-literal-in-java
 			// quickfix: we do nothing just strip off the "
 			String literal = token.getText();
 
-			if (literal.startsWith("'''")) {
-				/// '''foo'''
-				literal = literal.substring(3, literal.length() - 3);
-				// delete all backslashes of escaped quotes e.g. a\'b -> a'b
-				literal = literal.replace("\\'", "'");
-				token.setText(literal);
-			} else {
+			/*
+			 * Note, the text of a TMultilineString token does not start with
+			 * ''' because the ''' are contained in the TMultilineStringStartEnd
+			 * token
+			 */
+			if (literal.startsWith("\"")) {
 				/// "foo"
 				literal = literal.substring(1, literal.length() - 1);
-				// delete all backslashes of escaped quotes e.g. a\"b -> a"b
-				literal = literal.replace("\\\"", "\"");
-				token.setText(literal);
 			}
 
+			boolean backslashFound = false;
+			StringBuffer buffer = new StringBuffer();
+			for (int i = 0; i < literal.length(); i++) {
+				char c = literal.charAt(i);
+				if (backslashFound && stringReplacements.containsKey(c)) {
+					buffer.setLength(buffer.length() - 1);
+					buffer.append(stringReplacements.get(c));
+					backslashFound = false;
+					continue;
+				}
+				if (c == '\\') {
+					backslashFound = true;
+				}
+				buffer.append(c);
+			}
+			token.setText(buffer.toString());
 		}
+
 		if (token instanceof THexLiteral) {
 			final String literal = token.getText().substring(2);
 			int value = Integer.valueOf(literal, 16);

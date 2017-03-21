@@ -21,6 +21,7 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
@@ -60,40 +61,34 @@ public class RecursiveMachineLoader {
 	private final ParsingBehaviour parsingBehaviour;
 
 	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider,
-			ParsingBehaviour parsingBehaviour) throws BException {
+			ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		this.parsingBehaviour = parsingBehaviour;
 		this.rootDirectory = directory == null ? new File(".") : new File(directory);
 
 		if (!rootDirectory.exists()) {
-			throw new BException(null, new IOException("Directory does not exist: " + directory));
+			throw new BCompoundException(
+					new BException(null, new IOException("Directory does not exist: " + directory)));
 		}
 		this.contentProvider = contentProvider;
 	}
 
-	public RecursiveMachineLoader(String path, IDefinitionFileProvider contentProvider) throws BException {
+	public RecursiveMachineLoader(String path, IDefinitionFileProvider contentProvider) throws BCompoundException {
 		this(path, contentProvider, new ParsingBehaviour());
 	}
 
-	/**
-	 * Loads all machines that are (recursively) included (seen,etc) by the
-	 * given main machine
-	 * 
-	 * @param start
-	 *            The main machine
-	 * @throws BException
-	 */
-	public void loadAllMachines(final File startfile, final Start start, final SourcePositions positions,
-			final IDefinitions definitions) throws BException {
-
-		recursivlyLoadMachine(startfile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
+	public void loadAllMachines(final File startFile, final Start start, final SourcePositions positions,
+			final IDefinitions definitions) throws BCompoundException {
+		recursivlyLoadMachine(startFile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
 	}
 
-	private void loadMachine(final List<String> ancestors, final File machineFile) throws BException, IOException {
+	private void loadMachine(final List<String> ancestors, final File machineFile)
+			throws BCompoundException, IOException {
 		if (machineFilesLoaded.contains(machineFile)) {
 			return;
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		final Start tree = parser.parseFile(machineFile, parsingBehaviour.verbose, contentProvider);
+		Start tree;
+		tree = parser.parseFile(machineFile, parsingBehaviour.verbose, contentProvider);
 		recursivlyLoadMachine(machineFile, tree, ancestors, false, parser.getSourcePositions(),
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
@@ -103,12 +98,6 @@ public class RecursiveMachineLoader {
 		printAsProlog(pout);
 	}
 
-	/**
-	 * Prints the machines loaded by
-	 * {@link #loadAllMachines(File,Start,SourcePositions,IDefinitions)}.
-	 * 
-	 * @param pout
-	 */
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
@@ -196,14 +185,18 @@ public class RecursiveMachineLoader {
 
 	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, List<String> ancestors,
 			final boolean isMain, final SourcePositions sourcePositions, File directory, final IDefinitions definitions)
-			throws BException {
+			throws BCompoundException {
 
 		// make a copy of the referencing machines
 		ancestors = new ArrayList<String>(ancestors);
 
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
 				parsingBehaviour.machineNameMustMatchFileName);
-		refMachines.findReferencedMachines();
+		try {
+			refMachines.findReferencedMachines();
+		} catch (BException e) {
+			throw new BCompoundException(e);
+		}
 
 		final String name = refMachines.getName();
 		if (name == null) {
@@ -211,8 +204,8 @@ public class RecursiveMachineLoader {
 			 * the parsed file is a definition file, hence the name of the
 			 * machine is null
 			 */
-			throw new BException(machineFile.getName(),
-					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null);
+			throw new BCompoundException(new BException(machineFile.getName(),
+					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null));
 		}
 
 		machineFilesLoaded.add(machineFile);
@@ -235,7 +228,11 @@ public class RecursiveMachineLoader {
 		positions.put(name, sourcePositions);
 
 		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
-		checkForCycles(ancestors, referencesSet);
+		try {
+			checkForCycles(ancestors, referencesSet);
+		} catch (BException e) {
+			throw new BCompoundException(e);
+		}
 
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
@@ -272,18 +269,12 @@ public class RecursiveMachineLoader {
 			} catch (final BException e) {
 				// throw new BException(machineFile.getName(), e);
 				// we do not longer wrap a B Exception in a B Exception
-				throw e;
-			} catch (final IOException e) {
+				throw new BCompoundException(e);
+			} catch (final IOException | CheckException e) {
 				try {
-					throw new BException(machineFile.getCanonicalPath(), e);
+					throw new BCompoundException(new BException(machineFile.getCanonicalPath(), e));
 				} catch (IOException e1) {
-					throw new BException(machineFile.getAbsolutePath(), e);
-				}
-			} catch (CheckException e) {
-				try {
-					throw new BException(machineFile.getCanonicalPath(), e);
-				} catch (IOException e1) {
-					throw new BException(machineFile.getAbsolutePath(), e);
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 				}
 			}
 		}
@@ -304,7 +295,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void intersect(final Set<String> a, final Set<String> b) {
-		for (final Iterator<String> it = a.iterator(); it.hasNext();) {
+		for (final Iterator< String>it = a.iterator(); it.hasNext();) {
 			final String elem = it.next();
 			if (elem != null && !b.contains(elem)) {
 				it.remove();

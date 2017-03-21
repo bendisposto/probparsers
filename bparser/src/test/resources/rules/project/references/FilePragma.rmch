@@ -1,0 +1,4 @@
+RULES_MACHINE FilePragma
+REFERENCES
+  Rule1 /*@file "./test1/Rule1.rmch" */
+END

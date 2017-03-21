@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
@@ -70,9 +71,8 @@ public class PreParser {
 		this.debugOutput = debugOutput;
 	}
 
-	public void parse() throws PreParseException, IOException, BException {
+	public void parse() throws PreParseException, IOException, BException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
-		preLexer.setParseOptions(parseOptions);
 
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
@@ -103,7 +103,8 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(final List<Token> list) throws PreParseException, BException {
+	private void evaluateDefinitionFiles(final List<Token> list)
+			throws PreParseException, BException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
@@ -150,7 +151,6 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				e.printStackTrace();
 				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
 				// + " used in " + modelFileName
 				);
@@ -233,7 +233,7 @@ public class PreParser {
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
 			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
+			for (Iterator< String>iterator = cycle.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
 				if (iterator.hasNext()) {
 					sb.append(" -> ");
@@ -303,7 +303,7 @@ public class PreParser {
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
 		final LinkedList<Token> list = new LinkedList<Token>();
-		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator.hasNext();) {
+		for (final Iterator< Token>iterator = definitions.keySet().iterator(); iterator.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
 
@@ -459,8 +459,7 @@ public class PreParser {
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
-		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(
-				lexer);
+		final de.be4.classicalb.core.parser.parser.Parser parser = new SabbleCCBParser(lexer);
 		try {
 			return parser.parse();
 		} catch (final IOException e) {

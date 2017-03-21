@@ -9,10 +9,6 @@ import java.util.ListIterator;
 import org.junit.Test;
 
 import de.prob.prolog.output.PrologTermStringOutput;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
 
 public class ListPrologTermTest {
 	@Test(expected = IllegalStateException.class)
@@ -29,16 +25,14 @@ public class ListPrologTermTest {
 
 	@Test
 	public void tailTest2() {
-		ListPrologTerm l = new ListPrologTerm(
-				new PrologTerm[] { new IntegerPrologTerm(42) });
+		ListPrologTerm l = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42) });
 		ListPrologTerm tail = l.tail();
 		assertTrue(tail.isEmpty());
 	}
 
 	@Test
 	public void tailTest3() {
-		ListPrologTerm l = new ListPrologTerm(new PrologTerm[] {
-				new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
+		ListPrologTerm l = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
 		ListPrologTerm tail = l.tail();
 		assertFalse(tail.isEmpty());
 		assertTrue(tail.tail().isEmpty());
@@ -53,10 +47,9 @@ public class ListPrologTermTest {
 
 	@Test
 	public void initTest2() {
-		ListPrologTerm t1 = new ListPrologTerm(new PrologTerm[] {
-				new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
-		ListPrologTerm t2 = new ListPrologTerm(new IntegerPrologTerm(42),
-				new IntegerPrologTerm(5));
+		ListPrologTerm t1 = new ListPrologTerm(
+				new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
+		ListPrologTerm t2 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
 		assertEquals(t1, t2);
 	}
 
@@ -87,8 +80,7 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testToTermOutput() {
-		ListPrologTerm term = new ListPrologTerm(1, 5, new ListPrologTerm(
-				createFixture(10)));
+		ListPrologTerm term = new ListPrologTerm(1, 5, new ListPrologTerm(createFixture(10)));
 		PrologTermStringOutput output = new PrologTermStringOutput();
 		term.toTermOutput(output);
 		assertEquals("['1','2','3','4']", output.toString());
@@ -96,8 +88,7 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testIterator() {
-		ListPrologTerm term = new ListPrologTerm(1, 3, new ListPrologTerm(
-				createFixture(10)));
+		ListPrologTerm term = new ListPrologTerm(1, 3, new ListPrologTerm(createFixture(10)));
 		ListIterator<PrologTerm> i = term.listIterator();
 		assertFalse(i.hasPrevious());
 		assertEquals(-1, i.previousIndex());
@@ -135,7 +126,7 @@ public class ListPrologTermTest {
 		PrologTerm previous = i.previous();
 		assertEquals(previous, next);
 	}
-	
+
 	@Test
 	public void testMultiTail() {
 		ListPrologTerm term = new ListPrologTerm(createFixture(3));
@@ -146,7 +137,7 @@ public class ListPrologTermTest {
 		assertEquals("1", getAsString(h2));
 		assertEquals("2", getAsString(h3));
 	}
-	
+
 	@Test
 	public void testMultiTail2() {
 		ListPrologTerm term = new ListPrologTerm(createFixture(3));
@@ -155,7 +146,13 @@ public class ListPrologTermTest {
 		ListPrologTerm term3 = term2.tail();
 		assertEquals("2", getAsString(term3.head()));
 	}
-	
+
+	@Test
+	public void testLastIndexOf() {
+		ListPrologTerm t1 = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5),
+				new IntegerPrologTerm(5), new IntegerPrologTerm(6) });
+		assertEquals(2, t1.lastIndexOf(new IntegerPrologTerm(5)));
+	}
 
 	private String getAsString(ListPrologTerm l, int pos) {
 		return l.get(pos).getFunctor();

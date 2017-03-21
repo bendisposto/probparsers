@@ -11,20 +11,19 @@ import util.Helpers;
 
 public class SyntaxExtensionTest {
 
-	
 	@Test
 	public void testMultiLineString() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES '''foo''' /= '''bar\nbazz''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("'bar\\nbazz'"));
 	}
-	
+
 	@Test
 	public void testMultiLineStringIncludingSingleQuate() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES '''' ''' = \"b\" END";
 		Helpers.getMachineAsPrologTerm(testMachine);
 	}
-	
+
 	@Test
 	public void testFile() throws IOException, BException {
 		String file = "src/test/resources/strings/MultiLineString.mch";
@@ -32,18 +31,23 @@ public class SyntaxExtensionTest {
 		System.out.println(result);
 		assertTrue(result.contains("'\\n\\'\\na\\n\\'\\'\\'\\n'"));
 	}
-	
+
 	@Test
 	public void testMultiLineStringIncludingTwoSingleQuates() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES ''''' ''' = \"b\" END";
 		Helpers.getMachineAsPrologTerm(testMachine);
 	}
-	
-	
+
+	@Test
+	public void testLocalOperations() throws Exception {
+		final String testMachine = "MACHINE Test LOCAL_OPERATIONS foo = skip END";
+		Helpers.getMachineAsPrologTerm(testMachine);
+	}
+
 	@Test
 	public void testIfThenElseExpression() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES 1= IF 1=1 THEN 1 ELSE 2END END";
-		
+
 		final String result = Helpers.getTreeAsString(testMachine);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[APropertiesMachineClause(AEqualPredicate(AIntegerExpression(1),AIfThenElseExpression(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1))AIntegerExpression(1)AIntegerExpression(2))))]))",

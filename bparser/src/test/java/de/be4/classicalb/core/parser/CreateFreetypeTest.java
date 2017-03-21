@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ABoolSetExpression;
@@ -200,7 +200,7 @@ public class CreateFreetypeTest {
 	}
 
 	@Test
-	public void testFreetypeSyntax() throws IOException, BException {
+	public void testFreetypeSyntax() throws IOException, BCompoundException {
 		final BParser parser = new BParser("FreetypeIntList");
 		final File file = new File("src/test/resources/FreetypeIntList.mch");
 		parser.parseFile(file, false);

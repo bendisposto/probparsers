@@ -12,14 +12,15 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class Helpers {
 
-	public static String getTreeAsString(final String testMachine) throws BException {
+	public static String getTreeAsString(final String testMachine) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
@@ -29,6 +30,14 @@ public class Helpers {
 		final String string = ast2String.toString();
 		// System.out.println(string);
 		return string;
+	}
+
+	public static String getPrettyPrint(final String testMachine) throws BCompoundException {
+		final BParser parser = new BParser("testcase");
+		final Start startNode = parser.parse(testMachine, false);
+		PrettyPrinter pp = new PrettyPrinter();
+		startNode.apply(pp);
+		return pp.getPrettyPrint();
 	}
 
 	public static String parseFile2(String filename) throws IOException {
@@ -54,7 +63,7 @@ public class Helpers {
 			BParser.printASTasProlog(printStream, parser, machineFile, tree, new ParsingBehaviour(),
 					parser.getContentProvider());
 			return output.toString();
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			e.printStackTrace();
 			PrologExceptionPrinter.printException(output, e);
 			return output.toString();
@@ -94,7 +103,7 @@ public class Helpers {
 		return output.toString();
 	}
 
-	public static String getMachineAsPrologTerm(String input) throws BException {
+	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
 		Start start = parser.parse(input, true);
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -136,7 +145,7 @@ public class Helpers {
 		pout.flush();
 	}
 
-	public static void parseFile(final String filename) throws IOException, BException {
+	public static void parseFile(final String filename) throws IOException, BCompoundException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
 			final File machineFile = new File(filename);

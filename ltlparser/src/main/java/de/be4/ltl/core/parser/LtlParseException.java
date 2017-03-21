@@ -9,6 +9,11 @@ public class LtlParseException extends Exception {
 
 	/**
 	 * This constructor is not intended to be referenced by clients.
+	 * 
+	 * @param token
+	 *            the token where the error occurred
+	 * @param msg
+	 *            the error message
 	 */
 	public LtlParseException(final UniversalToken token, final String msg) {
 		super(msg);

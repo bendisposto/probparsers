@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 @RunWith(PolySuite.class)
 public class TwoBinopAssoziativityTests {
@@ -62,7 +62,7 @@ public class TwoBinopAssoziativityTests {
 	}
 
 	@Test
-	public void testAssociativity() throws BException {
+	public void testAssociativity() throws BCompoundException {
 		String s1 = op1.getSymbol();
 		String s2 = op2.getSymbol();
 		final String expr = createTripleExpr(s1, s2);

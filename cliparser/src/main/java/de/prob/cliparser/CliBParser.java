@@ -6,23 +6,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.MockedDefinitions;
-import de.be4.classicalb.core.parser.NoContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.OffsetPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.rules.project.RulesProject;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
@@ -50,6 +52,9 @@ public class CliBParser {
 	private static final String osEncoding = System.getProperty("file.encoding");
 	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"
 			: osEncoding;
+
+	private static Socket socket;
+	private static OutputStream socketOutputStream;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
@@ -128,10 +133,16 @@ public class CliBParser {
 	private static void runPRepl(final ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
 
 		PrintStream out;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, encoding));
+
+		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
+		// write port number as prolog term
+		System.out.println(serverSocket.getLocalPort() + ".");
+		socket = serverSocket.accept();
+		socketOutputStream = socket.getOutputStream();
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
 		String line = "";
-		IDefinitions context = new MockedDefinitions();
-		IFileContentProvider provider = new NoContentProvider();
+		MockedDefinitions context = new MockedDefinitions();
 		boolean terminate = false;
 		while (!terminate) {
 			line = in.readLine();
@@ -154,10 +165,7 @@ public class CliBParser {
 				String name = in.readLine();
 				String type = in.readLine();
 				String parameterCount = in.readLine();
-				if (context instanceof Definitions) {
-					context = new MockedDefinitions();
-				}
-				((MockedDefinitions) context).addMockedDefinition(name, type, parameterCount);
+				context.addMockedDefinition(name, type, parameterCount);
 				break;
 			case machine:
 				String filename = in.readLine();
@@ -169,10 +177,15 @@ public class CliBParser {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
 				try {
-					final BParser parser = new BParser(bfile.getAbsolutePath());
-					returnValue = parser.fullParsing(bfile, behaviour, out, ps);
-					context = parser.getDefinitions();
-					provider = parser.getContentProvider();
+					final String fileName = bfile.getName();
+					final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+					if (extension.equals("rmch")) {
+						returnValue = RulesProject.parseProject(bfile, behaviour, out, ps);
+					} else {
+						final BParser parser = new BParser(bfile.getAbsolutePath());
+						returnValue = parser.fullParsing(bfile, behaviour, out, ps);
+					}
+					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
 					returnValue = -4;
@@ -191,35 +204,35 @@ public class CliBParser {
 				break;
 			case formula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case expression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case predicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case substitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context, provider);
+				parseFormula(theFormula, context);
 				break;
 			case extendedformula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedexpression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedpredicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case extendedsubstitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, provider);
+				parseExtendedFormula(theFormula, context);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -237,6 +250,8 @@ public class CliBParser {
 				break;
 
 			case halt:
+				socket.close();
+				serverSocket.close();
 				terminate = true;
 				break;
 			default:
@@ -265,7 +280,7 @@ public class CliBParser {
 		print(strOutput.toString());
 	}
 
-	private static void parseExtendedFormula(String theFormula, IDefinitions context, IFileContentProvider provider) {
+	private static void parseExtendedFormula(String theFormula, IDefinitions context) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
@@ -297,8 +312,8 @@ public class CliBParser {
 			strOutput.fullstop();
 			strOutput.flush();
 			print(strOutput.toString());
-		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+		} catch (BCompoundException e) {
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 		} catch (LexerException e) {
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
@@ -306,15 +321,15 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(System.out, e, theFormula, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e, theFormula, false, true);
 		}
 	}
 
-	private static void parseFormula(String theFormula, IDefinitions context, IFileContentProvider provider) {
+	private static void parseFormula(String theFormula, IDefinitions context) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false, provider);
+			Start start = parser.parse(theFormula, false);
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
 			NodeIdAssignment na = new NodeIdAssignment();
@@ -344,15 +359,15 @@ public class CliBParser {
 			strOutput.flush();
 			String output = strOutput.toString();
 			print(output);
-		} catch (BException e) {
-			PrologExceptionPrinter.printException(System.out, e, false, true);
+		} catch (BCompoundException e) {
+			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 
 		}
 	}
 
 	private static void print(String output) {
 		try {
-			PrintStream out = new PrintStream(System.out, true, CliBParser.encoding);
+			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
 			out.print(output);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -363,8 +378,14 @@ public class CliBParser {
 			final boolean closeStream, final File bfile) {
 		int returnValue;
 		try {
-			final BParser parser = new BParser(bfile.getAbsolutePath());
-			returnValue = parser.fullParsing(bfile, behaviour, out, err);
+			final String fileName = bfile.getName();
+			final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+			if (extension.equals("rmch")) {
+				returnValue = RulesProject.parseProject(bfile, behaviour, out, err);
+			} else {
+				final BParser parser = new BParser(bfile.getAbsolutePath());
+				returnValue = parser.fullParsing(bfile, behaviour, out, err);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			returnValue = -4;

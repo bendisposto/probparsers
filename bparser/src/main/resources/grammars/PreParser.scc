@@ -15,6 +15,9 @@ Helpers
   slash = '/';
   hash = '#';
   double_quotation = '"';
+  triple_quote = 39 39 39 ;
+  single_quate = 39 ;
+
   lf = 10;
   cr = 13;
 
@@ -27,7 +30,13 @@ Helpers
 
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
-  all_chars_without_quote = [all_chars - double_quotation];
+
+  all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
+  string_literal = double_quotation  (all_chars_without_quote_and_newline | '\' double_quotation)* double_quotation;
+
+  all_chars_without_single_quote = [all_chars - 39];
+  multiline_string_literal = (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' 39)*;
+
   word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
   comment_char = [[all_chars - star] - slash];
 
@@ -70,7 +79,8 @@ normal,
   definitions_rhs,
   definition_file,
   no_definitions,
-  comment;
+  comment,
+  multiline_string_state;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -81,6 +91,10 @@ Tokens
   {normal, definitions, definitions_rhs} comment = comment_start ;  // switch to comment state is done in PreLexer.java
   {comment} comment_end = comment_end ; // switch back to previous state is done in PreLexer.java
   {comment} comment_content = all_chars ;
+
+  {normal, definitions_rhs} multiline_string_start = triple_quote;
+  {multiline_string_state} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
+  {multiline_string_state} multiline_string_content =  multiline_string_literal;
 
   {normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 
@@ -106,7 +120,7 @@ Tokens
   {definitions} comma = ',';
 
   {definitions -> definitions_rhs} begin_def_body = '==';
-  {definitions_rhs} rhs_body =  [word_chars - double_quotation]  | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  {definitions_rhs} rhs_body =  [word_chars - double_quotation]  | string_literal ;
   {definitions_rhs} begin_nesting =
   'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
   'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET' ;
@@ -115,9 +129,13 @@ Tokens
   {definitions, definitions_rhs} semicolon = semicolon; // returning to state definitions is done by PreLexer
 
   {definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
-  {definition_file} filename = all_chars_without_quote*;
+  {definition_file} filename = all_chars_without_quote_and_newline*;
+  //{definitions} filename= string_literal;
 
-  {normal} something = letter (letter | digit | underscore)* | [all_chars - double_quotation] | double_quotation  (all_chars_without_quote | '\' double_quotation)* double_quotation;
+  {normal} something = letter (letter | digit | underscore)*
+                       | string_literal
+                       | [all_chars - double_quotation]
+                       ;
 
   white_space = layout_char+;
 
@@ -128,7 +146,8 @@ Tokens
 Ignored Tokens
 
   white_space, other_clause_begin, end_machine, something,
-  comment, comment_content, comment_end, line_comment;
+  comment, comment_content, comment_end, line_comment,
+  multiline_string_start, multiline_string_end, multiline_string_content;
 
 
 /*******************************************************************

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class SubstitutionTest {
@@ -31,12 +31,12 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testParallelAssignWithNonIdentifier() throws BException {
+	public void testParallelAssignWithNonIdentifier() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx,yy,5  := 5, 3, zz";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 			// final CheckException cause = (CheckException) e.getCause();
 			// assertEquals(1, cause.getNodes().length);
 			// assertNotNull(cause.getNodes()[0]);
@@ -50,17 +50,17 @@ public class SubstitutionTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 		}
 	}
 
 	@Test
-	public void testInvalidIdentifierListInAnySubstitution() throws BException {
+	public void testInvalidIdentifierListInAnySubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION ANY (x|->y) WHERE x = 1 & y = 1 THEN skip END ";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
+		} catch (final BCompoundException e) {
 		}
 	}
 
@@ -142,7 +142,7 @@ public class SubstitutionTest {
 
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);

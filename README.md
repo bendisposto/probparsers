@@ -1,12 +1,14 @@
 # ProB Parsers Library
 
 [![Build Status](https://travis-ci.org/bendisposto/probparsers.svg?branch=develop)](https://travis-ci.org/bendisposto/probparsers)
+[![SonarQube Tech Debt](https://img.shields.io/sonar/http/sonarqube.com/probparsers/tech_debt.svg?maxAge=2592000)](https://sonarqube.com/overview?id=probparsers)
+
 
 ## Using
 Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
 
 <pre>
-def parser_version = '2.6.1' // development version: 2.7.0-SNAPSHOT
+def parser_version = '2.9.0' // development version: 2.9.1-SNAPSHOT
 dependencies {
 	compile group: "de.hhu.stups", name: "bparser", version: parser_version 
 	compile group: "de.hhu.stups", name: "ltlparser", version: parser_version// optional 
@@ -68,4 +70,4 @@ any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
 
-(c) 2011-2016 STUPS group, University of Düsseldorf
+(c) 2011-2017 STUPS group, University of Düsseldorf

@@ -1,0 +1,35 @@
+RULES_MACHINE TransitiveDependencyRule
+OPERATIONS
+
+COMPUTATION compute_x
+BODY
+  DEFINE
+    xx
+  TYPE
+    POW(INTEGER)
+  VALUE
+    {1}
+  END//DEFINE
+END//COMPUTATION
+;
+RULE rule1
+RULEID id1
+DEPENDS_ON_COMPUTATION compute_x
+BODY
+  skip
+END
+;
+COMPUTATION compute_z
+DEPENDS_ON_RULE rule1
+BODY
+  DEFINE
+    zz
+  TYPE
+    POW(INTEGER)
+  VALUE
+    xx \/ {3}
+  END//DEFINE
+END//COMPUTATION
+
+
+END

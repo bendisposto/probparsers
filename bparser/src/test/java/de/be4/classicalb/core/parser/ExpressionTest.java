@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -57,8 +57,7 @@ public class ExpressionTest {
 		final String testMachine = "#EXPRESSION pred";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals("Start(AExpressionParseUnit(APredecessorExpression()))",
-				result);
+		assertEquals("Start(AExpressionParseUnit(APredecessorExpression()))", result);
 	}
 
 	@Test
@@ -76,8 +75,7 @@ public class ExpressionTest {
 		final String testMachine = "#EXPRESSION succ";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals("Start(AExpressionParseUnit(ASuccessorExpression()))",
-				result);
+		assertEquals("Start(AExpressionParseUnit(ASuccessorExpression()))", result);
 	}
 
 	@Test
@@ -126,7 +124,7 @@ public class ExpressionTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Invalid renaming of identifier not detected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 		}
 
 	}
@@ -150,7 +148,7 @@ public class ExpressionTest {
 				result);
 	}
 
-	@Test(expected = BException.class)
+	@Test(expected = BCompoundException.class)
 	public void testLambdaExpression2() throws Exception {
 		final String testMachine = "#EXPRESSION % x.y.z.(x.y.z=0 | x.y.z )";
 		getTreeAsString(testMachine);
@@ -211,9 +209,7 @@ public class ExpressionTest {
 		final String testMachine = "#EXPRESSION \"Hello World\"";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals(
-				"Start(AExpressionParseUnit(AStringExpression(Hello World)))",
-				result);
+		assertEquals("Start(AExpressionParseUnit(AStringExpression(Hello World)))", result);
 	}
 
 	@Test
@@ -231,8 +227,7 @@ public class ExpressionTest {
 		final String testMachine = "#EXPRESSION [ ]";
 		final String result = getTreeAsString(testMachine);
 
-		assertEquals("Start(AExpressionParseUnit(AEmptySequenceExpression()))",
-				result);
+		assertEquals("Start(AExpressionParseUnit(AEmptySequenceExpression()))", result);
 	}
 
 	@Test
@@ -244,8 +239,7 @@ public class ExpressionTest {
 		final String result2 = getTreeAsString(testMachine2);
 		final String result3 = getTreeAsString(testMachine3);
 
-		assertEquals("Start(AExpressionParseUnit(AEmptySequenceExpression()))",
-				result1);
+		assertEquals("Start(AExpressionParseUnit(AEmptySequenceExpression()))", result1);
 		assertEquals(result1, result2);
 		assertEquals(result1, result3);
 		assertEquals(result2, result3);
@@ -324,9 +318,7 @@ public class ExpressionTest {
 	@Test
 	public void testConcat() throws Exception {
 		final String result = getExpressionAsString("s^t");
-		assertEquals(
-				"AConcatExpression(AIdentifierExpression([s]),AIdentifierExpression([t]))",
-				result);
+		assertEquals("AConcatExpression(AIdentifierExpression([s]),AIdentifierExpression([t]))", result);
 	}
 
 	@Test
@@ -342,7 +334,7 @@ public class ExpressionTest {
 	}
 
 	@Test
-	public void testComprehensionSets() throws BException {
+	public void testComprehensionSets() throws BCompoundException {
 		final String expected = "AComprehensionSetExpression([AIdentifierExpression([i])],AGreaterPredicate(AIdentifierExpression([i]),AIntegerExpression(0)))";
 		final String standard = getExpressionAsString("{i|i>0}");
 		assertEquals(expected, standard);
@@ -361,36 +353,34 @@ public class ExpressionTest {
 		try {
 			getExpressionAsString(expression);
 			fail("exception expected");
-		} catch (BException e) {
+		} catch (BCompoundException e) {
 			assertTrue(e.getCause() instanceof CheckException);
 		}
 	}
 
 	@Test
-	public void testRelationalImagePrio() throws BException {
+	public void testRelationalImagePrio() throws BCompoundException {
 		final String actual = getExpressionAsString("c~[s]*x");
 		final String expected = "AMultOrCartExpression(AImageExpression(AReverseExpression(AIdentifierExpression([c])),AIdentifierExpression([s])),AIdentifierExpression([x]))";
 		assertEquals(expected, actual);
 	}
 
 	@Test
-	public void testLargeInteger() throws BException {
+	public void testLargeInteger() throws BCompoundException {
 		final String actual = getExpressionAsString("922337203685477580756");
 		final String expected = "AIntegerExpression(922337203685477580756)";
 		assertEquals(expected, actual);
 	}
 
-	private String getExpressionAsString(final String expression)
-			throws BException {
+	private String getExpressionAsString(final String expression) throws BCompoundException {
 		final String machine = "#EXPRESSION " + expression;
 		final String astString = getTreeAsString(machine);
 		assertTrue(astString.startsWith(START_EXPRESSION));
 		assertTrue(astString.endsWith(END_EXPRESSION));
-		return astString.substring(START_EXPRESSION.length(),
-				astString.length() - END_EXPRESSION.length());
+		return astString.substring(START_EXPRESSION.length(), astString.length() - END_EXPRESSION.length());
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		final Start startNode = parser.parse(testMachine, false);
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);

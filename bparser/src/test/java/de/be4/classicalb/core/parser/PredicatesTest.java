@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -78,7 +78,7 @@ public class PredicatesTest {
 				result);
 	}
 
-	@Test(expected = BException.class)
+	@Test(expected = BCompoundException.class)
 	public void testTooManyparentheses() throws Exception {
 		final String testMachine = "#PREDICATE # ((b,c,d)). ( b > c)";
 		getTreeAsString(testMachine);
@@ -131,13 +131,13 @@ public class PredicatesTest {
 	}
 
 	@Test
-	public void testBFalse() throws BException {
+	public void testBFalse() throws BCompoundException {
 		parser.getOptions().restrictProverExpressions = true;
 		try {
 			getPredicateAsString("bfalse");
 			fail("exception expected");
-		} catch (BException e) {
-			assertTrue(e.getCause() instanceof CheckException);
+		} catch (BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof CheckException);
 		}
 
 		parser.getOptions().restrictProverExpressions = false;
@@ -152,8 +152,8 @@ public class PredicatesTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
-			assertTrue(e.getCause() instanceof BParseException);
+		} catch (final BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof BParseException);
 		}
 	}
 
@@ -163,13 +163,13 @@ public class PredicatesTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
-			assertTrue(e.getCause() instanceof BParseException);
+		} catch (final BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof BParseException);
 		}
 	}
 
 	@Test
-	public void testSubstitutionInPredicate() throws BException {
+	public void testSubstitutionInPredicate() throws BCompoundException {
 		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		parser.getOptions().restrictProverExpressions = false;
 		final String astString = getTreeAsString(testMachine);
@@ -184,22 +184,20 @@ public class PredicatesTest {
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
-		} catch (final BException e) {
-			assertTrue(e.getCause() instanceof BParseException);
+		} catch (final BCompoundException e) {
+			assertTrue(e.getFirstException().getCause() instanceof BParseException);
 		}
 	}
 
-	private String getPredicateAsString(final String expression)
-			throws BException {
+	private String getPredicateAsString(final String expression) throws BCompoundException {
 		final String machine = "#PREDICATE " + expression;
 		final String astString = getTreeAsString(machine);
 		assertTrue(astString.startsWith(START_PREDICATE));
 		assertTrue(astString.endsWith(END_PREDICATE));
-		return astString.substring(START_PREDICATE.length(), astString.length()
-				- END_PREDICATE.length());
+		return astString.substring(START_PREDICATE.length(), astString.length() - END_PREDICATE.length());
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException {
+	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		final Start startNode = parser.parse(testMachine, false);
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);

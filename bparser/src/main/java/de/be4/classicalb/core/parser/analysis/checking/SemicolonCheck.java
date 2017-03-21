@@ -1,9 +1,11 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AInvalidOperationsClauseMachineClause;
 import de.be4.classicalb.core.parser.node.AInvalidSubstitution;
 import de.be4.classicalb.core.parser.node.AMissingSemicolonOperation;
@@ -15,22 +17,23 @@ import de.be4.classicalb.core.parser.node.Start;
  */
 public class SemicolonCheck implements SemanticCheck {
 
+	private final List<CheckException> exceptions = new ArrayList<>();
+
 	private final class MissingSemicolonWalker extends DepthFirstAdapter {
 
 		@Override
-		public void caseAMissingSemicolonOperation(AMissingSemicolonOperation node) {
-			throw new VisitorException(new CheckException("Semicolon missing between operations", node.getOperation()));
+		public void inAMissingSemicolonOperation(AMissingSemicolonOperation node) {
+			exceptions.add(new CheckException("Semicolon missing between operations", node.getOperation()));
 		}
 
 		@Override
-		public void caseAInvalidOperationsClauseMachineClause(AInvalidOperationsClauseMachineClause node) {
-			throw new VisitorException(
-					new CheckException("Invalid semicolon after last operation", node.getSemicolon()));
+		public void inAInvalidOperationsClauseMachineClause(AInvalidOperationsClauseMachineClause node) {
+			exceptions.add(new CheckException("Invalid semicolon after last operation", node.getSemicolon()));
 		}
 
 		@Override
-		public void caseAInvalidSubstitution(AInvalidSubstitution node) {
-			throw new VisitorException(
+		public void inAInvalidSubstitution(AInvalidSubstitution node) {
+			exceptions.add(
 					new CheckException("Invalid semicolon after last substitution (before END)", node.getSemicolon()));
 		}
 
@@ -45,12 +48,13 @@ public class SemicolonCheck implements SemanticCheck {
 	}
 
 	@Override
-	public void runChecks(Start rootNode) throws CheckException {
+	public void runChecks(Start rootNode) {
 		MissingSemicolonWalker adapter = new MissingSemicolonWalker();
-		try {
-			rootNode.apply(adapter);
-		} catch (VisitorException e) {
-			throw (CheckException) e.getException();
-		}
+		rootNode.apply(adapter);
+	}
+
+	@Override
+	public List<CheckException> getCheckExceptions() {
+		return this.exceptions;
 	}
 }

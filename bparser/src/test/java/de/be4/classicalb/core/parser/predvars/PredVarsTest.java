@@ -10,7 +10,7 @@ import org.junit.Test;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.analysis.Ast2String;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -60,7 +60,7 @@ public class PredVarsTest {
 		assertEquals(result1, result2);
 	}
 
-	private String getTreeAsString(final String testMachine) throws BException,
+	private String getTreeAsString(final String testMachine) throws BCompoundException,
 			LexerException, IOException {
 		final BParser parser = new BParser("testcase");
 		Start ast = parser.eparse(testMachine, new Definitions());
@@ -71,7 +71,7 @@ public class PredVarsTest {
 	}
 
 	private String getTreeAsStringOrg(final String testMachine)
-			throws BException {
+			throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 		final Ast2String ast2String = new Ast2String();

@@ -9,7 +9,7 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
@@ -21,9 +21,6 @@ import de.be4.classicalb.core.parser.node.Start;
  */
 public class BatchParser {
 
-	/**
-	 * @param args
-	 */
 	public static void main(final String[] args) {
 		try {
 			for (final String filename : args) {
@@ -40,8 +37,7 @@ public class BatchParser {
 		}
 	}
 
-	private static void parseFile(final String filename) throws IOException,
-			BException {
+	private static void parseFile(final String filename) throws IOException, BCompoundException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
 			final File machineFile = new File(filename);
@@ -51,11 +47,10 @@ public class BatchParser {
 			Start tree = parser.parseFile(machineFile, false);
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree,
-					new ParsingBehaviour(), parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree, new ParsingBehaviour(),
+					parser.getContentProvider());
 			output.close();
 		} else
-			throw new IllegalArgumentException("Filename '" + filename
-					+ "' has no extension");
+			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
 	}
 }

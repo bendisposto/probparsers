@@ -1,10 +1,9 @@
 package de.be4.classicalb.core.parser;
 
+import de.be4.classicalb.core.parser.util.Utils;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class PlainFileContentProvider implements IFileContentProvider {
 
@@ -17,8 +16,8 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		// TODO caching could help for speed up if files are used more than
 		// once
 		final File file;
-		file = getFile(directory, filename);
-		return readFileContent(file);
+		file = this.getFile(directory, filename);
+		return Utils.readFile(file);
 	}
 
 	public File getFile(final File directory, final String filename)
@@ -33,22 +32,4 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		}
 		return provider.resolve();
 	}
-
-	public static String readFileContent(final File file)
-			throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader = new InputStreamReader(
-				new FileInputStream(file));
-
-		final StringBuilder builder = new StringBuilder();
-		final char[] buffer = new char[1024];
-		int read;
-		while ((read = inputStreamReader.read(buffer)) >= 0) {
-			builder.append(String.valueOf(buffer, 0, read));
-		}
-
-		inputStreamReader.close();
-
-		return builder.toString().replaceAll("\r\n", "\n");
-	}
-
 }

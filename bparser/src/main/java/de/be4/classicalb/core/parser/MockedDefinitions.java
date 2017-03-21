@@ -19,9 +19,12 @@ public class MockedDefinitions extends IDefinitions {
 	public void addMockedDefinition(String name, String type, String parameterCount) {
 		if ("predicate".equals(type)) {
 			types.put(name, Type.Predicate);
-		}
-		if ("expression".equals(type)) {
+		} else if ("expression".equals(type)) {
 			types.put(name, Type.Expression);
+		} else if ("substitution".equals(type)) {
+			types.put(name, Type.Substitution);
+		} else {
+			throw new IllegalStateException("Unkown definition type: " + type);
 		}
 		arity.put(name, new Integer(parameterCount));
 	}

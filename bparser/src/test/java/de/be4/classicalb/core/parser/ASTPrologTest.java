@@ -13,7 +13,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
-import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.AConstructorFreetypeConstructor;
 import de.be4.classicalb.core.parser.node.ADisjunctPredicate;
@@ -73,7 +73,7 @@ public class ASTPrologTest {
 	}
 
 	private void checkProlog(final int counter, final String bspec,
-			final String expected) throws BException {
+			final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		if (remove_restrictions) {
 			parser.getOptions().restrictProverExpressions = false;
@@ -84,22 +84,22 @@ public class ASTPrologTest {
 	}
 
 	private void checkPredicate(final String pred, final String expected)
-			throws BException {
+			throws BCompoundException {
 		checkProlog(2, BParser.PREDICATE_PREFIX + pred, expected);
 	}
 
 	private void checkExpression(final String expr, final String expected)
-			throws BException {
+			throws BCompoundException {
 		checkProlog(2, BParser.EXPRESSION_PREFIX + expr, expected);
 	}
 
 	private void checkSubstitution(final String subst, final String expected)
-			throws BException {
+			throws BCompoundException {
 		checkProlog(2, BParser.SUBSTITUTION_PREFIX + subst, expected);
 	}
 
 	private void checkOppatterns(final String pattern, final String expected)
-			throws BException {
+			throws BCompoundException {
 		checkProlog(1, BParser.OPERATION_PATTERN_PREFIX + pattern, expected);
 	}
 
@@ -123,7 +123,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testMachine() throws BException {
+	public void testMachine() throws BCompoundException {
 		String m = "MACHINE name" + "  OPERATIONS op=skip END";
 		String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo:
 																																					// warum
@@ -137,7 +137,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testMachine2() throws BException {
+	public void testMachine2() throws BCompoundException {
 		String m = "MACHINE mname(P)  SETS S; E={e1,e2}"
 				+ "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
 				+ "  INVARIANT x:NAT  INITIALISATION x:=5"
@@ -157,19 +157,19 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testRefinement() throws BException {
+	public void testRefinement() throws BCompoundException {
 		String ref = "REFINEMENT ref REFINES abstract VARIABLES x END";
 		String expected = "refinement_machine($,machine_header($,ref,[]),abstract,[variables($,[identifier($,x)])])";
 		checkProlog(1, ref, expected);
 	}
 
 	@Test
-	public void testEmptyString() throws BException {
+	public void testEmptyString() throws BCompoundException {
 		checkExpression("\"test\"+\"\"", "add(2,string(3,test),string(4,''))");
 	}
 
 	@Test
-	public void testPredicates() throws BException {
+	public void testPredicates() throws BCompoundException {
 		checkPredicate("5>r.j", "greater($,integer($,5),identifier($,'r.j'))");
 		checkPredicate(
 				"!x,y.(x<y)",
@@ -177,7 +177,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testExpressions() throws BException {
+	public void testExpressions() throws BCompoundException {
 		checkExpression(
 				"SIGMA x,y.(x:NAT & y:INT | x+y)",
 				"general_sum($,[identifier($,x),identifier($,y)],"
@@ -186,13 +186,13 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testSubstitutions() throws BException {
+	public void testSubstitutions() throws BCompoundException {
 		checkSubstitution("x,y :: BOOL",
 				"becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
 	}
 
 	@Test
-	public void testDefinitions() throws BException {
+	public void testDefinitions() throws BCompoundException {
 		String m = "MACHINE Defs  DEFINITIONS  INV == x:INT;"
 				+ "  lt(a) == x<7;  dbl(a) == 2*x*a;  ax(a) == x:=a"
 				+ "  VARIABLES x  INVARIANT INV & lt(7)"
@@ -211,7 +211,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testRewrite() throws BException {
+	public void testRewrite() throws BCompoundException {
 		checkPredicate("0 /= -1",
 				"not_equal($,integer($,0),unary_minus($,integer($,1)))");
 		checkPredicate("NATURAL <: INTEGER",
@@ -227,7 +227,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testTrueFalse() throws BException {
+	public void testTrueFalse() throws BCompoundException {
 		checkPredicate("TRUE : BOOL", "member($,boolean_true($),bool_set($))");
 		checkPredicate("FALSE : BOOL", "member($,boolean_false($),bool_set($))");
 
@@ -239,13 +239,13 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testBFalse() throws BException {
+	public void testBFalse() throws BCompoundException {
 		remove_restrictions = true;
 		checkPredicate("bfalse", "falsity($)");
 	}
 
 	@Test
-	public void testProverSET() throws BException {
+	public void testProverSET() throws BCompoundException {
 		remove_restrictions = true;
 		checkExpression(
 				"SET(x).(x>0)",
@@ -253,7 +253,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testOperationCalls() throws BException {
+	public void testOperationCalls() throws BCompoundException {
 		checkSubstitution("do(x)",
 				"operation_call($,identifier($,do),[],[identifier($,x)])");
 		checkSubstitution("r <-- do(x)",
@@ -261,7 +261,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testEvent() throws BException {
+	public void testEvent() throws BCompoundException {
 		final AEventBModelParseUnit model = new AEventBModelParseUnit();
 		model.setName(new TIdentifierLiteral("mm"));
 		final AEventsModelClause events = new AEventsModelClause();
@@ -303,20 +303,20 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testOppattern() throws BException {
+	public void testOppattern() throws BCompoundException {
 		final String pattern = "op1(x,_)";
 		final String expected = "oppattern($,op1,[def($,identifier($,x)),undef($)])";
 		checkOppatterns(pattern, expected);
 	}
 
 	@Test
-	public void testLargeInteger() throws BException {
+	public void testLargeInteger() throws BCompoundException {
 		checkExpression("922337203685477580756",
 				"integer($,922337203685477580756)");
 	}
 
 	@Test
-	public void testString() throws BException {
+	public void testString() throws BCompoundException {
 		checkExpression("\" \"", "string($,' ')");
 		checkExpression("\"\"", "string($,'')");
 		checkExpression("\"a\"", "string($,a)");
@@ -329,7 +329,7 @@ public class ASTPrologTest {
 	}
 
 	@Test
-	public void testFreeType() throws BException {
+	public void testFreeType() throws BCompoundException {
 		final AConstructorFreetypeConstructor multi = new AConstructorFreetypeConstructor(
 
 		new TIdentifierLiteral("multi"), new APowSubsetExpression(

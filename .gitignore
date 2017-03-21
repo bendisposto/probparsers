@@ -31,3 +31,6 @@ unicode/.gitignore
 .gitignore
 *.prob
 .settings
+build.xml
+bparser/src/test/java/Testing.java
+build.properties

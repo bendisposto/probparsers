@@ -11,9 +11,8 @@ public class BigInteger extends Number {
 		if (obj instanceof java.lang.Number) {
 			return this.compareTo((java.lang.Number) obj) == 0;
 		}
-		if (getClass() != obj.getClass())
-			return false;
-		return true;
+		// assert getClass() != obj.getClass()
+		return false;
 	}
 
 	private static final long serialVersionUID = -6484548796859331267L;
@@ -41,8 +40,7 @@ public class BigInteger extends Number {
 			throw new NullPointerException();
 		}
 		if (getClass() != o.getClass()) {
-			oi = new java.math.BigInteger(java.lang.String.valueOf(o
-					.longValue()));
+			oi = new java.math.BigInteger(java.lang.String.valueOf(o.longValue()));
 		} else {
 			BigInteger oo = (BigInteger) o;
 			oi = oo.value;
@@ -125,14 +123,13 @@ public class BigInteger extends Number {
 	}
 
 	@Override
-	public Number next(Number o) {
+	public Number next() {
 		return new BigInteger(this.value.add(new java.math.BigInteger("1")));
 	}
 
 	@Override
-	public Number previous(Number o) {
-		return new BigInteger(
-				this.value.subtract(new java.math.BigInteger("1")));
+	public Number previous() {
+		return new BigInteger(this.value.subtract(new java.math.BigInteger("1")));
 	}
 
 	@Override
@@ -151,17 +148,12 @@ public class BigInteger extends Number {
 	}
 
 	@Override
-	public Number bitwiseNegate(Number o) {
-		return new BigInteger(this.value.not());
-	}
-
-	@Override
-	public Number negative(Number o) {
+	public Number negative() {
 		return new BigInteger(this.value.negate());
 	}
 
 	@Override
-	public Number positive(Number o) {
+	public Number positive() {
 		return this;
 	}
 
