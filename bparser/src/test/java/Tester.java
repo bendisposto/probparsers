@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import util.Helpers;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 
 public class Tester {
@@ -28,7 +29,7 @@ public class Tester {
 	}
 	
 	@Test
-	public void testFile() throws IOException, BException {
+	public void testFile() throws Exception {
 		String file = "/Users/hansen/Desktop/temp/Implementation/Main.mch";
 		//String result = Helpers.fullParsing(file);
 		//System.out.println(result);
@@ -39,7 +40,7 @@ public class Tester {
 
 	
 	@Test
-	public void testFile2() throws IOException, BException {
+	public void testFile2() throws Exception {
 		String file = "/Users/hansen/git/prob_examples/public_examples/B/PerformanceTests/SATLIB/uf50-02.mch";
 		//String result = Helpers.fullParsing(file);
 		//System.out.println(result);
@@ -48,7 +49,7 @@ public class Tester {
 	}
 
 	@Test
-	public void testFile3() throws IOException, BException {
+	public void testFile3() throws Exception {
 		String file = "/Users/hansen/git/prob_examples/public_examples/B/PerformanceTests/SATLIB/sudoku.mch";
 		//String result = Helpers.fullParsing(file);
 		//System.out.println(result);
@@ -72,7 +73,7 @@ public class Tester {
 	}
 	
 	@Test
-	public void testTest() throws IOException, BException {
+	public void testTest() throws Exception {
 		String file = "/Users/hansen/git/prob_examples/public_examples/B/PragmasUnits/InternalRepresentationTests/MultiplicationConversion.mch";
 		//String result = Helpers.fullParsing(file);
 		//System.out.println(result);
@@ -160,7 +161,7 @@ public class Tester {
 
 	@Ignore
 	@Test
-	public void testDefinitionFile() throws IOException, BException {
+	public void testDefinitionFile() throws Exception {
 		String file = "/Users/hansen/git/thales_git/thales_documents/Engineering_Rules/LanguageExtensions/ChooseTest.mch";
 		// String result =
 		// Helpers.parseFile(file);
@@ -172,7 +173,7 @@ public class Tester {
 	
 	@Ignore
 	@Test
-	public void testLexerException() throws IOException, BException {
+	public void testLexerException() throws Exception {
 		String file = "/Users/hansen/Desktop/temp/SyntaxHighlighting/Foo.mch";
 		// String result =
 		Helpers.parseFile(file);
@@ -180,7 +181,7 @@ public class Tester {
 	}
 
 	@Test
-	public void testPushBackBufferTest() throws IOException, BException {
+	public void testPushBackBufferTest() throws Exception {
 		String file = "/Users/hansen/git/prob_examples/public_examples/B/Tickets/ParserPushBackOverflow/CorrectedTrackData2.mch";
 		//Helpers.parseFile(file);
 		String result = Helpers.fullParsing(file);
@@ -188,7 +189,7 @@ public class Tester {
 	}
 
 	@Test
-	public void testPushBackBuffer() throws IOException, BException {
+	public void testPushBackBuffer() throws Exception {
 		String file = "/Users/hansen/git/prob_examples/public_examples/B/Tickets/ParserPushBackOverflow/PushBackBufferError.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -200,7 +201,7 @@ public class Tester {
 
 	@Ignore
 	@Test
-	public void testDefinitionError() throws IOException, BException {
+	public void testDefinitionError() throws Exception {
 		String file = "/Users/hansen/Desktop/temp/Definitions/DefinitionError.mch";
 
 		String result = Helpers.fullParsing(file);
@@ -241,7 +242,7 @@ public class Tester {
 	}
 
 	@Test
-	public void testMachineNotFound8() throws IOException, BException {
+	public void testMachineNotFound8() throws Exception {
 		String file = "/Users/hansen/git/thales_git/thales_documents/Schulung/Folien/Training2/Models/RulesSyntax/SimpleRulesMachine.mch";
 		Helpers.parseFile(file);
 		// String result = Helpers.fullParsing(file);

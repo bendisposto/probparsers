@@ -104,37 +104,37 @@ public class AstTransformationTest {
 	}
 
 	@Test
-	public void testDefinition() throws BException {
+	public void testDefinition() throws Exception {
 		String result = translateUsingSableCCParser(
 				"MACHINE test PROPERTIES foo & bar(2)=2 DEFINITIONS foo == 1=1 END");
 	}
 
 	@Test
-	public void testUnicode() throws BException {
+	public void testUnicode() throws Exception {
 		final String machine = "MACHINE test PROPERTIES \u00ac(1=2) END";
 		test(machine);
 	}
 
 	@Test
-	public void testDefinition2() throws BException {
+	public void testDefinition2() throws Exception {
 		final String machine = "MACHINE test PROPERTIES def = 1 DEFINITIONS def == 1 END";
 		test(machine);
 	}
 
 	@Test
-	public void testExpressionDefinition() throws BException {
+	public void testExpressionDefinition() throws Exception {
 		final String machine = "MACHINE test PROPERTIES def(1) = 1 DEFINITIONS def(a) ==  a + 1 END";
 		test(machine);
 	}
 
 	@Test
-	public void testSubstitutionDefinition() throws BException {
+	public void testSubstitutionDefinition() throws Exception {
 		final String machine = "MACHINE test DEFINITIONS def(a) == skip INITIALISATION def(x) END";
 		test(machine);
 	}
 
 	@Test
-	public void testPredicateDefinition() throws BException {
+	public void testPredicateDefinition() throws Exception {
 		final String machine = "MACHINE test PROPERTIES def(1) DEFINITIONS def(a) ==  a = 1 END";
 		test(machine);
 	}
@@ -203,7 +203,7 @@ public class AstTransformationTest {
 		try {
 			expected = translateUsingSableCCParser(machine);
 			assertEquals(expected, result);
-		} catch (BException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -255,7 +255,7 @@ public class AstTransformationTest {
 		pout.flush();
 	}
 
-	public static String translateUsingSableCCParser(String input) throws BException {
+	public static String translateUsingSableCCParser(String input) throws Exception {
 		ParseOptions options = new ParseOptions();
 		options.useAntlr4Parser = false;
 		final BParser parser = new BParser("Test", options);

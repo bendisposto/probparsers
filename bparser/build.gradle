@@ -46,7 +46,7 @@ git=${getCheckedOutGitCommitHash()}"""
   }
 }
 
-
+// gradle antlr
 generateGrammarSource {
     maxHeapSize = "64m"
     arguments += ["-visitor", "-long-messages"]
