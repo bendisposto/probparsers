@@ -3,7 +3,7 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.antlr.Antlr4Parser;
 import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser;
-import de.be4.classicalb.core.parser.antlr.SableCCAstBuilder;
+import de.be4.classicalb.core.parser.antlr.BLanguageSableCCAstBuilder;
 import de.be4.classicalb.core.parser.node.Node;
 import files.BLexer;
 
@@ -118,7 +118,7 @@ public class ParserTest {
 		System.out.println(tree.getClass());
 		DefinitionsAnalyser definitionAnalyser = new DefinitionsAnalyser(tree);
 		definitionAnalyser.analyse();
-		SableCCAstBuilder astBuilder = new SableCCAstBuilder(definitionAnalyser);
+		BLanguageSableCCAstBuilder astBuilder = new BLanguageSableCCAstBuilder(definitionAnalyser);
 		Node ast = tree.accept(astBuilder);
 		//Antlr4Parser.printAsProlog(ast);
 	}

@@ -46,7 +46,7 @@ git=${getCheckedOutGitCommitHash()}"""
   }
 }
 
-// gradle antlr
+// gradle generateGrammarSource
 generateGrammarSource {
     maxHeapSize = "64m"
     arguments += ["-visitor", "-long-messages"]
@@ -89,7 +89,7 @@ jar {
 }
 
 compileJava {
- dependsOn = ['createBuildConstants','genPreparser','genBParser',':prologlib:deploy',':parserbase:deploy','generateGrammarSource']
+ dependsOn = ['createBuildConstants',':prologlib:deploy',':parserbase:deploy','generateGrammarSource']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")

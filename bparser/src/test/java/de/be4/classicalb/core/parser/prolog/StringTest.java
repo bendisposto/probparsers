@@ -21,10 +21,57 @@ public class StringTest {
 	}
 
 	@Test
+	public void testSimpleString() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES \"a b\" = \"a\" END";
+		System.out.println(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("'a b'"));
+	}
+
+	@Test
+	public void testSimpleMultiLineString() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES ''' abc ''' = '''a''' END";
+		System.out.println(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("' abc '"));
+	}
+	
+	@Test
+	public void testMultiLineStringIncludingSingleQuote() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES ''' ' ''' = '''a''' END";
+		System.out.println(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("' \\' '"));
+	}
+	
+	@Test
+	public void testMultiLineStringIncludingTwoSingleQuote() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES ''' '' ''' = '''a''' END";
+		System.out.println(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("' \\'\\' '"));
+	}
+	
+	@Test
+	public void testMultiLineStringIncludingTwoSingleQuoteAtTheENd() throws Exception {
+		final String testMachine = "MACHINE Test PROPERTIES ''' ''''' = '''a''' END";
+		System.out.println(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("' \\'\\''"));
+	}
+	
+	
+	@Test
 	public void testString() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES \"a\\\"b\" = \"a\" END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
 		assertTrue(result.contains("'a\"b'"));
 	}
 

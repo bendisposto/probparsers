@@ -9,17 +9,20 @@ package files;
 //options { tokenVocab=Blexer; } // this is currently not supported by gradle
 
 start
-  : parse_unit EOF
+  : parse_unit EOF      # ParseUnit
   ;
 
 parse_unit
   : machine_x                           # MachineParserUnit
+  | definition_clause                   # DefinitionParseUnit
   | FORMULA_KEYWORD formula             # FormulaParseUnit
   | EXPRESSION_KEYWORD expression       # ExpressionParseUnit
   | PREDICATE_KEYWORD predicate         # PredicateParseUnit
   | SUBSTITUTION_KEYWORD substitution   # SubstitutionParseUnit
   | OPPATTERN_KEYWORD operation_pattern  # OpPatternParseUnit
+  | MACHINECLAUSE machine_clause       # MachineClauseParseUnit
   ;
+
 
 operation_pattern
   : name=composed_identifier
@@ -33,31 +36,36 @@ op_pattern_param
 
 
 machine_x
-    : variant=(MACHINE|MODEL|SYSTEM|RULES_MACHINE) machine_header (clauses+=machine_clauses)* 'END'       # Machine
-    | REFINEMENT machine_header REFINES Identifier (clauses+=machine_clauses)* 'END'                      # Refinement
-    | IMPLEMENTATION Identifier machine_header REFINES Identifier (clauses+=machine_clauses)* 'END'       # Implementation
-    ;
-
-machine_header
-  : name=Identifier ('(' parameter_list=identifier_list ')')?
+  : variant=(MACHINE|MODEL|SYSTEM) machine_header (clauses+=machine_clause)* END                   # Machine
+  | REFINEMENT machine_header REFINES identifier (clauses+=machine_clause)* END                      # Refinement
+  | IMPLEMENTATION machine_header REFINES identifier (clauses+=machine_clause)* END                # Implementation
   ;
 
-machine_clauses
-  : DEFINITIONS defs+=definition (SEMICOLON defs+=definition)* SEMICOLON?   # DefinitionClause
+machine_header
+  : name=IDENTIFIER ('(' parameter_list=identifier_list ')')?
+  ;
+
+machine_clause
+  : definition_clause                                             # DefinitionClauseIndirection
   | name=(CONSTRAINTS|PROPERTIES|INVARIANT) pred=predicate        # PredicateClause
   | name=(INCLUDES|EXTENDS|IMPORTS) instances+=machine_instantiation
-      (COMMA instances+=machine_instantiation)*               # InstanceClause
+      (COMMA instances+=machine_instantiation)*                   # InstanceClause
   | name=(SEES|USES|PROMOTES)
       composed_identifier_list                                    # ReferenceClause
   | name=(CONSTANTS|ABSTRACT_CONSTANTS|CONCRETE_CONSTANTS|
           VARIABLES|ABSTRACT_VARIABLES|CONCRETE_VARIABLES)
           identifier_list                                         # DeclarationClause
   | INITIALISATION substitution                                   # InitialisationClause
-  | name=('OPERATIONS'|'LOCAL_OPERATIONS')
+  | name=(OPERATIONS|LOCAL_OPERATIONS)
       ops+=operation (SEMICOLON ops+=operation)*                  # OperationsClause
-  | VALUES values+=value_entry (SEMICOLON values+=value_entry)*   # ValuesClause
+  | VALUES idents+=IDENTIFIER EQUAL exprs+=expression
+     (SEMICOLON idents+=IDENTIFIER EQUAL exprs+=expression)*      # ValuesClause
   | ASSERTIONS preds+=predicate (SEMICOLON pred+=predicate)*      # AssertionClause
   | SETS set_definition (SEMICOLON set_definition)*               # SetsClause
+  ;
+
+definition_clause
+  : DEFINITIONS defs+=definition (SEMICOLON defs+=definition)* SEMICOLON? # DefinitionClause
   ;
 
 machine_instantiation
@@ -65,17 +73,12 @@ machine_instantiation
   ;
 
 set_definition
-  : Identifier                                            # DeferredSet
-  | Identifier EQUAL LEFT_BRACE identifier_list RIGHT_BRACE     # EnumeratedSet
-  ;
-
-
-value_entry
-  : ident=Identifier EQUAL expression
+  : IDENTIFIER                                                  # DeferredSet
+  | IDENTIFIER EQUAL LEFT_BRACE identifier_list RIGHT_BRACE     # EnumeratedSet
   ;
 
 operation
-  : (output=identifier_list OUTPUT_PRAMETERS )? Identifier ('(' parameters=identifier_list ')')?  EQUAL substitution
+  : (output=identifier_list OUTPUT_PRAMETERS )? IDENTIFIER ('(' parameters=identifier_list ')')?  EQUAL substitution # BOperation
   ;
 
 composed_identifier_list
@@ -88,22 +91,29 @@ quantified_variables_list
   ;
 
 identifier_list
-  : idents+=Identifier (',' idents+=Identifier)*
+  : idents+=IDENTIFIER (',' idents+=IDENTIFIER)*
   ;
 
 definition
-  : name=Identifier ('(' parameters+=Identifier (',' parameters+=Identifier)* ')')? DOUBLE_EQUAL formula
+  : name=IDENTIFIER ('(' parameters+=IDENTIFIER (',' parameters+=IDENTIFIER)* ')')? DOUBLE_EQUAL formula # OrdinaryDefinition
+  | StringLiteral  # DefinitionFile
   ;
 
 formula
-  : expression            #FormulaExpression
+  : composed_identifier ('(' expression_list ')')?  # FormulaAmbiguousCall
+  | expression            #FormulaExpression
   | predicate             #FormulaPredicate
   | substitution          #FormulaSubstitution
   ;
 
 //******************* Substitutions ****************************
-
+  //| left=substitution operator=(SEMICOLON | DOUBLE_VERTICAL_BAR) right=substitution     #SubstitutionCompositionOrParallel //P20
 substitution
+  : subs+=substitution_l1 ( operators+=(SEMICOLON | DOUBLE_VERTICAL_BAR) subs+=substitution_l1)+       # SubstitutionList //p40
+  | substitution_l1                                                                                  # SubstitutionNextL1
+  ;
+
+substitution_l1
   : BEGIN substitution END                                                              #SubstitutionBlock
   | SKIP_SUB                                                                            #SubstitutionSkip
   | keyword=(PRE|ASSERT) predicate THEN substitution END                                #ConditionSubstitution
@@ -112,8 +122,8 @@ substitution
       (WHEN when_pred+=predicate THEN when_sub+=substitution)*
       (ELSE else_sub=substitution)? END                                                 #SelectSubstitution
   | CASE expr=expression OF EITHER either=expression_list THEN sub=substitution
-      (OR or_exprs+=expression_list THEN or_subs+=substitution)+
-      (ELSE else_sub=substitution)? END                                                 #CaseSubstitution
+      (SUBSTITUTION_OR or_exprs+=expression_list THEN or_subs+=substitution)+
+      (ELSE else_sub=substitution)? END END                                             #CaseSubstitution
   | ANY identifier_list WHERE predicate THEN substitution END                           #AnySubstitution
   | LET identifier_list BE predicate IN substitution END                                #LetSubstitution
   | identifier_list DOUBLE_COLON expression                                             #BecomesElementOfSubstitution
@@ -121,30 +131,28 @@ substitution
   | VAR identifier_list IN substitution END                                             #VarSubstitution
   | IF pred=predicate THEN thenSub=substitution
       (ELSIF elsifPred+=predicate THEN elsifSub+=substitution)*
-      (ELSE elseSub=substitution)? END                                                  #SubstitutionIf
+      (ELSE elseSub=substitution)? END                                                  #IfSubstitution
   | WHILE condition=predicate DO substitution INVARIANT invariant=predicate
       VARIANT variant=expression END                                                    #WhileSubstitution
-  | identifier_or_function_or_record
-      (',' identifier_or_function_or_record)*
+  | identifier_or_function_or_record (',' identifier_or_function_or_record)*
       ':=' expression_list                                                              #AssignSubstitution
   | composed_identifier ('(' expression_list ')')?                                      #SubstitutionIdentifierCall
   | output=identifier_list OUTPUT_PRAMETERS composed_identifier ('(' expression_list ')')?     #SubstitutionOperationCall
-  | left=substitution operator=(SEMICOLON | DOUBLE_VERTICAL_BAR) right=substitution     #SubstitutionCompositionOrParallel //P20
-  | substitution_extension_point                                                        #SubstitutionExtensionPoint
+  | substitution_extension_point # SubstitutionNextExtensionPoint
   ;
 
 substitution_extension_point
-  : NOT_REACHABLE
+  : NOT_REACHABLE # SubstitutionExtensionPoint
   ;
 
 identifier_or_function_or_record
-  : Identifier                                                  # AssignSingleIdentifier
-  | name=Identifier '(' arguments=expression_list ')'           # AssignFunctionIdentifier
-  | name=Identifier (SINGLE_QUOTE attributes+=Identifier)+      # AssignRecordIdentifier
+  : IDENTIFIER                                                        # AssignSingleIdentifier
+  | name=IDENTIFIER ('(' argument_lists+=expression_list ')' )+       # AssignFunctionIdentifier
+  | name=IDENTIFIER (SINGLE_QUOTE attributes+=IDENTIFIER)+            # AssignRecordIdentifier
   ;
 
 expression_list
-  : expression_in_par (',' expression_in_par)*
+  : exprs+=expression (',' exprs+=expression)*
   ;
 
 predicate
@@ -161,8 +169,9 @@ predicate_atomic
   : '(' predicate ')'                                                                     # PredicateParenthesis
   | keyword=(BTRUE|BFALSE)                                                                # PredicateKeyword
   | composed_identifier ('(' arguments+=expression (',' arguments+=expression)* ')')?     # PredicateIdentifierCall
-  | 'IF' conditionPred=predicate 'THEN' thenPred=predicate
-      'ELSE' elsePred=predicate 'END'                                                     # PredicateIf
+  | IF conditionPred=predicate THEN thenPred=predicate
+      ELSE elsePred=predicate END                                                         # PredicateIf
+  | LET identifier_list BE pred1=predicate IN pred2=predicate END                         # PredicateLet
   | NOT '(' predicate ')'                                                                 # PredicateNot
   | operator=(FOR_ANY|EXITS) quantified_variables_list
       DOT LEFT_PAR predicate RIGHT_PAR                                                    # QuantifiedPredicate
@@ -200,28 +209,37 @@ expression_in_par
 
 expression
   : Number                                                                  # Number
+  | HEX_LITERAL                                                             # HexDigit
   | value=(TRUE|FALSE)                                                      # BooleanValue
-  | STRING_LITERAL                                                          # String
+  | StringLiteral                                                           # String
   | LEFT_PAR expression_in_par RIGHT_PAR                                    # Parenthesis
   | LEFT_PAR expression_in_par (COMMA expression_in_par)+ RIGHT_PAR         # Tuple
   | LEFT_BRACE expression_list RIGHT_BRACE                                  # SetEnumeration
   | LEFT_BRACE RIGHT_BRACE                                                  # EmptySet
   | LESS GREATER                                                            # EmptySequence
   | LEFT_BRACKET RIGHT_BRACKET                                              # EmptySequence
+  | LEFT_BRACKET expression_list RIGHT_BRACKET                              # SequenceEnumeration
   | operator=(REC|STRUCT) LEFT_PAR entries+=rec_entry
       (COMMA entries+=rec_entry)* RIGHT_PAR                                 # Record
   | composed_identifier DOLLAR_ZERO                                         # PrimedIdentifierExpression
   | composed_identifier                                                     # ExpressionIdentifier
+  | BOOl_CAST '(' predicate ')'                                             # BoolCastExpression
   | expression_prefix_operator '(' expr=expression_in_par ')'               # ExpressionPrefixOperator
+  | expression_prefix_operator_2_args
+      '(' expr1=expression_in_par ',' expr2=expression_in_par ')'           # ExpressionPrefixOperator2Args
   | expression_keyword                                                      # ExpressionKeyword
   | LAMBDA quantified_variables_list
       DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # LambdaExpression
   | operator=(QUANTIFIED_UNION|QUANTIFIED_INTER|SIGMA|PI)  quantified_variables_list
       DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # QuantifiedExpression
   | QUANTIFIED_SET quantified_variables_list DOT LEFT_PAR predicate RIGHT_PAR          # QuantifiedSet
-  | '{' identifier_list  VERTICAL_BAR predicate '}'                         #SetComprehension
+  | '{' identifier_list  VERTICAL_BAR predicate '}'                         # SetComprehension
 
+  // extensions
+  | LET identifier_list BE predicate IN expression_in_par END                           # LetExpression
+  | IF predicate THEN expr1=expression_in_par ELSE expr2=expression_in_par END          # IfExpression
   // operators with precedences
+  | expression SINGLE_QUOTE identifier                                                  # RecordFieldAccess //precedence?
   | left=expression LEFT_BRACKET right=expression_in_par RIGHT_BRACKET                  # ImageExpression
   | expression TILDE                                                                    # ReverseExpression //p230
   | function=expression '(' arguments+=expression_in_par
@@ -229,7 +247,7 @@ expression
   | MINUS expression                                                                    # UnaryMinus  //P210
   | <assoc=right> left=expression operator=POWER_OF right=expression                    # BinOperator //p200
   | left=expression operator=(MULT|DIVIDE|MOD) right=expression                         # BinOperator //p190
-  | left=expression operator=(PLUS|MINUS) right=expression                              # BinOperator //p180
+  | left=expression operator=(PLUS|MINUS|SET_SUBTRACTION) right=expression                              # BinOperator //p180
   | left=expression operator=INTERVAL right=expression                                  # BinOperator //p170
   | left=expression expressionOperatorP160 right=expression                             # BinOperatorP160 //p160
   | left=expression expression_bin_operator_p125 right=expression                       # ExpressionBinOperatorP125 //p125
@@ -250,6 +268,9 @@ expression_bin_operator_p125
   | PARTIAL_SURJECTION
   | TOTAL_BIJECTION
   | PARTIAL_BIJECTION
+  | TOTAL_RELATION
+  | SURJECTION_RELATION
+  | TOTAL_SURJECTION_RELATION
   )
   ;
 
@@ -294,6 +315,18 @@ expression_prefix_operator
   )
   ;
 
+expression_prefix_operator_2_args
+  :operator=(CONST
+  | FATHER
+  | PRJ1
+  | PRJ2
+  | RANK
+  | SUBTREE
+  | ARITY
+  | ITERATE
+  )
+  ;
+
 expression_keyword
   : operator=(NATURAL
   | NATURAL1
@@ -304,6 +337,8 @@ expression_keyword
   | BOOL
   | PRED
   | SUCC
+  | MAXINT
+  | MININT
   )
   ;
 
@@ -330,9 +365,9 @@ expressionOperatorP160
 
 
 composed_identifier
-  : Identifier ('.' Identifier)*      # ComposedIdentifier
+  : IDENTIFIER ('.' IDENTIFIER)*      # ComposedIdentifier
   ;
 
 identifier
-  : Identifier                        # IdentifierNode
+  : IDENTIFIER                        # IdentifierNode
   ;

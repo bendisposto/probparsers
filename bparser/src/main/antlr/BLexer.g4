@@ -5,7 +5,7 @@ package files;
 }
 
 @lexer::members {
-public boolean rulesGrammar = true;
+public boolean systemGrammar = false;
 }
 
 channels {
@@ -14,6 +14,7 @@ channels {
 
 
 fragment DIGIT: ('0'..'9');
+fragment HEX_DIGIT: DIGIT | [a-fA-F];
 fragment LETTER: [a-zA-Z];
 
 Number
@@ -21,16 +22,17 @@ Number
   | DIGIT
   ;
 
-MACHINE: 'MACHINE' {rulesGrammar = false;};
-RULES_MACHINE: 'RULES_MACHINE' {rulesGrammar}? ;
+HEX_LITERAL: '0x' HEX_DIGIT+;
+
+MACHINE: 'MACHINE' ;
 MODEL: 'MODEL';
-SYSTEM: 'SYSTEM';
+SYSTEM: 'SYSTEM' {systemGrammar}?;
 REFINEMENT: 'REFINEMENT';
 IMPLEMENTATION: 'IMPLEMENTATION';
 REFINES: 'REFINES';
 END: 'END' ;
 INITIALISATION: 'INITIALISATION';
-OPERATIONS: 'OPERATIONS';
+OPERATIONS: 'OPERATIONS' | 'EVENTS';
 LOCAL_OPERATIONS: 'LOCAL_OPERATIONS';
 VALUES: 'VALUES';
 
@@ -100,9 +102,10 @@ RIGHT_PAR: ')';
 LEFT_BRACKET: '[';
 RIGHT_BRACKET: ']';
 MINUS: '-' | '\u2212';
+SET_SUBTRACTION: '\\';
 PLUS: '+' | '\u002b';
 SINGLE_QUOTE: '\'';
-TILDE: '~' | '\u223c';
+TILDE: '~' | '∼' | '⁻' '¹';// 0x207b 0xb9;'\u223c';
 DOT: '.';
 SEMICOLON: ';';
 VERTICAL_BAR: '|';
@@ -122,7 +125,7 @@ OR: 'or';
 //expression_p125
 SET_RELATION: '<->' | '↔';//'\u2194';
 PARTIAL_FUNCTION: '+->'| '⇸';//'\u21f8';
-TOTAL_FUNCTION: '-->' | '→'; //'\u2192';
+TOTAL_FUNCTION: '-->' | '→' | MINUS MINUS GREATER; //'\u2192';
 TOTAL_INJECTION: '>->' | '↣'; //'\u21a3';
 PARTIAL_INJECTION: '>+>' | '⤔'; //'\u2914';
 TOTAL_SURJECTION: '-->>' | '↠'; //'\u21a0';
@@ -132,6 +135,8 @@ PARTIAL_BIJECTION: '>+>>' ;
 
 // Extensions
 TOTAL_RELATION: '<<->';
+SURJECTION_RELATION: '<->>' ; //surjection_relation = lt minus gt gt | 0xe101;
+TOTAL_SURJECTION_RELATION: '<<->>'; //{normal} total_surjection_relation = lt lt minus gt gt | 0xe102;
 
 // expression infix operators P160
 OVERWRITE_RELATION: '<+';
@@ -204,7 +209,7 @@ FRONT: 'front';
 ID: 'id';
 INFIX: 'infix';
 ISEQ: 'iseq';
-ISEQ1: 'iseq1'; // add 'iseq'0x8321 ?
+ISEQ1: 'iseq1' ; // add 'iseq'0x8321 ?
 LAST: 'last';
 LEFT: 'left';
 MAX: 'max';
@@ -230,7 +235,7 @@ TREE: 'tree';
 // expression prefix operators with two parameters
 CONST: 'const';
 FATHER: 'father';
-PRJ1: 'prj1'; // add | 'iseq'0x8321 ?
+PRJ1: 'prj1';
 PRJ2: 'prj2';
 RANK: 'rank';
 SUBTREE: 'subtree';
@@ -250,6 +255,8 @@ NAT: 'NAT';
 NAT1: 'NAT';
 INT: 'INT';
 INTEGER: 'INTEGER' | '\u2124';
+MAXINT: 'MAXINT';
+MININT: 'MININT';
 BOOL: 'BOOL';
 PRED: 'pred';
 SUCC: 'succ';
@@ -262,7 +269,41 @@ QUANTIFIED_UNION: 'UNION';
 QUANTIFIED_INTER: 'INTER';
 QUANTIFIED_SET: 'SET';
 
-STRING_LITERAL: '"' (~["] .*?)? '"';
+
+
+fragment TSQ: '\'\'\'';
+fragment SQ: '\'';
+
+StringLiteral
+    :   '"' SignleStringCharacters? '"'
+    | TSQ MultiLineStringCharacters? TSQ
+    ;
+fragment
+SignleStringCharacters
+    :   SingleLineStringCharacter+
+    ;
+
+fragment
+SingleLineStringCharacter
+    :   ~["\n]
+    |    '\\' '"'
+    ;
+
+fragment
+MultiLineStringCharacters
+    :  MultiLineStringCharacter+
+    | MultiLineStringCharacter+ SQ SQ
+    | MultiLineStringCharacter+ SQ
+    ;
+
+fragment
+MultiLineStringCharacter
+    :  ~[']
+    | SQ ~[']
+    | SQ SQ ~[']
+    |  '\\' SQ
+    ;
+
 // other
 
 
@@ -271,9 +312,9 @@ PREDICATE_KEYWORD: '#PREDICATE';
 SUBSTITUTION_KEYWORD: '#SUBSTITUTION';
 FORMULA_KEYWORD: '#FORMULA';
 OPPATTERN_KEYWORD: '#OPPATTERN';
+MACHINECLAUSE: '#MACHINECLAUSE';
 
-
-Identifier
+IDENTIFIER
   : LETTER (LETTER | DIGIT | '_')*
   ;
 

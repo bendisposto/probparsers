@@ -28,6 +28,7 @@ import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.antlr.Antlr4Parser;
 import de.be4.classicalb.core.parser.exceptions.*;
+import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -342,12 +343,18 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			parser = new Parser(lexer);
 			Start rootNode = null;
-			if(parseOptions.useAntlr4Parser){
-				rootNode = (Start) Antlr4Parser.createSableCCAst(input);
-			}else{
+			if (parseOptions.useAntlr4Parser) {
+				if(parseOptions.grammar instanceof RulesGrammar){
+					rootNode = (Start) Antlr4Parser.createSableCCAstFromRulesGrammar(input);
+				}else{
+					rootNode = (Start) Antlr4Parser.createSableCCAst(input);
+				}
+				
+				
+			} else {
 				rootNode = parser.parse();
 			}
-			
+
 			final List<IToken> tokenList = lexer.getTokenList();
 
 			/*
@@ -378,10 +385,12 @@ public class BParser {
 			// perfom AST transformations that can't be done by SableCC
 			applyAstTransformations(rootNode);
 
-			// perform some semantic checks which are not done in the parser
-			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
-			for (CheckException checkException : checkExceptions) {
-				bExceptionList.add(new BException(getFileName(), checkException));
+			if (!parseOptions.useAntlr4Parser) {
+				// perform some semantic checks which are not done in the parser
+				List<CheckException> checkExceptions = performSemanticChecks(rootNode);
+				for (CheckException checkException : checkExceptions) {
+					bExceptionList.add(new BException(getFileName(), checkException));
+				}
 			}
 			if (bExceptionList.size() > 0) {
 				BCompoundException comp = new BCompoundException(bExceptionList);

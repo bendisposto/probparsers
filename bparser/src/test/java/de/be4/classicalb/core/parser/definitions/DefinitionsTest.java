@@ -204,6 +204,16 @@ public class DefinitionsTest {
 	}
 
 	@Test
+	public void testExprOrSubst0() throws Exception {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefSubst==g\nOPERATIONS\nop=defSubst\nEND";
+		final String result = getTreeAsString(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(defSubst,[],AOpSubstitution(AIdentifierExpression([g]),[]))]),AOperationsMachineClause([AOperation([],[op],[],ADefinitionSubstitution(defSubst,[]))])]))",
+				result);
+	}
+
+	@Test
 	public void testExprOrSubst1() throws Exception {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefSubst==g(x)\nOPERATIONS\nop=defSubst\nEND";
 		final String result = getTreeAsString(testMachine);
@@ -233,8 +243,7 @@ public class DefinitionsTest {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(25, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting substitution here but found definition with type 'Expression'",
+			assertEquals("Expecting substitution here but found definition with type 'Expression'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -250,8 +259,7 @@ public class DefinitionsTest {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(24, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting expression here but found definition with type 'Substitution'",
+			assertEquals("Expecting expression here but found definition with type 'Substitution'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -287,8 +295,7 @@ public class DefinitionsTest {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(31, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting substitution here but found definition with type 'Expression'",
+			assertEquals("Expecting substitution here but found definition with type 'Expression'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -304,8 +311,7 @@ public class DefinitionsTest {
 			final BParseException cause = (BParseException) e.getCause();
 			assertNull(cause.getToken());
 			assertEquals(30, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting expression here but found definition with type 'Substitution'",
+			assertEquals("Expecting expression here but found definition with type 'Substitution'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -321,9 +327,7 @@ public class DefinitionsTest {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(1, cause.getNodes().length);
 			assertNotNull(cause.getNodes()[0]);
-			assertEquals(
-					"Number of parameters doesn't match declaration of definition",
-					cause.getLocalizedMessage());
+			assertEquals("Number of parameters doesn't match declaration of definition", cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
 	}
@@ -333,6 +337,8 @@ public class DefinitionsTest {
 		final String testMachine = "MACHINE Test  \n DEFINITIONS  \n bar(y) == foo(y);  \n foo(x)==x<3;  \n END";
 		String asString = getTreeAsString(testMachine);
 		System.out.println(asString);
+		String expected = "Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([APredicateDefinitionDefinition(bar,[AIdentifierExpression([y])],ADefinitionPredicate(foo,[AIdentifierExpression([y])])),APredicateDefinitionDefinition(foo,[AIdentifierExpression([x])],ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3)))])]))";
+		System.out.println(expected);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([APredicateDefinitionDefinition(bar,[AIdentifierExpression([y])],ADefinitionPredicate(foo,[AIdentifierExpression([y])])),APredicateDefinitionDefinition(foo,[AIdentifierExpression([x])],ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3)))])]))",
 				asString);
@@ -340,21 +346,21 @@ public class DefinitionsTest {
 
 	@Test
 	public void testAssertInDefinition() throws BCompoundException {
-		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n"
-				+ "ABORT == ASSERT TRUE=FALSE THEN skip END\n" + "END\n";
+		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n" + "ABORT == ASSERT TRUE=FALSE THEN skip END\n"
+				+ "END\n";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(ABORT,[],AAssertionSubstitution(AEqualPredicate(ABooleanTrueExpression(),ABooleanFalseExpression()),ASkipSubstitution()))])]))",
 				result);
 	}
-	
-	@Test (expected = BCompoundException.class)
+
+	@Test(expected = BCompoundException.class)
 	public void testDetectCycleInDefinitions() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS foo == 1=1 & foo END\n";
 		getTreeAsString(testMachine);
 	}
-	
-	@Test (expected = BCompoundException.class)
+
+	@Test(expected = BCompoundException.class)
 	public void testDetectCycleInDefinitions2() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS bar == foo; foo == 1=1 & bar END\n";
 		getTreeAsString(testMachine);

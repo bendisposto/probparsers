@@ -11,14 +11,39 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 
 public class RulesLanguageTest {
 
 	@Test
+	public void testSimpleRulesMachine() throws Exception {
+		final String testMachine = "RULES_MACHINE ruleMch END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testOrdinaryOperation() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS rule1 = skip END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
 	public void testSimpleRule() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testSimpleRuleForall() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -31,7 +56,7 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
-	
+
 	@Test
 	public void testRuleTags() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
@@ -47,8 +72,6 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
-	
 
 	@Test
 	public void testStringFormat() throws FileNotFoundException, IOException {
@@ -146,7 +169,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
 		String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
-		//TODO do not use the prettyprinter
+		// TODO do not use the prettyprinter
 		assertTrue(result.contains("foo_Counterexamples := foo_Counterexamples\\/{2}*{\"fail\"}"));
 
 	}
@@ -204,9 +227,9 @@ public class RulesLanguageTest {
 		assertTrue(!result.contains("exception"));
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
-		//TODO do not use the prettyprinter
+		// TODO do not use the prettyprinter
 		assertTrue(rulesMachineAsBMachine.contains("foo := IF k=TRUE THEN \"NOT_CHECKED\" ELSE \"DISABLED\" END"));
-		
+
 	}
 
 	@Test
@@ -386,7 +409,10 @@ public class RulesLanguageTest {
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
-
+		Start start = unit.getStart();
+		PrettyPrinter pp = new PrettyPrinter();
+		start.apply(pp);
+		System.out.println(pp.getPrettyPrint());
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 

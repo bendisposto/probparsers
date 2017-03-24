@@ -131,7 +131,6 @@ public class ExpressionTest {
 
 	@Test
 	public void testQuantifiedUnionExpression2() throws Exception {
-
 		final String testMachine = "#EXPRESSION UNION x,y . (x=0 & y=x | (x,y) )";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
