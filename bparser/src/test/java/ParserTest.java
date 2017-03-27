@@ -2,8 +2,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.antlr.Antlr4Parser;
-import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser;
 import de.be4.classicalb.core.parser.antlr.BLanguageSableCCAstBuilder;
+import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser;
 import de.be4.classicalb.core.parser.node.Node;
 import files.BLexer;
 

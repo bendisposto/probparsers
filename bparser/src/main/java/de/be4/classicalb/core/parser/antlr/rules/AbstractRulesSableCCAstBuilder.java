@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.be4.classicalb.core.parser.antlr.rules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import static de.be4.classicalb.core.parser.antlr.StaticSableCCAstBuilder.*;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser.DefinitionType;
+import de.be4.classicalb.core.parser.antlr.IDefinitions.*;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 import files.RulesGrammar.*;
@@ -19,9 +19,9 @@ import files.RulesGrammarBaseVisitor;
 import static files.RulesGrammar.*;
 
 public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node> {
-	private final DefinitionsAnalyser definitionsAnalyser;
+	private final RulesDefinitionAnalyser definitionsAnalyser;
 
-	public AbstractRulesSableCCAstBuilder(DefinitionsAnalyser definitionsAnalyser) {
+	public AbstractRulesSableCCAstBuilder(RulesDefinitionAnalyser definitionsAnalyser) {
 		this.definitionsAnalyser = definitionsAnalyser;
 	}
 
@@ -203,22 +203,20 @@ public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node
 		currentDefinitionType = type;
 		final Node rhs = formula.accept(this);
 		currentDefinitionType = null;
+		Node node;
 		if (type == DefinitionType.SUBSTITUTION_DEFINITION) {
-			final TDefLiteralSubstitution subLiteral = new TDefLiteralSubstitution(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new ASubstitutionDefinitionDefinition(subLiteral, parameterList, (PSubstitution) rhs), ctx);
+			TDefLiteralSubstitution tDefLiteral = createPositionedToken(new TDefLiteralSubstitution(definitionName),
+					ctx.name);
+			node = new ASubstitutionDefinitionDefinition(tDefLiteral, parameterList, (PSubstitution) rhs);
 		} else if (type == DefinitionType.PREDICATE_DEFINITION) {
-			final TDefLiteralPredicate predLiteral = new TDefLiteralPredicate(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new APredicateDefinitionDefinition(predLiteral, parameterList, (PPredicate) rhs), ctx);
+			TDefLiteralPredicate tDefLiteral = createPositionedToken(new TDefLiteralPredicate(definitionName),
+					ctx.name);
+			node = new APredicateDefinitionDefinition(tDefLiteral, parameterList, (PPredicate) rhs);
 		} else {
-			final TIdentifierLiteral exprLiteral = new TIdentifierLiteral(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new AExpressionDefinitionDefinition(exprLiteral, parameterList, (PExpression) rhs), ctx);
+			TIdentifierLiteral tDefLiteral = createPositionedToken(new TIdentifierLiteral(definitionName), ctx.name);
+			node = new AExpressionDefinitionDefinition(tDefLiteral, parameterList, (PExpression) rhs);
 		}
+		return createPositionedNode(node, ctx);
 	}
 
 	private Node createDefinitionCall(TerminalNode terminalNode, List<PExpression> argumentList,
@@ -987,8 +985,7 @@ public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node
 		final PExpression _expression1_ = (PExpression) ctx.expr1.accept(this);
 		final PExpression _expression2_ = (PExpression) ctx.expr2.accept(this);
 		final int type = ctx.expression_prefix_operator_2_args().operator.getType();
-		return createExpressionPrefixOperator2Args(VOCABULARY.getSymbolicName(type), _expression1_,
-				_expression2_, ctx);
+		return createExpressionPrefixOperator2Args(VOCABULARY.getSymbolicName(type), _expression1_, _expression2_, ctx);
 	}
 
 	@Override

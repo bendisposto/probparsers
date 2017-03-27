@@ -1,14 +1,14 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.be4.classicalb.core.parser.antlr.rules;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 
-import files.BLexer;
+import files.RulesLexer;
 
-public class MyLexer extends BLexer {
+public class MyRulesLexer extends RulesLexer {
 
-	public MyLexer(CharStream input) {
+	public MyRulesLexer(CharStream input) {
 		super(input);
 	}
 
@@ -17,6 +17,7 @@ public class MyLexer extends BLexer {
 		Token token = super.nextToken();
 		String s = this.VOCABULARY.getSymbolicName(token.getType());
 		System.out.println(token.getText() + " " + token.getClass() +" "+ token.getType() + " " + s + " " + this._mode);
+
 //		if (token.getText().equals("foo") && token instanceof CommonToken) {
 //			CommonToken commonToken = (CommonToken) token;
 //			System.out.println(commonToken.getType());

@@ -41,6 +41,23 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
+	public void testWritingDefineVariable() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		final String expected = "parse_exception(pos(1,95,'UnknownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testRuleFailNoMessage() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL requires at least one argument.').\n", result);
+	}
+	
+	@Test
 	public void testChoiceSubstitutionException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE skip OR skip END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);

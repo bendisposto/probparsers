@@ -78,6 +78,15 @@ public class PragmaTest {
 	}
 
 	@Test
+	public void testSymbolicLambda() throws Exception {
+		final String testMachine = "MACHINE test CONSTANTS c PROPERTIES c = /*@symbolic */ %x.(x: NATURAL | x )  END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+//		assertTrue(result.contains(
+//				"machine(abstract_machine(1,machine(2),machine_header(3,test,[]),[constants(4,[identifier(5,c)]),properties(6,equal(7,identifier(8,c),symbolic_comprehension_set(9,[identifier(10,x)],member(11,identifier(12,x),natural_set(13)))))]))."));
+	}
+	
+	@Test
 	public void testSymbolicSetComprehension() throws Exception {
 		final String testMachine = "MACHINE test CONSTANTS c PROPERTIES c = /*@symbolic*/ {x | x : NATURAL}  END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);

@@ -11,6 +11,10 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.antlr.rules.AbstractRulesSableCCAstBuilder;
+import de.be4.classicalb.core.parser.antlr.rules.MyRulesLexer;
+import de.be4.classicalb.core.parser.antlr.rules.RulesDefinitionAnalyser;
+import de.be4.classicalb.core.parser.antlr.rules.RulesSableCCAstBuilder;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
@@ -35,7 +39,7 @@ public class Antlr4Parser {
 		System.out.println("\n\n----------------Rules");
 		{
 			ParseTree tree2 = parseRules(input);
-			DefinitionsAnalyser definitionAnalyser2 = new DefinitionsAnalyser(tree2);
+			RulesDefinitionAnalyser definitionAnalyser2 = new RulesDefinitionAnalyser(tree2);
 			definitionAnalyser2.analyse();
 			AbstractRulesSableCCAstBuilder astBuilder2 = new AbstractRulesSableCCAstBuilder(definitionAnalyser2);
 			Node ast2 = tree2.accept(astBuilder2);
@@ -95,7 +99,7 @@ public class Antlr4Parser {
 
 	public static ParseTree parseRules(String input1) {
 		ANTLRInputStream input = new ANTLRInputStream(input1);
-		RulesLexer myLexer = new RulesLexer(input);
+		MyRulesLexer myLexer = new MyRulesLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(myLexer);
 
 		RulesGrammar parser = new RulesGrammar(tokens);
@@ -122,7 +126,7 @@ public class Antlr4Parser {
 			return ast;
 		} catch (RuntimeException e) {
 			// System.err.println(e.getMessage());
-			// e.printStackTrace();
+			 e.printStackTrace();
 			if (e.getCause() != null) {
 				throw (BParseException) e.getCause();
 			} else {
@@ -136,7 +140,7 @@ public class Antlr4Parser {
 		System.out.println("-------------Rules");
 		try {
 			ParseTree tree = parseRules(input);
-			DefinitionsAnalyser definitionAnalyser = new DefinitionsAnalyser(tree);
+			RulesDefinitionAnalyser definitionAnalyser = new RulesDefinitionAnalyser(tree);
 			definitionAnalyser.analyse();
 			RulesSableCCAstBuilder astBuilder = new RulesSableCCAstBuilder(definitionAnalyser);
 			Node ast = tree.accept(astBuilder);

@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.be4.classicalb.core.parser.antlr.rules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import files.RulesGrammar.Operation_attributesContext;
 
 public class RulesSableCCAstBuilder extends AbstractRulesSableCCAstBuilder {
 
-	public RulesSableCCAstBuilder(DefinitionsAnalyser definitionsAnalyser) {
+	public RulesSableCCAstBuilder(RulesDefinitionAnalyser definitionsAnalyser) {
 		super(definitionsAnalyser);
 	}
 
@@ -48,16 +48,73 @@ public class RulesSableCCAstBuilder extends AbstractRulesSableCCAstBuilder {
 	}
 
 	@Override
-	public Node visitRuleOperation(RuleOperationContext ctx) {
-		TIdentifierLiteral ruleName = createTIdentifierLiteral(ctx.IDENTIFIER());
+	public Node visitRuleComputationOperation(RuleComputationOperationContext ctx) {
 		List<POperationAttribute> attributes = new ArrayList<>();
 		for (Operation_attributesContext operation_attributesContext : ctx.operation_attributes()) {
 			POperationAttribute attr = (POperationAttribute) operation_attributesContext.accept(this);
 			attributes.add(attr);
 		}
 		PSubstitution ruleBody = (PSubstitution) ctx.substitution().accept(this);
-		ARuleOperation ruleOp = new ARuleOperation(ruleName, attributes, ruleBody);
-		return createPositionedNode(ruleOp, ctx);
+		TIdentifierLiteral tIdentifierLiteral = createTIdentifierLiteral(ctx.IDENTIFIER());
+		if (ctx.keyword.getType() == RULE) {
+			return createPositionedNode(new ARuleOperation(tIdentifierLiteral, attributes, ruleBody), ctx);
+		} else if (ctx.keyword.getType() == COMPUTATION) {
+			return createPositionedNode(new AComputationOperation(tIdentifierLiteral, attributes, ruleBody), ctx);
+		} else {
+			throw new RuntimeException("Unexpected operation type: " + ctx.keyword.getText());
+		}
+	}
+
+	@Override
+	public Node visitRuleFailSubstitution(RuleFailSubstitutionContext ctx) {
+		TKwSubstitutionOperator name = createPositionedToken(new TKwSubstitutionOperator(ctx.RULE_FAIL().getText()),
+				ctx.RULE_FAIL().getSymbol());
+		List<PExpression> arguments = new ArrayList<>();
+		List<ExpressionContext> exprs = ctx.expression_list().exprs;
+		for (ExpressionContext expressionContext : exprs) {
+			PExpression pExpression = (PExpression) expressionContext.accept(this);
+			arguments.add(pExpression);
+		}
+		AOperatorSubstitution opSub = new AOperatorSubstitution(name, arguments);
+		return createPositionedNode(opSub, ctx);
+	}
+
+	@Override
+	public Node visitFunctionOperation(FunctionOperationContext ctx) {
+		List<POperationAttribute> attributes = new ArrayList<>();
+		for (Operation_attributesContext operation_attributesContext : ctx.operation_attributes()) {
+			POperationAttribute attr = (POperationAttribute) operation_attributesContext.accept(this);
+			attributes.add(attr);
+		}
+		PSubstitution ruleBody = (PSubstitution) ctx.substitution().accept(this);
+		TIdentifierLiteral tIdentifierLiteral = createTIdentifierLiteral(ctx.IDENTIFIER());
+
+		List<PExpression> _returnValues_ = new ArrayList<>();
+		if (null != ctx.return_values) {
+			for (Token token : ctx.return_values.idents) {
+				AIdentifierExpression aIdentifierExpression = createAIdentifierExpression(token);
+				_returnValues_.add(aIdentifierExpression);
+			}
+		}
+		List<PExpression> _parameters_ = new ArrayList<>();
+		if (null != ctx.parameters) {
+			for (Token token : ctx.parameters.idents) {
+				AIdentifierExpression aIdentifierExpression = createAIdentifierExpression(token);
+				_parameters_.add(aIdentifierExpression);
+			}
+		}
+		AFunctionOperation aFunctionOperation = new AFunctionOperation(_returnValues_, tIdentifierLiteral, _parameters_,
+				attributes, ruleBody);
+		return createPositionedNode(aFunctionOperation, ctx);
+	}
+
+	@Override
+	public Node visitDefineSubstitution(RulesGrammar.DefineSubstitutionContext ctx) {
+		TIdentifierLiteral name = createTIdentifierLiteral(ctx.IDENTIFIER());
+		PExpression type = (PExpression) ctx.type_expr.accept(this);
+		PExpression dummyValue = null == ctx.dummy_expr ? null : (PExpression) ctx.dummy_expr.accept(this);
+		PExpression value = (PExpression) ctx.value_expr.accept(this);
+		return createPositionedNode(new ADefineSubstitution(name, type, dummyValue, value), ctx);
 	}
 
 	@Override
@@ -156,4 +213,27 @@ public class RulesSableCCAstBuilder extends AbstractRulesSableCCAstBuilder {
 		return createPositionedNode(forLoop, ctx);
 	}
 
+	@Override
+	public Node visitPredicateOperator(PredicateOperatorContext ctx) {
+		ArrayList<PExpression> pExpressionList = new ArrayList<>();
+		for (ExpressionContext expressionContext : ctx.expression_list().exprs) {
+			PExpression pExpression = (PExpression) expressionContext.accept(this);
+			pExpressionList.add(pExpression);
+		}
+		TKwPredicateOperator tName = createPositionedToken(new TKwPredicateOperator(ctx.keyword.getText()),
+				ctx.keyword);
+		return createPositionedNode(new AOperatorPredicate(tName, pExpressionList), ctx);
+	}
+
+	@Override
+	public Node visitExpressionOperator(ExpressionOperatorContext ctx) {
+		ArrayList<PExpression> pExpressionList = new ArrayList<>();
+		for (ExpressionContext expressionContext : ctx.expression_list().exprs) {
+			PExpression pExpression = (PExpression) expressionContext.accept(this);
+			pExpressionList.add(pExpression);
+		}
+		TKwExpressionOperator tName = createPositionedToken(new TKwExpressionOperator(ctx.keyword.getText()),
+				ctx.keyword);
+		return createPositionedNode(new AOperatorExpression(tName, pExpressionList), ctx);
+	}
 }

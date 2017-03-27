@@ -19,8 +19,10 @@ machine_x
 
 operation
   : (output=identifier_list OUTPUT_PRAMETERS )? IDENTIFIER ('(' parameters=identifier_list ')')?  EQUAL substitution   # BOperation
-  | RULE IDENTIFIER operation_attributes* BODY substitution END                                                        # RuleOperation
+  | keyword=(RULE|COMPUTATION) IDENTIFIER operation_attributes* BODY substitution END                                                        # RuleComputationOperation
+  | FUNCTION (return_values=identifier_list OUTPUT_PRAMETERS)? IDENTIFIER ('(' parameters=identifier_list ')') ? operation_attributes* BODY substitution END                             # FunctionOperation
   ;
+
 
 operation_attributes
   : keyword=(DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION) identifier_list    # DependsOnAttribute
@@ -38,4 +40,13 @@ substitution_extension_point
   | RULE_FAIL '(' expression_list ')'                                                                     # RuleFailSubstitution
   | DEFINE IDENTIFIER TYPE type_expr=expression_in_par
     (DUMMY_VALUE dummy_expr=expression_in_par)? VALUE value_expr=expression_in_par END                    # DefineSubstitution
+  ;
+
+predicate_extension_point
+  : keyword=(SUCCEEDED_RULE|SUCCEEDED_RULE_ERROR_TYPE|FAILED_RULE|FAILED_RULE_ERROR_TYPE
+      |NOT_CHECKED_RULE|DISABLED_RULE)  '(' expression_list ')'                                           # PredicateOperator
+  ;
+
+expression_extension_point
+  : keyword=(STRING_FORMAT|GET_RULE_COUNTEREXAMPLES)  '(' expression_list ')'                                                        # ExpressionOperator
   ;

@@ -138,7 +138,7 @@ substitution_l1
       ':=' expression_list                                                              #AssignSubstitution
   | composed_identifier ('(' expression_list ')')?                                      #SubstitutionIdentifierCall
   | output=identifier_list OUTPUT_PRAMETERS composed_identifier ('(' expression_list ')')?     #SubstitutionOperationCall
-  | substitution_extension_point # SubstitutionNextExtensionPoint
+  | substitution_extension_point                                                            # SubstitutionNextExtensionPoint
   ;
 
 substitution_extension_point
@@ -149,6 +149,10 @@ identifier_or_function_or_record
   : IDENTIFIER                                                        # AssignSingleIdentifier
   | name=IDENTIFIER ('(' argument_lists+=expression_list ')' )+       # AssignFunctionIdentifier
   | name=IDENTIFIER (SINGLE_QUOTE attributes+=IDENTIFIER)+            # AssignRecordIdentifier
+  ;
+
+expression_in_par_list
+  : '(' exprs+=expression_in_par (',' exprs+=expression_in_par)* ')'
   ;
 
 expression_list
@@ -180,7 +184,13 @@ predicate_atomic
     right=expression                                                                      # PredicateBinExpression
   | left=predicate_atomic operator=EQUIVALENCE right=predicate_atomic                     # PredicateBinPredicateOperator //p60
   | LEFT_BRACKET identifier_list ASSIGN expression_list RIGHT_BRACKET predicate_atomic    # WeakestPreconditionPredicate
+  | predicate_extension_point                                                             # PredicateNextExtensionPoint
   ;
+
+predicate_extension_point
+  : NOT_REACHABLE
+  ;
+
 
 predicate_expression_operator
   : operator=
@@ -227,8 +237,8 @@ expression
   | expression_prefix_operator '(' expr=expression_in_par ')'               # ExpressionPrefixOperator
   | expression_prefix_operator_2_args
       '(' expr1=expression_in_par ',' expr2=expression_in_par ')'           # ExpressionPrefixOperator2Args
-  | expression_keyword                                                      # ExpressionKeyword
-  | LAMBDA quantified_variables_list
+  | expression_keyword                                                      # ExpressionKeyword //e.g. NATURAL,..
+  | PRAGMA_SYMBOLIC? LAMBDA quantified_variables_list
       DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # LambdaExpression
   | operator=(QUANTIFIED_UNION|QUANTIFIED_INTER|SIGMA|PI)  quantified_variables_list
       DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # QuantifiedExpression
@@ -251,6 +261,11 @@ expression
   | left=expression operator=INTERVAL right=expression                                  # BinOperator //p170
   | left=expression expressionOperatorP160 right=expression                             # BinOperatorP160 //p160
   | left=expression expression_bin_operator_p125 right=expression                       # ExpressionBinOperatorP125 //p125
+  | expression_extension_point                                                          # ExpressionNextExtensionPoint
+  ;
+
+expression_extension_point
+  : NOT_REACHABLE
   ;
 
 rec_entry

@@ -24,6 +24,14 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
+	
+	@Test
+	public void testSymbolicFunctionRulesMachine() throws Exception {
+		final String testMachine = "RULES_MACHINE ruleMch PROPERTIES /*@symbolic*/ %x.(x:1..3|x) = 1 END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
 
 	@Test
 	public void testOrdinaryOperation() throws Exception {
@@ -204,15 +212,6 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testWritingDefineVariable() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		final String expected = "parse_exception(pos(1,95,'UnknownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
-		assertEquals(expected, result);
-	}
-
-	@Test
 	public void testRuleFail() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
@@ -270,21 +269,6 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleFailNoMessage() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL requires at least one argument.').\n", result);
-	}
-
-	@Test
-	public void testRuleIfThenElse() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-	}
-
-	@Test
 	public void testForLoop() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO FOR y IN 1..3 \nDO skip END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
@@ -303,7 +287,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testAllowedDefinitionCall() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == skip OPERATIONS RULE rule1 BODY RULE_SUCCESS; foo END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == skip OPERATIONS RULE rule1 BODY skip; foo END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));

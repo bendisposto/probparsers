@@ -12,7 +12,7 @@ import static de.be4.classicalb.core.parser.antlr.StaticSableCCAstBuilder.*;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser.DefinitionType;
+import de.be4.classicalb.core.parser.antlr.IDefinitions.*;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 import files.BParserBaseVisitor;
@@ -201,22 +201,20 @@ public class BLanguageSableCCAstBuilder extends BParserBaseVisitor<Node> {
 		currentDefinitionType = type;
 		final Node rhs = formula.accept(this);
 		currentDefinitionType = null;
+		Node node;
 		if (type == DefinitionType.SUBSTITUTION_DEFINITION) {
-			final TDefLiteralSubstitution subLiteral = new TDefLiteralSubstitution(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new ASubstitutionDefinitionDefinition(subLiteral, parameterList, (PSubstitution) rhs), ctx);
+			TDefLiteralSubstitution tDefLiteral = createPositionedToken(new TDefLiteralSubstitution(definitionName),
+					ctx.name);
+			node = new ASubstitutionDefinitionDefinition(tDefLiteral, parameterList, (PSubstitution) rhs);
 		} else if (type == DefinitionType.PREDICATE_DEFINITION) {
-			final TDefLiteralPredicate predLiteral = new TDefLiteralPredicate(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new APredicateDefinitionDefinition(predLiteral, parameterList, (PPredicate) rhs), ctx);
+			TDefLiteralPredicate tDefLiteral = createPositionedToken(new TDefLiteralPredicate(definitionName),
+					ctx.name);
+			node = new APredicateDefinitionDefinition(tDefLiteral, parameterList, (PPredicate) rhs);
 		} else {
-			final TIdentifierLiteral exprLiteral = new TIdentifierLiteral(definitionName, ctx.name.getLine(),
-					ctx.name.getCharPositionInLine());
-			return createPositionedNode(
-					new AExpressionDefinitionDefinition(exprLiteral, parameterList, (PExpression) rhs), ctx);
+			TIdentifierLiteral tDefLiteral = createPositionedToken(new TIdentifierLiteral(definitionName), ctx.name);
+			node = new AExpressionDefinitionDefinition(tDefLiteral, parameterList, (PExpression) rhs);
 		}
+		return createPositionedNode(node, ctx);
 	}
 
 	private Node createDefinitionCall(TerminalNode terminalNode, List<PExpression> argumentList,
@@ -1029,7 +1027,13 @@ public class BLanguageSableCCAstBuilder extends BParserBaseVisitor<Node> {
 				ctx.quantified_variables_list().identifier_list());
 		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
 		PExpression expression = (PExpression) ctx.expression_in_par().accept(this);
-		return createPositionedNode(new ALambdaExpression(identifierList, predicate, expression), ctx);
+		Node node;
+		if (null == ctx.PRAGMA_SYMBOLIC()) {
+			node = new ALambdaExpression(identifierList, predicate, expression);
+		} else {
+			node = new ASymbolicLambdaExpression(identifierList, predicate, expression);
+		}
+		return createPositionedNode(node, ctx);
 	}
 
 	@Override

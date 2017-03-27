@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.be4.classicalb.core.parser.antlr.rules;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,19 +10,23 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser;
+import de.be4.classicalb.core.parser.antlr.IDefinitions;
+import de.be4.classicalb.core.parser.antlr.IDefinitions.DefinitionType;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
-import files.BParserBaseVisitor;
-import files.BParser.*;
+import files.RulesGrammarBaseVisitor;
+import files.RulesGrammar.*;
 
-public class DefinitionsAnalyser implements IDefinitions {
+public class RulesDefinitionAnalyser implements IDefinitions {
+
 	final ParseTree parseTree;
 	HashMap<String, FormulaContext> definitions = new HashMap<>();
 	HashMap<String, DefinitionType> definitionTypes = new HashMap<>();
 	HashMap<String, Integer> definitionParameterNumber = new HashMap<>();
 	HashMap<String, String> definitionDependencies = new HashMap<>();
 
-	public DefinitionsAnalyser(ParseTree tree) {
+	public RulesDefinitionAnalyser(ParseTree tree) {
 		this.parseTree = tree;
 	}
 
@@ -79,7 +83,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 
 	}
 
-	class DefinitionFinder extends BParserBaseVisitor<Void> {
+	class DefinitionFinder extends RulesGrammarBaseVisitor<Void> {
 		@Override
 		public Void visitOrdinaryDefinition(OrdinaryDefinitionContext ctx) {
 			FormulaContext formula = ctx.formula();
@@ -119,7 +123,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 		}
 	}
 
-	class DefinitionUsage extends BParserBaseVisitor<Void> {
+	class DefinitionUsage extends RulesGrammarBaseVisitor<Void> {
 		@Override
 		public Void visitSubstitutionIdentifierCall(SubstitutionIdentifierCallContext ctx) {
 			final ComposedIdentifierContext subNode = (ComposedIdentifierContext) ctx.composed_identifier();
@@ -128,7 +132,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 			Expression_listContext expression_list = ctx.expression_list();
 			int numberOfArguments = (expression_list == null) ? 0 : expression_list.exprs.size();
 
-			if (identifiers.size() == 1 && DefinitionsAnalyser.this.isDefinition(id.getText())) {
+			if (identifiers.size() == 1 && RulesDefinitionAnalyser.this.isDefinition(id.getText())) {
 				addDefinitionTypeUsage(id.getText(), DefinitionType.SUBSTITUTION_DEFINITION, subNode,
 						numberOfArguments);
 			}
@@ -141,7 +145,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 			ComposedIdentifierContext subNode = (ComposedIdentifierContext) ctx.composed_identifier();
 			List<TerminalNode> identifiers = subNode.IDENTIFIER();
 			final String firstName = identifiers.get(0).getText();
-			if (identifiers.size() == 1 && DefinitionsAnalyser.this.isDefinition(firstName)) {
+			if (identifiers.size() == 1 && RulesDefinitionAnalyser.this.isDefinition(firstName)) {
 				addDefinitionTypeUsage(firstName, DefinitionType.EXPRESSION_DEFINITION, ctx, 0);
 			}
 			return null;
@@ -156,11 +160,11 @@ public class DefinitionsAnalyser implements IDefinitions {
 				ComposedIdentifierContext subNode = (ComposedIdentifierContext) identifierContext.composed_identifier();
 				List<TerminalNode> tokens = subNode.IDENTIFIER();
 				final TerminalNode id = tokens.get(0);
-				if (tokens.size() == 1 && DefinitionsAnalyser.this.isDefinition(id.getText())) {
+				if (tokens.size() == 1 && RulesDefinitionAnalyser.this.isDefinition(id.getText())) {
 					addDefinitionTypeUsage(id.getText(), DefinitionType.EXPRESSION_DEFINITION, function,
 							arguments.size());
 				}
-				//do not visit function again
+				// do not visit function again
 				for (Expression_in_parContext expression_in_parContext : ctx.arguments) {
 					expression_in_parContext.accept(this);
 				}

@@ -15,10 +15,10 @@ public class PragmaListener extends BParserBaseListener {
 	CommonTokenStream tokens;
 
 	public PragmaListener(CommonTokenStream tokens) {
-		this.tokens = new CommonTokenStream(tokens.getTokenSource(), BLexer.PRAGMA_CHANNEL);
-		String text = tokens.getText();
-		System.out.println(text);
-		System.out.println(tokens.getTokens());
+		//this.tokens = new CommonTokenStream(tokens.getTokenSource(), BLexer.PRAGMA_CHANNEL);
+		//String text = tokens.getText();
+		//System.out.println(text);
+		//System.out.println(tokens.getTokens());
 	}
 
 //	@Override

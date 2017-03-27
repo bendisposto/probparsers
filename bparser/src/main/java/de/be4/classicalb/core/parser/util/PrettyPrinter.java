@@ -120,28 +120,28 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-		sb.append(node.getName().getText());
-		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
-		if (copy.size() > 0) {
-			sb.append("(");
-			printExprList(copy);
-			sb.append(")");
-		}
-		sb.append(" == ");
-		node.getRhs().apply(this);
+		printDefinition(node.getName().getText(), node.getParameters(), node.getRhs());
 	}
 
 	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
-		sb.append(node.getName().getText());
-		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
-		if (copy.size() > 0) {
+		printDefinition(node.getName().getText(), node.getParameters(), node.getRhs());
+	}
+
+	@Override
+	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
+		printDefinition(node.getName().getText(), node.getParameters(), node.getRhs());
+	}
+
+	private void printDefinition(String name, List<PExpression> parameter, Node rhs) {
+		sb.append(name);
+		if (parameter.size() > 0) {
 			sb.append("(");
-			printExprList(copy);
+			printExprList(parameter);
 			sb.append(")");
 		}
 		sb.append(" == ");
-		node.getRhs().apply(this);
+		rhs.apply(this);
 	}
 
 	@Override
@@ -1542,6 +1542,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
+		String defLiteral = node.getDefLiteral().getText();
+		sb.append(defLiteral);
+		if (!node.getParameters().isEmpty()) {
+			sb.append("(");
+			printExprList(node.getParameters());
+			sb.append(")");
+		}
+	}
+
+	@Override
+	public void caseADefinitionSubstitution(final ADefinitionSubstitution node) {
 		String defLiteral = node.getDefLiteral().getText();
 		sb.append(defLiteral);
 		if (!node.getParameters().isEmpty()) {

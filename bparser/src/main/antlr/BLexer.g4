@@ -1,15 +1,16 @@
 lexer grammar BLexer;
 
+
+
+
 @header {
 package files;
 }
 
 @lexer::members {
 public boolean systemGrammar = false;
-}
 
-channels {
-  PRAGMA_CHANNEL
+private boolean pragmaMode = false;
 }
 
 
@@ -314,6 +315,10 @@ FORMULA_KEYWORD: '#FORMULA';
 OPPATTERN_KEYWORD: '#OPPATTERN';
 MACHINECLAUSE: '#MACHINECLAUSE';
 
+
+
+PRAGMA_SYMBOLIC: 'symbolic' {pragmaMode}?;
+
 IDENTIFIER
   : LETTER (LETTER | DIGIT | '_')*
   ;
@@ -321,7 +326,8 @@ IDENTIFIER
 
 NOT_REACHABLE: 'NOT_REACHABLE';
 
-//PRAGMA_START: '/*@' -> pushMode(PRAGMAS), skip ;
+PRAGMA_START: '/*@'  {pragmaMode=true;} ->  skip ;
+PRAGMA_STOP: '*/' {pragmaMode}? {pragmaMode=false;} -> skip  ;
 
 COMMENT
   :   '/*' (~[@] .*?)? '*/' -> skip
@@ -334,10 +340,13 @@ LINE_COMMENT
 WS: [ \t\r\n]+ -> skip;
 
 
-//---------------------- PRAGMA -------------------------------
-//mode PRAGMAS;
+
+//---------------------- PRAGMA_MODE -------------------------------
+//mode PRAGMA_MODE;
 
 //PRAGMA_STOP: '*/' -> popMode, skip  ;
+
+
 
 //PRAGMA_WS: [ \t\r\n]+ -> skip;
 
