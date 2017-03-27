@@ -302,7 +302,7 @@ MultiLineStringCharacter
     :  ~[']
     | SQ ~[']
     | SQ SQ ~[']
-    |  '\\' SQ
+    | '\\' SQ
     ;
 
 // other
