@@ -46,6 +46,7 @@ public class RulesGrammar implements IGrammar {
 	public static final String STRING_FORMAT = "STRING_FORMAT";
 	public static final String ACTIVATION = "ACTIVATION";
 	public static final String PRECONDITION = "PRECONDITION";
+	public static final String POSTCONDITION = "POSTCONDITION";
 	public static final String CLASSIFICATION = "CLASSIFICATION";
 	public static final String TAGS = "TAGS";
 
@@ -100,6 +101,7 @@ public class RulesGrammar implements IGrammar {
 		
 		map.put(ACTIVATION, TKwPredicateAttribute.class);
 		map.put(PRECONDITION, TKwPredicateAttribute.class);
+		map.put(POSTCONDITION, TKwPredicateAttribute.class);
 		
 
 		map.put(RULE_FAIL, TKwSubstitutionOperator.class);

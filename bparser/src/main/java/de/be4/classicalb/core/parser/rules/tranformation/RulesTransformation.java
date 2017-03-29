@@ -54,7 +54,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private RuleOperation currentRule;
 	private HashMap<String, AbstractOperation> allOperations;
-	private int nestedForLoopCount = 0; // used to provide unique identifiers for generated variables of FOR loops 
+	private int nestedForLoopCount = 0; // used to provide unique identifiers
+										// for generated variables of FOR loops
 
 	public RulesTransformation(Start start, BParser bParser, List<RulesMachineReference> machineReferences,
 			RulesMachineChecker rulesMachineVisitor, HashMap<String, AbstractOperation> allOperations) {
@@ -452,7 +453,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final String ruleName = id.getIdentifier().get(0).getText();
 			final AbstractOperation operation = allOperations.get(ruleName);
 			if (operation == null || !(operation instanceof RuleOperation)) {
-				errorList.add(new CheckException(String.format("'%s' does not match any rule.", ruleName), node));
+				errorList.add(new CheckException(
+						String.format("'%s' does not match any rule visible to this machine.", ruleName), node));
 				return;
 			}
 			final RuleOperation rule = (RuleOperation) operation;
@@ -622,7 +624,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outAFunctionOperation(AFunctionOperation node) {
 		FunctionOperation func = rulesMachineVisitor.getFunctionOperation(node);
-		PSubstitution body = null;
+
 		final List<PPredicate> preConditionList = new ArrayList<>();
 		if (func.getPreconditionPredicate() != null) {
 			preConditionList.add(func.getPreconditionPredicate());
@@ -637,10 +639,16 @@ public class RulesTransformation extends DepthFirstAdapter {
 					func.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 			preConditionList.addAll(dependsOnComputationPredicates);
 		}
+
+		PSubstitution body = node.getBody();
+		if (null != func.getPostconditionPredicate()) {
+			AAssertionSubstitution assertSub = new AAssertionSubstitution(func.getPostconditionPredicate(),
+					new ASkipSubstitution());
+			body = createSequenceSubstitution(body, assertSub);
+		}
+
 		if (preConditionList.size() > 0) {
-			body = new APreconditionSubstitution(createConjunction(preConditionList), node.getBody());
-		} else {
-			body = node.getBody();
+			body = new APreconditionSubstitution(createConjunction(preConditionList), body);
 		}
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add(node.getName());
@@ -664,13 +672,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAOperatorPredicate(AOperatorPredicate node) {
+		// currently all operator handle rule names
 		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
 		final AIdentifierExpression ruleIdentifier = (AIdentifierExpression) arguments.get(0);
 		final String ruleName = ruleIdentifier.getIdentifier().get(0).getText();
 		AbstractOperation operation = allOperations.get(ruleName);
 		if (operation == null || !(operation instanceof RuleOperation)) {
-			errorList.add(new CheckException(String.format("'%s' does not match any rule.", ruleName), node));
+			errorList.add(new CheckException(
+					String.format("'%s' does not match any rule visible to this machine.", ruleName), node));
 			return;
 		}
 		final RuleOperation rule = (RuleOperation) operation;
@@ -740,13 +750,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AIntegerExpression(new TIntegerLiteral("" + i));
 	}
 
-
-	
 	@Override
 	public void inAForLoopSubstitution(AForLoopSubstitution node) {
 		nestedForLoopCount++;
 	}
-	
+
 	@Override
 	public void outAForLoopSubstitution(AForLoopSubstitution node) {
 		/**
@@ -755,7 +763,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
-		
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
@@ -803,11 +810,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		// G_Set \ {CHOOSE(G_Set)}
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
-				new ASetExtensionExpression(createExpressionList(chooseCall2))); 
-		
+				new ASetExtensionExpression(createExpressionList(chooseCall2)));
+
 		// G_Set := G_Set \ {CHOOSE(G_Set)}
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs)); 
+				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
 		List<PSubstitution> var2List = new ArrayList<>();
 		var2List.add(assignX);
 		var2List.add(node.getDoSubst());
@@ -1020,8 +1027,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
 		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + FORCE));
 		forceDefType.setParameters(createIdentifierList("T"));
-		forceDefType.setRhs(
-				new ATotalFunctionExpression(createIdentifier("T"), createIdentifier("T")));
+		forceDefType.setRhs(new ATotalFunctionExpression(createIdentifier("T"), createIdentifier("T")));
 		try {
 			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
