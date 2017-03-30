@@ -1012,12 +1012,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (definitions.containsDefinition(FORCE)) {
 			return;
 		}
-		// TO_STRING(S) == "0";
-		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		
+		 // EXTERNAL_FUNCTION_FORCE(T) == T --> T;
+		 // FORCE(value) == value;
+		 // forces evaluation of symbolic set representations
+		 // usage FORCE( { x | x:1..100 & x mod 2 = 0 } )
 		AExpressionDefinitionDefinition forceDef = new AExpressionDefinitionDefinition();
 		forceDef.setName(new TIdentifierLiteral(FORCE));
-		forceDef.setParameters(createIdentifierList("X"));
-		forceDef.setRhs(createIdentifier("X"));
+		forceDef.setParameters(createIdentifierList("value"));
+		forceDef.setRhs(createIdentifier("value"));
 		try {
 			definitions.addDefinition(forceDef, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
