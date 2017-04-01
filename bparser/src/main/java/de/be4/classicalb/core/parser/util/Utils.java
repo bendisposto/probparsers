@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.PParseUnit;
@@ -24,8 +25,11 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Utils {
 
-	public static String getIdentifierAsString(
-			final List<TIdentifierLiteral> idElements) {
+	public static String getAIdentifierAsString(AIdentifierExpression idExpr) {
+		return getTIdentifierListAsString(idExpr.getIdentifier());
+	}
+
+	public static String getTIdentifierListAsString(final List<TIdentifierLiteral> idElements) {
 		final String string;
 		if (idElements.size() == 1) {
 			// faster version for the simple case
@@ -50,8 +54,7 @@ public class Utils {
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 
-		if (parseUnit instanceof AAbstractMachineParseUnit
-				|| parseUnit instanceof ARefinementMachineParseUnit
+		if (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
 				|| parseUnit instanceof AImplementationMachineParseUnit) {
 			return true;
 		}
@@ -61,8 +64,7 @@ public class Utils {
 
 	public static String getRevisionFromManifest() {
 		String revision = "";
-		InputStream stream = Utils.class.getClassLoader().getResourceAsStream(
-				"revision.properties");
+		InputStream stream = Utils.class.getClassLoader().getResourceAsStream("revision.properties");
 		Properties properties = new Properties();
 		try {
 			properties.load(stream);
@@ -98,8 +100,7 @@ public class Utils {
 		return sortedList;
 	}
 
-	public static <T> List<T> determineCycle(final Set<T> remaining,
-			final Map<T, Set<T>> dependencies) {
+	public static <T> List<T> determineCycle(final Set<T> remaining, final Map<T, Set<T>> dependencies) {
 		ArrayList<T> cycle = new ArrayList<T>();
 		Set<T> set = new HashSet<T>(remaining);
 		boolean newRun = true;
@@ -118,7 +119,7 @@ public class Utils {
 		}
 		return cycle;
 	}
-	
+
 	public static String getFileWithoutExtension(String f) {
 		String res = null;
 		int i = f.lastIndexOf('.');
@@ -130,11 +131,10 @@ public class Utils {
 		}
 		return res;
 	}
-	
-	
+
 	public static final String readFile(final File filePath) throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader
-            = new InputStreamReader(new FileInputStream(filePath), Charset.forName("UTF-8"));
+		final InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(filePath),
+				Charset.forName("UTF-8"));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
@@ -161,5 +161,5 @@ public class Utils {
 
 		return content.replaceAll("\r\n", "\n");
 	}
-	
+
 }

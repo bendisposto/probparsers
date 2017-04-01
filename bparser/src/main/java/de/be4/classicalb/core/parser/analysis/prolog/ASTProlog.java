@@ -254,7 +254,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	private void printIdentifier(final LinkedList<TIdentifierLiteral> list) {
-		pout.printAtom(Utils.getIdentifierAsString(list));
+		pout.printAtom(Utils.getTIdentifierListAsString(list));
 	}
 
 	private void printNullSafeSubstitution(final Node subst) {

@@ -112,7 +112,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 			if (funcId instanceof AIdentifierExpression) {
 				final AIdentifierExpression identifier = (AIdentifierExpression) funcId;
-				idString = Utils.getIdentifierAsString(identifier
+				idString = Utils.getTIdentifierListAsString(identifier
 						.getIdentifier());
 				idToken = identifier.getIdentifier().get(0);
 				type = definitions.getType(idString);
@@ -124,7 +124,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		} else if (expression instanceof AIdentifierExpression) {
 			// the operation was parsed as an identifier expression
 			final AIdentifierExpression identifier = (AIdentifierExpression) expression;
-			idString = Utils.getIdentifierAsString(identifier.getIdentifier());
+			idString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
 			idToken = identifier.getIdentifier().get(0);
 			type = definitions.getType(idString);
 
@@ -299,7 +299,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
-		final String identifierString = Utils.getIdentifierAsString(node
+		final String identifierString = Utils.getTIdentifierListAsString(node
 				.getIdentifier());
 		final Integer number = scopedVariables.get(identifierString);
 		final Type type = definitions.getType(identifierString);
@@ -402,7 +402,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		for (final PExpression expression : identifiers2) {
 			if (expression instanceof AIdentifierExpression) {
 				final String identifierString = Utils
-						.getIdentifierAsString(((AIdentifierExpression) expression)
+						.getTIdentifierListAsString(((AIdentifierExpression) expression)
 								.getIdentifier());
 
 				if (scopedVariables.containsKey(identifierString)) {
@@ -421,7 +421,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		for (final PExpression expression : identifiers) {
 			if (expression instanceof AIdentifierExpression) {
 				final String identifierString = Utils
-						.getIdentifierAsString(((AIdentifierExpression) expression)
+						.getTIdentifierListAsString(((AIdentifierExpression) expression)
 								.getIdentifier());
 				final Integer number = scopedVariables.get(identifierString);
 
