@@ -165,6 +165,15 @@ public class RulesProjectTest {
 	}
 
 	@Test
+	public void testReplacement() {
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/Replacement.rmch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		//the result should not contain name of the replacement operation 
+		assertFalse(result.contains("COMP_comp2New"));
+	}
+	
+	@Test
 	public void testImportedPackageDoesNotExist() {
 		String result = getRulesMachineAsPrologTerm(
 				"src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");

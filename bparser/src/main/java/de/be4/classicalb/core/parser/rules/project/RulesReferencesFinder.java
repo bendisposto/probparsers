@@ -75,7 +75,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		machineName = Utils.getIdentifierAsString(node.getName());
+		machineName = Utils.getTIdentifierListAsString(node.getName());
 		if (mainFile != null) {
 			final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
 			if (!machineName.equals(fileNameWithoutExtension)) {

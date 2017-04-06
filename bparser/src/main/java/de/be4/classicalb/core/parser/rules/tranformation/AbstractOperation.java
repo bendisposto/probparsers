@@ -25,6 +25,8 @@ public abstract class AbstractOperation {
 	private PPredicate activationPredicate;
 	private PPredicate postconditionPredicate;
 	private Set<AbstractOperation> transitiveDependencies;
+	private AIdentifierExpression replacesIdentifier;
+
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
@@ -138,8 +140,16 @@ public abstract class AbstractOperation {
 		return list;
 	}
 
+	public AIdentifierExpression getReplacesIdentifier() {
+		return this.replacesIdentifier;
+	}
+
 	public String getMachineName() {
 		return this.machineName;
+	}
+
+	public void addReplacesIdentifier(AIdentifierExpression idExpr) {
+		this.replacesIdentifier = idExpr;
 	}
 
 }

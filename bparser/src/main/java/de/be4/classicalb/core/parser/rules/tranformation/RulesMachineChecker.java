@@ -252,12 +252,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					}
 					break;
 				}
-				case RulesGrammar.POSTCONDITION:{
+				case RulesGrammar.POSTCONDITION: {
 					if (currentOperation instanceof RuleOperation) {
-						errorList.add(new CheckException(
-								"POSTCONDITION attribute is not allowed for a RULE operation",
+						errorList.add(new CheckException("POSTCONDITION attribute is not allowed for a RULE operation",
 								pOperationAttribute));
-					}else{
+					} else {
 						currentOperation.setPostcondition(predicate);
 					}
 					break;
@@ -339,7 +338,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 						final RuleOperation rule = (RuleOperation) currentOperation;
 						if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 							AIdentifierExpression identifier = (AIdentifierExpression) arguments.get(0);
-							String identifierString = Utils.getIdentifierAsString(identifier.getIdentifier());
+							String identifierString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
 							rule.setClassification(identifierString);
 						} else {
 							errorList.add(new CheckException("Expected exactly one identifier after CLASSIFICATION.",
@@ -357,7 +356,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					for (PExpression pExpression : arguments) {
 						if (pExpression instanceof AIdentifierExpression) {
 							final AIdentifierExpression ident = (AIdentifierExpression) pExpression;
-							final String identifierAsString = Utils.getIdentifierAsString(ident.getIdentifier());
+							final String identifierAsString = Utils.getTIdentifierListAsString(ident.getIdentifier());
 							tags.add(identifierAsString);
 						} else if (pExpression instanceof AStringExpression) {
 							final AStringExpression stringExpr = (AStringExpression) pExpression;
@@ -370,6 +369,17 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					currentOperation.addTags(tags);
 					break;
 				}
+				case RulesGrammar.REPLACES: {
+					if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
+						errorList.add(new CheckException("Expected exactly one identifier after REPLACES.",
+								pOperationAttribute));
+						break;
+					}
+					AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
+					currentOperation.addReplacesIdentifier(idExpr);
+					break;
+				}
+
 				default:
 					throw new AssertionError("Unexpected operation attribute: " + name);
 				}
@@ -861,6 +871,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				TStringLiteral content = aStringExpr.getContent();
 				String text = content.getText();
 				int xmlStartIndex = text.indexOf("<?");
+				if(xmlStartIndex == -1){
+					return;
+				}
 				String testString = text.substring(0, xmlStartIndex);
 				int numberOfNewLines = testString.length() - testString.replace("\n", "").length();
 				try {

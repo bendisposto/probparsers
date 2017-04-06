@@ -25,11 +25,13 @@ public class NodeCloner extends DepthFirstAdapter {
 	 *            the node to be cloned
 	 * @return the cloned node including position information.
 	 */
-	public static Node cloneNode(Node node) {
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Node> T cloneNode(T node) {
 		NodeCloner cloner = new NodeCloner(node);
 		Node copy = (Node) node.clone();
 		copy.apply(cloner);
-		return copy;
+		return (T) copy;
 	}
 
 	public void defaultIn(Node node) {
