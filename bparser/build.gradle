@@ -89,7 +89,7 @@ jar {
 }
 
 compileJava {
- dependsOn = ['createBuildConstants',':prologlib:deploy',':parserbase:deploy','generateGrammarSource']
+ dependsOn = ['createBuildConstants',':prologlib:deploy',':parserbase:deploy','genPreparser','genBParser','generateGrammarSource']
  doFirst {
 	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
 	File f = file("src/main/resources/revision.properties")
