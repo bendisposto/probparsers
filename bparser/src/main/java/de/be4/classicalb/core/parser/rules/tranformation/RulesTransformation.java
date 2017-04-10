@@ -421,9 +421,23 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String ctName = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		currentRule.setCounterExampleVariableName(ctName);
 		PPredicate ifCondition = new AEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
+		PSubstitution ifFailBody = null;
+		{
+			// fail substitution: set rule to fail and print counterexamples
+			ArrayList<PSubstitution> ifFailSubList = new ArrayList<>();
+			ifFailSubList.add(createRuleFailAssignment(currentRule.getNameLiteral()));
+
+			TDefLiteralSubstitution defLiteral = new TDefLiteralSubstitution("PRINT");
+			List<PExpression> parameters = createExpressionList(createIdentifier(ctName));
+			ADefinitionSubstitution printSub = new ADefinitionSubstitution(defLiteral, parameters);
+			ifFailSubList.add(printSub);
+			ifFailBody = new ASequenceSubstitution(ifFailSubList);
+			this.addPrintSubDefinition();
+		}
+
 		AIfSubstitution ifSub = new AIfSubstitution(ifCondition,
-				createRuleSuccessAssignment(currentRule.getNameLiteral()), new ArrayList<PSubstitution>(),
-				createRuleFailAssignment(currentRule.getNameLiteral()));
+				createRuleSuccessAssignment(currentRule.getNameLiteral()), new ArrayList<PSubstitution>(), ifFailBody);
+
 		subList.add(ifSub);
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
@@ -1110,6 +1124,36 @@ public class RulesTransformation extends DepthFirstAdapter {
 		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + FORCE));
 		forceDefType.setParameters(createIdentifierList("T"));
 		forceDefType.setRhs(new ATotalFunctionExpression(createIdentifier("T"), createIdentifier("T")));
+		try {
+			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new AssertionError(e);
+		}
+	}
+
+	private void addPrintSubDefinition() {
+		final String PRINT = "PRINT";
+		if (definitions.containsDefinition(PRINT)) {
+			return;
+		}
+
+		// PRINT(x) == skip;
+		// EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any
+		// type T */
+		ASubstitutionDefinitionDefinition printDef = new ASubstitutionDefinitionDefinition();
+		printDef.setName(new TDefLiteralSubstitution(PRINT));
+		printDef.setParameters(createIdentifierList("value"));
+		printDef.setRhs(new ASkipSubstitution());
+		try {
+			definitions.addDefinition(printDef, IDefinitions.Type.Substitution);
+		} catch (CheckException | BException e) {
+			throw new AssertionError(e);
+		}
+
+		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
+		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + PRINT));
+		forceDefType.setParameters(createIdentifierList("T"));
+		forceDefType.setRhs(createIdentifier("T"));
 		try {
 			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
 		} catch (CheckException | BException e) {
