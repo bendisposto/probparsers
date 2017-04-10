@@ -77,7 +77,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals(0, def1.getParameters().size());
 		assertTrue(def1.getRhs() instanceof AIdentifierExpression);
 		String ident = Utils
-				.getIdentifierAsString(((AIdentifierExpression) def1.getRhs())
+				.getTIdentifierListAsString(((AIdentifierExpression) def1.getRhs())
 						.getIdentifier());
 		assertEquals("xx", ident);
 
@@ -86,7 +86,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals("def2", def2.getName().getText());
 		assertEquals(0, def2.getParameters().size());
 		assertTrue(def2.getRhs() instanceof AIdentifierExpression);
-		ident = Utils.getIdentifierAsString(((AIdentifierExpression) def2
+		ident = Utils.getTIdentifierListAsString(((AIdentifierExpression) def2
 				.getRhs()).getIdentifier());
 
 		assertEquals("yy", ident);
@@ -96,7 +96,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals("def3", def3.getName().getText());
 		assertEquals(0, def3.getParameters().size());
 		assertTrue(def3.getRhs() instanceof AIdentifierExpression);
-		ident = Utils.getIdentifierAsString(((AIdentifierExpression) def3
+		ident = Utils.getTIdentifierListAsString(((AIdentifierExpression) def3
 				.getRhs()).getIdentifier());
 		// definition in outer def file should overwrite the one in referenced
 		// def file

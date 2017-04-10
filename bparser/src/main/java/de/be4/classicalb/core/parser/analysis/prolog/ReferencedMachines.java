@@ -129,7 +129,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		machineName = Utils.getIdentifierAsString(node.getName());
+		machineName = Utils.getTIdentifierListAsString(node.getName());
 		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
 		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
 			CheckException ch = new CheckException(

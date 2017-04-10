@@ -23,7 +23,10 @@ public abstract class AbstractOperation {
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
 	private final List<String> tags = new ArrayList<>();
 	private PPredicate activationPredicate;
+	private PPredicate postconditionPredicate;
 	private Set<AbstractOperation> transitiveDependencies;
+	private AIdentifierExpression replacesIdentifier;
+
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
@@ -65,6 +68,14 @@ public abstract class AbstractOperation {
 
 	public PPredicate getActivationPredicate() {
 		return this.activationPredicate;
+	}
+
+	public void setPostcondition(PPredicate predicate) {
+		this.postconditionPredicate = predicate;
+	}
+
+	public PPredicate getPostconditionPredicate() {
+		return this.postconditionPredicate;
 	}
 
 	public String getName() {
@@ -129,7 +140,16 @@ public abstract class AbstractOperation {
 		return list;
 	}
 
+	public AIdentifierExpression getReplacesIdentifier() {
+		return this.replacesIdentifier;
+	}
+
 	public String getMachineName() {
 		return this.machineName;
 	}
+
+	public void addReplacesIdentifier(AIdentifierExpression idExpr) {
+		this.replacesIdentifier = idExpr;
+	}
+
 }

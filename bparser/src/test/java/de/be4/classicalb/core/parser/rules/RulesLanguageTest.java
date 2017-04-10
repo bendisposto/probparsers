@@ -168,6 +168,16 @@ public class RulesLanguageTest {
 		assertFalse(result.contains("exception"));
 		assertTrue(result.contains("precondition(none,member(none,identifier(none,x),integer_set(none))"));
 	}
+	
+	@Test
+	public void testFunctionPostcondition() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER POSTCONDITION out : INTEGER BODY out := x + 1 END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		System.out.println(getRulesMachineAsBMachine(testMachine));
+		assertFalse(result.contains("exception"));
+		assertTrue(result.contains("assertion(none,member(none,identifier(none,out),integer_set(none)),skip(none))"));
+	}
 
 	@Test
 	public void testRuleId() throws Exception {

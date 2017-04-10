@@ -41,7 +41,7 @@ public class RulesProjectExceptionTest {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE(foo) END";
 		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("does not match any rule"));
+		assertTrue(result.contains("does not match any rule visible to this machine"));
 	}
 
 	

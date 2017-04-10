@@ -1,13 +1,25 @@
 package de.be4.classicalb.core.parser.rules.tranformation;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -24,6 +36,7 @@ import de.be4.classicalb.core.parser.node.AComputationOperation;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.ADeferredSetSet;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
+import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
@@ -67,6 +80,7 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -217,15 +231,17 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				PPredicate predicate = attr.getPredicate();
 				final String attrName = attr.getName().getText();
 				occurredAttributes.add(attrName, pOperationAttribute);
-				if (attrName.equals(RulesGrammar.ACTIVATION)) {
+				switch (attrName) {
+				case RulesGrammar.ACTIVATION: {
 					if (currentOperation instanceof FunctionOperation) {
 						errorList.add(new CheckException("ACTIVATION is not a valid attribute of a FUNCTION operation.",
 								pOperationAttribute));
 					} else {
 						currentOperation.setActivationPredicate(predicate);
 					}
-				} else {
-					// PRECONDITION
+					break;
+				}
+				case RulesGrammar.PRECONDITION: {
 					if (currentOperation instanceof FunctionOperation) {
 						FunctionOperation func = (FunctionOperation) currentOperation;
 						func.setPreconditionPredicate(predicate);
@@ -234,6 +250,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 								"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation",
 								pOperationAttribute));
 					}
+					break;
+				}
+				case RulesGrammar.POSTCONDITION: {
+					if (currentOperation instanceof RuleOperation) {
+						errorList.add(new CheckException("POSTCONDITION attribute is not allowed for a RULE operation",
+								pOperationAttribute));
+					} else {
+						currentOperation.setPostcondition(predicate);
+					}
+					break;
+				}
+				default:
+					throw new AssertionError("Unexpected operation attribute: " + attrName);
 				}
 				predicate.apply(this);
 			} else {
@@ -309,7 +338,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 						final RuleOperation rule = (RuleOperation) currentOperation;
 						if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 							AIdentifierExpression identifier = (AIdentifierExpression) arguments.get(0);
-							String identifierString = Utils.getIdentifierAsString(identifier.getIdentifier());
+							String identifierString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
 							rule.setClassification(identifierString);
 						} else {
 							errorList.add(new CheckException("Expected exactly one identifier after CLASSIFICATION.",
@@ -327,7 +356,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					for (PExpression pExpression : arguments) {
 						if (pExpression instanceof AIdentifierExpression) {
 							final AIdentifierExpression ident = (AIdentifierExpression) pExpression;
-							final String identifierAsString = Utils.getIdentifierAsString(ident.getIdentifier());
+							final String identifierAsString = Utils.getTIdentifierListAsString(ident.getIdentifier());
 							tags.add(identifierAsString);
 						} else if (pExpression instanceof AStringExpression) {
 							final AStringExpression stringExpr = (AStringExpression) pExpression;
@@ -340,6 +369,17 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					currentOperation.addTags(tags);
 					break;
 				}
+				case RulesGrammar.REPLACES: {
+					if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
+						errorList.add(new CheckException("Expected exactly one identifier after REPLACES.",
+								pOperationAttribute));
+						break;
+					}
+					AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
+					currentOperation.addReplacesIdentifier(idExpr);
+					break;
+				}
+
 				default:
 					throw new AssertionError("Unexpected operation attribute: " + name);
 				}
@@ -513,7 +553,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(AIdentifierExpression node) {
-		inAIdentifierExpression(node);
 		List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
 		if (copy.size() > 1) {
 			this.errorList.add(new CheckException("Identifier renaming is not allowed in a RULES_MACHINE.", node));
@@ -523,11 +562,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			currentOperation.addReadVariable(node);
 		}
 		if (!this.identifierScope.contains(name)) {
-
 			addReadIdentifier(node);
 		}
-
-		outAIdentifierExpression(node);
 	}
 
 	private void addReadIdentifier(AIdentifierExpression node) {
@@ -817,6 +853,59 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseADefinitionExpression(ADefinitionExpression node) {
+		node.getDefLiteral().apply(this);
+		final String defName = node.getDefLiteral().getText();
+		if (defName.equals("READ_XML_FROM_STRING")) {
+			if (node.getParameters().size() != 1) {
+				errorList.add(new CheckException(
+						"The external function 'READ_XML_FROM_STRING' requires exactly one argrument.", node));
+				return;
+			}
+			PExpression pExpression = node.getParameters().get(0);
+			if (pExpression instanceof AStringExpression) {
+				AStringExpression aStringExpr = (AStringExpression) pExpression;
+				TStringLiteral content = aStringExpr.getContent();
+				String text = content.getText();
+				int xmlStartIndex = text.indexOf("<?");
+				if(xmlStartIndex == -1){
+					return;
+				}
+				String testString = text.substring(0, xmlStartIndex);
+				int numberOfNewLines = testString.length() - testString.replace("\n", "").length();
+				try {
+					InputSource inputSource = new InputSource(new StringReader(text.trim()));
+					SAXParserFactory factory = SAXParserFactory.newInstance();
+					SAXParser saxParser = factory.newSAXParser();
+					Locale newLocale = new Locale("en", "GB");
+					// Surprisingly, we need both of the following two line in
+					// order to all error messages in English.
+					java.util.Locale.setDefault(newLocale);
+					saxParser.setProperty("http://apache.org/xml/properties/locale", newLocale);
+					saxParser.parse(inputSource, new DefaultHandler());
+				} catch (SAXParseException e) {
+					final int line = content.getLine() + numberOfNewLines + e.getLineNumber() - 1;
+					final int column = (numberOfNewLines == 0 && e.getLineNumber() == 1)
+							? content.getPos() + e.getColumnNumber() : e.getColumnNumber();
+					TStringLiteral dummy = new TStringLiteral("", line, column);
+					String message = e.getMessage();
+					errorList.add(new CheckException(message, dummy));
+				} catch (SAXException e) {
+					String message = e.getMessage();
+					errorList.add(new CheckException(message, aStringExpr));
+				} catch (ParserConfigurationException | IOException e) {
+					// do nothing
+					// the error is handled by the parser but will be handled
+					// prob_prolog
+				}
+
+			}
+
+		}
+		super.caseADefinitionExpression(node);
 	}
 
 	/*

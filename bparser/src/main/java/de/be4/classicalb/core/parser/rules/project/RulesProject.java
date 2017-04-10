@@ -98,10 +98,14 @@ public class RulesProject {
 			}
 			List<AbstractOperation> operations = rulesParseUnit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
-				if (abstractOperation instanceof FunctionOperation) {
-					continue;
+				if (abstractOperation instanceof Computation || abstractOperation instanceof RuleOperation) {
+					if (null != abstractOperation.getReplacesIdentifier()) {
+						// replacement operations are not add here because its
+						// original rule will be added
+						continue;
+					}
+					promotesList.add(abstractOperation.getName());
 				}
-				promotesList.add(abstractOperation.getName());
 			}
 			Start otherStart = rulesParseUnit.getStart();
 			injector.injectMachine(otherStart);
