@@ -23,7 +23,7 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
-	
+
 	@Test
 	public void testRuleClassification() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY skip END END";
@@ -31,12 +31,21 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
-	
+
 	@Test
 	public void testRuleTags() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testRulePrint() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("EXTERNAL_SUBSTITUTION_PRINT"));
 		assertTrue(!result.contains("exception"));
 	}
 
@@ -47,8 +56,6 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
-	
 
 	@Test
 	public void testStringFormat() throws FileNotFoundException, IOException {
@@ -146,7 +153,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
 		String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
-		//TODO do not use the prettyprinter
+		// TODO do not use the prettyprinter
 		assertTrue(result.contains("foo_Counterexamples := foo_Counterexamples\\/{2}*{\"fail\"}"));
 
 	}
@@ -168,7 +175,7 @@ public class RulesLanguageTest {
 		assertFalse(result.contains("exception"));
 		assertTrue(result.contains("precondition(none,member(none,identifier(none,x),integer_set(none))"));
 	}
-	
+
 	@Test
 	public void testFunctionPostcondition() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER POSTCONDITION out : INTEGER BODY out := x + 1 END END";
@@ -214,9 +221,9 @@ public class RulesLanguageTest {
 		assertTrue(!result.contains("exception"));
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
-		//TODO do not use the prettyprinter
+		// TODO do not use the prettyprinter
 		assertTrue(rulesMachineAsBMachine.contains("foo := IF k=TRUE THEN \"NOT_CHECKED\" ELSE \"DISABLED\" END"));
-		
+
 	}
 
 	@Test

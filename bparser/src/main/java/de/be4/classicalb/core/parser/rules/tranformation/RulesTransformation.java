@@ -1151,7 +1151,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 
 		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
-		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + PRINT));
+		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_SUBSTITUTION_" + PRINT));
 		forceDefType.setParameters(createIdentifierList("T"));
 		forceDefType.setRhs(createIdentifier("T"));
 		try {
