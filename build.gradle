@@ -1,4 +1,4 @@
-def global_version = '2.9.3'
+def global_version = '2.9.4-SNAPSHOT'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
