@@ -1,6 +1,6 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
-import static de.be4.classicalb.core.parser.rules.tranformation.ASTBuilder.*;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +82,6 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 import de.be4.classicalb.core.parser.util.Utils;
 
 /*
@@ -92,11 +91,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final String fileName;
 	private String machineName;
 	private final File file;
-	protected final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
-	protected final Map<AComputationOperation, Computation> computationMap = new HashMap<>();
-	protected final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
-	protected final ArrayList<CheckException> errorList = new ArrayList<>();
-	protected final HashSet<AIdentifierExpression> assignedVariables = new HashSet<>();
+	private final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
+	private final Map<AComputationOperation, ComputationOperation> computationMap = new HashMap<>();
+	private final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
+	private final ArrayList<CheckException> errorList = new ArrayList<>();
+	private final Set<AIdentifierExpression> referencedRuleOperations = new HashSet<>();
 
 	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
@@ -128,8 +127,16 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
+	public Set<RuleOperation> getRuleOperations() {
+		return new HashSet<>(this.rulesMap.values());
+	}
+
 	public String getFileName() {
 		return this.fileName;
+	}
+
+	public Set<AIdentifierExpression> getReferencedRuleOperations() {
+		return new HashSet<>(this.referencedRuleOperations);
 	}
 
 	public List<AbstractOperation> getOperations() {
@@ -138,6 +145,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		list.addAll(computationMap.values());
 		list.addAll(functionMap.values());
 		return list;
+	}
+
+	public RuleOperation getRuleOperation(ARuleOperation aRuleOperation) {
+		return this.rulesMap.get(aRuleOperation);
+	}
+
+	public ComputationOperation getComputationOperation(AComputationOperation node) {
+		return this.computationMap.get(node);
 	}
 
 	private boolean isInRule() {
@@ -411,8 +426,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAComputationOperation(AComputationOperation node) {
-		currentOperation = new Computation(node.getName(), this.fileName, this.machineName, machineReferences);
-		computationMap.put(node, (Computation) currentOperation);
+		currentOperation = new ComputationOperation(node.getName(), this.fileName, this.machineName, machineReferences);
+		computationMap.put(node, (ComputationOperation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
 		node.getBody().apply(this);
 		currentOperation = null;
@@ -438,10 +453,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		// the defined variable should not be used in the TYPE or the VALUE
 		// section
-		if (currentOperation != null && currentOperation instanceof Computation) {
-			Computation computation = (Computation) currentOperation;
+		if (currentOperation != null && currentOperation instanceof ComputationOperation) {
+			ComputationOperation computationOperation = (ComputationOperation) currentOperation;
 			try {
-				computation.addDefineVariable(node.getName());
+				computationOperation.addDefineVariable(node.getName());
 				this.knownIdentifier.addTIdentifier(node.getName());
 			} catch (CheckException e) {
 				this.errorList.add(e);
@@ -500,7 +515,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (!(pExpression instanceof AIdentifierExpression)) {
 				this.errorList.add(new CheckException(
 						"The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.", node));
+				return;
 			}
+			this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
 			return;
 		}
 		default:
@@ -537,11 +554,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				AIdentifierExpression id = (AIdentifierExpression) e;
 				String name = id.getIdentifier().get(0).getText();
 				if (!this.identifierScope.contains(name)) {
-					errorList
-							.add(new CheckException(
-									"Identifier '" + name
-											+ "' is not a local variable (VAR). Hence it can not be assigned here.",
-									id));
+					errorList.add(new CheckException("Identifier '" + name
+							+ "' is not a local variable (VAR). Hence it can not be assigned here.", id));
 				}
 			} else {
 				errorList.add(new CheckException(
@@ -584,53 +598,90 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
-		case RulesGrammar.SUCCEEDED_RULE:
-			if (arguments.size() != 1) {
+		case RulesGrammar.SUCCEEDED_RULE: {
+			if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
 				this.errorList.add(new CheckException(
-						"The SUCCEEDED_RULE predicate operator expects exactly one argument.", node));
+						"The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.", node));
+				return;
 			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
+		}
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
 			if (arguments.size() != 2) {
 				this.errorList.add(new CheckException(
 						"The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+				return;
 			}
 			PExpression pExpression = node.getIdentifiers().get(0);
 			if (!(pExpression instanceof AIdentifierExpression)) {
 				this.errorList.add(new CheckException(
 						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
+				return;
 			}
+			PExpression secondArg = node.getIdentifiers().get(1);
+			if (!(secondArg instanceof AIntegerExpression)) {
+				this.errorList.add(new CheckException(
+						"The second argument of SUCCEEDED_RULE_ERROR_TYPE must be an integer value.", node));
+				return;
+			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
 		}
-		case RulesGrammar.FAILED_RULE:
-			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("The FAILED_RULE predicate operator expects exactly one argument.", node));
+		case RulesGrammar.FAILED_RULE: {
+			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
+				return;
 			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
+		}
+		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES: {
+			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
+				return;
+			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+			return;
+		}
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
 			if (arguments.size() != 2) {
 				this.errorList.add(new CheckException(
 						"The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+				return;
 			}
 			PExpression pExpression = node.getIdentifiers().get(0);
 			if (!(pExpression instanceof AIdentifierExpression)) {
 				this.errorList.add(new CheckException(
 						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
+				return;
 			}
+			PExpression secondArg = node.getIdentifiers().get(1);
+			if (!(secondArg instanceof AIntegerExpression)) {
+				this.errorList.add(new CheckException(
+						"The second argument of FAILED_RULE_ERROR_TYPE must be an integer value.", node));
+				return;
+			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
 		}
 		case RulesGrammar.NOT_CHECKED_RULE:
-			if (arguments.size() != 1) {
+			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
 				this.errorList.add(new CheckException(
-						"The NOT_CHECKED_RULE predicate operator expects exactly one argument.", node));
+						"The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.", node));
+				return;
 			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
 		case RulesGrammar.DISABLED_RULE:
-			if (arguments.size() != 1) {
-				this.errorList.add(
-						new CheckException("The DISABLED_RULE predicate operator expects exactly one argument.", node));
+			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The DISABLED_RULE predicate operator expects exactly one rule identifier.", node));
+				return;
 			}
+			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 			return;
 		default:
 			throw new AssertionError("Unkown predicate operator: " + operatorName);
@@ -871,7 +922,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				TStringLiteral content = aStringExpr.getContent();
 				String text = content.getText();
 				int xmlStartIndex = text.indexOf("<?");
-				if(xmlStartIndex == -1){
+				if (xmlStartIndex == -1) {
 					return;
 				}
 				String testString = text.substring(0, xmlStartIndex);

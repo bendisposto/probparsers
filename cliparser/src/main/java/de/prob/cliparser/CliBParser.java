@@ -24,7 +24,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.rules.project.RulesProject;
+import de.be4.classicalb.core.parser.rules.RulesProject;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;

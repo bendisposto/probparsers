@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +16,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -76,8 +75,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	 *            rules machine.
 	 * 
 	 */
-	public RulesTransformation(Start start, BParser bParser, List<RulesMachineReference> machineReferences,
-			RulesMachineChecker rulesMachineVisitor, HashMap<String, AbstractOperation> allOperations) {
+	public RulesTransformation(Start start, BParser bParser, RulesMachineChecker rulesMachineVisitor,
+			HashMap<String, AbstractOperation> allOperations) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
 		this.rulesMachineVisitor = rulesMachineVisitor;
@@ -274,7 +273,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAComputationOperation(AComputationOperation node) {
-		final Computation computation = this.rulesMachineVisitor.computationMap.get(node);
+		final ComputationOperation computationOperation = this.rulesMachineVisitor.getComputationOperation(node);
 		computationLiteralList.add(node.getName());
 		if (operationsToBeDeleted.contains(node.getName().getText())) {
 			node.replaceBy(null);
@@ -288,12 +287,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// the SableCC node AOperation.class requires a list of
 			// TIdentifierLiterals as name
 			final List<TIdentifierLiteral> operationNameList = new ArrayList<>();
-			if (null != computation.getReplacesIdentifier()) {
+			if (null != computationOperation.getReplacesIdentifier()) {
 
 				// renaming the operation
-				TIdentifierLiteral first = computation.getReplacesIdentifier().getIdentifier().getFirst();
+				TIdentifierLiteral first = computationOperation.getReplacesIdentifier().getIdentifier().getFirst();
 				operationNameList.add((TIdentifierLiteral) cloneNode(first));
-				nameIdentifier = (AIdentifierExpression) cloneNode(computation.getReplacesIdentifier());
+				nameIdentifier = (AIdentifierExpression) cloneNode(computationOperation.getReplacesIdentifier());
 			} else {
 				operationNameList.add((TIdentifierLiteral) cloneNode(node.getName()));
 				nameIdentifier = (AIdentifierExpression) cloneNode(new AIdentifierExpression(operationNameList)); // todo
@@ -309,14 +308,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// guard
 			final List<PPredicate> selectConditionList = new ArrayList<>();
 			selectConditionList.add(grd1);
-			if (computation.getDependsOnRulesList().size() > 0) {
+			if (computationOperation.getDependsOnRulesList().size() > 0) {
 				final List<PPredicate> dependsOnRulesPredicates = createPredicateList(
-						computation.getDependsOnRulesList(), RULE_SUCCESS);
+						computationOperation.getDependsOnRulesList(), RULE_SUCCESS);
 				selectConditionList.addAll(dependsOnRulesPredicates);
 			}
-			if (computation.getDependsOnComputationList().size() > 0) {
+			if (computationOperation.getDependsOnComputationList().size() > 0) {
 				final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
-						computation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
+						computationOperation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
 				selectConditionList.addAll(dependsOnComputationPredicates);
 			}
 			select.setCondition(createConjunction(selectConditionList));
@@ -350,8 +349,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		invariantList.add(member);
 
 		PExpression value;
-		if (computation.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression((PPredicate) NodeCloner.cloneNode(computation.getActivationPredicate()),
+		if (computationOperation.getActivationPredicate() != null) {
+			value = new AIfThenElseExpression(
+					(PPredicate) NodeCloner.cloneNode(computationOperation.getActivationPredicate()),
 					createStringExpression(COMPUTATION_NOT_EXECUTED), createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
@@ -364,7 +364,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
-		if (operationsToBeDeleted.contains(this.rulesMachineVisitor.rulesMap.get(node).getName())) {
+		if (operationsToBeDeleted.contains(this.rulesMachineVisitor.getRuleOperation(node).getName())) {
 			node.replaceBy(null);
 			return;
 		} else {
@@ -375,7 +375,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public void inARuleOperation(ARuleOperation node) {
 		// setting current rule
-		this.currentRule = this.rulesMachineVisitor.rulesMap.get(node);
+		this.currentRule = this.rulesMachineVisitor.getRuleOperation(node);
 	}
 
 	@Override
@@ -790,6 +790,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		case RulesGrammar.FAILED_RULE:
 			replacePredicateOperator(node, arguments, RULE_FAIL);
 			return;
+		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES: {
+			// dom(rule_cts) = 1..n
+			String name = rule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+			AEqualPredicate equal = new AEqualPredicate(new ADomainExpression(createIdentifier(name)),
+					new AIntervalExpression(createAIntegerExpression(1),
+							createAIntegerExpression(rule.getNumberOfErrorTypes())));
+			node.replaceBy(equal);
+			return;
+		}
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
 			PExpression pExpression = node.getIdentifiers().get(0);
 			AIdentifierExpression id = (AIdentifierExpression) pExpression;

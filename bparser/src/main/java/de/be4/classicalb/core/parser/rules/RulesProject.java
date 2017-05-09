@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -22,11 +22,7 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.parser.rules.tranformation.Computation;
-import de.be4.classicalb.core.parser.rules.tranformation.FunctionOperation;
-import de.be4.classicalb.core.parser.rules.tranformation.RuleOperation;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
+import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -40,6 +36,7 @@ public class RulesProject {
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private HashMap<String, String> constantStringValues = new HashMap<>();
+	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -80,7 +77,7 @@ public class RulesProject {
 		if (this.bExceptionList.size() > 0) {
 			return;
 		}
-
+		extractConfigurationOfMainModel();
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME,
 				new File(COMPOSITION_MACHINE_NAME + ".mch"));
 		compositionMachine.addExternalFunctions();
@@ -98,7 +95,7 @@ public class RulesProject {
 			}
 			List<AbstractOperation> operations = rulesParseUnit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
-				if (abstractOperation instanceof Computation || abstractOperation instanceof RuleOperation) {
+				if (abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation) {
 					if (null != abstractOperation.getReplacesIdentifier()) {
 						// replacement operations are not add here because its
 						// original rule will be added
@@ -135,6 +132,7 @@ public class RulesProject {
 		checkReadWrite();
 		checkFunctionDependencies();
 		checkIdentifier();
+		checkReferencedRuleOperations();
 	}
 
 	private void checkFunctionDependencies() {
@@ -171,7 +169,7 @@ public class RulesProject {
 	}
 
 	private void parseProject() {
-		final IModel mainModel = parseMainFile();
+		RulesParseUnit mainModel = parseMainFile();
 		if (mainModel.hasError()) {
 			final BCompoundException compound = mainModel.getCompoundException();
 			this.bExceptionList.addAll(compound.getBExceptions());
@@ -189,6 +187,11 @@ public class RulesProject {
 				fifo.addAll(bModel.getMachineReferences());
 			}
 		}
+	}
+
+	private void extractConfigurationOfMainModel() {
+		this.rulesMachineRunConfiguration = new RulesMachineRunConfiguration(this.bModels.get(0), this.allOperations);
+		rulesMachineRunConfiguration.collect();
 	}
 
 	private void collectAllOperations() {
@@ -223,7 +226,7 @@ public class RulesProject {
 				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 				if (allOperations.containsKey(name)) {
 					AbstractOperation abstractOperation = allOperations.get(name);
-					if (!(abstractOperation instanceof Computation)) {
+					if (!(abstractOperation instanceof ComputationOperation)) {
 						this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 								"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
 					}
@@ -277,10 +280,10 @@ public class RulesProject {
 	// }
 
 	private void checkReadWrite() {
-		HashMap<String, Computation> allDefineVariables = new HashMap<>();
+		HashMap<String, ComputationOperation> allDefineVariables = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
-			if (operation instanceof Computation) {
-				Computation comp = (Computation) operation;
+			if (operation instanceof ComputationOperation) {
+				ComputationOperation comp = (ComputationOperation) operation;
 				for (String name : comp.getDefineVariables()) {
 					allDefineVariables.put(name, comp);
 				}
@@ -292,12 +295,12 @@ public class RulesProject {
 			readVariables.retainAll(allDefineVariables.keySet());
 
 			final HashSet<String> variablesInScope = new HashSet<>();
-			if (operation instanceof Computation) {
-				variablesInScope.addAll(((Computation) operation).getDefineVariables());
+			if (operation instanceof ComputationOperation) {
+				variablesInScope.addAll(((ComputationOperation) operation).getDefineVariables());
 			}
 			for (AbstractOperation op : operation.getTransitiveDependencies()) {
-				if (op instanceof Computation) {
-					variablesInScope.addAll(((Computation) op).getDefineVariables());
+				if (op instanceof ComputationOperation) {
+					variablesInScope.addAll(((ComputationOperation) op).getDefineVariables());
 				}
 			}
 			readVariables.removeAll(variablesInScope);
@@ -345,7 +348,47 @@ public class RulesProject {
 						new CheckException("Unknown identifier '" + name + "'.", node)));
 			}
 		}
+	}
 
+	public void checkReferencedRuleOperations() {
+		if (bExceptionList.size() > 0) {
+			return;
+		}
+		final HashMap<String, RulesParseUnit> map = new HashMap<>();
+		for (IModel model : bModels) {
+			RulesParseUnit parseUnit = (RulesParseUnit) model;
+			map.put(parseUnit.getMachineName(), parseUnit);
+		}
+		for (IModel model : bModels) {
+			if (model instanceof RulesParseUnit) {
+				RulesParseUnit rulesParseUnit = (RulesParseUnit) model;
+				Set<AIdentifierExpression> referencedRuleOperations = rulesParseUnit.getRulesMachineChecker()
+						.getReferencedRuleOperations();
+				final HashSet<String> knownRules = new HashSet<>();
+				for (RuleOperation ruleOperation : rulesParseUnit.getRulesMachineChecker().getRuleOperations()) {
+					knownRules.add(ruleOperation.getName());
+				}
+				for (RulesMachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
+					String referenceName = rulesMachineReference.getName();
+					RulesParseUnit otherParseUnit = map.get(referenceName);
+					RulesMachineChecker checker = otherParseUnit.getRulesMachineChecker();
+					if (checker == null) {
+						return;
+					}
+					for (RuleOperation ruleOperation : checker.getRuleOperations()) {
+						knownRules.add(ruleOperation.getName());
+					}
+				}
+
+				for (AIdentifierExpression aIdentifierExpression : referencedRuleOperations) {
+					String ruleName = Utils.getAIdentifierAsString(aIdentifierExpression);
+					if (!knownRules.contains(ruleName)) {
+						this.bExceptionList.add(new BException(rulesParseUnit.getFilePath(),
+								new CheckException("Unknown rule '" + ruleName + "'.", aIdentifierExpression)));
+					}
+				}
+			}
+		}
 	}
 
 	private Set<AbstractOperation> findDependencies(final AbstractOperation operation,
@@ -423,6 +466,10 @@ public class RulesProject {
 		return false;
 	}
 
+	public RulesMachineRunConfiguration getRulesMachineRunConfiguration() {
+		return this.rulesMachineRunConfiguration;
+	}
+
 	private IModel parseRulesMachine(RulesMachineReference reference) {
 		File file = reference.getFile();
 		RulesParseUnit unit = new RulesParseUnit(reference.getName());
@@ -432,7 +479,7 @@ public class RulesProject {
 		return unit;
 	}
 
-	private IModel parseMainFile() {
+	private RulesParseUnit parseMainFile() {
 		RulesParseUnit bParseUnit = new RulesParseUnit();
 		bParseUnit.readMachineFromFile(mainFile);
 		bParseUnit.setParsingBehaviour(this.parsingBehaviour);

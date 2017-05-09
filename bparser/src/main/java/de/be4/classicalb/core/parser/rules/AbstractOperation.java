@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public abstract class AbstractOperation {
 

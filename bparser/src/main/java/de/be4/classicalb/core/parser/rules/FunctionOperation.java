@@ -1,10 +1,9 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.List;
 
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public class FunctionOperation extends AbstractOperation {
 

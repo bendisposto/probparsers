@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.List;
 

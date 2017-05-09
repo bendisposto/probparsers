@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,13 +9,12 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
-public class Computation extends AbstractOperation {
+public class ComputationOperation extends AbstractOperation {
 
 	private final Map<String, TIdentifierLiteral> defineMap = new HashMap<>();
 
-	public Computation(TIdentifierLiteral computationName, String fileName, String machineName,
+	public ComputationOperation(TIdentifierLiteral computationName, String fileName, String machineName,
 			List<RulesMachineReference> machineReferences) {
 		super(computationName, fileName, machineName, machineReferences);
 	}
