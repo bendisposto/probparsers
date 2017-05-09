@@ -95,9 +95,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	public void runTransformation() throws BCompoundException {
-
 		start.apply(this);
-		// TODO why and what kind of defintions do we inject here?
+		// TODO why and what kind of definitions do we inject here?
 		DefinitionInjector.injectDefinitions(start, definitions);
 		MissingPositionsAdder.injectPositions(start);
 		if (this.errorList.size() > 0) {
