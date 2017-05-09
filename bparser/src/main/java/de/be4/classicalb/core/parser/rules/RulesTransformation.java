@@ -63,16 +63,19 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private final HashSet<String> operationsToBeDeleted = new HashSet<>();
 
 	/**
-	 * 
+	 * @param start
+	 *            The root node of the abstract syntax tree.
+	 * @param bParser
+	 *            The parser of the rules machine.
 	 * @param allOperations
 	 *            The list of all operation in the project. This parameter is
 	 *            needed in order to detect invalid reference to operations
 	 *            which does not exist. Note, that such checks can not be done
-	 *            by the {@link RulesMachineChecker.class} because they need
-	 *            more than the machine scope. For example, it is checked that
-	 *            the first argument of the GET_RULE_COUNTEREXAMPLES operator is
-	 *            an existing rule operation which may be located in another
-	 *            rules machine.
+	 *            by the {@link RulesMachineChecker} because they need more than
+	 *            the machine scope. For example, it is checked that the first
+	 *            argument of the GET_RULE_COUNTEREXAMPLES operator is an
+	 *            existing rule operation which may be located in another rules
+	 *            machine.
 	 * 
 	 */
 	public RulesTransformation(Start start, BParser bParser, RulesMachineChecker rulesMachineVisitor,
