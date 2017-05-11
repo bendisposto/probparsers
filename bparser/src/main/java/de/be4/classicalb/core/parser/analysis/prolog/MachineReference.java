@@ -4,7 +4,7 @@ import java.io.File;
 
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.rules.project.IModelReference;
+import de.be4.classicalb.core.parser.rules.IModelReference;
 
 public class MachineReference implements IModelReference {
 

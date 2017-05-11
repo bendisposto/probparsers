@@ -35,8 +35,7 @@ public class RulesGrammar implements IGrammar {
 	public static final String FAILED_RULE = "FAILED_RULE";
 	public static final String FAILED_RULE_ERROR_TYPE = "FAILED_RULE_ERROR_TYPE";
 	public static final String GET_RULE_COUNTEREXAMPLES = "GET_RULE_COUNTEREXAMPLES";
-	// public static final String FAILED_RULE_ALL_ERROR_TYPES =
-	// "FAILED_RULE_ALL_ERROR_TYPES";
+	public static final String FAILED_RULE_ALL_ERROR_TYPES = "FAILED_RULE_ALL_ERROR_TYPES";
 	public static final String NOT_CHECKED_RULE = "NOT_CHECKED_RULE";
 	public static final String DISABLED_RULE = "DISABLED_RULE";
 	public static final String DEPENDS_ON_RULE = "DEPENDS_ON_RULE";
@@ -90,7 +89,7 @@ public class RulesGrammar implements IGrammar {
 		map.put(SUCCEEDED_RULE_ERROR_TYPE, TKwPredicateOperator.class);
 		map.put(FAILED_RULE, TKwPredicateOperator.class);
 		map.put(FAILED_RULE_ERROR_TYPE, TKwPredicateOperator.class);
-		// map.put(FAILED_RULE_ALL_ERROR_TYPES, TKwPredicateOperator.class);
+		map.put(FAILED_RULE_ALL_ERROR_TYPES, TKwPredicateOperator.class);
 		map.put(NOT_CHECKED_RULE, TKwPredicateOperator.class);
 		map.put(DISABLED_RULE, TKwPredicateOperator.class);
 

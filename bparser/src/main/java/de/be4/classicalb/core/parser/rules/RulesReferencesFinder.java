@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.FileNotFoundException;

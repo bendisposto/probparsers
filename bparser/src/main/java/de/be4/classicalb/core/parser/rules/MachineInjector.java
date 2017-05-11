@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.Collections;

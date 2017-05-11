@@ -11,7 +11,6 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 
 public class RulesLanguageTest {

@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +20,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesTransformation;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -56,6 +53,14 @@ public class RulesParseUnit implements IModel {
 
 	public Start getStart() {
 		return this.start;
+	}
+
+	public String getFilePath() {
+		if (this.machineFile != null) {
+			return this.machineFile.getAbsolutePath();
+		} else {
+			return null;
+		}
 	}
 
 	public void setMachineAsString(String content) {
@@ -128,8 +133,8 @@ public class RulesParseUnit implements IModel {
 		if (bCompoundException != null) {
 			return;
 		}
-		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
-				rulesMachineChecker, allOperations);
+		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, rulesMachineChecker,
+				allOperations);
 		try {
 			ruleTransformation.runTransformation();
 		} catch (BCompoundException e) {

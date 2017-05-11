@@ -10,7 +10,6 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.rules.project.RulesProject;
 
 public class RulesProjectTest {
 

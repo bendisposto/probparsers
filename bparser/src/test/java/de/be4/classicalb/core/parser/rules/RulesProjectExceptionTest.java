@@ -14,16 +14,13 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.rules.project.IModel;
-import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
-import de.be4.classicalb.core.parser.rules.project.RulesProject;
 
 public class RulesProjectExceptionTest {
 
 	@Test
 	public void testDuplicateOperationNameException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY skip END; COMPUTATION foo BODY skip END END";
-		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
+		String result = parseRulesMachineAndGetExceptionAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,67,null),'Duplicate operation name: \\'foo\\'.').\n", result);
 	}
@@ -31,7 +28,7 @@ public class RulesProjectExceptionTest {
 	@Test
 	public void testDependsOnRuleIsNotARuleException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY skip END; COMPUTATION bar BODY skip END END";
-		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
+		String result = parseRulesMachineAndGetExceptionAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,56,null),'Operation \\'bar\\' is not a RULE operation.').\n", result);
 	}
@@ -39,20 +36,19 @@ public class RulesProjectExceptionTest {
 	@Test
 	public void testUnkownRuleInPredicateOperatorException() throws Exception {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE(foo) END";
-		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
+		String result = parseRulesMachineAndGetExceptionAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("does not match any rule visible to this machine"));
+		assertTrue(result.contains("Unknown rule \\'foo\\'"));
 	}
 
-	
 	@Test
 	public void testUnknownFunction() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END END END";
-		String result = parseRulesPrologAndGetExceptionAsPrologTerm(testMachine);
+		String result = parseRulesMachineAndGetExceptionAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,59,null),'Unknown FUNCTION name \\'Foo\\'').\n", result);
 	}
-	
+
 	@Test
 	public void testRulesMachineInOrdinaryMachineFileException() throws Exception {
 		OutputStream output = new OutputStream() {
@@ -78,14 +74,14 @@ public class RulesProjectExceptionTest {
 		assertTrue(output.toString().contains("parse_exception"));
 	}
 
-	public static String parseRulesPrologAndGetExceptionAsPrologTerm(final String content) throws Exception {
+	public static String parseRulesMachineAndGetExceptionAsPrologTerm(final String content) throws Exception {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.addLineNumbers = false;
 		unit.setParsingBehaviour(pb);
 		unit.parse();
-		RulesProject project = new RulesProject(null);
+		RulesProject project = new RulesProject(new File("TestFile.rmch"));
 		project.setParsingBehaviour(pb);
 		Field field = RulesProject.class.getDeclaredField("bModels");
 		field.setAccessible(true);

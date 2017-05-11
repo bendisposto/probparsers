@@ -17,8 +17,6 @@ import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.TKwExpressionOperator;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 import de.be4.classicalb.core.parser.node.TKwSubstitutionOperator;
-import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
 
 public class RulesLanguageExceptionTest {
 
@@ -180,7 +178,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,40,'UnknownFile'),'The SUCCEEDED_RULE predicate operator expects exactly one argument.').\n",
+				"parse_exception(pos(1,40,'UnknownFile'),'The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.').\n",
 				result);
 	}
 
@@ -199,7 +197,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,40,'UnknownFile'),'The FAILED_RULE predicate operator expects exactly one argument.').\n",
+				"parse_exception(pos(1,40,'UnknownFile'),'The FAILED_RULE predicate operator expects exactly one rule identifier.').\n",
 				result);
 	}
 
@@ -218,7 +216,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,40,'UnknownFile'),'The NOT_CHECKED_RULE predicate operator expects exactly one argument.').\n",
+				"parse_exception(pos(1,40,'UnknownFile'),'The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.').\n",
 				result);
 	}
 
@@ -228,7 +226,7 @@ public class RulesLanguageExceptionTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,40,'UnknownFile'),'The DISABLED_RULE predicate operator expects exactly one argument.').\n",
+				"parse_exception(pos(1,40,'UnknownFile'),'The DISABLED_RULE predicate operator expects exactly one rule identifier.').\n",
 				result);
 	}
 
