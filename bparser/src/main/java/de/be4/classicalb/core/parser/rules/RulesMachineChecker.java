@@ -505,6 +505,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 			return;
 		}
+		case RulesGrammar.STRING_CONCAT: {
+			if (parameters.size() < 2) {
+				this.errorList.add(new CheckException(
+						"Invalid number of arguments. Expected two more arguments of operator CONCAT_STRINGS.", node));
+			}
+			return;
+		}
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
 			// the grammar ensures at least one argument
 			if (parameters.size() > 2) {

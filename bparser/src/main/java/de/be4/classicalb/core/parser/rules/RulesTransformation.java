@@ -515,6 +515,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AAssignSubstitution(nameList, exprList);
 	}
 
+	private ADefinitionExpression applyExternalFunction(String name, PExpression... expressions) {
+		ADefinitionExpression defCall = new ADefinitionExpression(new TIdentifierLiteral(name),
+				createExpressionList(expressions));
+		return defCall;
+	}
+
 	@Override
 	public void outAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
@@ -538,6 +544,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 			list.add(seq);
 			final ADefinitionExpression def = new ADefinitionExpression(format, list);
 			node.replaceBy(def);
+			return;
+		}
+		case RulesGrammar.STRING_CONCAT: {
+			PExpression temp = null;
+			addExternalExpressionFunction("STRING_APPEND");
+			for (int i = parameters.size() - 2; i >= 0; i--) {
+				if (temp == null) {
+					temp = applyExternalFunction("STRING_APPEND", applyExternalFunction("TO_STRING", parameters.get(i)),
+							applyExternalFunction("TO_STRING", parameters.get(i + 1)));
+				} else {
+					temp = applyExternalFunction("STRING_APPEND", applyExternalFunction("TO_STRING", parameters.get(i)),
+							temp);
+				}
+			}
+			node.replaceBy(temp);
 			return;
 		}
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
@@ -1111,6 +1132,35 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 	}
 
+	private void addExternalExpressionFunction(String defName) {
+		if (definitions.containsDefinition(defName)) {
+			return;
+		}
+		List<PExpression> paramterList = null;
+		PExpression value = null;
+		switch (defName) {
+		case "STRING_APPEND": {
+			paramterList = createIdentifierList("a", "b");
+			value = createStringExpression("abc");
+			break;
+		}
+
+		default:
+			new AssertionError("Unknown external function: + " + defName);
+		}
+
+		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition();
+		def.setName(new TIdentifierLiteral(defName));
+		def.setParameters(paramterList);
+		def.setRhs(value);
+		try {
+			definitions.addDefinition(def, IDefinitions.Type.Expression);
+		} catch (CheckException | BException e) {
+			throw new AssertionError(e);
+		}
+
+	}
+
 	private void addForceDefinition() {
 		final String FORCE = "FORCE";
 		if (definitions.containsDefinition(FORCE)) {
@@ -1178,11 +1228,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 			list.add(createIdentifier(strings[i]));
 		}
 		return list;
-	}
-
-	@Override
-	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-		// skip properties clause
 	}
 
 }
