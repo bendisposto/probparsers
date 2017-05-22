@@ -1142,6 +1142,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 		case "STRING_APPEND": {
 			paramterList = createIdentifierList("a", "b");
 			value = createStringExpression("abc");
+			AExpressionDefinitionDefinition typeDef = new AExpressionDefinitionDefinition();
+			typeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
+			typeDef.setParameters(new ArrayList<PExpression>());
+			// EXTERNAL_FUNCTION_STRING_APPEND == (STRING*STRING) --> STRING;
+			typeDef.setRhs(new ATotalFunctionExpression(
+					new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
+					new AStringSetExpression()));
+			try {
+				definitions.addDefinition(typeDef, IDefinitions.Type.Expression);
+			} catch (CheckException | BException e) {
+				throw new AssertionError(e);
+			}
 			break;
 		}
 
