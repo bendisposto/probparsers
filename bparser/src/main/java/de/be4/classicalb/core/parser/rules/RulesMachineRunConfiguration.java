@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -24,11 +25,11 @@ import de.be4.classicalb.core.parser.util.Utils;
 public class RulesMachineRunConfiguration {
 
 	public static final String GOAL = "GOAL";
-	final HashMap<String, AbstractOperation> allOperations;
+	final Map<String, AbstractOperation> allOperations;
 	final RulesParseUnit mainModel;
-	final HashMap<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
+	final Map<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
 
-	public RulesMachineRunConfiguration(IModel mainModel, HashMap<String, AbstractOperation> allOperations) {
+	public RulesMachineRunConfiguration(IModel mainModel, Map<String, AbstractOperation> allOperations) {
 		this.mainModel = (RulesParseUnit) mainModel;
 		this.allOperations = allOperations;
 	}
@@ -46,7 +47,7 @@ public class RulesMachineRunConfiguration {
 		@Override
 		public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 			final String name = node.getName().getText();
-			if (name.equals("GOAL")) {
+			if (GOAL.equals(name)) {
 				RulesInGoalFinder rulesInGoalFinder = new RulesInGoalFinder();
 				node.getRhs().apply(rulesInGoalFinder);
 			}
@@ -55,6 +56,7 @@ public class RulesMachineRunConfiguration {
 	}
 
 	class RulesInGoalFinder extends DepthFirstAdapter {
+		@Override
 		public void caseAOperatorExpression(AOperatorExpression node) {
 			final String operatorName = node.getName().getText();
 			if (operatorName.equals(RulesGrammar.GET_RULE_COUNTEREXAMPLES)) {
@@ -66,8 +68,7 @@ public class RulesMachineRunConfiguration {
 		private RuleGoalAssumption getRuleCoverage(PExpression pExpression) {
 			AIdentifierExpression identifier = (AIdentifierExpression) pExpression;
 			String ruleName = Utils.getTIdentifierListAsString(identifier.getIdentifier());
-			RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(ruleName);
-			return ruleGoalAssumption;
+			return getRuleCoverage(ruleName);
 		}
 
 		private RuleGoalAssumption getRuleCoverage(String ruleName) {
@@ -163,11 +164,11 @@ public class RulesMachineRunConfiguration {
 			this.errorTypesAssumedToSucceed.add(i);
 		}
 
-		public HashSet<Integer> getErrorTypesAssumedToFail() {
+		public Set<Integer> getErrorTypesAssumedToFail() {
 			return new HashSet<>(errorTypesAssumedToFail);
 		}
 
-		public HashSet<Integer> getErrorTypesAssumedToSucceed() {
+		public Set<Integer> getErrorTypesAssumedToSucceed() {
 			return new HashSet<>(errorTypesAssumedToSucceed);
 		}
 
