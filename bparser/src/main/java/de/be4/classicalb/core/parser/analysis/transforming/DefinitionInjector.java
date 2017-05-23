@@ -33,7 +33,7 @@ public class DefinitionInjector extends DepthFirstAdapter {
 			definitionsMachineClause = new ADefinitionsMachineClause();
 			abstractMachineParseUnit.getMachineClauses().add(definitionsMachineClause);
 		} else if (abstractMachineParseUnit == null) {
-			throw new RuntimeException("Only AAbstractMachineParseUnit are supported by the DefinitionsInjector.");
+			throw new AssertionError("Only AAbstractMachineParseUnit are supported by the DefinitionsInjector.");
 		} else {
 			definitionsMachineClause.getDefinitions().clear();
 		}

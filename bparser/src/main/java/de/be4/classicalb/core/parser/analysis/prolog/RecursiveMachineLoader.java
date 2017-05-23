@@ -183,12 +183,12 @@ public class RecursiveMachineLoader {
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
-	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, List<String> ancestors,
+	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<String> ancestors,
 			final boolean isMain, final SourcePositions sourcePositions, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 
 		// make a copy of the referencing machines
-		ancestors = new ArrayList<String>(ancestors);
+		List<String> newAncestors = new ArrayList<>(ancestors);
 
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
 				parsingBehaviour.isMachineNameMustMatchFileName());
@@ -220,7 +220,7 @@ public class RecursiveMachineLoader {
 		parsedFiles.put(name, machineFile);
 
 		if (name != null) {
-			ancestors.add(name);
+			newAncestors.add(name);
 		}
 		if (isMain) {
 			main = name;
@@ -229,7 +229,7 @@ public class RecursiveMachineLoader {
 
 		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
 		try {
-			checkForCycles(ancestors, referencesSet);
+			checkForCycles(newAncestors, referencesSet);
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
@@ -240,7 +240,7 @@ public class RecursiveMachineLoader {
 				final String filePragma = refMachine.getPath();
 				File file = null;
 				if (filePragma == null) {
-					file = lookupFile(directory, refMachine, ancestors, refMachines.getPathList());
+					file = lookupFile(directory, refMachine, newAncestors, refMachines.getPathList());
 				} else {
 					File p = new File(filePragma);
 					if (p.isAbsolute()) {
@@ -259,7 +259,7 @@ public class RecursiveMachineLoader {
 				}
 				if (!getParsedMachines().containsKey(refMachine.getName())) {
 					try {
-						loadMachine(ancestors, file);
+						loadMachine(newAncestors, file);
 					} catch (IOException e) {
 						throw new BException(machineFile.getCanonicalPath(),
 								new CheckException(e.getMessage(), refMachine.getNode(), e));

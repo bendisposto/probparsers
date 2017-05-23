@@ -81,7 +81,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	}
 
 	public void findReferencedMachines() throws BException {
-		String fileName = null;
+		String fileName;
 		try {
 			fileName = mainFile.getCanonicalPath();
 		} catch (IOException e) {
@@ -90,8 +90,13 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			this.start.apply(this);
 		} catch (VisitorException e) {
+			logException(e);
 			throw new BException(fileName, e.getException());
 		}
+	}
+
+	private void logException(VisitorException e) {
+		// do nothing
 	}
 
 	/**

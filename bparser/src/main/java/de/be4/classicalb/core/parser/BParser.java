@@ -193,7 +193,6 @@ public class BParser {
 		final Reader reader = new StringReader(input);
 
 		Start ast = null;
-		boolean ok = false;
 
 		List<String> ids = new ArrayList<>();
 
@@ -213,11 +212,13 @@ public class BParser {
 		} while (!(t instanceof EOF));
 
 		Parser p = new Parser(new EBLexer(input, BigInteger.ZERO, ids, defTypes));
+		boolean ok;
 		try {
 			ast = p.parse();
 			ok = true;
 		} catch (ParserException e) {
 			handleEPraseException(e);
+			ok = false;
 		}
 
 		BigInteger b = new BigInteger("2");
