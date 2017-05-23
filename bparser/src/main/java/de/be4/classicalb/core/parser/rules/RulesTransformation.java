@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -18,7 +19,6 @@ import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class RulesTransformation extends DepthFirstAdapter {
 
@@ -176,76 +176,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	}
 
-	private AStringExpression createStringExpression(String string) {
-		return new AStringExpression(new TStringLiteral(string));
-	}
-
-	private AIdentifierExpression createRuleIdentifier(TIdentifierLiteral ruleLiteral) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add((TIdentifierLiteral) cloneNode((ruleLiteral)));
-		return new AIdentifierExpression(list);
-	}
-
-	private PPredicate createConjunction(List<PPredicate> predList) {
-		if (predList.isEmpty()) {
-			throw new AssertionError("Predicate list should not be empty.");
-		} else if (predList.size() == 1) {
-			return predList.get(0);
-		} else {
-			PPredicate p = predList.get(0);
-			for (int i = 1; i < predList.size(); i++) {
-				p = new AConjunctPredicate(p, predList.get(i));
-			}
-			return p;
-		}
-	}
-
-	private static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
-		List<PSubstitution> list = new ArrayList<>();
-		for (PSubstitution pSubstitution : pSubstitutions) {
-			list.add(pSubstitution);
-		}
-		return list;
-	}
-
-	private static List<PExpression> createExpressionList(PExpression... pExpressions) {
-		final List<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < pExpressions.length; i++) {
-			PExpression node = cloneNode(pExpressions[i]);
-			list.add(node);
-		}
-		return list;
-	}
-
-	private static AIdentifierExpression createIdentifier(String name) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add(new TIdentifierLiteral(name));
-		return new AIdentifierExpression(list);
-	}
-
-	private static AIdentifierExpression createIdentifier(String name, PositionedNode positionNode) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		TIdentifierLiteral literal = new TIdentifierLiteral(name);
-		// literal.setStartPos(positionNode.getStartPos());
-		// literal.setEndPos(positionNode.getEndPos());
-		list.add(literal);
-		AIdentifierExpression result = new AIdentifierExpression(list);
-		result.setStartPos(positionNode.getStartPos());
-		result.setEndPos(positionNode.getEndPos());
-		return result;
-	}
-
-	private static AIdentifierExpression createAIdentifierExpression(TIdentifierLiteral identifierLiteral) {
-		final String name = identifierLiteral.getText();
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		TIdentifierLiteral literal = new TIdentifierLiteral(name);
-		list.add(literal);
-		AIdentifierExpression result = new AIdentifierExpression(list);
-		result.setStartPos(identifierLiteral.getStartPos());
-		result.setEndPos(identifierLiteral.getEndPos());
-		return result;
-	}
-
 	class ClauseFinder extends DepthFirstAdapter {
 		AAbstractMachineParseUnit abstractMachineParseUnit = null;
 		AVariablesMachineClause variablesMachineClause = null;
@@ -302,7 +232,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			if (null != computationOperation.getReplacesIdentifier()) {
 
 				// renaming the operation
-				TIdentifierLiteral first = computationOperation.getReplacesIdentifier().getIdentifier().getFirst();
+				final TIdentifierLiteral first = computationOperation.getReplacesIdentifier().getIdentifier().getFirst();
 				operationNameList.add((TIdentifierLiteral) cloneNode(first));
 				nameIdentifier = cloneNode(computationOperation.getReplacesIdentifier());
 			} else {
@@ -674,19 +604,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AAssignSubstitution(nameList, exprList);
 	}
 
-	private PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add((PExpression) cloneNode(pExpression));
-		return createPositinedNode(new ASetExtensionExpression(list), pos);
-	}
 
-	private PExpression createSetOfPExpression(PExpression... pExpressions) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add((PExpression) cloneNode(pExpression));
-		}
-		return new ASetExtensionExpression(list);
-	}
 
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
@@ -729,26 +647,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
 	}
 
-	private PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2, PSubstitution... subs) {
-		List<PSubstitution> subList = new ArrayList<>();
-		subList.add(sub1);
-		subList.add(sub2);
-		for (PSubstitution pSubstitution : subs) {
-			subList.add(pSubstitution);
-		}
-		return new ASequenceSubstitution(subList);
-	}
 
-	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
-		node.setStartPos(pos.getStartPos());
-		node.setEndPos(pos.getEndPos());
-		return node;
-	}
-
-	public static void setPosition(PositionedNode node, PositionedNode pos) {
-		node.setStartPos(pos.getStartPos());
-		node.setEndPos(pos.getEndPos());
-	}
 
 	@Override
 	public void outAFunctionOperation(AFunctionOperation node) {
