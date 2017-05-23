@@ -68,6 +68,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 	 *            The root node of the abstract syntax tree.
 	 * @param bParser
 	 *            The parser of the rules machine.
+	 * @param rulesMachineChecker
+	 *            the rules machine checker which has already analyzed the rules
+	 *            machine
 	 * @param allOperations
 	 *            The list of all operation in the project. This parameter is
 	 *            needed in order to detect invalid reference to operations
@@ -79,11 +82,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 	 *            machine.
 	 * 
 	 */
-	public RulesTransformation(Start start, BParser bParser, RulesMachineChecker rulesMachineVisitor,
+	public RulesTransformation(Start start, BParser bParser, RulesMachineChecker rulesMachineChecker,
 			Map<String, AbstractOperation> allOperations) {
 		this.start = start;
 		this.definitions = bParser.getDefinitions();
-		this.rulesMachineVisitor = rulesMachineVisitor;
+		this.rulesMachineVisitor = rulesMachineChecker;
 		this.allOperations = allOperations;
 
 		for (AbstractOperation operation : allOperations.values()) {
