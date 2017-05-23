@@ -20,17 +20,8 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 
-/**
- * @author bendisposto
- *
- */
-/**
- * @author bendisposto
- * 
- */
 @RunWith(PolySuite.class)
-public class ParseableButProblematicOnWindowsUnixLF extends
-		AbstractParseMachineTest {
+public class ParseableButProblematicOnWindowsUnixLF extends AbstractParseMachineTest {
 
 	private static final String PATH = "src/test/resources/problematicOnWindows";
 
@@ -58,10 +49,8 @@ public class ParseableButProblematicOnWindowsUnixLF extends
 		public void defaultIn(Node node) {
 			if (node instanceof Start)
 				return; // start does not have position infos
-			assertNotNull(node.getClass().getSimpleName() + " start was null",
-					node.getStartPos());
-			assertNotNull(node.getClass().getSimpleName() + " end was null",
-					node.getEndPos());
+			assertNotNull(node.getClass().getSimpleName() + " start was null", node.getStartPos());
+			assertNotNull(node.getClass().getSimpleName() + " end was null", node.getEndPos());
 		}
 	}
 
@@ -71,12 +60,10 @@ public class ParseableButProblematicOnWindowsUnixLF extends
 		final File[] unixMachines = new File[machines.length];
 
 		for (int i = 0; i < machines.length; i++) {
-			unixMachines[i] = File.createTempFile(machines[i].getName()
-					.replace(".mch", "_unix"), ".mch");
+			unixMachines[i] = File.createTempFile(machines[i].getName().replace(".mch", "_unix"), ".mch");
 
 			BufferedReader in = new BufferedReader(new FileReader(machines[i]));
-			BufferedWriter out = new BufferedWriter(new FileWriter(
-					unixMachines[i]));
+			BufferedWriter out = new BufferedWriter(new FileWriter(unixMachines[i]));
 
 			String zeile;
 			while ((zeile = in.readLine()) != null) {

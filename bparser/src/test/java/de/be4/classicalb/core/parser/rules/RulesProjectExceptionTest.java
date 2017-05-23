@@ -122,6 +122,7 @@ public class RulesProjectExceptionTest {
 			method.setAccessible(true);
 			method.invoke(project, pStream, pStream);
 		}
+		output.close();
 		return output.toString();
 	}
 

@@ -66,6 +66,7 @@ public class Helpers {
 			PrintStream printStream = new PrintStream(output);
 			BParser.printASTasProlog(printStream, parser, machineFile, tree, new ParsingBehaviour(),
 					parser.getContentProvider());
+			output.close();
 			return output.toString();
 		} catch (BCompoundException e) {
 			e.printStackTrace();
