@@ -376,7 +376,7 @@ public class BParser {
 			for (CheckException checkException : checkExceptions) {
 				bExceptionList.add(new BException(getFileName(), checkException));
 			}
-			if (bExceptionList.size() > 0) {
+			if (!bExceptionList.isEmpty()) {
 				BCompoundException comp = new BCompoundException(bExceptionList);
 				throw comp;
 			}
@@ -392,7 +392,7 @@ public class BParser {
 			}
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(
-					new BException(getFileName(), new BParseException(token, range, msg, realMsg)));
+					new BException(getFileName(), new BParseException(token, range, msg, realMsg, e)));
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
@@ -535,8 +535,8 @@ public class BParser {
 				try {
 					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
 					out.println(fp);
-				} catch (Throwable e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
 			}
 		} catch (final IOException e) {

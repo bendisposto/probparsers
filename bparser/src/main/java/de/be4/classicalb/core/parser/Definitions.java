@@ -18,8 +18,8 @@ import de.be4.classicalb.core.parser.node.PDefinition;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Definitions extends IDefinitions {
-	private final Map<String, PDefinition> definitions = new HashMap<String, PDefinition>();
-	private final Map<String, Type> types = new HashMap<String, Type>();
+	private final Map<String, PDefinition> definitionsMap = new HashMap<>();
+	private final Map<String, Type> types = new HashMap<>();
 	private final File file;
 
 	public Definitions() {
@@ -32,7 +32,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public Map<String, Type> getTypes() {
-		final Map<String, Type> map = new HashMap<String, Type>();
+		final Map<String, Type> map = new HashMap<>();
 		map.putAll(types);
 		for (IDefinitions definitions : referencedDefinitions) {
 			map.putAll(definitions.getTypes());
@@ -78,7 +78,7 @@ public class Definitions extends IDefinitions {
 	@Override
 	public Set<String> getDefinitionNames() {
 		Set<String> resultSet = new HashSet<>();
-		resultSet.addAll(definitions.keySet());
+		resultSet.addAll(definitionsMap.keySet());
 		for (IDefinitions iDefinitions : referencedDefinitions) {
 			resultSet.addAll(iDefinitions.getDefinitionNames());
 		}
@@ -87,8 +87,8 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public PDefinition getDefinition(final String defName) {
-		if (definitions.containsKey(defName)) {
-			return definitions.get(defName);
+		if (definitionsMap.containsKey(defName)) {
+			return definitionsMap.get(defName);
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
 				if (iDefinitions.containsDefinition(defName)) {
@@ -101,7 +101,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public File getFile(final String defName) {
-		if (definitions.containsKey(defName)) {
+		if (definitionsMap.containsKey(defName)) {
 			return this.file;
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
@@ -115,7 +115,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public boolean containsDefinition(String defName) {
-		if (definitions.containsKey(defName)) {
+		if (definitionsMap.containsKey(defName)) {
 			return true;
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
@@ -148,7 +148,7 @@ public class Definitions extends IDefinitions {
 	public void replaceDefinition(final String key, final Type type, final PDefinition node) {
 		if (types.containsKey(key)) {
 			types.put(key, type);
-			definitions.put(key, node);
+			definitionsMap.put(key, node);
 			return;
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
@@ -199,7 +199,7 @@ public class Definitions extends IDefinitions {
 				throw e;
 			}
 		}
-		definitions.put(key, defNode);
+		definitionsMap.put(key, defNode);
 		types.put(key, type);
 	}
 
@@ -209,7 +209,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public String toString() {
-		return definitions.keySet().toString();
+		return definitionsMap.keySet().toString();
 	}
 
 	@Override
@@ -217,7 +217,7 @@ public class Definitions extends IDefinitions {
 		if (file != null) {
 			machineFilesLoaded.add(file);
 			final int fileNumber = machineFilesLoaded.indexOf(file) + 1;
-			for (PDefinition def : definitions.values()) {
+			for (PDefinition def : definitionsMap.values()) {
 				nodeIdMapping.assignIdentifiers(fileNumber, def);
 			}
 		}

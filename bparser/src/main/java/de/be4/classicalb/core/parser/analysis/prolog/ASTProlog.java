@@ -227,7 +227,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		// There is no rule to translate the class name to a prolog functor.
 		// Probably the class name is missing in table SUM_TYPE or in table
 		// ATOMIC_TYPE.
-		throw new RuntimeException("cannot determine functor name: " + className);
+		throw new AssertionError("cannot determine functor name: " + className);
 	}
 
 	/**

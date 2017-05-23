@@ -26,7 +26,7 @@ public class FastReadTransformer {
 
 	public String write() {
 		Collection<PrologTerm> sentences = spo.getSentences();
-		if (sentences.size() == 0) 
+		if (sentences.isEmpty())
 			throw new IllegalArgumentException(EMPTY_MSG);
 		if (sentences.size() > 1)
 			throw new IllegalArgumentException(MULTI_MSG);

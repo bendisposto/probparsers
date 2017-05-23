@@ -10,8 +10,7 @@ public class BParseException extends RuntimeException {
 	private final SourcecodeRange range;
 	private final String realMsg;
 
-	public BParseException(final Token token, final SourcecodeRange range,
-			final String message) {
+	public BParseException(final Token token, final SourcecodeRange range, final String message) {
 		this(token, range, message, message.substring(message.indexOf(']') + 1));
 	}
 
@@ -19,9 +18,16 @@ public class BParseException extends RuntimeException {
 		this(token, null, message);
 	}
 
-	public BParseException(Token token, SourcecodeRange range, String msg,
-			String realMsg) {
+	public BParseException(Token token, SourcecodeRange range, String msg, String realMsg) {
 		super(msg);
+		this.token = token;
+		this.range = range;
+		this.realMsg = realMsg;
+
+	}
+
+	public BParseException(Token token, SourcecodeRange range, String msg, String realMsg, Throwable throwable) {
+		super(msg, throwable);
 		this.token = token;
 		this.range = range;
 		this.realMsg = realMsg;

@@ -124,7 +124,7 @@ public class RulesProject {
 	}
 
 	private void checkProject() {
-		if (this.bExceptionList.size() > 0) {
+		if (!this.bExceptionList.isEmpty()) {
 			return;
 		}
 		collectAllOperations();
