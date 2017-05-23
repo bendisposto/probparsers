@@ -31,9 +31,14 @@ public class Helpers {
 		return string;
 	}
 
-	public static String getPrettyPrint(final String testMachine) throws BCompoundException {
+	public static String getPrettyPrint(final String testMachine) {
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
+		Start startNode;
+		try {
+			startNode = parser.parse(testMachine, false);
+		} catch (BCompoundException e) {
+			throw new RuntimeException(e);
+		}
 		PrettyPrinter pp = new PrettyPrinter();
 		startNode.apply(pp);
 		return pp.getPrettyPrint();
@@ -102,9 +107,14 @@ public class Helpers {
 		return output.toString();
 	}
 
-	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
+	public static String getMachineAsPrologTerm(String input) {
 		final BParser parser = new BParser("Test");
-		Start start = parser.parse(input, true);
+		Start start;
+		try {
+			start = parser.parse(input, true);
+		} catch (BCompoundException e) {
+			throw new RuntimeException(e);
+		}
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.prologOutput = true;
 		parsingBehaviour.useIndention = false;
