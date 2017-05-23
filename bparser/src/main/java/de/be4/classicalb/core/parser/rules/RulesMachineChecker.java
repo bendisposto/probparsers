@@ -276,20 +276,22 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		case RulesGrammar.TAGS:
 			checkTagsAttribute(pOperationAttribute, arguments);
 			return;
-		case RulesGrammar.REPLACES: {
-			if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
-				errorList.add(
-						new CheckException("Expected exactly one identifier after REPLACES.", pOperationAttribute));
-				break;
-			}
-			final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
-			currentOperation.addReplacesIdentifier(idExpr);
+		case RulesGrammar.REPLACES:
+			checkReplacesAttribute(pOperationAttribute, arguments);
 			return;
-		}
-
 		default:
 			throw new AssertionError("Unexpected operation attribute: " + name);
 		}
+	}
+
+	private void checkReplacesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
+			errorList.add(new CheckException("Expected exactly one identifier after REPLACES.", pOperationAttribute));
+			return;
+		}
+		final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
+		currentOperation.addReplacesIdentifier(idExpr);
+		return;
 	}
 
 	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
@@ -348,18 +350,17 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
-			if (currentOperation instanceof RuleOperation) {
-				final RuleOperation rule = (RuleOperation) currentOperation;
-				if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
-					rule.setRuleId((AIdentifierExpression) arguments.get(0));
-				} else {
-					errorList.add(
-							new CheckException("Expected exactly one identifier behind RULEID", pOperationAttribute));
-				}
+		if (currentOperation instanceof RuleOperation) {
+			final RuleOperation rule = (RuleOperation) currentOperation;
+			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
+				rule.setRuleId((AIdentifierExpression) arguments.get(0));
 			} else {
-				errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation",
-						pOperationAttribute));
+				errorList.add(new CheckException("Expected exactly one identifier behind RULEID", pOperationAttribute));
 			}
+		} else {
+			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation",
+					pOperationAttribute));
+		}
 		return;
 	}
 

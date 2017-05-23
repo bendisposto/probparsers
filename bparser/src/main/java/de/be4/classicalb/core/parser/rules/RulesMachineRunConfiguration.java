@@ -84,36 +84,31 @@ public class RulesMachineRunConfiguration {
 
 		@Override
 		public void caseAOperatorPredicate(AOperatorPredicate node) {
-			final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
+			final List<PExpression> arguments = new ArrayList<>(node.getIdentifiers());
 			final String operatorName = node.getName().getText();
 			switch (operatorName) {
-			case RulesGrammar.SUCCEEDED_RULE: {
-				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(arguments.get(0));
-				ruleGoalAssumption.setSuccessCompletelyTested();
+			case RulesGrammar.SUCCEEDED_RULE:
+				getRuleCoverage(arguments.get(0)).setSuccessCompletelyTested();
 				return;
-			}
-			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
-				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(arguments.get(0));
-				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(1);
-				String text = intExpr.getLiteral().getText();
-				int errorType = Integer.parseInt(text);
-				ruleGoalAssumption.addErrorTypeAssumedToSucceed(errorType);
+			case RulesGrammar.FAILED_RULE:
+				getRuleCoverage(arguments.get(0)).setFailCompletelyTested();
 				return;
-			}
-			case RulesGrammar.FAILED_RULE: {
-				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(arguments.get(0));
-				ruleGoalAssumption.setFailCompletelyTested();
-				return;
-			}
-			case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
+			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
+			case RulesGrammar.FAILED_RULE_ERROR_TYPE:
 				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(arguments.get(0));
 				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(1);
 				String text = intExpr.getLiteral().getText();
 				int errorType = Integer.parseInt(text);
-				ruleGoalAssumption.addErrorTypeAssumedToFail(errorType);
+				if (RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE.equals(operatorName)) {
+					getRuleCoverage(arguments.get(0)).addErrorTypeAssumedToSucceed(errorType);
+				} else {
+					ruleGoalAssumption.addErrorTypeAssumedToFail(errorType);
+				}
 				return;
+			default:
+				throw new AssertionError();
 			}
-			}
+
 		}
 
 	}
