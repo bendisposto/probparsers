@@ -6,10 +6,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
 
 public class RulesProjectTest {
 
@@ -20,6 +25,31 @@ public class RulesProjectTest {
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
 		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+	}
+
+	@Test
+	public void testRulesMachineConfiguration() throws Exception {
+		File file = new File("src/test/resources/rules/project/RulesMachineConfigurationTest.rmch");
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setPrologOutput(true);
+		RulesProject project = new RulesProject(file);
+		project.translateProject();
+		RulesMachineRunConfiguration rulesMachineRunConfiguration = project.getRulesMachineRunConfiguration();
+		Set<RuleGoalAssumption> rulesGoalAssumptions = rulesMachineRunConfiguration.getRulesGoalAssumptions();
+		assertEquals(2, rulesGoalAssumptions.size());
+		for (Iterator<RuleGoalAssumption> iterator = rulesGoalAssumptions.iterator(); iterator.hasNext();) {
+			RuleGoalAssumption next = iterator.next();
+			if ("rule1".equals(next.getRuleName())) {
+				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToSucceed());
+				assertEquals(true, next.isCheckedForCounterexamples());
+				assertEquals("rule1", next.getRuleOperation().getName());
+			} else {
+				assertEquals("rule2", next.getRuleName());
+				assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), next.getErrorTypesAssumedToFail());
+				assertEquals(false, next.isCheckedForCounterexamples());
+			}
+		}
 	}
 
 	@Test

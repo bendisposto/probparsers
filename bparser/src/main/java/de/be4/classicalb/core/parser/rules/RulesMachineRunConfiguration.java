@@ -59,7 +59,7 @@ public class RulesMachineRunConfiguration {
 		@Override
 		public void caseAOperatorExpression(AOperatorExpression node) {
 			final String operatorName = node.getName().getText();
-			if (operatorName.equals(RulesGrammar.GET_RULE_COUNTEREXAMPLES)) {
+			if (RulesGrammar.GET_RULE_COUNTEREXAMPLES.equals(operatorName)) {
 				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(node.getIdentifiers().get(0));
 				ruleGoalAssumption.setCheckedForCounterexamples();
 			}
