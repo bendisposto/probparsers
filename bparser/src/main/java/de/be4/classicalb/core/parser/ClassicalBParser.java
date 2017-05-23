@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -10,10 +7,6 @@ import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 
-/**
- * @author plagge
- * 
- */
 public class ClassicalBParser implements ProBParserBase {
 	private static final String WRAPPER_EXPR = "bexpr";
 	private static final String WRAPPER_PRED = "bpred";
@@ -40,7 +33,7 @@ public class ClassicalBParser implements ProBParserBase {
 		try {
 			ast = BParser.parse(formula);
 		} catch (BCompoundException e) {
-			throw new ProBParseException(e.getBExceptions().get(0).getLocalizedMessage());
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
 		}
 		final ASTProlog prologPrinter = new ASTProlog(pto, null);
 		if (wrap) {
