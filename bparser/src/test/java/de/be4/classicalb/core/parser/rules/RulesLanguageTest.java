@@ -385,7 +385,7 @@ public class RulesLanguageTest {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.readMachineFromFile(new File(file));
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
+		pb.setAddLineNumbers(false);
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
@@ -409,7 +409,7 @@ public class RulesLanguageTest {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
+		pb.setAddLineNumbers(false);
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
@@ -434,7 +434,7 @@ public class RulesLanguageTest {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
+		pb.setAddLineNumbers(false);
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		if (unit.getCompoundException() != null) {

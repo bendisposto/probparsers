@@ -17,8 +17,8 @@ public class RulesProjectTest {
 	public void testProject2() throws Exception {
 		File file = new File("src/test/resources/rules/project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.addLineNumbers = true;
-		parsingBehaviour.prologOutput = true;
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setPrologOutput(true);
 		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
 	}
 
@@ -42,7 +42,7 @@ public class RulesProjectTest {
 	public void testForAll() throws Exception {
 		String f = "src/test/resources/rules/ForAllPredicate.rmch";
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.addLineNumbers = true;
+		parsingBehaviour.setAddLineNumbers(true);
 		RulesProject.parseProject(new File(f), parsingBehaviour, System.out, System.err);
 	}
 
@@ -81,7 +81,7 @@ public class RulesProjectTest {
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
-	
+
 	@Test
 	public void testUnknownIdentifier() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnknownIdentifier.rmch");
@@ -168,10 +168,10 @@ public class RulesProjectTest {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/Replacement.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
-		//the result should not contain name of the replacement operation 
+		// the result should not contain name of the replacement operation
 		assertFalse(result.contains("COMP_comp2New"));
 	}
-	
+
 	@Test
 	public void testImportedPackageDoesNotExist() {
 		String result = getRulesMachineAsPrologTerm(
@@ -181,6 +181,7 @@ public class RulesProjectTest {
 		assertTrue(result.contains("Imported package does not exist"));
 
 	}
+
 	@Test
 	public void testImportedPackageDoesNotExist2() {
 		String result = getRulesMachineAsPrologTerm(
@@ -190,7 +191,6 @@ public class RulesProjectTest {
 		assertTrue(result.contains("Imported package does not exist"));
 
 	}
-	
 
 	@Test
 	public void testDuplicatePackageImport() {
@@ -272,8 +272,8 @@ public class RulesProjectTest {
 	private String getRulesMachineAsPrologTerm(String fileName) {
 		File file = new File(fileName);
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.addLineNumbers = true;
-		parsingBehaviour.prologOutput = true;
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setPrologOutput(true);
 		OutputStream out = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 

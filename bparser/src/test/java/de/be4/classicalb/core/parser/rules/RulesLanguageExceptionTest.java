@@ -453,7 +453,7 @@ public class RulesLanguageExceptionTest {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
+		pb.setAddLineNumbers(false);
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();

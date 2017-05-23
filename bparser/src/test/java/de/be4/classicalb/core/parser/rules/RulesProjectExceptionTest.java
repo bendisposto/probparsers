@@ -66,7 +66,7 @@ public class RulesProjectExceptionTest {
 		};
 		PrintStream pStream = new PrintStream(output);
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.prologOutput = true;
+		parsingBehaviour.setPrologOutput(true);
 		BParser bParser = new BParser("RulesMachineInOrdinaryMachineFile.mch");
 		bParser.fullParsing(new File("src/test/resources/rules/project/RulesMachineInOrdinaryMachineFile.mch"),
 				parsingBehaviour, pStream, pStream);
@@ -78,7 +78,7 @@ public class RulesProjectExceptionTest {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
+		pb.setAddLineNumbers(true);
 		unit.setParsingBehaviour(pb);
 		unit.parse();
 		RulesProject project = new RulesProject(new File("TestFile.rmch"));

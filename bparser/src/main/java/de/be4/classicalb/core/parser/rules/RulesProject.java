@@ -29,8 +29,8 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private final File mainFile;
-	final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
-	final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
+	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
+	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour;
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
@@ -70,12 +70,12 @@ public class RulesProject {
 		this.parsingBehaviour = parsingBehaviour;
 	}
 
-	public HashMap<String, AbstractOperation> getOperationsMap() {
+	public Map<String, AbstractOperation> getOperationsMap() {
 		return new HashMap<>(this.allOperations);
 	}
 
 	private void flattenProject() {
-		if (this.bExceptionList.size() > 0) {
+		if (!this.bExceptionList.isEmpty()) {
 			return;
 		}
 		extractConfigurationOfMainModel();
@@ -151,7 +151,7 @@ public class RulesProject {
 				final FunctionOperation functionOperation = (FunctionOperation) allOperations.get(functionName);
 				Set<AbstractOperation> transDeps = new HashSet<>(functionOperation.getTransitiveDependencies());
 				transDeps.removeAll(transitiveDependencies);
-				if (transDeps.size() > 0) {
+				if (!transDeps.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					sb.append("Missing dependencies due to FUNCTION call: ");
 					Iterator<AbstractOperation> iterator = transDeps.iterator();
@@ -305,7 +305,7 @@ public class RulesProject {
 				}
 			}
 			readVariables.removeAll(variablesInScope);
-			if (readVariables.size() > 0) {
+			if (!readVariables.isEmpty()) {
 				for (String varName : readVariables) {
 					this.bExceptionList.add(new BException(operation.getFileName(),
 							new CheckException(
@@ -425,7 +425,7 @@ public class RulesProject {
 					break;
 				}
 			}
-			if (opFound == false && allOperations.containsKey(opName)) {
+			if (!opFound && allOperations.containsKey(opName)) {
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
 								+ operation.getMachineName() + "'.", aIdentifierExpression)));
@@ -433,13 +433,6 @@ public class RulesProject {
 		}
 		operation.setDependencies(operationsFound);
 		return new HashSet<>(operationsFound);
-	}
-
-	@SuppressWarnings("unused")
-	private Set<AbstractOperation> findFunctionDependencies(final AbstractOperation operation,
-			final List<AbstractOperation> ancestors) {
-		// TODO find function dependencies
-		return null;
 	}
 
 	private boolean checkForCycles(AbstractOperation operation, List<AIdentifierExpression> list,
@@ -502,17 +495,13 @@ public class RulesProject {
 	}
 
 	public boolean hasErrors() {
-		if (this.bExceptionList.size() == 0) {
-			return false;
-		} else {
-			return true;
-		}
+		return !this.bExceptionList.isEmpty();
 	}
 
 	private int printPrologOutput(final PrintStream out, final PrintStream err) {
-		if (this.bExceptionList.size() > 0) {
+		if (!this.bExceptionList.isEmpty()) {
 			BCompoundException comp = new BCompoundException(bExceptionList);
-			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.useIndention, false);
+			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.isUseIndention(), false);
 			return -2;
 		} else {
 			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);

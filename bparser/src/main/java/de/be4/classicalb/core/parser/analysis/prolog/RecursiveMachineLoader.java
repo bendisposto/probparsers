@@ -88,13 +88,13 @@ public class RecursiveMachineLoader {
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		Start tree;
-		tree = parser.parseFile(machineFile, parsingBehaviour.verbose, contentProvider);
+		tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose(), contentProvider);
 		recursivlyLoadMachine(machineFile, tree, ancestors, false, parser.getSourcePositions(),
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
 
 	public void printAsProlog(final PrintWriter out) {
-		final IPrologTermOutput pout = new PrologTermOutput(out, parsingBehaviour.useIndention);
+		final IPrologTermOutput pout = new PrologTermOutput(out, parsingBehaviour.isUseIndention());
 		printAsProlog(pout);
 	}
 
@@ -128,7 +128,7 @@ public class RecursiveMachineLoader {
 		pout.fullstop();
 		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
 			pout.openTerm("machine");
-			if (parsingBehaviour.addLineNumbers) {
+			if (parsingBehaviour.isAddLineNumbers()) {
 				final SourcePositions src = positions.get(entry.getKey());
 				pprinter.setSourcePositions(src);
 			}
@@ -191,7 +191,7 @@ public class RecursiveMachineLoader {
 		ancestors = new ArrayList<String>(ancestors);
 
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
-				parsingBehaviour.machineNameMustMatchFileName);
+				parsingBehaviour.isMachineNameMustMatchFileName());
 		try {
 			refMachines.findReferencedMachines();
 		} catch (BException e) {
@@ -295,7 +295,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void intersect(final Set<String> a, final Set<String> b) {
-		for (final Iterator< String>it = a.iterator(); it.hasNext();) {
+		for (final Iterator<String> it = a.iterator(); it.hasNext();) {
 			final String elem = it.next();
 			if (elem != null && !b.contains(elem)) {
 				it.remove();
@@ -336,30 +336,37 @@ public class RecursiveMachineLoader {
 		// IGNORE most machine parts
 		@Override
 		public void caseAConstantsMachineClause(final AConstantsMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAPropertiesMachineClause(final APropertiesMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAInvariantMachineClause(final AInvariantMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAAssertionsMachineClause(final AAssertionsMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAInitialisationMachineClause(final AInitialisationMachineClause node) {
+			// skip
 		}
 
 		@Override
 		public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
+			// skip
 		}
 
 	}

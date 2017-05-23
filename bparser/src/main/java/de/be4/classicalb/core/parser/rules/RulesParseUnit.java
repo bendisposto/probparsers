@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
@@ -129,7 +130,7 @@ public class RulesParseUnit implements IModel {
 		this.translate(allOperations);
 	}
 
-	public void translate(HashMap<String, AbstractOperation> allOperations) {
+	public void translate(Map<String, AbstractOperation> allOperations) {
 		if (bCompoundException != null) {
 			return;
 		}
@@ -168,7 +169,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.useIndention, false);
+		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.isUseIndention(), false);
 	}
 
 	@Override
@@ -177,7 +178,7 @@ public class RulesParseUnit implements IModel {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
-		if (parsingBehaviour.addLineNumbers) {
+		if (parsingBehaviour.isAddLineNumbers()) {
 			final SourcePositions src = bParser.getSourcePositions();
 			pprinter.setSourcePositions(src);
 		}
@@ -188,11 +189,7 @@ public class RulesParseUnit implements IModel {
 
 	@Override
 	public boolean hasError() {
-		if (this.bCompoundException == null) {
-			return false;
-		} else {
-			return true;
-		}
+		return this.bCompoundException != null;
 	}
 
 	@Override

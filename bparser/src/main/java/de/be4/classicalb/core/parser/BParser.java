@@ -498,40 +498,40 @@ public class BParser {
 
 			// Properties hashes = new Properties();
 
-			if (parsingBehaviour.outputFile != null) {
-				if (hashesStillValid(parsingBehaviour.outputFile))
+			if (parsingBehaviour.getOutputFile() != null) {
+				if (hashesStillValid(parsingBehaviour.getOutputFile()))
 					return 0;
 			}
 
 			final long start = System.currentTimeMillis();
-			final Start tree = parseFile(bfile, parsingBehaviour.verbose);
+			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
 			final long end = System.currentTimeMillis();
 
-			if (parsingBehaviour.printTime) {
+			if (parsingBehaviour.isPrintTime()) {
 				out.println("Time for parsing: " + (end - start) + "ms");
 			}
 
-			if (parsingBehaviour.printAST) {
+			if (parsingBehaviour.isPrintAST()) {
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
 
-			if (parsingBehaviour.displayGraphically) {
+			if (parsingBehaviour.isDisplayGraphically()) {
 				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.prologOutput) {
+			if (parsingBehaviour.isPrologOutput()) {
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.printTime) {
+			if (parsingBehaviour.isPrintTime()) {
 				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 
-			if (parsingBehaviour.fastPrologOutput) {
+			if (parsingBehaviour.isFastPrologOutput()) {
 				try {
 					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
 					out.println(fp);
@@ -540,7 +540,7 @@ public class BParser {
 				}
 			}
 		} catch (final IOException e) {
-			if (parsingBehaviour.prologOutput) {
+			if (parsingBehaviour.isPrologOutput()) {
 				PrologExceptionPrinter.printException(err, e, bfile.getAbsolutePath());
 			} else {
 				err.println();
@@ -548,8 +548,8 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, parsingBehaviour.useIndention, false);
+			if (parsingBehaviour.isPrologOutput()) {
+				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();

@@ -76,11 +76,11 @@ public class Helpers {
 
 	public static String fullParsing(String filename) {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.prologOutput = true;
-		parsingBehaviour.useIndention = false;
-		parsingBehaviour.addLineNumbers = false;
-		parsingBehaviour.verbose = true;
-		parsingBehaviour.machineNameMustMatchFileName = true;
+		parsingBehaviour.setPrologOutput(true);
+		parsingBehaviour.setUseIndention(false);
+		parsingBehaviour.setAddLineNumbers(false);
+		parsingBehaviour.setVerbose(true);
+		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}
 
@@ -116,10 +116,11 @@ public class Helpers {
 			throw new RuntimeException(e);
 		}
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.prologOutput = true;
-		parsingBehaviour.useIndention = false;
-		parsingBehaviour.addLineNumbers = false;
-		parsingBehaviour.verbose = true;
+		parsingBehaviour.setPrologOutput(true);
+		parsingBehaviour.setUseIndention(false);
+		parsingBehaviour.setAddLineNumbers(false);
+		parsingBehaviour.setVerbose(true);
+		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -132,7 +133,7 @@ public class Helpers {
 				return this.string.toString();
 			}
 		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.useIndention);
+		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.isUseIndention());
 		printAsProlog(start, pout);
 		return output.toString();
 	}
@@ -164,7 +165,7 @@ public class Helpers {
 			Start tree = parser.parseFile(machineFile, false);
 
 			final ParsingBehaviour behaviour = new ParsingBehaviour();
-			behaviour.verbose = true;
+			behaviour.setVerbose(true);
 
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree, behaviour, parser.getContentProvider());

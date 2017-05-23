@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -110,7 +111,7 @@ public class BMachine implements IModel {
 
 	@Override
 	public List<RulesMachineReference> getMachineReferences() {
-		return new ArrayList<RulesMachineReference>();
+		return new ArrayList<>();
 	}
 
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
@@ -118,7 +119,7 @@ public class BMachine implements IModel {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
-		if (parsingBehaviour.addLineNumbers) {
+		if (parsingBehaviour.isAddLineNumbers()) {
 			pprinter.setSourcePositions(
 					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
 		}
@@ -158,7 +159,7 @@ public class BMachine implements IModel {
 			this.parseUnit.getMachineClauses().add(definitionsClause);
 		}
 		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
-				new ArrayList<PExpression>(), new AIntegerExpression(new TIntegerLiteral("" + value)));
+				new ArrayList<PExpression>(), new AIntegerExpression(new TIntegerLiteral(Integer.toString(value))));
 		definitionsClause.getDefinitions().add(def);
 	}
 
@@ -238,11 +239,11 @@ public class BMachine implements IModel {
 			definitionsClause = new ADefinitionsMachineClause(new ArrayList<PDefinition>());
 			this.parseUnit.getMachineClauses().add(definitionsClause);
 		}
-		PDefinition def = (PDefinition) NodeCloner.cloneNode(goalDefinition);
+		PDefinition def = NodeCloner.cloneNode(goalDefinition);
 		definitionsClause.getDefinitions().add(def);
 	}
 
-	public void addPropertiesPredicates(HashMap<String, String> constantStringValues) {
+	public void addPropertiesPredicates(Map<String, String> constantStringValues) {
 		if (constantStringValues.size() == 0) {
 			return;
 		}
