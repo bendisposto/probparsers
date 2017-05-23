@@ -233,7 +233,7 @@ public class PreParser {
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
 			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
+			for (Iterator< String>iterator = cycle.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
 				if (iterator.hasNext()) {
 					sb.append(" -> ");
@@ -303,7 +303,7 @@ public class PreParser {
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
 		final LinkedList<Token> list = new LinkedList<Token>();
-		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator.hasNext();) {
+		for (final Iterator< Token>iterator = definitions.keySet().iterator(); iterator.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
 
@@ -429,12 +429,12 @@ public class PreParser {
 		int pos = errorToken.getPos();
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf(']');
+		final int index = oldMessage.indexOf("]");
 		String message = oldMessage.substring(index + 1);
 		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
 		}
-		return '[' + line + ',' + pos + ']' + message;
+		return "[" + line + "," + pos + "]" + message;
 	}
 
 	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,
@@ -447,7 +447,7 @@ public class PreParser {
 		int pos = Integer.parseInt(m.group());
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf("]");
+		final int index = oldMessage.indexOf(']');
 		String message = oldMessage.substring(index + 1);
 		return "[" + line + "," + pos + "]" + message;
 	}
