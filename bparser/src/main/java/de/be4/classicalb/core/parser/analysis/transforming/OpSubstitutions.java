@@ -39,7 +39,7 @@ import de.hhu.stups.sablecc.patch.SourcePositions;
 
 /**
  * <p>
- * This visitor performs 2 AST transformations which need to be done in one DFS
+ * This visitor performs two AST transformations which need to be done in one DFS
  * cause they influence each other when definitions are involved. The reason is
  * that in some cases we cannot decide during preparsing and parsing, if the RHS
  * of a definition is an expression or a substitution. Function and operation
