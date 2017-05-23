@@ -1,8 +1,9 @@
 package de.be4.classicalb.core.parser.visualisation;
 
-/* -*- jde -*- ASTPrinter.java.in */
+import java.util.ArrayDeque;
+import java.util.Deque;
 
-import java.util.Stack;
+/* -*- jde -*- ASTPrinter.java.in */
 
 import de.be4.classicalb.core.preparser.analysis.ReversedDepthFirstAdapter;
 import de.be4.classicalb.core.preparser.node.EOF;
@@ -22,7 +23,7 @@ import de.be4.classicalb.core.preparser.node.Token;
 public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 
 	// ---Constants------------------------------------------------
-	public static char ESC = 27;
+	public static final char ESC = 27;
 
 	// Text attributes
 	public static final int NORMAL = 0;
@@ -53,18 +54,24 @@ public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 	public static final int BG_WHITE = 47;
 
 	// variables. We use a stack to push on indent tokens...
-	private String indent = "", output = "";
+	private String indent = "";
+	private String output = "";
 	private boolean last = false;
-	private final Stack<String> indentchar = new Stack<String>();
+	private final Deque<String> indentchar = new ArrayDeque<>();
 	private boolean color = false;
+
+	private String result;
+
+	public String getResult() {
+		return this.result;
+	}
 
 	/*
 	 * The last node we visit. It prints out the entire text that we have built.
 	 */
 	@Override
 	public void outStart(final Start node) {
-		System.out.println(treeColor() + "\n  >"
-				+ output.substring(3, output.length()) + "\n" + resetColor());
+		this.result = treeColor() + "\n  >" + output.substring(3, output.length()) + "\n" + resetColor();
 	}
 
 	/*
@@ -94,14 +101,9 @@ public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 		indent = indent.substring(0, indent.length() - 1) + indentchar.pop();
 
 		// prepend this line to the output.
-		output = indent
-				+ "- "
-				+ setColor(BOLD, FG_CYAN, BG_BLACK)
-				+ node.getClass()
-						.getName()
-						.substring(
-								node.getClass().getName().lastIndexOf('.') + 1)
-				+ treeColor() + "\n" + output;
+		output = indent + "- " + setColor(BOLD, FG_CYAN, BG_BLACK)
+				+ node.getClass().getName().substring(node.getClass().getName().lastIndexOf('.') + 1) + treeColor()
+				+ "\n" + output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';
@@ -120,8 +122,8 @@ public class PreParserASTPrinter extends ReversedDepthFirstAdapter {
 		}
 
 		// prepend this line to the output
-		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK)
-				+ ((Token) node).getText() + treeColor() + "\n" + output;
+		output = indent + "- " + setColor(BOLD, FG_GREEN, BG_BLACK) + ((Token) node).getText() + treeColor() + "\n"
+				+ output;
 
 		// replace any ` with a |
 		indent = indent.substring(0, indent.length() - 1) + '|';

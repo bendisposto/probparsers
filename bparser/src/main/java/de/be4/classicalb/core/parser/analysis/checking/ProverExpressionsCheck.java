@@ -26,7 +26,7 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements Semanti
 	private final List<CheckException> exceptions = new ArrayList<>();
 
 	public void runChecks(Start rootNode) {
-		if (options.restrictProverExpressions) {
+		if (options.isRestrictProverExpressions()) {
 			rootNode.apply(this);
 		}
 	}

@@ -214,7 +214,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private boolean isIdentifierExpression(final PExpression expression) {
 		return expression instanceof AIdentifierExpression
-				|| (!options.restrictPrimedIdentifiers && expression instanceof APrimedIdentifierExpression);
+				|| (!options.isRestrictPrimedIdentifiers() && expression instanceof APrimedIdentifierExpression);
 	}
 
 	class AssignCheck extends DepthFirstAdapter {

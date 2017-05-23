@@ -55,12 +55,11 @@ public class BParser {
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
 	public static final String CSP_PATTERN_PREFIX = "#CSPPATTERN";
 
-	private Parser parser;
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
-	private List<String> doneDefFiles = new ArrayList<String>();
+	private List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
 	private File directory;
@@ -196,7 +195,7 @@ public class BParser {
 		Start ast = null;
 		boolean ok = false;
 
-		List<String> ids = new ArrayList<String>();
+		List<String> ids = new ArrayList<>();
 
 		final DefinitionTypes defTypes = new DefinitionTypes();
 		defTypes.addAll(context.getTypes());
@@ -339,7 +338,7 @@ public class BParser {
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
-			parser = new SabbleCCBParser(lexer);
+			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
 
@@ -377,8 +376,7 @@ public class BParser {
 				bExceptionList.add(new BException(getFileName(), checkException));
 			}
 			if (!bExceptionList.isEmpty()) {
-				BCompoundException comp = new BCompoundException(bExceptionList);
-				throw comp;
+				throw new BCompoundException(bExceptionList);
 			}
 			return rootNode;
 		} catch (final LexerException | BParseException | IOException | PreParseException e) {
@@ -405,7 +403,7 @@ public class BParser {
 		File f = new File(fileName);
 		if (f.exists()) {
 			try {
-				return f.getCanonicalFile().getAbsolutePath();
+				return f.getCanonicalPath();
 			} catch (IOException e) {
 				return fileName;
 			}

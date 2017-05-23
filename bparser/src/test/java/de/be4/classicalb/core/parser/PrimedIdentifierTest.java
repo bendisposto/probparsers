@@ -49,12 +49,11 @@ public class PrimedIdentifierTest {
 	}
 
 	@Test(expected = BCompoundException.class)
-	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse()
-			throws BCompoundException {
+	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse() throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
-		parser.getOptions().restrictPrimedIdentifiers = false;
+		parser.getOptions().setRestrictPrimedIdentifiers(false);
 		getTreeAsString(testMachine);
-		// this mode is no longer supported 
+		// this mode is no longer supported
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public class PrimedIdentifierTest {
 	@Before
 	public void before() {
 		// resetting static variable to default value
-		parser.getOptions().restrictPrimedIdentifiers = true;
+		parser.getOptions().setRestrictPrimedIdentifiers(true);
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {

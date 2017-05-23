@@ -344,12 +344,12 @@ public class ExpressionTest {
 	public void testProverComprehensionSets() throws Exception {
 		final String expression = "SET(i).(i>0)";
 
-		parser.getOptions().restrictProverExpressions = false;
+		parser.getOptions().setRestrictProverExpressions(false);
 		final String expected = "AProverComprehensionSetExpression([AIdentifierExpression([i])],AGreaterPredicate(AIdentifierExpression([i]),AIntegerExpression(0)))";
 		final String prover = getExpressionAsString(expression);
 		assertEquals(expected, prover);
 
-		parser.getOptions().restrictProverExpressions = true;
+		parser.getOptions().setRestrictProverExpressions(true);
 		try {
 			getExpressionAsString(expression);
 			fail("exception expected");

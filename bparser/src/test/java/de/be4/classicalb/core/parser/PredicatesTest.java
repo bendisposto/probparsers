@@ -131,7 +131,7 @@ public class PredicatesTest {
 
 	@Test
 	public void testBFalse() throws BCompoundException {
-		parser.getOptions().restrictProverExpressions = true;
+		parser.getOptions().setRestrictProverExpressions(true);
 		try {
 			getPredicateAsString("bfalse");
 			fail("exception expected");
@@ -139,7 +139,7 @@ public class PredicatesTest {
 			assertTrue(e.getFirstException().getCause() instanceof CheckException);
 		}
 
-		parser.getOptions().restrictProverExpressions = false;
+		parser.getOptions().setRestrictProverExpressions(false);
 		final String actual = getPredicateAsString("bfalse");
 		final String expected = "AFalsityPredicate()";
 		assertEquals(expected, actual);
@@ -170,7 +170,7 @@ public class PredicatesTest {
 	@Test
 	public void testSubstitutionInPredicate() throws BCompoundException {
 		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
-		parser.getOptions().restrictProverExpressions = false;
+		parser.getOptions().setRestrictProverExpressions(false);
 		final String astString = getTreeAsString(testMachine);
 		assertEquals(
 				"Start(APredicateParseUnit(AConjunctPredicate(AGreaterPredicate(AIdentifierExpression([a]),AIntegerExpression(5)),ASubstitutionPredicate(AAssignSubstitution([AIdentifierExpression([b])],[AIdentifierExpression([a])])ALessPredicate(AIdentifierExpression([b]),AIntegerExpression(10))))))",

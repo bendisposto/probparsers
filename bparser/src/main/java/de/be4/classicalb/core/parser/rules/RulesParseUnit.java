@@ -103,7 +103,7 @@ public class RulesParseUnit implements IModel {
 				bParser = new BParser();
 			}
 			ParseOptions parseOptions = new ParseOptions();
-			parseOptions.grammar = RulesGrammar.getInstance();
+			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
 			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start);

@@ -44,7 +44,7 @@ public class StringLiteralNotClosedTest {
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
-		parser.getOptions().grammar = RulesGrammar.getInstance();
+		parser.getOptions().setGrammar(RulesGrammar.getInstance());
 		final Start startNode = parser.parse(testMachine, false);
 
 		// startNode.apply(new ASTPrinter());

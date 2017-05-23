@@ -262,7 +262,7 @@ public class RecursiveMachineLoader {
 						loadMachine(ancestors, file);
 					} catch (IOException e) {
 						throw new BException(machineFile.getCanonicalPath(),
-								new CheckException(e.getMessage(), refMachine.getNode()));
+								new CheckException(e.getMessage(), refMachine.getNode(), e));
 					}
 
 				}
@@ -274,7 +274,7 @@ public class RecursiveMachineLoader {
 				try {
 					throw new BCompoundException(new BException(machineFile.getCanonicalPath(), e));
 				} catch (IOException e1) {
-					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e1));
 				}
 			}
 		}

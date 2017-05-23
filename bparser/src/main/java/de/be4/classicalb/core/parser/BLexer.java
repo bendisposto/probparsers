@@ -121,8 +121,8 @@ public class BLexer extends Lexer {
 	}
 
 	private void applyGrammarExtension() {
-		if (parseOptions != null && this.parseOptions.grammar.containsAlternativeDefinitionForToken(token)) {
-			token = this.parseOptions.grammar.createNewToken(token);
+		if (parseOptions != null && this.parseOptions.getGrammar().containsAlternativeDefinitionForToken(token)) {
+			token = this.parseOptions.getGrammar().createNewToken(token);
 		}
 	}
 

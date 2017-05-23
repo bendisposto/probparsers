@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.exceptions;
 
-import org.xml.sax.SAXException;
-
 import de.be4.classicalb.core.parser.node.Node;
 
 @SuppressWarnings("serial")
@@ -17,7 +15,7 @@ public class CheckException extends Exception {
 		this(message, new Node[] { node });
 	}
 
-	public CheckException(String message, Node aStringExpr, SAXException e) {
+	public CheckException(String message, Node aStringExpr, Exception e) {
 		super(message, e);
 		this.nodes = new Node[] { aStringExpr };
 
