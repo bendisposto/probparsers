@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -338,7 +339,7 @@ public class RulesProject {
 				knownIdentifiers.addAll(checker.getGlobalIdentifiers());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
-			HashMap<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
+			Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
 			HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
 			unknownIdentifiers.removeAll(knownIdentifiers);
 			for (String name : unknownIdentifiers) {
@@ -351,7 +352,7 @@ public class RulesProject {
 	}
 
 	public void checkReferencedRuleOperations() {
-		if (bExceptionList.size() > 0) {
+		if (!bExceptionList.isEmpty()) {
 			return;
 		}
 		final HashMap<String, RulesParseUnit> map = new HashMap<>();
