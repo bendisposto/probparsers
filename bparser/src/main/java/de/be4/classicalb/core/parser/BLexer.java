@@ -17,14 +17,14 @@ public class BLexer extends Lexer {
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
 
-	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<Class<? extends Token>, Map<Class<? extends Token>, String>>();
+	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Map<Character, Character> stringReplacements = new HashMap<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
 		if (secs == null)
-			secs = new HashMap<Class<? extends Token>, String>();
+			secs = new HashMap<>();
 		secs.put(s, message);
 		invalid.put(f, secs);
 	}
@@ -76,17 +76,9 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
-	// private final List<IToken> dotList = new ArrayList<IToken>();
-
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions, final int tokenCountPrediction) {
 		super(in);
 		this.definitions = definitions;
-
-		// if (tokenCountPrediction > 10) {
-		// tokenList = new ArrayList<Token>(tokenCountPrediction);
-		// } else {
-		// tokenList = new ArrayList<Token>();
-		// }
 	}
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
@@ -154,36 +146,7 @@ public class BLexer extends Lexer {
 		}
 
 		if (token instanceof TStringLiteral || token instanceof TMultilineStringContent) {
-			// google for howto-unescape-a-java-string-literal-in-java
-			// quickfix: we do nothing just strip off the "
-			String literal = token.getText();
-
-			/*
-			 * Note, the text of a TMultilineString token does not start with
-			 * ''' because the ''' are contained in the TMultilineStringStartEnd
-			 * token
-			 */
-			if (literal.startsWith("\"")) {
-				/// "foo"
-				literal = literal.substring(1, literal.length() - 1);
-			}
-
-			boolean backslashFound = false;
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0; i < literal.length(); i++) {
-				char c = literal.charAt(i);
-				if (backslashFound && stringReplacements.containsKey(c)) {
-					buffer.setLength(buffer.length() - 1);
-					buffer.append(stringReplacements.get(c));
-					backslashFound = false;
-					continue;
-				}
-				if (c == '\\') {
-					backslashFound = true;
-				}
-				buffer.append(c);
-			}
-			token.setText(buffer.toString());
+			handleStringToken(token);
 		}
 
 		if (token instanceof THexLiteral) {
@@ -199,6 +162,38 @@ public class BLexer extends Lexer {
 			buildTokenList();
 
 		}
+	}
+
+	private void handleStringToken(Token token) {
+		// google for howto-unescape-a-java-string-literal-in-java
+		// quickfix: we do nothing just strip off the "
+		String literal = token.getText();
+
+		/*
+		 * Note, the text of a TMultilineString token does not start with '''
+		 * because the ''' are contained in the TMultilineStringStartEnd token
+		 */
+		if (literal.startsWith("\"")) {
+			/// "foo"
+			literal = literal.substring(1, literal.length() - 1);
+		}
+
+		boolean backslashFound = false;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < literal.length(); i++) {
+			char c = literal.charAt(i);
+			if (backslashFound && stringReplacements.containsKey(c)) {
+				sb.setLength(sb.length() - 1);
+				sb.append(stringReplacements.get(c));
+				backslashFound = false;
+				continue;
+			}
+			if (c == '\\') {
+				backslashFound = true;
+			}
+			sb.append(c);
+		}
+		token.setText(sb.toString());
 	}
 
 	private void replaceDefTokens() {
@@ -250,8 +245,7 @@ public class BLexer extends Lexer {
 			// final int line = token.getLine() - 1;
 			// final int pos = token.getPos() - 1;
 			final String text = token.getText();
-			throw new BLexerException(comment, "Comment not closed.", text.toString(), comment.getLine(),
-					comment.getPos());
+			throw new BLexerException(comment, "Comment not closed.", text, comment.getLine(), comment.getPos());
 		}
 
 		// starting a new comment
