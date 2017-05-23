@@ -216,8 +216,8 @@ public class BParser {
 		try {
 			ast = p.parse();
 			ok = true;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (ParserException e) {
+			handleEPraseException(e);
 		}
 
 		BigInteger b = new BigInteger("2");
@@ -229,12 +229,17 @@ public class BParser {
 			try {
 				ast = p.parse();
 				ok = true;
-			} catch (Exception e) {
+			} catch (ParserException e) {
 				b = b.subtract(BigInteger.ONE);
+				handleEPraseException(e);
 			}
 		}
 
 		return ast;
+	}
+
+	private void handleEPraseException(ParserException e) {
+		// do nothing
 	}
 
 	/**

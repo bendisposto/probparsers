@@ -96,7 +96,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new RuntimeException("Definition " + defName + " does not exist.");
+		throw new AssertionError("Definition " + defName + " does not exist.");
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new RuntimeException("Definition " + defName + " does not exist.");
+		throw new AssertionError("Definition " + defName + " does not exist.");
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new RuntimeException("Definition " + defName + " does not exist.");
+		throw new AssertionError("Definition " + defName + " does not exist.");
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new RuntimeException("Definition " + key + " does not exist.");
+		throw new AssertionError("Definition " + key + " does not exist.");
 	}
 
 	@Override

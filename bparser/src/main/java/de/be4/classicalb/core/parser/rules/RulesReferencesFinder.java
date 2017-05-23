@@ -51,7 +51,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	public void findReferencedMachines() throws BCompoundException {
 		this.start.apply(this);
-		if (errorList.size() > 0) {
+		if (!errorList.isEmpty()) {
 			final List<BException> bExceptionList = new ArrayList<>();
 			for (CheckException checkException : errorList) {
 				final BException bException = new BException(mainFile.getAbsolutePath(), checkException);

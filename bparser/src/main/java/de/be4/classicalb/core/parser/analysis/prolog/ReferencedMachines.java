@@ -318,7 +318,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				}
 
 			} else {
-				throw new RuntimeException("Not supported class: " + machineExpression.getClass());
+				throw new AssertionError("Not supported class: " + machineExpression.getClass());
 			}
 		}
 	}

@@ -479,7 +479,7 @@ public class RulesProject {
 		bParseUnit.setParsingBehaviour(this.parsingBehaviour);
 		bParseUnit.parse();
 		return bParseUnit;
-	};
+	}
 
 	protected boolean isANewModel(RulesMachineReference reference) {
 		for (IModel iModel : bModels) {

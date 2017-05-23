@@ -17,9 +17,9 @@ import de.be4.classicalb.core.parser.node.PDefinition;
 public abstract class IDefinitions {
 	public enum Type {
 		NoDefinition, Expression, Predicate, Substitution, ExprOrSubst
-	};
+	}
 
-	protected final List<IDefinitions> referencedDefinitions = new ArrayList<IDefinitions>();
+	protected final List<IDefinitions> referencedDefinitions = new ArrayList<>();
 
 	public abstract PDefinition getDefinition(String defName);
 
