@@ -23,7 +23,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  */
 public class RulesMachineRunConfiguration {
 
-	public static String GOAL = "GOAL";
+	public static final String GOAL = "GOAL";
 	final HashMap<String, AbstractOperation> allOperations;
 	final RulesParseUnit mainModel;
 	final HashMap<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
