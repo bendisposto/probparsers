@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.rules;
 
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
