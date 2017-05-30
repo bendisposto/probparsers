@@ -106,7 +106,7 @@ public class RulesMachineRunConfiguration {
 				}
 				return;
 			default:
-				throw new AssertionError();
+				// do nothing, e.g. for DISABLE_RULE
 			}
 
 		}

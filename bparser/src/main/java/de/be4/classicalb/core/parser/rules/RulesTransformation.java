@@ -324,7 +324,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outARuleOperation(ARuleOperation node) {
 		final String ruleName = currentRule.getName();
-
+		currentRule.getReplacesIdentifier();
 		ruleOperationLiteralList.add(node.getRuleName());
 		ruleNames.add(ruleName);
 

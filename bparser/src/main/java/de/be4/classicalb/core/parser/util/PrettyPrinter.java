@@ -146,6 +146,19 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
+		sb.append(node.getName().getText());
+		List<PExpression> copy = new ArrayList<>(node.getParameters());
+		if (!copy.isEmpty()) {
+			sb.append("(");
+			printExprList(copy);
+			sb.append(")");
+		}
+		sb.append(" == ");
+		node.getRhs().apply(this);
+	}
+
+	@Override
 	public void caseASetsMachineClause(ASetsMachineClause node) {
 		sb.append("SETS ");
 		List<PSet> list = new ArrayList<>(node.getSetDefinitions());
@@ -1545,16 +1558,6 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	private void printExprList(final List<PExpression> parameters) {
-		for (final Iterator<PExpression> iterator = parameters.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-			if (iterator.hasNext()) {
-				sb.append(", ");
-			}
-		}
-	}
-
 	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
 		String defLiteral = node.getDefLiteral().getText();
@@ -1563,6 +1566,16 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			sb.append("(");
 			printExprList(node.getParameters());
 			sb.append(")");
+		}
+	}
+
+	private void printExprList(final List<PExpression> parameters) {
+		for (final Iterator<PExpression> iterator = parameters.iterator(); iterator.hasNext();) {
+			final PExpression e = iterator.next();
+			e.apply(this);
+			if (iterator.hasNext()) {
+				sb.append(", ");
+			}
 		}
 	}
 

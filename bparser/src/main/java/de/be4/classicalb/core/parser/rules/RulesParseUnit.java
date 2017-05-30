@@ -52,15 +52,16 @@ public class RulesParseUnit implements IModel {
 		return this.operationList;
 	}
 
+	@Override
 	public Start getStart() {
 		return this.start;
 	}
 
-	public String getFilePath() {
+	public String getPath() {
 		if (this.machineFile != null) {
 			return this.machineFile.getAbsolutePath();
 		} else {
-			return null;
+			return this.machineName;
 		}
 	}
 

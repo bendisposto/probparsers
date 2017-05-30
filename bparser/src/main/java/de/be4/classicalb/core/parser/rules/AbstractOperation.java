@@ -127,7 +127,7 @@ public abstract class AbstractOperation {
 		return this.readMap.get(name);
 	}
 
-	public HashSet<String> getReadVariables() {
+	public Set<String> getReadVariables() {
 		return new HashSet<>(this.readMap.keySet());
 	}
 

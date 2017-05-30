@@ -55,12 +55,11 @@ public class BMachine implements IModel {
 	private final String machineName;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final Start start;
-	private final File file;
 
 	private AAbstractMachineParseUnit parseUnit;
 	private ADefinitionsMachineClause definitionsClause;
 
-	public BMachine(String name, File file) {
+	public BMachine(String name) {
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add(new TIdentifierLiteral(name));
 		AMachineHeader header = new AMachineHeader(nameList, new ArrayList<PExpression>());
@@ -68,7 +67,6 @@ public class BMachine implements IModel {
 		parseUnit = new AAbstractMachineParseUnit(new AMachineMachineVariant(), header,
 				new ArrayList<PMachineClause>());
 		this.start = new Start(parseUnit, new EOF());
-		this.file = file;
 		this.machineName = name;
 	}
 
@@ -139,8 +137,8 @@ public class BMachine implements IModel {
 	}
 
 	@Override
-	public File getFile() {
-		return this.file;
+	public String getPath() {
+		return this.machineName;
 	}
 
 	public void addPreferenceDefinition(String name, boolean bool) {

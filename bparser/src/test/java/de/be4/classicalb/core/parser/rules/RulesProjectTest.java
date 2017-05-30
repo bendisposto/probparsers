@@ -33,8 +33,9 @@ public class RulesProjectTest {
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
-		RulesProject project = new RulesProject(file);
-		project.translateProject();
+		RulesProject project = new RulesProject();
+		project.parseProject(file);
+		project.checkAndTranslateProject();
 		RulesMachineRunConfiguration rulesMachineRunConfiguration = project.getRulesMachineRunConfiguration();
 		Set<RuleGoalAssumption> rulesGoalAssumptions = rulesMachineRunConfiguration.getRulesGoalAssumptions();
 		assertEquals(2, rulesGoalAssumptions.size());

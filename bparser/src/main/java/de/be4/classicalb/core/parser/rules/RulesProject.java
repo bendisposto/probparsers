@@ -28,41 +28,80 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
-	private final File mainFile;
+	private File mainFile;
 	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
-	private ParsingBehaviour parsingBehaviour;
+	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
-	protected final NodeIdAssignment nodeIds = new NodeIdAssignment();
+	protected final NodeIdAssignment nodeIdAssignment = new NodeIdAssignment();
 	private HashMap<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
-		RulesProject project = new RulesProject(mainFile);
+		RulesProject project = new RulesProject();
 		project.setParsingBehaviour(parsingBehaviour);
-		project.translateProject();
+		project.parseProject(mainFile);
+		project.checkAndTranslateProject();
 		return project.printPrologOutput(out, err);
 	}
 
-	public RulesProject(File mainFile) {
-		this.mainFile = mainFile;
+	public RulesProject() {
+		// use the provided setter methods to parameterize the rules project
 	}
 
-	public void translateProject() {
-		this.parseProject();
+	public void parseRulesMachines(String mainMachineAsString, String... referencedMachines) {
+		final IModel mainMachine = parseRulesMachineFromString(mainMachineAsString);
+		this.bModels.add(mainMachine);
+		if (mainMachine.hasError()) {
+			this.bExceptionList.addAll(mainMachine.getCompoundException().getBExceptions());
+		}
+		for (String referencedMachine : referencedMachines) {
+			final IModel machine = parseRulesMachineFromString(referencedMachine);
+			this.bModels.add(machine);
+			if (machine.hasError()) {
+				this.bExceptionList.addAll(machine.getCompoundException().getBExceptions());
+			}
+		}
+	}
+
+	private IModel parseRulesMachineFromString(String mainMachineAsString) {
+		RulesParseUnit unit = new RulesParseUnit();
+		unit.setMachineAsString(mainMachineAsString);
+		unit.parse();
+		return unit;
+	}
+
+	public void parseProject(File mainFile) {
+		this.mainFile = mainFile;
+		RulesParseUnit mainModel = parseMainFile();
+		if (mainModel.hasError()) {
+			final BCompoundException compound = mainModel.getCompoundException();
+			this.bExceptionList.addAll(compound.getBExceptions());
+		}
+		bModels.add(mainModel);
+		final LinkedList<RulesMachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
+		while (!fifo.isEmpty()) {
+			final RulesMachineReference modelReference = fifo.pollFirst();
+			if (isANewModel(modelReference)) {
+				final IModel bModel = parseRulesMachine(modelReference);
+				if (bModel.hasError()) {
+					this.bExceptionList.addAll(bModel.getCompoundException().getBExceptions());
+				}
+				bModels.add(bModel);
+				fifo.addAll(bModel.getMachineReferences());
+			}
+		}
+	}
+
+	public void checkAndTranslateProject() {
 		this.checkProject();
 		this.flattenProject();
 	}
 
 	public List<BException> getBExceptionList() {
-		for (IModel iModel : bModels) {
-			if (iModel.hasError()) {
-				this.bExceptionList.add(iModel.getCompoundException().getFirstException());
-			}
-		}
 		return bExceptionList;
 	}
 
@@ -79,8 +118,7 @@ public class RulesProject {
 			return;
 		}
 		extractConfigurationOfMainModel();
-		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME,
-				new File(COMPOSITION_MACHINE_NAME + ".mch"));
+		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
 		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
 		final List<String> promotesList = new ArrayList<>();
@@ -90,7 +128,7 @@ public class RulesProject {
 			if (!rulesParseUnit.hasError()) {
 				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
-				nodeIds.assignIdentifiers(fileNumber, start);
+				nodeIdAssignment.assignIdentifiers(fileNumber, start);
 			} else {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
@@ -111,7 +149,7 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
-		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME, new File(MAIN_MACHINE_NAME + ".mch"));
+		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
@@ -165,27 +203,6 @@ public class RulesProject {
 					this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 							new CheckException(sb.toString(), tIdentifierLiteral)));
 				}
-			}
-		}
-	}
-
-	private void parseProject() {
-		RulesParseUnit mainModel = parseMainFile();
-		if (mainModel.hasError()) {
-			final BCompoundException compound = mainModel.getCompoundException();
-			this.bExceptionList.addAll(compound.getBExceptions());
-		}
-		bModels.add(mainModel);
-		final LinkedList<RulesMachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
-		while (!fifo.isEmpty()) {
-			final RulesMachineReference modelReference = fifo.pollFirst();
-			if (isANewModel(modelReference)) {
-				final IModel bModel = parseRulesMachine(modelReference);
-				if (bModel.hasError()) {
-					this.bExceptionList.addAll(bModel.getCompoundException().getBExceptions());
-				}
-				bModels.add(bModel);
-				fifo.addAll(bModel.getMachineReferences());
 			}
 		}
 	}
@@ -292,7 +309,7 @@ public class RulesProject {
 		}
 
 		for (AbstractOperation operation : allOperations.values()) {
-			final HashSet<String> readVariables = operation.getReadVariables();
+			final Set<String> readVariables = operation.getReadVariables();
 			readVariables.retainAll(allDefineVariables.keySet());
 
 			final HashSet<String> variablesInScope = new HashSet<>();
@@ -320,6 +337,14 @@ public class RulesProject {
 	}
 
 	private void checkIdentifier() {
+		if (this.hasErrors()) {
+			/*
+			 * if there is already an error such as an parse error in one
+			 * machine, it makes no sense to check for invalid identifiers
+			 * because this all declarations of this machine are missing.
+			 */
+			return;
+		}
 		final HashMap<String, RulesParseUnit> map = new HashMap<>();
 		for (IModel model : bModels) {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
@@ -345,7 +370,7 @@ public class RulesProject {
 			for (String name : unknownIdentifiers) {
 				HashSet<Node> hashSet = unknownIdentifierMap.get(name);
 				Node node = hashSet.iterator().next();
-				this.bExceptionList.add(new BException(parseUnit.getFile().getAbsolutePath(),
+				this.bExceptionList.add(new BException(parseUnit.getPath(),
 						new CheckException("Unknown identifier '" + name + "'.", node)));
 			}
 		}
@@ -384,7 +409,7 @@ public class RulesProject {
 				for (AIdentifierExpression aIdentifierExpression : referencedRuleOperations) {
 					String ruleName = Utils.getAIdentifierAsString(aIdentifierExpression);
 					if (!knownRules.contains(ruleName)) {
-						this.bExceptionList.add(new BException(rulesParseUnit.getFilePath(),
+						this.bExceptionList.add(new BException(rulesParseUnit.getPath(),
 								new CheckException("Unknown rule '" + ruleName + "'.", aIdentifierExpression)));
 					}
 				}
@@ -498,7 +523,7 @@ public class RulesProject {
 		return !this.bExceptionList.isEmpty();
 	}
 
-	private int printPrologOutput(final PrintStream out, final PrintStream err) {
+	public int printPrologOutput(final PrintStream out, final PrintStream err) {
 		if (!this.bExceptionList.isEmpty()) {
 			BCompoundException comp = new BCompoundException(bExceptionList);
 			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.isUseIndention(), false);
@@ -525,14 +550,17 @@ public class RulesProject {
 		pout.openList();
 
 		for (IModel iModel : bModels) {
-			pout.printAtom(iModel.getFile().getPath());
+			pout.printAtom(iModel.getPath());
 		}
 		pout.closeList();
 		pout.closeTerm();
 		pout.fullstop();
 
+		NodeIdAssignment nodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
+				: new NodeIdAssignment();
+
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, nodeIds);
+			iModel.printAsProlog(pout, nodeIdAssignment);
 		}
 	}
 

@@ -598,7 +598,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				String name = id.getIdentifier().get(0).getText();
 				if (!this.identifierScope.contains(name)) {
 					errorList.add(new CheckException("Identifier '" + name
-							+ "' is not a local variable (VAR). Hence it can not be assigned here.", id));
+							+ "' is not a local variable (VAR). Hence, it can not be assigned here.", id));
 				}
 			} else {
 				errorList.add(new CheckException(
