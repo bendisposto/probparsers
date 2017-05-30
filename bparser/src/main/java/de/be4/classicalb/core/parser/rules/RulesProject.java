@@ -121,27 +121,15 @@ public class RulesProject {
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
 		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
-		final List<String> promotesList = new ArrayList<>();
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
 			rulesParseUnit.translate(allOperations);
-			if (!rulesParseUnit.hasError()) {
+			if (!rulesParseUnit.hasError()) {// TODO do we need this check
 				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
 				nodeIdAssignment.assignIdentifiers(fileNumber, start);
 			} else {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
-			}
-			List<AbstractOperation> operations = rulesParseUnit.getOperations();
-			for (AbstractOperation abstractOperation : operations) {
-				if (abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation) {
-					if (null != abstractOperation.getReplacesIdentifier()) {
-						// replacement operations are not add here because its
-						// original rule will be added
-						continue;
-					}
-					promotesList.add(abstractOperation.getName());
-				}
 			}
 			Start otherStart = rulesParseUnit.getStart();
 			injector.injectMachine(otherStart);
@@ -149,20 +137,39 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
+		BMachine mainMachine = createMainMachine(injector);
+		bModels.add(mainMachine);
+	}
+
+	private BMachine createMainMachine(MachineInjector injector) {
 		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
 		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
-		mainMachine.addPreferenceDefinition("SET_PREF_TIME_OUT", 500000);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
-		mainMachine.addPromotesClause(promotesList);
+		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
 		if (injector.getGoalDefinition() != null) {
 			mainMachine.addDefinition(injector.getGoalDefinition());
 		}
-		bModels.add(mainMachine);
+		return mainMachine;
+	}
+
+	private List<String> getPromotesList() {
+		final List<String> promotesList = new ArrayList<>();
+		for (AbstractOperation abstractOperation : allOperations.values()) {
+			if (abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation) {
+				if (null != abstractOperation.getReplacesIdentifier()) {
+					// replacement operations are not add here because its
+					// original rule will be added
+					continue;
+				}
+				promotesList.add(abstractOperation.getName());
+			}
+		}
+		return promotesList;
 	}
 
 	private void checkProject() {
-		if (!this.bExceptionList.isEmpty()) {
+		if (this.hasErrors()) {
 			return;
 		}
 		collectAllOperations();
@@ -177,8 +184,7 @@ public class RulesProject {
 	private void checkFunctionDependencies() {
 		for (AbstractOperation abstractOperation : allOperations.values()) {
 			final Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
-			List<TIdentifierLiteral> functionCalls = abstractOperation.getFunctionCalls();
-			for (TIdentifierLiteral tIdentifierLiteral : functionCalls) {
+			for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
 				final String functionName = tIdentifierLiteral.getText();
 				if (!allOperations.containsKey(functionName)
 						|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
@@ -192,8 +198,7 @@ public class RulesProject {
 				if (!transDeps.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					sb.append("Missing dependencies due to FUNCTION call: ");
-					Iterator<AbstractOperation> iterator = transDeps.iterator();
-					while (iterator.hasNext()) {
+					for (Iterator<AbstractOperation> iterator = transDeps.iterator(); iterator.hasNext();) {
 						AbstractOperation next = iterator.next();
 						sb.append(next.getName());
 						if (iterator.hasNext()) {
@@ -377,7 +382,7 @@ public class RulesProject {
 	}
 
 	public void checkReferencedRuleOperations() {
-		if (!bExceptionList.isEmpty()) {
+		if (this.hasErrors()) {
 			return;
 		}
 		final HashMap<String, RulesParseUnit> map = new HashMap<>();
@@ -397,11 +402,7 @@ public class RulesProject {
 				for (RulesMachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
 					String referenceName = rulesMachineReference.getName();
 					RulesParseUnit otherParseUnit = map.get(referenceName);
-					RulesMachineChecker checker = otherParseUnit.getRulesMachineChecker();
-					if (checker == null) {
-						return;
-					}
-					for (RuleOperation ruleOperation : checker.getRuleOperations()) {
+					for (RuleOperation ruleOperation : otherParseUnit.getRulesMachineChecker().getRuleOperations()) {
 						knownRules.add(ruleOperation.getName());
 					}
 				}
@@ -556,11 +557,11 @@ public class RulesProject {
 		pout.closeTerm();
 		pout.fullstop();
 
-		NodeIdAssignment nodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
+		NodeIdAssignment tempNodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
 				: new NodeIdAssignment();
 
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, nodeIdAssignment);
+			iModel.printAsProlog(pout, tempNodeIdAssignment);
 		}
 	}
 
