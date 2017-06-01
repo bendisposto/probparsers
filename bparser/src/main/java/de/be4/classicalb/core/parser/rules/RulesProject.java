@@ -244,33 +244,41 @@ public class RulesProject {
 
 	private void checkDependencies() {
 		for (AbstractOperation operation : allOperations.values()) {
-			List<AIdentifierExpression> dependsOnComputationList = operation.getDependsOnComputationList();
-			for (AIdentifierExpression aIdentifierExpression : dependsOnComputationList) {
-				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-				if (allOperations.containsKey(name)) {
-					AbstractOperation abstractOperation = allOperations.get(name);
-					if (!(abstractOperation instanceof ComputationOperation)) {
-						this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
-								"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
-					}
-				} else {
-					this.bExceptionList.add(new BException(operation.getFileName(),
-							new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
+			checkDependsOnComputations(operation);
+			checkDependsOnRules(operation);
+		}
+	}
+
+	private void checkDependsOnRules(AbstractOperation operation) {
+		List<AIdentifierExpression> dependsOnRulesList = operation.getDependsOnRulesList();
+		for (AIdentifierExpression aIdentifierExpression : dependsOnRulesList) {
+			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
+			if (allOperations.containsKey(name)) {
+				AbstractOperation abstractOperation = allOperations.get(name);
+				if (!(abstractOperation instanceof RuleOperation)) {
+					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
+							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
 				}
+			} else {
+				this.bExceptionList.add(new BException(operation.getFileName(),
+						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
-			List<AIdentifierExpression> dependsOnRulesList = operation.getDependsOnRulesList();
-			for (AIdentifierExpression aIdentifierExpression : dependsOnRulesList) {
-				final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-				if (allOperations.containsKey(name)) {
-					AbstractOperation abstractOperation = allOperations.get(name);
-					if (!(abstractOperation instanceof RuleOperation)) {
-						this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
-								"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
-					}
-				} else {
-					this.bExceptionList.add(new BException(operation.getFileName(),
-							new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
+		}
+	}
+
+	private void checkDependsOnComputations(AbstractOperation operation) {
+		List<AIdentifierExpression> dependsOnComputationList = operation.getDependsOnComputationList();
+		for (AIdentifierExpression aIdentifierExpression : dependsOnComputationList) {
+			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
+			if (allOperations.containsKey(name)) {
+				AbstractOperation abstractOperation = allOperations.get(name);
+				if (!(abstractOperation instanceof ComputationOperation)) {
+					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
+							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
 				}
+			} else {
+				this.bExceptionList.add(new BException(operation.getFileName(),
+						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
 	}
@@ -307,8 +315,8 @@ public class RulesProject {
 		for (AbstractOperation operation : allOperations.values()) {
 			if (operation instanceof ComputationOperation) {
 				ComputationOperation comp = (ComputationOperation) operation;
-				for (String name : comp.getDefineVariables()) {
-					allDefineVariables.put(name, comp);
+				for (String defName : comp.getDefineVariables()) {
+					allDefineVariables.put(defName, comp);
 				}
 			}
 		}
