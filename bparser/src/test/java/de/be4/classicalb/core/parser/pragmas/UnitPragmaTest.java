@@ -87,7 +87,7 @@ public class UnitPragmaTest {
 
 		final String result = Helpers.getMachineAsPrologTerm(machine);
 		System.out.println(result);
-		assertTrue(result.contains("inferredunit(7,\"x**2\",identifier(8,yy))"));
+		assertTrue(result.contains("inferred_unit(7,\"x**2\",identifier(8,yy))"));
 	}
 
 	@Test
