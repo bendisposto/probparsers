@@ -29,16 +29,16 @@ public class ASTProlog extends DepthFirstAdapter {
 	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
-	private static final List<String> SUM_TYPE = new LinkedList<String>(Arrays.asList("expression", "predicate",
+	private static final List<String> SUM_TYPE = new LinkedList<>(Arrays.asList("expression", "predicate",
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(Arrays.asList("event", "freetype",
+	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
 			"machine_header", "machine_reference", "operation", "rec_entry", "values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
-	private final Map<String, String> simpleFormats = new HashMap<String, String>();
+	private final Map<String, String> simpleFormats = new HashMap<>();
 
 	// to look up the identifier of each node
 	private final PositionPrinter positionPrinter;
