@@ -9,11 +9,15 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
+import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
+import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
+import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.util.Utils;
 
@@ -28,6 +32,7 @@ public class RulesMachineRunConfiguration {
 	final Map<String, AbstractOperation> allOperations;
 	final RulesParseUnit mainModel;
 	final Map<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
+	private Map<String, String> probCorePreferencesInModel = new HashMap<>();
 
 	public RulesMachineRunConfiguration(IModel mainModel, Map<String, AbstractOperation> allOperations) {
 		this.mainModel = (RulesParseUnit) mainModel;
@@ -39,11 +44,38 @@ public class RulesMachineRunConfiguration {
 		mainModel.getStart().apply(definitionsFinder);
 	}
 
+	public Map<String, String> probCorePreferencesInModel() {
+		return new HashMap<>(this.probCorePreferencesInModel);
+	}
+
 	public Set<RuleGoalAssumption> getRulesGoalAssumptions() {
 		return new HashSet<>(this.rulesGoalAssumptions.values());
 	}
 
 	class DefinitionsFinder extends DepthFirstAdapter {
+
+		@Override
+		public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
+			final String prefix = "SET_PREF_";
+			final String name = node.getName().getText();
+			if (name.startsWith(prefix)) {
+				String prefName = name.substring(prefix.length());
+				if (node.getRhs() instanceof AIntegerExpression) {
+					AIntegerExpression aIntExpr = (AIntegerExpression) node.getRhs();
+					String value = aIntExpr.getLiteral().getText();
+					probCorePreferencesInModel.put(prefName, value);
+				} else if (node.getRhs() instanceof AStringExpression) {
+					AStringExpression aStringExpr = (AStringExpression) node.getRhs();
+					String value = aStringExpr.getContent().getText();
+					probCorePreferencesInModel.put(prefName, value);
+				} else if (node.getRhs() instanceof ABooleanTrueExpression) {
+					probCorePreferencesInModel.put(prefName, "TRUE");
+				} else if (node.getRhs() instanceof ABooleanFalseExpression) {
+					probCorePreferencesInModel.put(prefName, "FALSE");
+				}
+			}
+		}
+
 		@Override
 		public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 			final String name = node.getName().getText();
