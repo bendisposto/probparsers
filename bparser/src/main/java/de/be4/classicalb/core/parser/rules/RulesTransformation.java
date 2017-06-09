@@ -213,9 +213,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 	}
 
+	public List<PPredicate> getOperationDependenciesAsPredicateList(AbstractOperation operation) {
+		List<PPredicate> result = new ArrayList<>();
+		result.addAll(createPredicateList(operation.getDependsOnRulesList(), RULE_SUCCESS));
+		result.addAll(createPredicateList(operation.getDependsOnComputationList(), COMPUTATION_EXECUTED));
+		result.addAll(createPredicateListFromIdentifierLiterals(operation.getImplicitDependenciesToComputations(),
+				COMPUTATION_EXECUTED));
+		return result;
+	}
+
 	@Override
 	public void outAComputationOperation(AComputationOperation node) {
-		final ComputationOperation computationOperation = this.rulesMachineVisitor.getComputationOperation(node);
+		final ComputationOperation compOperation = this.rulesMachineVisitor.getComputationOperation(node);
 		computationLiteralList.add(node.getName());
 		if (operationsToBeDeleted.contains(node.getName().getText())) {
 			node.replaceBy(null);
@@ -229,12 +238,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// the SableCC node AOperation.class requires a list of
 			// TIdentifierLiterals as name
 			final List<TIdentifierLiteral> operationNameList = new ArrayList<>();
-			if (null != computationOperation.getReplacesIdentifier()) {
+			if (null != compOperation.getReplacesIdentifier()) {
 
 				// renaming the operation
-				final TIdentifierLiteral first = computationOperation.getReplacesIdentifier().getIdentifier().getFirst();
+				final TIdentifierLiteral first = compOperation.getReplacesIdentifier().getIdentifier().getFirst();
 				operationNameList.add((TIdentifierLiteral) cloneNode(first));
-				nameIdentifier = cloneNode(computationOperation.getReplacesIdentifier());
+				nameIdentifier = cloneNode(compOperation.getReplacesIdentifier());
 			} else {
 				operationNameList.add((TIdentifierLiteral) cloneNode(node.getName()));
 				// TODO refactor
@@ -250,16 +259,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// guard
 			final List<PPredicate> selectConditionList = new ArrayList<>();
 			selectConditionList.add(grd1);
-			if (!computationOperation.getDependsOnRulesList().isEmpty()) {
-				final List<PPredicate> dependsOnRulesPredicates = createPredicateList(
-						computationOperation.getDependsOnRulesList(), RULE_SUCCESS);
-				selectConditionList.addAll(dependsOnRulesPredicates);
-			}
-			if (!computationOperation.getDependsOnComputationList().isEmpty()) {
-				final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
-						computationOperation.getDependsOnComputationList(), COMPUTATION_EXECUTED);
-				selectConditionList.addAll(dependsOnComputationPredicates);
-			}
+			selectConditionList.addAll(getOperationDependenciesAsPredicateList(compOperation));
 			select.setCondition(createConjunction(selectConditionList));
 		}
 		{
@@ -291,9 +291,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		invariantList.add(member);
 
 		PExpression value;
-		if (computationOperation.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression(
-					(PPredicate) NodeCloner.cloneNode(computationOperation.getActivationPredicate()),
+		if (compOperation.getActivationPredicate() != null) {
+			value = new AIfThenElseExpression((PPredicate) NodeCloner.cloneNode(compOperation.getActivationPredicate()),
 					createStringExpression(COMPUTATION_NOT_EXECUTED), createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
@@ -345,17 +344,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 						new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression())));
 		selectConditionList.add(grd2);
 		final ASelectSubstitution select = new ASelectSubstitution();
-		if (!currentRule.getDependsOnRulesList().isEmpty()) {
-			final List<PPredicate> dependsOnRulesPredicates = createPredicateList(currentRule.getDependsOnRulesList(),
-					RULE_SUCCESS);
-			selectConditionList.addAll(dependsOnRulesPredicates);
-		}
-		if (!currentRule.getDependsOnComputationList().isEmpty()) {
-			final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
-					currentRule.getDependsOnComputationList(), COMPUTATION_EXECUTED);
-			selectConditionList.addAll(dependsOnComputationPredicates);
-		}
-
+		selectConditionList.addAll(getOperationDependenciesAsPredicateList(currentRule));
 		select.setCondition(createConjunction(selectConditionList));
 
 		ArrayList<PSubstitution> subList = new ArrayList<>();
@@ -604,8 +593,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AAssignSubstitution(nameList, exprList);
 	}
 
-
-
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
@@ -647,8 +634,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
 	}
 
-
-
 	@Override
 	public void outAFunctionOperation(AFunctionOperation node) {
 		FunctionOperation func = rulesMachineVisitor.getFunctionOperation(node);
@@ -657,16 +642,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (func.getPreconditionPredicate() != null) {
 			preConditionList.add(func.getPreconditionPredicate());
 		}
-		if (!func.getDependsOnRulesList().isEmpty()) {
-			final List<PPredicate> dependsOnRulesPredicates = createPredicateList(func.getDependsOnRulesList(),
-					RULE_SUCCESS);
-			preConditionList.addAll(dependsOnRulesPredicates);
-		}
-		if (!func.getDependsOnComputationList().isEmpty()) {
-			final List<PPredicate> dependsOnComputationPredicates = createPredicateList(
-					func.getDependsOnComputationList(), COMPUTATION_EXECUTED);
-			preConditionList.addAll(dependsOnComputationPredicates);
-		}
+
+		preConditionList.addAll(getOperationDependenciesAsPredicateList(func));
 
 		PSubstitution body = node.getBody();
 		if (null != func.getPostconditionPredicate()) {
@@ -771,9 +748,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private List<PPredicate> createPredicateList(final List<AIdentifierExpression> identifiers, final String value) {
 		final List<PPredicate> predList = new ArrayList<>();
-		for (PExpression e : identifiers) {
-			e = NodeCloner.cloneNode(e);
+		for (PExpression old : identifiers) {
+			PExpression e = NodeCloner.cloneNode(old);
 			final AEqualPredicate equal = new AEqualPredicate(e, new AStringExpression(new TStringLiteral(value)));
+			equal.setStartPos(e.getStartPos());
+			equal.setEndPos(e.getEndPos());
+			predList.add(equal);
+		}
+		return predList;
+	}
+
+	private List<PPredicate> createPredicateListFromIdentifierLiterals(final List<TIdentifierLiteral> literals,
+			final String value) {
+		final List<PPredicate> predList = new ArrayList<>();
+		for (TIdentifierLiteral old : literals) {
+			TIdentifierLiteral e = NodeCloner.cloneNode(old);
+			AIdentifierExpression aIdentifier = createAIdentifierExpression(e);
+			final AEqualPredicate equal = new AEqualPredicate(aIdentifier,
+					new AStringExpression(new TStringLiteral(value)));
 			equal.setStartPos(e.getStartPos());
 			equal.setEndPos(e.getEndPos());
 			predList.add(equal);

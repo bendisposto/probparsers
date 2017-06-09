@@ -24,6 +24,7 @@ public abstract class AbstractOperation {
 	private PPredicate activationPredicate;
 	private PPredicate postconditionPredicate;
 	private Set<AbstractOperation> transitiveDependencies;
+	private List<ComputationOperation> implicitDependenciesToComputations;
 	private AIdentifierExpression replacesIdentifier;
 
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
@@ -93,7 +94,7 @@ public abstract class AbstractOperation {
 		return this.name;
 	}
 
-	public void setDependencies(Set<AbstractOperation> dependencies) {
+	public void setTransitiveDependencies(Set<AbstractOperation> dependencies) {
 		this.transitiveDependencies = dependencies;
 	}
 
@@ -149,6 +150,19 @@ public abstract class AbstractOperation {
 
 	public void addReplacesIdentifier(AIdentifierExpression idExpr) {
 		this.replacesIdentifier = idExpr;
+	}
+
+	public void setImplicitComputationDependencies(List<ComputationOperation> inferredDependenciesToComputations) {
+		implicitDependenciesToComputations = inferredDependenciesToComputations;
+	}
+
+	public List<TIdentifierLiteral> getImplicitDependenciesToComputations() {
+		List<TIdentifierLiteral> result = new ArrayList<>();
+		for (ComputationOperation comp : implicitDependenciesToComputations) {
+			TIdentifierLiteral nameLiteral = comp.getNameLiteral();
+			result.add(nameLiteral);
+		}
+		return result;
 	}
 
 }

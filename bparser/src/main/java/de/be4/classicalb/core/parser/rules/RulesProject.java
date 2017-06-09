@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -125,9 +127,8 @@ public class RulesProject {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
 			rulesParseUnit.translate(allOperations);
 			if (!rulesParseUnit.hasError()) {// TODO do we need this check
-				final int fileNumber = i + 1;
 				Start start = rulesParseUnit.getStart();
-				nodeIdAssignment.assignIdentifiers(fileNumber, start);
+				nodeIdAssignment.assignIdentifiers(i + 1, start);
 			} else {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
@@ -174,10 +175,10 @@ public class RulesProject {
 		}
 		collectAllOperations();
 		checkDependencies();
+		findImplicitDependenciesToComputations();
+		checkIdentifiers();
 		findTransitiveDependencies();
-		checkReadWrite();
 		checkFunctionDependencies();
-		checkIdentifier();
 		checkReferencedRuleOperations();
 	}
 
@@ -232,16 +233,6 @@ public class RulesProject {
 		}
 	}
 
-	private void findTransitiveDependencies() {
-		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
-		while (!todoList.isEmpty()) {
-			AbstractOperation operation = todoList.poll();
-			if (operation.getTransitiveDependencies() == null) {
-				findDependencies(operation, new ArrayList<AbstractOperation>());
-			}
-		}
-	}
-
 	private void checkDependencies() {
 		for (AbstractOperation operation : allOperations.values()) {
 			checkDependsOnComputations(operation);
@@ -258,6 +249,8 @@ public class RulesProject {
 				if (!(abstractOperation instanceof RuleOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
+				} else {
+					checkVisibilityAIdentifierList(operation, dependsOnRulesList);
 				}
 			} else {
 				this.bExceptionList.add(new BException(operation.getFileName(),
@@ -275,6 +268,8 @@ public class RulesProject {
 				if (!(abstractOperation instanceof ComputationOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
+				} else {
+					checkVisibilityAIdentifierList(operation, dependsOnComputationList);
 				}
 			} else {
 				this.bExceptionList.add(new BException(operation.getFileName(),
@@ -283,73 +278,102 @@ public class RulesProject {
 		}
 	}
 
-	// public List<AbstractOperation>
-	// sortOperations(Collection<AbstractOperation> values) {
-	// HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new
-	// HashMap<>();
-	// for (AbstractOperation abstractOperation : values) {
-	// if (!(abstractOperation instanceof FunctionOperation)) {
-	// dependenciesMap.put(abstractOperation, new
-	// HashSet<>(abstractOperation.getDependencies()));
-	// }
-	// }
-	// List<AbstractOperation> resultList = new ArrayList<>();
-	// List<AbstractOperation> todoList = new
-	// ArrayList<>(dependenciesMap.keySet());
-	// while (!todoList.isEmpty()) {
-	// for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
-	// final Set<AbstractOperation> deps =
-	// dependenciesMap.get(abstractOperation);
-	// deps.removeAll(resultList);
-	// if (deps.isEmpty()) {
-	// resultList.add(abstractOperation);
-	// todoList.remove(abstractOperation);
-	// }
-	// }
-	// }
-	// return resultList;
-	// }
+	private void checkVisibilityAIdentifierList(AbstractOperation operation,
+			List<AIdentifierExpression> dependencyList) {
+		List<String> machineReferences = operation.getMachineReferencesAsString();
+		machineReferences.add(operation.getMachineName());
+		for (AIdentifierExpression aIdentifier : dependencyList) {
+			TIdentifierLiteral tIdentifierLiteral = aIdentifier.getIdentifier().get(0);
+			String otherOpName = tIdentifierLiteral.getText();
+			if (allOperations.containsKey(otherOpName)) {
+				AbstractOperation abstractOperation = allOperations.get(otherOpName);
+				String otherMachineName = abstractOperation.getMachineName();
+				if (!machineReferences.contains(otherMachineName)) {
+					this.bExceptionList
+							.add(new BException(operation.getFileName(),
+									new CheckException("Operation '" + otherOpName
+											+ "' is not visible in RULES_MACHINE '" + operation.getMachineName() + "'.",
+											tIdentifierLiteral)));
+				}
+			}
+		}
+	}
 
-	private void checkReadWrite() {
-		HashMap<String, ComputationOperation> allDefineVariables = new HashMap<>();
+	public List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
+		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
+		for (AbstractOperation abstractOperation : values) {
+			if (!(abstractOperation instanceof FunctionOperation)) {
+				dependenciesMap.put(abstractOperation, new HashSet<>(abstractOperation.getTransitiveDependencies()));
+			}
+		}
+		List<AbstractOperation> resultList = new ArrayList<>();
+		List<AbstractOperation> todoList = new ArrayList<>(dependenciesMap.keySet());
+		while (!todoList.isEmpty()) {
+			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
+				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
+				deps.removeAll(resultList);
+				if (deps.isEmpty()) {
+					resultList.add(abstractOperation);
+					todoList.remove(abstractOperation);
+				}
+			}
+		}
+		return resultList;
+	}
+
+	private void findImplicitDependenciesToComputations() {
+		HashMap<String, ComputationOperation> variableToComputation = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
 			if (operation instanceof ComputationOperation) {
 				ComputationOperation comp = (ComputationOperation) operation;
 				for (String defName : comp.getDefineVariables()) {
-					allDefineVariables.put(defName, comp);
+					variableToComputation.put(defName, comp);
 				}
 			}
 		}
 
 		for (AbstractOperation operation : allOperations.values()) {
 			final Set<String> readVariables = operation.getReadVariables();
-			readVariables.retainAll(allDefineVariables.keySet());
+			readVariables.retainAll(variableToComputation.keySet());
 
 			final HashSet<String> variablesInScope = new HashSet<>();
+			// Note, RulesMachineChecker locally checks that a variable is
+			// defined before read.
 			if (operation instanceof ComputationOperation) {
 				variablesInScope.addAll(((ComputationOperation) operation).getDefineVariables());
 			}
-			for (AbstractOperation op : operation.getTransitiveDependencies()) {
-				if (op instanceof ComputationOperation) {
-					variablesInScope.addAll(((ComputationOperation) op).getDefineVariables());
+			for (AIdentifierExpression aIdentifier : operation.getDependsOnComputationList()) {
+				String opName = aIdentifier.getIdentifier().get(0).getText();
+				AbstractOperation abstractOperation = allOperations.get(opName);
+				if (abstractOperation instanceof ComputationOperation) {
+					variablesInScope.addAll(((ComputationOperation) abstractOperation).getDefineVariables());
 				}
 			}
 			readVariables.removeAll(variablesInScope);
 			if (!readVariables.isEmpty()) {
+				List<ComputationOperation> inferredDependenciesToComputations = new ArrayList<>();
 				for (String varName : readVariables) {
-					this.bExceptionList.add(new BException(operation.getFileName(),
-							new CheckException(
-									"Missing dependency to computation '" + allDefineVariables.get(varName)
-											+ "' in order to use variable '" + varName + "'.",
-									operation.getVariableReadByName(varName))));
+					ComputationOperation computationOperation = variableToComputation.get(varName);
+					inferredDependenciesToComputations.add(computationOperation);
+					List<String> machineReferences = operation.getMachineReferencesAsString();
+					machineReferences.add(operation.getMachineName());
+					if (!machineReferences.contains(computationOperation.getMachineName())) {
+						this.bExceptionList.add(new BException(operation.getFileName(),
+								new CheckException(
+										"Missing reference to RULES_MACHINE '" + computationOperation.getMachineName()
+												+ "' in order to use variable '" + varName + "'.",
+										operation.getVariableReadByName(varName))));
+					}
+					operation.setImplicitComputationDependencies(inferredDependenciesToComputations);
 				}
+			} else {
+				operation.setImplicitComputationDependencies(Collections.<ComputationOperation>emptyList());
 			}
-
 		}
 
 	}
 
-	private void checkIdentifier() {
+	private void checkIdentifiers() {
 		if (this.hasErrors()) {
 			/*
 			 * if there is already an error such as an parse error in one
@@ -371,9 +395,6 @@ public class RulesProject {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
-				if (checker == null) {
-					return;
-				}
 				knownIdentifiers.addAll(checker.getGlobalIdentifiers());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
@@ -426,58 +447,64 @@ public class RulesProject {
 		}
 	}
 
-	private Set<AbstractOperation> findDependencies(final AbstractOperation operation,
+	private void findTransitiveDependencies() {
+		if (this.hasErrors())
+			return;
+		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
+		while (!todoList.isEmpty()) {
+			AbstractOperation operation = todoList.poll();
+			if (operation.getTransitiveDependencies() == null) {
+				findTransitiveDependencies(operation, new ArrayList<AbstractOperation>());
+			}
+		}
+	}
+
+	private Set<AbstractOperation> findTransitiveDependencies(final AbstractOperation operation,
 			final List<AbstractOperation> ancestors) {
 		ancestors.add(operation);
-		List<AIdentifierExpression> dependencies = new ArrayList<>();
-		dependencies.addAll(operation.getDependsOnComputationList());
-		dependencies.addAll(operation.getDependsOnRulesList());
+		List<TIdentifierLiteral> directDependencies = new ArrayList<>();
+		directDependencies
+				.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnComputationList()));
+		directDependencies.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnRulesList()));
+		directDependencies.addAll(operation.getImplicitDependenciesToComputations());
 		Set<AbstractOperation> operationsFound = new HashSet<>();
 		// check for cycle
-		boolean cycleDetected = checkForCycles(operation, dependencies, ancestors);
+		boolean cycleDetected = checkForCycles(operation, directDependencies, ancestors);
 		if (cycleDetected) {
-			operation.setDependencies(operationsFound);
+			operation.setTransitiveDependencies(operationsFound);
 			return operationsFound;
 		}
-		for (AIdentifierExpression aIdentifierExpression : dependencies) {
-			String opName = aIdentifierExpression.getIdentifier().get(0).getText();
-			List<String> machineReferences = operation.getMachineReferencesAsString();
-			boolean opFound = false;
-			for (AbstractOperation otherOperation : allOperations.values()) {
-				if ((otherOperation.getMachineName().equals(operation.getMachineName())
-						|| machineReferences.contains(otherOperation.getMachineName()))
-						&& otherOperation.getName().equals(opName)) {
-					AbstractOperation nextOperation = allOperations.get(opName);
-					operationsFound.add(nextOperation);
-					if (nextOperation.getTransitiveDependencies() != null) {
-						operationsFound.addAll(nextOperation.getTransitiveDependencies());
-					} else {
-						Set<AbstractOperation> found = findDependencies(nextOperation, new ArrayList<>(ancestors));
-						operationsFound.addAll(found);
-					}
-					opFound = true;
-					break;
-				}
-			}
-			if (!opFound && allOperations.containsKey(opName)) {
-				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Operation '" + opName + "' is not visible in RULES_MACHINE '"
-								+ operation.getMachineName() + "'.", aIdentifierExpression)));
+		for (TIdentifierLiteral tIdentifierLiteral : directDependencies) {
+			String opName = tIdentifierLiteral.getText();
+			AbstractOperation nextOperation = allOperations.get(opName);
+			operationsFound.add(nextOperation);
+			if (nextOperation.getTransitiveDependencies() != null) {
+				operationsFound.addAll(nextOperation.getTransitiveDependencies());
+			} else {
+				operationsFound.addAll(findTransitiveDependencies(nextOperation, new ArrayList<>(ancestors)));
 			}
 		}
-		operation.setDependencies(operationsFound);
+		operation.setTransitiveDependencies(operationsFound);
 		return new HashSet<>(operationsFound);
 	}
 
-	private boolean checkForCycles(AbstractOperation operation, List<AIdentifierExpression> list,
+	private List<TIdentifierLiteral> convertAIdentifierListToTIdentifierLiteralList(List<AIdentifierExpression> list) {
+		List<TIdentifierLiteral> result = new ArrayList<>();
+		for (AIdentifierExpression aIdentifier : list) {
+			result.add(aIdentifier.getIdentifier().get(0));
+		}
+		return result;
+	}
+
+	private boolean checkForCycles(AbstractOperation operation, List<TIdentifierLiteral> directDependencies,
 			List<AbstractOperation> ancestors) {
 		List<String> ancestorsNames = new ArrayList<>();
 		for (AbstractOperation op : ancestors) {
 			String opName = op.getName();
 			ancestorsNames.add(opName);
 		}
-		for (AIdentifierExpression id : list) {
-			final String opName = id.getIdentifier().get(0).getText();
+		for (TIdentifierLiteral id : directDependencies) {
+			final String opName = id.getText();
 			if (ancestorsNames.contains(opName)) {
 				StringBuilder sb = new StringBuilder();
 				for (int index = ancestorsNames.indexOf(opName); index < ancestors.size(); index++) {

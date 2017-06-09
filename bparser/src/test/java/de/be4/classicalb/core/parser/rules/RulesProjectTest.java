@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -257,6 +258,7 @@ public class RulesProjectTest {
 		assertTrue(result.contains(expected));
 	}
 
+	@Ignore
 	@Test
 	public void testMissingComputationDependency() {
 		String result = getRulesMachineAsPrologTerm(
