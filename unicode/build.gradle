@@ -13,7 +13,7 @@ configurations {
 }
 
 dependencies {
-    compile 'com.google.code.findbugs:jsr305:1.3.9'
+    //compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
 }
 
@@ -32,15 +32,15 @@ task genParser(type:JavaExec) {
 jar {
 //	manifest {  attributes 'Main-Class': 'de.prob.unicode.UnicodeTranslator'}
  include '**/*.class'
- exclude '**.*.scc' 
+ exclude '**.*.scc'
  from 'build/temp'
  include '**/*.dat'
  from sourceSets.main.toString()
  include '**/*.java'
 }
 
-compileJava { 
- dependsOn = ['genParser'] 
+compileJava {
+ dependsOn = ['genParser']
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
+import util.Ast2String;
 
 public class ExpressionTest {
 
@@ -344,12 +344,12 @@ public class ExpressionTest {
 	public void testProverComprehensionSets() throws Exception {
 		final String expression = "SET(i).(i>0)";
 
-		parser.getOptions().restrictProverExpressions = false;
+		parser.getOptions().setRestrictProverExpressions(false);
 		final String expected = "AProverComprehensionSetExpression([AIdentifierExpression([i])],AGreaterPredicate(AIdentifierExpression([i]),AIntegerExpression(0)))";
 		final String prover = getExpressionAsString(expression);
 		assertEquals(expected, prover);
 
-		parser.getOptions().restrictProverExpressions = true;
+		parser.getOptions().setRestrictProverExpressions(true);
 		try {
 			getExpressionAsString(expression);
 			fail("exception expected");

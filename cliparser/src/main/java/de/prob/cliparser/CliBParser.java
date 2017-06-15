@@ -24,7 +24,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.rules.project.RulesProject;
+import de.be4.classicalb.core.parser.rules.RulesProject;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
@@ -96,17 +96,17 @@ public class CliBParser {
 			out = System.out;
 			f = null;
 		}
-		behaviour.out = out;
-		behaviour.outputFile = f;
-		behaviour.printTime = options.isOptionSet(CLI_SWITCH_TIME);
-		behaviour.prologOutput = options.isOptionSet(CLI_SWITCH_PROLOG);
-		behaviour.addLineNumbers = options.isOptionSet(CLI_SWITCH_PROLOG_LINES);
-		behaviour.useIndention = options.isOptionSet(CLI_SWITCH_INDENTION);
-		behaviour.displayGraphically = options.isOptionSet(CLI_SWITCH_UI);
-		behaviour.printAST = options.isOptionSet(CLI_SWITCH_AST);
-		behaviour.verbose = options.isOptionSet(CLI_SWITCH_VERBOSE);
-		behaviour.fastPrologOutput = options.isOptionSet(CLI_SWITCH_FASTPROLOG);
-		behaviour.machineNameMustMatchFileName = options.isOptionSet(CLI_SWITCH_NAME_CHECK);
+		behaviour.setOut(out);
+		behaviour.setOutputFile(f);
+		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
+		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
+		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES));
+		behaviour.setUseIndention(options.isOptionSet(CLI_SWITCH_INDENTION));
+		behaviour.setDisplayGraphically(options.isOptionSet(CLI_SWITCH_UI));
+		behaviour.setPrintAST(options.isOptionSet(CLI_SWITCH_AST));
+		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE));
+		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
+		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);

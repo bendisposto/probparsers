@@ -1,0 +1,80 @@
+RULES_MACHINE ClsTest
+OPERATIONS
+  COMPUTATION COMP_comp1
+  BODY
+    DEFINE
+      special_value
+    TYPE
+      INTEGER
+    DUMMY_VALUE 0
+    VALUE
+      10
+    END//DEFINE
+    ;
+    DEFINE
+      sum
+    TYPE
+      INTEGER <-> INTEGER
+    VALUE
+      /*@symbolic*/
+        %x.(x : NATURAL
+          |
+          LET rr, acc_init
+          BE
+            acc_init = 0
+            &
+            rr =
+              %in,acc.(in > 1 & acc : INTEGER | in - 1 |-> acc + in )
+              \/ %in,acc.(in = 1 & acc : INTEGER | -1 |-> (acc + in) * special_value ) // base case and special value
+          IN
+            closure1(rr)[{(x,acc_init)}](-1)
+          END
+        )
+    END//DEFINE
+    ;
+    DEFINE
+      fib
+    TYPE
+      INTEGER <-> INTEGER
+    VALUE
+      /*@symbolic*/
+        %x.(x : NATURAL
+          |
+          LET rr, acc_init
+          BE
+            acc_init = 0
+            &
+            rr =
+              %in,acc.(in > 1 & acc : INTEGER | in - 1 |-> acc + in )
+              \/ %in,acc.(in = 1 & acc : INTEGER | -1 |-> (acc + in) * special_value ) // base case and special value
+          IN
+            closure1(rr)[{(x,acc_init)}](-1)
+          END
+        )
+    END//DEFINE
+    ;
+    DEFINE
+      sum2
+    TYPE
+      INTEGER <-> INTEGER
+    VALUE
+      /*@symbolic*/
+        %x.(x : NATURAL
+          |
+          LET rr, acc_init
+          BE
+            acc_init = 0
+            &
+            // f(x) == IF x = 1 THEN 1 ELSE f(x-1) + x END
+            rr =
+              {in,acc,res|
+                (x = 1 => res = (0 |-> acc + 1))
+                & (x > 1 => res = (x-1 |-> acc + x ))
+              }
+          IN
+            closure1(rr)[{(x,acc_init)}](0)
+          END
+        )
+    END//DEFINE
+  END//COMPUTATION
+END

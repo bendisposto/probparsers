@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.tranformation;
+package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.rules.project.RulesMachineReference;
 
 public abstract class AbstractOperation {
 
@@ -23,7 +22,11 @@ public abstract class AbstractOperation {
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
 	private final List<String> tags = new ArrayList<>();
 	private PPredicate activationPredicate;
+	private PPredicate postconditionPredicate;
 	private Set<AbstractOperation> transitiveDependencies;
+	private List<ComputationOperation> implicitDependenciesToComputations;
+	private AIdentifierExpression replacesIdentifier;
+
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 
@@ -67,6 +70,14 @@ public abstract class AbstractOperation {
 		return this.activationPredicate;
 	}
 
+	public void setPostcondition(PPredicate predicate) {
+		this.postconditionPredicate = predicate;
+	}
+
+	public PPredicate getPostconditionPredicate() {
+		return this.postconditionPredicate;
+	}
+
 	public String getName() {
 		return this.name.getText();
 	}
@@ -83,7 +94,7 @@ public abstract class AbstractOperation {
 		return this.name;
 	}
 
-	public void setDependencies(Set<AbstractOperation> dependencies) {
+	public void setTransitiveDependencies(Set<AbstractOperation> dependencies) {
 		this.transitiveDependencies = dependencies;
 	}
 
@@ -117,7 +128,7 @@ public abstract class AbstractOperation {
 		return this.readMap.get(name);
 	}
 
-	public HashSet<String> getReadVariables() {
+	public Set<String> getReadVariables() {
 		return new HashSet<>(this.readMap.keySet());
 	}
 
@@ -129,7 +140,29 @@ public abstract class AbstractOperation {
 		return list;
 	}
 
+	public AIdentifierExpression getReplacesIdentifier() {
+		return this.replacesIdentifier;
+	}
+
 	public String getMachineName() {
 		return this.machineName;
 	}
+
+	public void addReplacesIdentifier(AIdentifierExpression idExpr) {
+		this.replacesIdentifier = idExpr;
+	}
+
+	public void setImplicitComputationDependencies(List<ComputationOperation> inferredDependenciesToComputations) {
+		implicitDependenciesToComputations = inferredDependenciesToComputations;
+	}
+
+	public List<TIdentifierLiteral> getImplicitDependenciesToComputations() {
+		List<TIdentifierLiteral> result = new ArrayList<>();
+		for (ComputationOperation comp : implicitDependenciesToComputations) {
+			TIdentifierLiteral nameLiteral = comp.getNameLiteral();
+			result.add(nameLiteral);
+		}
+		return result;
+	}
+
 }

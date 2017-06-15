@@ -143,7 +143,7 @@ public class ClausesCheck implements SemanticCheck {
 		if ((clauses.containsKey(NAME_VARIABLES) || clauses.containsKey(NAME_CONCRETE_VARIABLES))
 				&& (!clauses.containsKey(NAME_INVARIANT) || !clauses.containsKey(NAME_INITIALISATION))) {
 
-			final Set<Node> nodes = new HashSet<Node>();
+			final Set<Node> nodes = new HashSet<>();
 			if (clauses.containsKey(NAME_VARIABLES)) {
 				nodes.addAll(clauses.get(NAME_VARIABLES));
 			}
@@ -173,7 +173,7 @@ public class ClausesCheck implements SemanticCheck {
 		 */
 		if ((clauses.containsKey(NAME_CONSTANTS) || clauses.containsKey(NAME_ABSTRACT_CONSTANTS))
 				&& !clauses.containsKey(NAME_PROPERTIES)) {
-			final Set<Node> nodes = new HashSet<Node>();
+			final Set<Node> nodes = new HashSet<>();
 
 			if (clauses.containsKey(NAME_CONSTANTS)) {
 				nodes.addAll(clauses.get(NAME_CONSTANTS));
@@ -188,7 +188,7 @@ public class ClausesCheck implements SemanticCheck {
 	private void findForbidden(final String[] forbiddenClassNames) {
 		final Set<String> clauseClasses = clauses.keySet();
 
-		final Set<Set<Node>> wrongClauses = new HashSet<Set<Node>>();
+		final Set<Set<Node>> wrongClauses = new HashSet<>();
 
 		for (int i = 0; i < forbiddenClassNames.length; i++) {
 			if (clauseClasses.contains(forbiddenClassNames[i])) {
@@ -196,10 +196,10 @@ public class ClausesCheck implements SemanticCheck {
 			}
 		}
 
-		if (wrongClauses.size() > 0) {
-			final Set<Node> nodes = new HashSet<Node>();
+		if (!wrongClauses.isEmpty()) {
+			final Set<Node> nodes = new HashSet<>();
 
-			for (final Iterator< Set<Node>>iterator = wrongClauses.iterator(); iterator.hasNext();) {
+			for (final Iterator<Set<Node>> iterator = wrongClauses.iterator(); iterator.hasNext();) {
 				final Set<Node> nodeSet = iterator.next();
 				nodes.addAll(nodeSet);
 			}
@@ -214,7 +214,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * @throws CheckException
 	 */
 	private void checkDoubleClauses() {
-		for (final Iterator< Set<Node>>iterator = clauses.values().iterator(); iterator.hasNext();) {
+		for (final Iterator<Set<Node>> iterator = clauses.values().iterator(); iterator.hasNext();) {
 			final Set<Node> nodesforClause = iterator.next();
 
 			if (nodesforClause.size() > 1) {
@@ -230,6 +230,7 @@ public class ClausesCheck implements SemanticCheck {
 	}
 
 	public void setOptions(ParseOptions options) {
+		// ignore options
 	}
 
 	@Override

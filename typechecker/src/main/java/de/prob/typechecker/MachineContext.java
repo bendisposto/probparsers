@@ -192,7 +192,7 @@ public class MachineContext extends DepthFirstAdapter {
 	}
 
 	private void exist(LinkedList<TIdentifierLiteral> list) {
-		String name = Utils.getIdentifierAsString(list);
+		String name = Utils.getTIdentifierListAsString(list);
 		identifierAlreadyExists(name);
 	}
 
@@ -230,13 +230,13 @@ public class MachineContext extends DepthFirstAdapter {
 		this.header = node;
 		if (machineName == null) {
 			List<TIdentifierLiteral> nameList = new ArrayList<TIdentifierLiteral>(node.getName());
-			this.machineName = Utils.getIdentifierAsString(nameList);
+			this.machineName = Utils.getTIdentifierListAsString(nameList);
 		}
 
 		List<PExpression> copy = new ArrayList<PExpression>(node.getParameters());
 		for (PExpression e : copy) {
 			AIdentifierExpression p = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(p.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(p.getIdentifier());
 			exist(p.getIdentifier());
 			if (Character.isUpperCase(name.charAt(0))) {
 				this.machineSetParameter.put(name, p);
@@ -379,7 +379,7 @@ public class MachineContext extends DepthFirstAdapter {
 		List<PExpression> copy = new ArrayList<PExpression>(node.getMachineNames());
 		for (PExpression e : copy) {
 			AIdentifierExpression p = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(p.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(p.getIdentifier());
 
 			try {
 				exist(p.getIdentifier());
@@ -402,7 +402,7 @@ public class MachineContext extends DepthFirstAdapter {
 	@Override
 	public void caseADeferredSetSet(ADeferredSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
-		String name = Utils.getIdentifierAsString(copy);
+		String name = Utils.getTIdentifierListAsString(copy);
 		exist(node.getIdentifier());
 		deferredSets.put(name, node);
 	}
@@ -411,14 +411,14 @@ public class MachineContext extends DepthFirstAdapter {
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		{
 			List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
-			String name = Utils.getIdentifierAsString(copy);
+			String name = Utils.getTIdentifierListAsString(copy);
 			exist(node.getIdentifier());
 			enumeratedSets.put(name, node);
 		}
 		List<PExpression> copy = new ArrayList<PExpression>(node.getElements());
 		for (PExpression e : copy) {
 			AIdentifierExpression v = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(v.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(v.getIdentifier());
 			exist(v.getIdentifier());
 			enumValues.put(name, v);
 		}
@@ -430,7 +430,7 @@ public class MachineContext extends DepthFirstAdapter {
 		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
 		for (PExpression e : copy) {
 			AIdentifierExpression c = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(c.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(c.getIdentifier());
 			exist(c.getIdentifier());
 			constants.put(name, c);
 		}
@@ -442,7 +442,7 @@ public class MachineContext extends DepthFirstAdapter {
 		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
 		for (PExpression e : copy) {
 			AIdentifierExpression c = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(c.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(c.getIdentifier());
 			exist(c.getIdentifier());
 			constants.put(name, c);
 		}
@@ -453,7 +453,7 @@ public class MachineContext extends DepthFirstAdapter {
 		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
 		for (PExpression e : copy) {
 			AIdentifierExpression v = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(v.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(v.getIdentifier());
 			exist(v.getIdentifier());
 			variables.put(name, v);
 		}
@@ -464,14 +464,14 @@ public class MachineContext extends DepthFirstAdapter {
 		List<PExpression> copy = new ArrayList<PExpression>(node.getIdentifiers());
 		for (PExpression e : copy) {
 			AIdentifierExpression v = (AIdentifierExpression) e;
-			String name = Utils.getIdentifierAsString(v.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(v.getIdentifier());
 			exist(v.getIdentifier());
 			variables.put(name, v);
 		}
 	}
 
 	private void putLocalVariableIntoCurrentScope(AIdentifierExpression node) throws ScopeException {
-		String name = Utils.getIdentifierAsString(node.getIdentifier());
+		String name = Utils.getTIdentifierListAsString(node.getIdentifier());
 		LinkedHashMap<String, Node> currentScope = contextTable.get(contextTable.size() - 1);
 		if (currentScope.containsKey(name)) {
 			throw new ScopeException("Duplicate Identifier: " + name);
@@ -482,7 +482,7 @@ public class MachineContext extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(AIdentifierExpression node) {
-		String name = Utils.getIdentifierAsString(node.getIdentifier());
+		String name = Utils.getTIdentifierListAsString(node.getIdentifier());
 		for (int i = contextTable.size() - 1; i >= 0; i--) {
 			LinkedHashMap<String, Node> currentScope = contextTable.get(i);
 			if (currentScope.containsKey(name)) {
@@ -495,7 +495,7 @@ public class MachineContext extends DepthFirstAdapter {
 
 	@Override
 	public void caseAPrimedIdentifierExpression(APrimedIdentifierExpression node) {
-		String name = Utils.getIdentifierAsString(node.getIdentifier());
+		String name = Utils.getTIdentifierListAsString(node.getIdentifier());
 		for (int i = contextTable.size() - 1; i >= 0; i--) {
 			LinkedHashMap<String, Node> currentScope = contextTable.get(i);
 			if (currentScope.containsKey(name)) {
@@ -636,7 +636,7 @@ public class MachineContext extends DepthFirstAdapter {
 		// first collect all operations
 		for (POperation e : copy) {
 			AOperation op = (AOperation) e;
-			String name = Utils.getIdentifierAsString(op.getOpName());
+			String name = Utils.getTIdentifierListAsString(op.getOpName());
 			// existString(name);
 			if (operations.keySet().contains(name)) {
 				throw new ScopeException(String.format("Duplicate operation: '%s'", name));
@@ -733,7 +733,7 @@ public class MachineContext extends DepthFirstAdapter {
 	public void caseAOpSubstitution(AOpSubstitution node) {
 		if (node.getName() != null) {
 			AIdentifierExpression op = (AIdentifierExpression) node.getName();
-			String name = Utils.getIdentifierAsString(op.getIdentifier());
+			String name = Utils.getTIdentifierListAsString(op.getIdentifier());
 			Node o = operations.get(name);
 			if (o != null) {
 				this.referencesTable.put(op, o);

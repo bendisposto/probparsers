@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules.project;
+package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
@@ -20,9 +21,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.rules.tranformation.AbstractOperation;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesMachineChecker;
-import de.be4.classicalb.core.parser.rules.tranformation.RulesTransformation;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -54,8 +52,17 @@ public class RulesParseUnit implements IModel {
 		return this.operationList;
 	}
 
+	@Override
 	public Start getStart() {
 		return this.start;
+	}
+
+	public String getPath() {
+		if (this.machineFile != null) {
+			return this.machineFile.getAbsolutePath();
+		} else {
+			return this.machineName;
+		}
 	}
 
 	public void setMachineAsString(String content) {
@@ -97,7 +104,7 @@ public class RulesParseUnit implements IModel {
 				bParser = new BParser();
 			}
 			ParseOptions parseOptions = new ParseOptions();
-			parseOptions.grammar = RulesGrammar.getInstance();
+			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
 			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start);
@@ -124,12 +131,12 @@ public class RulesParseUnit implements IModel {
 		this.translate(allOperations);
 	}
 
-	public void translate(HashMap<String, AbstractOperation> allOperations) {
+	public void translate(Map<String, AbstractOperation> allOperations) {
 		if (bCompoundException != null) {
 			return;
 		}
-		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, machineReferences,
-				rulesMachineChecker, allOperations);
+		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, rulesMachineChecker,
+				allOperations);
 		try {
 			ruleTransformation.runTransformation();
 		} catch (BCompoundException e) {
@@ -163,7 +170,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.useIndention, false);
+		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.isUseIndention(), false);
 	}
 
 	@Override
@@ -172,7 +179,7 @@ public class RulesParseUnit implements IModel {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
-		if (parsingBehaviour.addLineNumbers) {
+		if (parsingBehaviour.isAddLineNumbers()) {
 			final SourcePositions src = bParser.getSourcePositions();
 			pprinter.setSourcePositions(src);
 		}
@@ -183,11 +190,7 @@ public class RulesParseUnit implements IModel {
 
 	@Override
 	public boolean hasError() {
-		if (this.bCompoundException == null) {
-			return false;
-		} else {
-			return true;
-		}
+		return this.bCompoundException != null;
 	}
 
 	@Override

@@ -15,8 +15,8 @@ import de.be4.classicalb.core.parser.node.Node;
  * @author plagge
  */
 public class NodeIdAssignment extends DepthFirstAdapter {
-	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<Node, Integer>();
-	private ArrayList<Node> nodes = new ArrayList<Node>(1000);
+	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();
+	private ArrayList<Node> nodes = new ArrayList<>(1000);
 	private int currentIdentifier = 0;
 
 	private int current_file_number = -1;
@@ -66,10 +66,10 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		try {
 			result = nodes.get(id);
 		} catch (IndexOutOfBoundsException e) {
-			throw new RuntimeException("Unknown id " + id);
+			throw new AssertionError("Unknown id " + id, e);
 		}
 		if (result == null) {
-			throw new RuntimeException("Unknown id " + id);
+			throw new AssertionError("Unknown id " + id);
 		}
 		return result;
 	}

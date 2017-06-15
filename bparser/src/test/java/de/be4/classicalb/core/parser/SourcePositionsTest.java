@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.LinkedList;
 
@@ -38,12 +39,9 @@ public class SourcePositionsTest {
 	public void testTokenAsPositionedNode() throws Exception {
 		final String testMachine = "#EXPRESSION xx + 5";
 		final Start result = getAst(testMachine);
-		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result
-				.getPParseUnit();
-		final AAddExpression addExpression = (AAddExpression) exprParseUnit
-				.getExpression();
-		final AIntegerExpression intExpression = (AIntegerExpression) addExpression
-				.getRight();
+		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result.getPParseUnit();
+		final AAddExpression addExpression = (AAddExpression) exprParseUnit.getExpression();
+		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 
 		assertTrue(intExpression instanceof PositionedNode);
 		final PositionedNode intNode = (PositionedNode) intExpression;
@@ -64,36 +62,29 @@ public class SourcePositionsTest {
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result
-				.getPParseUnit();
+		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result.getPParseUnit();
 		assertEquals(1, positions.getBeginColumn(exprParseUnit));
 		assertEquals(1, positions.getBeginLine(exprParseUnit));
 		assertEquals(1, positions.getEndLine(exprParseUnit));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(exprParseUnit));
+		assertEquals(testMachine.length(), positions.getEndColumn(exprParseUnit));
 
-		final AAddExpression addExpression = (AAddExpression) exprParseUnit
-				.getExpression();
+		final AAddExpression addExpression = (AAddExpression) exprParseUnit.getExpression();
 		assertEquals(13, positions.getBeginColumn(addExpression));
 		assertEquals(1, positions.getBeginLine(addExpression));
 		assertEquals(1, positions.getEndLine(addExpression));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(addExpression));
+		assertEquals(testMachine.length(), positions.getEndColumn(addExpression));
 
-		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression
-				.getLeft();
+		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression.getLeft();
 		assertEquals(13, positions.getBeginColumn(varExpression));
 		assertEquals(1, positions.getBeginLine(varExpression));
 		assertEquals(1, positions.getEndLine(varExpression));
 		assertEquals(14, positions.getEndColumn(varExpression));
 
-		final AIntegerExpression intExpression = (AIntegerExpression) addExpression
-				.getRight();
+		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 		assertEquals(18, positions.getBeginColumn(intExpression));
 		assertEquals(1, positions.getBeginLine(intExpression));
 		assertEquals(1, positions.getEndLine(intExpression));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(intExpression));
+		assertEquals(testMachine.length(), positions.getEndColumn(intExpression));
 	}
 
 	@Test
@@ -102,21 +93,17 @@ public class SourcePositionsTest {
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final ASubstitutionParseUnit substParseUnit = (ASubstitutionParseUnit) result
-				.getPParseUnit();
+		final ASubstitutionParseUnit substParseUnit = (ASubstitutionParseUnit) result.getPParseUnit();
 		assertEquals(1, positions.getBeginColumn(substParseUnit));
 		assertEquals(1, positions.getBeginLine(substParseUnit));
 		assertEquals(1, positions.getEndLine(substParseUnit));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(substParseUnit));
+		assertEquals(testMachine.length(), positions.getEndColumn(substParseUnit));
 
-		final ASequenceSubstitution sequenceSubst = (ASequenceSubstitution) substParseUnit
-				.getSubstitution();
+		final ASequenceSubstitution sequenceSubst = (ASequenceSubstitution) substParseUnit.getSubstitution();
 		assertEquals(15, positions.getBeginColumn(sequenceSubst));
 		assertEquals(1, positions.getBeginLine(sequenceSubst));
 		assertEquals(1, positions.getEndLine(sequenceSubst));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(sequenceSubst));
+		assertEquals(testMachine.length(), positions.getEndColumn(sequenceSubst));
 
 		final PSubstitution subst1 = sequenceSubst.getSubstitutions().get(0);
 		assertEquals(15, positions.getBeginColumn(subst1));
@@ -139,34 +126,29 @@ public class SourcePositionsTest {
 
 	@Test
 	public void testMultilineSubst() throws Exception {
-		final String testMachine = "#SUBSTITUTION IF 1=1\n" + "THEN skip\n"
-				+ "ELSE skip\n" + "END";
+		final String testMachine = "#SUBSTITUTION IF 1=1\n" + "THEN skip\n" + "ELSE skip\n" + "END";
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final ASubstitutionParseUnit substParseUnit = (ASubstitutionParseUnit) result
-				.getPParseUnit();
+		final ASubstitutionParseUnit substParseUnit = (ASubstitutionParseUnit) result.getPParseUnit();
 		assertEquals(1, positions.getBeginColumn(substParseUnit));
 		assertEquals(1, positions.getBeginLine(substParseUnit));
 		assertEquals(4, positions.getEndLine(substParseUnit));
 		assertEquals(3, positions.getEndColumn(substParseUnit));
 
-		final AIfSubstitution ifSubst = (AIfSubstitution) substParseUnit
-				.getSubstitution();
+		final AIfSubstitution ifSubst = (AIfSubstitution) substParseUnit.getSubstitution();
 		assertEquals(15, positions.getBeginColumn(ifSubst));
 		assertEquals(1, positions.getBeginLine(ifSubst));
 		assertEquals(4, positions.getEndLine(ifSubst));
 		assertEquals(3, positions.getEndColumn(ifSubst));
 
-		final ASkipSubstitution thenSubst = (ASkipSubstitution) ifSubst
-				.getThen();
+		final ASkipSubstitution thenSubst = (ASkipSubstitution) ifSubst.getThen();
 		assertEquals(6, positions.getBeginColumn(thenSubst));
 		assertEquals(2, positions.getBeginLine(thenSubst));
 		assertEquals(2, positions.getEndLine(thenSubst));
 		assertEquals(9, positions.getEndColumn(thenSubst));
 
-		final ASkipSubstitution elseSubst = (ASkipSubstitution) ifSubst
-				.getElse();
+		final ASkipSubstitution elseSubst = (ASkipSubstitution) ifSubst.getElse();
 		assertEquals(6, positions.getBeginColumn(elseSubst));
 		assertEquals(3, positions.getBeginLine(elseSubst));
 		assertEquals(3, positions.getEndLine(elseSubst));
@@ -179,36 +161,29 @@ public class SourcePositionsTest {
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result
-				.getPParseUnit();
+		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result.getPParseUnit();
 		assertEquals(1, positions.getBeginColumn(exprParseUnit));
 		assertEquals(1, positions.getBeginLine(exprParseUnit));
 		assertEquals(1, positions.getEndLine(exprParseUnit));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(exprParseUnit));
+		assertEquals(testMachine.length(), positions.getEndColumn(exprParseUnit));
 
-		final AAddExpression addExpression = (AAddExpression) exprParseUnit
-				.getExpression();
+		final AAddExpression addExpression = (AAddExpression) exprParseUnit.getExpression();
 		assertEquals(13, positions.getBeginColumn(addExpression));
 		assertEquals(1, positions.getBeginLine(addExpression));
 		assertEquals(1, positions.getEndLine(addExpression));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(addExpression));
+		assertEquals(testMachine.length(), positions.getEndColumn(addExpression));
 
-		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression
-				.getLeft();
+		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression.getLeft();
 		assertEquals(13, positions.getBeginColumn(varExpression));
 		assertEquals(1, positions.getBeginLine(varExpression));
 		assertEquals(1, positions.getEndLine(varExpression));
 		assertEquals(14, positions.getEndColumn(varExpression));
 
-		final AIntegerExpression intExpression = (AIntegerExpression) addExpression
-				.getRight();
+		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 		assertEquals(32, positions.getBeginColumn(intExpression));
 		assertEquals(1, positions.getBeginLine(intExpression));
 		assertEquals(1, positions.getEndLine(intExpression));
-		assertEquals(testMachine.length(),
-				positions.getEndColumn(intExpression));
+		assertEquals(testMachine.length(), positions.getEndColumn(intExpression));
 	}
 
 	@Test
@@ -217,29 +192,25 @@ public class SourcePositionsTest {
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result
-				.getPParseUnit();
+		final AExpressionParseUnit exprParseUnit = (AExpressionParseUnit) result.getPParseUnit();
 		assertEquals(1, positions.getBeginColumn(exprParseUnit));
 		assertEquals(1, positions.getBeginLine(exprParseUnit));
 		assertEquals(2, positions.getEndLine(exprParseUnit));
 		assertEquals(16, positions.getEndColumn(exprParseUnit));
 
-		final AAddExpression addExpression = (AAddExpression) exprParseUnit
-				.getExpression();
+		final AAddExpression addExpression = (AAddExpression) exprParseUnit.getExpression();
 		assertEquals(13, positions.getBeginColumn(addExpression));
 		assertEquals(1, positions.getBeginLine(addExpression));
 		assertEquals(2, positions.getEndLine(addExpression));
 		assertEquals(16, positions.getEndColumn(addExpression));
 
-		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression
-				.getLeft();
+		final AIdentifierExpression varExpression = (AIdentifierExpression) addExpression.getLeft();
 		assertEquals(13, positions.getBeginColumn(varExpression));
 		assertEquals(1, positions.getBeginLine(varExpression));
 		assertEquals(1, positions.getEndLine(varExpression));
 		assertEquals(14, positions.getEndColumn(varExpression));
 
-		final AIntegerExpression intExpression = (AIntegerExpression) addExpression
-				.getRight();
+		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 		assertEquals(16, positions.getBeginColumn(intExpression));
 		assertEquals(2, positions.getBeginLine(intExpression));
 		assertEquals(2, positions.getEndLine(intExpression));
@@ -253,23 +224,19 @@ public class SourcePositionsTest {
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
 
-		final AExpressionParseUnit parseUnit = (AExpressionParseUnit) result
-				.getPParseUnit();
-		final ASetExtensionExpression expression = (ASetExtensionExpression) parseUnit
-				.getExpression();
+		final AExpressionParseUnit parseUnit = (AExpressionParseUnit) result.getPParseUnit();
+		final ASetExtensionExpression expression = (ASetExtensionExpression) parseUnit.getExpression();
 
 		assertEquals("{y}", positions.getNodeString(expression));
 	}
 
 	@Test
 	public void testVariablesSourcePositions() throws Exception {
-		final String testMachine = "MACHINE test\n" + "VARIABLES\n" + "  xx,\n"
-				+ "    yy\n" + "INVARIANT xx:INT & yy:INT\n"
-				+ "INITIALISATION xx,yy:=0,0\n" + "END\n";
+		final String testMachine = "MACHINE test\n" + "VARIABLES\n" + "  xx,\n" + "    yy\n"
+				+ "INVARIANT xx:INT & yy:INT\n" + "INITIALISATION xx,yy:=0,0\n" + "END\n";
 		final Start result = getAst(testMachine);
 		final SourcePositions positions = parser.getSourcePositions();
-		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) result
-				.getPParseUnit();
+		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) result.getPParseUnit();
 
 		AVariablesMachineClause variables = null;
 		for (final PMachineClause clause : machine.getMachineClauses()) {
@@ -278,7 +245,9 @@ public class SourcePositionsTest {
 				break;
 			}
 		}
-		assertNotNull(variables);
+		if (variables == null) {
+			fail("variables clause not found");
+		}
 		final LinkedList<PExpression> ids = variables.getIdentifiers();
 		assertEquals(2, ids.size());
 		final AIdentifierExpression x = (AIdentifierExpression) ids.get(0);
@@ -305,9 +274,7 @@ public class SourcePositionsTest {
 
 	@Test
 	public void testGetTokenForPosition() throws Exception {
-		parser.parse(
-				"MACHINE TestMachine\n\nVARIABLES x\n\nINVARIANT x:NAT\nINITIALISATION x:=1\nEND",
-				false);
+		parser.parse("MACHINE TestMachine\n\nVARIABLES x\n\nINVARIANT x:NAT\nINITIALISATION x:=1\nEND", false);
 		final SourcePositions positions = parser.getSourcePositions();
 
 		// 1. token: "MACHINE"

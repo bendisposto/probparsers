@@ -219,8 +219,8 @@ public class PreParser {
 
 	private List<Token> sortDefinitionsByTopologicalOrderAndCheckForCycles(Map<Token, Token> definitions)
 			throws PreParseException {
-		final Set<String> definitionNames = new HashSet<String>();
-		final Map<String, Token> definitionMap = new HashMap<String, Token>();
+		final Set<String> definitionNames = new HashSet<>();
+		final Map<String, Token> definitionMap = new HashMap<>();
 		for (Token token : definitions.keySet()) {
 			final String definitionName = token.getText();
 			definitionNames.add(definitionName);
@@ -229,7 +229,7 @@ public class PreParser {
 		Map<String, Set<String>> dependencies = determineDependencies(definitionNames, definitions);
 		List<String> sortedDefinitionNames = Utils.sortByTopologicalOrder(dependencies);
 		if (sortedDefinitionNames.size() < definitionNames.size()) {
-			Set<String> remaining = new HashSet<String>(definitionNames);
+			Set<String> remaining = new HashSet<>(definitionNames);
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
 			StringBuilder sb = new StringBuilder();
@@ -266,7 +266,7 @@ public class PreParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
-			Set<String> set = new HashSet<String>();
+			Set<String> set = new HashSet<>();
 			de.be4.classicalb.core.parser.node.Token next = null;
 			try {
 				next = lexer.next();
@@ -429,7 +429,7 @@ public class PreParser {
 		int pos = errorToken.getPos();
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf("]");
+		final int index = oldMessage.indexOf(']');
 		String message = oldMessage.substring(index + 1);
 		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
@@ -447,7 +447,7 @@ public class PreParser {
 		int pos = Integer.parseInt(m.group());
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf("]");
+		final int index = oldMessage.indexOf(']');
 		String message = oldMessage.substring(index + 1);
 		return "[" + line + "," + pos + "]" + message;
 	}

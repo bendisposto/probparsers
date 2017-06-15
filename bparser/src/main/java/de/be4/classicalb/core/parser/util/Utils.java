@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +14,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.PParseUnit;
@@ -22,10 +22,16 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
-public class Utils {
+public final class Utils {
 
-	public static String getIdentifierAsString(
-			final List<TIdentifierLiteral> idElements) {
+	private Utils() {
+	}
+
+	public static String getAIdentifierAsString(AIdentifierExpression idExpr) {
+		return getTIdentifierListAsString(idExpr.getIdentifier());
+	}
+
+	public static String getTIdentifierListAsString(final List<TIdentifierLiteral> idElements) {
 		final String string;
 		if (idElements.size() == 1) {
 			// faster version for the simple case
@@ -50,28 +56,18 @@ public class Utils {
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 
-		if (parseUnit instanceof AAbstractMachineParseUnit
-				|| parseUnit instanceof ARefinementMachineParseUnit
-				|| parseUnit instanceof AImplementationMachineParseUnit) {
-			return true;
-		}
-
-		return false;
+		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
+				|| parseUnit instanceof AImplementationMachineParseUnit);
 	}
 
 	public static String getRevisionFromManifest() {
-		String revision = "";
-		InputStream stream = Utils.class.getClassLoader().getResourceAsStream(
-				"revision.properties");
-		Properties properties = new Properties();
-		try {
+		try (InputStream stream = Utils.class.getClassLoader().getResourceAsStream("revision.properties")) {
+			Properties properties = new Properties();
 			properties.load(stream);
-			stream.close();
-			revision = properties.getProperty("CompileDate");
+			return properties.getProperty("CompileDate");
 		} catch (IOException e) {
-			revision = String.valueOf(System.currentTimeMillis());
+			return String.valueOf(System.currentTimeMillis());
 		}
-		return revision;
 	}
 
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
@@ -80,7 +76,7 @@ public class Utils {
 
 	public static <T> List<T> sortByTopologicalOrder(final Map<T, Set<T>> dependencies) {
 		final Set<T> allValues = new HashSet<>(dependencies.keySet());
-		ArrayList<T> sortedList = new ArrayList<T>();
+		ArrayList<T> sortedList = new ArrayList<>();
 		boolean newRun = true;
 		while (newRun) {
 			newRun = false;
@@ -98,10 +94,9 @@ public class Utils {
 		return sortedList;
 	}
 
-	public static <T> List<T> determineCycle(final Set<T> remaining,
-			final Map<T, Set<T>> dependencies) {
-		ArrayList<T> cycle = new ArrayList<T>();
-		Set<T> set = new HashSet<T>(remaining);
+	public static <T> List<T> determineCycle(final Set<T> remaining, final Map<T, Set<T>> dependencies) {
+		ArrayList<T> cycle = new ArrayList<>();
+		Set<T> set = new HashSet<>(remaining);
 		boolean newRun = true;
 		while (newRun) {
 			for (T next : set) {
@@ -118,7 +113,7 @@ public class Utils {
 		}
 		return cycle;
 	}
-	
+
 	public static String getFileWithoutExtension(String f) {
 		String res = null;
 		int i = f.lastIndexOf('.');
@@ -130,21 +125,20 @@ public class Utils {
 		}
 		return res;
 	}
-	
-	
-	public static final String readFile(final File filePath) throws FileNotFoundException, IOException {
-		final InputStreamReader inputStreamReader
-            = new InputStreamReader(new FileInputStream(filePath), Charset.forName("UTF-8"));
 
-		final StringBuilder builder = new StringBuilder();
-		final char[] buffer = new char[1024];
-		int read;
-		while ((read = inputStreamReader.read(buffer)) >= 0) {
-			builder.append(String.valueOf(buffer, 0, read));
+	public static final String readFile(final File filePath) throws IOException {
+		String content = null;
+		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, Charset.forName("UTF-8"));
+			final StringBuilder builder = new StringBuilder();
+			final char[] buffer = new char[1024];
+			int read;
+			while ((read = inputStreamReader.read(buffer)) >= 0) {
+				builder.append(String.valueOf(buffer, 0, read));
+			}
+			content = builder.toString();
+			inputStreamReader.close();
 		}
-		String content = builder.toString();
-
-		inputStreamReader.close();
 
 		// remove utf-8 byte order mark
 		// replaceAll \uFEFF did not work for some reason
@@ -161,5 +155,5 @@ public class Utils {
 
 		return content.replaceAll("\r\n", "\n");
 	}
-	
+
 }

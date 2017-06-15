@@ -1024,7 +1024,7 @@ identifier_declaration_expression {-> expression} =
   {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
   {unit} pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.unit(content,identifier.expression)} |
   {new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
-  {inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
+  {inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferred_unit(content,identifier.expression)} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 
@@ -1213,7 +1213,7 @@ expression =
   {description} [content]:pragma_free_text [expression]:expression |
   {unit} [content]:unit_content [identifier]:expression |
   {new_unit} [content]:unit_content [identifier]:expression |
-  {inferredunit} [content]:unit_content [identifier]:expression |
+  {inferred_unit} [content]:unit_content [identifier]:expression |
   {identifier} [identifier]:identifier_literal* |
   {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
   {string} [content]:string_literal |

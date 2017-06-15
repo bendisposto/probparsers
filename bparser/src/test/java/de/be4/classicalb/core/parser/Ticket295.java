@@ -8,10 +8,10 @@ import java.io.StringReader;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.parser.Parser;
+import util.Ast2String;
 
 public class Ticket295 {
 
