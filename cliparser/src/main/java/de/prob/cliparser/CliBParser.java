@@ -275,6 +275,10 @@ public class CliBParser {
 		}
 		print("Hello World!");
 		System.err.println("HI\n");
+
+		PrologTermStringOutput strOutput = new PrologTermStringOutput();
+		strOutput.openTerm("foo").closeTerm().fullstop();
+		print(strOutput.toString());
 	}
 
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
