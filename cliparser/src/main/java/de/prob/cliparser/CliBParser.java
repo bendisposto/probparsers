@@ -12,6 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -249,6 +252,8 @@ public class CliBParser {
 				parseTemporalFormula(in, parser2);
 				break;
 
+			case frege:
+				handleFrege(in);
 			case halt:
 				socket.close();
 				serverSocket.close();
@@ -259,6 +264,17 @@ public class CliBParser {
 			}
 
 		}
+	}
+
+	private static void handleFrege(BufferedReader in) {
+		try {
+			String content = in.readLine();
+			Files.write(Paths.get("/tmp/prob"), Collections.singletonList(content));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		print("Hello World!");
+		System.err.println("HI\n");
 	}
 
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
