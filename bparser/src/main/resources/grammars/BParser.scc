@@ -42,7 +42,7 @@ Helpers
   white_space = line_break | layout_char+;
 
   identifier_literal = letter (letter | digit | underscore)*;
-  pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\')*;
+  pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\')+;
   //pragma_label_chars = ([all_chars - '*']* ('*' [all_chars - '/'])?)* '*'?;
 
 /*******************************************************************
