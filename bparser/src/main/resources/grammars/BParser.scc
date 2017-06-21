@@ -42,7 +42,8 @@ Helpers
   white_space = line_break | layout_char+;
 
   identifier_literal = letter (letter | digit | underscore)*;
-  pragma_identifier_literal = ([all_chars - '*']* ('*' [all_chars - '/'])?)* '*'?;
+  pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#')*;
+  //pragma_label_chars = ([all_chars - '*']* ('*' [all_chars - '/'])?)* '*'?;
 
 /*******************************************************************
  * States                                                          *
@@ -85,7 +86,8 @@ Tokens
   {pragma} pragma_import_package = 'import-package' | 'import_package';
   {pragma->description} pragma_description = 'desc' | 'description';
   {pragma} pragma_conversion = 'conversion';
-  {pragma} pragma_id_or_string = pragma_identifier_literal;
+  {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  //{pragma} pragma_label_string = pragma_label_chars; // not used yet, due to tests failing
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
   {unit} unit_content = string_literal;
