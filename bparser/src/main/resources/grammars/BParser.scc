@@ -340,7 +340,6 @@ Tokens
   {section->normal} kw_machine_clause = '#MACHINECLAUSE';
 
   {section->normal,normal} identifier_literal = identifier_literal;
-  {pragma} pragma_identifier_literal = pragma_identifier_literal;
   {normal} def_literal_substitution = '#literal_substitution' letter*;
   {normal} def_literal_predicate = '#literal_predicate' letter*;
   {normal} predicate_identifier = '#predicate_identifier' letter*;
