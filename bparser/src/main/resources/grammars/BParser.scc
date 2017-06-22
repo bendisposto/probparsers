@@ -44,6 +44,8 @@ Helpers
   identifier_literal = letter (letter | digit | underscore)*;
   //pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$'| '|'| ':'| '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[33 .. 126] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
+  // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
+  // accepted due to the maximal munching
   // versions below do not work:
   // layout_char_with_ws = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   // pragma_identifier_literal = ([all_chars - [layout_char_with_ws + '*']]+ ('*' [all_chars - [layout_char_with_ws + '/']])?)* '*'?;
