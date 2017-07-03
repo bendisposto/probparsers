@@ -183,6 +183,9 @@ public class RulesProject {
 	}
 
 	private void checkFunctionDependencies() {
+		if (this.hasErrors()) {
+			return;
+		}
 		for (AbstractOperation abstractOperation : allOperations.values()) {
 			final Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
 			for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
