@@ -126,7 +126,7 @@ public class RulesProject {
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
 			rulesParseUnit.translate(allOperations);
-			if (!rulesParseUnit.hasError()) {// TODO do we need this check
+			if (!rulesParseUnit.hasError()) {
 				Start start = rulesParseUnit.getStart();
 				nodeIdAssignment.assignIdentifiers(i + 1, start);
 			} else {
@@ -151,6 +151,7 @@ public class RulesProject {
 		if (injector.getGoalDefinition() != null) {
 			mainMachine.addDefinition(injector.getGoalDefinition());
 		}
+		mainMachine.addExternalFunctions();
 		return mainMachine;
 	}
 

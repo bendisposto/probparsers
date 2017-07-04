@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
 import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -188,6 +189,25 @@ public class BMachine implements IModel {
 			toStringType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_TO_STRING"));
 			toStringType.setParameters(createExpressionList("T"));
 			toStringType.setRhs(new ATotalFunctionExpression(createIdentifier("T"), new AStringSetExpression()));
+			externalFunctionsList.add(toStringType);
+		}
+		{
+
+			/* SORT */
+			// SORT(X) == [];
+			// EXTERNAL_FUNCTION_SORT(T) == (POW(T)-->seq(T));
+
+			AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
+			toStringDef.setName(new TIdentifierLiteral("SORT"));
+			toStringDef.setParameters(createExpressionList("X"));
+			toStringDef.setRhs(new AEmptySequenceExpression());
+			externalFunctionsList.add(toStringDef);
+			// EXTERNAL_FUNCTION_TO_STRING(T) == (T --> STRING);
+			AExpressionDefinitionDefinition toStringType = new AExpressionDefinitionDefinition();
+			toStringType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_TO_STRING"));
+			toStringType.setParameters(createExpressionList("T"));
+			toStringType.setRhs(new ATotalFunctionExpression(new APowSubsetExpression(createIdentifier("T")),
+					new ASeqExpression(createIdentifier("T"))));
 			externalFunctionsList.add(toStringType);
 		}
 
