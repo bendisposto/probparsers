@@ -37,12 +37,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
-	private static final String FORCE = "FORCE";
-	private static final String STRING_APPEND = "STRING_APPEND";
-	private static final String CHOOSE = "CHOOSE";
-	private static final String TO_STRING = "TO_STRING";
 
-	private final IDefinitions definitions;
+	private final IDefinitions iDefinitions;
 	private final Start start;
 	private final RulesMachineChecker rulesMachineVisitor;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
@@ -85,7 +81,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public RulesTransformation(Start start, BParser bParser, RulesMachineChecker rulesMachineChecker,
 			Map<String, AbstractOperation> allOperations) {
 		this.start = start;
-		this.definitions = bParser.getDefinitions();
+		this.iDefinitions = bParser.getDefinitions();
 		this.rulesMachineVisitor = rulesMachineChecker;
 		this.allOperations = allOperations;
 
@@ -100,8 +96,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public void runTransformation() throws BCompoundException {
 		start.apply(this);
-		// TODO why and what kind of definitions do we inject here?
-		DefinitionInjector.injectDefinitions(start, definitions);
+		DefinitionInjector.injectDefinitions(start, iDefinitions);
 		MissingPositionsAdder.injectPositions(start);
 		if (!this.errorList.isEmpty()) {
 			List<BException> list = new ArrayList<>();
@@ -364,7 +359,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			ADefinitionSubstitution printSub = new ADefinitionSubstitution(defLiteral, parameters);
 			ifFailSubList.add(printSub);
 			ifFailBody = new ASequenceSubstitution(ifFailSubList);
-			this.addPrintSubDefinition();
+			addPrintSubDefinitionToIdefinitions(iDefinitions);
 		}
 
 		AIfSubstitution ifSub = new AIfSubstitution(ifCondition,
@@ -494,7 +489,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private void translateStringConcatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
 		PExpression temp = null;
-		addExternalFunctionStringAppend();
+		addStringAppendDefinition(iDefinitions);
 		for (int i = parameters.size() - 2; i >= 0; i--) {
 			if (temp == null) {
 				temp = applyExternalFunction(STRING_APPEND, applyExternalFunction(TO_STRING, parameters.get(i)),
@@ -508,7 +503,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
-		final TIdentifierLiteral format = new TIdentifierLiteral("FORMAT_TO_STRING");
+		final TIdentifierLiteral format = new TIdentifierLiteral(FORMAT_TO_STRING);
 		format.setStartPos(node.getName().getStartPos());
 		format.setEndPos(node.getName().getEndPos());
 		PExpression stringValue = parameters.get(0);
@@ -611,7 +606,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = node.getValue();
 		} else {
 			// value = node.getValue();
-			addForceDefinition();
+			addForceDefinition(iDefinitions);
 			value = new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(node.getValue()));
 			value.setStartPos(node.getValue().getStartPos());
 			value.setEndPos(node.getValue().getEndPos());
@@ -839,7 +834,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		varSub2.setIdentifiers(createExpressionList((PExpression) cloneNode(node.getIdentifier())));
 
 		// x := CHOOSE(set);
-		addChooseDefinition();
+		addChooseDefinition(iDefinitions);
 		PExpression chooseCall = new ADefinitionExpression(new TIdentifierLiteral(CHOOSE),
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())));
 		PSubstitution assignX = new AAssignSubstitution(
@@ -867,7 +862,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
-		addForceDefinition();
+		addForceDefinition(iDefinitions);
 		final PSubstitution newNode = createPositinedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
 				node.getWhere(), null, node.getMessage(), node.getErrorType()), node);
 		node.replaceBy(newNode);
@@ -895,7 +890,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			}
 			set.setPredicates(condition);
 		}
-		addToStringDefinition();
+		addToStringDefinition(this.iDefinitions);
 		Integer errorType = null;
 		if (errorTypeNode != null) {
 			errorType = Integer.parseInt(errorTypeNode.getText());
@@ -956,193 +951,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		addForceDefinition();
+		addForceDefinition(iDefinitions);
 		PSubstitution newNode = createPositinedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
 				node.getWhere(), node.getExpect(), node.getMessage(), node.getErrorType()), node);
 		node.replaceBy(newNode);
-	}
-
-	@SuppressWarnings("unused")
-	private void addStringAppendDefinition() {
-		if (definitions.containsDefinition(STRING_APPEND)) {
-			return;
-		}
-
-		// STRING_APPEND(x,y) == "str";
-		// EXTERNAL_FUNCTION_STRING_APPEND == (STRING*STRING) --> STRING;
-		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
-		toStringDef.setName(new TIdentifierLiteral(STRING_APPEND));
-		toStringDef.setParameters(createIdentifierList("x", "y"));
-		toStringDef.setRhs(new AStringExpression(new TStringLiteral("str")));
-		try {
-			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
-		toStringTypeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
-		toStringTypeDef.setRhs(new ATotalFunctionExpression(
-				new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
-				new AStringSetExpression()));
-		try {
-			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	private void addToStringDefinition() {
-		if (definitions.containsDefinition(TO_STRING)) {
-			return;
-		}
-		// TO_STRING(S) == "0";
-		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
-		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
-		toStringDef.setName(new TIdentifierLiteral(TO_STRING));
-		toStringDef.setParameters(createIdentifierList("S"));
-		toStringDef.setRhs(new AStringExpression(new TStringLiteral("0")));
-		try {
-			definitions.addDefinition(toStringDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition toStringTypeDef = new AExpressionDefinitionDefinition();
-		toStringTypeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_TO_STRING"));
-		toStringTypeDef.setParameters(createIdentifierList("X"));
-		toStringTypeDef.setRhs(new ATotalFunctionExpression(createIdentifier("X"), new AStringSetExpression()));
-		try {
-			definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	private void addChooseDefinition() {
-		if (definitions.containsDefinition(CHOOSE)) {
-			return;
-		}
-		// TO_STRING(S) == "0";
-		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
-		AExpressionDefinitionDefinition ChooseDef = new AExpressionDefinitionDefinition();
-		ChooseDef.setName(new TIdentifierLiteral(CHOOSE));
-		ChooseDef.setParameters(createIdentifierList("X"));
-		ChooseDef.setRhs(new AStringExpression(new TStringLiteral("a member of X")));
-		try {
-			definitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
-		chooseDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_CHOOSE"));
-		chooseDefType.setParameters(createIdentifierList("T"));
-		chooseDefType.setRhs(
-				new ATotalFunctionExpression(new APowSubsetExpression(createIdentifier("T")), createIdentifier("T")));
-		try {
-			definitions.addDefinition(chooseDefType, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	private void addExternalFunctionStringAppend() {
-		if (definitions.containsDefinition(STRING_APPEND)) {
-			return;
-		}
-		AExpressionDefinitionDefinition typeDef = new AExpressionDefinitionDefinition();
-		typeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
-		typeDef.setParameters(new ArrayList<PExpression>());
-		// EXTERNAL_FUNCTION_STRING_APPEND == (STRING*STRING) --> STRING;
-		typeDef.setRhs(new ATotalFunctionExpression(
-				new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
-				new AStringSetExpression()));
-		try {
-			definitions.addDefinition(typeDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition();
-		def.setName(new TIdentifierLiteral(STRING_APPEND));
-		def.setParameters(createIdentifierList("a", "b"));
-		def.setRhs(createStringExpression("abc"));
-		try {
-			definitions.addDefinition(def, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-	}
-
-	private void addForceDefinition() {
-		if (definitions.containsDefinition(FORCE)) {
-			return;
-		}
-
-		// EXTERNAL_FUNCTION_FORCE(T) == T --> T;
-		// FORCE(value) == value;
-		// forces evaluation of symbolic set representations
-		// usage FORCE( { x | x:1..100 & x mod 2 = 0 } )
-		AExpressionDefinitionDefinition forceDef = new AExpressionDefinitionDefinition();
-		forceDef.setName(new TIdentifierLiteral(FORCE));
-		String value = "value";
-		forceDef.setParameters(createIdentifierList(value));
-		forceDef.setRhs(createIdentifier(value));
-		try {
-			definitions.addDefinition(forceDef, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
-		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_" + FORCE));
-		forceDefType.setParameters(createIdentifierList("T"));
-		forceDefType.setRhs(new ATotalFunctionExpression(createIdentifier("T"), createIdentifier("T")));
-		try {
-			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	private void addPrintSubDefinition() {
-		final String PRINT = "PRINT";
-		if (definitions.containsDefinition(PRINT)) {
-			return;
-		}
-
-		// PRINT(x) == skip;
-		// EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any
-		// type T */
-		ASubstitutionDefinitionDefinition printDef = new ASubstitutionDefinitionDefinition();
-		printDef.setName(new TDefLiteralSubstitution(PRINT));
-		printDef.setParameters(createIdentifierList("value"));
-		printDef.setRhs(new ASkipSubstitution());
-		try {
-			definitions.addDefinition(printDef, IDefinitions.Type.Substitution);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-
-		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
-		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_SUBSTITUTION_" + PRINT));
-		forceDefType.setParameters(createIdentifierList("T"));
-		forceDefType.setRhs(createIdentifier("T"));
-		try {
-			definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
-		} catch (CheckException | BException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	private List<PExpression> createIdentifierList(String... strings) {
-		ArrayList<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < strings.length; i++) {
-			list.add(createIdentifier(strings[i]));
-		}
-		return list;
 	}
 
 }

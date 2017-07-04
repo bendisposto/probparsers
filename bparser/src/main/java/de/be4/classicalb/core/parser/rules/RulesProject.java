@@ -1,5 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
@@ -23,6 +26,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -121,7 +125,6 @@ public class RulesProject {
 		}
 		extractConfigurationOfMainModel();
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
-		compositionMachine.addExternalFunctions();
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
 		for (int i = 0; i < bModels.size(); i++) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
@@ -138,20 +141,24 @@ public class RulesProject {
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 
 		bModels.add(compositionMachine);
-		BMachine mainMachine = createMainMachine(injector);
-		bModels.add(mainMachine);
+		bModels.add(createMainMachine(injector.getGoalDefinition()));
 	}
 
-	private BMachine createMainMachine(MachineInjector injector) {
+	private BMachine createMainMachine(PDefinition goalDefinition) {
 		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
-		mainMachine.addPreferenceDefinition("SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
-		if (injector.getGoalDefinition() != null) {
-			mainMachine.addDefinition(injector.getGoalDefinition());
+		IDefinitions definitions = mainMachine.getDefinitions();
+		addToStringDefinition(definitions);
+		addSortDefinition(definitions);
+		addStringFormatDefinition(definitions);
+		addChooseDefinition(definitions);
+		if (goalDefinition != null) {
+			addDefinition(definitions, goalDefinition);
 		}
-		mainMachine.addExternalFunctions();
+		addPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		mainMachine.injectAllDefinition();
 		return mainMachine;
 	}
 
