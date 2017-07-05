@@ -1,21 +1,5 @@
 package de.prob.cliparser;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
@@ -36,6 +20,18 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.PrologTermStringOutput;
 import de.prob.prolog.term.PrologTerm;
+import frege.language.CSPM.TranslateToProlog;
+import frege.main.FregeInterface;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CliBParser {
 
@@ -269,16 +265,43 @@ public class CliBParser {
 	private static void handleFrege(BufferedReader in) {
 		try {
 			String content = in.readLine();
-			Files.write(Paths.get("/tmp/prob"), Collections.singletonList(content));
+			String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(content));
+//			String listOfTerms = "[" + prologCode.replaceAll("\\n", ",") + "]";
+			int numberOfFacts = numberOfLines(prologCode);
+//			print("frege_lines(" + numberOfFacts + ").");
+			String listOfFacts = getListOfFacts(prologCode);
+			print("frege_facts(" + listOfFacts + ").");
+			Files.write(Paths.get("/tmp/prob"), Collections.singletonList(listOfFacts));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		print("Hello World!");
-		System.err.println("HI\n");
+//		print("Hello World!");
+//		System.err.println("HI\n");
+//
+//		PrologTermStringOutput strOutput = new PrologTermStringOutput();
+//		strOutput.openTerm("foo").closeTerm().fullstop();
+//		print(strOutput.toString());
+	}
 
-		PrologTermStringOutput strOutput = new PrologTermStringOutput();
-		strOutput.openTerm("foo").closeTerm().fullstop();
-		print(strOutput.toString());
+	private static String getListOfFacts(String prologCode) {
+		List<String> facts = new LinkedList<>();
+		String[] lines = prologCode.split("\n");
+		for(String line: lines) {
+			if(!line.startsWith(":")) {
+				facts.add(line.substring(0, line.length() - 1));
+			}
+		}
+		return "["+String.join(",", facts)+"]";
+	}
+
+	private static int numberOfLines(String prologCode) {
+		int newlines = 0;
+		for(char c: prologCode.toCharArray()) {
+			if(c == '\n') {
+				newlines++;
+			}
+		}
+		return newlines;
 	}
 
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)

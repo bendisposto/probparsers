@@ -8,6 +8,12 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+repositories {
+ flatDir {
+  dirs 'libs'
+ }
+}
+
 dependencies {
  compile project(path: ":bparser", configuration: "archives") 
  compile project(path: ":prologlib", configuration: "archives") 
@@ -15,6 +21,7 @@ dependencies {
  compile project(path: ":ltlparser", configuration: "archives") 
  compile project(path: ":answerparser", configuration: "archives") 
  compile project(path: ":unicode", configuration: "archives")
+ compile name: 'cspmf-0.1.0.0'
 }
 
 compileJava {
