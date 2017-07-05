@@ -248,7 +248,7 @@ public class CliBParser {
 				parseTemporalFormula(in, parser2);
 				break;
 
-			case frege:
+			case cspfrege_prologout:
 				handleFrege(in);
 			case halt:
 				socket.close();
@@ -264,23 +264,16 @@ public class CliBParser {
 
 	private static void handleFrege(BufferedReader in) {
 		try {
-			String content = in.readLine();
-			String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(content));
-//			String listOfTerms = "[" + prologCode.replaceAll("\\n", ",") + "]";
-			int numberOfFacts = numberOfLines(prologCode);
-//			print("frege_lines(" + numberOfFacts + ").");
+			String inputCspFileName = in.readLine();
+			String outputPlFileName = in.readLine();
+			FregeInterface.evaluateIOUnitFunction(TranslateToProlog.translateToProlog(inputCspFileName, outputPlFileName));
+			String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
 			String listOfFacts = getListOfFacts(prologCode);
 			print("frege_facts(" + listOfFacts + ").");
 			Files.write(Paths.get("/tmp/prob"), Collections.singletonList(listOfFacts));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		print("Hello World!");
-//		System.err.println("HI\n");
-//
-//		PrologTermStringOutput strOutput = new PrologTermStringOutput();
-//		strOutput.openTerm("foo").closeTerm().fullstop();
-//		print(strOutput.toString());
 	}
 
 	private static String getListOfFacts(String prologCode) {
