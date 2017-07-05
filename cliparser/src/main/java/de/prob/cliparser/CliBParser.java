@@ -21,6 +21,7 @@ import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.PrologTermStringOutput;
 import de.prob.prolog.term.PrologTerm;
 import frege.language.CSPM.TranslateToProlog;
+import frege.main.ExecCommand;
 import frege.main.FregeInterface;
 
 import java.io.*;
@@ -250,6 +251,10 @@ public class CliBParser {
 
 			case cspfrege_prologout:
 				handleFrege(in);
+				break;
+			case cspfrege_addunicode:
+				addUnicode(in);
+				break;
 			case halt:
 				socket.close();
 				serverSocket.close();
@@ -262,6 +267,17 @@ public class CliBParser {
 		}
 	}
 
+	private static void addUnicode(BufferedReader in) {
+		try {
+			String inputCspFileName = in.readLine();
+			String outputCspFileName = in.readLine();
+			FregeInterface.evaluateIOUnitFunction(ExecCommand.addUnicode(inputCspFileName, outputCspFileName));
+			print("frege_facts(ok).\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static void handleFrege(BufferedReader in) {
 		try {
 			String inputCspFileName = in.readLine();
@@ -269,8 +285,7 @@ public class CliBParser {
 			FregeInterface.evaluateIOUnitFunction(TranslateToProlog.translateToProlog(inputCspFileName, outputPlFileName));
 			String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
 			String listOfFacts = getListOfFacts(prologCode);
-			print("frege_facts(" + listOfFacts + ").");
-			Files.write(Paths.get("/tmp/prob"), Collections.singletonList(listOfFacts));
+			print("frege_facts(" + listOfFacts + ").\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
