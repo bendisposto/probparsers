@@ -244,13 +244,16 @@ public class CliBParser {
 				break;
 
 			case cspfrege_prologout:
-				handleFrege(in);
+				cspToProlog(in);
 				break;
 			case cspfrege_addunicode:
 				addUnicode(in);
 				break;
 			case cspfrege_removeunicode:
 				removeUnicode(in);
+				break;
+			case cspfrege_declaration:
+				translateCspDeclarationToProlog(in);
 				break;
 			case halt:
 				socket.close();

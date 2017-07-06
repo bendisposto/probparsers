@@ -3,6 +3,7 @@ package de.prob.cliparser;
 import frege.language.CSPM.TranslateToProlog;
 import frege.main.ExecCommand;
 import frege.main.FregeInterface;
+import frege.prelude.PreludeBase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,13 +39,25 @@ class FregeCspParser {
         }
     }
 
-    static void handleFrege(BufferedReader in) {
+    static void cspToProlog(BufferedReader in) {
         try {
             String inputCspFileName = in.readLine();
             String outputPlFileName = in.readLine();
             FregeInterface.evaluateIOUnitFunction(TranslateToProlog.translateToProlog(inputCspFileName, outputPlFileName));
             String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
             String listOfFacts = getListOfFacts(prologCode);
+            print("frege_facts(" + listOfFacts + ").\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void translateCspDeclarationToProlog(BufferedReader in) {
+        try {
+            String cspDeclaration = in.readLine();
+            String inputCspFileName = in.readLine();
+            String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm(FregeInterface.just(inputCspFileName), cspDeclaration));
+            String listOfFacts = getListOfFacts(prologDeclaration);
             print("frege_facts(" + listOfFacts + ").\n");
         } catch (IOException e) {
             e.printStackTrace();
