@@ -20,19 +20,13 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.PrologTermStringOutput;
 import de.prob.prolog.term.PrologTerm;
-import frege.language.CSPM.TranslateToProlog;
-import frege.main.ExecCommand;
-import frege.main.FregeInterface;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+
+import static de.prob.cliparser.FregeCspParser.*;
 
 public class CliBParser {
 
@@ -270,62 +264,6 @@ public class CliBParser {
 		}
 	}
 
-	private static void addUnicode(BufferedReader in) {
-		try {
-			String inputCspFileName = in.readLine();
-			String outputCspFileName = in.readLine();
-			FregeInterface.evaluateIOUnitFunction(ExecCommand.addUnicode(inputCspFileName, outputCspFileName));
-			print("frege_facts(ok).\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void removeUnicode(BufferedReader in) {
-		try {
-			String inputCspFileName = in.readLine();
-			String outputCspFileName = in.readLine();
-			FregeInterface.evaluateIOUnitFunction(ExecCommand.removeUnicode(inputCspFileName, outputCspFileName));
-			print("frege_facts(ok).\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void handleFrege(BufferedReader in) {
-		try {
-			String inputCspFileName = in.readLine();
-			String outputPlFileName = in.readLine();
-			FregeInterface.evaluateIOUnitFunction(TranslateToProlog.translateToProlog(inputCspFileName, outputPlFileName));
-			String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
-			String listOfFacts = getListOfFacts(prologCode);
-			print("frege_facts(" + listOfFacts + ").\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static String getListOfFacts(String prologCode) {
-		List<String> facts = new LinkedList<>();
-		String[] lines = prologCode.split("\n");
-		for(String line: lines) {
-			if(!line.startsWith(":")) {
-				facts.add(line.substring(0, line.length() - 1));
-			}
-		}
-		return "["+String.join(",", facts)+"]";
-	}
-
-	private static int numberOfLines(String prologCode) {
-		int newlines = 0;
-		for(char c: prologCode.toCharArray()) {
-			if(c == '\n') {
-				newlines++;
-			}
-		}
-		return newlines;
-	}
-
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
 			throws IOException {
 		String theFormula;
@@ -430,7 +368,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void print(String output) {
+	static void print(String output) {
 		try {
 			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
 			out.print(output);
