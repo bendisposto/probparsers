@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -44,7 +43,6 @@ public class BMachine implements IModel {
 	private final String machineName;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final Start start;
-	private final IDefinitions definitions;
 	private AAbstractMachineParseUnit parseUnit;
 
 	public BMachine(String name) {
@@ -55,7 +53,6 @@ public class BMachine implements IModel {
 				new ArrayList<PMachineClause>());
 		this.start = new Start(parseUnit, new EOF());
 		this.machineName = name;
-		this.definitions = new Definitions();
 	}
 
 	public Start getStart() {
@@ -129,12 +126,9 @@ public class BMachine implements IModel {
 		return this.machineName;
 	}
 
-	public IDefinitions getDefinitions() {
-		return this.definitions;
-	}
-
-	public void injectAllDefinition() {
-		DefinitionInjector.injectDefinitions(start, this.definitions);
+	public void replaceDefinition(IDefinitions definitions) {
+		// Note, this replaces all existing definitions
+		DefinitionInjector.injectDefinitions(start, definitions);
 	}
 
 	public void addPropertiesPredicates(Map<String, String> constantStringValues) {

@@ -372,7 +372,7 @@ public final class ASTBuilder {
 		}
 	}
 
-	public static void addStringFormatDefinition(IDefinitions iDefinitions) {
+	public static void addFormatToStringDefinition(IDefinitions iDefinitions) {
 		if (iDefinitions.containsDefinition(FORMAT_TO_STRING)) {
 			return;
 		}

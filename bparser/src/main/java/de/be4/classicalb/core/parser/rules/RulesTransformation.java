@@ -503,6 +503,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
+		addFormatToStringDefinition(iDefinitions);
 		final TIdentifierLiteral format = new TIdentifierLiteral(FORMAT_TO_STRING);
 		format.setStartPos(node.getName().getStartPos());
 		format.setEndPos(node.getName().getEndPos());

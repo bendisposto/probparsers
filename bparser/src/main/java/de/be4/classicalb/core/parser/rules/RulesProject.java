@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -149,16 +150,16 @@ public class RulesProject {
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
-		IDefinitions definitions = mainMachine.getDefinitions();
+		IDefinitions definitions = new Definitions();
 		addToStringDefinition(definitions);
 		addSortDefinition(definitions);
-		addStringFormatDefinition(definitions);
+		addFormatToStringDefinition(definitions);
 		addChooseDefinition(definitions);
 		if (goalDefinition != null) {
 			addDefinition(definitions, goalDefinition);
 		}
 		addPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
-		mainMachine.injectAllDefinition();
+		mainMachine.replaceDefinition(definitions);
 		return mainMachine;
 	}
 
