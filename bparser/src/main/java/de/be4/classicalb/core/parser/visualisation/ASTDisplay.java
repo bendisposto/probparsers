@@ -7,10 +7,11 @@ package de.be4.classicalb.core.parser.visualisation;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -27,7 +28,7 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class ASTDisplay extends DepthFirstAdapter {
 
-	private final Stack<DefaultMutableTreeNode> parents = new Stack<DefaultMutableTreeNode>();
+	private final Deque<DefaultMutableTreeNode> parents = new ArrayDeque<>();
 
 	@Override
 	public void outStart(final Start node) {
@@ -80,6 +81,7 @@ public class ASTDisplay extends DepthFirstAdapter {
 
 	@Override
 	public void caseEOF(final EOF node) {
+		// do nothing
 	}
 
 	/*

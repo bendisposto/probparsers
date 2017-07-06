@@ -1,4 +1,4 @@
-def global_version = '2.9.4'
+def global_version = '2.9.5'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
@@ -71,18 +71,23 @@ dependencies {
  task deploy(dependsOn: [build])
 
 
- cleanEclipseJdt << {
-	file(".settings/org.eclipse.jdt.ui.prefs").delete()
+ cleanEclipseJdt  {
+   doLast {
+	   file(".settings/org.eclipse.jdt.ui.prefs").delete()
+   }
  }
 
  eclipseJdt {
 	inputFile = file("scripts/org.eclipse.jdt.core.prefs")
  }
 
- eclipseJdt << {
-	copy {  from 'scripts'
-		into '.settings'
-		include 'org.eclipse.jdt.ui.prefs'
+ eclipseJdt  {
+    doLast {
+    	copy {
+        from 'scripts'
+	  	  into '.settings'
+		    include 'org.eclipse.jdt.ui.prefs'
+      }
     }
  }
 

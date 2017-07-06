@@ -95,6 +95,7 @@ public class MachineInjector extends DepthFirstAdapter {
 		definitionNames.add(node.getName().getText());
 	}
 
+	@Override
 	public void inAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
 		definitionNames.add(node.getName().getText());
 	}
@@ -126,6 +127,7 @@ public class MachineInjector extends DepthFirstAdapter {
 
 	class ClauseFinder extends DepthFirstAdapter {
 
+		@Override
 		public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 			node.setMachineClauses(new LinkedList<PMachineClause>());
 		}
@@ -244,9 +246,9 @@ public class MachineInjector extends DepthFirstAdapter {
 			for (PDefinition def : node.getDefinitions()) {
 				def.apply(this);
 				// using the first GOAL definition
-				if (def instanceof APredicateDefinitionDefinition & goalDefinition == null) {
+				if (def instanceof APredicateDefinitionDefinition && goalDefinition == null) {
 					TDefLiteralPredicate name = ((APredicateDefinitionDefinition) def).getName();
-					if (name.getText().equals("GOAL")) {
+					if ("GOAL".equals(name.getText())) {
 						goalDefinition = def;
 					}
 

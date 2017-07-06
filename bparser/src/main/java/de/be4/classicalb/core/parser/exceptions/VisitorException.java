@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.exceptions;
 
-
 @SuppressWarnings("serial")
 public class VisitorException extends RuntimeException {
 
@@ -12,5 +11,10 @@ public class VisitorException extends RuntimeException {
 
 	public Exception getException() {
 		return this.exception;
+	}
+
+	@Override
+	public String toString() {
+		return this.exception.toString();
 	}
 }

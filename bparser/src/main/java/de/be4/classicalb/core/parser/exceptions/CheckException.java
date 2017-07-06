@@ -15,6 +15,12 @@ public class CheckException extends Exception {
 		this(message, new Node[] { node });
 	}
 
+	public CheckException(String message, Node aStringExpr, Exception e) {
+		super(message, e);
+		this.nodes = new Node[] { aStringExpr };
+
+	}
+
 	/**
 	 * Returns all {@link Node}s that are relevant for this exception. This can
 	 * be a list of all nodes which caused this same {@link CheckException}. In

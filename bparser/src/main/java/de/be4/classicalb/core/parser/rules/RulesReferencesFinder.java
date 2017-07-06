@@ -36,7 +36,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	private final File mainFile;
 	private final Node start;
-	private final List<String> pathList = new ArrayList<String>();
+	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
 	private String packageName;
 	private File rootDirectory;
@@ -51,7 +51,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	public void findReferencedMachines() throws BCompoundException {
 		this.start.apply(this);
-		if (errorList.size() > 0) {
+		if (!errorList.isEmpty()) {
 			final List<BException> bExceptionList = new ArrayList<>();
 			for (CheckException checkException : errorList) {
 				final BException bException = new BException(mainFile.getAbsolutePath(), checkException);
@@ -91,7 +91,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 	@Override
 	public void caseAPackageParseUnit(APackageParseUnit node) {
 		determineRootDirectory(node.getPackage(), node);
-		List<PImportPackage> copy = new ArrayList<PImportPackage>(node.getImports());
+		List<PImportPackage> copy = new ArrayList<>(node.getImports());
 		for (PImportPackage e : copy) {
 			e.apply(this);
 		}
@@ -106,7 +106,8 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 		final File pathFile = getFileStartingAtRootDirectory(packageArray);
 		final String path = pathFile.getAbsolutePath();
 		if (!pathFile.exists()) {
-			errorList.add(new CheckException(String.format("Imported package does not exist: %s", path), node.getPackage()));
+			errorList.add(
+					new CheckException(String.format("Imported package does not exist: %s", path), node.getPackage()));
 			return;
 		}
 		if (this.pathList.contains(path)) {
@@ -129,7 +130,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 		try {
 			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
-			errorList.add(new CheckException(e.getMessage(), (Node) null));
+			errorList.add(new CheckException(e.getMessage(), (Node) null,e));
 			return;
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
@@ -237,9 +238,8 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 			throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				final File file = new FileSearchPathProvider(parentMachineDirectory.getPath(), name + suffix,
+				return new FileSearchPathProvider(parentMachineDirectory.getPath(), name + suffix,
 						this.pathList).resolve();
-				return file;
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -255,26 +255,32 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	@Override
 	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
+		//skip
 	}
 
 	@Override
 	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
+		//skip
 	}
 
 	@Override
 	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
+		//skip
 	}
 
 	@Override
 	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+		//skip
 	}
 
 	@Override
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
+		//skip
 	}
 
 	@Override
 	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
+		//skip
 	}
 
 }

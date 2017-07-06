@@ -1,0 +1,22 @@
+RULES_MACHINE RulesMachineConfigurationTest
+DEFINITIONS
+GOAL ==
+  SUCCEEDED_RULE(rule1)
+  & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)
+  & GET_RULE_COUNTEREXAMPLES(rule1) = {}
+  & FAILED_RULE(rule2)
+  & FAILED_RULE_ERROR_TYPE(rule2,1)
+OPERATIONS
+
+RULE rule1
+BODY
+  skip
+END
+;
+RULE rule2
+ERROR_TYPES 2
+BODY
+  RULE_FAIL(1, "error1");
+  RULE_FAIL(2, "error1")
+END
+END

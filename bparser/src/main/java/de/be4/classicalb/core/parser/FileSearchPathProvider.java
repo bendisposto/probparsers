@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
@@ -69,10 +70,6 @@ public class FileSearchPathProvider implements Iterable<File> {
 		return fileName;
 	}
 
-	private String get(int idx) {
-		return this.searchPath.get(idx);
-	}
-
 	public File resolve() throws FileNotFoundException {
 		for (File f : this) {
 			if (f.exists() && f.isFile()) {
@@ -99,10 +96,18 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 		@Override
 		public File next() {
-			String base = this.provider.get(this.idx);
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+
+			String base = get(this.idx);
 			this.idx += 1;
 			Path path = FileSystems.getDefault().getPath(base, this.provider.getFilename());
 			return new java.io.File(path.toString());
+		}
+
+		private String get(int idx) {
+			return FileSearchPathProvider.this.searchPath.get(idx);
 		}
 
 		@Override

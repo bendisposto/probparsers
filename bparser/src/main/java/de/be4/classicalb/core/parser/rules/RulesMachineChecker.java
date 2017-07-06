@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -116,7 +117,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public void runChecks() throws BCompoundException {
 		start.apply(this);
-		if (errorList.size() > 0) {
+		if (!errorList.isEmpty()) {
 			final List<BException> bExceptionList = new ArrayList<>();
 			final String filePath = file == null ? "UnknownFile" : file.getAbsolutePath();
 			for (CheckException checkException : errorList) {
@@ -163,11 +164,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.functionMap.get(funcOp);
 	}
 
-	public HashMap<String, HashSet<Node>> getUnknownIdentifier() {
+	public Map<String, HashSet<Node>> getUnknownIdentifier() {
 		HashMap<String, HashSet<Node>> result = new HashMap<>();
-		for (String name : readIdentifier.keySet()) {
+		for (Entry<String, HashSet<Node>> entry : readIdentifier.entrySet()) {
+			String name = entry.getKey();
+			HashSet<Node> nodes = entry.getValue();
 			if (!this.knownIdentifier.getKnownIdentifier().contains(name) && !this.definitions.contains(name)) {
-				result.put(name, readIdentifier.get(name));
+				result.put(name, nodes);
 			}
 		}
 		return result;
@@ -179,7 +182,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		if (node.getParameters().size() > 0) {
+		if (!node.getParameters().isEmpty()) {
 			errorList.add(new CheckException("A RULES_MACHINE must not have any machine parameters", node));
 		}
 		LinkedList<TIdentifierLiteral> nameList = node.getName();
@@ -192,6 +195,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAReferencesMachineClause(AReferencesMachineClause node) {
+		// do nothing
 	}
 
 	@Override
@@ -218,188 +222,214 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
-		{
-			List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
-			this.knownIdentifier.addTIdentifier(copy.get(0));
-		}
+		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
+		this.knownIdentifier.addTIdentifier(copy.get(0));
 		this.knownIdentifier.addIdentifier(new ArrayList<PExpression>(node.getElements()));
 	}
 
-	private void visitOperationAttributes(final LinkedList<POperationAttribute> attributes) {
-		class OccurredAttributes {
-			final HashMap<String, POperationAttribute> map = new HashMap<>();
+	class OccurredAttributes {
+		final HashMap<String, POperationAttribute> map = new HashMap<>();
 
-			public void add(String attrName, POperationAttribute node) {
-				if (map.containsKey(attrName)) {
-					errorList
-							.add(new CheckException(String.format("%s clause is used more than once in operation '%s'.",
-									attrName, currentOperation.getName()), node));
-				}
-				map.put(attrName, node);
+		public void add(String attrName, POperationAttribute node) {
+			if (map.containsKey(attrName)) {
+				errorList.add(new CheckException(String.format("%s clause is used more than once in operation '%s'.",
+						attrName, currentOperation.getName()), node));
 			}
+			map.put(attrName, node);
 		}
+	}
+
+	private void visitOperationAttributes(final LinkedList<POperationAttribute> attributes) {
 		OccurredAttributes occurredAttributes = new OccurredAttributes();
 		// set operation attributes
 		for (POperationAttribute pOperationAttribute : attributes) {
 			if (pOperationAttribute instanceof APredicateAttributeOperationAttribute) {
-				APredicateAttributeOperationAttribute attr = (APredicateAttributeOperationAttribute) pOperationAttribute;
-				PPredicate predicate = attr.getPredicate();
-				final String attrName = attr.getName().getText();
-				occurredAttributes.add(attrName, pOperationAttribute);
-				switch (attrName) {
-				case RulesGrammar.ACTIVATION: {
-					if (currentOperation instanceof FunctionOperation) {
-						errorList.add(new CheckException("ACTIVATION is not a valid attribute of a FUNCTION operation.",
-								pOperationAttribute));
-					} else {
-						currentOperation.setActivationPredicate(predicate);
-					}
-					break;
-				}
-				case RulesGrammar.PRECONDITION: {
-					if (currentOperation instanceof FunctionOperation) {
-						FunctionOperation func = (FunctionOperation) currentOperation;
-						func.setPreconditionPredicate(predicate);
-					} else {
-						errorList.add(new CheckException(
-								"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation",
-								pOperationAttribute));
-					}
-					break;
-				}
-				case RulesGrammar.POSTCONDITION: {
-					if (currentOperation instanceof RuleOperation) {
-						errorList.add(new CheckException("POSTCONDITION attribute is not allowed for a RULE operation",
-								pOperationAttribute));
-					} else {
-						currentOperation.setPostcondition(predicate);
-					}
-					break;
-				}
-				default:
-					throw new AssertionError("Unexpected operation attribute: " + attrName);
-				}
-				predicate.apply(this);
+				checkOperationPredicateAttribute(occurredAttributes, pOperationAttribute);
 			} else {
-				AOperationAttribute attribute = (AOperationAttribute) pOperationAttribute;
-				LinkedList<PExpression> arguments = attribute.getArguments();
-				String name = attribute.getName().getText();
-				occurredAttributes.add(name, pOperationAttribute);
-				switch (name) {
-				case RulesGrammar.DEPENDS_ON_RULE: {
-					List<AIdentifierExpression> list = new ArrayList<>();
-					for (PExpression pExpression : arguments) {
-						if (pExpression instanceof AIdentifierExpression) {
-							list.add((AIdentifierExpression) pExpression);
-						} else {
-							errorList.add(new CheckException("Expected a list of identifiers after DEPENDS_ON_RULE.",
-									pOperationAttribute));
-						}
-					}
-					currentOperation.addAllRuleDependencies(list);
-					break;
-				}
-				case RulesGrammar.DEPENDS_ON_COMPUTATION: {
-					List<AIdentifierExpression> list = new ArrayList<>();
-					for (PExpression pExpression : arguments) {
-						if (pExpression instanceof AIdentifierExpression) {
-							list.add((AIdentifierExpression) pExpression);
-						} else {
-							errorList.add(
-									new CheckException("Expected a list of identifiers after DEPENDS_ON_COMPUTATION.",
-											pOperationAttribute));
-						}
-					}
-					currentOperation.addAllComputationDependencies(list);
-					break;
-				}
-				case RulesGrammar.RULEID: {
-					{
-						if (currentOperation instanceof RuleOperation) {
-							final RuleOperation rule = (RuleOperation) currentOperation;
-							if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
-								rule.setRuleId((AIdentifierExpression) arguments.get(0));
-							} else {
-								errorList.add(new CheckException("Expected exactly one identifier behind RULEID",
-										pOperationAttribute));
-							}
-						} else {
-							errorList.add(new CheckException(
-									"RULEID is not an attribute of a FUNCTION or Computation operation",
-									pOperationAttribute));
-						}
-					}
-					break;
-				}
-				case RulesGrammar.ERROR_TYPES: {
-					if (currentOperation instanceof RuleOperation) {
-						final RuleOperation rule = (RuleOperation) currentOperation;
-						if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
-							AIntegerExpression intExpr = (AIntegerExpression) arguments.get(0);
-							rule.setErrrorTypes(intExpr);
-						} else {
-							errorList.add(new CheckException("Expected exactly one integer after ERROR_TYPES.",
-									pOperationAttribute));
-						}
-					} else {
-						errorList.add(new CheckException(
-								"ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
-								pOperationAttribute));
-					}
-					break;
-				}
-				case RulesGrammar.CLASSIFICATION: {
-					if (currentOperation instanceof RuleOperation) {
-						final RuleOperation rule = (RuleOperation) currentOperation;
-						if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
-							AIdentifierExpression identifier = (AIdentifierExpression) arguments.get(0);
-							String identifierString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
-							rule.setClassification(identifierString);
-						} else {
-							errorList.add(new CheckException("Expected exactly one identifier after CLASSIFICATION.",
-									pOperationAttribute));
-						}
-					} else {
-						errorList.add(new CheckException(
-								"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.",
-								pOperationAttribute));
-					}
-					break;
-				}
-				case RulesGrammar.TAGS: {
-					final List<String> tags = new ArrayList<>();
-					for (PExpression pExpression : arguments) {
-						if (pExpression instanceof AIdentifierExpression) {
-							final AIdentifierExpression ident = (AIdentifierExpression) pExpression;
-							final String identifierAsString = Utils.getTIdentifierListAsString(ident.getIdentifier());
-							tags.add(identifierAsString);
-						} else if (pExpression instanceof AStringExpression) {
-							final AStringExpression stringExpr = (AStringExpression) pExpression;
-							tags.add(stringExpr.getContent().getText());
-						} else {
-							errorList.add(new CheckException("Expected identifier or string after the TAGS attribute.",
-									pOperationAttribute));
-						}
-					}
-					currentOperation.addTags(tags);
-					break;
-				}
-				case RulesGrammar.REPLACES: {
-					if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
-						errorList.add(new CheckException("Expected exactly one identifier after REPLACES.",
-								pOperationAttribute));
-						break;
-					}
-					AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
-					currentOperation.addReplacesIdentifier(idExpr);
-					break;
-				}
-
-				default:
-					throw new AssertionError("Unexpected operation attribute: " + name);
-				}
+				checkOperationExpressionAttribute(occurredAttributes, pOperationAttribute);
 			}
 		}
+	}
+
+	private void checkOperationExpressionAttribute(OccurredAttributes occurredAttributes,
+			POperationAttribute pOperationAttribute) throws AssertionError {
+		AOperationAttribute attribute = (AOperationAttribute) pOperationAttribute;
+		LinkedList<PExpression> arguments = attribute.getArguments();
+		String name = attribute.getName().getText();
+		occurredAttributes.add(name, pOperationAttribute);
+		switch (name) {
+		case RulesGrammar.DEPENDS_ON_RULE:
+			checkDependsOnRuleAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.DEPENDS_ON_COMPUTATION:
+			checkDependsOnComputationAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.RULEID:
+			checkRuleIdAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.ERROR_TYPES:
+			checkErrorTypesAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.CLASSIFICATION:
+			checkClassificationAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.TAGS:
+			checkTagsAttribute(pOperationAttribute, arguments);
+			return;
+		case RulesGrammar.REPLACES:
+			checkReplacesAttribute(pOperationAttribute, arguments);
+			return;
+		default:
+			throw new AssertionError("Unexpected operation attribute: " + name);
+		}
+	}
+
+	private void checkReplacesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
+			errorList.add(new CheckException("Expected exactly one identifier after REPLACES.", pOperationAttribute));
+			return;
+		}
+		final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
+		currentOperation.addReplacesIdentifier(idExpr);
+		return;
+	}
+
+	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+		final List<String> tags = new ArrayList<>();
+		for (PExpression pExpression : arguments) {
+			if (pExpression instanceof AIdentifierExpression) {
+				final AIdentifierExpression ident = (AIdentifierExpression) pExpression;
+				final String identifierAsString = Utils.getTIdentifierListAsString(ident.getIdentifier());
+				tags.add(identifierAsString);
+			} else if (pExpression instanceof AStringExpression) {
+				final AStringExpression stringExpr = (AStringExpression) pExpression;
+				tags.add(stringExpr.getContent().getText());
+			} else {
+				errorList.add(new CheckException("Expected identifier or string after the TAGS attribute.",
+						pOperationAttribute));
+			}
+		}
+		currentOperation.addTags(tags);
+		return;
+	}
+
+	private void checkClassificationAttribute(POperationAttribute pOperationAttribute,
+			LinkedList<PExpression> arguments) {
+		if (currentOperation instanceof RuleOperation) {
+			final RuleOperation rule = (RuleOperation) currentOperation;
+			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
+				AIdentifierExpression identifier = (AIdentifierExpression) arguments.get(0);
+				String identifierString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
+				rule.setClassification(identifierString);
+			} else {
+				errorList.add(new CheckException("Expected exactly one identifier after CLASSIFICATION.",
+						pOperationAttribute));
+			}
+		} else {
+			errorList.add(new CheckException(
+					"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.", pOperationAttribute));
+		}
+		return;
+	}
+
+	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+		if (currentOperation instanceof RuleOperation) {
+			final RuleOperation rule = (RuleOperation) currentOperation;
+			if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
+				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(0);
+				rule.setErrrorTypes(intExpr);
+			} else {
+				errorList.add(
+						new CheckException("Expected exactly one integer after ERROR_TYPES.", pOperationAttribute));
+			}
+		} else {
+			errorList.add(new CheckException("ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
+					pOperationAttribute));
+		}
+		return;
+	}
+
+	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+		if (currentOperation instanceof RuleOperation) {
+			final RuleOperation rule = (RuleOperation) currentOperation;
+			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
+				rule.setRuleId((AIdentifierExpression) arguments.get(0));
+			} else {
+				errorList.add(new CheckException("Expected exactly one identifier behind RULEID", pOperationAttribute));
+			}
+		} else {
+			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation",
+					pOperationAttribute));
+		}
+		return;
+	}
+
+	private void checkDependsOnComputationAttribute(POperationAttribute pOperationAttribute,
+			LinkedList<PExpression> arguments) {
+		List<AIdentifierExpression> list = new ArrayList<>();
+		for (PExpression pExpression : arguments) {
+			if (pExpression instanceof AIdentifierExpression) {
+				list.add((AIdentifierExpression) pExpression);
+			} else {
+				errorList.add(new CheckException("Expected a list of identifiers after DEPENDS_ON_COMPUTATION.",
+						pOperationAttribute));
+			}
+		}
+		currentOperation.addAllComputationDependencies(list);
+		return;
+	}
+
+	private void checkDependsOnRuleAttribute(POperationAttribute pOperationAttribute,
+			LinkedList<PExpression> arguments) {
+		final List<AIdentifierExpression> list = new ArrayList<>();
+		for (final PExpression pExpression : arguments) {
+			if (pExpression instanceof AIdentifierExpression) {
+				list.add((AIdentifierExpression) pExpression);
+			} else {
+				errorList.add(new CheckException("Expected a list of identifiers after DEPENDS_ON_RULE.",
+						pOperationAttribute));
+			}
+		}
+		currentOperation.addAllRuleDependencies(list);
+		return;
+	}
+
+	private void checkOperationPredicateAttribute(OccurredAttributes occurredAttributes,
+			POperationAttribute pOperationAttribute) throws AssertionError {
+		APredicateAttributeOperationAttribute attr = (APredicateAttributeOperationAttribute) pOperationAttribute;
+		PPredicate predicate = attr.getPredicate();
+		final String attrName = attr.getName().getText();
+		occurredAttributes.add(attrName, pOperationAttribute);
+		switch (attrName) {
+		case RulesGrammar.ACTIVATION:
+			if (currentOperation instanceof FunctionOperation) {
+				errorList.add(new CheckException("ACTIVATION is not a valid attribute of a FUNCTION operation.",
+						pOperationAttribute));
+			} else {
+				currentOperation.setActivationPredicate(predicate);
+			}
+			break;
+		case RulesGrammar.PRECONDITION:
+			if (currentOperation instanceof FunctionOperation) {
+				FunctionOperation func = (FunctionOperation) currentOperation;
+				func.setPreconditionPredicate(predicate);
+			} else {
+				errorList.add(new CheckException(
+						"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation", pOperationAttribute));
+			}
+			break;
+		case RulesGrammar.POSTCONDITION:
+			if (currentOperation instanceof RuleOperation) {
+				errorList.add(new CheckException("POSTCONDITION attribute is not allowed for a RULE operation",
+						pOperationAttribute));
+			} else {
+				currentOperation.setPostcondition(predicate);
+			}
+			break;
+		default:
+			throw new AssertionError("Unexpected operation attribute: " + attrName);
+		}
+		predicate.apply(this);
 	}
 
 	private boolean containsRule(String name) {
@@ -482,47 +512,60 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.removeScope();
 	}
 
+	@Override
 	public void caseAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
 		final LinkedList<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
-		case RulesGrammar.STRING_FORMAT: {
-			PExpression stringValue = parameters.get(0);
-			if (stringValue instanceof AStringExpression) {
-				AStringExpression string = (AStringExpression) stringValue;
-				String content = string.getContent().getText();
-				int count = (content.length() - content.replace("~w", "").length()) / 2;
-				if (count != parameters.size() - 1) {
-					this.errorList.add(new CheckException(
-							"The number of arguments (" + (parameters.size() - 1)
-									+ ") does not match the number of placeholders (" + count + ") in the string.",
-							node));
-				}
-			}
-			LinkedList<PExpression> identifiers = node.getIdentifiers();
-			for (PExpression pExpression : identifiers) {
-				pExpression.apply(this);
-			}
+		case RulesGrammar.STRING_FORMAT:
+			checkStringFormatOperator(node, parameters);
 			return;
-		}
-		case RulesGrammar.GET_RULE_COUNTEREXAMPLES: {
-			// the grammar ensures at least one argument
-			if (parameters.size() > 2) {
-				this.errorList
-						.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
-			}
-			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
+		case RulesGrammar.STRING_CONCAT:
+			if (parameters.size() < 2) {
 				this.errorList.add(new CheckException(
-						"The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.", node));
-				return;
+						"Invalid number of arguments. Expected two more arguments of operator CONCAT_STRINGS.", node));
 			}
-			this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
 			return;
-		}
+		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
+			checkGetTuleCounterExamplesOperator(node, parameters);
+			return;
 		default:
 			throw new AssertionError("Unkown expression operator: " + operatorName);
 		}
+	}
+
+	private void checkStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
+		PExpression stringValue = parameters.get(0);
+		if (stringValue instanceof AStringExpression) {
+			AStringExpression string = (AStringExpression) stringValue;
+			String content = string.getContent().getText();
+			int count = (content.length() - content.replace("~w", "").length()) / 2;
+			if (count != parameters.size() - 1) {
+				this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
+						+ ") does not match the number of placeholders (" + count + ") in the string.", node));
+			}
+		}
+		LinkedList<PExpression> identifiers = node.getIdentifiers();
+		for (PExpression pExpression : identifiers) {
+			pExpression.apply(this);
+		}
+		return;
+	}
+
+	private void checkGetTuleCounterExamplesOperator(AOperatorExpression node,
+			final LinkedList<PExpression> parameters) {
+		// the grammar ensures at least one argument
+		if (parameters.size() > 2) {
+			this.errorList.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
+		}
+		PExpression pExpression = node.getIdentifiers().get(0);
+		if (!(pExpression instanceof AIdentifierExpression)) {
+			this.errorList.add(
+					new CheckException("The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
+		return;
 	}
 
 	@Override
@@ -531,7 +574,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (PExpression pExpression : righthand) {
 			pExpression.apply(this);
 		}
-		List<PExpression> copy = new ArrayList<PExpression>(node.getLhsExpression());
+		List<PExpression> copy = new ArrayList<>(node.getLhsExpression());
 		checkThatIdentifiersAreLocalVariables(copy);
 	}
 
@@ -541,7 +584,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (opNameList.size() > 1) {
 			errorList.add(new CheckException("Renaming of operation names is not allowed.", node));
 		}
-		List<PExpression> copy = new ArrayList<PExpression>(node.getResultIdentifiers());
+		List<PExpression> copy = new ArrayList<>(node.getResultIdentifiers());
 		checkThatIdentifiersAreLocalVariables(copy);
 		if (currentOperation != null) {
 			currentOperation.addFunctionCall(opNameList.get(0));
@@ -555,7 +598,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				String name = id.getIdentifier().get(0).getText();
 				if (!this.identifierScope.contains(name)) {
 					errorList.add(new CheckException("Identifier '" + name
-							+ "' is not a local variable (VAR). Hence it can not be assigned here.", id));
+							+ "' is not a local variable (VAR). Hence, it can not be assigned here.", id));
 				}
 			} else {
 				errorList.add(new CheckException(
@@ -567,7 +610,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(AIdentifierExpression node) {
-		List<TIdentifierLiteral> copy = new ArrayList<TIdentifierLiteral>(node.getIdentifier());
+		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
 		if (copy.size() > 1) {
 			this.errorList.add(new CheckException("Identifier renaming is not allowed in a RULES_MACHINE.", node));
 		}
@@ -595,108 +638,137 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAOperatorPredicate(AOperatorPredicate node) {
-		final List<PExpression> arguments = new ArrayList<PExpression>(node.getIdentifiers());
+		final List<PExpression> arguments = new ArrayList<>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
-		case RulesGrammar.SUCCEEDED_RULE: {
-			if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		case RulesGrammar.SUCCEEDED_RULE:
+			checkSucceededRuleOperator(node, arguments);
 			return;
-		}
-		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				this.errorList.add(new CheckException(
-						"The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
-				return;
-			}
-			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
-				return;
-			}
-			PExpression secondArg = node.getIdentifiers().get(1);
-			if (!(secondArg instanceof AIntegerExpression)) {
-				this.errorList.add(new CheckException(
-						"The second argument of SUCCEEDED_RULE_ERROR_TYPE must be an integer value.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
+			checkSucceededRuleErrorTypeOperator(node, arguments);
 			return;
-		}
-		case RulesGrammar.FAILED_RULE: {
-			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		case RulesGrammar.FAILED_RULE:
+			checkFailedRuleOperator(node, arguments);
 			return;
-		}
-		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES: {
-			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
+			checkFailedRuleAllErrorTypesOperator(node, arguments);
 			return;
-		}
-		case RulesGrammar.FAILED_RULE_ERROR_TYPE: {
-			if (arguments.size() != 2) {
-				this.errorList.add(new CheckException(
-						"The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
-				return;
-			}
-			PExpression pExpression = node.getIdentifiers().get(0);
-			if (!(pExpression instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
-				return;
-			}
-			PExpression secondArg = node.getIdentifiers().get(1);
-			if (!(secondArg instanceof AIntegerExpression)) {
-				this.errorList.add(new CheckException(
-						"The second argument of FAILED_RULE_ERROR_TYPE must be an integer value.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		case RulesGrammar.FAILED_RULE_ERROR_TYPE:
+			checkFailedRuleErrorTypeOperator(node, arguments);
 			return;
-		}
 		case RulesGrammar.NOT_CHECKED_RULE:
-			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+			checkNotCheckedRuleOperator(node, arguments);
 			return;
 		case RulesGrammar.DISABLED_RULE:
-			if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-				this.errorList.add(new CheckException(
-						"The DISABLED_RULE predicate operator expects exactly one rule identifier.", node));
-				return;
-			}
-			this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+			checkDisabledRuleOperator(node, arguments);
 			return;
 		default:
-			throw new AssertionError("Unkown predicate operator: " + operatorName);
+			throw new AssertionError("Unsupported predicate operator: " + operatorName);
 		}
+	}
+
+	private void checkDisabledRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+			this.errorList.add(new CheckException(
+					"The DISABLED_RULE predicate operator expects exactly one rule identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkNotCheckedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+			this.errorList.add(new CheckException(
+					"The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 2) {
+			this.errorList.add(new CheckException(
+					"The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+			return;
+		}
+		PExpression pExpression = node.getIdentifiers().get(0);
+		if (!(pExpression instanceof AIdentifierExpression)) {
+			this.errorList.add(
+					new CheckException("The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
+			return;
+		}
+		PExpression secondArg = node.getIdentifiers().get(1);
+		if (!(secondArg instanceof AIntegerExpression)) {
+			this.errorList.add(new CheckException(
+					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer value.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+			this.errorList.add(new CheckException(
+					"The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkFailedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
+			this.errorList.add(new CheckException(
+					"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkSucceededRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
+			this.errorList.add(new CheckException(
+					"The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
+	}
+
+	private void checkSucceededRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+		if (arguments.size() != 2) {
+			this.errorList.add(new CheckException(
+					"The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+			return;
+		}
+		PExpression pExpression = node.getIdentifiers().get(0);
+		if (!(pExpression instanceof AIdentifierExpression)) {
+			this.errorList.add(
+					new CheckException("The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
+			return;
+		}
+		PExpression secondArg = node.getIdentifiers().get(1);
+		if (!(secondArg instanceof AIntegerExpression)) {
+			this.errorList.add(new CheckException(
+					"The second argument of SUCCEEDED_RULE_ERROR_TYPE must be an integer value.", node));
+			return;
+		}
+		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
+		return;
 	}
 
 	@Override
 	public void inAOperatorSubstitution(AOperatorSubstitution node) {
 		final String operatorName = node.getName().getText();
-		switch (operatorName) {
-		case RulesGrammar.RULE_FAIL: {
+		if (RulesGrammar.RULE_FAIL.equals(operatorName)) {
 			if (!isInRule()) {
 				errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
 			}
-			if (node.getArguments().size() == 0) {
+			if (node.getArguments().isEmpty()) {
 				errorList.add(new CheckException("RULE_FAIL requires at least one argument.", node));
 			}
 			if (node.getArguments().size() == 2) {
@@ -710,8 +782,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("RULE_FAIL has at most two argument.", node));
 			}
 			return;
-		}
-		default:
+		} else {
 			throw new AssertionError("Unkown substitution operator: " + operatorName);
 		}
 	}
@@ -763,7 +834,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
 		node.getSet().apply(this);
-		LinkedList<PExpression> linkedList = new LinkedList<PExpression>();
+		LinkedList<PExpression> linkedList = new LinkedList<>();
 		linkedList.add(node.getIdentifier());
 		this.identifierScope.createNewScope(linkedList);
 		node.getDoSubst().apply(this);
@@ -884,7 +955,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
 		final String name = node.getName().getText();
 		this.definitions.add(name);
-		if (name.equals("GOAL")) {
+		if ("GOAL".equals(name)) {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
@@ -897,7 +968,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
 		final String name = node.getName().getText();
 		this.definitions.add(name);
-		if (name.equals("GOAL")) {
+		if ("GOAL".equals(name)) {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
@@ -910,7 +981,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseADefinitionExpression(ADefinitionExpression node) {
 		node.getDefLiteral().apply(this);
 		final String defName = node.getDefLiteral().getText();
-		if (defName.equals("READ_XML_FROM_STRING")) {
+		if ("READ_XML_FROM_STRING".equals(defName)) {
 			if (node.getParameters().size() != 1) {
 				errorList.add(new CheckException(
 						"The external function 'READ_XML_FROM_STRING' requires exactly one argrument.", node));
@@ -932,8 +1003,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					SAXParser saxParser = factory.newSAXParser();
 					Locale newLocale = new Locale("en", "GB");
-					// Surprisingly, we need both of the following two line in
-					// order to all error messages in English.
+					// Surprisingly, we need both of the following two lines in
+					// order to obtain all error messages in English.
 					java.util.Locale.setDefault(newLocale);
 					saxParser.setProperty("http://apache.org/xml/properties/locale", newLocale);
 					saxParser.parse(inputSource, new DefaultHandler());
@@ -943,14 +1014,15 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 							? content.getPos() + e.getColumnNumber() : e.getColumnNumber();
 					TStringLiteral dummy = new TStringLiteral("", line, column);
 					String message = e.getMessage();
-					errorList.add(new CheckException(message, dummy));
+					errorList.add(new CheckException(message, dummy, e));
 				} catch (SAXException e) {
 					String message = e.getMessage();
-					errorList.add(new CheckException(message, aStringExpr));
+					errorList.add(new CheckException(message, aStringExpr, e));
 				} catch (ParserConfigurationException | IOException e) {
-					// do nothing
-					// the error is handled by the parser but will be handled
-					// prob_prolog
+					/*
+					 * We do nothing. The error is not handled by the parser but
+					 * will be handled by the ProB prolog kernel.
+					 */
 				}
 
 			}
@@ -995,7 +1067,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class KnownIdentifier {
-		Set<String> knownIdentifier = new HashSet<>();
+		Set<String> knownIdentifiers = new HashSet<>();
 
 		public void addIdentifier(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
@@ -1004,11 +1076,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public void addTIdentifier(TIdentifierLiteral identifier) {
-			knownIdentifier.add(identifier.getText());
+			knownIdentifiers.add(identifier.getText());
 		}
 
 		public Set<String> getKnownIdentifier() {
-			return this.knownIdentifier;
+			return this.knownIdentifiers;
 		}
 
 		public void addPExpression(PExpression expression) {
@@ -1021,11 +1093,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				}
 				TIdentifierLiteral tIdentifierLiteral = list.get(0);
 				String constantName = tIdentifierLiteral.getText();
-				if (this.knownIdentifier.contains(constantName)) {
+				if (this.knownIdentifiers.contains(constantName)) {
 					errorList.add(new CheckException("Constant already exists.", expression));
 					return;
 				}
-				knownIdentifier.add(constantName);
+				knownIdentifiers.add(constantName);
 			} else {
 				errorList.add(new CheckException("Identifier expected.", expression));
 			}
@@ -1039,7 +1111,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			this.localVariablesScope.add(identifiers);
 		}
 
-		public void createNewScope(final LinkedList<PExpression> parameters) {
+		public void createNewScope(final List<PExpression> parameters) {
 			final HashSet<String> set = new HashSet<>();
 			for (PExpression expression : parameters) {
 				if (expression instanceof AIdentifierExpression) {

@@ -36,7 +36,7 @@ public class PrimedIdentifierCheck extends DepthFirstAdapter implements Semantic
 	@Override
 	public void runChecks(final Start rootNode) {
 
-		if (options.restrictPrimedIdentifiers) {
+		if (options.isRestrictPrimedIdentifiers()) {
 			rootNode.apply(this);
 		}
 	}

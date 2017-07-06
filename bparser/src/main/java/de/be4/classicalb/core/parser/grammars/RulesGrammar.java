@@ -42,13 +42,15 @@ public class RulesGrammar implements IGrammar {
 	public static final String DEPENDS_ON_COMPUTATION = "DEPENDS_ON_COMPUTATION";
 	public static final String ERROR_TYPES = "ERROR_TYPES";
 	public static final String RULEID = "RULEID";
+
 	public static final String STRING_FORMAT = "STRING_FORMAT";
+	public static final String STRING_CONCAT = "STRING_CONCAT";
 	public static final String ACTIVATION = "ACTIVATION";
 	public static final String PRECONDITION = "PRECONDITION";
 	public static final String POSTCONDITION = "POSTCONDITION";
 	public static final String CLASSIFICATION = "CLASSIFICATION";
 	public static final String REPLACES = "REPLACES";
-	
+
 	public static final String TAGS = "TAGS";
 
 	public static final String RULE_FAIL = "RULE_FAIL";
@@ -100,25 +102,22 @@ public class RulesGrammar implements IGrammar {
 		map.put(CLASSIFICATION, TKwAttributeIdentifier.class);
 		map.put(TAGS, TKwAttributeIdentifier.class);
 		map.put(REPLACES, TKwAttributeIdentifier.class);
-		
+
 		map.put(ACTIVATION, TKwPredicateAttribute.class);
 		map.put(PRECONDITION, TKwPredicateAttribute.class);
 		map.put(POSTCONDITION, TKwPredicateAttribute.class);
-		
 
 		map.put(RULE_FAIL, TKwSubstitutionOperator.class);
 		map.put(GET_RULE_COUNTEREXAMPLES, TKwExpressionOperator.class);
 		map.put(STRING_FORMAT, TKwExpressionOperator.class);
+		map.put(STRING_CONCAT, TKwExpressionOperator.class);
 	}
 
 	private static void add(Class<? extends Token> clazz) {
 		try {
 			map.put(clazz.newInstance().getText(), clazz);
-		} catch (InstantiationException e) {
-			throw new RuntimeException("Cannot create an instance of class:" + clazz.getName());
-		} catch (IllegalAccessException e) {
-			// should never happen
-			throw new RuntimeException("Cannot create an instance of class:" + clazz.getName());
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
 		}
 	}
 
@@ -128,12 +127,7 @@ public class RulesGrammar implements IGrammar {
 
 	@Override
 	public boolean containsAlternativeDefinitionForToken(Token token) {
-		if (token instanceof TIdentifierLiteral && map.containsKey(token.getText())) {
-			return true;
-		} else {
-			return false;
-		}
-
+		return token instanceof TIdentifierLiteral && map.containsKey(token.getText());
 	}
 
 	@Override
@@ -157,11 +151,10 @@ public class RulesGrammar implements IGrammar {
 				return newInstance;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-				throw new RuntimeException("Cannot create an instance of class:" + clazz.getName());
+				throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e1);
 			}
-
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Cannot create an instance of class:" + clazz.getName());
+			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
 		}
 	}
 

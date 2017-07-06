@@ -11,6 +11,10 @@ public class BException extends Exception {
 		this(filename, null, e);
 	}
 
+	public BException(final String filename, final VisitorException e) {
+		this(filename, null, e.getException());
+	}
+
 	public BException(final String filename, final String message, final Throwable cause) {
 		this.filename = filename;
 		this.message = message;

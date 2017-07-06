@@ -55,7 +55,7 @@ import de.be4.classicalb.core.parser.node.Start;
  */
 public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
-	private final Set<Node> nonIdentifiers = new HashSet<Node>();
+	private final Set<Node> nonIdentifiers = new HashSet<>();
 	private ParseOptions options;
 	private final List<CheckException> exceptions = new ArrayList<>();
 
@@ -91,7 +91,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		rootNode.apply(assignCheck);
 
 		final Set<Node> assignErrorNodes = assignCheck.nonIdentifiers;
-		if (assignErrorNodes.size() > 0) {
+		if (!assignErrorNodes.isEmpty()) {
 			exceptions.add(new CheckException("Identifier or function expected",
 					assignErrorNodes.toArray(new Node[assignErrorNodes.size()])));
 		}
@@ -102,7 +102,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		 */
 		rootNode.apply(this);
 
-		if (nonIdentifiers.size() > 0) {
+		if (!nonIdentifiers.isEmpty()) {
 			// at least one error was found
 			exceptions.add(
 					new CheckException("Identifier expected", nonIdentifiers.toArray(new Node[nonIdentifiers.size()])));
@@ -203,7 +203,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-		for (final Iterator< PExpression>iterator = identifiers.iterator(); iterator.hasNext();) {
+		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
 			final PExpression expression = iterator.next();
 
 			if (!(isIdentifierExpression(expression))) {
@@ -214,11 +214,11 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private boolean isIdentifierExpression(final PExpression expression) {
 		return expression instanceof AIdentifierExpression
-				|| (!options.restrictPrimedIdentifiers && expression instanceof APrimedIdentifierExpression);
+				|| (!options.isRestrictPrimedIdentifiers() && expression instanceof APrimedIdentifierExpression);
 	}
 
 	class AssignCheck extends DepthFirstAdapter {
-		final Set<Node> nonIdentifiers = new HashSet<Node>();
+		final Set<Node> nonIdentifiers = new HashSet<>();
 
 		@Override
 		public void inAAssignSubstitution(final AAssignSubstitution node) {
@@ -231,7 +231,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		}
 
 		private void checkList(final List<PExpression> list) {
-			for (final Iterator< PExpression>iterator = list.iterator(); iterator.hasNext();) {
+			for (final Iterator<PExpression> iterator = list.iterator(); iterator.hasNext();) {
 				final PExpression expression = iterator.next();
 
 				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression)) {
