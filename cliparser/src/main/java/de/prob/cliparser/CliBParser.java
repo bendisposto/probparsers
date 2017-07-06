@@ -255,6 +255,9 @@ public class CliBParser {
 			case cspfrege_addunicode:
 				addUnicode(in);
 				break;
+			case cspfrege_removeunicode:
+				removeUnicode(in);
+				break;
 			case halt:
 				socket.close();
 				serverSocket.close();
@@ -272,6 +275,17 @@ public class CliBParser {
 			String inputCspFileName = in.readLine();
 			String outputCspFileName = in.readLine();
 			FregeInterface.evaluateIOUnitFunction(ExecCommand.addUnicode(inputCspFileName, outputCspFileName));
+			print("frege_facts(ok).\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void removeUnicode(BufferedReader in) {
+		try {
+			String inputCspFileName = in.readLine();
+			String outputCspFileName = in.readLine();
+			FregeInterface.evaluateIOUnitFunction(ExecCommand.removeUnicode(inputCspFileName, outputCspFileName));
 			print("frege_facts(ok).\n");
 		} catch (IOException e) {
 			e.printStackTrace();
