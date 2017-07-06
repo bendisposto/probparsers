@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -33,16 +31,13 @@ public abstract class IDefinitions {
 
 	public abstract Set<String> getDefinitionNames();
 
-	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type)
-			throws CheckException, BException;
+	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type);
 
-	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type)
-			throws CheckException, BException;
+	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type);
 
-	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type)
-			throws CheckException, BException;
+	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type);
 
-	public abstract void addDefinition(PDefinition defNode, Type type, String key) throws CheckException, BException;
+	public abstract void addDefinition(PDefinition defNode, Type type, String key);
 
 	public void addDefinitions(IDefinitions defs) {
 		referencedDefinitions.add(defs);

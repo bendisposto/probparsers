@@ -8,14 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
-import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Definitions extends IDefinitions {
 	private final Map<String, PDefinition> definitionsMap = new HashMap<>();
@@ -162,49 +159,27 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type)
-			throws CheckException, BException {
+	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type)
-			throws CheckException, BException {
+	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type)
-			throws CheckException, BException {
+	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type) {
 		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override
-	public void addDefinition(final PDefinition defNode, final Type type, final String key)
-			throws CheckException, BException {
+	public void addDefinition(final PDefinition defNode, final Type type, final String key) {
 		if (this.containsDefinition(key)) {
-			final PDefinition defNode2 = this.getDefinition(key);
-			final File file2 = this.getFile(key);
-			StringBuilder sb = new StringBuilder();
-			sb.append("Duplicate definition: " + key + ".\n");
-			sb.append("(First appearance: ").append(this.getPosition(defNode2.getStartPos()));
-			if (file2 != null) {
-				sb.append(" in ").append(file2.getAbsolutePath());
-			}
-			sb.append(")\n");
-			CheckException e = new CheckException(sb.toString(), defNode);
-			if (file != null) {
-				throw new BException(file.getAbsolutePath(), e);
-			} else {
-				throw e;
-			}
+			throw new AssertionError("Duplicate definition. This should be handled by the caller.");
 		}
 		definitionsMap.put(key, defNode);
 		types.put(key, type);
-	}
-
-	private String getPosition(SourcePosition pos) {
-		return "[" + pos.getLine() + "," + pos.getPos() + "]";
 	}
 
 	@Override
