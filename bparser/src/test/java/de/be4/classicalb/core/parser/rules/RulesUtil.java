@@ -45,6 +45,21 @@ public class RulesUtil {
 		return output.toString();
 	}
 
+	public static String getRulesMachineAsBMachine(File file) {
+		RulesProject rulesProject = new RulesProject();
+		rulesProject.parseProject(file);
+		rulesProject.checkAndTranslateProject();
+		List<IModel> bModels = rulesProject.getBModels();
+		List<BException> bExceptionList = rulesProject.getBExceptionList();
+		if (!bExceptionList.isEmpty()) {
+			throw new RuntimeException(bExceptionList.get(0));
+		}
+		IModel model = bModels.get(bModels.size() - 2);
+		PrettyPrinter pp = new PrettyPrinter();
+		model.getStart().apply(pp);
+		return pp.getPrettyPrint();
+	}
+
 	public static String getRulesMachineAsBMachine(final String content) {
 		RulesProject rulesProject = new RulesProject();
 		rulesProject.parseRulesMachines(content, new String[] {});

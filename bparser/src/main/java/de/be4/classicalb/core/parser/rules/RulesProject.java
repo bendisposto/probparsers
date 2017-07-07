@@ -332,7 +332,7 @@ public class RulesProject {
 	private void findImplicitDependenciesToComputations() {
 		HashMap<String, ComputationOperation> variableToComputation = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
-			if (operation instanceof ComputationOperation) {
+			if (operation instanceof ComputationOperation && !operation.replacesOperation()) {
 				ComputationOperation comp = (ComputationOperation) operation;
 				for (String defName : comp.getDefineVariables()) {
 					variableToComputation.put(defName, comp);
