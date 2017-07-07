@@ -37,7 +37,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
-
 	private final IDefinitions iDefinitions;
 	private final Start start;
 	private final RulesMachineChecker rulesMachineVisitor;
@@ -489,6 +488,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private void translateStringConcatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
 		PExpression temp = null;
+		addToStringDefinition(iDefinitions);
 		addStringAppendDefinition(iDefinitions);
 		for (int i = parameters.size() - 2; i >= 0; i--) {
 			if (temp == null) {
@@ -504,11 +504,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
 		addFormatToStringDefinition(iDefinitions);
+		addToStringDefinition(iDefinitions);
 		final TIdentifierLiteral format = new TIdentifierLiteral(FORMAT_TO_STRING);
 		format.setStartPos(node.getName().getStartPos());
 		format.setEndPos(node.getName().getEndPos());
 		PExpression stringValue = parameters.get(0);
-
 		final List<PExpression> list = new ArrayList<>();
 		list.add(stringValue);
 		final List<PExpression> seqList = new ArrayList<>();

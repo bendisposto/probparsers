@@ -4,6 +4,8 @@ import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -12,6 +14,7 @@ import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMultOrCartExpression;
 import de.be4.classicalb.core.parser.node.APowSubsetExpression;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
@@ -29,6 +32,7 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
@@ -41,6 +45,7 @@ public final class ASTBuilder {
 	public static final String FORMAT_TO_STRING = "FORMAT_TO_STRING";
 	public static final String SORT = "SORT";
 	public static final String PRINT = "PRINT";
+	public static final String PREFERENCES_PREFIX = "SET_PREF_";
 
 	private ASTBuilder() {
 	}
@@ -328,10 +333,41 @@ public final class ASTBuilder {
 		iDefinitions.addDefinition(formatType, IDefinitions.Type.Expression);
 	}
 
-	public static void addPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
+	public static void addBooleanPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
 		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
 				new ArrayList<PExpression>(), bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
 		iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
+	}
+
+	public static void addGeneralPreferenceDefinitions(IDefinitions iDefinitions, Map<String, String> map) {
+		for (Entry<String, String> entry : map.entrySet()) {
+			addGeneralPreferenceDefinition(iDefinitions, entry.getKey(), entry.getValue());
+		}
+	}
+
+	public static void addGeneralPreferenceDefinition(IDefinitions iDefinitions, String name, String value) {
+		if (iDefinitions.containsDefinition(name)) {
+			return;
+		}
+		if ("TRUE".equals(value)) {
+			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, true);
+		} else if ("FALSE".equals(value)) {
+			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
+		} else {
+			try {
+				Integer.parseInt(value);
+				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
+						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
+						new AIntegerExpression(new TIntegerLiteral(value)));
+				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
+			} catch (NumberFormatException er) {
+				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
+						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
+						new AStringExpression(new TStringLiteral(value)));
+				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
+			}
+		}
+
 	}
 
 }

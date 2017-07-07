@@ -32,9 +32,17 @@ public class RulesMachineRunConfiguration {
 	final Map<String, AbstractOperation> allOperations;
 	final RulesParseUnit mainModel;
 	final Map<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
-	private Map<String, String> probCorePreferencesInModel = new HashMap<>();
+	private Map<String, String> preferencesInMainMachine = new HashMap<>();
 
-	public RulesMachineRunConfiguration(IModel mainModel, Map<String, AbstractOperation> allOperations) {
+	public static RulesMachineRunConfiguration extractConfigurationOfMainModel(IModel mainModel,
+			Map<String, AbstractOperation> allOperations) {
+		RulesMachineRunConfiguration rulesMachineRunConfiguration = new RulesMachineRunConfiguration(mainModel,
+				allOperations);
+		rulesMachineRunConfiguration.collect();
+		return rulesMachineRunConfiguration;
+	}
+
+	private RulesMachineRunConfiguration(IModel mainModel, Map<String, AbstractOperation> allOperations) {
 		this.mainModel = (RulesParseUnit) mainModel;
 		this.allOperations = allOperations;
 	}
@@ -44,8 +52,8 @@ public class RulesMachineRunConfiguration {
 		mainModel.getStart().apply(definitionsFinder);
 	}
 
-	public Map<String, String> probCorePreferencesInModel() {
-		return new HashMap<>(this.probCorePreferencesInModel);
+	public Map<String, String> getPreferencesInModel() {
+		return new HashMap<>(this.preferencesInMainMachine);
 	}
 
 	public Set<RuleGoalAssumption> getRulesGoalAssumptions() {
@@ -63,15 +71,15 @@ public class RulesMachineRunConfiguration {
 				if (node.getRhs() instanceof AIntegerExpression) {
 					AIntegerExpression aIntExpr = (AIntegerExpression) node.getRhs();
 					String value = aIntExpr.getLiteral().getText();
-					probCorePreferencesInModel.put(prefName, value);
+					preferencesInMainMachine.put(prefName, value);
 				} else if (node.getRhs() instanceof AStringExpression) {
 					AStringExpression aStringExpr = (AStringExpression) node.getRhs();
 					String value = aStringExpr.getContent().getText();
-					probCorePreferencesInModel.put(prefName, value);
+					preferencesInMainMachine.put(prefName, value);
 				} else if (node.getRhs() instanceof ABooleanTrueExpression) {
-					probCorePreferencesInModel.put(prefName, "TRUE");
+					preferencesInMainMachine.put(prefName, "TRUE");
 				} else if (node.getRhs() instanceof ABooleanFalseExpression) {
-					probCorePreferencesInModel.put(prefName, "FALSE");
+					preferencesInMainMachine.put(prefName, "FALSE");
 				}
 			}
 		}
