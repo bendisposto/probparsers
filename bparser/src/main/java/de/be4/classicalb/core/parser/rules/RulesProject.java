@@ -124,7 +124,8 @@ public class RulesProject {
 		if (!this.bExceptionList.isEmpty()) {
 			return;
 		}
-		extractConfigurationOfMainModel();
+		this.rulesMachineRunConfiguration = RulesMachineRunConfiguration
+				.extractConfigurationOfMainModel(this.bModels.get(0), this.allOperations);
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
 		for (int i = 0; i < bModels.size(); i++) {
@@ -140,7 +141,6 @@ public class RulesProject {
 			injector.injectMachine(otherStart);
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
-
 		bModels.add(compositionMachine);
 		bModels.add(createMainMachine(injector.getGoalDefinition()));
 	}
@@ -151,6 +151,7 @@ public class RulesProject {
 		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
 		IDefinitions definitions = new Definitions();
+		addGeneralPreferenceDefinitions(definitions, this.rulesMachineRunConfiguration.getPreferencesInModel());
 		addToStringDefinition(definitions);
 		addSortDefinition(definitions);
 		addFormatToStringDefinition(definitions);
@@ -158,7 +159,7 @@ public class RulesProject {
 		if (goalDefinition != null) {
 			addDefinition(definitions, goalDefinition);
 		}
-		addPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		addBooleanPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.replaceDefinition(definitions);
 		return mainMachine;
 	}
@@ -223,11 +224,6 @@ public class RulesProject {
 				}
 			}
 		}
-	}
-
-	private void extractConfigurationOfMainModel() {
-		this.rulesMachineRunConfiguration = new RulesMachineRunConfiguration(this.bModels.get(0), this.allOperations);
-		rulesMachineRunConfiguration.collect();
 	}
 
 	private void collectAllOperations() {
@@ -336,7 +332,7 @@ public class RulesProject {
 	private void findImplicitDependenciesToComputations() {
 		HashMap<String, ComputationOperation> variableToComputation = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
-			if (operation instanceof ComputationOperation) {
+			if (operation instanceof ComputationOperation && !operation.replacesOperation()) {
 				ComputationOperation comp = (ComputationOperation) operation;
 				for (String defName : comp.getDefineVariables()) {
 					variableToComputation.put(defName, comp);

@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
 
-public class RulesProjectTest {
+public class RulesMachineFilesTest {
+	public static final String dir = "src/test/resources/rules/";
 
 	@Test
 	public void testProject2() throws Exception {
@@ -258,14 +258,11 @@ public class RulesProjectTest {
 		assertTrue(result.contains(expected));
 	}
 
-	@Ignore
 	@Test
-	public void testMissingComputationDependency() {
+	public void testImplicitDependencyToComputation() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/MissingComputationDependency.rmch");
-		String expected = "'Missing dependency to computation \\'compute_xx\\' in order to use variable \\'set\\'.').\n";
-		System.out.println(result);
-		assertTrue(result.contains(expected));
+				"src/test/resources/rules/ImplicitDependencyToComputation.rmch");
+		assertFalse(result.contains("exception"));
 	}
 
 	@Test
@@ -300,6 +297,15 @@ public class RulesProjectTest {
 		String expected = "Unknown operation: \\'compute_xx\\'.')";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
+	}
+
+	@Test
+	public void testReplaces() {
+		String result = getRulesMachineAsPrologTerm(dir + "Replaces.rmch");
+		System.out.println(result);
+		//System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir, "Replaces.rmch")));
+		assertFalse(result.contains("exception"));
+		assertFalse(result.contains("COMP_NewComp1"));
 	}
 
 	private String getRulesMachineAsPrologTerm(String fileName) {

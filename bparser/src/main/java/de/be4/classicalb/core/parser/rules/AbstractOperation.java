@@ -140,6 +140,10 @@ public abstract class AbstractOperation {
 		return list;
 	}
 
+	public boolean replacesOperation() {
+		return this.replacesIdentifier != null;
+	}
+
 	public AIdentifierExpression getReplacesIdentifier() {
 		return this.replacesIdentifier;
 	}
