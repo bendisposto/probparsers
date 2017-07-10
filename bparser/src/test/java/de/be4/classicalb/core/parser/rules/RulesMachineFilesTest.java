@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -259,14 +258,11 @@ public class RulesMachineFilesTest {
 		assertTrue(result.contains(expected));
 	}
 
-	@Ignore
 	@Test
-	public void testMissingComputationDependency() {
+	public void testImplicitDependencyToComputation() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/MissingComputationDependency.rmch");
-		String expected = "'Missing dependency to computation \\'compute_xx\\' in order to use variable \\'set\\'.').\n";
-		System.out.println(result);
-		assertTrue(result.contains(expected));
+				"src/test/resources/rules/ImplicitDependencyToComputation.rmch");
+		assertFalse(result.contains("exception"));
 	}
 
 	@Test
