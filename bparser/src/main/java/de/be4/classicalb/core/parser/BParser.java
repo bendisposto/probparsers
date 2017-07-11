@@ -69,13 +69,13 @@ public class BParser {
 
 	public static String getVersion() throws IOException {
 		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
 		return p.getProperty("version");
 	}
 
 	public static String getGitSha() throws IOException {
 		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
+		p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
 		return p.getProperty("git");
 	}
 
