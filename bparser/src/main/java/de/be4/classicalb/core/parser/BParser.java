@@ -68,15 +68,31 @@ public class BParser {
 	private Map<PositionedNode, SourcecodeRange> positions;
 
 	public static String getVersion() throws IOException {
-		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
-		return p.getProperty("version");
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("version");
+		} else {
+			return "UNKNOWN";
+		}
 	}
 
 	public static String getGitSha() throws IOException {
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("git");
+		} else {
+			return "UNKNOWN";
+		}
+	}
+
+	private static Properties loadProperties() {
 		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
-		return p.getProperty("git");
+		try {
+			p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
+		} catch (Exception e) {
+			return null;
+		}
+		return p;
 	}
 
 	public BParser() {
