@@ -64,6 +64,14 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testCyclicComputationDependencies() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "CyclicComputationDependencies.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("parse_exception(pos(15,13"));
+		assertTrue(result.contains("'Cyclic dependencies between operations: compute_yy -> compute_xx -> compute_yy'"));
+	}
+
+	@Test
 	public void testPackage() throws Exception {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/folder/M1.rmch");
 		System.out.println(result);
@@ -260,8 +268,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testImplicitDependencyToComputation() {
-		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/ImplicitDependencyToComputation.rmch");
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/ImplicitDependencyToComputation.rmch");
 		assertFalse(result.contains("exception"));
 	}
 
@@ -303,7 +310,8 @@ public class RulesMachineFilesTest {
 	public void testReplaces() {
 		String result = getRulesMachineAsPrologTerm(dir + "Replaces.rmch");
 		System.out.println(result);
-		//System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir, "Replaces.rmch")));
+		// System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir,
+		// "Replaces.rmch")));
 		assertFalse(result.contains("exception"));
 		assertFalse(result.contains("COMP_NewComp1"));
 	}

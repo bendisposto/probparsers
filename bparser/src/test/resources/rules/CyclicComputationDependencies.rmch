@@ -1,0 +1,26 @@
+RULES_MACHINE CyclicComputationDependencies
+OPERATIONS
+
+COMPUTATION compute_xx
+BODY
+  DEFINE
+    xx
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : yy | {x + x })
+  END//DEFINE
+END//COMPUTATION
+;
+COMPUTATION compute_yy
+BODY
+  DEFINE
+    yy
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : xx | {x + x })
+  END//DEFINE
+END//COMPUTATION
+
+END
