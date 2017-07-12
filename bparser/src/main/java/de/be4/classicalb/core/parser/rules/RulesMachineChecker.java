@@ -702,7 +702,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		PExpression secondArg = node.getIdentifiers().get(1);
 		if (!(secondArg instanceof AIntegerExpression)) {
 			this.errorList.add(new CheckException(
-					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer value.", node));
+					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.", node));
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));

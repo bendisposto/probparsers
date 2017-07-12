@@ -39,6 +39,16 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
+	public void testOperatorFailedRulesErrorTypeWithSecondArgumentNotAnIntegerLiteral() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule, 1+1) OPERATIONS RULE rule BODY skip END  END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,40,'UnknownFile'),'The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.').\n",
+				result);
+	}
+
+	@Test
 	public void testChoiceSubstitutionException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE skip OR skip END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
