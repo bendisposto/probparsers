@@ -383,7 +383,7 @@ public class RulesProject {
 			/*
 			 * if there is already an error such as an parse error in one
 			 * machine, it makes no sense to check for invalid identifiers
-			 * because this all declarations of this machine are missing.
+			 * because all declarations of this machine are missing.
 			 */
 			return;
 		}
