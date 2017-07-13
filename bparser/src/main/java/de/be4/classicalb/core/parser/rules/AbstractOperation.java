@@ -29,6 +29,7 @@ public abstract class AbstractOperation {
 
 	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
 	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
+	private Set<AbstractOperation> requiredDependencies;
 
 	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,
 			List<RulesMachineReference> machineReferences2) {
@@ -99,7 +100,30 @@ public abstract class AbstractOperation {
 	}
 
 	public Set<AbstractOperation> getTransitiveDependencies() {
-		return this.transitiveDependencies;
+		return transitiveDependencies;
+	}
+
+	public Set<AbstractOperation> getRequiredDependencies() {
+		if (this.requiredDependencies == null) {
+			this.requiredDependencies = new HashSet<>();
+			HashSet<AIdentifierExpression> aIdentifierSet = new HashSet<>();
+			aIdentifierSet.addAll(this.dependsOnComputationList);
+			aIdentifierSet.addAll(this.dependsOnRuleList);
+			HashSet<String> directDependencies = new HashSet<>();
+			for (AIdentifierExpression aIdentifier : aIdentifierSet) {
+				directDependencies.add(aIdentifier.getIdentifier().get(0).getText());
+			}
+			for (AbstractOperation abstractOperation : this.transitiveDependencies) {
+				String name = abstractOperation.getName();
+				if (this.implicitDependenciesToComputations.contains(abstractOperation)
+						|| directDependencies.contains(name)) {
+					requiredDependencies.add(abstractOperation);
+				} else if (functionCallMap.containsKey(name)) {
+					requiredDependencies.addAll(abstractOperation.getRequiredDependencies());
+				}
+			}
+		}
+		return new HashSet<>(requiredDependencies);
 	}
 
 	@Override

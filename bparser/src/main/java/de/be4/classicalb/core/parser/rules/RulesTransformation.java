@@ -216,7 +216,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// result.addAll(createPredicateListFromIdentifierLiterals(operation.getImplicitDependenciesToComputations(),
 		// COMPUTATION_EXECUTED));
 		
-		for (AbstractOperation op : operation.getTransitiveDependencies()) {
+		for (AbstractOperation op : operation.getRequiredDependencies()) {
 			if (op instanceof RuleOperation) {
 				result.add(createEqualPredicate(op.getNameLiteral(), RULE_SUCCESS));
 			} else if (op instanceof ComputationOperation) {
