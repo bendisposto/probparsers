@@ -29,6 +29,22 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testImplicitDependenciesDueToFunctionCall() throws Exception {
+		File file = new File(dir + "ImplicitDependencyDueFunctionCall.rmch");
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setPrologOutput(true);
+		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+	}
+
+	@Test
+	public void testFunctionUsesDefinitionOfCallingComputation() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("'Cyclic dependencies between operations: compute_xx -> FUNC_add -> compute_xx'"));
+	}
+
+	@Test
 	public void testRulesMachineConfiguration() throws Exception {
 		File file = new File("src/test/resources/rules/project/RulesMachineConfigurationTest.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -67,8 +83,7 @@ public class RulesMachineFilesTest {
 	public void testCyclicComputationDependencies() throws Exception {
 		String result = getRulesMachineAsPrologTerm(dir + "CyclicComputationDependencies.rmch");
 		System.out.println(result);
-		assertTrue(result.contains("parse_exception(pos(15,13"));
-		assertTrue(result.contains("'Cyclic dependencies between operations: compute_yy -> compute_xx -> compute_yy'"));
+		assertTrue(result.contains("Cyclic dependencies between operations"));
 	}
 
 	@Test
@@ -180,11 +195,9 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testFunctionDependencies() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/FunctionDependencies.rmch");
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionDependencies.rmch");
 		System.out.println(result);
-		assertTrue(result.contains("exception"));
-		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp1"));
-		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp2"));
+		assertTrue(!result.contains("exception"));
 	}
 
 	@Test
@@ -283,7 +296,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testCyclicRules() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/CyclicRules.rmch");
-		String expected = "Cyclic dependencies between operations: rule1 -> rule2 -> rule1').\n";
+		String expected = "Cyclic dependencies between operations";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
