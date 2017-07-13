@@ -494,7 +494,6 @@ public class RulesProject {
 		}
 
 		operation.setTransitiveDependencies(transitiveDependenciesFound);
-		System.out.println(operation.getName() + " " + operation.getTransitiveDependencies());
 		return new HashSet<>(transitiveDependenciesFound);
 	}
 
