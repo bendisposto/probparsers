@@ -212,12 +212,17 @@ public class BParser {
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
+	public Start parseExpression(final String input) throws BCompoundException {
+		final String theFormula = EXPRESSION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
 	public Start parseSubstitution(final String input) throws BCompoundException {
 		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
-	public Start parsePrediate(final String input) throws BCompoundException {
+	public Start parsePredicate(final String input) throws BCompoundException {
 		final String theFormula = PREDICATE_PREFIX + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
 	}

@@ -18,7 +18,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap)
 			throws ProBParseException, UnsupportedOperationException {
 		try {
-			Start ast = new BParser().parsePrediate(expression);
+			Start ast = new BParser().parseExpression(expression);
 			printAst(pto, ast, wrap, WRAPPER_EXPR);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
@@ -29,7 +29,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
 			throws ProBParseException, UnsupportedOperationException {
 		try {
-			Start ast = new BParser().parsePrediate(predicate);
+			Start ast = new BParser().parsePredicate(predicate);
 			printAst(pto, ast, wrap, WRAPPER_PRED);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
@@ -40,7 +40,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
 			throws ProBParseException, UnsupportedOperationException {
 		try {
-			Start ast = new BParser().parsePrediate(trans);
+			Start ast = new BParser().parseSubstitution(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
