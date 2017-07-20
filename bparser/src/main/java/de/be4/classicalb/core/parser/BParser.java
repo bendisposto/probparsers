@@ -53,7 +53,6 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
-	public static final String CSP_PATTERN_PREFIX = "#CSPPATTERN";
 
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
@@ -219,6 +218,11 @@ public class BParser {
 
 	public Start parseSubstitution(final String input) throws BCompoundException {
 		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseTranstion(final String input) throws BCompoundException {
+		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
