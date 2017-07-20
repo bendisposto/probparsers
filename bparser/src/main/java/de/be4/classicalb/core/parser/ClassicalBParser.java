@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.OffsetPositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.parserbase.ProBParseException;
@@ -12,30 +14,44 @@ public class ClassicalBParser implements ProBParserBase {
 	private static final String WRAPPER_PRED = "bpred";
 	private static final String WRAPPER_TRANS = "bop";
 
+	@Override
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap)
 			throws ProBParseException, UnsupportedOperationException {
-		parseFormula(pto, BParser.EXPRESSION_PREFIX + expression, wrap, WRAPPER_EXPR);
-	}
-
-	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
-		parseFormula(pto, BParser.PREDICATE_PREFIX + predicate, wrap, WRAPPER_PRED);
-	}
-
-	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
-		parseFormula(pto, BParser.OPERATION_PATTERN_PREFIX + trans, wrap, WRAPPER_TRANS);
-	}
-
-	private void parseFormula(final IPrologTermOutput pto, final String formula, final boolean wrap,
-			final String wrapper) throws ProBParseException {
-		final Start ast;
 		try {
-			ast = BParser.parse(formula);
+			Start ast = new BParser().parsePrediate(expression);
+			printAst(pto, ast, wrap, WRAPPER_EXPR);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
 		}
-		final ASTProlog prologPrinter = new ASTProlog(pto, null);
+	}
+
+	@Override
+	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
+			throws ProBParseException, UnsupportedOperationException {
+		try {
+			Start ast = new BParser().parsePrediate(predicate);
+			printAst(pto, ast, wrap, WRAPPER_PRED);
+		} catch (BCompoundException e) {
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
+			throws ProBParseException, UnsupportedOperationException {
+		try {
+			Start ast = new BParser().parsePrediate(trans);
+			printAst(pto, ast, wrap, WRAPPER_TRANS);
+		} catch (BCompoundException e) {
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
+		}
+	}
+
+	private void printAst(final IPrologTermOutput pto, Start ast, final boolean wrap, final String wrapper) {
+		NodeIdAssignment na = new NodeIdAssignment();
+		ast.apply(na);
+		OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
+		final ASTProlog prologPrinter = new ASTProlog(pto, pprinter);
 		if (wrap) {
 			pto.openTerm(wrapper);
 		}

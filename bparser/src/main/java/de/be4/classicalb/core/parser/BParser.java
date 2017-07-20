@@ -192,7 +192,9 @@ public class BParser {
 	/**
 	 * Use this method, if you only need to parse small inputs. This only gives
 	 * the AST or an Exception, but no information about source positions. If
-	 * you need those, call the instance method of BParser instead
+	 * you need those, call the instance method of BParser instead. Do NOT use
+	 * this method to parse formulas, predicates and expression. Use the
+	 * corresponding instance methods instead.
 	 * 
 	 * @param input
 	 *            the B machine as input string
@@ -203,6 +205,21 @@ public class BParser {
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
 		return parser.parse(input, false, new NoContentProvider());
+	}
+
+	public Start parseFormula(final String input) throws BCompoundException {
+		final String theFormula = FORMULA_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseSubstitution(final String input) throws BCompoundException {
+		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parsePrediate(final String input) throws BCompoundException {
+		final String theFormula = PREDICATE_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
