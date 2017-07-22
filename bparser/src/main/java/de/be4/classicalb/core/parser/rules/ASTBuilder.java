@@ -216,11 +216,13 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(FORCE)) {
 			return;
 		}
+		/*-
+		 * EXTERNAL_FUNCTION_FORCE(T) == T --> T; 
+		 * FORCE(value) == value;
+		 * forces evaluation of symbolic set representations 
+		 * usage: FORCE({ x | x:1..100 & x mod 2 = 0 } )
+		 */
 
-		// EXTERNAL_FUNCTION_FORCE(T) == T --> T;
-		// FORCE(value) == value;
-		// forces evaluation of symbolic set representations
-		// usage FORCE( { x | x:1..100 & x mod 2 = 0 } )
 		AExpressionDefinitionDefinition forceDef = new AExpressionDefinitionDefinition();
 		forceDef.setName(new TIdentifierLiteral(FORCE));
 		String value = "value";
@@ -259,8 +261,11 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(CHOOSE)) {
 			return;
 		}
-		// TO_STRING(S) == "0";
-		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		/*-
+		 * TO_STRING(S) == "0";
+		 * EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		 */
+
 		AExpressionDefinitionDefinition ChooseDef = new AExpressionDefinitionDefinition();
 		ChooseDef.setName(new TIdentifierLiteral(CHOOSE));
 		ChooseDef.setParameters(createIdentifierList("X"));
@@ -279,10 +284,10 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(SORT)) {
 			return;
 		}
-		/* SORT */
-		// SORT(X) == [];
-		// EXTERNAL_FUNCTION_SORT(T) == (POW(T)-->seq(T));
-
+		/*- SORT
+		 *  SORT(X) == [];
+		 *  EXTERNAL_FUNCTION_SORT(T) == POW(T)-->seq(T);
+		 */
 		AExpressionDefinitionDefinition sortDef = new AExpressionDefinitionDefinition();
 		sortDef.setName(new TIdentifierLiteral(SORT));
 		sortDef.setParameters(createExpressionList("X"));
@@ -322,8 +327,10 @@ public final class ASTBuilder {
 		formatDef.setRhs(new AStringExpression(new TStringLiteral("abc")));
 		iDefinitions.addDefinition(formatDef, IDefinitions.Type.Expression);
 
-		// EXTERNAL_FUNCTION_FORMAT_TO_STRING(TO_STRING_TYPE) ==
-		// ((STRING*seq(TO_STRING_TYPE)) --> STRING);
+		/*-
+		 * EXTERNAL_FUNCTION_FORMAT_TO_STRING(TO_STRING_TYPE) == STRING*seq(TO_STRING_TYPE) --> STRING;
+		 */
+
 		AExpressionDefinitionDefinition formatType = new AExpressionDefinitionDefinition();
 		formatType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_FORMAT_TO_STRING"));
 		formatType.setParameters(createExpressionList("T"));
@@ -354,13 +361,12 @@ public final class ASTBuilder {
 		} else if ("FALSE".equals(value)) {
 			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
 		} else {
-			try {
-				Integer.parseInt(value);
+			if (isInteger(value)) {
 				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
 						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
 						new AIntegerExpression(new TIntegerLiteral(value)));
 				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-			} catch (NumberFormatException er) {
+			} else {
 				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
 						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
 						new AStringExpression(new TStringLiteral(value)));
@@ -368,6 +374,30 @@ public final class ASTBuilder {
 			}
 		}
 
+	}
+
+	public static boolean isInteger(String str) {
+		if (str == null) {
+			return false;
+		}
+		int length = str.length();
+		if (length == 0) {
+			return false;
+		}
+		int i = 0;
+		if (str.charAt(0) == '-') {
+			if (length == 1) {
+				return false;
+			}
+			i = 1;
+		}
+		for (; i < length; i++) {
+			char c = str.charAt(i);
+			if (c < '0' || c > '9') {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
