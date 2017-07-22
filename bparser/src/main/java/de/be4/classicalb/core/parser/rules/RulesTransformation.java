@@ -283,9 +283,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// create variables in VARIABLES clause
 		variablesList.add(cloneNode(nameIdentifier));
 
-		// create invariant in INVARIANT clause
-		// Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED",
-		// "COMPUTATION_DISABLED" }
+		/*-
+		 * create invariant in INVARIANT
+		 * Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED","COMPUTATION_DISABLED" }
+		 */
 		final List<PExpression> list = new ArrayList<>();
 		list.add(createStringExpression(COMPUTATION_EXECUTED));
 		list.add(createStringExpression(COMPUTATION_NOT_EXECUTED));
@@ -378,18 +379,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
 
-		// PrettyPrinter pp = new PrettyPrinter();
-		// select.apply(pp);
-		// System.out.println(pp.getPrettyPrint());
-
 		ArrayList<PExpression> returnValues = new ArrayList<>();
 		returnValues.add(createIdentifier(RULE_RESULT_OUTPUT_PARAMETER_NAME));
 		returnValues.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
 		operation.setReturnValues(returnValues);
 		operation.setOperationBody(select);
 
-		node.replaceBy(operation); // replacing the rule operation by an
-									// ordinary operation
+		// replacing the rule operation by an ordinary operation
+		node.replaceBy(operation);
 
 		/*********************************************************/
 
@@ -408,10 +405,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		invariantList.add(member);
 
-		/*
+		/*-
 		 * If there are no constant dependencies: rule := RULE_NOT_CHECKED
-		 * Otherwise: rule := IF dependencies THEN RULE_NOT_CHECKED ELSE
-		 * RULE_DISABLED END
+		 * Otherwise: rule := IF dependencies THEN RULE_NOT_CHECKED ELSE RULE_DISABLED END
 		 */
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
@@ -539,7 +535,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String operatorName = node.getName().getText();
 		if (RulesGrammar.RULE_FAIL.equals(operatorName)) {
 			final LinkedList<PExpression> arguments = node.getArguments();
-			// arguments is never null because a list in sablecc is empty
+			// arguments is never null because a list in SableCC is empty
 			// if not provided
 			if (arguments.size() == 1) {
 				final PSubstitution assign = createCounterExampleSubstitution(1,
