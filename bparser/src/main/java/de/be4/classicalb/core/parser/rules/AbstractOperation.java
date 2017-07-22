@@ -114,11 +114,11 @@ public abstract class AbstractOperation {
 				directDependencies.add(aIdentifier.getIdentifier().get(0).getText());
 			}
 			for (AbstractOperation abstractOperation : this.transitiveDependencies) {
-				String name = abstractOperation.getName();
+				String opName = abstractOperation.getName();
 				if (this.implicitDependenciesToComputations.contains(abstractOperation)
-						|| directDependencies.contains(name)) {
+						|| directDependencies.contains(opName)) {
 					requiredDependencies.add(abstractOperation);
-				} else if (functionCallMap.containsKey(name)) {
+				} else if (functionCallMap.containsKey(opName)) {
 					requiredDependencies.addAll(abstractOperation.getRequiredDependencies());
 				}
 			}

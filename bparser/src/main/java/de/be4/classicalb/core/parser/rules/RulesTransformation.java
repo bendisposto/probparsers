@@ -215,7 +215,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// COMPUTATION_EXECUTED));
 		// result.addAll(createPredicateListFromIdentifierLiterals(operation.getImplicitDependenciesToComputations(),
 		// COMPUTATION_EXECUTED));
-		
+
 		for (AbstractOperation op : operation.getRequiredDependencies()) {
 			if (op instanceof RuleOperation) {
 				result.add(createEqualPredicate(op.getNameLiteral(), RULE_SUCCESS));
@@ -750,44 +750,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		ANotEqualPredicate notEqual = new ANotEqualPredicate(funcCall, new AEmptySetExpression());
 		node.replaceBy(notEqual);
 		return;
-	}
-
-	@SuppressWarnings("unused")
-	private List<PPredicate> createPredicateList(final List<AIdentifierExpression> expressions, final String value) {
-		final List<PPredicate> predList = new ArrayList<>();
-		for (PExpression expr : expressions) {
-			final AEqualPredicate equal = createEqualPredicate(expr, value);
-			predList.add(equal);
-		}
-		return predList;
-	}
-
-	private AEqualPredicate createEqualPredicate(PExpression expr, final String value) {
-		PExpression e = NodeCloner.cloneNode(expr);
-		final AEqualPredicate equal = new AEqualPredicate(e, new AStringExpression(new TStringLiteral(value)));
-		equal.setStartPos(e.getStartPos());
-		equal.setEndPos(e.getEndPos());
-		return equal;
-	}
-
-	@SuppressWarnings("unused")
-	private List<PPredicate> createPredicateListFromIdentifierLiterals(final List<TIdentifierLiteral> literals,
-			final String value) {
-		final List<PPredicate> predList = new ArrayList<>();
-		for (TIdentifierLiteral old : literals) {
-			predList.add(createEqualPredicate(old, value));
-		}
-		return predList;
-	}
-
-	private AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
-		TIdentifierLiteral e = NodeCloner.cloneNode(old);
-		AIdentifierExpression aIdentifier = createAIdentifierExpression(e);
-		final AEqualPredicate equal = new AEqualPredicate(aIdentifier,
-				new AStringExpression(new TStringLiteral(value)));
-		equal.setStartPos(e.getStartPos());
-		equal.setEndPos(e.getEndPos());
-		return equal;
 	}
 
 	private void replacePredicateOperator(final AOperatorPredicate node, List<PExpression> copy,

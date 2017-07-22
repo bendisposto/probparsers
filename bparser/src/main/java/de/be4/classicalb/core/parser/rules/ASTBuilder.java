@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
 import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
+import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
@@ -34,6 +35,7 @@ import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public final class ASTBuilder {
@@ -164,6 +166,25 @@ public final class ASTBuilder {
 		return list;
 	}
 
+	public static List<PPredicate> createPredicateListFromIdentifierLiterals(final List<TIdentifierLiteral> literals,
+			final String value) {
+		final List<PPredicate> predList = new ArrayList<>();
+		for (TIdentifierLiteral old : literals) {
+			predList.add(createEqualPredicate(old, value));
+		}
+		return predList;
+	}
+
+	public static AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
+		TIdentifierLiteral e = NodeCloner.cloneNode(old);
+		AIdentifierExpression aIdentifier = createAIdentifierExpression(e);
+		final AEqualPredicate equal = new AEqualPredicate(aIdentifier,
+				new AStringExpression(new TStringLiteral(value)));
+		equal.setStartPos(e.getStartPos());
+		equal.setEndPos(e.getEndPos());
+		return equal;
+	}
+
 	private static List<PExpression> createExpressionList(String... names) {
 		List<PExpression> list = new ArrayList<>();
 		for (String name : names) {
@@ -176,8 +197,11 @@ public final class ASTBuilder {
 		if (definitions.containsDefinition(TO_STRING)) {
 			return;
 		}
-		// TO_STRING(S) == "0";
-		// EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+		/*-
+		 * TO_STRING(S) == "0"; 
+		 * EXTERNAL_FUNCTION_TO_STRING(X) == X -->STRING;
+		 */
+
 		AExpressionDefinitionDefinition toStringDef = new AExpressionDefinitionDefinition();
 		toStringDef.setName(new TIdentifierLiteral(TO_STRING));
 		toStringDef.setParameters(createIdentifierList("S"));
@@ -266,11 +290,11 @@ public final class ASTBuilder {
 		 * EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
 		 */
 
-		AExpressionDefinitionDefinition ChooseDef = new AExpressionDefinitionDefinition();
-		ChooseDef.setName(new TIdentifierLiteral(CHOOSE));
-		ChooseDef.setParameters(createIdentifierList("X"));
-		ChooseDef.setRhs(new AStringExpression(new TStringLiteral("a member of X")));
-		iDefinitions.addDefinition(ChooseDef, IDefinitions.Type.Expression);
+		AExpressionDefinitionDefinition chooseDef = new AExpressionDefinitionDefinition();
+		chooseDef.setName(new TIdentifierLiteral(CHOOSE));
+		chooseDef.setParameters(createIdentifierList("X"));
+		chooseDef.setRhs(new AStringExpression(new TStringLiteral("a member of X")));
+		iDefinitions.addDefinition(chooseDef, IDefinitions.Type.Expression);
 
 		AExpressionDefinitionDefinition chooseDefType = new AExpressionDefinitionDefinition();
 		chooseDefType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_CHOOSE"));
@@ -320,16 +344,16 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(FORMAT_TO_STRING)) {
 			return;
 		}
-		// FORMAT_TO_STRING(MyFormatString,ListOfValues) == "0";
+		/*-
+		 * FORMAT_TO_STRING(MyFormatString,ListOfValues) == "0";
+		 * EXTERNAL_FUNCTION_FORMAT_TO_STRING(TO_STRING_TYPE) == STRING*seq(TO_STRING_TYPE) --> STRING;
+		 */
+
 		AExpressionDefinitionDefinition formatDef = new AExpressionDefinitionDefinition();
 		formatDef.setName(new TIdentifierLiteral(FORMAT_TO_STRING));
 		formatDef.setParameters(createExpressionList("S", "T"));
 		formatDef.setRhs(new AStringExpression(new TStringLiteral("abc")));
 		iDefinitions.addDefinition(formatDef, IDefinitions.Type.Expression);
-
-		/*-
-		 * EXTERNAL_FUNCTION_FORMAT_TO_STRING(TO_STRING_TYPE) == STRING*seq(TO_STRING_TYPE) --> STRING;
-		 */
 
 		AExpressionDefinitionDefinition formatType = new AExpressionDefinitionDefinition();
 		formatType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_FORMAT_TO_STRING"));

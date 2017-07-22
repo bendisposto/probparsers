@@ -66,7 +66,7 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 	private Map<PositionedNode, SourcecodeRange> positions;
 
-	public static String getVersion() throws IOException {
+	public static String getVersion() {
 		Properties p = loadProperties();
 		if (p != null) {
 			return p.getProperty("version");
@@ -75,7 +75,7 @@ public class BParser {
 		}
 	}
 
-	public static String getGitSha() throws IOException {
+	public static String getGitSha() {
 		Properties p = loadProperties();
 		if (p != null) {
 			return p.getProperty("git");
