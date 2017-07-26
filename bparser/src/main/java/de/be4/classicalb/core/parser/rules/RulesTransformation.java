@@ -39,7 +39,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private final IDefinitions iDefinitions;
 	private final Start start;
-	private final RulesMachineChecker rulesMachineVisitor;
+	private final RulesMachineChecker rulesMachineChecker;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 	private ArrayList<String> ruleNames = new ArrayList<>();
 	private ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
@@ -50,6 +50,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private List<PSubstitution> initialisationList = new ArrayList<>();
 
 	private RuleOperation currentRule;
+	private TIdentifierLiteral currentComputationIdentifier;
 	private Map<String, AbstractOperation> allOperations;
 
 	// used to provide unique identifiers for generated variables of FOR loops
@@ -81,7 +82,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			Map<String, AbstractOperation> allOperations) {
 		this.start = start;
 		this.iDefinitions = bParser.getDefinitions();
-		this.rulesMachineVisitor = rulesMachineChecker;
+		this.rulesMachineChecker = rulesMachineChecker;
 		this.allOperations = allOperations;
 
 		for (AbstractOperation operation : allOperations.values()) {
@@ -100,14 +101,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (!this.errorList.isEmpty()) {
 			List<BException> list = new ArrayList<>();
 			for (CheckException checkException : this.errorList) {
-				list.add(new BException(this.rulesMachineVisitor.getFileName(), checkException));
+				list.add(new BException(this.rulesMachineChecker.getFileName(), checkException));
 			}
 			throw new BCompoundException(list);
 		}
 	}
 
 	public List<AbstractOperation> getOperations() {
-		return this.rulesMachineVisitor.getOperations();
+		return this.rulesMachineChecker.getOperations();
 	}
 
 	public List<String> getComputations() {
@@ -203,19 +204,19 @@ public class RulesTransformation extends DepthFirstAdapter {
 			node.replaceBy(null);
 			return;
 		} else {
+			ComputationOperation computationOperation = this.rulesMachineChecker.getComputationOperation(node);
+			if (computationOperation.replacesOperation()) {
+				this.currentComputationIdentifier = computationOperation.getReplacesIdentifier().getIdentifier()
+						.getFirst();
+			} else {
+				this.currentComputationIdentifier = computationOperation.getNameLiteral();
+			}
 			super.caseAComputationOperation(node);
 		}
 	}
 
 	public List<PPredicate> getOperationDependenciesAsPredicateList(AbstractOperation operation) {
 		List<PPredicate> result = new ArrayList<>();
-		// result.addAll(createPredicateList(operation.getDependsOnRulesList(),
-		// RULE_SUCCESS));
-		// result.addAll(createPredicateList(operation.getDependsOnComputationList(),
-		// COMPUTATION_EXECUTED));
-		// result.addAll(createPredicateListFromIdentifierLiterals(operation.getImplicitDependenciesToComputations(),
-		// COMPUTATION_EXECUTED));
-
 		for (AbstractOperation op : operation.getRequiredDependencies()) {
 			if (op instanceof RuleOperation) {
 				result.add(createEqualPredicate(op.getNameLiteral(), RULE_SUCCESS));
@@ -228,7 +229,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAComputationOperation(AComputationOperation node) {
-		final ComputationOperation compOperation = this.rulesMachineVisitor.getComputationOperation(node);
+		final ComputationOperation compOperation = this.rulesMachineChecker.getComputationOperation(node);
 		computationLiteralList.add(node.getName());
 		if (operationsToBeDeleted.contains(node.getName().getText())) {
 			node.replaceBy(null);
@@ -284,7 +285,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		variablesList.add(cloneNode(nameIdentifier));
 
 		/*-
-		 * create invariant in INVARIANT
+		 * create predicate in INVARIANT
 		 * Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED","COMPUTATION_DISABLED" }
 		 */
 		final List<PExpression> list = new ArrayList<>();
@@ -293,6 +294,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(createStringExpression(COMPUTATION_DISABLED));
 		final ASetExtensionExpression set = new ASetExtensionExpression(list);
 		final AMemberPredicate member = new AMemberPredicate(cloneNode(nameIdentifier), set);
+
 		invariantList.add(member);
 
 		PExpression value;
@@ -310,7 +312,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
-		if (operationsToBeDeleted.contains(this.rulesMachineVisitor.getRuleOperation(node).getName())) {
+		if (operationsToBeDeleted.contains(this.rulesMachineChecker.getRuleOperation(node).getName())) {
 			node.replaceBy(null);
 			return;
 		} else {
@@ -322,7 +324,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void inARuleOperation(ARuleOperation node) {
 		// setting current rule
-		this.currentRule = this.rulesMachineVisitor.getRuleOperation(node);
+		this.currentRule = this.rulesMachineChecker.getRuleOperation(node);
 	}
 
 	@Override
@@ -598,8 +600,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
+		final TIdentifierLiteral computationIdentifierLiteral = cloneNode(this.currentComputationIdentifier);
+		PPredicate compExecuted = new AEqualPredicate(createAIdentifierExpression(computationIdentifierLiteral),
+				createStringExpression(COMPUTATION_EXECUTED));
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
-		invariantList.add(member);
+		final AImplicationPredicate impl = new AImplicationPredicate(compExecuted, member);
+		invariantList.add(impl);
 
 		if (node.getDummyValue() != null) {
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), node.getDummyValue()));
@@ -638,7 +644,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAFunctionOperation(AFunctionOperation node) {
-		FunctionOperation func = rulesMachineVisitor.getFunctionOperation(node);
+		FunctionOperation func = rulesMachineChecker.getFunctionOperation(node);
 
 		final List<PPredicate> preConditionList = new ArrayList<>();
 		if (func.getPreconditionPredicate() != null) {
