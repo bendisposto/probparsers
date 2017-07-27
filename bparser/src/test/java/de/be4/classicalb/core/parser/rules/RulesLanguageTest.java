@@ -91,8 +91,8 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleAny() throws FileNotFoundException, IOException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_ANY x WHERE x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
+	public void testRuleFail2() throws FileNotFoundException, IOException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -140,33 +140,8 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleOperation() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({}) END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue("Invalid variables transformation",
-				result.contains("variables(none,[identifier(none,foo),identifier(none,foo_Counterexamples)])"));
-		assertTrue("Invalid invariant transformation", result.contains(
-				"invariant(none,conjunct(none,member(none,identifier(none,foo),set_extension(none,[string(none,'FAIL'),string(none,'SUCCESS'),string(none,'NOT_CHECKED'),string(none,'DISABLED')]))"));
-
-		assertTrue("Invalid invariant transformation", result.contains(
-				"member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none)))"));
-
-	}
-
-	@Test
-	public void testRuleFailErrorType() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
-		String result = getRulesMachineAsBMachine(testMachine);
-		System.out.println(result);
-		// TODO do not use the prettyprinter
-		assertTrue(result.contains("foo_Counterexamples := foo_Counterexamples\\/{2}*{\"fail\"}"));
-
-	}
-
-	@Test
 	public void testRuleCounterexmples() {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL( \"fail\") END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"fail\" END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
@@ -194,7 +169,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleId() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL(\"Rule violated\") END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
@@ -267,14 +242,6 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleFailNoMessage() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL requires at least one argument.').\n", result);
-	}
-
-	@Test
 	public void testRuleIfThenElse() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
@@ -321,8 +288,8 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS foo == 1 END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue("Invalid definition injector", result.contains(
-				"expression_definition(none,foo,[],integer(none,1))"));
+		assertTrue("Invalid definition injector",
+				result.contains("expression_definition(none,foo,[],integer(none,1))"));
 		assertFalse(result.contains("exception"));
 	}
 

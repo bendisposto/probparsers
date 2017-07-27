@@ -5,6 +5,8 @@ OPERATIONS
   RULE rule1
   RULEID id1
   BODY
-      RULE_FAIL({"fail"})
+      RULE_FAIL
+      COUNTEREXAMPLE "fail"
+      END
   END
 END

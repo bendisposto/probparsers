@@ -58,7 +58,6 @@ import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
@@ -66,7 +65,8 @@ import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
 import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
+import de.be4.classicalb.core.parser.node.ARuleFailParametersWhen;
+import de.be4.classicalb.core.parser.node.ARuleFailSubSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
@@ -762,41 +762,21 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAOperatorSubstitution(AOperatorSubstitution node) {
-		final String operatorName = node.getName().getText();
-		if (RulesGrammar.RULE_FAIL.equals(operatorName)) {
-			if (!isInRule()) {
-				errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
-			}
-			if (node.getArguments().isEmpty()) {
-				errorList.add(new CheckException("RULE_FAIL requires at least one argument.", node));
-			}
-			if (node.getArguments().size() == 2) {
-				if (node.getArguments().get(0) instanceof AIntegerExpression) {
-					AIntegerExpression intExpr = (AIntegerExpression) node.getArguments().get(0);
-					checkErrorType(intExpr.getLiteral());
-				} else {
-					errorList.add(new CheckException("The first argument of RULE_FAIL must be an integer.", node));
-				}
-			} else if (node.getArguments().size() > 2) {
-				errorList.add(new CheckException("RULE_FAIL has at most two argument.", node));
-			}
-			return;
-		} else {
-			throw new AssertionError("Unkown substitution operator: " + operatorName);
-		}
-	}
-
-	@Override
-	public void caseARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
+	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_ANY used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
-		node.getWhere().apply(this);
+		inARuleFailSubSubstitution(node);
+		if (node.getRuleFailParametersWhen() != null) {
+			ARuleFailParametersWhen ruleFailParametersWhen = (ARuleFailParametersWhen) node.getRuleFailParametersWhen();
+			this.identifierScope.createNewScope(new LinkedList<PExpression>(ruleFailParametersWhen.getIdentifiers()));
+			node.getRuleFailParametersWhen().apply(this);
+		}
 		node.getMessage().apply(this);
-		this.identifierScope.removeScope();
+		if (node.getRuleFailParametersWhen() != null) {
+			this.identifierScope.removeScope();
+		}
 		checkErrorType(node.getErrorType());
 	}
 

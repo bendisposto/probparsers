@@ -368,7 +368,7 @@ Tokens
   {normal} kw_attribute_identifier = identifier_literal;
   {normal} kw_for = 'FOR';
   {normal} kw_rule_for_all = 'RULE_FORALL';
-  {normal} kw_rule_any = 'RULE_ANY';
+  {normal} kw_rule_fail = 'RULE_FAIL';
   {normal} kw_rule_error_type = 'ERROR_TYPE';
   {normal} kw_expect = 'EXPECT';
   {normal} kw_computation = 'COMPUTATION';
@@ -951,12 +951,14 @@ substitution_l3 {-> substitution} =
     {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
     {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression)} |
-  {rule_any_message_sub} kw_rule_any [identifiers]:identifier_list where [where_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
-    {-> New substitution.rule_any_sub_message([identifiers.expression], where_pred.predicate, error_type.integer_literal, message.expression)} |
+  {rule_fail_sub} kw_rule_fail [params_when]:rule_fail_parameters_when? [error_type]:error_type? kw_counterexample [message]:expression_top end
+    {-> New substitution.rule_fail_sub(params_when.rule_fail_parameters_when, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
   {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
   	{-> New substitution.define(name, type.expression, dummy.expression, value.expression)}
   ;
+  
+rule_fail_parameters_when {-> rule_fail_parameters_when} = [identifiers]:identifier_list when [when_pred]:predicate_top {-> New rule_fail_parameters_when([identifiers.expression], when_pred.predicate) };
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id };
@@ -1367,7 +1369,7 @@ expression =
 
 rec_entry = [identifier]:expression [value]:expression;
 
-
+rule_fail_parameters_when = [identifiers]:expression* [when]:predicate;
 
 /* Substitutions */
 substitution =
@@ -1398,7 +1400,7 @@ substitution =
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
   {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
-  {rule_any_sub_message}  [identifiers]:expression* [where]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
+  {rule_fail_sub}  rule_fail_parameters_when? [error_type]:integer_literal? [message]:expression | //extension for rules
   {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | //extension for rules
   {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression ; //extension for rules

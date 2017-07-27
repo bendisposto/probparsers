@@ -532,36 +532,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return;
 	}
 
-	@Override
-	public void outAOperatorSubstitution(AOperatorSubstitution node) {
-		final String operatorName = node.getName().getText();
-		if (RulesGrammar.RULE_FAIL.equals(operatorName)) {
-			final LinkedList<PExpression> arguments = node.getArguments();
-			// arguments is never null because a list in SableCC is empty
-			// if not provided
-			if (arguments.size() == 1) {
-				final PSubstitution assign = createCounterExampleSubstitution(1,
-						createSetOfPExpression(arguments.get(0), node));
-				node.replaceBy(assign);
-				return;
-			} else if (arguments.size() == 2) {
-				PExpression pExpression = node.getArguments().get(0);
-				if (pExpression instanceof AIntegerExpression) {
-					AIntegerExpression intExpr = (AIntegerExpression) pExpression;
-					final int errorIndex = Integer.parseInt(intExpr.getLiteral().getText());
-					final PSubstitution assign = createCounterExampleSubstitution(errorIndex,
-							createSetOfPExpression(arguments.get(1), node));
-					node.replaceBy(assign);
-					return;
-				} else {
-					throw new AssertionError();
-				}
-			}
-		} else {
-			throw new AssertionError();
-		}
-	}
-
 	private AAssignSubstitution createRuleSuccessAssignment(final TIdentifierLiteral ruleLiteral) {
 		final ArrayList<PExpression> nameList = new ArrayList<>();
 		final ArrayList<PExpression> exprList = new ArrayList<>();
@@ -847,11 +817,23 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
+	public void outARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		addForceDefinition(iDefinitions);
-		final PSubstitution newNode = createPositinedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
-				node.getWhere(), null, node.getMessage(), node.getErrorType()), node);
+		Node newNode = null;
+		if (node.getRuleFailParametersWhen() != null) {
+			ARuleFailParametersWhen ruleFailParametersWhen = (ARuleFailParametersWhen) node.getRuleFailParametersWhen();
+			newNode = createPositinedNode(createCounterExampleSubstitutions(ruleFailParametersWhen.getIdentifiers(),
+					ruleFailParametersWhen.getWhen(), null, node.getMessage(), node.getErrorType()), node);
+		} else {
+			int errorType = 1; // default value if no value is provided
+			if (node.getErrorType() != null) {
+				errorType = Integer.parseInt(node.getErrorType().getText());
+			}
+			newNode = createCounterExampleSubstitution(errorType,
+					createSetOfPExpression(node.getMessage(), node.getMessage()));
+		}
 		node.replaceBy(newNode);
+
 	}
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,

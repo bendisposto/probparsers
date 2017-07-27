@@ -18,11 +18,10 @@ import de.be4.classicalb.core.parser.node.TKwPredicateAttribute;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 import de.be4.classicalb.core.parser.node.TKwReferences;
 import de.be4.classicalb.core.parser.node.TKwRule;
-import de.be4.classicalb.core.parser.node.TKwRuleAny;
 import de.be4.classicalb.core.parser.node.TKwRuleErrorType;
+import de.be4.classicalb.core.parser.node.TKwRuleFail;
 import de.be4.classicalb.core.parser.node.TKwRuleForAll;
 import de.be4.classicalb.core.parser.node.TKwRulesMachine;
-import de.be4.classicalb.core.parser.node.TKwSubstitutionOperator;
 import de.be4.classicalb.core.parser.node.TKwType;
 import de.be4.classicalb.core.parser.node.TKwValue;
 import de.be4.classicalb.core.parser.node.TMachine;
@@ -53,7 +52,7 @@ public class RulesGrammar implements IGrammar {
 
 	public static final String TAGS = "TAGS";
 
-	public static final String RULE_FAIL = "RULE_FAIL";
+	// public static final String RULE_FAIL = "RULE_FAIL";
 
 	private static RulesGrammar ruleExtension;
 
@@ -82,7 +81,7 @@ public class RulesGrammar implements IGrammar {
 		add(TKwDummyValue.class);
 		add(TKwFunction.class);
 		add(TKwReferences.class);
-		add(TKwRuleAny.class);
+		add(TKwRuleFail.class);
 		add(TKwRuleErrorType.class);
 		add(TKwBody.class);
 
@@ -107,7 +106,6 @@ public class RulesGrammar implements IGrammar {
 		map.put(PRECONDITION, TKwPredicateAttribute.class);
 		map.put(POSTCONDITION, TKwPredicateAttribute.class);
 
-		map.put(RULE_FAIL, TKwSubstitutionOperator.class);
 		map.put(GET_RULE_COUNTEREXAMPLES, TKwExpressionOperator.class);
 		map.put(STRING_FORMAT, TKwExpressionOperator.class);
 		map.put(STRING_CONCAT, TKwExpressionOperator.class);
