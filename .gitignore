@@ -35,3 +35,6 @@ build.xml
 bparser/src/test/java/Testing.java
 build.properties
 bparser-build.properties
+bparser/doc
+typechecker/doc
+translator/doc
