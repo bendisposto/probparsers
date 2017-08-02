@@ -58,7 +58,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	 *            the IPrologTermOutput to which the formula is printed
 	 * 
 	 */
-	public void printFormula(Start start, final IPrologTermOutput pout) {
+	public static void printFormula(Start start, final IPrologTermOutput pout) {
 		NodeIdAssignment na = new NodeIdAssignment();
 		start.apply(na);
 		OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
