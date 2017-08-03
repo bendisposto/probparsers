@@ -6,6 +6,8 @@ import frege.main.FregeInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +24,7 @@ class FregeCspParser {
             return "frege_facts(ok).\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage() + "\n";
+            return exceptionAsPrologTerm(e);
         }
     }
 
@@ -34,21 +36,26 @@ class FregeCspParser {
             return "frege_facts(ok).\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage() + "\n";
+            return exceptionAsPrologTerm(e);
         }
     }
 
+    /**
+     * Parses a CSPM file to Prolog, writes the Prolog code to a file and returns the written facts as list.
+     * @param in containing two lines: input csp file name and output prolog file name
+     * @return frege_facts/1 predicate with the list of facts returned by the Frege CSPM parser
+     */
     static String cspToProlog(BufferedReader in) {
         try {
-            String inputCspFileName = in.readLine();
-            String outputPlFileName = in.readLine();
-            FregeInterface.evaluateIOUnitFunction(TranslateToProlog.translateToProlog(inputCspFileName, outputPlFileName));
+            final String inputCspFileName = in.readLine();
+            final String outputPlFileName = in.readLine();
             String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
+            Files.write(Paths.get(outputPlFileName), prologCode.getBytes());
             String listOfFacts = getListOfFacts(prologCode);
             return "frege_facts(" + listOfFacts + ").\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage() + "\n";
+            return exceptionAsPrologTerm(e);
         }
     }
 
@@ -61,7 +68,7 @@ class FregeCspParser {
             return "frege_facts(" + listOfFacts + ").\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage() + "\n";
+            return exceptionAsPrologTerm(e);
         }
     }
 
@@ -74,5 +81,9 @@ class FregeCspParser {
             }
         }
         return "["+String.join(",", facts)+"]";
+    }
+
+    private static String exceptionAsPrologTerm(Exception exception) {
+        return "'parseResult'('exception','" + exception.getMessage() + "',0,0,0).";
     }
 }
