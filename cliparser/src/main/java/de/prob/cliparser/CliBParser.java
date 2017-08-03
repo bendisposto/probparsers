@@ -244,16 +244,16 @@ public class CliBParser {
 				break;
 
 			case cspfrege_prologout:
-				cspToProlog(in);
+				print(cspToProlog(in));
 				break;
 			case cspfrege_addunicode:
-				addUnicode(in);
+				print(addUnicode(in));
 				break;
 			case cspfrege_removeunicode:
-				removeUnicode(in);
+				print(removeUnicode(in));
 				break;
 			case cspfrege_declaration:
-				translateCspDeclarationToProlog(in);
+				print(translateCspDeclarationToProlog(in));
 				break;
 			case halt:
 				socket.close();
@@ -371,7 +371,7 @@ public class CliBParser {
 		}
 	}
 
-	static void print(String output) {
+	private static void print(String output) {
 		try {
 			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
 			out.print(output);
