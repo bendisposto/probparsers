@@ -447,7 +447,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AAssignSubstitution(nameList, exprList);
 	}
 
-	private ADefinitionExpression applyExternalFunction(String name, PExpression... expressions) {
+	private ADefinitionExpression callExternalFunction(String name, PExpression... expressions) {
 		return new ADefinitionExpression(new TIdentifierLiteral(name), createExpressionList(expressions));
 	}
 
@@ -458,9 +458,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		switch (operatorName) {
 		case RulesGrammar.STRING_FORMAT:
 			translateStringFormatOperator(node, parameters);
-			return;
-		case RulesGrammar.STRING_CONCAT:
-			translateStringConcatOperator(node, parameters);
 			return;
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
 			translateGetRuleCounterExamplesOperator(node);
@@ -491,22 +488,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 					rule.getNumberOfErrorTypes());
 			node.replaceBy(funcCall);
 		}
-		return;
-	}
-
-	private void translateStringConcatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
-		PExpression temp = null;
-		addToStringDefinition(iDefinitions);
-		addStringAppendDefinition(iDefinitions);
-		for (int i = parameters.size() - 2; i >= 0; i--) {
-			if (temp == null) {
-				temp = applyExternalFunction(STRING_APPEND, applyExternalFunction(TO_STRING, parameters.get(i)),
-						applyExternalFunction(TO_STRING, parameters.get(i + 1)));
-			} else {
-				temp = applyExternalFunction(STRING_APPEND, applyExternalFunction(TO_STRING, parameters.get(i)), temp);
-			}
-		}
-		node.replaceBy(temp);
 		return;
 	}
 
@@ -789,22 +770,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 		whileSub.setDoSubst(varSub2);
 		varSub2.setIdentifiers(createExpressionList((PExpression) cloneNode(node.getIdentifier())));
 
-		// x := CHOOSE(set);
+		// <code> x := CHOOSE(set); </code>
 		addChooseDefinition(iDefinitions);
-		PExpression chooseCall = new ADefinitionExpression(new TIdentifierLiteral(CHOOSE),
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())));
+
+		PExpression chooseCall = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
 		PSubstitution assignX = new AAssignSubstitution(
 				createExpressionList((PExpression) cloneNode(node.getIdentifier())), createExpressionList(chooseCall));
 
 		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
-		PExpression chooseCall2 = new ADefinitionExpression(new TIdentifierLiteral(CHOOSE),
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet()))); // CHOOSE(G_Set)
+		PExpression chooseCall2 = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet())); // CHOOSE(G_Set)
 
 		// <code> G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
 				new ASetExtensionExpression(createExpressionList(chooseCall2)));
 
-		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
 		List<PSubstitution> var2List = new ArrayList<>();

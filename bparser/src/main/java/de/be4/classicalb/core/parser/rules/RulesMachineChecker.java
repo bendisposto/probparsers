@@ -519,12 +519,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		case RulesGrammar.STRING_FORMAT:
 			checkStringFormatOperator(node, parameters);
 			return;
-		case RulesGrammar.STRING_CONCAT:
-			if (parameters.size() < 2) {
-				this.errorList.add(new CheckException(
-						"Invalid number of arguments. Expected two more arguments of operator CONCAT_STRINGS.", node));
-			}
-			return;
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
 			checkGetTuleCounterExamplesOperator(node, parameters);
 			return;

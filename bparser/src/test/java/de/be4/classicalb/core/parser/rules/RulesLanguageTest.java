@@ -25,16 +25,6 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testStringConcat() {
-		final String testMachine = "RULES_MACHINE Test PROPERTIES STRING_CONCAT(1,2,3) = \"123\" END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(!result.contains("exception"));
-		assertTrue(result.contains("expression_definition(none,'STRING_APPEND'"));
-		assertTrue(result.contains("expression_definition(none,'TO_STRING'"));
-	}
-
-	@Test
 	public void testRuleTags() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);

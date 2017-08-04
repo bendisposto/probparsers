@@ -45,7 +45,6 @@ public class RulesGrammar implements IGrammar {
 	public static final String RULEID = "RULEID";
 
 	public static final String STRING_FORMAT = "STRING_FORMAT";
-	public static final String STRING_CONCAT = "STRING_CONCAT";
 	public static final String ACTIVATION = "ACTIVATION";
 	public static final String PRECONDITION = "PRECONDITION";
 	public static final String POSTCONDITION = "POSTCONDITION";
@@ -108,7 +107,6 @@ public class RulesGrammar implements IGrammar {
 
 		map.put(GET_RULE_COUNTEREXAMPLES, TKwExpressionOperator.class);
 		map.put(STRING_FORMAT, TKwExpressionOperator.class);
-		map.put(STRING_CONCAT, TKwExpressionOperator.class);
 	}
 
 	private static void add(Class<? extends Token> clazz) {
