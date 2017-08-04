@@ -21,7 +21,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testProject2() throws Exception {
-		File file = new File("src/test/resources/rules/project/references/test1/Rule1.rmch");
+		File file = new File(dir + "project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
@@ -42,6 +42,21 @@ public class RulesMachineFilesTest {
 		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("'Cyclic dependencies between operations: compute_xx -> FUNC_add -> compute_xx'"));
+	}
+
+	@Test
+	public void testReadXML() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "ReadXML.rmch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testReadInvalidXML() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "ReadInvalidXML.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("'XML document structures must start and end within the same entity.'"));
+
 	}
 
 	@Test

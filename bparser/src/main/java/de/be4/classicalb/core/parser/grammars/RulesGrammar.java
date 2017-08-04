@@ -29,6 +29,8 @@ import de.be4.classicalb.core.parser.node.Token;
 
 public class RulesGrammar implements IGrammar {
 
+	private static final String INSTANTIATION_ERROR_MESSAGE = "Cannot create an instance of class: ";
+
 	public static final String SUCCEEDED_RULE = "SUCCEEDED_RULE";
 	public static final String SUCCEEDED_RULE_ERROR_TYPE = "SUCCEEDED_RULE_ERROR_TYPE";
 	public static final String FAILED_RULE = "FAILED_RULE";
@@ -51,8 +53,6 @@ public class RulesGrammar implements IGrammar {
 	public static final String REPLACES = "REPLACES";
 
 	public static final String TAGS = "TAGS";
-
-	// public static final String RULE_FAIL = "RULE_FAIL";
 
 	private static RulesGrammar ruleExtension;
 
@@ -115,7 +115,7 @@ public class RulesGrammar implements IGrammar {
 		try {
 			map.put(clazz.newInstance().getText(), clazz);
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
+			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}
 
@@ -149,10 +149,10 @@ public class RulesGrammar implements IGrammar {
 				return newInstance;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-				throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e1);
+				throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e1);
 			}
 		} catch (IllegalAccessException e) {
-			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
+			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}
 

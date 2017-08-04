@@ -1,0 +1,21 @@
+RULES_MACHINE ReadXML
+DEFINITIONS
+XML_Element_Type ==
+     struct(
+       recId: NATURAL1,
+       pId:NATURAL,
+       element:STRING,
+       attributes: STRING +-> STRING,
+       meta: STRING +-> STRING
+       );
+EXTERNAL_FUNCTION_READ_XML_FROM_STRING == STRING --> seq(XML_Element_Type);
+READ_XML_FROM_STRING(string) == {};
+CONSTANTS data
+PROPERTIES
+  data = READ_XML_FROM_STRING(
+'''
+<?xml version="1.0" encoding="ASCII"?>
+<foo/>
+'''
+)
+END

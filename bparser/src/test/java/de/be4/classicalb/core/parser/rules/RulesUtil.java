@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -75,7 +74,7 @@ public class RulesUtil {
 		return pp.getPrettyPrint();
 	}
 
-	public static String getFileAsPrologTerm(final String file) throws FileNotFoundException, IOException {
+	public static String getFileAsPrologTerm(final String file) {
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(false);
 		OutputStream output = new OutputStream() {

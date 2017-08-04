@@ -2,9 +2,6 @@ package de.be4.classicalb.core.parser.rules;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.junit.Test;
 
 import static de.be4.classicalb.core.parser.rules.RulesUtil.*;
@@ -55,7 +52,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testForAllPredicate() throws FileNotFoundException, IOException {
+	public void testForAllPredicate() {
 		String file = "src/test/resources/rules/ForAllPredicate.rmch";
 		String result = getFileAsPrologTerm(file);
 		System.out.println(result);
@@ -63,7 +60,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testStringFormat() throws FileNotFoundException, IOException {
+	public void testStringFormat() {
 		final String testMachine = "RULES_MACHINE Test PROPERTIES STRING_FORMAT(\" ~w ~w \", 1) = \" 1 2 \" END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
@@ -72,7 +69,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleForall() throws FileNotFoundException, IOException {
+	public void testRuleForall()  {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id11 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
@@ -82,7 +79,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testDublicateRuleName() throws FileNotFoundException, IOException {
+	public void testDublicateRuleName() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
@@ -91,8 +88,18 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleFail2() throws FileNotFoundException, IOException {
+	public void testRuleFail2() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testRuleFailWithoutParametersButWitWhenPredicate() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL WHEN 1=1 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));

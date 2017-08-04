@@ -796,15 +796,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PSubstitution assignX = new AAssignSubstitution(
 				createExpressionList((PExpression) cloneNode(node.getIdentifier())), createExpressionList(chooseCall));
 
-		// G_Set := G_Set \ {CHOOSE(G_Set)}
+		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression chooseCall2 = new ADefinitionExpression(new TIdentifierLiteral(CHOOSE),
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet()))); // CHOOSE(G_Set)
 
-		// G_Set \ {CHOOSE(G_Set)}
+		// <code> G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
 				new ASetExtensionExpression(createExpressionList(chooseCall2)));
 
-		// G_Set := G_Set \ {CHOOSE(G_Set)}
+		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
 		List<PSubstitution> var2List = new ArrayList<>();
@@ -820,17 +820,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void outARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		addForceDefinition(iDefinitions);
 		Node newNode = null;
-		if (node.getRuleFailParametersWhen() != null) {
-			ARuleFailParametersWhen ruleFailParametersWhen = (ARuleFailParametersWhen) node.getRuleFailParametersWhen();
-			newNode = createPositinedNode(createCounterExampleSubstitutions(ruleFailParametersWhen.getIdentifiers(),
-					ruleFailParametersWhen.getWhen(), null, node.getMessage(), node.getErrorType()), node);
+		if (!node.getIdentifiers().isEmpty()) {
+			newNode = createPositinedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(), null,
+					node.getMessage(), node.getErrorType()), node);
 		} else {
 			int errorType = 1; // default value if no value is provided
 			if (node.getErrorType() != null) {
 				errorType = Integer.parseInt(node.getErrorType().getText());
 			}
-			newNode = createCounterExampleSubstitution(errorType,
+			PSubstitution sub = createCounterExampleSubstitution(errorType,
 					createSetOfPExpression(node.getMessage(), node.getMessage()));
+			if (node.getWhen() != null) {
+				// there is a when predicate but no parameters
+				newNode = new AIfSubstitution(node.getWhen(), sub, new ArrayList<PSubstitution>(), null);
+			} else {
+				// no parameters and no when predicate
+				newNode = sub;
+			}
+
 		}
 		node.replaceBy(newNode);
 

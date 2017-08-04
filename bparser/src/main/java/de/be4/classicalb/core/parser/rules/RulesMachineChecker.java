@@ -65,7 +65,6 @@ import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
 import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.ARuleFailParametersWhen;
 import de.be4.classicalb.core.parser.node.ARuleFailSubSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
@@ -200,12 +199,12 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
-		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+		this.knownIdentifier.addKnownIdentifierList(node.getIdentifiers());
 	}
 
 	@Override
 	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
-		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+		this.knownIdentifier.addKnownIdentifierList(node.getIdentifiers());
 	}
 
 	@Override
@@ -223,8 +222,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
-		this.knownIdentifier.addTIdentifier(copy.get(0));
-		this.knownIdentifier.addIdentifier(new ArrayList<PExpression>(node.getElements()));
+		this.knownIdentifier.addKnownIdentifier(copy.get(0));
+		this.knownIdentifier.addKnownIdentifierList(new ArrayList<PExpression>(node.getElements()));
 	}
 
 	class OccurredAttributes {
@@ -487,7 +486,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			ComputationOperation computationOperation = (ComputationOperation) currentOperation;
 			try {
 				computationOperation.addDefineVariable(node.getName());
-				this.knownIdentifier.addTIdentifier(node.getName());
+				this.knownIdentifier.addKnownIdentifier(node.getName());
 			} catch (CheckException e) {
 				this.errorList.add(e);
 			}
@@ -767,16 +766,17 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
 			return;
 		}
-		inARuleFailSubSubstitution(node);
-		if (node.getRuleFailParametersWhen() != null) {
-			ARuleFailParametersWhen ruleFailParametersWhen = (ARuleFailParametersWhen) node.getRuleFailParametersWhen();
-			this.identifierScope.createNewScope(new LinkedList<PExpression>(ruleFailParametersWhen.getIdentifiers()));
-			node.getRuleFailParametersWhen().apply(this);
+		if (!node.getIdentifiers().isEmpty() && node.getWhen() == null) {
+			this.errorList.add(new CheckException(
+					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
+			return;
+		}
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		if (node.getWhen() != null) {
+			node.getWhen().apply(this);
 		}
 		node.getMessage().apply(this);
-		if (node.getRuleFailParametersWhen() != null) {
-			this.identifierScope.removeScope();
-		}
+		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
 	}
 
@@ -1043,19 +1043,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseADeferredSetSet(ADeferredSetSet node) {
-		errorList.add(new CheckException("The DeferredSet clause not allowed in a RULES_MACHINE.", node));
+		errorList.add(new CheckException("Deferred sets are not allowed in a RULES_MACHINE.", node));
 	}
 
 	class KnownIdentifier {
 		Set<String> knownIdentifiers = new HashSet<>();
 
-		public void addIdentifier(List<PExpression> parameters) {
+		public void addKnownIdentifierList(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
-				this.addPExpression(pExpression);
+				this.addKnownIdentifier(pExpression);
 			}
 		}
 
-		public void addTIdentifier(TIdentifierLiteral identifier) {
+		public void addKnownIdentifier(TIdentifierLiteral identifier) {
 			knownIdentifiers.add(identifier.getText());
 		}
 
@@ -1063,7 +1063,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return this.knownIdentifiers;
 		}
 
-		public void addPExpression(PExpression expression) {
+		public void addKnownIdentifier(PExpression expression) {
 			if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
 				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
@@ -1086,10 +1086,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	class LocalIdentifierScope {
 		private final LinkedList<Set<String>> localVariablesScope = new LinkedList<>();
-
-		public void createNewScope(final Set<String> identifiers) {
-			this.localVariablesScope.add(identifiers);
-		}
 
 		public void createNewScope(final List<PExpression> parameters) {
 			final HashSet<String> set = new HashSet<>();
