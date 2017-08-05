@@ -74,6 +74,21 @@ class FregeCspParser {
         }
     }
 
+    static String translateCspExpressionToProlog(BufferedReader in) {
+        try {
+            String cspExpression = in.readLine();
+            String inputCspFileName = in.readLine();
+            String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExpToPrologTerm(FregeInterface.just(inputCspFileName), cspExpression));
+            String listOfFacts = getListOfFacts(prologExpression);
+            return "frege_facts(" + listOfFacts + ").\n";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return exceptionAsPrologTerm(e);
+        } catch (frege.runtime.WrappedCheckedException e) {
+            return "frege_facts('" + e.getCause().getLocalizedMessage() + "').\n";
+        }
+    }
+
     private static String getListOfFacts(String prologCode) {
         List<String> facts = new LinkedList<>();
         String[] lines = prologCode.split("\n");

@@ -255,6 +255,9 @@ public class CliBParser {
 			case cspfrege_declaration:
 				print(translateCspDeclarationToProlog(in));
 				break;
+			case cspfrege_expression:
+				print(translateCspExpressionToProlog(in));
+				break;
 			case halt:
 				socket.close();
 				serverSocket.close();
