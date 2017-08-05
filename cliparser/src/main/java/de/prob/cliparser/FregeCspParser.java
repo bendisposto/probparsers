@@ -69,6 +69,8 @@ class FregeCspParser {
         } catch (IOException e) {
             e.printStackTrace();
             return exceptionAsPrologTerm(e);
+        } catch (frege.runtime.WrappedCheckedException e) {
+            return "frege_facts('" + e.getCause().getLocalizedMessage() + "').\n";
         }
     }
 
