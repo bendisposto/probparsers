@@ -808,16 +808,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
 		node.getSet().apply(this);
-		LinkedList<PExpression> linkedList = new LinkedList<>();
-		linkedList.add(node.getIdentifier());
-		this.identifierScope.createNewScope(linkedList);
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getDoSubst().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
@@ -825,7 +823,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getPred().apply(this);
 		this.identifierScope.removeScope();
@@ -833,7 +831,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getExpr().apply(this);
 		this.identifierScope.removeScope();
@@ -841,7 +839,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralProductExpression(AGeneralProductExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -849,7 +847,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralSumExpression(AGeneralSumExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -857,7 +855,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -865,7 +863,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -873,21 +871,21 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -895,7 +893,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALambdaExpression(ALambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -903,14 +901,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExistsPredicate(AExistsPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAForallPredicate(AForallPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getImplication().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -920,7 +918,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		final String name = node.getName().getText();
 		this.definitions.add(name);
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -933,7 +931,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -946,7 +944,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}

@@ -59,7 +59,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleForall()  {
+	public void testRuleForall() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id11 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
@@ -246,11 +246,21 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testForLoop() {
+	public void testNestedForLoop() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO FOR y IN 1..3 \nDO skip END END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("var(none,[identifier(none,'$SET0')"));
 		assertTrue(result.contains("var(none,[identifier(none,'$SET1')"));
+	}
+
+	@Test
+	public void testForLoopTwoLoopVariables() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x,y IN {1..3}*{TRUE} \nDO skip END END";
+		final String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		// x,y:: {CHOOSE(..)}
+		assertTrue(result.contains(
+				"becomes_element_of(none,[identifier(none,x),identifier(none,y)],set_extension(none,[definition(none,'CHOOSE',[identifier(none,'$SET0')])"));
 	}
 
 	@Test

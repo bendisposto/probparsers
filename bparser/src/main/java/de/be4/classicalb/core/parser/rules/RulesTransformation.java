@@ -26,12 +26,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_SUCCESS = "SUCCESS";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
-	// public static final String RULE_BLOCKED = "RULE_BLOCKED";
 
 	public static final String COMPUTATION_EXECUTED = "EXECUTED";
 	public static final String COMPUTATION_NOT_EXECUTED = "NOT_EXECUTED";
 	public static final String COMPUTATION_DISABLED = "COMPUTATION_DISABLED";
-	// public static final String COMPUTATION_BLOCKED = "COMPUTATION_BLOCKED";
 
 	public static final String RULE_RESULT_OUTPUT_PARAMETER_NAME = "$RESULT";
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
@@ -730,10 +728,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAForLoopSubstitution(AForLoopSubstitution node) {
-		/**
+		/*-
 		 * FOR x IN set DO sub END
-		 **/
-
+		 * or
+		 * FOR x,y IN set DO sub END
+		 * 
+		 */
 		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
 
@@ -768,17 +768,32 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// VAR x IN ...
 		final AVarSubstitution varSub2 = new AVarSubstitution();
 		whileSub.setDoSubst(varSub2);
-		varSub2.setIdentifiers(createExpressionList((PExpression) cloneNode(node.getIdentifier())));
+		List<PExpression> varIdList = new ArrayList<>();
+		for (PExpression pExpression : node.getIdentifiers()) {
+			varIdList.add(cloneNode(pExpression));
+		}
+		varSub2.setIdentifiers(varIdList);
 
-		// <code> x := CHOOSE(set); </code>
 		addChooseDefinition(iDefinitions);
-
 		PExpression chooseCall = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
-		PSubstitution assignX = new AAssignSubstitution(
-				createExpressionList((PExpression) cloneNode(node.getIdentifier())), createExpressionList(chooseCall));
+		PSubstitution assignSub;
+		if (varIdList.size() >= 2) {
+			// <code> x,y :: {CHOOSE(set)}; </code>
+			List<PExpression> assignIdList = new ArrayList<>();
+			for (PExpression pExpression : node.getIdentifiers()) {
+				assignIdList.add(cloneNode(pExpression));
+			}
+			assignSub = new ABecomesElementOfSubstitution(assignIdList,
+					new ASetExtensionExpression(createExpressionList(chooseCall)));
+		} else {
+			// <code> x := CHOOSE(set); </code>
+			assignSub = new AAssignSubstitution(
+					createExpressionList((PExpression) cloneNode(node.getIdentifiers().get(0))),
+					createExpressionList(chooseCall));
+		}
 
 		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
-		PExpression chooseCall2 = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet())); // CHOOSE(G_Set)
+		PExpression chooseCall2 = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
 
 		// <code> G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
@@ -787,7 +802,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
 		List<PSubstitution> var2List = new ArrayList<>();
-		var2List.add(assignX);
+		var2List.add(assignSub);
 		var2List.add(node.getDoSubst());
 		var2List.add(assignSetVariable2);
 		varSub2.setSubstitution(new ASequenceSubstitution(var2List));

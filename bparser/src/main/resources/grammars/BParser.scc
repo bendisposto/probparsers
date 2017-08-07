@@ -947,8 +947,8 @@ substitution_l3 {-> substitution} =
   {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
 
     // extensions for rules
-  {for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
-    {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
+  {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
+    {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
     {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression)} |
   {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate? [error_type]:error_type? kw_counterexample [message]:expression_top end
@@ -1399,6 +1399,6 @@ substitution =
   {invalid} semicolon |
   {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
   {rule_fail_sub}  [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | //extension for rules
-  {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
+  {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | //extension for rules
   {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression ; //extension for rules
