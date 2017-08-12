@@ -3,6 +3,7 @@ package de.prob.cliparser;
 import frege.language.CSPM.TranslateToProlog;
 import frege.main.ExecCommand;
 import frege.main.FregeInterface;
+import frege.prelude.PreludeBase;
 import frege.runtime.WrappedCheckedException;
 
 import java.io.BufferedReader;
@@ -64,7 +65,7 @@ class FregeCspParser {
         try {
             String cspDeclaration = in.readLine();
             String inputCspFileName = in.readLine();
-            String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm(FregeInterface.just(inputCspFileName), cspDeclaration));
+            String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm(filePathParameter(inputCspFileName), cspDeclaration));
             String listOfFacts = getListOfFacts(prologDeclaration);
             return asFregeFact(listOfFacts);
         } catch (IOException e) {
@@ -79,7 +80,7 @@ class FregeCspParser {
         try {
             String cspExpression = in.readLine();
             String inputCspFileName = in.readLine();
-            String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExpToPrologTerm(FregeInterface.just(inputCspFileName), cspExpression));
+            String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExpToPrologTerm(filePathParameter(inputCspFileName), cspExpression));
             String listOfFacts = getListOfFacts(prologExpression);
             return asFregeFact(listOfFacts);
         } catch (IOException e) {
@@ -88,6 +89,16 @@ class FregeCspParser {
         } catch (frege.runtime.WrappedCheckedException e) {
             return asFregeFact(e);
         }
+    }
+
+    private static PreludeBase.TMaybe filePathParameter(String inputCspFileName) {
+        PreludeBase.TMaybe file;
+        if(inputCspFileName.equals("no-file")) {
+            file = FregeInterface.nothing();
+        } else {
+            file = FregeInterface.just(inputCspFileName);
+        }
+        return file;
     }
 
     private static String getListOfFacts(String prologCode) {
