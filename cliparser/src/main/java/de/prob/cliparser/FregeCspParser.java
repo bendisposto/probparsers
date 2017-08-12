@@ -3,6 +3,7 @@ package de.prob.cliparser;
 import frege.language.CSPM.TranslateToProlog;
 import frege.main.ExecCommand;
 import frege.main.FregeInterface;
+import frege.runtime.WrappedCheckedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,7 +25,7 @@ class FregeCspParser {
             return "frege_facts(ok).\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return exceptionAsPrologTerm(e);
+            return exceptionAsParseResult(e);
         }
     }
 
@@ -36,7 +37,7 @@ class FregeCspParser {
             return "frege_facts(ok).\n";
         } catch (IOException e) {
             e.printStackTrace();
-            return exceptionAsPrologTerm(e);
+            return exceptionAsParseResult(e);
         }
     }
 
@@ -52,10 +53,10 @@ class FregeCspParser {
             String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
             Files.write(Paths.get(outputPlFileName), prologCode.getBytes());
             String listOfFacts = getListOfFacts(prologCode);
-            return "frege_facts(" + listOfFacts + ").\n";
+            return asFregeFact(listOfFacts);
         } catch (IOException e) {
             e.printStackTrace();
-            return exceptionAsPrologTerm(e);
+            return exceptionAsParseResult(e);
         }
     }
 
@@ -65,12 +66,12 @@ class FregeCspParser {
             String inputCspFileName = in.readLine();
             String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm(FregeInterface.just(inputCspFileName), cspDeclaration));
             String listOfFacts = getListOfFacts(prologDeclaration);
-            return "frege_facts(" + listOfFacts + ").\n";
+            return asFregeFact(listOfFacts);
         } catch (IOException e) {
             e.printStackTrace();
-            return exceptionAsPrologTerm(e);
+            return exceptionAsParseResult(e);
         } catch (frege.runtime.WrappedCheckedException e) {
-            return "frege_facts('" + e.getCause().getLocalizedMessage() + "').\n";
+            return asFregeFact(e);
         }
     }
 
@@ -80,12 +81,12 @@ class FregeCspParser {
             String inputCspFileName = in.readLine();
             String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExpToPrologTerm(FregeInterface.just(inputCspFileName), cspExpression));
             String listOfFacts = getListOfFacts(prologExpression);
-            return "frege_facts(" + listOfFacts + ").\n";
+            return asFregeFact(listOfFacts);
         } catch (IOException e) {
             e.printStackTrace();
-            return exceptionAsPrologTerm(e);
+            return exceptionAsParseResult(e);
         } catch (frege.runtime.WrappedCheckedException e) {
-            return "frege_facts('" + e.getCause().getLocalizedMessage() + "').\n";
+            return asFregeFact(e);
         }
     }
 
@@ -100,7 +101,15 @@ class FregeCspParser {
         return "["+String.join(",", facts)+"]";
     }
 
-    private static String exceptionAsPrologTerm(Exception exception) {
+    private static String asFregeFact(String term) {
+        return "frege_facts(" + term + ").\n";
+    }
+
+    private static String asFregeFact(WrappedCheckedException e) {
+        return asFregeFact("'" + e.getCause().getLocalizedMessage().replaceAll("'", "''") + "'");
+    }
+
+    private static String exceptionAsParseResult(Exception exception) {
         return "'parseResult'('exception','" + exception.getMessage() + "',0,0,0).";
     }
 }
