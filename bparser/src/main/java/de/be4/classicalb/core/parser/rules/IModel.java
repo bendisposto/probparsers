@@ -22,5 +22,5 @@ public interface IModel {
 	public BCompoundException getCompoundException();
 
 	Start getStart();
-
+	
 }

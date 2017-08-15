@@ -36,6 +36,7 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private File mainFile;
+	public static final String CTAGS_FILE_NAME = ".rules-tags";
 	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -52,6 +53,9 @@ public class RulesProject {
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
 		project.checkAndTranslateProject();
+		if (parsingBehaviour.isGenerateCtagsFile()) {
+			project.generateCTagsFile(CTAGS_FILE_NAME + "1");
+		}
 		return project.printPrologOutput(out, err);
 	}
 
@@ -79,6 +83,15 @@ public class RulesProject {
 		unit.setMachineAsString(mainMachineAsString);
 		unit.parse();
 		return unit;
+	}
+
+	public void generateCTagsFile(String fileName) {
+		RulesParseUnit first = (RulesParseUnit) this.bModels.get(0);
+		File projectDirectory = first.getProjectDirectory();
+		if (projectDirectory != null) {
+			File ctagsFile = new File(projectDirectory, fileName);
+			CTagsGenerator.generateCtagsFile(this, ctagsFile);
+		}
 	}
 
 	public void parseProject(File mainFile) {
@@ -400,7 +413,7 @@ public class RulesProject {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
-				knownIdentifiers.addAll(checker.getGlobalIdentifiers());
+				knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
 			Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();

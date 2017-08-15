@@ -168,15 +168,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (Entry<String, HashSet<Node>> entry : readIdentifier.entrySet()) {
 			String name = entry.getKey();
 			HashSet<Node> nodes = entry.getValue();
-			if (!this.knownIdentifier.getKnownIdentifier().contains(name) && !this.definitions.contains(name)) {
+			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)) {
 				result.put(name, nodes);
 			}
 		}
 		return result;
 	}
 
-	public Set<String> getGlobalIdentifiers() {
-		return this.knownIdentifier.getKnownIdentifier();
+	public Set<String> getGlobalIdentifierNames() {
+		return this.knownIdentifier.getKnownIdentifierNames();
+	}
+
+	public Set<TIdentifierLiteral> getGlobalIdentifiers() {
+		return this.knownIdentifier.getKnownIdentifiers();
 	}
 
 	@Override
@@ -1039,7 +1043,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class KnownIdentifier {
-		Set<String> knownIdentifiers = new HashSet<>();
+		Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
 
 		public void addKnownIdentifierList(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
@@ -1048,11 +1052,15 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public void addKnownIdentifier(TIdentifierLiteral identifier) {
-			knownIdentifiers.add(identifier.getText());
+			knownIdentifiers.put(identifier.getText(), identifier);
 		}
 
-		public Set<String> getKnownIdentifier() {
-			return this.knownIdentifiers;
+		public Set<String> getKnownIdentifierNames() {
+			return new HashSet<>(knownIdentifiers.keySet());
+		}
+
+		public Set<TIdentifierLiteral> getKnownIdentifiers() {
+			return new HashSet<>(this.knownIdentifiers.values());
 		}
 
 		public void addKnownIdentifier(PExpression expression) {
@@ -1065,11 +1073,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				}
 				TIdentifierLiteral tIdentifierLiteral = list.get(0);
 				String constantName = tIdentifierLiteral.getText();
-				if (this.knownIdentifiers.contains(constantName)) {
+				if (this.knownIdentifiers.containsKey(constantName)) {
 					errorList.add(new CheckException("Constant already exists.", expression));
 					return;
 				}
-				knownIdentifiers.add(constantName);
+				knownIdentifiers.put(constantName, tIdentifierLiteral);
 			} else {
 				errorList.add(new CheckException("Identifier expected.", expression));
 			}

@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,10 @@ public class ComputationOperation extends AbstractOperation {
 
 	public Set<String> getDefineVariables() {
 		return new HashSet<>(defineMap.keySet());
+	}
+
+	public List<TIdentifierLiteral> getDefineLiterals() {
+		return new ArrayList<>(defineMap.values());
 	}
 
 }

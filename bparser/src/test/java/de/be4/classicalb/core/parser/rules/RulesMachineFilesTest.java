@@ -35,6 +35,7 @@ public class RulesMachineFilesTest {
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
 		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+		
 	}
 
 	@Test
