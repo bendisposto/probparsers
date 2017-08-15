@@ -38,3 +38,5 @@ bparser-build.properties
 bparser/doc
 typechecker/doc
 translator/doc
+.rules-tags
+.rules-tags1
