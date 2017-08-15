@@ -12,6 +12,9 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class CTagsGenerator {
 
+	private static final String OPERATION_TYPE = "operation";
+	private static final String IDENTIFIER_TYPE = "identifier";
+
 	private CTagsGenerator() {
 		// class only contains static methods
 	}
@@ -31,7 +34,6 @@ public class CTagsGenerator {
 			for (CTagsEntry cTagsEntry : list) {
 				fw.write(cTagsEntry.toString());
 				fw.write(System.lineSeparator());
-				System.out.println(cTagsEntry);
 			}
 			fw.flush();
 		} catch (IOException e) {
@@ -48,7 +50,7 @@ public class CTagsGenerator {
 				if (null != parseUnit.getRulesMachineChecker()) {
 					for (TIdentifierLiteral literal : parseUnit.getRulesMachineChecker().getGlobalIdentifiers()) {
 						list.add(new CTagsEntry(literal.getText(), parseUnit.getFile().getAbsolutePath(),
-								literal.getStartPos(), "identifier"));
+								literal.getStartPos(), IDENTIFIER_TYPE));
 					}
 				}
 			}
@@ -60,7 +62,7 @@ public class CTagsGenerator {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (AbstractOperation operation : values) {
 			list.add(new CTagsEntry(operation.getName(), operation.getFileName(),
-					operation.getNameLiteral().getStartPos(), "operation"));
+					operation.getNameLiteral().getStartPos(), OPERATION_TYPE));
 		}
 		return list;
 	}
