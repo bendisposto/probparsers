@@ -15,7 +15,7 @@ public class ParsingBehaviour {
 	private boolean fastPrologOutput = false;
 	private File outputFile;
 	private boolean machineNameMustMatchFileName = false;
-	private boolean generateCtagsFile = true;
+	private boolean generateCtagsFile = false;
 
 	public boolean isPrologOutput() {
 		return prologOutput;
