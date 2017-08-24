@@ -105,6 +105,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private AbstractOperation currentOperation;
 	private final Start start;
+	private TIdentifierLiteral nameLiteral;
 
 	public RulesMachineChecker(final File file, final String fileName, List<RulesMachineReference> machineReferences,
 			Start start) {
@@ -133,6 +134,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public String getFileName() {
 		return this.fileName;
+	}
+
+	public TIdentifierLiteral getNameLiteral() {
+		return this.nameLiteral;
 	}
 
 	public Set<AIdentifierExpression> getReferencedRuleOperations() {
@@ -192,7 +197,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (nameList.size() > 1) {
 			errorList.add(new CheckException("Renaming of a RULES_MACHINE name is not allowed.", node));
 		}
-		final TIdentifierLiteral nameLiteral = nameList.get(0);
+		this.nameLiteral = nameList.get(0);
 		this.machineName = nameLiteral.getText();
 	}
 

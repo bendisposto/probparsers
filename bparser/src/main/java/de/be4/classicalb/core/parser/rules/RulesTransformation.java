@@ -622,12 +622,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,
 			int numberOfErrorTypes) {
 		final ALambdaExpression lambda = new ALambdaExpression();
-		final String lambdaIdentifier = "$x";
-		lambda.setIdentifiers(createExpressionList(createIdentifier(lambdaIdentifier)));
-		lambda.setPredicate(new AMemberPredicate(createIdentifier(lambdaIdentifier),
+		final String LAMBDA_IDENTIFIER = "$x";
+		lambda.setIdentifiers(createExpressionList(createIdentifier(LAMBDA_IDENTIFIER)));
+		lambda.setPredicate(new AMemberPredicate(createIdentifier(LAMBDA_IDENTIFIER),
 				new AIntervalExpression(createAIntegerExpression(1), createAIntegerExpression(numberOfErrorTypes))));
 		lambda.setExpression(new AImageExpression(createIdentifier(name),
-				createSetOfPExpression(createIdentifier(lambdaIdentifier))));
+				createSetOfPExpression(createIdentifier(LAMBDA_IDENTIFIER))));
 		return new AFunctionExpression(lambda, createExpressionList(errorTypeNode));
 	}
 
@@ -868,13 +868,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 			errorType = 1;
 		}
 		AVarSubstitution var = new AVarSubstitution();
-		final String resultTuple = "$ResultTuple";
-		final String resultStrings = "$ResultSrings";
-		var.setIdentifiers(createExpressionList(createIdentifier(resultTuple), createIdentifier(resultStrings)));
+		final String RESULT_TUPLE = "$ResultTuple";
+		final String RESULT_STRINGS = "$ResultSrings";
+		var.setIdentifiers(createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(RESULT_STRINGS)));
 		List<PSubstitution> subList = new ArrayList<>();
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(resultTuple)));
+			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_TUPLE)));
 			assign.setRhsExpressions(createExpressionList(
 					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(set))));
 			// assign.setRhsExpressions(createExpressionList(set));
@@ -882,8 +882,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		{
 			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression();
-			final String stringParam = "$String";
-			stringSet.setIdentifiers(createExpressionList(createIdentifier(stringParam)));
+			final String STRING_PARAM = "$String";
+			stringSet.setIdentifiers(createExpressionList(createIdentifier(STRING_PARAM)));
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
 			for (PExpression id : identifiers) {
@@ -900,18 +900,18 @@ public class RulesTransformation extends DepthFirstAdapter {
 			} else {
 				couple = list2.get(0);
 			}
-			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(resultTuple));
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(stringParam), message);
+			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), message);
 			exists.setPredicate(new AConjunctPredicate(member, equal));
 			stringSet.setPredicates(exists);
 			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(resultStrings)));
+			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_STRINGS)));
 			assign.setRhsExpressions(createExpressionList(stringSet));
 			subList.add(assign);
 		}
 
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
-				createIdentifier(resultStrings));
+				createIdentifier(RESULT_STRINGS));
 		subList.add(counterExampleSubstitution);
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);

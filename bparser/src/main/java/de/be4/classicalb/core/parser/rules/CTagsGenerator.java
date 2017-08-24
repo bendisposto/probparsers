@@ -12,23 +12,19 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class CTagsGenerator {
 
-	private static final String OPERATION_TYPE = "operation";
-	private static final String IDENTIFIER_TYPE = "identifier";
+	private static final String TYPE_OPERATION = "operation";
+	private static final String TYPE_IDENTIFIER = "identifier";
+	private static final String TYPE_MACHINE = "machine";
 
 	private CTagsGenerator() {
 		// class only contains static methods
 	}
 
 	public static void generateCtagsFile(RulesProject project, File ctagsFile) {
-		try {
-			ctagsFile.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
 		List<CTagsEntry> list = new ArrayList<>();
 		list.addAll(createFromOperations(project.getOperationsMap().values()));
 		list.addAll(createFromConstants(project));
+		list.addAll(createFromMachines(project));
 
 		try (FileWriter fw = new FileWriter(ctagsFile);) {
 			for (CTagsEntry cTagsEntry : list) {
@@ -37,9 +33,23 @@ public class CTagsGenerator {
 			}
 			fw.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
-			// do nothing
+			throw new AssertionError("Unable to write to ctags file.", e);
 		}
+	}
+
+	private static Collection<? extends CTagsEntry> createFromMachines(RulesProject project) {
+		List<CTagsEntry> list = new ArrayList<>();
+		for (IModel model : project.bModels) {
+			if (model instanceof RulesParseUnit) {
+				RulesParseUnit parseUnit = (RulesParseUnit) model;
+				if (null != parseUnit.getRulesMachineChecker()) {
+					TIdentifierLiteral literal = parseUnit.getRulesMachineChecker().getNameLiteral();
+					list.add(new CTagsEntry(literal.getText(), parseUnit.getFile().getAbsolutePath(),
+							literal.getStartPos(), TYPE_MACHINE));
+				}
+			}
+		}
+		return list;
 	}
 
 	private static Collection<? extends CTagsEntry> createFromConstants(RulesProject project) {
@@ -50,7 +60,7 @@ public class CTagsGenerator {
 				if (null != parseUnit.getRulesMachineChecker()) {
 					for (TIdentifierLiteral literal : parseUnit.getRulesMachineChecker().getGlobalIdentifiers()) {
 						list.add(new CTagsEntry(literal.getText(), parseUnit.getFile().getAbsolutePath(),
-								literal.getStartPos(), IDENTIFIER_TYPE));
+								literal.getStartPos(), TYPE_IDENTIFIER));
 					}
 				}
 			}
@@ -62,7 +72,7 @@ public class CTagsGenerator {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (AbstractOperation operation : values) {
 			list.add(new CTagsEntry(operation.getName(), operation.getFileName(),
-					operation.getNameLiteral().getStartPos(), OPERATION_TYPE));
+					operation.getNameLiteral().getStartPos(), TYPE_OPERATION));
 		}
 		return list;
 	}

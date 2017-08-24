@@ -36,7 +36,7 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private File mainFile;
-	public static final String CTAGS_FILE_NAME = ".rules-tags";
+	public static final String CTAGS_FILE_NAME = ".rules-tags1";
 	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -54,7 +54,7 @@ public class RulesProject {
 		project.parseProject(mainFile);
 		project.checkAndTranslateProject();
 		if (parsingBehaviour.isGenerateCtagsFile()) {
-			project.generateCTagsFile(CTAGS_FILE_NAME + "1");
+			project.generateCTagsFile(CTAGS_FILE_NAME);
 		}
 		return project.printPrologOutput(out, err);
 	}
@@ -85,11 +85,11 @@ public class RulesProject {
 		return unit;
 	}
 
-	public void generateCTagsFile(String fileName) {
+	public void generateCTagsFile(String outputFileName) {
 		RulesParseUnit first = (RulesParseUnit) this.bModels.get(0);
 		File projectDirectory = first.getProjectDirectory();
 		if (projectDirectory != null) {
-			File ctagsFile = new File(projectDirectory, fileName);
+			File ctagsFile = new File(projectDirectory, outputFileName);
 			CTagsGenerator.generateCtagsFile(this, ctagsFile);
 		}
 	}
