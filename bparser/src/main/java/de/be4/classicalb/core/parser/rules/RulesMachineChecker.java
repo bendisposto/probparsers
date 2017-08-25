@@ -34,6 +34,7 @@ import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
+import de.be4.classicalb.core.parser.node.AConcatExpression;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.ADeferredSetSet;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
@@ -537,21 +538,43 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
-		PExpression stringValue = parameters.get(0);
-		if (stringValue instanceof AStringExpression) {
-			AStringExpression string = (AStringExpression) stringValue;
-			String content = string.getContent().getText();
-			int count = (content.length() - content.replace("~w", "").length()) / 2;
-			if (count != parameters.size() - 1) {
-				this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
-						+ ") does not match the number of placeholders (" + count + ") in the string.", node));
-			}
+		PExpression firstParam = parameters.get(0);
+		Integer count = countPlaceHoldersInExpression(firstParam);
+		if (count != null && count != parameters.size() - 1) {
+			this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
+					+ ") does not match the number of placeholders (" + count + ") in the string.", node));
 		}
 		LinkedList<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
 		return;
+	}
+
+	private Integer countPlaceHoldersInExpression(PExpression param) {
+		if (param instanceof AConcatExpression) {
+			AConcatExpression con = (AConcatExpression) param;
+			Integer left = countPlaceHoldersInExpression(con.getLeft());
+			Integer right = countPlaceHoldersInExpression(con.getRight());
+			if (left == null || right == null) {
+				return null;
+			} else {
+				return left + right;
+			}
+		} else if (param instanceof AStringExpression) {
+			AStringExpression string = (AStringExpression) param;
+			String content = string.getContent().getText();
+			String subString = "~w";
+			return countOccurrences(content, subString);
+		} else {
+			return null;
+		}
+
+	}
+
+	private int countOccurrences(String content, String subString) {
+		int subStringLength = subString.length();
+		return (content.length() - content.replace(subString, "").length()) / subStringLength;
 	}
 
 	private void checkGetTuleCounterExamplesOperator(AOperatorExpression node,

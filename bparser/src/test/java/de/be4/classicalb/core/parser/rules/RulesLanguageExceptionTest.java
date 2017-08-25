@@ -2,19 +2,17 @@ package de.be4.classicalb.core.parser.rules;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.TKwExpressionOperator;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
+
+import static de.be4.classicalb.core.parser.rules.RulesUtil.*;
 
 public class RulesLanguageExceptionTest {
 
@@ -423,28 +421,4 @@ public class RulesLanguageExceptionTest {
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Identifier expected.').\n", result);
 	}
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		unit.setParsingBehaviour(pb);
-		unit.parse();
-		unit.translate();
-
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
-	}
 }

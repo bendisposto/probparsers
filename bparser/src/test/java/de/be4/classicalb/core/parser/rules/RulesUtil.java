@@ -12,7 +12,7 @@ import de.be4.classicalb.core.parser.util.PrettyPrinter;
 
 public class RulesUtil {
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
+	public static String getRulesProjectAsPrologTerm(final String content) {
 		RulesProject rulesProject = new RulesProject();
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(false);
@@ -90,6 +90,31 @@ public class RulesUtil {
 			}
 		};
 		RulesProject.parseProject(new File(file), pb, new PrintStream(output), new PrintStream(output));
+		return output.toString();
+	}
+
+	public static String getRulesMachineAsPrologTerm(final String content) {
+		RulesParseUnit unit = new RulesParseUnit();
+		unit.setMachineAsString(content);
+		ParsingBehaviour pb = new ParsingBehaviour();
+		pb.setAddLineNumbers(false);
+		unit.setParsingBehaviour(pb);
+		unit.parse();
+		unit.translate();
+
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
 		return output.toString();
 	}
 
