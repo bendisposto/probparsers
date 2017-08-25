@@ -61,13 +61,13 @@ public class RulesMachineRunConfiguration {
 	}
 
 	class DefinitionsFinder extends DepthFirstAdapter {
+		private static final String PROB_PREFERENCES_PREFIX = "SET_PREF_";
 
 		@Override
 		public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-			final String prefix = "SET_PREF_";
 			final String name = node.getName().getText();
-			if (name.startsWith(prefix)) {
-				String prefName = name.substring(prefix.length());
+			if (name.startsWith(PROB_PREFERENCES_PREFIX)) {
+				String prefName = name.substring(PROB_PREFERENCES_PREFIX.length());
 				if (node.getRhs() instanceof AIntegerExpression) {
 					AIntegerExpression aIntExpr = (AIntegerExpression) node.getRhs();
 					String value = aIntExpr.getLiteral().getText();
