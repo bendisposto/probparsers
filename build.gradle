@@ -209,11 +209,10 @@ task copyCoverage(){
 sonarqube {
   properties {
 
-    property("sonar.organization", "HHU")
     property("sonar.projectKey", "probparsers")
     property("sonar.projectName", "probparsers")
 
-    property("sonar.sources", "bparser/src")
+    property("sonar.sources", "bparser")
     property("sonar.java.binaries", "bparser/build/classes")
     property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
     property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
