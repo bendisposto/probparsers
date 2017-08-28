@@ -44,6 +44,9 @@ public class BLexer extends Lexer {
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
 				"|| || is not allowed (probably one || too many).");
 		addInvalid(TSetSubtraction.class, TEqual.class, "You need to use /= for inequality and not \\=.");
+		addInvalid(TSetSubtraction.class, TElementOf.class, "You need to use /: for not membership and not \\:.");
+		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
+		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
 		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TAssertions.class);

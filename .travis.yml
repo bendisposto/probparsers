@@ -19,9 +19,9 @@ sudo: false
 
 script:
   - TERM=dumb ./gradlew clean deploy uploadArchives
-  - sonar-scanner -Dsonar.login=$SONAR_TOKEN
-
-after_success: curl -L $JENKINS_URL
+after_success:
+  - curl -L $JENKINS_URL
+  - TERM=dumb ./gradlew sonarqube --info --stacktrace
 env:
   global:
   - secure: laGlF46pirAFs3xrBTm+7AFi0CubtBj0PRLqhAe2q9wEhyUvU+LOhJZiqeyuc2FBzGOSlfevGhVOgmWxph6g2EP/bxhwiFywXD/CCzjDhca2JahMdYW925006jGIfh+QmWnxb7hoXUb+DvOoDQdHoiTPmVom2oTEGTctjLB4BhI=

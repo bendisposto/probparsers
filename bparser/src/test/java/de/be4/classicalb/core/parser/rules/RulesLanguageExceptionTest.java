@@ -2,21 +2,17 @@ package de.be4.classicalb.core.parser.rules;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.TKwExpressionOperator;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
-import de.be4.classicalb.core.parser.node.TKwSubstitutionOperator;
+
+import static de.be4.classicalb.core.parser.rules.RulesUtil.*;
 
 public class RulesLanguageExceptionTest {
 
@@ -36,6 +32,16 @@ public class RulesLanguageExceptionTest {
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception(pos(1,15"));
 		assertTrue(result.contains("Renaming of a RULES_MACHINE name is not allowed"));
+	}
+
+	@Test
+	public void testOperatorFailedRulesErrorTypeWithSecondArgumentNotAnIntegerLiteral() throws Exception {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule, 1+1) OPERATIONS RULE rule BODY skip END  END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,40,'UnknownFile'),'The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.').\n",
+				result);
 	}
 
 	@Test
@@ -66,11 +72,11 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testNoNumberOfErrorTypesDefinedException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(2, \"abc\") END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,55,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
+				"parse_exception(pos(1,66,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
 				result);
 	}
 
@@ -86,11 +92,11 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testErrorTypeZeroException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(0, \"abc\") END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 0 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,69,'UnknownFile'),'The ERROR_TYPE must be a natural number greater than zero.').\n",
+				"parse_exception(pos(1,80,'UnknownFile'),'The ERROR_TYPE must be a natural number greater than zero.').\n",
 				result);
 	}
 
@@ -104,26 +110,8 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
-	public void testRuleAnyUsedOutsideOfARuleOperationException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_ANY x WHERE x : 1..3 COUNTEREXAMPLE \"Fail\"END END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals("parse_exception(pos(1,52,'UnknownFile'),'RULE_ANY used outside of a RULE operation').\n", result);
-	}
-
-	@Test
-	public void testErrorTypeExceededTheNumberOfErrorTypesException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(3, \"abc\") END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals(
-				"parse_exception(pos(1,69,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
-				result);
-	}
-
-	@Test
-	public void testRuleFailUsedOutsideOfRuleException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FAIL(2, \"abc\") END END";
+	public void testRuleFailUsedOutsideOfARuleOperationException() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"Fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,52,'UnknownFile'),'RULE_FAIL used outside of a RULE operation').\n",
@@ -131,29 +119,13 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
-	public void testFirstArgumentOfRuleFailMustBeAnIntegerException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(v, \"abc\") END END";
+	public void testErrorTypeExceededTheNumberOfErrorTypesException() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 3 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,45,'UnknownFile'),'The first argument of RULE_FAIL must be an integer.').\n",
+				"parse_exception(pos(1,80,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
 				result);
-	}
-
-	@Test
-	public void testRuleFailShouldHaveAMostTwoArgumentsException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL(1,2,3) END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL has at most two argument.').\n", result);
-	}
-
-	@Test(expected = AssertionError.class)
-	public void testUnkownSubstitutionOperatorException() throws Exception {
-		AOperatorSubstitution operator = new AOperatorSubstitution(new TKwSubstitutionOperator("foo"),
-				new ArrayList<PExpression>());
-		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null, null);
-		operator.apply(rulesMachineVisitor);
 	}
 
 	@Test(expected = AssertionError.class)
@@ -449,28 +421,4 @@ public class RulesLanguageExceptionTest {
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Identifier expected.').\n", result);
 	}
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		unit.setParsingBehaviour(pb);
-		unit.parse();
-		unit.translate();
-
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
-	}
 }

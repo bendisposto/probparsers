@@ -19,8 +19,7 @@ public class OffsetPositionPrinter implements PositionPrinter {
 
 	private int columnOffset;
 
-	public OffsetPositionPrinter(final NodeIdAssignment nodeIds,
-			final int lineOffset, final int columnOffset) {
+	public OffsetPositionPrinter(final NodeIdAssignment nodeIds, final int lineOffset, final int columnOffset) {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;
@@ -40,11 +39,18 @@ public class OffsetPositionPrinter implements PositionPrinter {
 			} else {
 				pout.openTerm("pos", true);
 				pout.printNumber(id);
-				pout.printNumber(nodeIds.lookupFileNumber(node));
-				pout.printNumber(positions.getBeginLine(node) + lineOffset);
-				pout.printNumber(positions.getBeginColumn(node) + columnOffset);
-				pout.printNumber(positions.getEndLine(node) + lineOffset);
-				pout.printNumber(positions.getEndColumn(node) + columnOffset);
+				if (positions.getSourcecodeRange(node) == null && node.getStartPos() != null) {
+					pout.printNumber(node.getStartPos().getLine() + lineOffset);
+					pout.printNumber(node.getStartPos().getPos() + columnOffset);
+					pout.printNumber(node.getEndPos().getLine() + lineOffset);
+					pout.printNumber(node.getEndPos().getPos() + columnOffset);
+				} else {
+					pout.printNumber(nodeIds.lookupFileNumber(node));
+					pout.printNumber(positions.getBeginLine(node) + lineOffset);
+					pout.printNumber(positions.getBeginColumn(node) + columnOffset);
+					pout.printNumber(positions.getEndLine(node) + lineOffset);
+					pout.printNumber(positions.getEndColumn(node) + columnOffset);
+				}
 				pout.closeTerm();
 			}
 		}

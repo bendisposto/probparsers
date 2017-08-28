@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +36,12 @@ import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private File mainFile;
+	public static final String CTAGS_FILE_NAME = ".rules-tags1";
 	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final List<BException> bExceptionList = new ArrayList<>();
-	private final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
+	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIdAssignment = new NodeIdAssignment();
 	private HashMap<String, String> constantStringValues = new HashMap<>();
@@ -52,6 +53,9 @@ public class RulesProject {
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
 		project.checkAndTranslateProject();
+		if (parsingBehaviour.isGenerateCtagsFile()) {
+			project.generateCTagsFile(CTAGS_FILE_NAME);
+		}
 		return project.printPrologOutput(out, err);
 	}
 
@@ -79,6 +83,15 @@ public class RulesProject {
 		unit.setMachineAsString(mainMachineAsString);
 		unit.parse();
 		return unit;
+	}
+
+	public void generateCTagsFile(String outputFileName) {
+		RulesParseUnit first = (RulesParseUnit) this.bModels.get(0);
+		File projectDirectory = first.getProjectDirectory();
+		if (projectDirectory != null) {
+			File ctagsFile = new File(projectDirectory, outputFileName);
+			CTagsGenerator.generateCtagsFile(this, ctagsFile);
+		}
 	}
 
 	public void parseProject(File mainFile) {
@@ -188,42 +201,7 @@ public class RulesProject {
 		findImplicitDependenciesToComputations();
 		checkIdentifiers();
 		findTransitiveDependencies();
-		checkFunctionDependencies();
 		checkReferencedRuleOperations();
-	}
-
-	private void checkFunctionDependencies() {
-		if (this.hasErrors()) {
-			return;
-		}
-		for (AbstractOperation abstractOperation : allOperations.values()) {
-			final Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
-			for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
-				final String functionName = tIdentifierLiteral.getText();
-				if (!allOperations.containsKey(functionName)
-						|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
-					this.bExceptionList.add(new BException(abstractOperation.getFileName(),
-							new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
-					return;
-				}
-				final FunctionOperation functionOperation = (FunctionOperation) allOperations.get(functionName);
-				Set<AbstractOperation> transDeps = new HashSet<>(functionOperation.getTransitiveDependencies());
-				transDeps.removeAll(transitiveDependencies);
-				if (!transDeps.isEmpty()) {
-					StringBuilder sb = new StringBuilder();
-					sb.append("Missing dependencies due to FUNCTION call: ");
-					for (Iterator<AbstractOperation> iterator = transDeps.iterator(); iterator.hasNext();) {
-						AbstractOperation next = iterator.next();
-						sb.append(next.getName());
-						if (iterator.hasNext()) {
-							sb.append(", ");
-						}
-					}
-					this.bExceptionList.add(new BException(abstractOperation.getFileName(),
-							new CheckException(sb.toString(), tIdentifierLiteral)));
-				}
-			}
-		}
 	}
 
 	private void collectAllOperations() {
@@ -245,53 +223,85 @@ public class RulesProject {
 		for (AbstractOperation operation : allOperations.values()) {
 			checkDependsOnComputations(operation);
 			checkDependsOnRules(operation);
+			checkFunctionCalls(operation);
 		}
 	}
 
+	private void checkFunctionCalls(AbstractOperation abstractOperation) {
+		boolean errorOccured = false;
+		for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
+			final String functionName = tIdentifierLiteral.getText();
+			if (!allOperations.containsKey(functionName)
+					|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
+				this.bExceptionList.add(new BException(abstractOperation.getFileName(),
+						new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
+				errorOccured = true;
+			}
+		}
+		if (!errorOccured) {
+			checkVisibilityOfTIdentifierList(abstractOperation, abstractOperation.getFunctionCalls());
+		}
+
+	}
+
 	private void checkDependsOnRules(AbstractOperation operation) {
-		List<AIdentifierExpression> dependsOnRulesList = operation.getDependsOnRulesList();
-		for (AIdentifierExpression aIdentifierExpression : dependsOnRulesList) {
+		boolean errorOccured = false;
+		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnRulesList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
 				AbstractOperation abstractOperation = allOperations.get(name);
 				if (!(abstractOperation instanceof RuleOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
-				} else {
-					checkVisibilityAIdentifierList(operation, dependsOnRulesList);
+					errorOccured = true;
 				}
 			} else {
+				errorOccured = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
+		if (!errorOccured) {
+			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnRulesList());
+		}
 	}
 
 	private void checkDependsOnComputations(AbstractOperation operation) {
-		List<AIdentifierExpression> dependsOnComputationList = operation.getDependsOnComputationList();
-		for (AIdentifierExpression aIdentifierExpression : dependsOnComputationList) {
+		boolean errorOccured = false;
+		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnComputationList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
 				AbstractOperation abstractOperation = allOperations.get(name);
 				if (!(abstractOperation instanceof ComputationOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
-				} else {
-					checkVisibilityAIdentifierList(operation, dependsOnComputationList);
+					errorOccured = true;
 				}
 			} else {
+				errorOccured = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
+		if (!errorOccured) {
+			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnComputationList());
+		}
 	}
 
-	private void checkVisibilityAIdentifierList(AbstractOperation operation,
+	private void checkVisibilityOfAIdentifierList(AbstractOperation operation,
 			List<AIdentifierExpression> dependencyList) {
+		List<TIdentifierLiteral> tidentifierList = new ArrayList<>();
+		for (AIdentifierExpression aIdentifier : dependencyList) {
+			tidentifierList.add(aIdentifier.getIdentifier().get(0));
+		}
+		checkVisibilityOfTIdentifierList(operation, tidentifierList);
+	}
+
+	private void checkVisibilityOfTIdentifierList(AbstractOperation operation,
+			List<TIdentifierLiteral> dependencyList) {
 		List<String> machineReferences = operation.getMachineReferencesAsString();
 		machineReferences.add(operation.getMachineName());
-		for (AIdentifierExpression aIdentifier : dependencyList) {
-			TIdentifierLiteral tIdentifierLiteral = aIdentifier.getIdentifier().get(0);
+		for (TIdentifierLiteral tIdentifierLiteral : dependencyList) {
 			String otherOpName = tIdentifierLiteral.getText();
 			if (allOperations.containsKey(otherOpName)) {
 				AbstractOperation abstractOperation = allOperations.get(otherOpName);
@@ -386,7 +396,7 @@ public class RulesProject {
 			/*
 			 * if there is already an error such as an parse error in one
 			 * machine, it makes no sense to check for invalid identifiers
-			 * because this all declarations of this machine are missing.
+			 * because all declarations of this machine are missing.
 			 */
 			return;
 		}
@@ -403,7 +413,7 @@ public class RulesProject {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
-				knownIdentifiers.addAll(checker.getGlobalIdentifiers());
+				knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
 			Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
@@ -475,25 +485,29 @@ public class RulesProject {
 				.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnComputationList()));
 		directDependencies.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnRulesList()));
 		directDependencies.addAll(operation.getImplicitDependenciesToComputations());
-		Set<AbstractOperation> operationsFound = new HashSet<>();
+		directDependencies.addAll(operation.getFunctionCalls());
+
 		// check for cycle
+		Set<AbstractOperation> transitiveDependenciesFound = new HashSet<>();
 		boolean cycleDetected = checkForCycles(operation, directDependencies, ancestors);
 		if (cycleDetected) {
-			operation.setTransitiveDependencies(operationsFound);
-			return operationsFound;
+			operation.setTransitiveDependencies(transitiveDependenciesFound);
+			return transitiveDependenciesFound;
 		}
 		for (TIdentifierLiteral tIdentifierLiteral : directDependencies) {
 			String opName = tIdentifierLiteral.getText();
 			AbstractOperation nextOperation = allOperations.get(opName);
-			operationsFound.add(nextOperation);
+			transitiveDependenciesFound.add(nextOperation);
 			if (nextOperation.getTransitiveDependencies() != null) {
-				operationsFound.addAll(nextOperation.getTransitiveDependencies());
+				transitiveDependenciesFound.addAll(nextOperation.getTransitiveDependencies());
 			} else {
-				operationsFound.addAll(findTransitiveDependencies(nextOperation, new ArrayList<>(ancestors)));
+				transitiveDependenciesFound
+						.addAll(findTransitiveDependencies(nextOperation, new ArrayList<>(ancestors)));
 			}
 		}
-		operation.setTransitiveDependencies(operationsFound);
-		return new HashSet<>(operationsFound);
+
+		operation.setTransitiveDependencies(transitiveDependenciesFound);
+		return new HashSet<>(transitiveDependenciesFound);
 	}
 
 	private List<TIdentifierLiteral> convertAIdentifierListToTIdentifierLiteralList(List<AIdentifierExpression> list) {

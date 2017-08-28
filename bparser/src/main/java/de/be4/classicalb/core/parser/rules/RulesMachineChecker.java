@@ -34,6 +34,7 @@ import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AComputationOperation;
+import de.be4.classicalb.core.parser.node.AConcatExpression;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.ADeferredSetSet;
 import de.be4.classicalb.core.parser.node.ADefineSubstitution;
@@ -58,7 +59,6 @@ import de.be4.classicalb.core.parser.node.AOperationAttribute;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.AOperatorSubstitution;
 import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
@@ -66,7 +66,7 @@ import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
 import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.ARuleAnySubMessageSubstitution;
+import de.be4.classicalb.core.parser.node.ARuleFailSubSubstitution;
 import de.be4.classicalb.core.parser.node.ARuleOperation;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
@@ -106,6 +106,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private AbstractOperation currentOperation;
 	private final Start start;
+	private TIdentifierLiteral nameLiteral;
 
 	public RulesMachineChecker(final File file, final String fileName, List<RulesMachineReference> machineReferences,
 			Start start) {
@@ -134,6 +135,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public String getFileName() {
 		return this.fileName;
+	}
+
+	public TIdentifierLiteral getNameLiteral() {
+		return this.nameLiteral;
 	}
 
 	public Set<AIdentifierExpression> getReferencedRuleOperations() {
@@ -169,15 +174,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (Entry<String, HashSet<Node>> entry : readIdentifier.entrySet()) {
 			String name = entry.getKey();
 			HashSet<Node> nodes = entry.getValue();
-			if (!this.knownIdentifier.getKnownIdentifier().contains(name) && !this.definitions.contains(name)) {
+			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)) {
 				result.put(name, nodes);
 			}
 		}
 		return result;
 	}
 
-	public Set<String> getGlobalIdentifiers() {
-		return this.knownIdentifier.getKnownIdentifier();
+	public Set<String> getGlobalIdentifierNames() {
+		return this.knownIdentifier.getKnownIdentifierNames();
+	}
+
+	public Set<TIdentifierLiteral> getGlobalIdentifiers() {
+		return this.knownIdentifier.getKnownIdentifiers();
 	}
 
 	@Override
@@ -189,7 +198,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (nameList.size() > 1) {
 			errorList.add(new CheckException("Renaming of a RULES_MACHINE name is not allowed.", node));
 		}
-		final TIdentifierLiteral nameLiteral = nameList.get(0);
+		this.nameLiteral = nameList.get(0);
 		this.machineName = nameLiteral.getText();
 	}
 
@@ -200,12 +209,12 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
-		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+		this.knownIdentifier.addKnownIdentifierList(node.getIdentifiers());
 	}
 
 	@Override
 	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
-		this.knownIdentifier.addIdentifier(node.getIdentifiers());
+		this.knownIdentifier.addKnownIdentifierList(node.getIdentifiers());
 	}
 
 	@Override
@@ -223,8 +232,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
-		this.knownIdentifier.addTIdentifier(copy.get(0));
-		this.knownIdentifier.addIdentifier(new ArrayList<PExpression>(node.getElements()));
+		this.knownIdentifier.addKnownIdentifier(copy.get(0));
+		this.knownIdentifier.addKnownIdentifierList(new ArrayList<PExpression>(node.getElements()));
 	}
 
 	class OccurredAttributes {
@@ -487,7 +496,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			ComputationOperation computationOperation = (ComputationOperation) currentOperation;
 			try {
 				computationOperation.addDefineVariable(node.getName());
-				this.knownIdentifier.addTIdentifier(node.getName());
+				this.knownIdentifier.addKnownIdentifier(node.getName());
 			} catch (CheckException e) {
 				this.errorList.add(e);
 			}
@@ -520,12 +529,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		case RulesGrammar.STRING_FORMAT:
 			checkStringFormatOperator(node, parameters);
 			return;
-		case RulesGrammar.STRING_CONCAT:
-			if (parameters.size() < 2) {
-				this.errorList.add(new CheckException(
-						"Invalid number of arguments. Expected two more arguments of operator CONCAT_STRINGS.", node));
-			}
-			return;
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
 			checkGetTuleCounterExamplesOperator(node, parameters);
 			return;
@@ -535,21 +538,43 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
-		PExpression stringValue = parameters.get(0);
-		if (stringValue instanceof AStringExpression) {
-			AStringExpression string = (AStringExpression) stringValue;
-			String content = string.getContent().getText();
-			int count = (content.length() - content.replace("~w", "").length()) / 2;
-			if (count != parameters.size() - 1) {
-				this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
-						+ ") does not match the number of placeholders (" + count + ") in the string.", node));
-			}
+		PExpression firstParam = parameters.get(0);
+		Integer count = countPlaceHoldersInExpression(firstParam);
+		if (count != null && count != parameters.size() - 1) {
+			this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
+					+ ") does not match the number of placeholders (" + count + ") in the string.", node));
 		}
 		LinkedList<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
 		return;
+	}
+
+	private Integer countPlaceHoldersInExpression(PExpression param) {
+		if (param instanceof AConcatExpression) {
+			AConcatExpression con = (AConcatExpression) param;
+			Integer left = countPlaceHoldersInExpression(con.getLeft());
+			Integer right = countPlaceHoldersInExpression(con.getRight());
+			if (left == null || right == null) {
+				return null;
+			} else {
+				return left + right;
+			}
+		} else if (param instanceof AStringExpression) {
+			AStringExpression string = (AStringExpression) param;
+			String content = string.getContent().getText();
+			String subString = "~w";
+			return countOccurrences(content, subString);
+		} else {
+			return null;
+		}
+
+	}
+
+	private int countOccurrences(String content, String subString) {
+		int subStringLength = subString.length();
+		return (content.length() - content.replace(subString, "").length()) / subStringLength;
 	}
 
 	private void checkGetTuleCounterExamplesOperator(AOperatorExpression node,
@@ -702,7 +727,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		PExpression secondArg = node.getIdentifiers().get(1);
 		if (!(secondArg instanceof AIntegerExpression)) {
 			this.errorList.add(new CheckException(
-					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer value.", node));
+					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.", node));
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
@@ -762,39 +787,20 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAOperatorSubstitution(AOperatorSubstitution node) {
-		final String operatorName = node.getName().getText();
-		if (RulesGrammar.RULE_FAIL.equals(operatorName)) {
-			if (!isInRule()) {
-				errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
-			}
-			if (node.getArguments().isEmpty()) {
-				errorList.add(new CheckException("RULE_FAIL requires at least one argument.", node));
-			}
-			if (node.getArguments().size() == 2) {
-				if (node.getArguments().get(0) instanceof AIntegerExpression) {
-					AIntegerExpression intExpr = (AIntegerExpression) node.getArguments().get(0);
-					checkErrorType(intExpr.getLiteral());
-				} else {
-					errorList.add(new CheckException("The first argument of RULE_FAIL must be an integer.", node));
-				}
-			} else if (node.getArguments().size() > 2) {
-				errorList.add(new CheckException("RULE_FAIL has at most two argument.", node));
-			}
-			return;
-		} else {
-			throw new AssertionError("Unkown substitution operator: " + operatorName);
-		}
-	}
-
-	@Override
-	public void caseARuleAnySubMessageSubstitution(ARuleAnySubMessageSubstitution node) {
+	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_ANY used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
+			return;
+		}
+		if (!node.getIdentifiers().isEmpty() && node.getWhen() == null) {
+			this.errorList.add(new CheckException(
+					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
 			return;
 		}
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
-		node.getWhere().apply(this);
+		if (node.getWhen() != null) {
+			node.getWhen().apply(this);
+		}
 		node.getMessage().apply(this);
 		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
@@ -834,16 +840,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
 		node.getSet().apply(this);
-		LinkedList<PExpression> linkedList = new LinkedList<>();
-		linkedList.add(node.getIdentifier());
-		this.identifierScope.createNewScope(linkedList);
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getDoSubst().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
@@ -851,7 +855,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getPred().apply(this);
 		this.identifierScope.removeScope();
@@ -859,7 +863,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getExpr().apply(this);
 		this.identifierScope.removeScope();
@@ -867,7 +871,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralProductExpression(AGeneralProductExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -875,7 +879,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralSumExpression(AGeneralSumExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -883,7 +887,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -891,7 +895,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -899,21 +903,21 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -921,7 +925,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALambdaExpression(ALambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -929,14 +933,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExistsPredicate(AExistsPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAForallPredicate(AForallPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getImplication().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -946,7 +950,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		final String name = node.getName().getText();
 		this.definitions.add(name);
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -959,7 +963,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -972,7 +976,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getParameters()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -1063,27 +1067,31 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseADeferredSetSet(ADeferredSetSet node) {
-		errorList.add(new CheckException("The DeferredSet clause not allowed in a RULES_MACHINE.", node));
+		errorList.add(new CheckException("Deferred sets are not allowed in a RULES_MACHINE.", node));
 	}
 
 	class KnownIdentifier {
-		Set<String> knownIdentifiers = new HashSet<>();
+		Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
 
-		public void addIdentifier(List<PExpression> parameters) {
+		public void addKnownIdentifierList(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
-				this.addPExpression(pExpression);
+				this.addKnownIdentifier(pExpression);
 			}
 		}
 
-		public void addTIdentifier(TIdentifierLiteral identifier) {
-			knownIdentifiers.add(identifier.getText());
+		public void addKnownIdentifier(TIdentifierLiteral identifier) {
+			knownIdentifiers.put(identifier.getText(), identifier);
 		}
 
-		public Set<String> getKnownIdentifier() {
-			return this.knownIdentifiers;
+		public Set<String> getKnownIdentifierNames() {
+			return new HashSet<>(knownIdentifiers.keySet());
 		}
 
-		public void addPExpression(PExpression expression) {
+		public Set<TIdentifierLiteral> getKnownIdentifiers() {
+			return new HashSet<>(this.knownIdentifiers.values());
+		}
+
+		public void addKnownIdentifier(PExpression expression) {
 			if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
 				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
@@ -1093,11 +1101,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				}
 				TIdentifierLiteral tIdentifierLiteral = list.get(0);
 				String constantName = tIdentifierLiteral.getText();
-				if (this.knownIdentifiers.contains(constantName)) {
+				if (this.knownIdentifiers.containsKey(constantName)) {
 					errorList.add(new CheckException("Constant already exists.", expression));
 					return;
 				}
-				knownIdentifiers.add(constantName);
+				knownIdentifiers.put(constantName, tIdentifierLiteral);
 			} else {
 				errorList.add(new CheckException("Identifier expected.", expression));
 			}
@@ -1106,10 +1114,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	class LocalIdentifierScope {
 		private final LinkedList<Set<String>> localVariablesScope = new LinkedList<>();
-
-		public void createNewScope(final Set<String> identifiers) {
-			this.localVariablesScope.add(identifiers);
-		}
 
 		public void createNewScope(final List<PExpression> parameters) {
 			final HashSet<String> set = new HashSet<>();

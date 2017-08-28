@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.PrintStream;
 
 public class ParsingBehaviour {
-	private boolean prologOutput;
-	private boolean useIndention;
-	private boolean addLineNumbers;
-	private boolean displayGraphically;
-	private boolean verbose;
-	private boolean printTime;
+	private boolean prologOutput = false;
+	private boolean useIndention = false;
+	private boolean addLineNumbers = false;
+	private boolean displayGraphically = false;
+	private boolean verbose = false;
+	private boolean printTime = false;
 	private PrintStream out = System.out;
-	private boolean printAST;
-	private boolean fastPrologOutput;
+	private boolean printAST = false;
+	private boolean fastPrologOutput = false;
 	private File outputFile;
-	private boolean machineNameMustMatchFileName;
+	private boolean machineNameMustMatchFileName = false;
+	private boolean generateCtagsFile = false;
 
 	public boolean isPrologOutput() {
 		return prologOutput;
@@ -102,6 +103,14 @@ public class ParsingBehaviour {
 
 	public void setMachineNameMustMatchFileName(boolean machineNameMustMatchFileName) {
 		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
+	}
+
+	public void setGenerateCtagsFile(boolean b) {
+		this.generateCtagsFile = b;
+	}
+
+	public boolean isGenerateCtagsFile() {
+		return this.generateCtagsFile;
 	}
 
 }

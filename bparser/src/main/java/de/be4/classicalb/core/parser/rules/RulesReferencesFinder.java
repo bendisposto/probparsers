@@ -65,6 +65,10 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 		return machineName;
 	}
 
+	public File getProjectRootDirectory() {
+		return this.rootDirectory;
+	}
+
 	public List<RulesMachineReference> getReferences() {
 		ArrayList<RulesMachineReference> list = new ArrayList<>();
 		for (Entry<String, RulesMachineReference> entry : referncesTable.entrySet()) {
@@ -130,7 +134,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 		try {
 			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
-			errorList.add(new CheckException(e.getMessage(), (Node) null,e));
+			errorList.add(new CheckException(e.getMessage(), (Node) null, e));
 			return;
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
@@ -238,8 +242,8 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 			throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				return new FileSearchPathProvider(parentMachineDirectory.getPath(), name + suffix,
-						this.pathList).resolve();
+				return new FileSearchPathProvider(parentMachineDirectory.getPath(), name + suffix, this.pathList)
+						.resolve();
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -255,32 +259,32 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 
 	@Override
 	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
-		//skip
+		// skip
 	}
 
 	@Override
 	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
-		//skip
+		// skip
 	}
 
 	@Override
 	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
-		//skip
+		// skip
 	}
 
 	@Override
 	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-		//skip
+		// skip
 	}
 
 	@Override
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
-		//skip
+		// skip
 	}
 
 	@Override
 	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
-		//skip
+		// skip
 	}
 
 }

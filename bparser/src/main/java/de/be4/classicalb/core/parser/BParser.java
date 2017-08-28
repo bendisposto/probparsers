@@ -53,7 +53,6 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
-	public static final String CSP_PATTERN_PREFIX = "#CSPPATTERN";
 
 	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
@@ -67,16 +66,32 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 	private Map<PositionedNode, SourcecodeRange> positions;
 
-	public static String getVersion() throws IOException {
-		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
-		return p.getProperty("version");
+	public static String getVersion() {
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("version");
+		} else {
+			return "UNKNOWN";
+		}
 	}
 
-	public static String getGitSha() throws IOException {
+	public static String getGitSha() {
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("git");
+		} else {
+			return "UNKNOWN";
+		}
+	}
+
+	private static Properties loadProperties() {
 		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
-		return p.getProperty("git");
+		try {
+			p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
+		} catch (Exception e) {
+			return null;
+		}
+		return p;
 	}
 
 	public BParser() {
@@ -176,7 +191,9 @@ public class BParser {
 	/**
 	 * Use this method, if you only need to parse small inputs. This only gives
 	 * the AST or an Exception, but no information about source positions. If
-	 * you need those, call the instance method of BParser instead
+	 * you need those, call the instance method of BParser instead. Do NOT use
+	 * this method to parse formulas, predicates and expression. Use the
+	 * corresponding instance methods instead.
 	 * 
 	 * @param input
 	 *            the B machine as input string
@@ -187,6 +204,31 @@ public class BParser {
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
 		return parser.parse(input, false, new NoContentProvider());
+	}
+
+	public Start parseFormula(final String input) throws BCompoundException {
+		final String theFormula = FORMULA_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseExpression(final String input) throws BCompoundException {
+		final String theFormula = EXPRESSION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseSubstitution(final String input) throws BCompoundException {
+		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseTranstion(final String input) throws BCompoundException {
+		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parsePredicate(final String input) throws BCompoundException {
+		final String theFormula = PREDICATE_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {

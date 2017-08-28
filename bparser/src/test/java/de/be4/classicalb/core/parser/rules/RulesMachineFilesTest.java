@@ -21,11 +21,43 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testProject2() throws Exception {
-		File file = new File("src/test/resources/rules/project/references/test1/Rule1.rmch");
+		File file = new File(dir + "project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
 		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+	}
+
+	@Test
+	public void testImplicitDependenciesDueToFunctionCall() throws Exception {
+		File file = new File(dir + "ImplicitDependencyDueFunctionCall.rmch");
+		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setPrologOutput(true);
+		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+		
+	}
+
+	@Test
+	public void testFunctionUsesDefinitionOfCallingComputation() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("'Cyclic dependencies between operations: compute_xx -> FUNC_add -> compute_xx'"));
+	}
+
+	@Test
+	public void testReadXML() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "ReadXML.rmch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testReadInvalidXML() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "ReadInvalidXML.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("'XML document structures must start and end within the same entity.'"));
+
 	}
 
 	@Test
@@ -61,6 +93,13 @@ public class RulesMachineFilesTest {
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception(pos(1,15"));
 		assertTrue(result.contains("RULES_MACHINE name must match the file name"));
+	}
+
+	@Test
+	public void testCyclicComputationDependencies() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "CyclicComputationDependencies.rmch");
+		System.out.println(result);
+		assertTrue(result.contains("Cyclic dependencies between operations"));
 	}
 
 	@Test
@@ -172,11 +211,9 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testFunctionDependencies() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/FunctionDependencies.rmch");
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionDependencies.rmch");
 		System.out.println(result);
-		assertTrue(result.contains("exception"));
-		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp1"));
-		assertTrue(result.contains("Missing dependencies due to FUNCTION call: COMP_comp2"));
+		assertTrue(!result.contains("exception"));
 	}
 
 	@Test
@@ -260,8 +297,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testImplicitDependencyToComputation() {
-		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/ImplicitDependencyToComputation.rmch");
+		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/ImplicitDependencyToComputation.rmch");
 		assertFalse(result.contains("exception"));
 	}
 
@@ -276,7 +312,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testCyclicRules() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/CyclicRules.rmch");
-		String expected = "Cyclic dependencies between operations: rule1 -> rule2 -> rule1').\n";
+		String expected = "Cyclic dependencies between operations";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
@@ -303,7 +339,8 @@ public class RulesMachineFilesTest {
 	public void testReplaces() {
 		String result = getRulesMachineAsPrologTerm(dir + "Replaces.rmch");
 		System.out.println(result);
-		//System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir, "Replaces.rmch")));
+		// System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir,
+		// "Replaces.rmch")));
 		assertFalse(result.contains("exception"));
 		assertFalse(result.contains("COMP_NewComp1"));
 	}

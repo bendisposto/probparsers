@@ -18,17 +18,18 @@ import de.be4.classicalb.core.parser.node.TKwPredicateAttribute;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 import de.be4.classicalb.core.parser.node.TKwReferences;
 import de.be4.classicalb.core.parser.node.TKwRule;
-import de.be4.classicalb.core.parser.node.TKwRuleAny;
 import de.be4.classicalb.core.parser.node.TKwRuleErrorType;
+import de.be4.classicalb.core.parser.node.TKwRuleFail;
 import de.be4.classicalb.core.parser.node.TKwRuleForAll;
 import de.be4.classicalb.core.parser.node.TKwRulesMachine;
-import de.be4.classicalb.core.parser.node.TKwSubstitutionOperator;
 import de.be4.classicalb.core.parser.node.TKwType;
 import de.be4.classicalb.core.parser.node.TKwValue;
 import de.be4.classicalb.core.parser.node.TMachine;
 import de.be4.classicalb.core.parser.node.Token;
 
 public class RulesGrammar implements IGrammar {
+
+	private static final String INSTANTIATION_ERROR_MESSAGE = "Cannot create an instance of class: ";
 
 	public static final String SUCCEEDED_RULE = "SUCCEEDED_RULE";
 	public static final String SUCCEEDED_RULE_ERROR_TYPE = "SUCCEEDED_RULE_ERROR_TYPE";
@@ -44,7 +45,6 @@ public class RulesGrammar implements IGrammar {
 	public static final String RULEID = "RULEID";
 
 	public static final String STRING_FORMAT = "STRING_FORMAT";
-	public static final String STRING_CONCAT = "STRING_CONCAT";
 	public static final String ACTIVATION = "ACTIVATION";
 	public static final String PRECONDITION = "PRECONDITION";
 	public static final String POSTCONDITION = "POSTCONDITION";
@@ -52,8 +52,6 @@ public class RulesGrammar implements IGrammar {
 	public static final String REPLACES = "REPLACES";
 
 	public static final String TAGS = "TAGS";
-
-	public static final String RULE_FAIL = "RULE_FAIL";
 
 	private static RulesGrammar ruleExtension;
 
@@ -82,7 +80,7 @@ public class RulesGrammar implements IGrammar {
 		add(TKwDummyValue.class);
 		add(TKwFunction.class);
 		add(TKwReferences.class);
-		add(TKwRuleAny.class);
+		add(TKwRuleFail.class);
 		add(TKwRuleErrorType.class);
 		add(TKwBody.class);
 
@@ -107,17 +105,15 @@ public class RulesGrammar implements IGrammar {
 		map.put(PRECONDITION, TKwPredicateAttribute.class);
 		map.put(POSTCONDITION, TKwPredicateAttribute.class);
 
-		map.put(RULE_FAIL, TKwSubstitutionOperator.class);
 		map.put(GET_RULE_COUNTEREXAMPLES, TKwExpressionOperator.class);
 		map.put(STRING_FORMAT, TKwExpressionOperator.class);
-		map.put(STRING_CONCAT, TKwExpressionOperator.class);
 	}
 
 	private static void add(Class<? extends Token> clazz) {
 		try {
 			map.put(clazz.newInstance().getText(), clazz);
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
+			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}
 
@@ -151,10 +147,10 @@ public class RulesGrammar implements IGrammar {
 				return newInstance;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-				throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e1);
+				throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e1);
 			}
 		} catch (IllegalAccessException e) {
-			throw new AssertionError("Cannot create an instance of class:" + clazz.getName(), e);
+			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}
 

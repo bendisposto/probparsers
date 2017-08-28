@@ -46,6 +46,26 @@ public class ASTProlog extends DepthFirstAdapter {
 	// helper object to print the prolog terms
 	private final IPrologTermOutput pout;
 
+	/**
+	 * @param start
+	 *            the AST node which should contain an
+	 *            {@link AExpressionParseUnit}, an {@link APredicateParseUnit}
+	 *            or an {@link ASubstitutionParseUnit}. The {@code start} node
+	 *            should have been created by
+	 *            {@link de.be4.classicalb.core.parser.BParser#parseFormula(String input)
+	 *            parseFormula}.
+	 * @param pout
+	 *            the IPrologTermOutput to which the formula is printed
+	 * 
+	 */
+	public static void printFormula(Start start, final IPrologTermOutput pout) {
+		NodeIdAssignment na = new NodeIdAssignment();
+		start.apply(na);
+		OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
+		ASTProlog printer = new ASTProlog(pout, pprinter);
+		start.apply(printer);
+	}
+
 	public ASTProlog(final IPrologTermOutput pout, final PositionPrinter positionPrinter) {
 		this.positionPrinter = positionPrinter;
 		this.pout = pout;

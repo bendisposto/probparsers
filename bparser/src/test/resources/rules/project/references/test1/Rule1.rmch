@@ -1,10 +1,43 @@
 RULES_MACHINE Rule1
+CONSTANTS
+  foo
+, bar
+PROPERTIES foo = 1 & bar =2
 REFERENCES
   Rule2
+
 OPERATIONS
   RULE rule1
   RULEID id1
   BODY
-      RULE_FAIL({"fail"})
+      RULE_FAIL
+      COUNTEREXAMPLE "fail"
+      END
   END
+  ;
+  RULE rule3
+  DEPENDS_ON_RULE rule1
+  BODY
+      RULE_FAIL
+      COUNTEREXAMPLE "fail"
+      END
+  END;
+  COMPUTATION COMP_comp1
+  BODY
+    DEFINE
+      AA
+    TYPE
+      POW(INTEGER)
+    VALUE
+      {1}
+    END//DEFINE
+    ;
+    DEFINE
+      BB
+    TYPE
+      POW(INTEGER)
+    VALUE
+      AA \/ {1}
+    END//DEFINE
+  END//COMPUTATION
 END

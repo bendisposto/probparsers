@@ -38,8 +38,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 				pout.openTerm("pos", true);
 				pout.printNumber(id);
 				pout.printNumber(nodeIds.lookupFileNumber(node));
-				if (positions.getSourcecodeRange(node) == null
-						&& node.getStartPos() != null) {
+				if (positions.getSourcecodeRange(node) == null && node.getStartPos() != null) {
 					pout.printNumber(node.getStartPos().getLine());
 					pout.printNumber(node.getStartPos().getPos());
 					pout.printNumber(node.getEndPos().getLine());

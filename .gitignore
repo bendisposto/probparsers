@@ -34,3 +34,11 @@ unicode/.gitignore
 build.xml
 bparser/src/test/java/Testing.java
 build.properties
+bparser-build.properties
+bparser/doc
+typechecker/doc
+translator/doc
+.rules-tags
+.rules-tags1
+.tags1
+.tags

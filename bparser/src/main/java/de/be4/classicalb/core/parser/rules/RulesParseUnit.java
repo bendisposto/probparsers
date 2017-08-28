@@ -40,6 +40,7 @@ public class RulesParseUnit implements IModel {
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
 	private RulesMachineChecker rulesMachineChecker;
+	private RulesReferencesFinder refFinder;
 
 	public RulesParseUnit() {
 	}
@@ -107,7 +108,7 @@ public class RulesParseUnit implements IModel {
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
-			RulesReferencesFinder refFinder = new RulesReferencesFinder(machineFile, start);
+			refFinder = new RulesReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();
 
 			this.machineReferences = refFinder.getReferences();
@@ -196,6 +197,13 @@ public class RulesParseUnit implements IModel {
 	@Override
 	public BCompoundException getCompoundException() {
 		return this.bCompoundException;
+	}
+
+	public File getProjectDirectory() {
+		if (this.refFinder != null && this.refFinder.getProjectRootDirectory() != null) {
+			return this.refFinder.getProjectRootDirectory();
+		}
+		return this.machineFile.getParentFile();
 	}
 
 }
