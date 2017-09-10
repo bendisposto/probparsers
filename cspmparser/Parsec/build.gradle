@@ -1,0 +1,25 @@
+plugins {
+    id "org.frege-lang" version "0.8"
+}
+
+apply plugin: 'maven-publish'
+
+group = 'de.hhu.stups.frege'
+version = '3.1.9'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.frege-lang:frege:3.23.422-ga05a487'
+}

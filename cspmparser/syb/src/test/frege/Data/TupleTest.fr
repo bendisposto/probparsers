@@ -1,0 +1,50 @@
+-- {-# LANGUAGE DeriveDataTypeable #-}
+module Syb.TupleTest where
+
+import Test.QuickCheck
+
+import Data.Data
+import Data.Generics.Schemes
+import Data.Generics.Aliases
+import Data.Typeable
+
+data Point = Point (Int,Char)
+derive Show Point
+derive Eq Point
+pointTc :: TyCon
+pointTc = mkTyCon3 "Syb" "TupleTest" "Point"
+instance Typeable Point where
+    typeOf _ = mkTyConApp pointTc []
+con_Point = mkConstr ty_Point "Point" [] Prefix
+ty_Point = mkDataType "Syb.TupleTest.Point" [con_Point]
+instance Data Point where
+    toConstr (Point _) = con_Point
+    dataTypeOf _ = ty_Point
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z Point)
+    gfoldl f z x = z fromTuple `f` toTuple x
+      where 
+          fromTuple :: (Int,Char) -> Point
+          fromTuple (a1,a2) = Point (a1,a2)
+          toTuple :: Point -> (Int,Char)
+          toTuple (Point (a1,a2)) = (a1,a2)
+
+example :: Point
+example = Point (5,'h')
+
+append :: Point -> Point
+append = everywhere (mkT app)
+      where
+          app :: Char -> Char
+          app _ = 'i'
+
+getStrings :: Point -> [Char]
+getStrings = listify get
+    where
+        get :: Char -> Bool
+        get _ = True
+
+test :: Property
+test = once $ result1 == Point (5, 'i') && result2 == ['h']
+    where result1 = append example
+          result2 = getStrings example

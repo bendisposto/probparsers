@@ -1,0 +1,6 @@
+module MainCallReference where
+
+import Main.ExecCommand
+import Data.List
+
+main args = prologOut (args !! 0) (args !! 1);

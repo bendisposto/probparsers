@@ -1,0 +1,54 @@
+module DataDeriver.Preprocessor where
+
+import Data.List
+
+--- Gets content from a frege file, returns its package and module name and
+--- lines belonging to a date or type block annotated with {-# derive DataTypeable #-}.
+--- NOTE: No exact syntactically match, but works for the needed cases.
+--- (eg. strings containing "--" are detected as comment start)
+preprocess :: String -> (String, String, String)
+preprocess content = (p, m, decls)
+    where
+        ls = lines $ removeLineComment $ removeBlockComments content ++ "module noname"
+        moduleName = (filter (\l -> length l > 0 && l !! 0 == "module") $ map words ls) !! 0 !! 1
+        modulePath = ´\.´.splitted moduleName
+        mpl = length modulePath
+        p = if (mpl  > 1) then concat $ intersperse "." (take (mpl - 1) modulePath)
+                          else ""
+        m = drop (mpl - 1) modulePath !! 0
+        decls = unlines $ getDecls ls
+
+--- Removes all block comments ({- -}) in s, excluding magic comments ({-# #-}).
+private removeBlockComments :: String -> String
+private removeBlockComments s = packed $ rm (unpacked s) 0
+    where
+        rm :: [Char] -> Int -> [Char]
+        rm []              _ = []
+        rm ('{':'-':'#':r) 0 = '{':'-':'#' : rm r 0
+        rm ('#':'-':'}':r) 0 = '#':'-':'}' : rm r 0
+        rm ('{':'-':r)     d = rm r (d+1)
+        rm ('-':'}':r)     d = rm r (d-1)
+        rm (h:t)           0 = h : rm t 0
+        rm (h:t)           d = rm t d
+
+--- Removes line comments in ls (--).
+private removeLineComment :: String -> String
+private removeLineComment ls = ls.replaceAll ´(?m)--.*$´ ""
+
+--- Remove from ls all lines not belonging to a data definition not annotated
+--- with {-# derive DataTypeable #-}.
+private getDecls :: [String] -> [String]
+private getDecls ls = getDecls' ls false
+    where
+        getDecls' :: [String] -> Bool -> [String]
+        getDecls' (l:ls) _     | isMagicComment l = getDecls' ls true
+        getDecls' (l:ls) false                    = getDecls' ls false
+        getDecls' (l:ls) true  | isContinuation l = [l] ++ getDecls' ls true
+        getDecls' (l:ls) true                     = getDecls' ls false
+        getDecls' []     _                        = []
+        isMagicComment   = (== "{-# derive DataTypeable #-}")
+        isContinuation l = l.startsWith(" ")
+                        || l.startsWith("data ")
+                        || l.startsWith("--")
+                        || l.startsWith("}")
+                        || l == ""

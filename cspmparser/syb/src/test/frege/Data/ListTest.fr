@@ -1,0 +1,71 @@
+module Syb.ListTest where
+
+import Test.QuickCheck
+
+import Data.Data
+import Data.Generics.Schemes
+import Data.Generics.Aliases
+import Data.Typeable
+
+data L = LI (Li Int) (Li Char)
+derive Show L
+derive Eq L
+
+addOne :: L -> L
+addOne = everywhere (mkT add)
+      where
+        add :: Li Int -> Li Int
+        add (Li a) = Li (a+1)
+
+data Li a = Li a
+derive Show (Li a)
+derive Eq (Li a)
+
+test :: Property
+test = once $ result1 == expected1 && (result2 == expected2 || result2 == expected2')
+    where result1 = addOne $ LI (Li 1) (Li 'a')
+          result2 = show $ typeOf $ Li [1,2,3]
+          expected1  = LI (Li 2) (Li 'a')
+          expected2  = "Li [Int]"
+          expected2' = "Li' ''['Int']'" --bug in showChar in some Frege versions
+
+--
+
+tc_Li :: TyCon
+tc_Li = mkTyCon3 "Syb" "ListTest" "Li"
+-- This is WRONG:
+-- instance (Data a1) => Typeable (Li a1 ) where
+--     typeOf _ = mkTyConApp tc_Li []
+instance Typeable1 Li where
+    typeOf1 _ = mkTyConApp tc_Li []
+instance (Typeable a1) => Typeable (Li a1) where
+    typeOf = typeOfDefault
+con_Li_Li :: Constr
+con_Li_Li = mkConstr ty_Li "Li" [] Prefix
+ty_Li :: DataType
+ty_Li = mkDataType "Syb.ListTest.Li" [con_Li_Li]
+instance (Data a1) => Data (Li a1 ) where
+    toConstr (Li _) = con_Li_Li
+    dataTypeOf _ = ty_Li
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z Li)
+                         _ -> error "gunfold(Li)"
+    gfoldl f z x = case x of
+                         (Li a1) -> (z Li) `f` a1
+
+tc_L :: TyCon
+tc_L = mkTyCon3 "Syb" "ListTest" "L"
+instance Typeable (L ) where
+    typeOf _ = mkTyConApp tc_L []
+con_L_LI :: Constr
+con_L_LI = mkConstr ty_L "LI" [] Prefix
+ty_L :: DataType
+ty_L = mkDataType "Syb.ListTest.L" [con_L_LI]
+instance Data (L ) where
+    toConstr (LI _ _) = con_L_LI
+    dataTypeOf _ = ty_L
+    gunfold k z c = case constrIndex c of
+                         1 -> k (k (z LI))
+                         _ -> error "gunfold(L)"
+    gfoldl f z x = case x of
+                         (LI a1 a2) -> ((z LI) `f` a1) `f` a2

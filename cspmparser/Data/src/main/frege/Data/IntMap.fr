@@ -1,0 +1,24 @@
+module frege.data.IntMap where
+
+import frege.Prelude hiding (empty)
+import frege.data.Map as Map()
+import frege.data.Map(Map)
+import frege.data.TreeMap public
+-- import Data.TreeMap(TreeMap.Nil, TreeMap.Node, TreeMap.Leaf)
+
+type IntMap x = Map Int x
+
+empty :: IntMap a
+empty = TreeMap.empty
+-- 
+-- insert :: Int -> a -> IntMap a -> IntMap a
+-- insert = Map.insert
+-- 
+-- lookup :: Int -> IntMap a -> Maybe a
+-- lookup = Map.lookup
+-- 
+-- fromList :: [(Int, v)] -> IntMap v
+-- fromList = Map.fromList
+-- 
+-- toList :: IntMap a -> [(Int,a)]
+-- toList = Map.toList

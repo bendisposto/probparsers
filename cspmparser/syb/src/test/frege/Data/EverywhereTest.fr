@@ -1,0 +1,100 @@
+module Syb.EverywhereTest where
+
+import Test.QuickCheck
+
+import Data.Generics.Aliases
+import Data.Generics.Schemes
+import Data.Data
+
+data Program = Program [Expression]
+derive Show Program
+derive Eq Program
+
+data Expression = VarFloat Float
+                | VarInt Int
+                | Plus Expression Expression
+                | Prog Program
+derive Show Expression
+derive Eq Expression
+
+----
+programTc :: TyCon
+programTc = mkTyCon3 "Syb" "EverywhereTest" "Program"
+instance Typeable Program where
+    typeOf _ = mkTyConApp programTc []
+con_Progr = mkConstr ty_Program "Program" [] Prefix
+ty_Program = mkDataType "EverywhereTest.Program" [con_Progr]
+instance Data Program where
+    toConstr (Program _) = con_Progr
+    dataTypeOf _ = ty_Program
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z Program)
+    gfoldl f z x = z fromList `f` toList x
+      where 
+          fromList :: [Expression] -> Program
+          fromList = Program
+          toList :: Program -> [Expression]
+          toList (Program xs) = xs
+
+expressionTc :: TyCon
+expressionTc = mkTyCon3 "Syb" "EverywhereTest" "Expression"
+instance Typeable Expression where
+    typeOf _ = mkTyConApp expressionTc []
+con_Expression_VarFloat :: Constr
+con_Expression_VarFloat = mkConstr ty_Expression "VarFloat" [] Prefix
+con_Expression_VarInt :: Constr
+con_Expression_VarInt = mkConstr ty_Expression "VarInt" [] Prefix
+con_Expression_Plus :: Constr
+con_Expression_Plus = mkConstr ty_Expression "Plus" [] Prefix
+con_Expression_Prog :: Constr
+con_Expression_Prog = mkConstr ty_Expression "Prog" [] Prefix
+ty_Expression :: DataType
+ty_Expression = mkDataType "EverywhereTest.Expression" [con_Expression_VarFloat, con_Expression_VarInt, con_Expression_Plus, con_Expression_Prog]
+instance Data Expression where
+    toConstr (VarFloat _) = con_Expression_VarFloat
+    toConstr (VarInt _) = con_Expression_VarInt
+    toConstr (Plus _ _) = con_Expression_Plus
+    toConstr (Prog _) = con_Expression_Prog
+    dataTypeOf _ = ty_Expression
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z VarFloat)
+                         2 -> k (z VarInt)
+                         3 -> k (k (z Plus))
+                         4 -> k (z Prog)
+                         _ -> error "gunfold(Expression)"
+    gfoldl :: (forall d b. Data d => c (d -> b) -> d -> c b)
+           -> (forall g. g -> c g)
+           -> Expression
+           -> c Expression
+    gfoldl f z x = case x of
+                        (VarFloat a) -> z VarFloat `f` a
+                        (VarInt a) -> z VarInt `f` a
+                        (Plus a1 a2) -> z fromList_Plus `f` [a1, a2]
+                        (Prog a) -> z Prog `f` a
+      where 
+          fromList_Plus :: [Expression] -> Expression
+          fromList_Plus [a1, a2] = Plus a1 a2
+----
+
+example = Program [Plus (VarFloat 1.5) (VarInt 1), (VarFloat 3.14), Prog (Program [VarFloat 42, VarInt 42]) ]
+
+intsToFloats :: Program -> Program
+intsToFloats = everywhere (mkT conv)
+      where
+          conv :: Expression -> Expression
+          conv (VarInt i) = VarFloat (fromIntegral i)
+          conv a = a
+
+getFloats :: Program -> [Expression]
+getFloats = listify isFloat
+    where
+        isFloat :: Expression -> Bool
+        isFloat (VarFloat _) = True
+        isFloat _ = False
+
+test :: Property
+test = once $ result1 == expected1 && result2 == expected2
+    where result1 = intsToFloats example
+          result2 = getFloats example
+          expected1 = Program [Plus (VarFloat 1.5) (VarFloat 1.0), VarFloat 3.14, Prog (Program [VarFloat 42.0, VarFloat 42.0])]
+          expected2 = [VarFloat 1.5, VarFloat 3.14, VarFloat 42.0]

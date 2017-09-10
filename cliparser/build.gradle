@@ -21,7 +21,17 @@ dependencies {
  compile project(path: ":ltlparser", configuration: "archives") 
  compile project(path: ":answerparser", configuration: "archives") 
  compile project(path: ":unicode", configuration: "archives")
- compile name: 'cspmf-0.1.0.0'
+ compile 'org.frege-lang:frege:3.23.422-ga05a487'
+ compile project(path: ":cspmparser/CSPM-cspm-frontend-java", configuration: "archives")
+ compile project(path: ":cspmparser/CSPM-cspm-frontend", configuration: "archives")
+ compile project(path: ":cspmparser/CSPM-ToProlog", configuration: "archives")
+ compile project(path: ":cspmparser/CSPM-Frontend", configuration: "archives")
+ compile project(path: ":cspmparser/Data")
+ compile project(path: ":cspmparser/Parsec")
+ compile project(path: ":cspmparser/PrettyPrint")
+ compile project(path: ":cspmparser/State")
+ compile project(path: ":cspmparser/syb")
+ compile project(path: ":cspmparser/System")
 }
 
 compileJava {

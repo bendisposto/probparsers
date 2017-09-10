@@ -1,0 +1,27 @@
+plugins {
+    id "org.frege-lang" version "0.8"
+}
+
+apply plugin: 'maven-publish'
+
+group = 'de.hhu.stups.frege'
+version = '1.3.14'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile 'org.frege-lang:frege:3.23.422-ga05a487'
+    compile project(path: ":cspmparser/syb")
+}

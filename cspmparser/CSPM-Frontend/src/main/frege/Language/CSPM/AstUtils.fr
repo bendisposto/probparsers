@@ -1,0 +1,133 @@
+{--
+    Some utility functions for converting the AST
+    
+    [Module]    Language.CSPM.AstUtils
+    [Copyright]   (c) Fontaine 2008 - 2011
+    [License]    BSD3
+    
+    [Maintainer] Fontaine@cs.uni-duesseldorf.de
+    [Stability] experimental
+-}
+
+module Language.CSPM.AstUtils where
+
+import Language.CSPM.AST
+import Language.CSPM.SrcLoc(SrcLoc)
+
+import Data.IntMap(IntMap)
+import Data.Data
+import Data.Maybe
+import Data.Generics.Schemes (everywhere,listify)
+import Data.Generics.Aliases (mkT)
+
+--- 'removeSourceLocations' sets all locationsInfos to 'NoLocation'
+removeSourceLocations :: Data b => b -> b
+removeSourceLocations ast 
+  = everywhere (mkT patchLabel) ast
+  where
+    patchLabel :: SrcLoc.SrcLoc -> SrcLoc.SrcLoc
+    patchLabel _ = SrcLoc.NoLocation
+
+--- 'removeParens' removes all occurrences of Parens,
+--- i.e. explicit parentheses from the AST
+removeParens :: Data b => b -> b
+removeParens ast 
+  = everywhere (mkT patchExp) ast
+  where
+    patchExp :: LExp -> LExp
+    patchExp x = case x.unLabel of
+      Parens e -> e
+      _ -> x
+
+--- Set all NodeIds to zero.
+setNodeIdsZero :: Data b => b -> b
+setNodeIdsZero ast 
+  = everywhere (mkT nID) ast
+  where
+    nID :: NodeId -> NodeId
+    nID _ = NodeId { unNodeId = 0 }
+
+--- 'unUniqueIdent' replaces all 'UIdent' with the 'Ident' of the new name,
+--- thus forgetting additional information like the bindingside, etc.
+--- Useful to get a smaller AST.
+unUniqueIdent :: Data b => b -> b
+unUniqueIdent ast
+  = everywhere (mkT patchIdent) ast
+  where
+    patchIdent :: Ident -> Ident
+    patchIdent (UIdent u) = Ident $ u.newName
+    patchIdent _ = error "unUniqueIdent : did not expect and 'Ident' in the AST"
+
+--- Compute the 'FreeNames' of an Expression.
+--- This function does only work after renaming has been done.
+--- This implementation is inefficient.
+computeFreeNames :: Data b => b -> FreeNames
+computeFreeNames syntax
+  = IntMap.difference (IntMap.fromList used) (IntMap.fromList def)
+  where
+    used :: [(Int, UniqueIdent)]
+    used = map (getIdent . unUse) $ listify isUse syntax
+    def :: [(Int, UniqueIdent)]
+    def  =  (map (getIdent . unDef) $ listify isDef syntax)
+         ++ (map (getIdent . unDecl) $ listify isDecl syntax)
+    getIdent :: LIdent -> (Int, UniqueIdent)
+    getIdent x = (h.uniqueIdentId, h)
+      where h = unUIdent $ x.unLabel
+
+    isUse :: Exp -> Bool
+    isUse (Var {}) = True
+    isUse _ = False
+
+    unUse (Var x) = x
+    unUse _ = error "computeFreeNames : expecting Var"
+
+    isDef :: Pattern -> Bool
+    isDef (VarPat {}) = True
+    isDef _ = False
+
+    isDecl (FunBind {}) = True
+    isDecl _ = False
+
+    unDef (VarPat x) = x
+    unDef _ = error "computeFreeNames : expecting VarPar"
+
+    unDecl (FunBind x _) = x
+    unDecl _ = error "computeFreeNames : expecting FunBind"
+
+--- Get the assert declarations of a module.
+getModuleAsserts :: Module a -> [LAssertDecl]
+getModuleAsserts = mapMaybe justAssert . Module.moduleDecls
+  where
+    justAssert decl = case decl.unLabel of
+      Assert  a -> Just a
+      _ -> Nothing
+
+getLastBindExpression :: Module a -> LExp
+getLastBindExpression = justDeclExp . last . Module.moduleDecls
+  where
+    justDeclExp decl = case decl.unLabel of
+      (PatBind _ exp) -> exp
+      _ -> error "getLastBindExpression: expection PatBind"
+
+getLastDeclaration :: Module a -> LDecl
+getLastDeclaration = last . Module.moduleDecls
+
+--- Remove assert declarations from a module.
+removeModuleAsserts :: Module a -> Module a
+removeModuleAsserts m = m.{ moduleDecls = mapMaybe notAssert $  m.moduleDecls}
+  where
+    notAssert decl = case decl.unLabel of
+      Assert _ -> Nothing
+      _ -> Just decl
+
+--- Remove source locations, tokens, comments and pragmas from a module.
+removeMetaInfo :: Data a => Module a -> Module a
+removeMetaInfo ast = removeSourceLocations
+                        ast.{moduleTokens   = Nothing
+                            ,moduleSrcLoc   = NoLocation
+                            ,moduleComments = []
+                            ,modulePragmas  = []}
+
+--- Add module declarations of second module to the first module.
+mergeDecls :: Module a -> Module a -> Module a
+mergeDecls m1 m2 = m1.{moduleDecls <- (++ m2.moduleDecls) }

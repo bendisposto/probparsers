@@ -1,0 +1,103 @@
+{--
+    Comand line interface for the CSPM tools.
+
+    [Module]     Main.ExecCommand
+    [Copyright]  (c) Fontaine 2010-2011
+    [License]    BSD3
+    
+    [Maintainer] Fontaine@cs.uni-duesseldorf.de
+    [Stability]  experimental
+-}
+
+module Main.ExecCommand
+where
+
+import frege.Prelude hiding (empty, display, <+>)
+import Language.CSPM.Frontend
+import Language.CSPM.LexHelper
+
+import Language.CSPM.TranslateToProlog
+import Language.CSPM.AstToXML
+
+import Text.PrettyPrint
+import Data.Version
+
+import Main.ExceptionHandler
+
+cmdVersion :: Version
+cmdVersion = makeVersion [0,1,0,0]
+
+version :: IO ()
+version = putStrLn $ "cspm command line utility version " ++ showVersion cmdVersion
+
+numericVersion :: IO ()
+numericVersion = putStrLn $ showVersion frontendVersion
+
+verbose :: IO ()
+verbose =
+    putStr $ concat
+        [
+        "Versions :",nl
+        ,"  cspmf command line utility : ", showVersion cmdVersion, nl
+        ,"  CSPM-Frontend              : ", showVersion frontendVersion, nl
+        ,"  CSPM-ToProlog              : ", showVersion toPrologVersion, nl
+        ,nl
+        ,"Usage examples:",nl
+        ,"  cspmf --help",nl
+        ,"  cspmf info",nl
+        ,"  cspmf translate",nl
+        ,nl
+        ,"Copyright (c) Marc Fontaine, Ivaylo Dobrikov, Markus Brenneis 2007-2017",nl
+        ,"Email : Marc.Fontaine@gmx.de, ivaylo.dobrikov@googlemail.com",nl
+        ]
+  where nl = "\n"
+
+prettyOut :: FilePath -> Bool -> FilePath -> IO ()
+prettyOut = genericOut prettyShow
+
+xmlOut :: FilePath -> Bool -> FilePath -> IO ()
+xmlOut = genericOut (showTopElement . moduleToXML)
+
+private genericOut :: (ModuleFromRenaming -> String) -> FilePath -> Bool -> FilePath -> IO ()
+private genericOut showModule src rename outFile = handleException $ do
+    ast <- do
+          ast1 <- parseFile src
+          if rename
+            then fmap fst $ eitherToExc $ renameModule ast1
+            else return $ castModule ast1
+    writeFile outFile $ showModule ast
+
+addUnicodeStr :: FilePath -> IO String
+addUnicodeStr src = do
+    tokens <- readFile src >>= lexInclude src >>= eitherToExc
+    return $ concatMap unicodeTokenString tokens
+
+addUnicode :: FilePath -> FilePath -> IO ()
+addUnicode src outFile = handleException $ do
+    unicodeString <- addUnicodeStr src
+    writeFile outFile unicodeString
+
+removeUnicode :: FilePath -> FilePath -> IO ()
+removeUnicode src outFile = handleException $ do
+    tokens <- readFile src >>= lexInclude src >>= eitherToExc
+    writeFile outFile $ concatMap asciiTokenString tokens
+
+prologStdOut :: FilePath -> IO String
+prologStdOut src = -- exception handling is done in translateToProlog
+    translateToPrologStr src
+
+prologOut :: FilePath -> FilePath -> IO ()
+prologOut src outFile = do -- exception handling is done in translateToProlog
+    translateToProlog src outFile
+
+expressionToPrologTerm :: FilePath -> String -> IO ()
+expressionToPrologTerm "no-file" str = handleException $ do
+    putStrLn =<< translateExpToPrologTerm Nothing str
+expressionToPrologTerm src str = handleException $ do
+    putStrLn =<< translateExpToPrologTerm (Just src) str
+
+declarationToPrologTerm :: FilePath -> String -> IO ()
+declarationToPrologTerm "no-file" str = handleException $
+    putStrLn =<< translateDeclToPrologTerm Nothing str
+declarationToPrologTerm src str = handleException $
+    putStrLn =<< translateDeclToPrologTerm (Just src) str

@@ -1,0 +1,41 @@
+module Syb.TypeTest where
+
+import Test.QuickCheck
+
+import Data.Generics.Aliases
+import Data.Generics.Schemes
+import Data.Data
+
+data Program = Program T
+derive Show Program
+derive Eq Program
+
+tc_Program :: TyCon
+tc_Program = mkTyCon3 "Syb" "TypeTest" "Program"
+instance Typeable (Program ) where
+    typeOf _ = mkTyConApp tc_Program []
+con_Program_Program :: Constr
+con_Program_Program = mkConstr ty_Program "Program" [] Prefix
+ty_Program :: DataType
+ty_Program = mkDataType "Syb.TypeTest.Program" [con_Program_Program]
+instance Data (Program ) where
+    toConstr (Program _) = con_Program_Program
+    dataTypeOf _ = ty_Program
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z Program)
+                         _ -> error "gunfold(Program)"
+    gfoldl f z x = case x of
+                         (Program a1) -> (z Program) `f` a1
+
+type T = (Int, Int)
+
+addOne :: Program -> Program
+addOne = everywhere (mkT add)
+      where
+          add :: Int -> Int
+          add = (+1)
+
+example = Program (1,1)
+
+test :: Property
+test = once $ addOne example == Program (2, 2)

@@ -1,0 +1,70 @@
+module DataDeriver.Deriver where
+
+import DataDeriver.AST
+import Data.List
+
+createInstance :: String -> String -> Topdecl -> String
+createInstance packag modul (Topdecl typeName typeArgs constrs) = unlines $
+    typeableInstance tn tc pn mn targs typeArgs
+    ++
+    [ con++" :: Constr\n"++
+      con++" = mkConstr "++ty++" \""++c++"\" [] Prefix" | (c, _, con) <- cons ]
+    ++
+    [ ty++" :: DataType"
+    , ty++" = mkDataType \""++pn++"."++mn++"."++tn++"\" "++conList
+    , "instance "++requ++"Data ("++tn++targs++") where" ]
+    ++
+    [ "    toConstr ("++c++(concat (replicate ts " _"))++") = "++con | (c, ts, con) <- cons ]
+    ++
+    [ "    dataTypeOf _ = "++ty ]
+    ++
+    [ "    gunfold k z c = case constrIndex c of" ]
+    ++
+    map ("                         "++) (gunfoldBody 1 tn cons)
+    ++
+    [ "    gfoldl f z x = case x of" ]
+    ++
+    map ("                         "++) (gfoldlBody tn cons)
+    where
+        tn = typeName
+        tc = "tc_" ++ tn
+        ty = "ty_" ++ tn
+        pn = packag
+        mn = modul
+        cons = [(c, ts, "con_"++tn++"_"++c) | (Constr c ts) <- constrs]
+        conList = "[" ++ concat (intersperse ", " (map (\(_,_,c)->c) cons)) ++ "]"
+        requ | typeArgs == 0 = ""
+             | otherwise     = "(" ++ concat (intersperse ", " ["Data a"++show i | i <- [1..typeArgs]]) ++ ") => "
+        targs = " " ++ concat ["a"++show i++" " | i <- [1..typeArgs]]
+
+typeableInstance :: String -> String -> String -> String -> String -> Int -> [String]
+typeableInstance tn tc pn mn targs 0 =
+    [ tc++" :: TyCon"
+    , tc++" = mkTyCon3 \""++pn++"\" \""++mn++"\" \""++tn++"\""
+    , "instance Typeable ("++tn++targs++") where"
+    , "    typeOf _ = mkTyConApp "++tc++" []" ]
+typeableInstance tn tc pn mn targs 1 =
+    [ tc++" :: TyCon"
+    , tc++" = mkTyCon3 \""++pn++"\" \""++mn++"\" \""++tn++"\""
+    , "instance (Typeable a1) => Typeable ("++tn++targs++") where"
+    , "    typeOf = typeOfDefault" ]
+    ++ typeableNs
+    where typeableNs = ["instance Typeable1 "++tn++" where"
+                       ,"    typeOf1 _ = mkTyConApp "++tc++" []"]
+typeableInstance _ _ _ _ _ n = error $ "typeableInstance for " ++ show n ++ " type parameters not implemented"
+    
+
+gunfoldBody :: Int -> String -> [(ConstrName, Int, String)] -> [String]
+gunfoldBody n tn []     = ["_ -> error \"gunfold("++tn++")\""]
+gunfoldBody n tn ((c,ts,_):cs) = ((show n)++" -> "++ks++"z "++c++cbs) : (gunfoldBody (n+1) tn cs)
+    where
+        ks  = concat $ replicate ts "k ("
+        cbs = concat $ replicate ts ")"
+
+gfoldlBody :: String -> [(ConstrName, Int, String)] -> [String]
+gfoldlBody tn []     = []
+gfoldlBody tn ((c,ts,_):cs) = "("++c++args++") -> "++obs++"z "++c++fs : gfoldlBody tn cs
+    where
+        args = concat $ [" a" ++ show i | i <- [1..ts] ]
+        obs  = concat $ replicate ts "("
+        fs   = concat $ [") `f` a" ++ show i | i <- [1..ts] ]

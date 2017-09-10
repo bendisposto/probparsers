@@ -1,0 +1,435 @@
+{--
+    Translation of an AST into Prolog terms, suitable for the ProB CSPM-Interpreter
+    
+    [Module]     Language.CSPM.CompileAstToProlog
+    [Copyright]  (c) Fontaine, Dobrikov 2011
+    [License]    BSD3
+    
+    [Maintainer] fontaine@cs.uni-duesseldorf.de
+    [Stability]  experimental
+-}
+
+module Language.CSPM.CompileAstToProlog
+where
+
+import frege.Prelude hiding (MonadAlt.<+>, Show.display, ListEmpty.empty)
+
+import Language.CSPM.Frontend (ModuleFromRenaming, frontendVersion)
+import Language.CSPM.AST
+import Language.CSPM.SrcLoc as SrcLoc
+import Language.Prolog.PrettyPrint.Direct
+
+-- import Text.PrettyPrint
+import Data.Set (Set)
+import Data.Set(fromList, member)
+import Data.Map(elems)
+import Data.Version
+
+--- Translate an 'LModule' into a 'Doc' containing a number of Prolog facts.
+--- The LModule must be a renamed,i.e. contain only unique 'Ident'ifier.
+cspToProlog ::
+  ModuleFromRenaming -- ^ the renamed Module
+  -> Doc  -- ^ prolog facts
+cspToProlog ast = header $+$ core
+  where
+    core = mkModule ast
+    header = vcat [
+         text ":- dynamic channel/2, bindval/3, agent/3."
+        ,text ":- dynamic agent_curry/3, symbol/4."
+        ,text ":- dynamic dataTypeDef/2, subTypeDef/2, nameType/2."
+        ,text ":- dynamic cspTransparent/1."
+        ,text ":- dynamic cspPrint/1."
+        ,text ":- dynamic pragma/1."
+        ,text ":- dynamic comment/2."
+        ,text ":- dynamic assertBool/1, assertRef/5, assertTauPrio/6."
+        ,text ":- dynamic assertModelCheckExt/4, assertModelCheck/3."
+        ,text ":- dynamic assertLtl/4, assertCtl/4."
+        ]
+
+private plLocatedConstructs :: Set Const
+private plLocatedConstructs = Set.fromList 
+  [F_Interleave , F_Interrupt, F_Timeout, F_CHAOS,
+   F_ExtChoice, F_IntChoice, F_Sequential, F_Hiding
+  ]
+
+private mkModule :: ModuleFromRenaming -> Doc
+private mkModule m
+  = plPrg [
+      singleClause $ clause $ termToClause $ nTerm "parserVersionNum"
+        [pList $ map atom $ frontendVersion.versionBranch]
+     ,singleClause $ clause $ termToClause $ nTerm "parserVersionStr"
+        [atom ("CSPM-Frontent-" ++ showVersion frontendVersion)]
+     ,declGroup $ map (clause . termToClause) $ declList $ Module.moduleDecls m
+     ,declGroup $ map mkPragma  $ Module.modulePragmas m
+     ,declGroup $ map mkComment $ Module.moduleComments m
+     ]
+
+private mkPragma :: String -> Clause
+private mkPragma s = clause $ termToClause $ nTerm "pragma" [aTerm s]
+
+private mkComment :: (Comment, SrcLoc.SrcLoc) -> Clause
+private mkComment (c, loc) = clause $ termToClause $ nTerm "comment" [com, mkSrcLoc loc]
+  where
+    com = case c of
+      LineComment s ->  nTerm "lineComment" [aTerm s]
+      BlockComment s -> nTerm "blockComment" [aTerm s]
+      PragmaComment s -> nTerm "pragmaComment" [aTerm s]
+
+te :: LExp -> Term
+te expr = case expr.unLabel of
+  Var i -> let u = unUIdent $ i.unLabel in
+    case (u.prologMode,u.idType) of
+      (PrologGround,VarID)   -> nTerm "val_of" [plNameTerm i, plLoc expr]
+      _ -> plNameTerm i
+  IntExp i -> nTerm "int" [atom i]
+  SetExp r Nothing -> nTerm "setExp" [range r]
+  SetExp r (Just comp) -> nTerm "setExp" [range r, comprehension comp]
+  ListExp r Nothing -> nTerm "listExp" [range r]
+  ListExp r (Just comp) -> nTerm "listExp" [range r, comprehension comp]
+  ClosureComprehension (e,c) ->  nTerm "closureComp" [comprehension c ,eList e] 
+  Let decl e -> nTerm "let" [pList $ declList decl, te e]
+  Ifte cond t e -> nTerm "ifte" [te cond, te t, te e,condPos,thenPos,elsePos] where
+    condPos = mkSrcLoc $ SrcLoc.srcLocFromTo (Labeled.srcLoc expr) (Labeled.srcLoc cond)
+    thenPos = mkSrcLoc $ SrcLoc.srcLocBetween (Labeled.srcLoc cond) (Labeled.srcLoc t)
+    elsePos = mkSrcLoc $ SrcLoc.srcLocBetween (Labeled.srcLoc t) (Labeled.srcLoc e)
+  CallFunction fkt args -> case args of
+     [l] -> nTerm "agent_call" [plLoc fkt, te fkt, eList l]
+     (_:_:_) -> nTerm "agent_call_curry" [te fkt, pList $ map eList args ]
+     [] -> error ("CallFunction without args" ++ show expr)
+  CallBuiltIn builtIn args
+    -> if (Set.member (unBuiltIn builtIn) plLocatedConstructs )
+          then nTerm "builtin_call" [ nTerm (builtInToString builtIn) (plLoc expr : flatArgs args) ]
+          else nTerm "builtin_call" [ nTerm (builtInToString builtIn) $ flatArgs args ]
+  Lambda patl e -> nTerm "lambda" [pList $ map tp patl, te e]
+  Stop  -> nTerm "stop" [plLoc expr]
+  Skip  -> nTerm "skip" [plLoc expr]
+  CTrue -> aTerm "true"
+  CFalse -> aTerm "false"
+  Events -> aTerm "Events"
+  BoolSet -> aTerm "boolType"
+  IntSet  -> aTerm "intType"
+  TupleExp i -> nTerm "tupleExp" [eList i]
+  Parens e -> term $ te e
+  AndExp a b -> nTerm "bool_and" [te a, te b]
+  OrExp a b -> nTerm "bool_or" [te a, te b]
+  NotExp a -> nTerm "bool_not" [te a]
+  NegExp a -> nTerm "negate" [te a]
+  Fun1 op a -> nTerm (builtInToString op) [te a]
+  Fun2 op a b -> if (Set.member (unBuiltIn op) plLocatedConstructs ) 
+    then nTerm (builtInToString op) [te a, te b, nTerm "src_span_operator" [plLoc expr, plLoc op]]
+    else nTerm (builtInToString op) [te a, te b]
+  DotTuple a -> nTerm "dotTuple" [eList a]
+  Closure l -> nTerm "closure" [ eList l]
+  ProcSharing al p1 p2 -> nTerm "sharing" [te al, te p1, te p2,plLoc expr]
+  ProcAParallel a1 a2 p1 p2
+    -> nTerm "aParallel" [te a1, te p1, te a2, te p2, plLoc expr]
+  ProcLinkParallel ll a b
+    ->  nTerm "lParallel" [ linkList ll, te a, te b, plLoc ll ] 
+  ProcRenaming ren Nothing p
+    -> nTerm "procRenaming" [ renameList ren, te p, plLoc expr ]
+  ProcRenaming ren (Just gen) p
+    -> nTerm "procRenamingComp" [te p, comprehension $ Labeled.unLabel gen, renameList ren]
+  ProcException p1 e p2 -> nTerm "exception" [te p1, te e, te p2, plLoc expr]
+  ProcRepSequence gen proc -> nTerm "repSequence" [comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  ProcRepInternalChoice gen proc 
+    -> nTerm "repInternalChoice" [comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  ProcRepInterleave gen proc 
+    -> nTerm "repInterleave" [comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  ProcRepExternalChoice gen proc -> nTerm "repChoice" [comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  ProcRepAParallel gen alph proc
+    -> nTerm "procRepAParallel" [comprehension $ Labeled.unLabel gen, nTerm "pair" [te alph, te proc] ,plLoc gen]
+  ProcRepLinkParallel gen links proc
+    -> nTerm "procRepLinkParallel" [linkList links, comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  ProcRepSharing gen share proc
+    -> nTerm "procRepSharing" [te share, comprehension $ Labeled.unLabel gen, te proc, plLoc gen]
+  PrefixExp ch fields proc -> nTerm "prefix" [plLoc ch, mkCommFields fields, te ch, te proc,prefixLoc ]
+    where
+      prefixLoc = mkSrcLoc $ SrcLoc.srcLocBetween
+        (if null fields then Labeled.srcLoc $ ch else Labeled.srcLoc $ last fields)
+        (Labeled.srcLoc proc)
+  PrefixI {} -> missingCase "PrefixI"
+  ExprWithFreeNames {} -> missingCase "ExprWithFreeNames"
+  LambdaI {} -> missingCase "LambdaI"
+  LetI {} -> missingCase "LetI"
+ where
+    missingCase :: String -> Term
+    missingCase s = error $ "missing case in te :" ++ s
+    flatArgs :: [[LExp]] -> [Term]
+    flatArgs l = concatMap (map te) l  
+
+    comprehension :: [LCompGen] -> Term
+    comprehension l = pList $ map (comp . Labeled.unLabel ) l
+      where
+        comp (Guard e) = nTerm "comprehensionGuard" [te e]
+        comp (Generator pat e) = nTerm "comprehensionGenerator" [tp pat, te e]
+
+    linkList :: LLinkList -> Term
+    linkList ll = case Labeled.unLabel ll of
+      LinkList l -> nTerm "linkList" [ pList $ map (mklink . Labeled.unLabel) l ]
+      LinkListComprehension gen l 
+        -> nTerm "linkListComp" [ comprehension gen, pList $ map (mklink . Labeled.unLabel) l ]
+     where
+        mklink (Link a b) = nTerm "link" [te a,te b]
+
+    renameList :: [LRename] -> Term
+    renameList l = pList $ map (mkRen . Labeled.unLabel) l
+      where
+        mkRen (Rename a b) = nTerm "rename" [te a, te b]
+    mkCommFields :: [LCommField] -> Term
+    mkCommFields l = pList $ map (mkCF . Labeled.unLabel) l
+      where
+        mkCF (InComm p) = nTerm "in" [tp p]
+        mkCF (OutComm e) = nTerm "out" [te e]
+        mkCF (InCommGuarded p e) = nTerm "inGuard" [tp p, te e]
+
+    range :: LRange -> Term
+    range r = case Labeled.unLabel r of
+      RangeOpen a -> nTerm "rangeOpen" [te a]
+      RangeClosed a b -> nTerm "rangeClosed" [te a, te b]
+      RangeEnum l -> nTerm "rangeEnum" [eList l]
+
+private eList :: [LExp] -> Term
+private eList l = pList h
+  where h :: [Term]
+        h = map te l
+
+private tp :: LPattern -> Term
+private tp pattern = case Labeled.unLabel pattern of
+  IntPat i -> nTerm "int" [atom i]
+  TruePat -> aTerm "true"
+  FalsePat -> aTerm "false"
+  WildCard -> plWildCard
+  VarPat i -> plNameTerm i
+  ConstrPat i -> plNameTerm i
+  Also l -> tpList "alsoPattern" l
+  Append l ->  tpList "appendPattern" l
+  DotPat l ->  tpList "dotpat" l
+  SingleSetPat p -> tpList "singleSetPat" [p]
+  EmptySetPat -> aTerm "emptySet"
+  ListEnumPat l -> tpList "listPat" l
+  TuplePat l -> tpList "tuplePat" l
+  Selector {} -> error "missing case in tp : Selector"
+  Selectors {} -> error "missing case in tp : Selectors"
+ where
+    tpList :: String -> [LPattern] -> Term
+    tpList f l =  nTerm f [pList $ map tp l]
+
+private declList :: [LDecl] -> [Term]
+private declList l = concatMap td l
+
+td :: LDecl -> [Term]
+td decl = case Labeled.unLabel decl of
+  PatBind pat e -> [ nTerm "bindval" [tp pat, te e, plLoc decl]]
+  FunBind fkt caseList -> map (mkFunBind fkt) caseList
+  Assert e -> mkAssert e
+  Transparent idList 
+    -> [ nTerm "cspTransparent" [pList $ map plName idList] ]
+  SubType i constrL  -> [ nTerm "subTypeDef"  [plNameTerm i, mkConstructorList constrL] ]
+  DataType i constrL -> [ nTerm "dataTypeDef" [plNameTerm i, mkConstructorList constrL] ]
+  NameType i t -> [ nTerm "nameType" [plNameTerm i, nTerm "type" [mkTypeDef t]] ]
+  Channel ids tdef -> map (mkChannel tdef) ids
+  Print e -> [ nTerm "cspPrint" [te e] ]
+ where
+    mkFunBind :: LIdent -> FunCase -> Term
+    mkFunBind ident (FunCase pat e) = case pat of 
+      [p] -> nTerm "agent" [
+              nTerm (plName ident) $ map tp p
+             ,te e
+             ,plLoc e]
+      l -> nTerm "agent_curry" [
+              nTerm (plName ident) $ map (pList . map tp) l 
+             ,te e
+             ,plLoc e]
+    mkFunBind _ (FunCaseI {}) = error "unexpected case in mkFunBind: FunCaseI"
+    
+    mkConstructorList :: [LConstructor] -> Term
+    mkConstructorList l = pList $ map mkConstructor l
+    
+    mkConstructor :: LConstructor -> Term
+    mkConstructor c = case Labeled.unLabel c of
+      Constructor i Nothing  -> nTerm "constructor" [plNameTerm i]
+      Constructor i (Just t) -> nTerm "constructorC" [plNameTerm i, mkTypeDef t]
+
+    mkTypeDef :: LTypeDef -> Term
+    mkTypeDef t = case Labeled.unLabel t of
+       TypeDot na_tuples -> nTerm "dotTupleType" [mkTypeDotArgs na_tuples]
+
+    mkTypeDotArgs :: [LNATuples] -> Term
+    mkTypeDotArgs na_tuples = pList $ map mkTypeTupleArg na_tuples
+       where
+         mkTypeTupleArg na_tuple =
+             case Labeled.unLabel na_tuple of
+                 SingleValue e -> te e
+                 TypeTuple le -> nTerm "typeTuple" [eList le]
+
+{-
+    mkTypeDef :: LTypeDef -> Term
+    mkTypeDef t = case Labeled.unLabel t of
+      TypeTuple l -> nTerm "typeTuple" [eList l]
+      TypeDot   l -> nTerm "dotTupleType" [eList l]
+-}
+
+    mkChannel :: Maybe LTypeDef -> LIdent -> Term
+    mkChannel Nothing  i = nTerm "channel" [ plNameTerm i, nTerm "type" [term $ atom "dotUnitType" ]]
+    mkChannel (Just t) i = nTerm "channel" [ plNameTerm i, nTerm "type" [mkTypeDef t]]
+
+
+
+    mkAssert :: LAssertDecl -> [Term]
+    mkAssert ass = case Labeled.unLabel ass of
+      AssertBool e -> [ nTerm "assertBool" [te e] ]
+      AssertRefine b p1 m p2
+        -> [ nTerm "assertRef" [aTerm $ showBool b, te p1, termShow m, te p2, plLoc decl] ]
+      AssertLTLCTL b p t s
+        -> case Labeled.unLabel t of
+          LTL -> [ nTerm "assertLtl" [aTerm $ showBool b, te p, aTerm s, plLoc decl] ]
+          CTL -> [ nTerm "assertCtl" [aTerm $ showBool b, te p, aTerm s, plLoc decl] ]
+      AssertTauPrio b p1 m p2 e
+        -> [ nTerm "assertTauPrio" [aTerm $ showBool b, te p1, termShow m, te p2, te e, plLoc decl] ]
+      AssertModelCheck b p m (Just ext)
+        -> [ nTerm "assertModelCheckExt" [aTerm $ showBool b, te p, termShow m, termShow ext] ]
+      AssertModelCheck b p m Nothing
+        -> [ nTerm "assertModelCheck" [aTerm $ showBool b, te p, termShow m ] ]
+    termShow :: Show a => Labeled a -> Term
+    termShow = aTerm . show . Labeled.unLabel
+    -- in Frege, show True is "true"
+    showBool :: Bool -> String
+    showBool True  = "True"
+    showBool False = "False"
+
+private plNameTerm :: LIdent -> Term
+private plNameTerm l
+    = case (uIdent.idType,uIdent.prologMode) of
+        (VarID,PrologVariable) -> plVar ("_" ++ uniquePlName uIdent)
+        (VarID,PrologGround)   -> term $ atom $ uniquePlName uIdent
+        _             -> term $ plName l
+    where uIdent = unUIdent $ Labeled.unLabel l
+
+private plName :: LIdent -> Atom
+private plName l
+    = case UniqueIdent.idType uIdent of
+         TransparentID -> atom $ UniqueIdent.realName uIdent
+         VarID         -> error ("plName : " ++ show l)
+         _             -> atom $ uniquePlName uIdent
+    where uIdent = unUIdent $ Labeled.unLabel l
+
+private uniquePlName :: UniqueIdent -> String
+private uniquePlName = UniqueIdent.newName
+
+
+private plLoc :: Labeled x -> Term
+private plLoc = mkSrcLoc . Labeled.srcLoc
+
+--- Translate a source location to Prolog
+mkSrcLoc :: SrcLoc.SrcLoc -> Term
+mkSrcLoc loc =  case loc of
+  SrcLoc.TokPos {} ->  nTerm "src_position" 
+      [itt $ SrcLoc.getStartLine loc
+      ,itt $ SrcLoc.getStartCol loc
+      ,itt $ SrcLoc.getStartOffset loc
+      ,itt $ SrcLoc.getTokenLen loc ]
+  SrcLoc.TokSpan {} -> nTerm "src_span"
+      [itt $ SrcLoc.getStartLine loc
+      ,itt $ SrcLoc.getStartCol loc
+      ,itt $ SrcLoc.getEndLine loc
+      ,itt $ SrcLoc.getEndCol loc
+      ,itt $ SrcLoc.getStartOffset loc
+      ,itt $ SrcLoc.getTokenLen loc ]
+  SrcLoc.FixedLoc {} -> nTerm "src_span"
+      [itt $ SrcLoc.getStartLine loc
+      ,itt $ SrcLoc.getStartCol loc
+      ,itt $ SrcLoc.getEndLine loc
+      ,itt $ SrcLoc.getEndCol loc
+      ,itt $ SrcLoc.getStartOffset loc
+      ,itt $ SrcLoc.getTokenLen loc ]
+  _ -> term $ atom "no_loc_info_available"
+ where 
+    itt :: Int -> Term
+    itt = term . iatom . fromIntegral
+    iatom :: Integer -> Atom
+    iatom = atom
+
+--- Translate a 'AstAnnotation' with 'UnqiueIdentifier' (i.e. a Symboltable)
+-- into a 'Doc' containing Prolog facts
+mkSymbolTable :: AstAnnotation UniqueIdent -> Doc
+mkSymbolTable ids 
+  = plPrg [declGroup $ map mkSymbol $ Map.elems ids]
+  where
+  mkSymbol :: UniqueIdent -> Clause
+  mkSymbol i = clause $ termToClause $ nTerm "symbol"
+   [aTerm $ uniquePlName i
+   ,aTerm i.realName
+   ,mkSrcLoc i.bindingLoc
+   ,aTerm $ pprintIDType i
+   ]
+  pprintIDType :: UniqueIdent -> String
+  pprintIDType i = case UniqueIdent.idType i of
+    ChannelID -> "Channel"
+    NameTypeID -> "Nametype"
+    FunID -> "Funktion or Process"
+    ConstrID   -> "Constructor of Datatype"
+    DataTypeID     -> "Datatype"
+    TransparentID  -> "Transparent function"
+    BuiltInID  -> "BuiltIn primitive"
+    VarID -> case i.prologMode of
+      PrologGround -> "Ident (Groundrep.)"
+      PrologVariable -> "Ident (Prolog Variable)"
+
+--- Map the abstract datatype LBuiltIn back to plain Strings for Prolog
+private builtInToString :: LBuiltIn -> String
+private builtInToString x = 
+  let (BuiltIn bi) = Labeled.unLabel x in
+  case bi of
+  F_STOP -> "STOP"     
+  F_SKIP -> "SKIP"     
+  F_true -> "true"     
+  F_false -> "false"
+  F_not -> "not"      
+  F_and -> "and"      
+  F_or -> "or"       
+  F_Int -> "Int"      
+  F_Bool -> "Bool"     
+  F_Events -> "Events"   
+  F_CHAOS -> "CHAOS"    
+  -- F_union -> "union"    
+  -- F_inter -> "inter"    
+  -- F_diff -> "diff"     
+  -- F_Union -> "Union"    
+  -- F_Inter -> "Inter"    
+  -- F_member -> "member"   
+  -- F_card -> "card"     
+  -- F_empty -> "empty"    
+  -- F_set -> "set"      
+  -- F_seq -> "seq"
+  -- F_Set -> "Set"      
+  -- F_Seq -> "Seq"      
+  -- F_null -> "null"     
+  -- F_head -> "head"     
+  -- F_tail -> "tail"     
+  -- F_concat -> "concat"   
+  -- F_elem -> "elem"     
+  -- F_length -> "length"   
+  F_Concat -> "^"        
+  F_Len2 -> "#"        
+  F_Mult -> "*"        
+  F_Div -> "/"        
+  F_Mod -> "%"        
+  F_Add -> "+"        
+  F_Sub -> "-"      
+  F_Eq -> "=="       
+  F_NEq -> "!="       
+  F_GE -> ">="       
+  F_LE -> "<="       
+  F_LT -> "<"        
+  F_GT -> ">"        
+  F_Guard -> "&"        
+  F_Sequential -> ";"        
+  F_Interrupt -> "/\\"      
+  F_ExtChoice -> "[]"       
+  F_Timeout -> "[>"       
+  F_IntChoice -> "|~|"      
+  F_Interleave -> "|||"      
+  F_Hiding -> "\\"        
+
+private unBuiltIn :: LBuiltIn -> Const
+private unBuiltIn x =  let (BuiltIn fkt) = Labeled.unLabel x in fkt

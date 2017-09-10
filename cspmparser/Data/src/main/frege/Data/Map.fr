@@ -1,0 +1,46 @@
+--- A 'Map' based on an AVL trees
+--- This module reexports the functions of TreeMap and makes it behave like Haskell’s Data.Map.
+package frege.data.Map where
+
+import frege.Prelude hiding (toList)
+import Data.TreeMap public
+import Data.Data
+import Data.Typeable
+
+type Map k v = TreeMap k v
+
+instance (Eq k,Eq a) => Eq (TreeMap k a) where
+  t1 == t2  = (size t1 == size t2) && (toList t1 == toList t2)
+  hashCode = hashCode . toList
+
+instance (Ord k, Ord v) => Ord (TreeMap k v) where
+    t1 <=> t2 = compare (toList t1) (toList t2)
+
+--- Convert the map to list of key/value pairs sorted by key.
+toList :: Map a b -> [(a, b)]
+toList = each
+
+--- Convert the map to list of values sorted by key.
+elems :: Map a b -> [b]
+elems = map snd . each
+
+--- remove from a everything which is in b
+difference :: (Ord k,Eq v) => Map k v -> Map k v -> Map k v
+difference a b = fromList $ filter notInB $ Map.toList a
+    where notInB (k,v) = lookup k b == Nothing
+
+tc_Map :: TyCon
+tc_Map = mkTyCon3 "Prelude" "TreeMap" "TreeMap"
+instance Typeable b => Typeable (Map a b) where
+    typeOf _ = mkTyConApp tc_Map []
+con_TreeMap_TreeMap :: Constr
+con_TreeMap_TreeMap = mkConstr ty_Map "TreeMap" [] Prefix
+ty_Map :: DataType
+ty_Map = mkDataType "Prelude.TreeMap" [con_TreeMap_TreeMap]
+instance (Data k, Data a, Ord k) => Data (Map k a) where
+--     toConstr _ = con_TreeMap_TreeMap
+    toConstr _     = error "toConstr"
+    gunfold _ _    = error "gunfold"
+    dataTypeOf _   = mkNoRepType "Prelude.TreeMap"
+--     dataCast2 f    = gcast2 f
+    gfoldl f z m   = z Map.fromList `f` Map.toList m

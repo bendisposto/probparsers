@@ -1,0 +1,30 @@
+module Data.Fingerprint where
+
+import Control.CombineIn(&&&)
+
+-- Using 128-bit MD5 fingerprints for now.
+
+data Fingerprint = pure native com.netflix.frege.runtime.Fingerprint where
+  pure native new :: Long -> Long -> Fingerprint
+  pure native high :: Fingerprint -> Long
+  pure native low :: Fingerprint -> Long
+
+instance Eq Fingerprint where
+  (==) = (==) `on` Fingerprint.high &&& Fingerprint.low
+  pure native hashCode :: Fingerprint -> Int
+
+instance Ord Fingerprint where
+  (<=>) = (<=>) `on` Fingerprint.high &&& Fingerprint.low
+
+instance Show Fingerprint where
+  pure native show :: Fingerprint -> String
+
+fingerprint0 :: Fingerprint
+fingerprint0 = Fingerprint.new 0 0
+
+fingerprintFingerprints :: [Fingerprint] -> Fingerprint
+fingerprintFingerprints fs = fingerprintData $ arrayFromList $
+  foldr (\x \acc -> x.high : x.low : acc) [] fs
+
+pure native fingerprintData com.netflix.frege.runtime.Fingerprint.fingerprintData:: JArray Long -> Fingerprint
+pure native fingerprintString com.netflix.frege.runtime.Fingerprint.fingerprintString :: String -> Fingerprint

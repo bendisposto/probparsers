@@ -1,0 +1,79 @@
+{--
+    Some Utilities
+    
+    [Module]     Language.CSPM.Utils
+    [Copyright]  (c) Fontaine 2008
+    [License]    BSD
+    
+    [Maintainer] fontaine@cs.uni-duesseldorf.de
+    [Stability]  experimental
+-}
+
+module Language.CSPM.Utils
+where
+
+import Language.CSPM.Token (Token, LexError)
+import Language.CSPM.Parser (ParseError, parse)
+import Language.CSPM.Rename (RenameError, renameModule, ModuleFromRenaming)
+import Language.CSPM.AST (ModuleFromParser)
+import Language.CSPM.PrettyPrinter
+import Language.CSPM.LexHelper as Lexer (lexInclude,lexPlain)
+import Language.CSPM.CspmException
+import Text.PrettyPrint(pPrint)
+
+type FilePath = String
+
+private native getCPUTime java.lang.System.currentTimeMillis :: () -> IO Long
+
+--- 'eitherToExc' returns the Right part of 'Either' or throws the Left part as an dynamic exception.
+eitherToExc :: CspmException a => Either a b ->  IO b
+eitherToExc (Right r) = return r
+eitherToExc (Left e)  = throwCspm e
+
+--- Lex and parse a file and return a 'LModule', throw an exception in case of an error
+parseFile :: FilePath -> IO ModuleFromParser
+parseFile fileName = do
+  src <- readFile fileName
+  parseNamedString fileName src
+
+--- Small test function which just parses a String.
+parseString :: String -> IO ModuleFromParser
+parseString = parseNamedString "no-file-name"
+
+parseNamedString :: FilePath -> String -> IO ModuleFromParser
+parseNamedString name str = do
+  tokenList <- Lexer.lexInclude name str >>= eitherToExc
+  eitherToExc $ parse name tokenList
+
+--- Test function that parses a string and then pretty prints the produced AST
+parseAndPrettyPrint :: String -> IO String
+parseAndPrettyPrint str = do
+  ast <- parseString str
+  return $ show $ pPrint ast
+
+--- Lex and parse File.
+--- Return the module and print some timing infos
+benchmarkFrontend :: FilePath -> IO (ModuleFromParser, ModuleFromRenaming)
+benchmarkFrontend fileName = do
+    src <- readFile fileName
+
+    putStrLn $ "Reading File " ++ fileName
+    startTime <- (return $ length src) >> getCPUTime ()
+    tokenList <- Lexer.lexInclude fileName src >>= eitherToExc
+    time_have_tokens <- getCPUTime ()
+
+    ast <- eitherToExc $ parse fileName tokenList
+    time_have_ast <- getCPUTime ()
+
+    (astNew, _renaming) <- eitherToExc $ renameModule ast
+    time_have_renaming <- getCPUTime ()
+
+    putStrLn $ "Parsing OK"
+    putStrLn $ "lextime : " ++ showTime (time_have_tokens - startTime)
+    putStrLn $ "parsetime : " ++ showTime(time_have_ast - time_have_tokens)
+    putStrLn $ "renamingtime : " ++ showTime (time_have_renaming - time_have_ast)
+    putStrLn $ "total : " ++ showTime(time_have_ast - startTime)
+    return (ast,astNew)
+  where
+    showTime :: Long -> String
+    showTime a = show a ++ "ms"

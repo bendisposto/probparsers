@@ -1,0 +1,21 @@
+module Language.CSPM.Parser__ParseErrorException
+where
+
+import Language.CSPM.Parser__ParseError
+
+native module where {
+    /**
+    * Wraps Language.CSPM.ParseError in a native Java Exception
+    * such that it can be thrown in Frege code.
+    */
+    public static class ParseErrorException extends Exception {
+        Parser__ParseError.TParseError parseError;
+        public ParseErrorException(Parser__ParseError.TParseError err) {
+            super("ParseErrorException: " +  Parser__ParseError.IShow_ParseError.show(err));
+            parseError = err;
+        }
+        public Parser__ParseError.TParseError getParseError() {
+            return parseError;
+        }
+    }
+}

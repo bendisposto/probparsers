@@ -1,0 +1,6 @@
+module Language.CSPM.CspmException where
+
+--- Instances of this class should throw a native exception in 'throwCspm'.
+--- This class is like Frege's 'Throwable', but is not restricted to Java types.
+class CspmException a where
+    throwCspm :: a -> IO b

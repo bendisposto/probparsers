@@ -1,0 +1,106 @@
+module DataDeriver.Parser where
+
+import DataDeriver.AST
+
+import frege.Prelude hiding(try, pzero, <|>)
+import Data.List
+import Text.ParserCombinators.Parsec.Char
+import Text.ParserCombinators.Parsec.Combinator
+import Text.ParserCombinators.Parsec.Error
+import Text.ParserCombinators.Parsec.Prim
+
+--- Main function used for testing.
+main :: [String] -> IO ()
+main args = putStrLn $ show $ getTopdecls (args !! 0)
+
+--- Parses a string containing only data declarations to a Topdecl.
+getTopdecls :: String -> [Either ParseError Topdecl]
+getTopdecls str = map (parse topdeclParser "") topdecls
+    where 
+        topdecls :: [[Char]]
+        topdecls = map ((unpacked "data ") ++) $ drop 1 $ map unpacked $ ´data ´.splitted str
+
+--- Parses one data declaration according to this grammar (simplified version
+--- of the grammar for Algebraic Data type Declaration in Frege, eg. "abstract",
+--- "private" and "forall"  are not supported):
+--- topdecl      -> "data" typeName typeVar* "=" constructors*
+--- constructors -> constructor ("|" constructor)*
+--- constructor  -> "!"? typeName simpleType*
+---               | "!"? typeName "{" fieldLine ("," fieldLine)* "}"
+--- fieldLine    -> "!"? identifier "::" typeApp
+--- simpleType   -> identifier
+---               | "(" typeApp ("," typeApp)* ")"
+---               | "[" typeApp "]"
+--- typeApp      -> simpleType
+---               | typeApp simpleType
+--- typeName     -> identifier
+--- typeVar      -> identifier
+--- identifier   -> [0-9A-Za-z_']+
+private topdeclParser :: Parser Topdecl
+private topdeclParser = do
+    string "data"
+    spaces
+    typeName <- identifier
+    spaces
+    typeVars <- identifier `sepEndBy` spaces
+    char '='
+    spaces
+    constrs <- constructorParser `sepBy` (spaces >> (char '|') >> spaces)
+    eof
+    return (Topdecl typeName (length typeVars) constrs)
+
+--- Parses a single constructor like "NodeId Int (Maybe [Int])".
+private constructorParser :: Parser Constr
+private constructorParser = do
+    optional $ char '!'
+    spaces
+    constrName <- identifier
+    spaces
+    typeNames <- (fieldParser <|> (simpleTypeParser `sepBy` spaces))
+    spaces
+    return (Constr constrName (length typeNames))
+
+--- Parses a single simpleType like "Bool" or "(Maybe [[Int]], Foo Bar)".
+private simpleTypeParser :: Parser TypeName
+private simpleTypeParser = do
+    simpleType <- ( identifier
+                <|> tupleParser
+                <|> between (char '[') (char ']') (spaces >> typeAppParser) )
+    spaces
+    return simpleType
+
+--- Parses tuples like "(Maybe [[Int]], Foo Bar)" or "(Int)".
+private tupleParser :: Parser TypeName
+private tupleParser = do
+    typeNames <- between (char '(' >> spaces) (char ')') (typeAppParser `sepBy` (spaces >> (char ',') >> spaces))
+    spaces
+    return $ concat $ intersperse ", " typeNames
+
+--- Parses a single typeApp like "Foo Bar" or "Maybe [[Int]]".
+private typeAppParser :: Parser String
+private typeAppParser = do
+    typeApp <- simpleTypeParser `sepBy` spaces
+    spaces
+    return $ concat typeApp
+
+--- Parses a field like "{ id :: String, content :: Maybe [ [Maybe Int] ] }".
+private fieldParser :: Parser [TypeName]
+private fieldParser = do
+    typeNames <- between (char '{' >> spaces) (char '}') (fieldLineParser `sepBy` char ',')
+    spaces
+    return $ typeNames
+
+--- Parses a single fieldLine like "id :: Maybe String".
+private fieldLineParser :: Parser TypeName
+private fieldLineParser = do
+    optional $ char '!'
+    spaces
+    identifier
+    spaces
+    string "::"
+    spaces
+    typeApp <- typeAppParser
+    return typeApp
+
+private identifier :: Parser String
+private identifier = fmap packed $ many1 (alphaNum <|> char '_' <|> char '\'')

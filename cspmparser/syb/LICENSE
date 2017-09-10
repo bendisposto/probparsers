@@ -1,0 +1,19 @@
+Port of syb 0.3 <http://hackage.haskell.org/package/syb-0.3> to Frege by Markus
+Brenneis
+
+This library (libraries/syb) is derived from code from several
+sources: 
+
+  * Code from the GHC project which is largely (c) The University of
+    Glasgow, and distributable under a BSD-style license (see below),
+
+  * Code from the Haskell 98 Report which is (c) Simon Peyton Jones
+    and freely redistributable (but see the full license for
+    restrictions).
+
+  * Code from the Haskell Foreign Function Interface specification,
+    which is (c) Manuel M. T. Chakravarty and freely redistributable
+    (but see the full license for restrictions).
+
+The full text of these licenses is reproduced below.  All of the
+licenses are BSD-style or compatible.

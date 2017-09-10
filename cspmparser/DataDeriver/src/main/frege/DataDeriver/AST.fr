@@ -1,0 +1,11 @@
+module DataDeriver.AST where
+
+data Topdecl = Topdecl TypeName Int [Constr]
+derive Show Topdecl
+
+data Constr = Constr ConstrName Int
+derive Show Constr
+
+type TypeName = String
+type TypeParameter = String
+type ConstrName = String

@@ -1,0 +1,679 @@
+{--
+    A helper module to parse lexical elements (tokens).
+    
+    [Module]      Text.ParserCombinators.Parsec.Token
+    [Copyright]   (c) Daan Leijen 1999-2001
+    [License]     BSD-style (see the file Libraries/LICENSE)
+    
+    [Maintainer]  Antoine Latter <aslatter@gmail.com>
+    [Stability]   provisional
+    [Portability] non-portable (uses existentially quantified data constructors)
+-}
+
+module Text.ParserCombinators.Parsec.Token where
+
+import frege.Prelude hiding (<|>,pzero,try)
+import Data.Char as C(isAlpha,toLower,toUpper,isSpace,digitToInt)
+import Data.List (nub,sort)
+import Text.ParserCombinators.Parsec.Parsec
+
+-- --------------------------------------------------------
+--- Language Definition
+-- --------------------------------------------------------
+
+--- The @LanguageDef@ type is a record that contains all parameterizable
+--- features of the 'Text.ParserCombinators.Parsec.Token' module. The module
+--- 'Text.ParserCombinators.Parsec.Language' contains some default definitions.
+data LanguageDef st  
+    = LanguageDef {
+    --- Describes the start of a block comment. Use the empty string if the
+    --- language doesn't support block comments. For example "\/*".
+      commentStart   :: String
+
+    --- Describes the end of a block comment. Use the empty string if the
+    --- language doesn't support block comments. For example "*\/".
+      commentEnd     :: String
+
+    --- Describes the start of a line comment. Use the empty string if the
+    --- language doesn't support line comments. For example "\/\/".
+      commentLine    :: String
+
+    --- Set to 'True' if the language supports nested block comments.
+      nestedComments :: Bool                  
+
+    --- This parser should accept any start characters of identifiers. For
+    --- example @letter \<|> char "_"@.
+      identStart     :: CharParser st Char
+
+    --- This parser should accept any legal tail characters of identifiers.
+    --- For example @alphaNum \<|> char "_"@.
+      identLetter    :: CharParser st Char
+
+    --- This parser should accept any start characters of operators. For
+    --- example @oneOf ":!#$%&*+.\/\<=>?\@\\\\^|-~"@
+      opStart        :: CharParser st Char
+
+    --- This parser should accept any legal tail characters of operators.
+    --- Note that this parser should even be defined if the language doesn't
+    --- support user-defined operators, or otherwise the 'reservedOp'
+    --- parser won't work correctly.
+      opLetter       :: CharParser st Char
+
+    --- The list of reserved identifiers.
+      reservedNames  :: [String]
+
+    --- The list of reserved operators.
+      reservedOpNames:: [String]
+
+    --- Set to 'True' if the language is case sensitive.
+      caseSensitive  :: Bool
+    }                           
+           
+-- --------------------------------------------------------
+--- A first class module: TokenParser
+-- --------------------------------------------------------
+
+--- The type of the record that holds lexical parsers.
+data TokenParser st
+      = TokenParser {
+        --- This lexeme parser parses a legal identifier. Returns the identifier
+        --- string. This parser will fail on identifiers that are reserved
+        --- words. Legal identifier (start) characters and reserved words are
+        --- defined in the 'LanguageDef' that is passed to
+        --- 'makeTokenParser'. An @identifier@ is treated as
+        --- a single token using 'try'.
+          identifier       :: CharParser st String
+
+        --- The lexeme parser @reserved name@ parses @symbol
+        --- name@, but it also checks that the @name@ is not a prefix of a
+        --- valid identifier. A @reserved@ word is treated as a single token
+        --- using 'try'.
+          reserved         :: String -> CharParser st ()
+
+        --- This lexeme parser parses a legal operator. Returns the name of the
+        --- operator. This parser will fail on any operators that are reserved
+        --- operators. Legal operator (start) characters and reserved operators
+        --- are defined in the 'LanguageDef' that is passed to
+        --- 'makeTokenParser'. An @operator@ is treated as a
+        --- single token using 'try'.
+          operator         :: CharParser st String
+
+        ---The lexeme parser @reservedOp name@ parses @symbol
+        --- name@, but it also checks that the @name@ is not a prefix of a
+        --- valid operator. A @reservedOp@ is treated as a single token using
+        --- 'try'.
+          reservedOp       :: String -> CharParser st ()
+
+
+        --- This lexeme parser parses a single literal character. Returns the
+        --- literal character value. This parsers deals correctly with escape
+        --- sequences. The literal character is parsed according to the grammar
+        --- rules defined in the Haskell report (which matches most programming
+        --- languages quite closely).
+          charLiteral      :: CharParser st Char
+
+        --- This lexeme parser parses a literal string. Returns the literal
+        --- string value. This parsers deals correctly with escape sequences and
+        --- gaps. The literal string is parsed according to the grammar rules
+        --- defined in the Haskell report (which matches most programming
+        --- languages quite closely).
+          stringLiteral    :: CharParser st String
+
+        --- This lexeme parser parses a natural number (a positive whole
+        --- number). Returns the value of the number. The number can be
+        --- specified in 'decimal', 'hexadecimal' or
+        --- 'octal'. The number is parsed according to the grammar
+        --- rules in the Haskell report.
+          natural          :: CharParser st Integer
+
+        --- This lexeme parser parses an integer (a whole number). This parser
+        --- is like 'natural' except that it can be prefixed with
+        --- sign (i.e. \'-\' or \'+\'). Returns the value of the number. The
+        --- number can be specified in 'decimal', 'hexadecimal'
+        --- or 'octal'. The number is parsed according
+        --- to the grammar rules in the Haskell report.
+          integer          :: CharParser st Integer
+
+        --- This lexeme parser parses a floating point value. Returns the value
+        --- of the number. The number is parsed according to the grammar rules
+        --- defined in the Haskell report.
+          float            :: CharParser st Double
+
+        --- This lexeme parser parses either 'natural' or a 'float'.
+        --- Returns the value of the number. This parsers deals with
+        --- any overlap in the grammar rules for naturals and floats. The number
+        --- is parsed according to the grammar rules defined in the Haskell report.
+          naturalOrFloat   :: CharParser st (Either Integer Double)
+
+        --- Parses a positive whole number in the decimal system. Returns the
+        --- value of the number.
+          decimal          :: CharParser st Integer
+
+        --- Parses a positive whole number in the hexadecimal system. The number
+        --- should be prefixed with "0x" or "0X". Returns the value of the
+        --- number.
+          hexadecimal      :: CharParser st Integer
+
+        --- Parses a positive whole number in the octal system. The number
+        --- should be prefixed with "0o" or "0O". Returns the value of the
+        --- number.
+          octal            :: CharParser st Integer
+
+
+        --- Lexeme parser @symbol s@ parses 'string' @s@ and skips
+        --- trailing white space.
+          symbol           :: String -> CharParser st String
+
+        --- @lexeme p@ first applies parser @p@ and than the 'whiteSpace'
+        --- parser, returning the value of @p@. Every lexical
+        --- token (lexeme) is defined using @lexeme@, this way every parse
+        --- starts at a point without white space. Parsers that use @lexeme@ are
+        --- called /lexeme/ parsers in this document.
+        --
+        --- The only point where the 'whiteSpace' parser should be
+        --- called explicitly is the start of the main parser in order to skip
+        --- any leading white space.
+        --
+        --- >    mainParser  = do{ whiteSpace
+        --- >                     ; ds <- many (lexeme digit)
+        --- >                     ; eof
+        --- >                     ; return (sum ds)
+        --- >                     }
+          lexeme           :: forall a. CharParser st a -> CharParser st a
+
+        --- Parses any white space. White space consists of /zero/ or more
+        --- occurrences of a 'space', a line comment or a block (multi
+        --- line) comment. Block comments may be nested. How comments are
+        --- started and ended is defined in the 'LanguageDef'
+        --- that is passed to 'makeTokenParser'.
+          whiteSpace       :: CharParser st ()
+
+
+
+        --- Lexeme parser @parens p@ parses @p@ enclosed in parenthesis,
+        --- returning the value of @p@.
+          parens           :: forall a. CharParser st a -> CharParser st a
+
+        --- Lexeme parser @braces p@ parses @p@ enclosed in braces (\'{\' and
+        --- \'}\'), returning the value of @p@.
+          braces           :: forall a. CharParser st a -> CharParser st a
+
+        --- Lexeme parser @angles p@ parses @p@ enclosed in angle brackets (\'\<\'
+        --- and \'>\'), returning the value of @p@.
+          angles           :: forall a. CharParser st a -> CharParser st a
+
+        --- Lexeme parser @brackets p@ parses @p@ enclosed in brackets (\'[\'
+        --- and \']\'), returning the value of @p@.
+          brackets         :: forall a. CharParser st a -> CharParser st a
+
+        --- DEPRECATED: Use 'brackets'.
+          squares          :: forall a. CharParser st a -> CharParser st a
+
+
+        --- Lexeme parser |semi| parses the character \';\' and skips any
+        --- trailing white space. Returns the string ";".
+          semi             :: CharParser st String
+
+        --- Lexeme parser @comma@ parses the character \',\' and skips any
+        --- trailing white space. Returns the string ",".
+          comma            :: CharParser st String
+
+        --- Lexeme parser @colon@ parses the character \':\' and skips any
+        --- trailing white space. Returns the string ":".
+          colon            :: CharParser st String
+
+        --- Lexeme parser @dot@ parses the character \'.\' and skips any
+        --- trailing white space. Returns the string ".".
+          dot              :: CharParser st String
+
+        --- Lexeme parser @semiSep p@ parses /zero/ or more occurrences of @p@
+        --- separated by 'semi'. Returns a list of values returned by
+        --- @p@.
+          semiSep          :: forall a . CharParser st a -> CharParser st [a]
+
+        --- Lexeme parser @semiSep1 p@ parses /one/ or more occurrences of @p@
+        --- separated by 'semi'. Returns a list of values returned by @p@.
+          semiSep1         :: forall a . CharParser st a -> CharParser st [a]
+
+        --- Lexeme parser @commaSep p@ parses /zero/ or more occurrences of
+        --- @p@ separated by 'comma'. Returns a list of values returned
+        --- by @p@.
+          commaSep         :: forall a . CharParser st a -> CharParser st [a]
+
+        --- Lexeme parser @commaSep1 p@ parses /one/ or more occurrences of
+        --- @p@ separated by 'comma'. Returns a list of values returned
+        --- by @p@.
+          commaSep1        :: forall a . CharParser st a -> CharParser st [a]
+        }
+
+-- --------------------------------------------------------
+--- Given a LanguageDef, create a token parser.
+-- --------------------------------------------------------
+
+--- The expression @makeTokenParser language@ creates a 'TokenParser'
+--- record that contains lexical parsers that are
+--- defined using the definitions in the @language@ record.
+--
+--- The use of this function is quite stylized - one imports the
+--- appropiate language definition and selects the lexical parsers that
+--- are needed from the resulting 'TokenParser'.
+--
+--- >  module Main where
+--- >
+--- >  import Text.ParserCombinators.Parsec
+--- >  import qualified Text.ParserCombinators.Parsec.Token as P
+--- >  import Text.ParserCombinators.Parsec.Language (haskellDef)
+--- >
+--- >  --- The parser
+--- >  ...
+--- >
+--- >  expr  =   parens expr
+--- >        <|> identifier
+--- >        <|> ...
+--- >
+--- >
+--- >  --- The lexer
+--- >  lexer       = P.makeTokenParser haskellDef
+--- >
+--- >  parens      = P.parens lexer
+--- >  braces      = P.braces lexer
+--- >  identifier  = P.identifier lexer
+--- >  reserved    = P.reserved lexer
+--- >  ...
+makeTokenParser :: LanguageDef st -> TokenParser st
+makeTokenParser languageDef
+    = TokenParser{ identifier = identifier
+                 , reserved = reserved
+                 , operator = operator
+                 , reservedOp = reservedOp
+                        
+                 , charLiteral = charLiteral
+                 , stringLiteral = stringLiteral
+                 , natural = natural
+                 , integer = integer
+                 , float = float
+                 , naturalOrFloat = naturalOrFloat
+                 , decimal = decimal
+                 , hexadecimal = hexadecimal
+                 , octal = octal
+            
+                 , symbol = symbol
+                 , lexeme = lexeme
+                 , whiteSpace = whiteSpace
+             
+                 , parens = parens
+                 , braces = braces
+                 , angles = angles
+                 , brackets = brackets
+                 , squares = squares
+                 , semi = semi
+                 , comma = comma
+                 , colon = colon
+                 , dot = dot
+                 , semiSep = semiSep
+                 , semiSep1 = semiSep1
+                 , commaSep = commaSep
+                 , commaSep1 = commaSep1
+                 }
+    where
+     
+    -- --------------------------------------------------------
+    -- Bracketing
+    -- --------------------------------------------------------
+    parens p        = between (symbol "(") (symbol ")") p
+    braces p        = between (symbol "{") (symbol "}") p
+    angles p        = between (symbol "<") (symbol ">") p
+    brackets p      = between (symbol "[") (symbol "]") p
+    squares p       = between (symbol "[") (symbol "]") p
+
+    semi            = symbol ";" 
+    comma           = symbol ","
+    dot             = symbol "."
+    colon           = symbol ":"
+
+    commaSep p      = sepBy p comma
+--     semiSep :: forall a st. CharParser st a -> CharParser st [a]
+    semiSep p       = sepBy p semi
+
+    commaSep1 p     = sepBy1 p comma
+    semiSep1 p      = sepBy1 p semi
+
+
+    -- --------------------------------------------------------
+    -- Chars & Strings
+    -- --------------------------------------------------------
+    -- charLiteral :: CharParser st Char
+    charLiteral     = lexeme (between (char '\'') 
+                                      (char '\'' <?> "end of character")
+                                      characterChar )
+                    <?> "character"
+
+    characterChar   = charLetter <|> charEscape 
+                    <?> "literal character"
+
+    charEscape      = do{ char '\\'; escapeCode }
+    charLetter      = satisfy (\c -> (c /= '\'') && (c /= '\\') && (c > '\026'))
+
+
+
+    -- stringLiteral :: CharParser st String
+    stringLiteral   = lexeme (
+                      do{ str <- between (char '"')                   
+                                         (char '"' <?> "end of string")
+                                         (many stringChar) 
+                        ; return $ packed (foldr (maybe id (:)) [] str.toList)
+                        }
+                      <?> "literal string")
+
+    -- stringChar :: CharParser st (Maybe Char)
+    stringChar      =   do{ c <- stringLetter; return (Just c) }
+                    <|> stringEscape 
+                    <?> "string character"
+                
+    stringLetter    = satisfy (\c -> (c /= '"') && (c /= '\\') && (c > '\026'))
+
+    stringEscape    = do{ char '\\'
+                        ;     do{ escapeGap  ; return Nothing }
+                          <|> do{ escapeEmpty; return Nothing }
+                          <|> do{ esc <- escapeCode; return (Just esc) }
+                        }
+                        
+    escapeEmpty     = char '&'
+    escapeGap       = do{ many1 space
+                        ; char '\\' <?> "end of string gap"
+                        }
+                        
+                        
+                        
+    -- escape codes
+    escapeCode      = charEsc <|> charNum <|> charAscii <|> charControl
+                    <?> "escape code"
+
+    -- charControl :: CharParser st Char
+    charControl     = do{ char '^'
+                        ; code <- upper
+                        ; return (toEnum (fromEnum code - fromEnum 'A'))
+                        }
+
+    -- charNum :: CharParser st Char                    
+    charNum         = do{ code <- decimal 
+                                  <|> do{ char 'o'; number 8 octDigit }
+                                  <|> do{ char 'x'; number 16 hexDigit }
+                        ; return (toEnum (fromInteger code))
+                        }
+
+    charEsc         = choice (map parseEsc escMap)
+                    where
+                      parseEsc (c,code)     = do{ char c; return code }
+                      
+    charAscii       = choice (map parseAscii asciiMap)
+                    where
+                      parseAscii (asc,code) = try (do{ string asc; return code })
+
+
+    -- escape code tables
+    escMap          = zip (unpacked "abfnrtv\\\"\'") (unpacked "\007\010\f\n\r\t\013\\\"\'")
+    asciiMap        = zip (ascii3codes ++ ascii2codes) (ascii3 ++ ascii2) 
+
+    ascii2codes     = ["BS","HT","LF","VT","FF","CR","SO","SI","EM",
+                       "FS","GS","RS","US","SP"]
+    ascii3codes     = ["NUL","SOH","STX","ETX","EOT","ENQ","ACK","BEL",
+                       "DLE","DC1","DC2","DC3","DC4","NAK","SYN","ETB",
+                       "CAN","SUB","ESC","DEL"]
+
+    ascii2 :: [Char]
+    ascii2          = ['\010','\011','\012','\013','\014','\015','\016','\017',
+                       '\031','\034','\035','\036','\037','\040']
+    ascii3 :: [Char]
+    ascii3          = ['\000','\001','\002','\003','\004','\005','\006',
+                       '\007','\020','\021','\022','\023','\024','\025',
+                       '\026','\027','\030','\032','\033','\177']
+
+
+    -- --------------------------------------------------------
+    -- Numbers
+    -- --------------------------------------------------------
+    -- naturalOrFloat :: CharParser st (Either Integer Double)
+    naturalOrFloat  = lexeme (natFloat) <?> "number"
+
+    float           = lexeme floating   <?> "float"
+    integer         = lexeme int        <?> "integer"
+    natural         = lexeme nat        <?> "natural"
+
+
+    -- floats
+    floating        = do{ n <- decimal 
+                        ; fractExponent n
+                        }
+
+
+    natFloat        = do{ char '0'
+                        ; zeroNumFloat
+                        }
+                      <|> decimalFloat
+                      
+    zeroNumFloat    =  do{ n <- hexadecimal <|> octal
+                         ; return (Left n)
+                         }
+                    <|> decimalFloat
+                    <|> fractFloat 0
+                    <|> return (Left 0)                  
+                      
+    decimalFloat    = do{ n <- decimal
+                        ; option (Left n) 
+                                 (fractFloat n)
+                        }
+
+    fractFloat n    = do{ f <- fractExponent n
+                        ; return (Right f)
+                        }
+                        
+    fractExponent n = do{ fract <- fraction
+                        ; expo  <- option 1.0 exponent'
+                        ; return ((fromInteger n + fract)*expo)
+                        }
+                    <|>
+                      do{ expo <- exponent'
+                        ; return ((fromInteger n)*expo)
+                        }
+
+    fraction        = do{ char '.'
+                        ; digits <- many1 digit <?> "fraction"
+                        ; return (foldr op 0.0 digits)
+                        }
+                      <?> "fraction"
+                    where
+                      op d f    = (f + fromIntegral (digitToInt d))/10.0
+                        
+    exponent'       = do{ oneOf "eE"
+                        ; f <- sign
+                        ; e <- decimal <?> "exponent"
+                        ; return (power (f e))
+                        }
+                      <?> "exponent"
+                    where
+                       power e  | e < 0      = 1.0/power(-e)
+                                | otherwise  = fromInteger (10^e)
+
+
+    -- integers and naturals
+    int             = do{ f <- lexeme sign
+                        ; n <- nat
+                        ; return (f n)
+                        }
+                        
+    -- sign            :: CharParser st (Integer -> Integer)
+    sign            =   (char '-' >> return negate) 
+                    <|> (char '+' >> return id)     
+                    <|> return id
+
+    nat             = zeroNumber <|> decimal
+        
+    zeroNumber      = do{ char '0'
+                        ; hexadecimal <|> octal <|> decimal <|> return 0
+                        }
+                      <?> ""       
+
+    decimal         = number 10 digit        
+    hexadecimal     = do{ oneOf "xX"; number 16 hexDigit }
+    octal           = do{ oneOf "oO"; number 8 octDigit  }
+
+    -- number :: Integer -> CharParser st Char -> CharParser st Integer
+    number base baseDigit
+        = do{ digits <- many1 baseDigit
+            ; let n = fold (\x d -> base*x + toInteger (digitToInt d)) 0 digits
+            ; seq n (return n)
+            }          
+
+    -- --------------------------------------------------------
+    -- Operators & reserved ops
+    -- --------------------------------------------------------
+--  reservedOp :: String -> CharParser st ()
+    reservedOp name =   
+        lexeme $ try $
+        do{ string name
+          ; notFollowedBy (languageDef.opLetter) <?> ("end of " ++ show name)
+          }
+
+    operator =
+        lexeme $ try $
+        do{ name <- oper
+          ; if (isReservedOp name)
+             then unexpected ("reserved operator " ++ show name)
+             else return name
+          }
+          
+    oper =
+        fmap packed (
+        do{ c <- (languageDef.opStart)
+          ; cs <- many (languageDef.opLetter)
+          ; return (c:cs)
+          }
+        <?> "operator" )
+        
+    isReservedOp name =
+        isReserved (map packed (sort (map unpacked languageDef.reservedOpNames))) name          
+        
+        
+    -- --------------------------------------------------------
+    -- Identifiers & Reserved words
+    -- --------------------------------------------------------
+    reserved name =
+        lexeme $ try $
+        do{ caseString name
+          ; notFollowedBy (languageDef.identLetter) <?> ("end of " ++ show name)
+          }
+
+    caseString name
+        | languageDef.caseSensitive = string name
+        | otherwise                 = do{ walk (unpacked name); return (unpacked name) }
+        where
+          walk []     = return ()
+          walk (c:cs) = do{ caseChar c <?> msg; walk cs }
+          
+          caseChar c  | isAlpha c  = char (toLower c) <|> char (toUpper c)
+                      | otherwise  = char c
+          
+          msg         = show name
+          
+
+    identifier =
+        lexeme $ try $
+        do{ name <- ident
+          ; if (isReservedName name)
+             then unexpected ("reserved word " ++ show name)
+             else return name
+          }
+        
+        
+    ident           
+        = do{ c <- languageDef.identStart
+            ; cs <- many (languageDef.identLetter)
+            ; return $ packed (c:cs)
+            }
+        <?> "identifier"
+
+    isReservedName :: String -> Bool
+    isReservedName name
+        = isReserved theReservedNames caseName
+        where
+          caseName      | languageDef.caseSensitive = name
+                        | otherwise                 = name.toLowerCase
+
+        
+    isReserved :: [String] -> String -> Bool
+    isReserved names name    
+        = scan names
+        where
+          scan []       = False
+          scan (r:rs)   = case (compare r name) of
+                            LT  -> scan rs
+                            EQ  -> true
+                            GT  -> false
+
+    theReservedNames :: [String]
+    theReservedNames
+        | languageDef.caseSensitive = sort names
+        | otherwise                 = sort (map (String.toLowerCase) names)
+        where
+          names = languageDef.reservedNames
+                                 
+
+
+    -- --------------------------------------------------------
+    -- White space & symbols
+    -- --------------------------------------------------------
+    symbol name
+        = fmap packed $ lexeme (string name)
+
+    lexeme :: forall a st. CharParser st a -> CharParser st a
+    lexeme p       
+        = do{ x <- p; whiteSpace; return x  }
+      
+      
+    whiteSpace :: forall st. CharParser st ()
+    whiteSpace
+        | noLine && noMulti  = skipMany (simpleSpace <?> "")
+        | noLine             = skipMany (simpleSpace <|> multiLineComment <?> "")
+        | noMulti            = skipMany (simpleSpace <|> oneLineComment <?> "")
+        | otherwise          = skipMany (simpleSpace <|> oneLineComment <|> multiLineComment <?> "")
+        where
+          noLine  = null (languageDef.commentLine)
+          noMulti = null (languageDef.commentStart)
+          
+          
+    simpleSpace =
+        skipMany1 (satisfy isSpace)    
+        
+    oneLineComment =
+        do{ try (string (languageDef.commentLine))
+          ; skipMany (satisfy (/= '\n'))
+          ; return ()
+          }
+
+    multiLineComment =
+        do { try (string (languageDef.commentStart))
+           ; inComment
+           }
+
+    inComment 
+        | languageDef.nestedComments = inCommentMulti
+        | otherwise                  = inCommentSingle
+        
+    inCommentMulti 
+        =   do{ try (string (languageDef.commentEnd)) ; return () }
+        <|> do{ multiLineComment                      ; inCommentMulti }
+        <|> do{ skipMany1 (noneOf startEnd)           ; inCommentMulti }
+        <|> do{ oneOf startEnd                        ; inCommentMulti }
+        <?> "end of comment"  
+        where
+          startEnd   = packed $ nub (unpacked $ languageDef.commentEnd ++ languageDef.commentStart)
+
+    inCommentSingle
+        =   do{ try (string (languageDef.commentEnd)); return () }
+        <|> do{ skipMany1 (noneOf startEnd)          ; inCommentSingle }
+        <|> do{ oneOf startEnd                       ; inCommentSingle }
+        <?> "end of comment"
+        where
+          startEnd   = packed $ nub (unpacked $ languageDef.commentEnd ++ languageDef.commentStart)
+

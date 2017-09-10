@@ -1,0 +1,232 @@
+{--
+    Convert an AST to XML.
+    
+    [Module]     Language.CSPM.AstToXml
+    [Copyright]  (c) Fontaine 2011
+    [License]    BSD3
+    
+    [Maintainer] Fontaine@cs.uni-duesseldorf.de
+    [Stability]  experimental
+-}
+
+module Language.CSPM.AstToXML where
+
+import Text.XML.Light.Light(public showTopElement)
+import Text.XML.Light.Light
+import Data.Data hiding (DataType)
+import Data.Generics.Aliases (extQ, ext1Q)
+import Language.CSPM.AST
+import Language.CSPM.SrcLoc
+
+--- Translate a Module to XML
+moduleToXML :: Module a -> Element
+moduleToXML m
+  = unodeElements "Module"
+    [
+       unodeElement "moduleDecls" $ astToXML m.moduleDecls
+      ,unodeElements "modulePragmas" $ map
+         (unodeAttr "Pragma" . Attr (unqual "val"))
+         m.modulePragmas
+      ,unodeElement "moduleComments" $ astToXML m.moduleComments
+    ]
+
+--- Translate an AST node to an XML Element.
+--- This is an 'almost' totally generic translation which
+--- works for any Haskell type, but it handles some special cases.
+--- Note Frege 3.23 does not like the type of ext1Q, so we use extQ
+--- here instead, which cannot be as generic as we'd like to have it.
+--- (Nope, unsafeCoerce does not help.)
+astToXML :: (Data a, Typeable a) => a -> Element
+astToXML
+     = genericCase
+        `extQ` identToXML
+        `extQ` labelToXML_LIdent
+        `extQ` labelToXML_LExp
+        `extQ` labelToXML_LRange
+        `extQ` labelToXML_LCommField
+        `extQ` labelToXML_LLinkList
+        `extQ` labelToXML_LLink
+        `extQ` labelToXML_LRename
+        `extQ` labelToXML_LBuiltIn
+        `extQ` labelToXML_LCompGenList
+        `extQ` labelToXML_LCompGen
+        `extQ` labelToXML_LPattern
+        `extQ` labelToXML_LDecl
+        `extQ` labelToXML_LTypeDef
+        `extQ` labelToXML_LNATuples
+        `extQ` labelToXML_LConstructor
+        `extQ` labelToXML_LAssertDecl
+        `extQ` labelToXML_LFDRModels
+        `extQ` labelToXML_LFdrExt
+        `extQ` labelToXML_LTauRefineOp
+        `extQ` labelToXML_LRefineOp
+        `extQ` labelToXML_LFormulaType
+        `extQ` listToXML_FunCase
+        `extQ` listToXML_LCommField
+        `extQ` listToXML_LCompGen
+        `extQ` listToXML_LConstructor
+        `extQ` listToXML_LDecl
+        `extQ` listToXML_LExp
+        `extQ` listToXML_LExp2
+        `extQ` listToXML_LIdent
+        `extQ` listToXML_LLink
+        `extQ` listToXML_LNATuples
+        `extQ` listToXML_LocComment
+        `extQ` listToXML_LPattern
+        `extQ` listToXML_LPattern2
+        `extQ` listToXML_LRename
+        `extQ` listToXML_Pragma
+        `extQ` intToXML
+        `extQ` commentToXML
+      
+  where
+    
+    genericCase :: Data a => a -> Element
+    genericCase n = unodeElements (showConstr $ toConstr n) $ gmapQ astToXML n
+    
+    identToXML :: Ident -> Element
+    identToXML x = case x of
+      Ident s -> unodeAttr "Ident" (Attr (unqual "unIdent") s)
+      UIdent u -> unodeElement "UIdent" $ uniqueIdentToXML u
+    
+    labelToXML :: Data a => Labeled a -> Element
+    labelToXML l = add_attrs
+        ( idAttr : location)
+        ( astToXML l.unLabel)
+      where 
+        idAttr = strAttr "nodeId" $ show l.nodeId.unNodeId
+        location = srcLocAttr l.srcLoc
+    
+    -- basing upon what has a Labeled type alias Language.CSPM.AST
+    labelToXML_LIdent :: LIdent -> Element
+    labelToXML_LIdent = labelToXML
+    labelToXML_LExp :: LExp -> Element
+    labelToXML_LExp = labelToXML
+    labelToXML_LRange :: LRange -> Element
+    labelToXML_LRange = labelToXML
+    labelToXML_LCommField :: LCommField -> Element
+    labelToXML_LCommField = labelToXML
+    labelToXML_LLinkList :: LLinkList -> Element
+    labelToXML_LLinkList = labelToXML
+    labelToXML_LLink :: LLink -> Element
+    labelToXML_LLink = labelToXML
+    labelToXML_LRename :: LRename -> Element
+    labelToXML_LRename = labelToXML
+    labelToXML_LBuiltIn :: LBuiltIn -> Element
+    labelToXML_LBuiltIn = labelToXML
+    labelToXML_LCompGenList :: LCompGenList -> Element
+    labelToXML_LCompGenList = labelToXML
+    labelToXML_LCompGen :: LCompGen -> Element
+    labelToXML_LCompGen = labelToXML
+    labelToXML_LPattern :: LPattern -> Element
+    labelToXML_LPattern = labelToXML
+    labelToXML_LDecl :: LDecl -> Element
+    labelToXML_LDecl = labelToXML
+    labelToXML_LTypeDef :: LTypeDef -> Element
+    labelToXML_LTypeDef = labelToXML
+    labelToXML_LNATuples :: LNATuples -> Element
+    labelToXML_LNATuples = labelToXML
+    labelToXML_LConstructor :: LConstructor -> Element
+    labelToXML_LConstructor = labelToXML
+    labelToXML_LAssertDecl :: LAssertDecl -> Element
+    labelToXML_LAssertDecl = labelToXML
+    labelToXML_LFDRModels :: LFDRModels -> Element
+    labelToXML_LFDRModels = labelToXML
+    labelToXML_LFdrExt :: LFdrExt -> Element
+    labelToXML_LFdrExt = labelToXML
+    labelToXML_LTauRefineOp :: LTauRefineOp -> Element
+    labelToXML_LTauRefineOp = labelToXML
+    labelToXML_LRefineOp :: LRefineOp -> Element
+    labelToXML_LRefineOp = labelToXML
+    labelToXML_LFormulaType :: LFormulaType -> Element
+    labelToXML_LFormulaType = labelToXML
+
+    listToXML :: Data a => [a] -> Element
+    listToXML = unodeElements "list" . map astToXML
+    
+    -- basing upon what is used in Language.CSPM.AST as List
+    listToXML_FunCase :: [FunCase] -> Element
+    listToXML_FunCase = listToXML
+    listToXML_LCommField :: [LCommField] -> Element
+    listToXML_LCommField = listToXML
+    listToXML_LCompGen :: [LCompGen] -> Element
+    listToXML_LCompGen = listToXML
+    listToXML_LConstructor :: [LConstructor] -> Element
+    listToXML_LConstructor = listToXML
+    listToXML_LDecl :: [LDecl] -> Element
+    listToXML_LDecl = listToXML
+    listToXML_LExp :: [LExp] -> Element
+    listToXML_LExp = listToXML
+    listToXML_LExp2 :: [[LExp]] -> Element
+    listToXML_LExp2 = listToXML
+    listToXML_LIdent :: [LIdent] -> Element
+    listToXML_LIdent = listToXML
+    listToXML_LLink :: [LLink] -> Element
+    listToXML_LLink = listToXML
+    listToXML_LNATuples :: [LNATuples] -> Element
+    listToXML_LNATuples = listToXML
+    listToXML_LocComment :: [LocComment] -> Element
+    listToXML_LocComment = listToXML
+    listToXML_LPattern :: [LPattern] -> Element
+    listToXML_LPattern = listToXML
+    listToXML_LPattern2 :: [[LPattern]] -> Element
+    listToXML_LPattern2 = listToXML
+    listToXML_LRename :: [LRename] -> Element
+    listToXML_LRename = listToXML
+    listToXML_Pragma :: [Pragma] -> Element
+    listToXML_Pragma = listToXML
+
+    intToXML :: Integer -> Element
+    intToXML i = unodeAttr "Integer" $ strAttr "val" $ show i
+
+    uniqueIdentToXML :: UniqueIdent -> Element
+    uniqueIdentToXML n = unodeAttrs "UniqueIdent"
+     [
+      strAttr "uniqueIdentId" $ show n.uniqueIdentId
+     ,strAttr "bindingSide" $ show n.bindingSide
+     ,strAttr "bindingLoc" $ "todo: bindingLoc"
+     ,strAttr "idType" $ show n.idType
+     ,strAttr "realName" n.realName
+     ,strAttr "newName" n.newName
+     ,strAttr "prologMode" $ show n.prologMode
+     ,strAttr "bindType" $ show n.bindType
+     ]
+
+    strAttr :: String -> String -> Attr
+    strAttr a s = Attr (unqual a) s
+
+    srcLocAttr :: SrcLoc.SrcLoc -> [Attr]
+    srcLocAttr loc = case loc of
+      SrcLoc.TokPos {} -> [
+          locAttr "sLine" $ SrcLoc.getStartLine loc
+        , locAttr "sCol" $ SrcLoc.getStartCol loc
+        , locAttr "sPos" $ SrcLoc.getStartOffset loc
+        , locAttr "len" $ SrcLoc.getTokenLen loc
+        ]
+      SrcLoc.TokSpan {} -> [
+          locAttr "sLine" $ SrcLoc.getStartLine loc
+        , locAttr "sCol" $ SrcLoc.getStartCol loc
+        , locAttr "eLine" $ SrcLoc.getEndLine loc
+        , locAttr "eCol" $ SrcLoc.getEndCol loc
+        , locAttr "sPos" $ SrcLoc.getStartOffset loc
+        , locAttr "len" $ SrcLoc.getTokenLen loc
+        ]
+      SrcLoc.FixedLoc {} -> [
+          locAttr "sLine" $ SrcLoc.getStartLine loc
+        , locAttr "sCol" $ SrcLoc.getStartCol loc
+        , locAttr "eLine" $ SrcLoc.getEndLine loc
+        , locAttr "eCol" $ SrcLoc.getEndCol loc
+        , locAttr "sPos" $ SrcLoc.getStartOffset loc
+        , locAttr "len" $ SrcLoc.getTokenLen loc
+        ]
+      _ -> []
+
+    locAttr :: Show a => String -> a -> Attr
+    locAttr s i = Attr (unqual s) $ show i
+
+    commentToXML :: (Comment,SrcLoc.SrcLoc) -> Element
+    commentToXML (comment,loc)
+       = add_attrs (srcLocAttr loc) $ case comment of
+      LineComment c -> unodeAttr "LineComment" $ strAttr "val" c
+      BlockComment c -> unodeAttr "BlockComment" $ strAttr "val" c
+      PragmaComment c -> unodeAttr "PragmaComment" $ strAttr "val" c

@@ -1,0 +1,49 @@
+module Syb.DataTest where
+
+import Test.QuickCheck
+
+import Data.Generics.Aliases
+import Data.Generics.Schemes
+import Data.Data
+-- import Data.Generics -- Typeable, Data, everywhere, mkT, listify
+-- import Data.Data -- re-exports Data.Typeable
+-- (cf. https://hackage.haskell.org/package/base-4.8.2.0/docs/Data-Data.html)
+-- class Typeable a => Data a
+-- (cf. https://hackage.haskell.org/package/base-4.8.2.0/docs/Data-Data.html#t:Constr)
+
+data Program = Program [Int]
+derive Show Program
+derive Eq Program
+programTc :: TyCon
+programTc = mkTyCon3 "Syb" "DataTest" "Program"
+instance Typeable Program where
+    typeOf _ = mkTyConApp programTc []
+con_Progr = mkConstr ty_Program "Program" [] Prefix
+ty_Program = mkDataType "DataTest.Program" [con_Progr]
+instance Data Program where
+    toConstr (Program _) = con_Progr
+    dataTypeOf _ = ty_Program
+    gunfold k z c = case constrIndex c of
+                         1 -> k (z Program)
+    gfoldl f z x = z fromList `f` toList x
+      where fromList = Program
+            toList (Program xs) = xs
+
+invertInts :: Program -> Program
+invertInts = everywhere (mkT conv)
+      where
+          conv :: Int -> Int
+          conv i = -i
+
+getPoss :: Program -> [Int]
+getPoss = listify isPos
+    where
+        isPos :: Int -> Bool
+        isPos i = i > 0
+
+example = Program [-1,0,1]
+
+test :: Property
+test = once $ result1 == Program [1, 0, -1] && result2 == [1]
+    where result1 = invertInts example
+          result2 = getPoss example

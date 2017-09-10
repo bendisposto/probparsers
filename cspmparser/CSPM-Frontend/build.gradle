@@ -1,0 +1,104 @@
+plugins {
+    id "org.frege-lang" version "0.8"
+}
+
+apply plugin: 'maven-publish'
+
+group = 'de.hhu.stups.frege'
+version = '0.11.0.1'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile 'org.frege-lang:frege:3.23.422-ga05a487'
+    compile project(path: ":cspmparser/Data")
+    compile project(path: ":cspmparser/Parsec")
+    compile project(path: ":cspmparser/PrettyPrint")
+    compile project(path: ":cspmparser/State")
+    compile project(path: ":cspmparser/syb")
+    compile project(path: ":cspmparser/System")
+}
+
+configurations {
+    dataDeriver
+}
+
+dependencies {
+    dataDeriver project(path: ":cspmparser/DataDeriver")
+}
+
+task deriveDataTypeable(type: JavaExec) {
+    def sourceDirectory = new File("src/main/frege/Language/CSPM/")
+    def fregeFiles = sourceDirectory.listFiles({d, f -> f ==~ /.*.fr/ } as FilenameFilter)
+    classpath = configurations.dataDeriver
+    main = "frege.dataDeriver.Main"
+//    args = Arrays.asList(fregeFiles)
+}
+
+task alex << {
+    exec {
+        executable = 'alex'
+        args "src/main/frege/Language/CSPM/Lexer.x"
+    }
+    copy {
+        from "src/main/frege/Language/CSPM/Lexer.hs"
+        into 'src/main/frege/Language/CSPM/'
+        rename { fileName ->
+            fileName.replace(".hs", ".fr")
+        }
+        filter { line ->
+            line
+                // remove cpp includes starting with #
+                .replaceAll("^#.*", "")
+                // remove qualified keyword (not needed)
+                .replaceAll("^import qualified ", "import ")
+                // remove unneeded imports
+                .replace("import Data.Array.Base (unsafeAt)", "")
+                .replace("import Array", "")
+                // remove strictness flags
+                .replace("!AlexInput", "AlexInput")
+                .replace("!Int", "Int")
+                // replace Array.! with Array.!!
+                .replace(" ! ", " !! ")
+                // add strictness where supported by frege
+                // (mixed like AlexToken !AlexInput !Int is not supported)
+                .replace("| AlexError", "| !AlexError")
+                .replace("| AlexSkip", "| !AlexSkip")
+                // change record access syntax
+                .replace("tokenClass tok", "tok.tokenClass")
+                // make everything private
+                .replaceAll("^([a-z])", "private \$1")
+                .replaceAll("private (module|where|import|scanner|data|instance|type)", "\$1")
+                // workaround for frege bug #26 (Pattern support)
+                .replace("case new_s of", "if new_s == -1")
+                .replace("(-1) ->", "then")
+                // prevent "code too large" message from JVM (#287)
+                .replaceAll("(alex_table|alex_check)(.*)\\[(.*)\\]", "\$1\$2(unJust (parseJSON \"\\[\$3\\]\"))")
+                .replace("_ -> alex_", "else alex_")
+        }
+    }
+}
+
+compileFrege {
+    // Can't find context for Typeable.Typeable in Rename.fr if compiled with -inline
+    inline = false
+}
+
+compileFrege.doFirst {
+    println "run »gradle deriveDataTypeable« if you changed a type deriving Data or Typeable"
+    println "run »gradle alex« if you changed Lexer.x"
+}
+
+

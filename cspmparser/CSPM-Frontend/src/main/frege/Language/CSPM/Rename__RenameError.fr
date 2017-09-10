@@ -1,0 +1,11 @@
+module Language.CSPM.Rename__RenameError where
+
+import Language.CSPM.SrcLoc
+
+--- RenameError data type. This has an wrapping RenameErrorException.
+data RenameError
+  = RenameError {
+   renameErrorMsg :: String
+  ,renameErrorLoc :: SrcLoc
+  }
+derive Show RenameError
