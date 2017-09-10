@@ -1,0 +1,10 @@
+module Language.CSPM.VersionTest
+where
+
+import Test.QuickCheck
+
+import Language.CSPM.TranslateToProlog
+import Data.Version
+
+test :: Property
+test = once $ showVersion toPrologVersion == "0.6.1.1"

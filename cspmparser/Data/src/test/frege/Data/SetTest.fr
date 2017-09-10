@@ -1,0 +1,8 @@
+package frege.data.SetTest where
+
+import Test.QuickCheck
+
+import frege.data.Set
+
+singletonTest :: Property
+singletonTest = once $ insert 1 empty == singleton 1

@@ -1,0 +1,10 @@
+module Language.CSPM.UnicodeSymbolsTest
+where
+
+import Test.QuickCheck
+
+import Data.Maybe
+import Language.CSPM.UnicodeSymbols
+
+test :: Property
+test = once $ lookupDefaultSymbol (fromJust $ lookupToken '⟷') == Just ('⟷', "<->")

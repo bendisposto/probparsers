@@ -1,7 +1,4 @@
-plugins {
-    id "org.frege-lang" version "0.8"
-}
-
+apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'application'
 

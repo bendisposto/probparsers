@@ -1,0 +1,5 @@
+module Text.XML.Light.Test where
+
+import Test.QuickCheck
+
+-- only here so that gradle build does not fail (https://github.com/Frege/frege-gradle-plugin/issues/39)

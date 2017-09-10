@@ -1,0 +1,11 @@
+module Main.ExecCommandTest
+
+where
+
+import Test.QuickCheck
+
+import Main.ExecCommand
+import Data.Version
+
+test :: Property
+test = once $ showVersion cmdVersion == "0.1.0.0"

@@ -1,0 +1,8 @@
+module Text.XML.Light.Test where
+
+import Test.QuickCheck
+
+import frege.control.monad.MState
+
+simpleTest :: Property
+simpleTest = once $ runState (return 'X') 1 == ('X', 1)
