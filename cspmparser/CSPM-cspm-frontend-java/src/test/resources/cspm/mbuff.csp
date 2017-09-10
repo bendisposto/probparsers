@@ -1,0 +1,103 @@
+-- Multiplexed buffers, version for fdr.1.1   -- Bill Roscoe
+-- Modified for fdr.1.2 10/8/92 Dave Jackson
+
+-- The idea of this example is to multplex a number of buffers down a
+-- pair of channels.  They can all be in one direction, or there might be
+-- some both ways.  The techniques demonstrated here work for all
+-- numbers of buffers, and any types for transmission.  The number of states
+-- in the system can be easily increased to any desired size by increasing
+-- either the number of buffers, or the size of the transmitted type.
+
+datatype Tag  = t1 | t2 | t3
+datatype Data = d1 | d2
+
+channel left, right : Tag.Data
+channel snd_mess, rcv_mess : Tag.Data
+channel snd_ack, rcv_ack   : Tag
+channel mess : Tag.Data
+channel ack  : Tag
+
+-- The following four processes form the core of the system
+--
+--
+--    --> SndMess -->  ...........   --> RcvMess -->
+--                
+--    <-- RcvAck  <--  ...........   <-- SndAck  <--
+--
+-- SndMess and RcvMess send and receive tagged messages, while
+-- SndAck and RcvAck send and receive acknowledgements.  
+
+SndMess = [] i:Tag @ (snd_mess.i ? x -> mess ! i.x -> SndMess)
+
+RcvMess = mess ? i.x -> rcv_mess.i ! x -> RcvMess
+
+SndAck = [] i:Tag @ (snd_ack.i  -> ack ! i -> SndAck)
+
+RcvAck = ack ? i -> rcv_ack.i -> RcvAck 
+
+-- These four processes communicate with equal numbers of transmitters (Tx)
+-- and receivers (Rx), which in turn provide the interface with the
+-- environment.
+
+Tx(i) = left.i ? x -> snd_mess.i ! x -> rcv_ack.i -> Tx(i)
+
+Rx(i) = rcv_mess.i ? x -> right.i ! x -> snd_ack.i -> Rx(i)
+
+FaultyRx(i) = rcv_mess.i ? x -> right.i ! x ->(FaultyRx(i)
+                                              |~| snd_ack.i -> FaultyRx(i))
+
+-- Txs is the collection of transmitters working independently
+
+Txs = ||| i:Tag @ Tx(i)
+
+-- LHS is just everything concerned with transmission combined, with
+-- internal communication hidden.
+
+LHS = (Txs [|{|snd_mess, rcv_ack|}|](SndMess ||| RcvAck))\{|snd_mess, rcv_ack|}
+
+-- The receiving side is built in a similar way.
+
+Rxs = ||| i:Tag @ Rx(i)
+
+FaultyRxs = Rx(t1) ||| Rx(t2) ||| FaultyRx(t3)
+      
+RHS = (Rxs [|{|rcv_mess, snd_ack|}|]
+                  (RcvMess ||| SndAck))\{|rcv_mess, snd_ack|}
+
+FaultyRHS = (FaultyRxs [|{|rcv_mess, snd_ack|}|]
+                        (RcvMess ||| SndAck))\{|rcv_mess, snd_ack|}
+
+-- Finally we put it all together, and hide internal communication 
+
+System = (LHS [|{|mess, ack|}|] RHS)\{|mess,ack|}
+
+FaultySystem = (LHS [|{|mess, ack|}|] FaultyRHS)\{|mess, ack|}
+
+-- The specification is just the parallel composition of several one-place
+-- buffers.
+
+Copy(i) = left.i ? x -> right.i ! x -> Copy(i)
+
+Spec = ||| i:Tag @ Copy(i) 
+
+-- Correctness of the system is asserted by  Spec [FD= System.
+
+assert Spec [FD= System
+
+-- If the multiplexer is being used as part of a larger system, then
+-- it would make a lot of sense to prove that it meets its specification
+-- and then use its specification in its stead in higher-level system
+-- descriptions.  This applies even if the higher-level system does not
+-- break up into smaller components, since the state-space of the
+-- specification is significantly smaller than that of the multiplexer,
+-- which will make the verification of a large system quicker.  It is
+-- even more true if the channels of the multiplexer are used independently,
+-- in other words if each external channel of the multiplexer is connected
+-- to a different user, and the users do not interact otherwise,
+-- for it would then be sufficient to prove that each of the separate
+-- pairs of processes interacting via our multiplexer are correct relative
+-- to its own specification, with a simple one-place buffer between them.
+
+-- For we would have proved the equivalence, by the correctness of the
+-- multiplexer, of our system with a set of three-process independent ones.
+

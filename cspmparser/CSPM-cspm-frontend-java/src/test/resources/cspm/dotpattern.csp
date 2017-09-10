@@ -1,0 +1,10 @@
+datatype COL = red | green
+channel ap: {0..3}.COL
+
+
+f(0.red) = 1
+f(0.green) = 2
+f(x.red) = f(x-1.green)
+f(x.green) = f(x-1.red)
+
+MAIN = ap?pair -> ap!(f(pair).red) -> ap?x?y -> ap!f(x.y).green -> MAIN

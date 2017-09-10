@@ -1,0 +1,1 @@
+test = [] op : {1} @ true & [] i : op @ STOP

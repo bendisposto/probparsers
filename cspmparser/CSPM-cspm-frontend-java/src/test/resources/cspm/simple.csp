@@ -1,0 +1,32 @@
+-- Simple demonstration of FDR2
+-- A single place buffer implemented over two channels
+-- Original by D.Jackson 22 September 1992
+-- Modified for FDR2 by M. Goldsmith 6 December 1995
+
+-- First, the set of values to be communicated
+datatype FRUIT = apples | oranges | pears
+
+-- Channel declarations
+channel left,right,mid : FRUIT
+channel ack
+
+-- The specification is simply a single place buffer
+COPY = left ? x -> right ! x -> COPY
+
+-- The implementation consists of two processes communicating over
+-- mid and ack
+SEND = left ? x -> mid ! x -> ack -> SEND
+REC = mid ? x -> right ! x -> ack -> REC
+
+-- These components are composed in parallel and the internal comms hidden
+SYSTEM = (SEND [| {| mid, ack |} |] REC) \ {| mid, ack |}
+
+-- Checking "SYSTEM" against "COPY" will confirm that the implementation
+-- is correct.
+
+assert COPY [FD= SYSTEM
+
+-- In fact, the processes are equal, as shown by
+
+assert SYSTEM [FD= COPY
+

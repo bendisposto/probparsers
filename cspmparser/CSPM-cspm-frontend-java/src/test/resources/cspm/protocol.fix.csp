@@ -1,0 +1,379 @@
+{-
+  Case study in protocol development
+  David Jackson, 1995
+  Adapted for FDR2.11, Bryan Scattergood, May 1997
+
+  Protocols are built in layers, as shown below
+
+    environment
+      | connection channel
+    Connection
+      | network channel
+    Network
+      | transport channel
+    Transport
+-}
+
+-- We begin by declaring the compression operations we will use
+
+transparent normal
+
+-- and also a convenient shorthand for sharing and hiding
+
+wire(P,A,Q) = (P [| A |] Q) \ A
+
+-- A buffer from 'in' to 'out' restricted to values in 'type'
+-- and non-deterministically holding at most 'n' values.
+
+BUFFER(n,in,out,type) =
+  let
+    B(<>) = in?x:type -> B(<x>)
+    B(s)  = out!head(s) -> B(tail(s))
+         [] (STOP |~| #s<n & in?x:type -> B(s^<x>))
+  within B(<>)
+
+-- A buffer, as above, but which is allowed to drop up to (but not
+-- including) 'PassRate' consecutive values.
+
+FAULTY(n,in,out,type) =
+  let
+    PassRate = 3
+    B(<>,since_last) = in?x:type -> A(<>,since_last,x)
+    B(s,since_last)  = out!head(s) -> B(tail(s),since_last)
+                    [] (STOP |~| #s<n & in?x:type -> A(s,since_last,x))
+    A(s,since_last,x) =
+      if since_last < PassRate then
+        B(s^<x>,0) |~| B(s,since_last+1)
+      else
+        B(s^<x>,0)
+  within B(<>,0)
+
+
+{-----------------------------------------------------------------------
+  Specification of Connection Service
+ 
+  Packets of data (type Connection_Data) are to be transmitted between hosts
+  according to connections defined by ports at each end.
+-}
+
+datatype Connection_Data = bit.{0,1}
+
+datatype Host = newton | goedel
+
+nametype Port = {0..2}
+
+nametype Connection_Addr = Host . Port
+
+channel connection : Connection_Addr . Connection_Data
+
+-- Instance data: how this particular network is wired up
+
+Connections = {
+  (newton.0, goedel.1),
+  (goedel.0, newton.1),
+  (newton.2, goedel.2)
+}
+
+{-
+  The specification for the connection is that each
+  source/destination pair which are specified by Connections
+  show behave like a one-place buffer.
+-}
+
+ConnectionService = 
+  let
+    Buff(read, write) = read?x -> write!x -> Buff(read, write)
+  within ||| (s,d) : Connections @ Buff(connection.s, connection.d)
+
+
+{-----------------------------------------------------------------------
+  Refinement 1
+
+  Connection service implemented on top of a network service which provides
+  unsynchronized transmission between host.port pairs.
+-}
+
+datatype Network_Data = CAck | CData . Connection_Data
+
+Network_Data_Fwd = {| CData |}
+Network_Data_Rev = diff(Network_Data, Network_Data_Fwd)
+
+Network_Addr = Connection_Addr
+
+--hostof(h.p) = h  -- dot-pattern not supported at the moment
+hostof(h,p) = h
+
+channel network : Network_Addr . Network_Data
+
+{-
+  The specification for the network service is that it provides
+  reliable bidirectional communication, but may introduce buffering.
+-}
+
+NetworkService =
+  ||| (s,d) : Connections @
+    (
+      BUFFER(3,network.s, network.d, Network_Data_Fwd)
+    |||
+      BUFFER(3,network.d, network.s, Network_Data_Rev)
+    )
+
+{-
+  Given a network layer which is at least as good as NetworkService,
+  we can build a connection layer which is as good as the required
+  ConnectionService.  We do this by masking the buffering introduced
+  by the network using an explicit acknowledgement.  Each output
+  port between the connection and network layer needs to wait for the
+  acknowledgement inserted by the corresponding input port.
+-}
+
+inports(host)  = {s | (s,_) <- Connections, hostof(s)==host}
+
+outports(host) = {d | (_,d) <- Connections, hostof(d)==host}
+
+ConImp =
+  let
+    InPort(addr) =
+      connection.addr?v -> 
+      network.addr!CData.v -> 
+      network.addr.CAck -> InPort(addr)
+    OutPort(addr) =
+      network.addr.CData?v ->
+      connection.addr!v ->
+      network.addr!CAck -> OutPort(addr)
+    Ports(host) =
+      (||| s : inports(host) @ InPort(s))
+      |||
+      (||| d : outports(host) @ OutPort(d))
+  within ||| h : Host @ Ports(h)
+
+ConnectionLayer1 =
+  wire(ConImp, {|network|}, NetworkService)
+
+assert ConnectionService [F= ConnectionLayer1
+
+
+{-----------------------------------------------------------------------
+  Refinement 2
+
+  Implementing the network layer on top of a transport layer by
+  multiplexing.
+-}
+
+-- Transport packets are labelled with destination addresses
+
+datatype Direction = Inbound | Outbound
+
+nametype Transport_Addr = Host . Direction
+
+nametype Transport_Data = Connection_Addr . Network_Data
+
+channel transport : Transport_Addr . Transport_Data
+
+
+remoteport(p) = 
+  let
+    uniq({x}) = x
+    others = { if p==s then d else s | (s,d) <- Connections, p==s or p==d }
+  within uniq(others)
+
+Transport_Data_Sent(host) =
+  union(
+    { remoteport(p).d | d <- Network_Data_Fwd, p <- inports(host) },
+    { remoteport(p).d | d <- Network_Data_Rev, p <- outports(host) }
+  )
+
+Transport_Data_Recd(host) =
+  union(
+    { p.d | d <- Network_Data_Fwd, p <- outports(host) },
+    { p.d | d <- Network_Data_Rev, p <- inports(host) }
+  )
+
+-- Transport Service Spec
+
+TransportService =
+  ||| s : Host, d : Host, s != d @
+    BUFFER(1, transport.s.Outbound, transport.d.Inbound,
+           inter(Transport_Data_Sent(s), Transport_Data_Recd(d)))
+
+-- Multiplexer Definitions
+
+NetImp =
+  let
+    NetworkTransmitter(host) =
+      let
+        th = transport.host.Outbound
+        NT =
+          ([] p : inports(host) @ 
+            network.p?d:Network_Data_Fwd ->
+            th!remoteport(p)!d -> NT
+          )
+          []
+          ([] p : outports(host) @
+            network.p?d:Network_Data_Rev ->
+            th!remoteport(p)!d -> NT
+          )
+      within NT
+    NetworkReceiver(host) =
+      let
+        th = transport.host.Inbound
+        NR =
+          ([] p : outports(host) @
+            th.p?d:Network_Data_Fwd ->
+            network.p!d -> NR
+          )
+          []
+          ([] p : inports(host) @
+            th.p?d:Network_Data_Rev ->
+            network.p!d -> NR
+          )
+      within NR
+--  within ||| h : Host @ NetworkTransmitter(h) ||| NetworkReceiver(h)
+-- precedences in FDR are unconsistent
+-- we have to use Parenteses here
+  within ||| h : Host @ (NetworkTransmitter(h) ||| NetworkReceiver(h))
+
+NetworkLayer1 = 
+  wire(NetImp, {|transport|}, TransportService)
+
+-- Subject to establishing suitable buffering constraints, we could prove
+--
+--         C[NetworkService] [F= C[NetworkLayer}
+--
+-- for a context C[ ]
+-- The Connection Layer is, in fact such a context:
+
+ConnectionLayer2 =
+  wire(ConImp, {|network|}, NetworkLayer1)
+
+assert ConnectionService [F= ConnectionLayer2
+
+
+{-----------------------------------------------------------------------
+  Refinement 3
+
+  Implement transport service on top of two pairs of potentially unreliable
+  channels, using the alternating bit protocol.
+-}
+
+datatype MySeq = seq0 | seq1       -- Seq is allread a buitin !
+
+seq_next(seq0) = seq1
+seq_next(seq1) = seq0
+
+datatype Transport_Primitive = TAck . MySeq | TData . MySeq . Transport_Data
+
+-- Packet Service Spec
+
+Packet_Data = Transport_Primitive
+
+datatype Function = Forward | Reverse
+
+nametype Packet_Addr = Host . Direction . Function
+
+channel packet : Packet_Addr . Packet_Data
+
+Packet_Data_Sent(host) =
+  { TData.s.d | s <- MySeq, d <- Transport_Data_Sent(host) }
+
+Packet_Data_Recd(host) =
+  { TData.s.d | s <- MySeq, d <- Transport_Data_Recd(host) }
+
+PacketPair(s,d) =
+  FAULTY(1,packet.s.Forward, packet.d.Forward,
+         inter(Packet_Data_Sent(hostof(s)),Packet_Data_Recd(hostof(d))))
+  |||
+  FAULTY(1,packet.d.Reverse, packet.s.Reverse, {|TAck|})
+
+PacketService =
+  ||| s : Host, d : Host, s != d @ PacketPair(s.Outbound,d.Inbound)
+
+TransportSender(taddr) = 
+  let
+    h = hostof(taddr)
+    TS(vs, seq) = 
+      (if null(vs) then
+        transport.taddr?tdata :
+        Transport_Data_Sent(h) ->
+        TS(<tdata>,seq_next(seq))
+      else
+        packet.taddr.Forward!TData.seq.head(vs) ->
+        TS(vs,seq)
+      )
+      []
+      (packet.taddr.Reverse.TAck?s ->
+        TS(if s==seq then <> else vs,seq)
+      )
+  within TS(<>,seq1)
+
+TransportReceiver(taddr) = 
+  let
+    h = hostof(taddr)
+    TR(seq) = 
+      packet.taddr.Reverse.TAck!seq_next(seq) -> TR(seq)
+      []
+      packet.taddr.Forward.TData?s?v:Transport_Data_Recd(h) ->
+        if s==seq then
+          transport.taddr!v ->TR(seq_next(seq))
+        else
+          TR(seq)
+  within TR(seq0)
+
+SenderInterface(h) = 
+  {|packet.h.Outbound.Forward.d,
+    packet.h.Outbound.Reverse.TAck |
+    d <- Packet_Data_Sent(h) |}
+
+ReceiverInterface(h) =
+  {|packet.h.Inbound.Forward.d,
+    packet.h.Inbound.Reverse.TAck |
+    d <- Packet_Data_Recd(h) |}
+
+TransportLayer =
+  let
+    Trans(s,d) =
+      let
+        si = SenderInterface(s)
+        ri = ReceiverInterface(d)
+        sr = TransportSender(s.Outbound) ||| TransportReceiver(d.Inbound)
+      within wire(sr, union(si, ri), PacketPair(s.Outbound, d.Inbound))
+  within ||| s : Host, d : Host, s != d @ normal(Trans(s,d))
+
+assert TransportService [F= TransportLayer
+
+NetworkLayer2 = 
+  wire(NetImp, {|transport|}, TransportLayer)
+
+
+{-
+  Given suitable constraints on the buffering and network capacity
+  (which we might represent as a context C[ ], we would be able to
+  show
+          C[NetworkService] [F= C[NetworkLayer2]
+  
+  Indeed the following  result is an example of this:
+-}
+
+ConnectionLayer3 =
+  wire(ConImp, {|network|}, NetworkLayer2)
+
+assert ConnectionService [F= ConnectionLayer3
+
+{-
+  If we introduce a deliberate fault into the transport service,
+  then the implementations of the network and connection layers
+  may no longer good enough ... if we attempt to use them, we could
+  fail to be as good as ConnectionService.  
+-}
+
+FaultyConnectionLayer =
+  let
+    FaultyTransportService =
+      ||| s : Host, d : Host, s != d @
+        FAULTY(1,transport.s.Outbound, transport.d.Inbound,
+               inter(Transport_Data_Sent(s), Transport_Data_Recd(d)))
+    FaultyNetworkLayer =
+      wire(NetImp, {|transport|}, FaultyTransportService)
+  within wire(ConImp, {|network|}, FaultyNetworkLayer)
+
+assert ConnectionService [F= FaultyConnectionLayer

@@ -1,0 +1,75 @@
+{-
+  An version of the Towers of Hanoi using lots of features
+  which were not present in FDR 1.4
+  JBS 6 March 1995 (based loosely on AWR's version for FDR 1.4)
+-}
+
+transparent diamond
+
+n             = 5 -- How many discs
+
+-- Discs are numbered
+DISCS         = {1..n}
+
+-- But the pegs are labelled
+datatype PEGS = A | B | C
+
+{-
+  For a given peg, we can get a new disc or put the
+  top disc somewhere else.  We are also allowed to
+  to indicate when the peg is full.
+-}
+
+channel get, put : DISCS
+channel full
+
+-- We are allowed to put any *smaller* disc onto the current stack
+allowed(s) = { 1..head(s^<n+1>)-1 }
+
+PEG(s) =
+  get?d:allowed(s)->PEG(<d>^s)
+    []
+  not null(s) & put!head(s)->PEG(tail(s))
+    []
+  length(s) == n & full->PEG(s)
+
+{-
+  Now, given a simple peg we can rename it to form each
+  of the three physical pegs (`poles') of the puzzle.
+
+  move.d.i.j indicates that disc d moves to pole i from pole j
+-}
+
+channel move : DISCS.PEGS.PEGS
+channel complete : PEGS
+
+initial(p)   = if p==A then < 1..n> else <>
+
+
+POLE(p) =
+  PEG(initial(p))
+    [[ full <- complete.p, 
+       get.d <- move.d.p.i,
+       put.d <- move.d.i.p | i<- PEGS, i != p, d<-DISCS ]]
+
+{-
+  The puzzle is just the three poles, communicating on the
+  relevant events: all the moves, and the done/notdone events.
+-}
+
+interface(p) = {| move.d.i.p, move.d.p.i, complete.p | d<-DISCS, i<-PEGS |}
+
+PUZZLE =
+  || p : PEGS @ [ interface(p) ] diamond(POLE(p))
+
+{-
+  The puzzle is solved by asserting that C cannot become complete.
+  then the trace that refutes the assertion is the solution.
+-}
+
+-- partial instantitiation of channel move 
+-- NOTSOLVED = complete?x:{A,B}-> NOTSOLVED [] move?x -> NOTSOLVED
+NOTSOLVED = complete?x:{A,B}-> NOTSOLVED [] move?x?y?z -> NOTSOLVED
+
+assert NOTSOLVED [T= PUZZLE
+assert PUZZLE \ {| complete.A, complete.B, move |} [F= STOP

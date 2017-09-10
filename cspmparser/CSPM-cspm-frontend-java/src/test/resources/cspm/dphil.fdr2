@@ -1,0 +1,42 @@
+-- The dining philosophers with deadlock.
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+-- It's more convenient to call the events pickup.1.2 etc, 
+-- instead of 1.pickup.2 as in the notes.
+
+channel pickup:{0..4}.{0..4}
+channel putdown:{0..4}.{0..4}
+channel sitdown:{0..4}
+channel getup:{0..4}
+
+-- Define addition and subtraction mod 5
+
+inc(x) = (x + 1) % 5
+dec(x) = (x - 1) % 5
+
+-- The definitions of the philosophers and the forks are just as in
+-- the notes.
+
+PHIL(i) =  sitdown.i -> pickup.i.inc(i) -> pickup.i.i -> 
+           putdown.i.inc(i) -> putdown.i.i -> getup.i -> PHIL(i)
+
+FORK(i) = pickup.i.i -> putdown.i.i -> FORK(i)
+        [] pickup.dec(i).i -> putdown.dec(i).i -> FORK(i)
+
+-- Notice the use of indexed parallel here.
+
+PHILS = || i:{0..4} @ [{|pickup.i.i, pickup.i.inc(i),
+                         putdown.i.i, putdown.i.inc(i), 
+                         sitdown.i, getup.i|}]          
+                    PHIL(i)
+
+FORKS = || i:{0..4} @ [{|pickup.i.i, putdown.i.i, 
+                         pickup.dec(i).i, putdown.dec(i).i|}] 
+                    FORK(i)
+
+COLLEGE = PHILS [ {|pickup,putdown,sitdown,getup|} || 
+                                   {|pickup,putdown|} ] FORKS
+
+

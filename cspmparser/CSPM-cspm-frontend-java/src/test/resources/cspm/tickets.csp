@@ -1,0 +1,13 @@
+-- tickets.csp
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+--
+
+channel on, off, staines, ashford, pound, ticket
+
+MACHINE = on -> TICKETS
+
+TICKETS =   staines -> pound -> ticket -> TICKETS
+         [] ashford -> pound -> pound -> ticket -> TICKETS
+         [] off -> MACHINE

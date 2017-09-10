@@ -1,0 +1,373 @@
+{-
+  Alternating bit protocol.
+
+  Bill Roscoe, August 1992
+  Adapted for FDR2.11, Bryan Scattergood, April 1997
+
+  This is the initial example of a set which make use of a pair of media
+  which are permitted to lose data, and provided no infinite sequence is lost
+  will work independently of how lossy the channels are (unlike the file
+  prots.csp where the protocols were designed to cope with specific badnesses)
+  They work by transmitting messages one way and acknowledgements the other.
+
+  The alternating bit protocol provides the most standard of all protocol
+  examples.  The treatment here has a lot in common with that in the
+  Formal Systems information leaflet "The Untimed Analysis of Concurrent
+  Systems".
+-}
+
+{-
+  Channels and data types
+  left and right are the external input and output.
+  a and b carry a tag and a data value.
+  c and d carry an acknowledgement tag.
+  (In this protocol tags are bits.)
+
+             a  PUT  b
+  left        /	    \       right
+  ------> SEND       RECV ------>
+              \     /
+             d  GET  c
+-}
+
+DATA = {2,3}  -- in a data-independent program, where nothing is done to
+              -- or conditional on data, this is sufficient to establish
+              -- correctness
+
+channel left,right : DATA
+channel a, b : Bool.DATA
+channel c, d : Bool
+
+{-
+  The overall specification we want to meet is that of a buffer.
+-}
+
+SPEC = let
+    {-
+      The most nondeterministic (left-to-right) buffer with size bounded
+      by N is given by BUFF(<>, N), where
+    -}
+    BUFF(s, N) =
+      if null(s) then
+        left?x -> BUFF(<x>, N)
+      else
+        right!head(s) -> BUFF(tail(s), N)
+        []
+        #s<N & (STOP |~| left?x -> BUFF(s^<x>, N))
+    {-
+      For our purposes we will set N=3 since this example does not introduce
+      more buffering than this.
+    -}
+  within BUFF(<>, 3)
+
+{-
+  The protocol is designed to work in the presence of lossy channels.
+  We specify here channels which must transmit one out of any three values, but
+  any definition would work provided it maintains order and does not lose
+  an infinite sequence of values.  The only difference would evidence itself
+  in the size of the state-space!
+-}
+
+lossy_buffer(in, out, bound) =
+  let
+    -- Increasing bound makes this definition less deterministic.
+    -- n is the number of outputs which may be discarded.
+    B(0) = in?x -> out!x -> B(bound-1)
+    B(n) = in?x -> (B(n-1) |~| out!x -> B(bound-1))
+  within B(bound-1)
+
+PUT = lossy_buffer(a, b, 3)
+
+GET = lossy_buffer(c, d, 3)
+
+{-
+  The implementation of the protocol consists of a sender process and
+  receiver process, linked by PUT and GET above.
+-}
+
+SEND =
+  let
+    Null = 99 -- any value not in DATA
+    {-
+      The sender process is parameterised by the current value it
+      tries to send out, which may be Null in which case it does
+      not try to send it, but instead accepts a new one from
+      channel left.
+      It is always willing to accept any acknowledgement, and if
+      the tag corresponds to the current bit, v is made Null.
+    -}
+    S(v,bit) =
+      (if v == Null then left?x -> S(x, not bit) else a!bit!v -> S(v, bit))
+      []
+      d?ack -> S(if ack==bit then Null else v, bit)
+    {-
+      Initially the data value is Null and bit is true so the first
+      value input gets bit false.
+    -}
+  within S(Null, true)
+
+RECV =
+  let
+    {-
+      The basic part of the receiver takes in messages, sends
+      acknowledgements, and transmits messages to the environment.
+      R(b) is a process that will always accept a message or
+      send an acknowledgement, save that it will not do so when it
+      has a pending message to transmit to the environment.
+    -}
+    R(bit) =
+      b?tag?data -> (if tag==bit then right!data -> R(not bit) else R(bit))
+      []
+      c!not bit -> R(bit)
+    {-
+      The first message to be output has tag false, and there is no pending
+      message.
+    -}
+  within R(false)
+
+{-
+  If this receiver is placed in the system, there is the danger of
+  livelock, or divergence, if an infinite sequence of acknowledgements is
+  transmitted by RECV and received by SEND without the next message being
+  transmitted, as is possible.  Alternatively, a message can be transmitted
+  and received infinitely without being acknowledged.
+  Thus, while the following system is
+  partially correct, it can diverge:
+-}
+
+make_system(receiver) =
+  make_full_system(SEND, PUT|||GET, receiver)
+
+make_full_system(sender, wiring, receiver) =
+  sender[|{|a,d|}|](wiring[|{|b,c|}|]receiver)\{|a,b,c,d|}
+
+DIVSYSTEM = make_system(RECV)
+
+assert DIVSYSTEM :[livelock free]
+
+{-
+  We can avoid divergence by preventing the receiver acknowledging or
+  receiving infinitely without doing the other.  This can be done by
+  putting it in parallel with any process which allows these actions
+  in such a way as to avoid these infinitely unfair sequences.  In fact,
+  the receiver may choose one of the two to do rather than give the
+  choice as above.  Examples that will work are:
+-}
+
+-- Simple alternation
+
+ALT = b?_ -> c?_ -> ALT
+
+-- Give the environment the choice, provided there is no run of more
+-- than M of either.
+
+LIMIT(M) =
+  let
+    L(bs,cs) =
+      bs < M & b?_ -> L(bs+1, 0)
+      []
+      cs < M & c?_ -> L(0, cs+1)
+  within L(0,0)
+
+-- Choose nondeterministically which to allow, provided the totals
+-- of b's and c's do not differ too much.
+
+NDC(M) =
+  let
+    C(n) =
+      if n==0 then
+        c?_ -> C(n+1)
+      else if n==M then
+        b?_ -> C(n-1)
+      else
+        c?_ -> C(n+1) |~| b?_ -> C(n-1)
+  within C(M/2)
+
+-- Modified receiver processes, with small values for the constants, are
+
+modify_receiver(constraint) =
+  RECV [|{|b,c|}|] constraint
+
+RCVA = modify_receiver(ALT)
+RCVL = modify_receiver(LIMIT(3))
+RCVN = modify_receiver(NDC(4))
+
+-- and the checks of the respective systems against SPEC
+
+assert SPEC [FD= make_system(RCVA)
+assert SPEC [FD= make_system(RCVL)
+assert SPEC [FD= make_system(RCVN)
+
+{-
+  Of course, one would not normally construct one's receiver as a composition
+  of an algorithmic process and constraint in this way, but we now know that
+  any receiver which refines RCVN will work.  For example
+-}
+
+RCVimp =
+  let
+    R(bit) =
+      b?tag?data -> if tag==bit then
+                      right!data -> c!tag -> R(not bit)
+                    else
+                      c!tag -> R(bit)
+  within R(false)
+
+{-
+  You can check that RCVimp refines RCVN, which proves that the larger
+  check below is correct.  (This can, in this instance, be proved directly.)
+-}
+
+assert RCVN [FD= RCVimp
+
+assert SPEC [FD= make_system(RCVimp)
+
+{-
+  Indeed, RCVimp actually equals (semantically) RCVA, and you can check
+  that refinement either way.
+-}
+
+assert RCVimp [FD= RCVA
+assert RCVA [FD= RCVimp
+
+{-
+  If you want to develop this example much further, perhaps by inserting
+  a more interesting process in one or both channels, the state-space may
+  grow uncomfortably large for a Full check (including absence of divergence).
+
+  Any different channel definitions which satisfy all of
+
+  1. outputs(tr)  subseq of  inputs(tr)  in the obvious sense
+
+  2. will not do an infinite sequence of inputs without an output
+
+  3. refines LIVCH (given below) and hence can always either input
+     any value, or make an output
+
+  is substitutable for PUT and/or GET.
+-}
+
+LIVCH(in, out) =
+  let
+    P =
+      in?_ -> P
+      |~|
+      |~| x:{|out|} @ x -> P
+  within P
+
+assert LIVCH(a,b) [FD= PUT
+assert LIVCH(c,d) [FD= GET
+
+{-
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   Failures-only Checking
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  The following is fairly advanced material for those who want to
+  understand the subtle differences between Full and Failures-only, and even
+  exploit them.
+
+  As we know, Failures and Traces checking do not test the implementation
+  for potential divergence.  This is usually something to overcome
+  by establishing separately that the implementation is divergence-free.
+
+  Provided we know clearly what we are doing, there are cases where
+  establishing facts about processes which can diverge are valuable.
+  In other words, there are useful theorems that can be proved using
+  these restricted forms of check that are not provable using a full check.
+
+  We know of two sorts of results to prove in this way.  They are
+  similar in execution, but rather different in interpretation, and
+  both can be successfully demonstrated using the alternating bit
+  example.
+
+  Spec [=F Imp  proves that every trace, and every stable refusal
+  of Imp is satisfactory.  If we take a divergence-free
+  component of Imp and refine it,
+  then not only will the overall set of failures and divergence be
+  refined (reduced), but so will the observable traces and stable refusals.
+
+  It follows that, if we can establish Spec  [=F Imp, then we have proved
+  a theorem that any Imp' produced by refining the component which is
+  also divergence free (i.e., Imp' is), then Imp' will failures-divergence
+  refine Spec.
+
+  This is valuable in arguments like that involving the receiver process
+  above, where a number of different processes were introduced, as varying
+  ways of eliminating divergence.  We proved each of them worked,
+  but really we would like a general result about a class of receiver
+  processes, which leaves divergence as the only remaining issue.  This
+  can be done with the generalised co-process
+-}
+
+ND = b?_ -> ND |~| c?_ -> ND
+
+{-
+  which is an approximation to  ALT, LIMIT and NDC above. The generalised
+  receiver process
+-}
+
+RCVG = modify_receiver(ND)
+
+{-
+  approximates any conceivable process we might want to put at the
+  right-hand-side of the alternating bit protocol.  Note that it can
+  always choose whether it wants to accept a message or send an acknowledgement
+-}
+
+-- The system
+
+GSYSTEM = make_system(RCVG)
+
+{-
+  will be found to diverge if you use a full check.  However the failures
+  check will work, which, as we said above, establishes that
+  any refinement of RCVG which eliminates divergence from the whole
+  system will give a valid failures-divergence refinement of SPEC.
+
+  Note that we could not have made the same argument using RECV, since
+  it is a deterministic process.  In fact, DIVSYSTEM has no stable
+  states at all, a very different proposition from GSYSTEM,
+  which implicitly has all the stable states of every possible working
+  right-hand process.
+-}
+
+assert SPEC [F= GSYSTEM
+assert SPEC [FD= GSYSTEM
+
+{-
+  The second sort of result uses very similar techniques to reason about
+  fairness issues.  It perhaps does not make much sense to talk about a
+  fair receiver process, when the design of that process is likely to be
+  firmly within our control.  But it certainly makes sense to introduce
+  fairness assumptions about the communications medium.  It is really more
+  natural to bring in assumption like "the medium will never lose an infinite
+  sequence of consecutive messages" rather than "it will not lose more than
+  three out of every four".  The ideal model of a communications medium
+  in this respect is
+-}
+
+PUT' = a?tag?data -> (b!tag!data -> PUT' |~|  PUT')
+
+GET' = c?tag -> (d!tag -> GET' |~|  GET')
+
+{-
+  with the additional assumption that an infinite set of messages is not
+  lost.  This actually defines perfectly valid processes in the infinite
+  traces/failures model of CSP, and mathematical arguments in that model
+  will exclude divergence from a system such as
+-}
+
+FSYSTEM =
+  make_full_system(SEND, PUT'|||GET', RCVA)
+
+{-
+  with the additional assumptions about EG and FG that we cannot make in
+  the finite failures/divergence model.  Since the additional assumptions
+  only serve to refine EG and FG further, proving that FSYSTEM refines
+  SPEC using a failures check will prove that the system with the
+  fairness assumptions in place will be a full refinement of SPEC.
+-}
+
+assert SPEC [F= FSYSTEM
+

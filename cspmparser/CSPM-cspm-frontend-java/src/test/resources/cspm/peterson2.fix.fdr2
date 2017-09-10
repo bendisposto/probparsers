@@ -1,0 +1,57 @@
+-- Peterson's Algorithm in CSP: version 2
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+channel flag1set, flag1read, flag2set, flag2read:{1..2}.Bool
+channel turnset, turnread:{1..2}.{1..2}
+channel enter, critical, leave:{1..2}
+
+FLAG1(v) =  flag1set?x?y -> FLAG1(y)
+         [] flag1read.1.v -> FLAG1(v)
+         [] flag1read.2.v -> FLAG1(v)
+
+FLAG2(v) =  flag2set?x?y -> FLAG2(y)
+         [] flag2read.1.v -> FLAG2(v)
+         [] flag2read.2.v -> FLAG2(v)
+
+TURN(v) =  turnset?x?y -> TURN(y)
+        [] turnread.1.v -> TURN(v)
+        [] turnread.2.v -> TURN(v)
+
+P1 = flag1set.1.true -> turnset.1.2 -> P1WAIT
+
+P1WAIT =  flag2read.1.true -> (turnread.1.2 -> P1WAIT
+                            [] turnread.1.1 -> P1ENTER)
+       [] flag2read.1.false -> P1ENTER
+
+P1ENTER = enter.1 -> critical.1 -> leave.1 -> flag1set.1.false -> P1
+
+P2 = flag2set.2.true -> turnset.2.1 -> P2WAIT
+
+P2WAIT =  flag1read.2.true -> (turnread.2.1 -> P2WAIT
+                            [] turnread.2.2 -> P2ENTER)
+       [] flag1read.2.false -> P2ENTER
+
+P2ENTER = enter.2 -> critical.2 -> leave.2 -> flag2set.2.false -> P2
+
+aP1 = {| flag1set.1, flag1read.1, flag2set.1, flag2read.1,
+         turnset.1, turnread.1, enter.1, critical.1, leave.1 |}
+
+aP2 = {| flag1set.2, flag1read.2, flag2set.2, flag2read.2,
+         turnset.2, turnread.2, enter.2, critical.2, leave.2 |}
+
+aF1 = {| flag1set,flag1read |}
+
+aF2 = {| flag2set,flag2read |}
+
+aT  = {| turnset,turnread |}
+
+PROCS = P1 [ aP1 || aP2 ] P2
+
+FLAGS = FLAG1(false) [ aF1 || aF2 ] FLAG2(false)
+
+VARS = FLAGS [ union(aF1,aF2) || aT ] TURN(1)
+
+SYSTEM = PROCS [ union(aP1,aP2) || union(union(aF1,aF2),aT) ] VARS
+

@@ -1,0 +1,394 @@
+datatype Encryption =
+  Alice | Bob | Mallory | Na | Nb | Ni | Kab | Garbage | 
+  shared_.(Agent, Agent) | Sq.Seq(Encryption) | 
+  Encrypt.(ALL_KEYS,Seq(Encryption)) | Xor.(Encryption, Encryption)
+
+ALL_KEYS = Union({SessionKey, SharedKey})
+
+ATOM = {Alice, Bob, Mallory, Na, Nb, Ni, Kab, Garbage}
+
+encrypt(m_,k_) = Encrypt.(k_,m_)
+decrypt(Encrypt.(k1_,m_),k_) = if k_ == inverse(k1_) then m_ else Garbage
+decrypt(_,_) = Garbage
+decryptable(Encrypt.(k1_,m_),k_) = k_ == inverse(k1_) 
+decryptable(_,_) = false
+nth(ms_,n_) = if n_ == 1 then rmts(head(ms_)) else nth(tail(ms_), n_ - 1)
+
+rmts(Timestamp.t_) = t_
+rmts(x_) = x_
+
+datatype Labels =
+  Msg1 | Msg2 | Msg3 | Msg4 | Env0
+
+addGarbage_(S) = union(S, ATOM)
+
+MSG1_BODY = 
+  {(Msg1, Sq.<A, na>) |
+     A <- Agent, na <- Nonce}
+MSG2_BODY = 
+  {(Msg2, Encrypt.(shared(A, B), <na, kab>)) |
+     A <- Agent, B <- Agent, kab <- SessionKey, na <- Nonce}
+MSG3_BODY = 
+  {(Msg3, Encrypt.(kab, <na>)) |
+     kab <- SessionKey, na <- Nonce}
+MSG4_BODY = 
+  {(Msg4, nb) |
+     nb <- Nonce}
+MSG_BODY = Union({MSG1_BODY, MSG2_BODY, MSG3_BODY, MSG4_BODY})
+
+ENVMSG0 = 
+  {A.(Env0, B) | A <- Agent, B <- Agent}
+ENVMSG = ENVMSG0
+
+ENVMSG0_BODY = 
+  {(Env0, B) | B <- Agent}
+ENVMSG_BODY = ENVMSG0_BODY
+
+SenderType ((Msg1, Sq.<A, _>)) = {A}
+SenderType ((Msg2, Encrypt.(_, <_, _>))) = Agent
+SenderType ((Msg3, Encrypt.(_, <_>))) = Agent
+SenderType ((Msg4, _)) = Agent
+
+ReceiverType((Msg1, Sq.<_, _>)) = Agent
+ReceiverType((Msg2, Encrypt.(_, <_, _>))) = Agent
+ReceiverType((Msg3, Encrypt.(_, <_>))) = Agent
+ReceiverType((Msg4, _)) = Agent
+
+ALL_PRINCIPALS = Agent
+
+channel comm, fake, intercept : ALL_PRINCIPALS.ALL_PRINCIPALS.MSG_BODY
+channel env : ALL_PRINCIPALS.ENVMSG_BODY
+
+datatype ROLE = INITIATOR_role | RESPONDER_role
+
+ALL_SECRETS = SessionKey
+
+datatype Signal = 
+  Claim_Secret.ALL_PRINCIPALS.ALL_SECRETS.Set(ALL_PRINCIPALS) |
+  Running1.ROLE.ALL_PRINCIPALS.ALL_PRINCIPALS |
+  Commit1.ROLE.ALL_PRINCIPALS.ALL_PRINCIPALS
+
+channel signal : Signal
+
+-- Definitions of agents
+
+INITIATOR_0(A, na) =
+  [] B : Agent @ env.A.(Env0, B) ->
+  if A != B then
+  comm.A.B.(Msg1, Sq.<A, na>) ->
+  [] kab : SessionKey @ 
+      comm.B.A.(Msg2, Encrypt.(shared(A, B), <na, kab>)) ->
+  signal.Claim_Secret.A.kab.{B} ->
+  comm.A.B.(Msg3, Encrypt.(kab, <na>)) ->
+  [] nb : Nonce @ comm.B.A.(Msg4, nb) ->
+  signal.Commit1.INITIATOR_role.A.B ->
+  SKIP
+  else SKIP
+
+INITIATOR(A, na) =
+  INITIATOR_0(A, na)
+    [[comm.A.B.m_ <- comm.A.B.m_, comm.A.B.m_ <- intercept.A.B.m_ |
+        B <- Agent, m_ <- MSG1_BODY]]
+    [[comm.A.B.m_ <- comm.A.B.m_, comm.A.B.m_ <- intercept.A.B.m_ |
+        B <- Agent, m_ <- MSG3_BODY]]
+    [[comm.B.A.m_ <- comm.B.A.m_, comm.B.A.m_ <- fake.B.A.m_ |
+        B <- Agent, m_ <- MSG2_BODY]]
+    [[comm.B.A.m_ <- comm.B.A.m_, comm.B.A.m_ <- fake.B.A.m_ |
+        B <- Agent, m_ <- MSG4_BODY]]
+
+RESPONDER_0(B, kab, nb) =
+  [] A : Agent @ [] na : Nonce @ comm.A.B.(Msg1, Sq.<A, na>) ->
+  if A != B then
+  signal.Claim_Secret.B.kab.{A} ->
+  comm.B.A.(Msg2, Encrypt.(shared(A, B), <na, kab>)) ->
+  comm.A.B.(Msg3, Encrypt.(inverse(kab), <na>)) ->
+  signal.Running1.RESPONDER_role.B.A ->
+  comm.B.A.(Msg4, nb) ->
+  SKIP
+  else SKIP
+
+RESPONDER(B, kab, nb) =
+  RESPONDER_0(B, kab, nb)
+    [[comm.B.A.m_ <- comm.B.A.m_, comm.B.A.m_ <- intercept.B.A.m_ |
+        A <- Agent, m_ <- MSG2_BODY]]
+    [[comm.B.A.m_ <- comm.B.A.m_, comm.B.A.m_ <- intercept.B.A.m_ |
+        A <- Agent, m_ <- MSG4_BODY]]
+    [[comm.A.B.m_ <- comm.A.B.m_, comm.A.B.m_ <- fake.A.B.m_ |
+        A <- Agent, m_ <- MSG1_BODY]]
+    [[comm.A.B.m_ <- comm.A.B.m_, comm.A.B.m_ <- fake.A.B.m_ |
+        A <- Agent, m_ <- MSG3_BODY]]
+
+-- Types in actual system
+
+Agent = {Alice, Bob, Mallory}
+Nonce = {Na, Nb, Ni}
+SessionKey = {Kab}
+SharedKey = {shared(arg_1_, arg_2_) | arg_1_ <- Agent, arg_2_ <- Agent}
+
+inverse(Kab) = Kab
+inverse(shared_.arg_) = shared_.arg_
+
+shared(arg_1_, arg_2_) = shared_.(arg_1_, arg_2_)
+
+-- Facts and deductions
+
+--["Agent", "SharedKey", "SessionKey", "Nonce"]
+--[Encrypt (Apply "shared" ["A", "B"]) [Atom "na", Atom "kab"], Encrypt (Atom "kab") [Atom "na"]]
+
+Fact_0 = 
+  Union({
+    {Garbage},
+    Agent,
+    SharedKey,
+    SessionKey,
+    Nonce,
+    {Encrypt.(shared(A, B), <na, kab>) |
+       A <- Agent, B <- Agent, kab <- SessionKey, na <- Nonce},
+    {Encrypt.(kab, <na>) |
+       kab <- SessionKey, na <- Nonce}
+  })
+
+unSq_ (Sq.ms_) = set(ms_)
+unSq_ (m_) = {m_}
+
+IK0 = {Alice, Bob, Mallory, Ni, shared(Alice, Mallory), 
+       shared(Bob, Mallory), shared(Mallory, Alice), shared(Mallory, Bob), Garbage}
+
+unknown_(S) = diff(S,IK0)
+
+Deductions_0 =
+  Union({EncryptionDeductions, DecryptionDeductions,
+         VernEncDeductions, VernDecDeductions, VernEquivs, 
+         UserDeductions, FnAppDeductions})
+
+EncryptionDeductions =
+  {(Encrypt.(k_,fs_), unknown_(union({k_}, set(fs_)))) | 
+      Encrypt.(k_,fs_) <- Fact_0}
+
+DecryptionDeductions =
+  {(f_, unknown_({Encrypt.(k_,fs_), inverse(k_)})) |
+      Encrypt.(k_,fs_) <- Fact_0, f_ <- unknown_(set(fs_))}
+
+VernEncDeductions =
+  {(Xor.(m1_,m2_), unknown_(union(unSq_(m1_), unSq_(m2_)))) | 
+      Xor.(m1_,m2_) <- Fact_0}
+
+VernDecDeductions =
+  union(
+    {(m11_, union(unknown_(unSq_(m2_)), {Xor.(m1_,m2_)})) | 
+       Xor.(m1_,m2_) <- Fact_0, m11_ <- unSq_(m1_)},
+    {(m21_, union(unknown_(unSq_(m1_)), {Xor.(m1_,m2_)})) | 
+       Xor.(m1_,m2_) <- Fact_0, m21_ <- unSq_(m2_)})
+
+VernEquivs =
+  {(Xor.(m2_,m1_), {Xor.(m1_,m2_)}) | 
+      Xor.(m1_,m2_) <- Fact_0, member (Xor.(m2_,m1_), Fact_0) }
+
+UserDeductions = {}
+
+FnAppDeductions = {}
+
+components_((_, Sq.ms_)) = set(ms_)
+components_((_, m_)) = {m_}
+
+-- close up knowledge and deductions
+
+subset(A_,B_) = inter(A_,B_) == A_
+
+Seeable_ = Union({unknown_(components_(m_)) | m_ <- MSG_BODY})
+
+Close_(IK_, ded_, fact_) =
+  let IK1_ = 
+        union(IK_, {f_ | (f_,fs_) <- ded_, subset(fs_,IK_)})
+      ded1_ = 
+        {(f_,fs_) | (f_,fs_) <- ded_, not (member(f_,IK_)),
+                        subset(fs_,fact_)}
+      fact1_ = Union({IK_, {f_ | (f_,fs_) <- ded_}, Seeable_})
+  within
+  if IK_==IK1_ and ded_==ded1_ and fact_==fact1_
+  then (IK_, {(f_,diff(fs_,IK_)) | (f_,fs_) <- ded_}, fact_)
+  else Close_(IK1_, ded1_, fact1_)
+
+Deductions_1 = {(f_,fs_) | (f_,fs_) <- Deductions_0, 
+                               not (member(f_,fs_))}
+
+triple_ = Close_(IK0, Deductions_1, Fact_0)
+
+first_((a_,_,_)) = a_
+second_((_,b_,_)) = b_
+third_((_,_,c_)) = c_
+
+IK1 = first_(triple_)
+Deductions = second_(triple_)
+Fact = third_(triple_)
+print card(IK1)
+print card(Fact)
+print card(Deductions)
+print diff(Fact_0,Fact)
+print diff(IK1,IK0)
+
+-- The intruder
+
+channel leak : addGarbage_(ALL_SECRETS)
+channel hear, say : MSG_BODY
+channel infer : Deductions
+
+IGNORANT(f_,ms_,fss_,ds_) =
+   hear?m_:ms_ -> KNOWS(f_,ms_,ds_)
+   []
+   ([] fs_ : fss_ @ infer.(f_,fs_) -> KNOWS(f_,ms_,ds_))
+
+KNOWS(f_,ms_,ds_) =
+  hear?m_:ms_ -> KNOWS(f_,ms_,ds_)
+  []
+  say?m_:ms_ -> KNOWS(f_,ms_,ds_)
+  [] 
+  infer?(f1_,fs_) : ds_ -> KNOWS(f_,ms_,ds_)
+  []
+  member(f_,ALL_SECRETS) & leak.f_ -> KNOWS(f_,ms_,ds_)
+
+f_ms_fss_ds_s = 
+  {(f_, {m_ | m_ <- MSG_BODY, member(f_,components_(m_))},
+        {fs_ | (f1_,fs_) <- Deductions, f_ == f1_},
+        {(f1_,fs_) | (f1_,fs_) <- Deductions, member(f_, fs_)}) |
+          f_ <- diff(Fact,IK1)}
+
+AlphaL(f_,ms_,fss_,ds_) =
+  Union({(if member(f_,ALL_SECRETS) then {leak.f_} else {}),
+         {hear.m_, say.m_ | m_ <- ms_},
+         {infer.(f_,fs_) | fs_ <- fss_},
+         {infer.(f1_,fs_) | (f1_,fs_) <- ds_}})
+
+transparent chase
+
+INTRUDER_0 = 
+  (|| (f_,ms_,fss_,ds_) : f_ms_fss_ds_s @ 
+        [AlphaL(f_,ms_,fss_,ds_)] IGNORANT(f_,ms_,fss_,ds_)) 
+  \ {|infer|}
+
+INTRUDER_1 =
+  chase(INTRUDER_0)
+    [[hear.m_ <- comm.A_.B_.m_, 
+      hear.m_ <- intercept.A_.B_.m_, 
+      say.m_ <- fake.A_.B_.m_ |
+        m_ <- MSG_BODY, A_ <- SenderType(m_), B_ <- ReceiverType(m_)]]
+
+SAY_KNOWN =
+  ([] f_ : inter(IK1, ALL_SECRETS) @ leak.f_ -> SAY_KNOWN)
+  []
+  ([] m_ : {m_ | m_ <- MSG_BODY, subset(components_(m_),IK1)} @
+     let ST_ = SenderType(m_)
+         RT_ = ReceiverType(m_)
+     within
+       (  comm?A_:diff(ST_,{Mallory})?B_:RT_!m_ -> SAY_KNOWN
+       [] intercept?A_:diff(ST_,{Mallory})?B_:RT_!m_ -> SAY_KNOWN
+       [] fake?A_:ST_?B_:RT_!m_ -> SAY_KNOWN))
+
+INTRUDER =
+  (INTRUDER_1 [|{|comm.Mallory, intercept.Mallory|}|] STOP) ||| SAY_KNOWN
+
+-- Process representing Alice
+
+Alpha_INITIATOR_Alice = 
+  Union({
+    {|comm.Alice.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG1_BODY|},
+    {|comm.Alice.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG3_BODY|},
+    {|comm.A_.Alice.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG2_BODY|},
+    {|comm.A_.Alice.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG4_BODY|}
+  })
+
+INITIATOR_Alice = INITIATOR(Alice, Na)
+
+Alpha_Alice = {|comm.Alice.A_, comm.A_.Alice | A_ <- ALL_PRINCIPALS|}
+
+Alice_STOP_SET = 
+  Union({
+    {|comm.Alice.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG2_BODY|},
+    {|comm.Alice.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG4_BODY|},
+    {|comm.A_.Alice.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG1_BODY|},
+    {|comm.A_.Alice.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG3_BODY|}
+  })
+
+AGENT_Alice =
+  INITIATOR_Alice [|Alice_STOP_SET|] STOP
+
+-- Process representing Bob
+
+Alpha_RESPONDER_Bob = 
+  Union({
+    {|comm.Bob.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG2_BODY|},
+    {|comm.Bob.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG4_BODY|},
+    {|comm.A_.Bob.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG1_BODY|},
+    {|comm.A_.Bob.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG3_BODY|}
+  })
+
+RESPONDER_Bob = RESPONDER(Bob, Kab, Nb)
+
+Alpha_Bob = {|comm.Bob.A_, comm.A_.Bob | A_ <- ALL_PRINCIPALS|}
+
+Bob_STOP_SET = 
+  Union({
+    {|comm.Bob.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG1_BODY|},
+    {|comm.Bob.A_.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG3_BODY|},
+    {|comm.A_.Bob.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG2_BODY|},
+    {|comm.A_.Bob.m_ | A_ <- ALL_PRINCIPALS, m_ <- MSG4_BODY|}
+  })
+
+AGENT_Bob =
+  RESPONDER_Bob [|Bob_STOP_SET|] STOP
+
+-- Complete system
+
+SYSTEM_0 =
+  (AGENT_Alice
+    [| inter(Alpha_Alice, Alpha_Bob) |]
+  AGENT_Bob)
+
+SYSTEM = SYSTEM_0 [| {|comm, fake, intercept|} |] INTRUDER
+
+-- Systems specifications
+
+Sigma = {|comm, fake, intercept, env, signal, leak|}
+
+-- Secret specifications
+
+SECRET_SPEC_0(s_) = 
+  signal.Claim_Secret?A_!s_?Bs_ ->
+    (if member(Mallory, Bs_) then SECRET_SPEC_0(s_) else SECRET_SPEC_1(s_))
+  []
+  leak.s_ -> SECRET_SPEC_0(s_)
+
+SECRET_SPEC_1(s_) = signal.Claim_Secret?A_!s_?Bs_ -> SECRET_SPEC_1(s_)
+
+AlphaS(s_) = 
+  union({|signal.Claim_Secret.A_.s_ | A_ <- ALL_PRINCIPALS|}, {leak.s_})
+
+Alpha_SECRETS = {|leak, signal.Claim_Secret|}
+
+SECRET_SPEC = (|| s_ : ALL_SECRETS @ [AlphaS(s_)] SECRET_SPEC_0(s_))
+
+assert SECRET_SPEC [T= SYSTEM \ diff(Sigma, Alpha_SECRETS)
+
+---------- Authentication specifications
+
+AuthenticateRESPONDERToINITIATORAliveness(B) =
+  signal.Running1?B_role_!B?C_ ->
+  CHAOS({signal.Commit1.INITIATOR_role.A.B | A <- Agent})
+
+AlphaAuthenticateRESPONDERToINITIATORAliveness(B) =
+  {|signal.Running1.B_role_.B.A,
+    signal.Commit1.INITIATOR_role.A.B |
+       A <- Agent, B_role_ <- ROLE|}
+
+AuthenticateRESPONDERAliceToINITIATORAliveness =
+  STOP
+
+assert AuthenticateRESPONDERAliceToINITIATORAliveness [T=
+  SYSTEM \ diff(Sigma, AlphaAuthenticateRESPONDERToINITIATORAliveness(Alice))
+
+AuthenticateRESPONDERBobToINITIATORAliveness =
+  AuthenticateRESPONDERToINITIATORAliveness(Bob)
+
+assert AuthenticateRESPONDERBobToINITIATORAliveness [T=
+  SYSTEM \ diff(Sigma, AlphaAuthenticateRESPONDERToINITIATORAliveness(Bob))
+

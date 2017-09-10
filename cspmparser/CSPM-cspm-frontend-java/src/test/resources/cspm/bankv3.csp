@@ -1,0 +1,172 @@
+-- Example controllers to accompany "ZB2003" paper
+--  version 3
+
+-- In this example, the CSP controllers have assumptions and no guards.
+
+-- NextQCtrl is adapted with an additional state variable in order to
+-- prevent divergence of BankSystem
+
+QUEUENUM = {1..numQueues}
+datatype CUSTOMER = c1 | c2 | c3 | c4 | c5 | c6
+datatype STATUS = success | fail
+datatype QSTATUS =yes | no
+
+maxLimit = 2
+defaultCounter  = 1
+defaultCustomer = c1
+maxQueueingCustomers = maxLimit -1
+numQueues = 3
+
+
+-- external channels
+channel enterBank : CUSTOMER
+channel leaveBank : CUSTOMER
+channel report : STATUS
+
+-- communication channels, no underlying B, between CSP processes
+channel com1 : CUSTOMER
+channel com3 : CUSTOMER
+channel canJoinResponse : STATUS
+channel retrieveCustomer
+
+-- machine channels
+channel joinQueue : CUSTOMER
+channel leaveQueue : QUEUENUM.CUSTOMER
+channel queryQueueEmpty : QUEUENUM.QSTATUS
+
+
+inc(queueNo) = (queueNo % numQueues) + 1
+dec(queueNo) = ((queueNo - 2) % numQueues) + 1
+
+-- abstract specfication
+-- num is the number of people waiting and the one being serviced
+
+--Spec  = Waiting(0,<>)
+--Waiting(num,people_waiting) = 
+--   num < bankLimit & input ? cc -> Waiting(num+1, people_waiting ^<cc>)
+--   []
+--   num > 0 & |~| cc : people_waiting @ output. cc ->
+--   Waiting(num - 1, .....
+
+--- implementation
+
+CounterCtrl = CurrentCtrl(0,defaultCustomer)
+
+CurrentCtrl(num, currentCust) = 
+    JoinCtrl(num, currentCust) [] LeaveCtrl(num,currentCust)
+
+-- we allow any input but then the queues do the checking about
+-- passing com1 access 
+-- whether the customer is already in the queue 
+
+
+JoinCtrl(num,currentCust) = 
+  num < maxLimit & enterBank ?cc ->
+   (    (num == 0 & report.success -> CurrentCtrl(num+1,cc))
+        []
+        ((num > 0 and not(cc==currentCust)) & com1! cc -> 
+                      canJoinResponse  ? bb -> report.bb ->
+                        if (bb == success) then
+                          CurrentCtrl(num+1,currentCust) 
+                        else 
+                          CurrentCtrl(num,currentCust))
+        []
+         ((num > 0 and (cc == currentCust)) & report.fail -> CurrentCtrl(num,currentCust) ))
+                        
+-- don't need to set back to default because could put it as cust
+--because never going to use that value again
+-- but what if the size of that queue is empty the we should precoess
+--the next one along, where is that info going to be kept
+-- with the com3 is there goign to be a deadlock again with requesting
+--value, do we need an atomic event to prevent that to signal update
+--sequence of events
+-- if > 1 then output the currentperson and get the next one from a
+--queue
+
+LeaveCtrl(num,currentCust) = 
+         (num ==1 & leaveBank!currentCust -> CurrentCtrl(0,defaultCustomer))
+         []
+         (num > 1 & leaveBank!currentCust -> retrieveCustomer -> com3?cc -> CurrentCtrl(num-1,cc))
+
+-- now queues is tracking the counter and is making the choice of
+--which queue to get info from
+
+QueuesCtrl = QCtrl(0,1,{})
+
+QCtrl(s,queueNo,custSet) = 
+     (s < maxQueueingCustomers & com1 ? cc -> 
+               if (member(cc,custSet)) then   
+                  canJoinResponse!fail -> QCtrl(s,queueNo,custSet)
+               else
+                  canJoinResponse!success -> joinQueue.cc ->
+		  QCtrl(s+1,queueNo,union(custSet,{cc})  ) )
+     []
+      
+     (s > 0 & retrieveCustomer -> NextQCtrl(s,queueNo,dec(queueNo),custSet))
+
+
+-- Because after finding somebody to leave the queues we need to
+--return with those parameters, we need to carry them across as well.
+
+NextQCtrl(s,queueNo,lastQueueNo,custSet) = 
+           (not(queueNo == lastQueueNo) & queryQueueEmpty!queueNo?bb ->
+           if (bb == no) 
+           then
+             leaveQueue!queueNo?cc ->
+              if (member(cc,custSet)) 
+              then com3!cc ->
+                       QCtrl(s-1,inc(queueNo),diff(custSet,{cc}))
+              else DIV
+           else
+             NextQCtrl(s,inc(queueNo),lastQueueNo,custSet))
+           []
+           ((queueNo == lastQueueNo) & queryQueueEmpty!queueNo.no ->
+              leaveQueue!queueNo?cc ->
+                (if (member(cc,custSet)) 
+                then com3!cc ->
+                         QCtrl(s-1,inc(queueNo),diff(custSet,{cc}))
+                else DIV))
+           [] ((queueNo == lastQueueNo) & queryQueueEmpty!queueNo.yes
+                       -> DIV)
+
+-- We have introduced an additional parameter, lastQueueNo, into
+-- NextQCtrl.  This is the last point by which a `no' response can
+-- come on a queryQueueEmpty query.  This is built into the model,
+-- which has that if queueNo == lastQueueNo then the only possible
+-- input for that queue is `no'
+
+A = {|com1,com3,canJoinResponse,retrieveCustomer|}
+B = {|   joinQueue, leaveQueue,  queryQueueEmpty |}
+
+BankSystem = CounterCtrl [|A|] QueuesCtrl \ union(A,B)
+
+FullBankSystem = CounterCtrl [|A|] QueuesCtrl
+
+SPEC = ||| i:{1..maxLimit} @ CUST
+CUST = enterBank?i -> (report.fail -> CUST [] report.success ->
+                            leaveBank.i -> CUST)
+
+-- Need to set maxLimit to 2 for this check to succeed in
+-- any sort of reasonable time.
+
+
+
+ assert SPEC [T= BankSystem
+ assert SPEC [F= BankSystem
+--- not appropriate to check CUSTSPEC for failures refinement
+
+SPEC2 = NEWSPEC(0)
+NEWSPEC(num) = 
+   num < maxLimit & enterBank? cc -> 
+          (report.success -> NEWSPEC(num+1) |~| report.fail -> NEWSPEC(num))
+   []
+   num > 0 & |~| cc :CUSTOMER @ leaveBank. cc -> NEWSPEC(num-1)
+
+assert SPEC2 [T= BankSystem
+assert SPEC2 [F= BankSystem
+
+
+
+channel a
+DIV = LOOP \ {a}
+LOOP = a -> LOOP

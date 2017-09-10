@@ -1,0 +1,13 @@
+-- independent.csp
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+--
+
+channel up, down, left, right
+
+UD = up -> down -> UD
+
+LR = left -> right -> LR
+
+UDLR = UD [ {| up,down |} || {| left,right |} ] LR

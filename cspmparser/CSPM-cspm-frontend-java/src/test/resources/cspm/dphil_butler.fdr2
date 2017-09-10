@@ -1,0 +1,39 @@
+-- The dining philosophers with a butler.
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+channel pickup:{0..4}.{0..4}
+channel putdown:{0..4}.{0..4}
+channel sitdown:{0..4}
+channel getup:{0..4}
+
+inc(x) = (x + 1) % 5
+dec(x) = (x - 1) % 5
+
+PHIL(i) =  sitdown.i -> pickup.i.inc(i) -> pickup.i.i -> 
+           putdown.i.inc(i) -> putdown.i.i -> getup.i -> PHIL(i)
+
+FORK(i) = pickup.i.i -> putdown.i.i -> FORK(i)
+        [] pickup.dec(i).i -> putdown.dec(i).i -> FORK(i)
+
+PHILS = || i:{0..4} @ [{|pickup.i.i, pickup.i.inc(i),
+                         putdown.i.i, putdown.i.inc(i), 
+                         sitdown.i, getup.i|}]          
+                    PHIL(i)
+
+FORKS = || i:{0..4} @ [{|pickup.i.i, putdown.i.i, 
+                         pickup.dec(i).i, putdown.dec(i).i|}] 
+                    FORK(i)
+
+COLLEGE = PHILS [ {|pickup,putdown,sitdown,getup|} ||
+                  {|pickup,putdown|} ]  FORKS
+
+BUTLER(i) = if i == 0 
+            then sitdown?x -> BUTLER(1)
+            else if i == 4
+                 then getup?y -> BUTLER(3)
+                 else (  sitdown?x -> BUTLER(i+1)
+                      [] getup?y -> BUTLER(i-1) )
+
+NEWCOLLEGE = COLLEGE [ {|pickup,putdown,sitdown,getup|} ||
+                       {|sitdown,getup|} ] BUTLER(0)

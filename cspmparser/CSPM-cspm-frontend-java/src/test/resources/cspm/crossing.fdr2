@@ -1,0 +1,86 @@
+-- The level crossing example
+-- Originator: Simon Gay, Royal Holloway, January 1999
+-- Adapted by Steve Schneider, Royal Holloway, May 1999
+-- Given in the lecture slides accompanying the book 
+-- `Concurrent and Real Time Systems: the CSP Approach
+
+channel car, train : LOC
+channel gate : POS
+channel crash
+
+datatype LOC = approach | enter | leave
+
+datatype POS = raise | lower
+
+CR = car.approach -> car.enter -> C
+     [] train.approach -> train.enter -> T
+
+C = car.leave -> CR
+    [] train.approach -> train.enter -> CT
+
+T = train.leave -> CR
+    [] car.approach -> car.enter -> CT
+
+CT = crash -> STOP
+
+GATE = gate.lower -> gate.raise -> GATE
+       [] car.enter -> GATE
+
+CARS = car.approach -> car.enter -> car.leave -> CARS
+
+TRAINS = train.approach -> train.enter -> train.leave -> TRAINS
+
+ET = {| train |}
+
+EC = {| car |}
+
+EGC = {gate.raise, gate.lower, car.enter}
+
+EX = {crash}
+
+ES = {| train, car, gate, crash |}
+
+ETCC = {| train, car, crash |}
+
+ETCG = {| train, car, gate |}
+
+SYSTEM = ((CR [ETCC||EGC] GATE) [ES||EC] CARS ) [ES||ET] TRAINS
+
+SPEC = [] x : ETCG @ x -> SPEC
+
+assert SPEC [T= SYSTEM
+
+-- checking this assertion in FDR will check whether any sequence of events
+-- can lead to the event `crash', since performance of this event is the 
+-- only way that SPEC can fail to be met.  This can also be expressed as 
+-- follows:
+
+assert STOP [T= SYSTEM \ ETCG
+
+-- Since the system is not safe (as checking the above assertion 
+-- demonstrates), a controller is introduced:
+
+CONTROL = train.approach -> gate.lower -> 
+            train.enter -> train.leave -> gate.raise -> CONTROL
+          [] car.approach -> car.enter -> car.leave -> CONTROL
+
+SAFE_SYSTEM = SYSTEM [ES||ETCG] CONTROL
+
+assert SPEC [T= SAFE_SYSTEM
+
+assert STOP [T= SAFE_SYSTEM \ ETCG
+
+-- Finally, the specification which requires the activity of trains and 
+-- cars not to overlap at all, but allows any gate activity intermingled
+-- with car and train activity, will be given as SPEC0
+
+SPEC1 = [] x : {| gate |} @ x -> SPEC1
+
+SPEC2 = train.approach -> train.enter -> train.leave -> SPEC2
+        [] car.approach -> car.enter -> car.leave -> SPEC2
+
+SPEC0 = SPEC1 ||| SPEC2
+
+assert SPEC0 [T= SYSTEM
+
+assert SPEC0 [T= SAFE_SYSTEM

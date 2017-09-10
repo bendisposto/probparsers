@@ -1,0 +1,3 @@
+channel out,e
+TestFact2 = out!if true then e else 2 -> SKIP  -- why does this work
+TestFact2 = out!-e -> SKIP    -- and this does not ?

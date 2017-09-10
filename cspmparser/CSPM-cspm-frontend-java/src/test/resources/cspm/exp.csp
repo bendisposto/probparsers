@@ -1,0 +1,22 @@
+{-
+todo: fix this
+exponential parser complexity !
+-}
+test = (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+        + (x
+)))))))))))))))))

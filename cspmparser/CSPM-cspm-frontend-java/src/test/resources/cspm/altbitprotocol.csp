@@ -1,0 +1,122 @@
+ChData = {0,1,2,3}
+ChControl = {0,1,2}
+
+channel in,outb: ChData 
+channel out,inb: ChData.ChControl
+channel ok,err
+
+StartA(x) = AS1((x+1)%4)
+AS1(x) = out!x!1 -> AS2(x)
+
+AS2(x) = in?vr -> 
+             if (vr==1) then  StartA(x)
+	     else (if (vr==0) then AS3(x)
+	              else AS5(x)) 
+AS3(x) = out!x!1 -> AS2(x)
+
+AS4(x) = in?vr -> 
+             if (vr==1) then  StartA(x)
+	     else if (vr==0) then StartA(x)
+	          else AS5(x)  -- error
+AS5(x) = out!x!0 -> AS4(x)
+
+
+Breceived(x,y) = if (x==y) then
+                     ok -> BS1((y+1)%4)
+                 else
+		     err -> BS1((y+1)%4)
+
+BS1(y) = outb!1 -> BS2(y)
+
+BS2(y) = inb?x?ar ->
+             if ar==1 then  Breceived(x,y)
+	     else if ar==0 then BS3(y)
+	          else BS5(y)  -- error
+
+BS3(y) = outb!1 -> BS2(y)
+
+BS4(y) = inb?x?ar -> 
+             if ar==1 then  Breceived(x,y)
+	     else if ar==0 then Breceived(x,y)
+	          else BS5(x)  -- error
+BS5(y) = outb!0 -> BS4(y)
+
+Buffer(cin,cout) = cin?x -> (cout!x -> Buffer(cin,cout))
+Buffer2(cin,cout) = cin?x?y -> cout!x!y -> Buffer2(cin,cout)
+
+Buff2(cin,cout) = cin?x -> Buff2m(cin,cout,x)
+Buff2m(cin,cout,x) = (cout!x -> Buff2(cin,cout))
+                   [] (cin?y -> cout!x -> Buff2m(cin,cout,y))
+Buff22(cin,cout) = cin?x?y -> Buff22m(cin,cout,x,y)
+Buff22m(cin,cout,x,y) = (cout!x!y -> Buff22(cin,cout))
+                   [] (cin?u?v -> cout!x!y -> Buff22m(cin,cout,u,v))
+
+
+System = (((StartA(0) [| {| out |} |] Buff22(out,inb)) \{|out|})
+             [|  {| inb, in |} |]
+          ((BS2(1) [| {| outb |} |] Buff2(outb,in)) \{|outb|}))
+
+
+-- Verify property: always eventually ok
+-- 1. Buechi automata translation for  not Alw Ev ok = Ev Alw not ok
+channel success,deadlock,ko
+TESTER = State1
+State1 =  (in?x->State1 [] ok->State1 [] err->State1 [] inb?x?y->State1)
+           |~| (State2)
+State2 =  (success->(in?x->State2 [] err->State2 [] inb?x?y->State2))
+          [] deadlock -> Deadlock
+
+Deadlock =  (in?x->ko->STOP [] ok->ko->STOP [] err->ko->STOP [] inb?x?y->ko->STOP)
+
+-- 2. compose system with TESTER
+Composition = (System [| {|in,ok,err,inb|} |] TESTER) 
+                    \{|in,ok,err,inb,deadlock,ko|}
+DComposition = (System [| {|in,ok,err,inb|} |] TESTER) 
+                    \{|in,ok,err,inb,success|}
+
+-- 3. check whether intersection empty
+SUC = success->SUC
+assert Composition [T= SUC
+
+RealDeadlock = deadlock->STOP
+assert DComposition [F= RealDeadlock
+
+
+-- A safety property:  always not err
+TESTER2 =  (in?x->TESTER2 [] ok->TESTER2 [] err->State22 [] inb?x?y->TESTER2)
+State22 =  success->State22
+Composition2 = (System [| {|in,ok,err,inb|} |] TESTER2) \{|in,ok,err,inb|}
+assert Composition2 [T= SUC
+-- test fails -> safety property ok
+
+
+-- Now the system with a faulty buffer
+
+FaultyBuff2(cin,cout) = cin?x -> FaultyBuff2m(cin,cout,x)
+FaultyBuff2m(cin,cout,x) = (cout!x -> FaultyBuff2(cin,cout))
+                   [] (cout!2 -> FaultyBuff2(cin,cout))
+                   [] (cin?y -> (   (cout!x -> FaultyBuff2m(cin,cout,y))
+                                 [] (cout!y -> cout!x -> FaultyBuff2(cin,cout))))
+-- or worse                      [] (cout!y -> FaultyBuff2m(cin,cout,x))))
+
+
+FaultySystem = (((StartA(0) [| {| out |} |] Buff22(out,inb)) \{|out|})
+             [|  {| inb, in |} |]
+          ((BS2(1) [| {| outb |} |] FaultyBuff2(outb,in)) \{|outb|}))
+FaultyComposition = (FaultySystem [| {|in,ok,err,inb|} |] TESTER)
+                    \{|in,ok,err,inb,deadlock,ko|}
+assert FaultyComposition [T= SUC
+DFaultyComposition = (FaultySystem [| {|in,ok,err,inb|} |] TESTER)
+                    \{|in,ok,err,inb,success|}
+assert DFaultyComposition [F= RealDeadlock
+
+FaultyComposition2 = (FaultySystem [| {|in,ok,err,inb|} |] TESTER2) \{|in,ok,err,inb|}
+assert FaultyComposition2 [T= SUC
+
+
+-- a classical refinement check:
+SPEC = ok -> SPEC
+assert (System \{|in,err,inb|}) [T= SPEC
+assert (System \{|in,err,inb|}) [F= SPEC
+assert (System \{|in,err,inb|}) [FD= SPEC
+DivComp = System \{|ok|}

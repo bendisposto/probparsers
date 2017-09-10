@@ -1,0 +1,153 @@
+-- Virtual Channel Mux-DeMux
+-- G. S. Stiles
+-- July 17, 1998
+
+-- This script models a Mux-DeMux system which multiplexes
+-- two virtual channels over a single communications link between two
+-- computing nodes. The data flow from the upstream node to the downstream
+-- nodes.
+
+-- Data type declarations: raw data is restricted to the set {0, 1};
+-- data transmitted over the link is concatenated with a virtual channel
+-- number. Internal acknowledgements are simply the value 0; acknowledgements
+-- sent over the common link are either 1 or 2.
+
+RawData = {0, 1}
+VChans = {0, 1}
+LinkData = { 0.0, 0.1, 1.0, 1.1}
+InternalAcks = {0}
+LinkAcks = {0, 1}
+
+-- We next declare the channels which will carry the raw data; the data will
+-- be restricted to the set {0, 1}:
+
+channel upin0, upin1, upout0, upout1: RawData
+channel downin0, downin1, downout0, downout1: RawData
+channel upack0, upack1, downack0, downack1: InternalAcks
+
+-- The channels on the link between the two nodes carries the data
+-- concatenated with a virtual channel identifier:
+
+channel uptodown: LinkData
+channel downtoup: LinkAcks
+
+-- Acknowledgement channels:
+
+channel inack0, inack1, outack0, outack1: Acks
+
+-- The basic processes
+
+-- The input handlers; they accept inputs from the source, send them to the
+-- mux, wait for an ack, then repeat:
+
+UpHandler0 = upin0 ? x:RawData -> upout0 ! x -> upack0 ? y:InternalAcks ->
+                UpHandler0
+
+UpHandler1 = upin1 ? x:RawData -> upout1 ! x -> upack1 ? y:InternalAcks ->
+                UpHandler1
+
+-- The upstream controller: it monitors the input to the upstream node and
+-- passes acknowledgements along to the appropriate input handlers:
+
+UpControl = downtoup ? x:LinkAcks ->
+               if x == 0
+                 then upack0 ! 0 -> UpControl
+                 else
+                 upack1 ! 0 -> UpControl
+
+-- Upstream mux; it accepts inputs from the two input handlers, appends the
+-- appropriate virtual channel number, and passes the result downstream.
+-- For simplicity, it is modeled as the external choice combination of two
+-- processes, each of which monitors one input channel.
+
+InOut0 = upout0 ? x:RawData -> uptodown ! 0.x -> Mux
+InOut1 = upout1 ? x:RawData -> uptodown ! 1.x -> Mux
+
+Mux = InOut0 [] InOut1
+
+
+-- The downstream demux; it accepts LinkData on uptodown and passes the data
+-- to the output handler specified by the virtual channel number:
+
+DeMux = uptodown ? vchan.data:LinkData ->
+        if vchan == 0
+           then downin0 ! data  -> DeMux
+           else downin1 ! data  -> DeMux
+
+-- Output handlers; they accept raw data and pass it to the output
+-- buffers, then send an ack to the output controller - and continue.
+
+DownHandler0 = downin0 ? x:RawData -> downout0 ! x -> downack0 ! 0 ->
+                 DownHandler0
+
+DownHandler1 = downin1 ? x:RawData -> downout1 ! x -> downack1 ! 0 ->
+                 DownHandler1
+
+-- The output controller; it muxes the acknowledgements from the output
+-- handlers and sends them out downtoup.
+
+DownControl = downack0 ? x:InternalAcks -> downtoup ! 0 ->
+              DownControl
+              []
+              downack1 ? x:InternalAcks -> downtoup ! 1 ->
+              DownControl
+
+-- The upstream system: we put the two input handlers, the input controller,
+-- and the mux in sharing parallel, hiding the internal channels since they
+-- should not interact with any processes outside this system:
+
+Upstream =  (((((UpHandler0 [| {| upout0 |} |] Mux) \  {| upout0 |})
+            [| {| upout1 |} |] UpHandler1) \ {| upout1 |})
+            [| {| upack0, upack1 |} |] UpControl) \ {| upack0, upack1 |}
+
+-- Naked version with channels not hidden - for debugging:
+
+UpstreamV =  (((((UpHandler0 [| {| upout0 |} |] Mux) )
+            [| {| upout1 |} |] UpHandler1) )
+            [| {| upack0, upack1 |} |] UpControl)
+
+-- Similarly for the downstream system:
+
+Downstream = (((((DownHandler0 [| {| downin0 |} |] DeMux) \ {| downin0 |} )
+        [| {| downin1 |} |] DownHandler1) \ {| downin1 |})
+        [| {| downack0, downack1 |} |] DownControl) \ {| downack0, downack1 |}
+
+-- Naked version with channels not hidden - for debugging:
+
+DownstreamV = (((((DownHandler0 [| {| downin0 |} |] DeMux) )
+          [| {| downin1 |} |] DownHandler1) )
+          [| {| downack0, downack1 |} |] DownControl)
+
+-- And the complete system is the parallel combination of Upstream and
+-- Downstream - with the connecting channels hidden:
+
+System = Upstream [| {| uptodown, downtoup |} |] Downstream
+         \  {| uptodown, downtoup |}
+
+
+-- Check for deadlock and livelock:
+
+assert System :[ deadlock free [F] ]
+assert System :[ divergence free ]
+assert System :[ deterministic [FD] ]  
+
+-- Specification check:
+
+-- The system just defined should refine a pair of independent
+-- one-place buffers which run interleaved:  -
+
+Copy0 = upin0 ? x:RawData -> downout0 ! x -> Copy0
+
+Copy1 = upin1 ? x:RawData -> downout1 ! x -> Copy1
+
+DCopy = Copy0 ||| Copy1
+
+-- The assertion that the System refines DCopy:
+
+assert DCopy [FD= System
+
+-- If it works both ways, the processes are equivalent:
+
+assert System [FD= DCopy
+
+-- End of definition

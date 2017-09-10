@@ -1,0 +1,27 @@
+-- buses.csp
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+--
+
+channel board37A, alight37A, alight37B, 
+        board111A, alight111A, alight111B, 
+        pay70, pay90
+
+BUS37 = board37A -> (pay90 -> alight37B -> STOP
+                     [] alight37A -> STOP)
+
+BUS111 = board111A -> (pay70 -> alight111B -> STOP
+                      [] alight111A -> STOP)
+
+SERVICE = BUS37 |~| BUS111
+
+PASS = board37A -> pay90 -> alight37B -> STOP
+
+SYSTEM = SERVICE
+[
+{|board37A,alight37A,alight37B,board111A,alight111A,alight111B,pay70,pay90|}
+|| 
+{|board37A,alight37A,alight37B,board111A,alight111A,alight111B,pay70,pay90|}
+] PASS
+

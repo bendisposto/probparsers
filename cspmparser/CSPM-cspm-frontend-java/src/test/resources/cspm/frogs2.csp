@@ -1,0 +1,61 @@
+datatype square = E | Y | G
+subtype colour = Y | G
+
+StartBoard = <Y, Y, Y, E, G, G, G>
+EndBoard = <G, G, G, E, Y, Y, Y>
+
+board_el(i, xs) = if i==0 then head(xs) else board_el(i-1, tail(xs))
+
+len = #StartBoard-1
+
+pos = {(-2)..len+2}
+realpos = {0..len}
+
+channel move_left, move_right, hop_left, hop_right:pos.colour
+channel done
+
+EMPTY(i, target) = target==E & done -> EMPTY(i, target)
+		[] move_left.i?c -> FULL(i, c, target)
+		[] move_right.i?c -> FULL(i, c, target)
+		[] hop_left.i?c -> FULL(i, c, target)
+		[] hop_right.i?c -> FULL(i, c, target)
+
+FULL(i, c, target) = target==c & done -> FULL(i, c, target)
+		  [] move_left.i-1.c -> EMPTY(i, target)
+		  [] move_right.i+1.c -> EMPTY(i, target)
+		  [] hop_left.i-2.c -> EMPTY(i, target)
+		  [] hop_right.i+2.c -> EMPTY(i, target)
+		  [] hop_left.i-1?x -> FULL(i, c, target)
+		  [] hop_right.i+1?x -> FULL(i, c, target)
+
+INIT(i) = if board_el(i, StartBoard)==E then EMPTY(i, board_el(i, EndBoard))
+	  else if board_el(i, StartBoard)==Y then FULL(i, Y, board_el(i, EndBoard))
+	       else FULL(i, G, board_el(i, EndBoard))
+
+Alpha(i) = Union({{done},
+		  {| move_left.i-k | k <- {0, 1} |},
+		  {| move_right.i+k | k <- {0, 1} |},
+		  {| hop_left.i-k | k <- {0, 1, 2} |},
+		  {| hop_right.i+k | k <- {0, 1, 2} |}})
+
+COMPLETEBOARD = || i:realpos @ [Alpha(i)] INIT(i)
+
+OnBoardPlay = [] x:realpos @
+		   ( move_left.x?c -> OnBoardPlay
+                  [] move_right.x?c -> OnBoardPlay
+                  [] hop_left.x?c -> OnBoardPlay
+                  [] hop_right.x?c -> OnBoardPlay )
+
+AlphaBoard = {| move_left, move_right, hop_left, hop_right |}
+
+Ac = Union({Alpha(i) | i <- realpos})
+
+invalidmoves = diff(pos, realpos)
+OffBoardMoves = Union({{| move_left.i | i <- invalidmoves |},
+		       {| move_right.i | i <- invalidmoves |},
+		       {| hop_left.i | i <- invalidmoves |},
+		       {| hop_right.i | i <- invalidmoves |}})
+
+PUZZLE = COMPLETEBOARD [ Ac || AlphaBoard ] OnBoardPlay
+
+assert STOP [T= PUZZLE \ {| move_left, move_right, hop_left, hop_right |}

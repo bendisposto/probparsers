@@ -1,0 +1,7 @@
+channel get,sets : Int
+
+MAIN = GETSET [| {|get|} |] GEN(0)
+
+GETSET = get?Val -> sets!Val -> GETSET 
+
+GEN(X) = get!X -> GEN(X+1)

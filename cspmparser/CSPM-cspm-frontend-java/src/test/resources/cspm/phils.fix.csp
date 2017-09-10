@@ -1,0 +1,39 @@
+-- Play with massive numbers of dining philosophers
+-- (Powers of 2 only)
+-- JBS, May 1997.
+
+datatype Move = Up | Down
+
+channel left, right : Move
+
+FORK = left.Up->left.Down->FORK [] right.Up->right.Down->FORK
+
+PHIL = left.Up->right.Up->left.Down->right.Down->PHIL
+
+LPHILS(n) =
+  let
+    L(0) =
+      FORK [right<->left] PHIL
+    L(n) =
+      let
+        HALF = LPHILS(n-1)
+      within HALF [right<->left] HALF
+--    transparent normal  -- transparent only allowed at toplevel
+  within normal(L(n) [[ ]])
+
+transparent normal
+
+RPHILS(n) =
+  LPHILS(n) [[ left <- right, right <- left ]]
+
+PHILS(n) =
+  LPHILS(n-1) [| {| left, right |} |] RPHILS(n-1)
+
+-- PHILS(n) represents a network of 2^n philosophers
+
+assert PHILS(1) :[deadlock free [F]]
+assert PHILS(10) :[deadlock free [F]]
+assert PHILS(100) :[deadlock free [F]]
+assert PHILS(1000) :[deadlock free [F]]
+
+

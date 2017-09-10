@@ -1,0 +1,38 @@
+nametype Val = {0..6}
+
+datatype Slot = sl1 | sl2 | sl3 | sl4
+
+datatype Signal = noarg | valarg.Val | slotarg.Slot | botharg.Val.Slot
+
+subtype LPSignal = noarg | slotarg.Slot
+
+subtype HPSignal = valarg.Val | botharg.Val.Slot
+
+channel gen_high_pri : HPSignal
+
+channel gen_low_pri : LPSignal
+
+channel remove : Signal
+
+Test = remove?sgn -> Test
+Test2 = gen_high_pri?v ->Test2
+
+CAPACITY = 3
+Q(s1,s2) =
+   #s1 < CAPACITY & gen_high_pri?sig -> Q(s1^<sig>,s2)
+   []
+   #s2 < CAPACITY & gen_low_pri?sig -> Q(s1,s2^<sig>)
+   []
+   #s1 > 0 & remove!head(s1) -> Q(tail(s1),s2)
+   []
+   #s1 == 0 and #s2 > 0 & remove!head(s2) -> Q(s1,tail(s2))
+
+IN = gen_low_pri.noarg -> gen_high_pri.valarg?v1 ->  
+       gen_low_pri.slotarg?s1 -> gen_high_pri.botharg?v2?s2 -> STOP
+
+OUT = remove?s -> OUT
+
+NET = (IN ||| OUT) [| {|gen_high_pri,gen_low_pri,remove|} |] Q(<>,<>)
+
+
+MAIN = NET

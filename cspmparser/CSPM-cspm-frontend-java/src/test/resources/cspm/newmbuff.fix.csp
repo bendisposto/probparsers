@@ -1,0 +1,127 @@
+{-
+  Multiplexed buffers
+  Original version for FDR1.1, Bill Roscoe
+  Modified for FDR1.2 August 1992, Dave Jackson
+  Updates for FDR2.11, May 1997, JBS
+
+  The idea of this example is to multplex a number of buffers down a
+  pair of channels.  They can all be in one direction, or there might be
+  some both ways.  The techniques demonstrated here work for all
+  numbers of buffers, and any types for transmission.  The number of states
+  in the system can be easily increased to any desired size by increasing
+  either the number of buffers, or the size of the transmitted type.
+-}
+
+transparent normal
+
+Tags = {1,2,3}
+Data = {1,2}
+
+channel left, a, b, right : Tags . Data
+channel c, d : Tags
+channel mess : Tags . Data
+channel ack  : Tags
+
+{-
+  The following four processes form the core of the system
+ 
+     a              mess                b
+     --> SM -->  ...........   --> RM -->
+                 
+     <-- RA <--  ...........   <-- SA <--
+     d              ack                 c
+ 
+  SM and RM send and receive tagged messages, while
+  SA and RA send and receive acknowledgements.  
+-}
+
+SM = [] i : Tags @ (a . i ? x -> mess ! i . x -> SM)
+
+RM = mess ? t ? x -> b . t ! x -> RM
+
+SA = [] i : Tags @ (c . i  -> ack ! i -> SA)
+
+RA = ack ? x -> d . x -> RA 
+
+-- These four processes communicate with equal numbers of  transmitters (T)
+-- and receivers (R), which in turn provide the interface with the environment.
+
+T(i) = left.i ? x -> a.i ! x -> d.i -> T(i)
+
+R(i) = b.i ? x -> right.i ! x -> c.i -> R(i)
+
+FAULTYR(i) = b.i ? x -> right.i ! x -> (FAULTYR(i) |~| c.i -> FAULTYR(i))
+
+-- To get the transmitters, we just combine the T's
+-- We can interleave them since they have no events in common
+
+INS = ||| i : Tags @  T(i)
+
+-- (the parallel composition of the transmitters, which could have been
+-- written T1 ||| T2 ||| T3 since their alphabets are disjoint)
+
+ASM = {| a, mess |}
+ARA = {| d, ack |}
+-- ATS = Union({ AT(i) | i <- Tags }}  AT(i) nowhere defined 
+
+LHS = normal(INS [a<->a, d<->d] (SM ||| RA))
+
+-- LHS is just everything in the left hand `box' combined, with its internal
+-- communication hidden.
+
+-- Below we do the same for the right hand end.
+
+AR1 = {|right.1, b.1, c.1|}
+AR2 = {|right.2, b.2, c.2|}
+AR3 = {|right.3, b.3, c.3|}
+
+OUTS = ||| i : Tags @ R(i)
+
+FAULTYOUTS = ||| i : Tags @ (if i!=3 then R else FAULTYR)(i)
+      
+RHS = normal(OUTS [b<->b, c<->c] (RM ||| SA))
+
+FAULTYRHS = normal(FAULTYOUTS [b<->b, c<->c] (RM ||| SA))
+
+-- and finally we put it all together, and hide internal communication 
+
+SYSTEM = LHS [mess<->mess, ack<->ack] RHS
+
+FAULTYSYSTEM = LHS [mess<->mess, ack<->ack] FAULTYRHS
+
+-- The specification is just the parallel composition of three one-place
+-- buffers.
+
+COPY(in,out) = in?x -> out!x -> COPY(in,out)
+
+SPEC = ||| i : Tags @ COPY(left.i, right.i)
+
+-- We can check the refinement by Check1 "SPEC" "SYSTEM"; (or the other versions-- of Check) 
+
+assert SPEC [FD= SYSTEM
+
+
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-- You are challenged to modify this example so that some of the channels
+-- go one way, and some the other (say, 2 and 2).
+
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-- If the multiplexer is being used as part of a larger system, then
+-- it would make a lot of sense to prove that it meets its specification
+-- and then use its specification in its stead in higher-level system
+-- descriptions.  This applies even if the higher-level system does not
+-- break up into smaller components, since the state-space of the
+-- specification is significantly smaller than that of the multiplexer,
+-- which will make the verification of a large system quicker.  It is
+-- even more true if the channels of the multiplexer are used independently,
+-- in other words if each external channel of the multiplexer is connected
+-- to a different user, and the users do not interact otherwise,
+-- for it would then be sufficient to prove that each of the separate
+-- pairs of processes interacting via our multiplexer are correct relative
+-- to its own specification, with a simple one-place buffer between them.
+
+-- For we would have proved the equivalence, by the correctness of the
+-- multiplexer, of our system with a set of three-process independent ones.
+

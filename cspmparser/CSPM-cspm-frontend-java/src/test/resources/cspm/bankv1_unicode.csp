@@ -1,0 +1,150 @@
+-- Example controllers to accompany "ZB2003" paper
+
+-- bank version 1
+
+QUEUENUM = {1..3}
+datatype CUSTOMER = c1 | c2 | c3
+datatype STATUS = success | fail
+datatype QSTATUS =yes | no
+
+maxLimit = 2
+defaultCounter  = 1
+defaultCustomer = c1
+maxQueueingCustomers = maxLimit -1
+numQueues = 2 
+
+
+-- external channels
+channel enterBank : CUSTOMER
+channel leaveBank : CUSTOMER
+channel report : STATUS
+
+-- communication channels, no underlying B, between CSP processes
+channel com1 : CUSTOMER
+channel com2 : QUEUENUM
+channel com3 : CUSTOMER.QUEUENUM
+channel canJoinResponse : STATUS
+channel retrieveCustomer 
+
+-- machine channels
+channel joinQueue : CUSTOMER
+channel leaveQueue : QUEUENUM.CUSTOMER
+channel queryQueueEmpty : QUEUENUM.QSTATUS
+channel queryIsInQueue : CUSTOMER.QSTATUS
+
+channel getQueueNo : QUEUENUM
+channel setNextQueue : QUEUENUM
+channel setCustomer : CUSTOMER
+channel getCustomer : CUSTOMER
+
+
+inc(queueNo) = (queueNo % numQueues) + 1
+
+-- abstract specfication
+-- num is the number of people waiting and the one being serviced
+
+--Spec  = Waiting(0,<>)
+--Waiting(num,people_waiting) = 
+--   num < bankLimit & input ? cc -> Waiting(num+1, people_waiting ^<cc>)
+--   []
+--   num > 0 & |~| cc : people_waiting @ output. cc ->
+--   Waiting(num - 1, .....
+
+--- implementation
+
+BankCounterCtrl = CurrentCtrl(0)
+
+CurrentCtrl(num) = 
+    JoinCtrl(num) ◻ LeaveCtrl(num)
+
+-- we allow any input but then the queues do the checking about
+-- passing com1 access 
+-- whether the customer is already in the queue 
+
+
+JoinCtrl(num) = 
+  num ⟨ maxLimit & enterBank ?cc ➔
+   (    (num ≡ 0 & report.success ➔ setCustomer.cc ➔ CurrentCtrl(num+1))
+        ◻
+        (num ⟩ 0 & getCustomer?currentCust ➔ 
+             if (cc ≡ currentCust) then report.fail ➔ CurrentCtrl(num)
+             else 
+                   com1!cc ➔ canJoinResponse?bb ➔ report.bb ➔
+                   (if (bb≡success) then
+                       CurrentCtrl(num+1)
+                    else
+                       CurrentCtrl(num))
+        )
+        )
+                        
+-- don't need to set back to default because could put it as cust
+--because never going to use that value again
+-- but what if the size of that queue is empty the we should precoess
+--the next one along, where is that info going to be kept
+-- with the com3 is there goign to be a deadlock again with requesting
+--value, do we need an atomic event to prevent that to signal update
+--sequence of events
+-- if > 1 then output the currentperson and get the next one from a
+--queue
+
+LeaveCtrl(num) = 
+         (num ≡1 & getCustomer?cc ➔  leaveBank!cc ➔
+         setCustomer.defaultCustomer ➔ CurrentCtrl(0))
+         ◻
+         (num ⟩ 1 & getCustomer?cc ➔ leaveBank!cc ➔ 
+              getQueueNo?qNo ➔ com2!qNo ➔ com3?newCust?newQNo ➔ 
+              setCustomer!newCust ➔ setNextQueue!newQNo ➔ CurrentCtrl(num-1))
+--              retrieveCustomer -> getQueueNo?qNo -> com2!qNo -> com3?newCust?newQNo -> 
+--              setCustomer!newCust -> setNextQueue!newQNo -> CurrentCtrl(num-1))
+
+-- now queues is tracking the counter and is making the choice of
+--which queue to get info from
+
+QueuesCtrl = QCtrl(0)
+QCtrl(s) = 
+     (s ⟨ maxQueueingCustomers & com1 ? cc ➔ 
+               queryIsInQueue!cc?bb ➔
+               if (bb≡yes) then   
+                  canJoinResponse!fail ➔ QCtrl(s)
+               else
+                  canJoinResponse!success ➔ joinQueue.cc ➔
+		  QCtrl(s+1))
+     ◻
+      
+     (s ⟩ 0 & com2?qNo ➔ NextQCtrl(s,qNo))
+--   (s > 0 & retrieveCustomer -> com2?qNo -> NextQCtrl(s,qNo))
+
+NextQCtrl(s,queueNo) = 
+       queryQueueEmpty!queueNo?bb ➔
+       if (bb ≡ no) then
+        leaveQueue!queueNo?cc ➔ com3!cc!inc(queueNo) ➔ QCtrl(s-1)
+       else
+             NextQCtrl(s,inc(queueNo))
+
+A = {|com1,com2,com3,canJoinResponse, retrieveCustomer|}
+B = {|   joinQueue, leaveQueue,  queryQueueEmpty, queryIsInQueue, getCustomer,setCustomer, getQueueNo, setNextQueue |}
+BankSystem = (BankCounterCtrl [|A|] QueuesCtrl) \ union(A,B)
+BankSystemNoHide = BankCounterCtrl [|A|] QueuesCtrl 
+
+SPEC = ||| i:{1..maxLimit} @ CUST
+CUST = enterBank?i ➔ (report.fail ➔ CUST ◻ report.success ➔
+                            leaveBank.i ➔ CUST)
+
+
+-- Need to set maxQueueingCustomers to 2 for this check to succeed in
+-- any sort of reasonable time.
+
+SPEC2 = NEWSPEC(0)
+NEWSPEC(num) = 
+   num ⟨ maxLimit & enterBank? cc ➔ 
+          (report.success ➔ NEWSPEC(num+1) ⊓ report.fail ➔ NEWSPEC(num))
+   ◻
+   num ⟩ 0 & ⊓ cc :CUSTOMER @ leaveBank. cc ➔ NEWSPEC(num-1)
+
+
+assert SPEC [T= BankSystem
+assert SPEC [F= BankSystem
+
+assert SPEC2 [T= BankSystem
+assert SPEC2 [F= BankSystem
+

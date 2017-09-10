@@ -1,0 +1,10 @@
+-- Test include
+Data = 1337
+
+channel mid_clk, mid_miso, mid_mosi: Data  
+
+include "../cspm/very_simple.csp"
+
+include "vm1.csp"
+
+L = N

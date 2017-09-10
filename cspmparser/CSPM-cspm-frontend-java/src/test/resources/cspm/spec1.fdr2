@@ -1,0 +1,16 @@
+-- spec1.fdr2
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+channel a, b, c
+
+P = a -> b -> P
+
+Q = a -> b -> STOP
+
+R = a -> c -> STOP
+
+assert P [T= Q
+
+assert P [T= R

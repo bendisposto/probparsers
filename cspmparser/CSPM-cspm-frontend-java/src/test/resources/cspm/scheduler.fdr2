@@ -1,0 +1,56 @@
+-- The Cyclic Scheduler
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+-- Define a constant for the largest cell number
+n = 5
+
+channel start, finish, c : {0..n}
+
+-- Define increment modulo (n+1)
+inc(x) = (x+1) % (n+1)
+
+STARTCELL(i) = start.i -> c.inc(i) -> 
+                (  finish.i -> c.i -> STARTCELL(i)
+                [] c.i -> finish.i -> STARTCELL(i) )
+
+WAITCELL(i) = c.i -> STARTCELL(i)
+
+CELL(i) = if i==0 then STARTCELL(i) else WAITCELL(i)
+
+SCHED = (|| i:{0..n} @ [ {|start.i, finish.i, c.i, c.inc(i) |} ] CELL(i) )
+        \ {|c|}
+
+-- The specifications
+
+ALT(i) = start.i -> finish.i -> ALT(i)
+
+ALTSPEC = || i:{0..n} @ [ {|start.i, finish.i |} ] ALT(i)
+
+CYCLE(i) = start.i -> CYCLE(inc(i))
+
+-- The assertions
+
+assert ALTSPEC [T= SCHED
+assert CYCLE(0) [T= (SCHED \ {|finish|})
+
+-- The alternative definition of the scheduler
+
+SCH(s,R) = (if not(union(R,{s}) == R) 
+            then start.s -> SCH(inc(s),union(R,{s}))
+            else STOP)
+         [] ([] i:R @ finish.i -> SCH(s,diff(R,{i})))
+
+NEWSCHED = SCH(0,{})
+
+-- Assertions for the new scheduler
+
+assert ALTSPEC [T= NEWSCHED
+assert CYCLE(0) [T= (NEWSCHED \ {|finish|})
+
+-- Trace equivalence of the two schedulers
+
+assert SCHED [T= NEWSCHED
+assert NEWSCHED [T= SCHED
+

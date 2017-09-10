@@ -1,0 +1,99 @@
+-- The level crossing with a liveness specification.
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+-- The purpose of these datatype and channel declarations is to give
+-- us events car.enter, gate.raise etc
+
+datatype UD = raise | lower
+datatype ELA = enter | leave | approach
+
+channel car:ELA
+channel train:ELA
+channel gate:UD
+
+-- A supply of cars
+
+CARS = car.approach -> car.enter -> car.leave -> CARS
+
+-- ... and trains
+
+TRAINS = train.approach -> train.enter -> train.leave -> TRAINS
+
+-- The behaviour of the crossing, unconstrained by any sensible
+-- restrictions on when the gate should be raised. The only
+-- thing not allowed is a car crossing when the gate is down.
+
+CR_UP =  car.approach -> CR_UP
+      [] car.enter -> CR_UP
+      [] car.leave -> CR_UP
+      [] train.approach -> CR_UP
+      [] train.enter -> CR_UP
+      [] train.leave -> CR_UP
+      [] gate.lower -> CR_DOWN
+
+CR_DOWN =  car.approach -> CR_DOWN
+      [] car.leave -> CR_DOWN
+      [] train.approach -> CR_DOWN
+      [] train.enter -> CR_DOWN
+      [] train.leave -> CR_DOWN
+      [] gate.raise -> CR_UP
+
+-- The crossing, cars and trains - still no restrictions on the gate
+-- Notice that we only have to put the channel names, not all the 
+-- individual events, in the alphabets for [ || ]
+
+SYSTEM = (CR_UP [ {|train,car,gate|} || {|car|} ] CARS)
+          [ {|train,car,gate|} || {|train|} ] TRAINS
+
+-- The safety specification doesn't allow a car and a train to enter
+-- the crossing simultaneously.
+
+SPEC =  train.enter -> train.leave -> SPEC
+     [] car.enter -> car.leave -> SPEC
+
+-- Define RUN(A)
+
+RUN(A) = [] x:A @ x -> RUN(A)
+
+-- The assertion is best written with hiding
+
+assert SPEC [T= SYSTEM \ {|gate,car.approach,train.approach|}
+
+-- Now we can restrict the use of the gate
+
+CONTROL =  train.approach -> gate.lower -> CONTROL_D
+        [] car.approach -> car.enter -> car.leave -> CONTROL
+CONTROL_D = train.enter -> train.leave -> (gate.raise -> CONTROL
+                                          [] train.approach -> CONTROL_D)
+
+-- The system with control added
+
+SAFE_SYSTEM = SYSTEM 
+                [ {|train,car,gate|} || {|train,car,gate|} ]
+              CONTROL 
+
+-- and a new assertion
+
+assert SPEC [T= SAFE_SYSTEM \ {|gate,car.approach,train.approach|}
+
+-- The liveness specifications
+
+CARSPEC = car.approach -> car.enter -> car.leave -> CARSPEC
+
+TRAINSPEC = train.approach -> train.enter -> train.leave -> TRAINSPEC
+
+-- and assertions
+
+assert CARSPEC [F= (SAFE_SYSTEM \ {|train,gate|})
+
+assert TRAINSPEC [F= (SAFE_SYSTEM \ {|car,gate|})
+
+NC = gate.lower -> STOP
+
+NEW_SAFE_SYSTEM = SAFE_SYSTEM [ {|train,car,gate|} || {|gate|} ] NC
+
+assert CARSPEC [F= (NEW_SAFE_SYSTEM \ {|train,gate|})
+
+assert TRAINSPEC [F= (NEW_SAFE_SYSTEM \ {|car,gate|})

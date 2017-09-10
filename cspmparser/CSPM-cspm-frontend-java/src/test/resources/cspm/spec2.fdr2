@@ -1,0 +1,34 @@
+-- spec2.fdr2
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+channel year1, year2, year3, pass, fail, graduate, prize
+
+S = {| year1, year2, year3, pass, fail, graduate |}
+
+C = {| pass, fail, prize |}
+
+STUDENT = year1 -> (pass -> YEAR2 [] fail -> STUDENT)
+YEAR2 = year2 -> (pass -> YEAR3 [] fail -> YEAR2)
+YEAR3 = year3 -> (pass -> graduate -> STOP [] fail -> YEAR3)
+
+COLLEGE = fail -> STOP [] pass -> C1
+C1 = fail -> STOP [] pass -> C2
+C2 = fail -> STOP [] pass -> prize -> STOP
+
+SYSTEM = STUDENT [ S || C ] COLLEGE
+
+SPECP = pass -> S1 [] fail -> SPECF
+S1 = pass -> S2 [] fail -> SPECF
+S2 = pass -> prize -> STOP [] fail -> SPECF
+
+SPECF = pass -> SPECF [] fail -> SPECF
+
+assert SPECP [T= SYSTEM
+
+
+
+
+
+

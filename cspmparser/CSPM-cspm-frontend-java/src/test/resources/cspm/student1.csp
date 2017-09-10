@@ -1,0 +1,21 @@
+-- student.csp
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+--
+
+channel year1, year2, year3, pass, fail, graduate, present
+
+S = {| year1, year2, year3, pass, fail, graduate |}
+
+P = {| pass, present |}
+
+STUDENT = year1 -> (pass -> YEAR2 [] fail -> STUDENT)
+
+YEAR2 = year2 -> (pass -> YEAR3 [] fail -> YEAR2)
+
+YEAR3 = year3 -> (pass -> graduate -> STOP [] fail -> YEAR3)
+
+PARENT = pass -> present -> PARENT
+
+SYSTEM = STUDENT [ S || P ] PARENT

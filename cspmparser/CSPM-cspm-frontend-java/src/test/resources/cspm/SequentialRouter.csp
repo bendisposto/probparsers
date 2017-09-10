@@ -1,0 +1,153 @@
+-- Sequential version of the Virtual Channel MUX-DEMUX
+-- G. S. Stiles
+-- July 20, 1998
+
+-- This script uses sequential processes on the upstream and downstream
+-- nodes.
+
+-- Declare the tag identifying the virtual channels and the data:
+
+Data = {0, 1}
+Chans = {0, 1}
+LinkData = {0.0, 0.1, 1.0, 1.1}
+nametype LinkDataT = {0,1}.{0,1} -- added by leuschel
+Acks = {0.0, 1.0}
+nametype AcksT = {0,1}.{0} -- added by leuschel
+
+-- The input and output channels carry data tagged with the virtual channel
+-- identifier:
+
+channel upin0, upin1, downin0, downin1, downout0, downout1: Data
+
+-- The channels connecting the two nodes:
+
+
+channel uptodown: LinkDataT
+channel downtoup: AcksT
+
+-- The upstream process; it monitors all possible inputs and then branches
+-- according to the input:
+
+-- MUX is used when we expect only data inputs (no acks):
+
+MUX = []chan:{upin0, upin1} @ chan ? x ->
+        if (chan == upin0)
+          then uptodown ! 0.x -> MUX0
+          else uptodown ! 1.x -> MUX1
+
+-- MUX is used when we are awaiting acknowledgement of virtual channel 0
+-- data and can accept virtual channel 1 input; if we get an acknowledgement
+-- of the virtual channel 0 data we simply go back to MUX:
+
+MUX0 = []chan:{upin1, downtoup.0} @ chan ? x ->
+       if (chan == upin1)
+         then uptodown ! (1.x) -> MUX01
+         else MUX
+
+-- MUX1 is similar - but for virtual channel 1:
+
+MUX1 = []chan:{upin0, downtoup.1} @ chan ? x ->  -- originally not work with ProB
+              -- The Problem is that Acks is seen as a single type;
+              -- have added nametype directive for AcksT
+       if (chan == upin0)
+         then uptodown ! (0.x) -> MUX01
+         else MUX
+
+
+-- MUX01 applies when we are awaiting acknowledgements of data from both
+-- virtual channels:
+
+MUX01 = downtoup?(x.y):Acks ->  -- leuschel: had to put () around x.y for parser
+        if (x == 0)
+          then MUX1
+          else MUX0
+
+
+-- Now the downstream side; the processes are similar to the upstream,
+-- and differ based on the actions pending:
+
+DEMUX = uptodown?vchan.x ->
+            if (vchan == 0)
+              then downin0 ! x -> DEMUX0(x) 
+              else downin1 ! x -> DEMUX1(x)
+
+-- DEMUX0 waits for virtual channel 0 data to be picked up, then sends the
+-- appropriate acknowledgement upstream - while waiting for virtual
+-- channel 1 data as well:
+
+DEMUX0(x) = [] chan:{uptodown.1, downout0.x} @ chan?y ->
+         if (chan == (uptodown.1))
+           then downin1 ! y -> DEMUX01(x, y)
+           else DEMUX0a
+
+DEMUX0a =  [] chan:{uptodown.1, downtoup.0.0} @ chan?y ->
+         if (chan == (uptodown.1))
+           then downin1 ! y -> DEMUX0b(y)
+           else DEMUX
+
+DEMUX0b(y) =  [] chan:{downout1.y, downtoup.0.0} @ chan ->
+         if (chan == (downout1.y))
+           then DEMUX01a
+           else DEMUX1(y)
+
+
+DEMUX01a = [] chan:{downtoup.0.0, downtoup.1.0} @ chan ->
+          if (chan == (downtoup.0.0))
+            then DEMUX1a
+            else DEMUX0a
+
+
+-- DEMUX1 does the other half:
+
+DEMUX1(x) = [] chan:{uptodown.0, downout1.x} @ chan?y ->
+         if (chan == (uptodown.0))
+           then downin0 ! y -> DEMUX01(y, x)
+           else DEMUX1a
+
+
+DEMUX1a =  [] chan:{uptodown.0, downtoup.1.0} @ chan?y ->
+         if (chan == (uptodown.0))
+           then downin0 ! y -> DEMUX1b(y)
+           else DEMUX
+
+
+DEMUX1b(y) =  [] chan:{downout0.y, downtoup.1.0} @ chan ->
+           if (chan == (downout0.y))
+           then DEMUX01a
+           else DEMUX0(y)
+
+-- DEMUX01 waits for two acknowledgements:
+
+DEMUX01(x, y) = [] chan:{downout0.x, downout1.y} @ chan -> 
+          if (chan == (downout0.x))
+            then downtoup ! 0.0 -> DEMUX1(y)
+            else downtoup ! 1.0 -> DEMUX0(x)
+           
+
+-- The complete system runs the two processes in parallel, synchronizing
+-- them only on the connecting link channels:
+
+Seqsys = MUX [| {| uptodown, downtoup |} |] DEMUX \ 
+         {| uptodown, downtoup, downin0, downin1 |}
+
+-- SeqsysV = MUX [| {| uptodown, downtoup |} |] DEMUX 
+
+-- Safety Checks:
+
+-- assert Seqsys :[deterministic [FD] ]
+-- assert Seqsys :[deadlock free [F] ]
+-- assert Seqsys :[divergence free ]
+
+-- Check the specifications:
+
+Copy0 = upin0?x:{0, 1} -> downout0 ! x -> Copy0
+
+Copy1 = upin1?x:{0, 1} -> downout1 ! x -> Copy1
+
+
+DCopy = Copy0 ||| Copy1
+
+-- assert DCopy  [FD= Seqsys
+-- assert Seqsys [FD= DCopy
+
+MAIN = Seqsys

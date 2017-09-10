@@ -1,0 +1,9 @@
+-- vm2.csp
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+--
+
+channel coin, choc
+
+VM = coin -> choc -> VM

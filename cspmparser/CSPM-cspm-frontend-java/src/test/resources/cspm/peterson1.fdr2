@@ -1,0 +1,98 @@
+-- Peterson's Algorithm in CSP: version 1
+--
+-- Simon Gay, Royal Holloway, January 1999
+--
+
+channel p1setflag1, p1resetflag1, p2setflag1, p2resetflag1,
+        p1gettrueflag1, p1getfalseflag1, p2gettrueflag1, p2getfalseflag1,
+        p1setflag2, p1resetflag2, p2setflag2, p2resetflag2,
+        p1gettrueflag2, p1getfalseflag2, p2gettrueflag2, p2getfalseflag2,
+        p1set1turn, p1set2turn, p2set1turn, p2set2turn,
+        p1get1turn, p1get2turn, p2get1turn, p2get2turn,
+        p1enter, p1critical, p1leave,
+        p2enter, p2critical, p2leave
+
+FLAG1 = FLAG1FALSE
+FLAG1FALSE =  p1getfalseflag1 -> FLAG1FALSE
+           [] p2getfalseflag1 -> FLAG1FALSE
+           [] p1setflag1 -> FLAG1TRUE
+           [] p2setflag1 -> FLAG1TRUE
+           [] p1resetflag1 -> FLAG1FALSE
+           [] p2resetflag1 -> FLAG1FALSE
+FLAG1TRUE  =  p1gettrueflag1 -> FLAG1TRUE
+           [] p2gettrueflag1 -> FLAG1TRUE
+           [] p1resetflag1 -> FLAG1FALSE
+           [] p2resetflag1 -> FLAG1FALSE
+           [] p1setflag1 -> FLAG1TRUE
+           [] p2setflag1 -> FLAG1TRUE
+
+FLAG2 = FLAG2FALSE
+FLAG2FALSE =  p1getfalseflag2 -> FLAG2FALSE
+           [] p2getfalseflag2 -> FLAG2FALSE
+           [] p1setflag2 -> FLAG2TRUE
+           [] p2setflag2 -> FLAG2TRUE
+           [] p1resetflag2 -> FLAG2FALSE
+           [] p2resetflag2 -> FLAG2FALSE
+FLAG2TRUE  =  p1gettrueflag2 -> FLAG2TRUE
+           [] p2gettrueflag2 -> FLAG2TRUE
+           [] p1resetflag2 -> FLAG2FALSE
+           [] p2resetflag2 -> FLAG2FALSE
+           [] p1setflag2 -> FLAG2TRUE
+           [] p2setflag2 -> FLAG2TRUE
+
+TURN = TURNONE
+TURNONE =  p1get1turn -> TURNONE
+        [] p2get1turn -> TURNONE
+        [] p1set1turn -> TURNONE
+        [] p2set1turn -> TURNONE
+        [] p1set2turn -> TURNTWO
+        [] p2set2turn -> TURNTWO
+TURNTWO =  p1get2turn -> TURNTWO
+        [] p2get2turn -> TURNTWO
+        [] p1set1turn -> TURNONE
+        [] p2set1turn -> TURNONE
+        [] p1set2turn -> TURNTWO
+        [] p2set2turn -> TURNTWO
+
+P1 = p1setflag1 -> p1set2turn -> P1WAIT
+
+P1WAIT =  p1gettrueflag2 -> (p1get2turn -> P1WAIT
+                            [] p1get1turn -> P1ENTER)
+       [] p1getfalseflag2 -> P1ENTER
+
+P1ENTER = p1enter -> p1critical -> p1leave -> p1resetflag1 -> P1
+
+P2 = p2setflag2 -> p2set1turn -> P2WAIT
+
+P2WAIT =  p2gettrueflag1 -> (p2get1turn -> P2WAIT
+                            [] p2get2turn -> P2ENTER)
+       [] p2getfalseflag1 -> P2ENTER
+
+P2ENTER = p2enter -> p2critical -> p2leave -> p2resetflag2 -> P2
+
+aP1 = {| p1setflag1,p1resetflag1,p1gettrueflag1,p1getfalseflag1,
+         p1setflag2,p1resetflag2,p1gettrueflag2,p1getfalseflag2,
+         p1set1turn,p1set2turn,p1get1turn,p1get2turn,
+         p1enter,p1critical,p1leave |}
+
+aP2 = {| p2setflag1,p2resetflag1,p2gettrueflag1,p2getfalseflag1,
+         p2setflag2,p2resetflag2,p2gettrueflag2,p2getfalseflag2,
+         p2set1turn,p2set2turn,p2get1turn,p2get2turn,
+         p2enter,p2critical,p2leave |}
+
+aF1 = {| p1setflag1,p1resetflag1,p1gettrueflag1,p1getfalseflag1,
+         p2setflag1,p2resetflag1,p2gettrueflag1,p2getfalseflag1 |}
+
+aF2 = {| p1setflag2,p1resetflag2,p1gettrueflag2,p1getfalseflag2,
+         p2setflag2,p2resetflag2,p2gettrueflag2,p2getfalseflag2 |}
+
+aT  = {| p1set1turn,p1set2turn,p1get1turn,p1get2turn,
+         p2set1turn,p2set2turn,p2get1turn,p2get2turn |}
+
+PROCS = P1 [ aP1 || aP2 ] P2
+
+FLAGS = FLAG1 [ aF1 || aF2 ] FLAG2
+
+VARS = FLAGS [ union(aF1,aF2) || aT ] TURN
+
+SYSTEM = PROCS [ union(aP1,aP2) || union(union(aF1,aF2),aT) ] VARS
