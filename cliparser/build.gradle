@@ -35,7 +35,7 @@ dependencies {
 }
 
 compileJava {
- dependsOn=[':bparser:deploy',':prologlib:deploy',':parserbase:deploy',':ltlparser:deploy',':answerparser:deploy',':unicode:deploy']
+ dependsOn=[':cspmparser/CSPM-cspm-frontend-java:deploy', ':bparser:deploy',':prologlib:deploy',':parserbase:deploy',':ltlparser:deploy',':answerparser:deploy',':unicode:deploy']
 }
 
 
