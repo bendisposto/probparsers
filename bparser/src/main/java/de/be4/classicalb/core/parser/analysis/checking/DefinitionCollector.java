@@ -54,14 +54,14 @@ public class DefinitionCollector extends DepthFirstAdapter {
 	public void inAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
-		definitions.addDefinition(node, type, defName);
+		addDefinition(node, type, defName);
 	}
 
 	@Override
 	public void inASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
 		final String defName = node.getName().getText();
 		final Type type = defTypes.getType(defName);
-		definitions.addDefinition(node, type, defName);
+		addDefinition(node, type, defName);
 	}
 
 	@Override

@@ -176,7 +176,7 @@ public class Definitions extends IDefinitions {
 	@Override
 	public void addDefinition(final PDefinition defNode, final Type type, final String key) {
 		if (this.containsDefinition(key)) {
-			throw new AssertionError("Duplicate definition. This should be handled by the caller.");
+			throw new AssertionError("Duplicate definition \"" + key + "\". This should be handled by the caller.");
 		}
 		definitionsMap.put(key, defNode);
 		types.put(key, type);
