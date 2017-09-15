@@ -43,7 +43,7 @@ Helpers
 
   identifier_literal = letter (letter | digit | underscore)*;
   //pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$'| '|'| ':'| '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
-  pragma_identifier_literal = ([[[35 .. 126] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
+  pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
   // versions below do not work:
