@@ -879,7 +879,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_TUPLE)));
 			assign.setRhsExpressions(createExpressionList(
 					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(set))));
-			// assign.setRhsExpressions(createExpressionList(set));
 			subList.add(assign);
 		}
 		{
