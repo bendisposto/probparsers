@@ -87,6 +87,18 @@ public class RulesLanguageTest {
 		String result2 = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result2);
 	}
+	
+
+	@Test
+	public void testRuleFailSequence() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"fail1\"END; RULE_FAIL COUNTEREXAMPLE \"fail2\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		assertTrue(!result.contains("$ResultTuple"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
 
 	@Test
 	public void testRuleFail2() {
