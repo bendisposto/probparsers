@@ -35,7 +35,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
-	private final String RESULT_TUPLE = "$ResultTuple";
+	private static final String RESULT_TUPLE = "$ResultTuple";
 
 	private final IDefinitions iDefinitions;
 	private final Start start;
@@ -580,7 +580,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(assign);
 	}
 
-	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
+	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples,
+			boolean conditionalFail) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 
 		final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
@@ -590,7 +591,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 						(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 				createExpressionList(union));
-		return createSequenceSubstitution(assign, createConditionalFailAssignment());
+		if (conditionalFail) {
+			return createSequenceSubstitution(assign, createConditionalFailAssignment());
+		} else {
+			return createSequenceSubstitution(assign, createRuleFailAssignment(currentRule.getNameLiteral()));
+		}
+
 	}
 
 	@Override
@@ -825,7 +831,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				errorType = Integer.parseInt(node.getErrorType().getText());
 			}
 			PSubstitution sub = createCounterExampleSubstitution(errorType,
-					createSetOfPExpression(node.getMessage(), node.getMessage()));
+					createSetOfPExpression(node.getMessage(), node.getMessage()), false);
 			if (node.getWhen() != null) {
 				// there is a when predicate but no parameters
 				newNode = new AIfSubstitution(node.getWhen(), sub, new ArrayList<PSubstitution>(), null);
@@ -913,7 +919,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
-				createIdentifier(RESULT_STRINGS));
+				createIdentifier(RESULT_STRINGS), true);
 		subList.add(counterExampleSubstitution);
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);

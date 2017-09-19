@@ -21,11 +21,13 @@ import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
+import de.be4.classicalb.core.parser.node.ASetsMachineClause;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
+import de.be4.classicalb.core.parser.node.PSet;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
@@ -35,6 +37,7 @@ public class MachineInjector extends DepthFirstAdapter {
 	List<PMachineClause> clausesList;
 
 	AAbstractConstantsMachineClause abstractConstantsClause;
+	ASetsMachineClause setsClause;
 	AConstantsMachineClause constantsClause;
 	APropertiesMachineClause propertiesClause;
 	AVariablesMachineClause variablesClause;
@@ -63,6 +66,11 @@ public class MachineInjector extends DepthFirstAdapter {
 	public void inAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		this.abstractMachineParseUnit = node;
 		this.clausesList = node.getMachineClauses();
+	}
+
+	@Override
+	public void inASetsMachineClause(ASetsMachineClause node) {
+		this.setsClause = node;
 	}
 
 	@Override
@@ -130,6 +138,20 @@ public class MachineInjector extends DepthFirstAdapter {
 		@Override
 		public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 			node.setMachineClauses(new LinkedList<PMachineClause>());
+		}
+
+		@Override
+		public void inASetsMachineClause(ASetsMachineClause node) {
+			if (setsClause == null) {
+				setsClause = node;
+				clausesList.add(node);
+			} else {
+
+				LinkedList<PSet> sets = setsClause.getSetDefinitions();
+				for (PSet set : node.getSetDefinitions()) {
+					sets.add(set);
+				}
+			}
 		}
 
 		@Override

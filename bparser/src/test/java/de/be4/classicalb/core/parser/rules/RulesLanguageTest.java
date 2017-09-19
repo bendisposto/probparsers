@@ -33,6 +33,16 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testEnumeratedSet() {
+		final String testMachine = "RULES_MACHINE Test SETS foo= {foo1, foo2} END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+
+		assertTrue(result.contains("sets(none,[enumerated_set(none,foo,[identifier(none,foo1),identifier(none,foo2)]"));
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
 	public void testRulePrint() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
@@ -48,7 +58,6 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-
 
 	@Test
 	public void testRuleForall() {
@@ -67,6 +76,16 @@ public class RulesLanguageTest {
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception"));
 		assertTrue(result.contains("Duplicate operation name"));
+	}
+
+	@Test
+	public void testRuleFailWithoutParametersAndPredicate() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FAIL COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
 	}
 
 	@Test
@@ -165,13 +184,6 @@ public class RulesLanguageTest {
 		System.out.println(rulesMachineAsBMachine);
 		assertTrue(!result.contains("exception"));
 		assertTrue("RULEID should not appear in the translated B machine.", !result.contains("id2"));
-	}
-
-	@Test
-	public void testRuleFail() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
-		final String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 	}
 
 	@Test
