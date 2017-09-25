@@ -35,6 +35,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public static final String RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME = "$COUNTEREXAMPLES";
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 
+	private static final String RESULT_TUPLE = "$ResultTuple";
+
 	private final IDefinitions iDefinitions;
 	private final Start start;
 	private final RulesMachineChecker rulesMachineChecker;
@@ -357,12 +359,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// IF rule_Counterexamples = {} THEN RULE_SUCCESS ELSE RULE_FAIL END
 		final String ctName = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		currentRule.setCounterExampleVariableName(ctName);
-		PPredicate ifCondition = new AEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
+		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(ruleName),
+				new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		PSubstitution ifFailBody = null;
 		{
 			// fail substitution: set rule to fail and print counterexamples
 			ArrayList<PSubstitution> ifFailSubList = new ArrayList<>();
-			ifFailSubList.add(createRuleFailAssignment(currentRule.getNameLiteral()));
+			// ifFailSubList.add(createRuleFailAssignment(currentRule.getNameLiteral()));
 
 			TDefLiteralSubstitution defLiteral = new TDefLiteralSubstitution("PRINT");
 			List<PExpression> parameters = createExpressionList(createIdentifier(ctName));
@@ -523,9 +526,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new AAssignSubstitution(nameList, exprList);
 	}
 
-	private PSubstitution createConditionalFailAssignment(TIdentifierLiteral ruleLiteral) {
-		final String ctName = ruleLiteral.getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(ctName), new AEmptySetExpression());
+	private PSubstitution createConditionalFailAssignment() {
+		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(RESULT_TUPLE), new AEmptySetExpression());
 		return new AIfSubstitution(ifCondition, createRuleFailAssignment(currentRule.getNameLiteral()),
 				new ArrayList<PSubstitution>(), null);
 	}
@@ -578,7 +580,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(assign);
 	}
 
-	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples) {
+	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples,
+			boolean conditionalFail) {
 		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 
 		final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
@@ -588,7 +591,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 						(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 				createExpressionList(union));
-		return createSequenceSubstitution(assign, createConditionalFailAssignment(currentRule.getNameLiteral()));
+		if (conditionalFail) {
+			return createSequenceSubstitution(assign, createConditionalFailAssignment());
+		} else {
+			return createSequenceSubstitution(assign, createRuleFailAssignment(currentRule.getNameLiteral()));
+		}
+
 	}
 
 	@Override
@@ -823,7 +831,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				errorType = Integer.parseInt(node.getErrorType().getText());
 			}
 			PSubstitution sub = createCounterExampleSubstitution(errorType,
-					createSetOfPExpression(node.getMessage(), node.getMessage()));
+					createSetOfPExpression(node.getMessage(), node.getMessage()), false);
 			if (node.getWhen() != null) {
 				// there is a when predicate but no parameters
 				newNode = new AIfSubstitution(node.getWhen(), sub, new ArrayList<PSubstitution>(), null);
@@ -868,7 +876,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			errorType = 1;
 		}
 		AVarSubstitution var = new AVarSubstitution();
-		final String RESULT_TUPLE = "$ResultTuple";
+
 		final String RESULT_STRINGS = "$ResultSrings";
 		var.setIdentifiers(createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(RESULT_STRINGS)));
 		List<PSubstitution> subList = new ArrayList<>();
@@ -877,7 +885,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_TUPLE)));
 			assign.setRhsExpressions(createExpressionList(
 					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(set))));
-			// assign.setRhsExpressions(createExpressionList(set));
 			subList.add(assign);
 		}
 		{
@@ -906,12 +913,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 			stringSet.setPredicates(exists);
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_STRINGS)));
-			assign.setRhsExpressions(createExpressionList(stringSet));
+			assign.setRhsExpressions(createExpressionList(
+					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(stringSet))));
 			subList.add(assign);
 		}
 
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
-				createIdentifier(RESULT_STRINGS));
+				createIdentifier(RESULT_STRINGS), true);
 		subList.add(counterExampleSubstitution);
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);
