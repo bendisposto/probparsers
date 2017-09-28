@@ -1,3 +1,4 @@
+package de.prob.unicode;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -5798,4 +5799,7 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("UNION_"), "UNION_");
 		assertEquals(UnicodeTranslator.toUnicode("union_"), "union_");
 	}
+	
+	
+	
 }
