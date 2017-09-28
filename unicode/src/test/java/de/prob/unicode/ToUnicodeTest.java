@@ -1,4 +1,5 @@
 package de.prob.unicode;
+
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -358,26 +359,22 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UniversalQuantification() {
-		assertEquals(UnicodeTranslator.toUnicode("!(z).(P => Q)"),
-				"\u2200(z)\u00b7(P \u21d2 Q)");
+		assertEquals(UnicodeTranslator.toUnicode("!(z).(P => Q)"), "\u2200(z)\u00b7(P \u21d2 Q)");
 	}
 
 	@Test
 	public void UniversalQuantification2() {
-		assertEquals(UnicodeTranslator.toUnicode("(!z.P => Q)"),
-				"(\u2200z\u00b7P \u21d2 Q)");
+		assertEquals(UnicodeTranslator.toUnicode("(!z.P => Q)"), "(\u2200z\u00b7P \u21d2 Q)");
 	}
 
 	@Test
 	public void ExistentialQuantification() {
-		assertEquals(UnicodeTranslator.toUnicode("#(z).(P & Q)"),
-				"\u2203(z)\u00b7(P \u2227 Q)");
+		assertEquals(UnicodeTranslator.toUnicode("#(z).(P & Q)"), "\u2203(z)\u00b7(P \u2227 Q)");
 	}
 
 	@Test
 	public void ExistentialQuantification2() {
-		assertEquals(UnicodeTranslator.toUnicode("(#z.P & Q)"),
-				"(\u2203z\u00b7P \u2227 Q)");
+		assertEquals(UnicodeTranslator.toUnicode("(#z.P & Q)"), "(\u2203z\u00b7P \u2227 Q)");
 	}
 
 	@Test
@@ -417,8 +414,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void SetComprehension2() {
-		assertEquals(UnicodeTranslator.toUnicode("{z . P | F}"),
-				"{z \u00b7 P \u2223 F}");
+		assertEquals(UnicodeTranslator.toUnicode("{z . P | F}"), "{z \u00b7 P \u2223 F}");
 	}
 
 	@Test
@@ -505,8 +501,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void Partition() {
-		assertEquals(UnicodeTranslator.toUnicode("partition(S,x,y)"),
-				"partition(S,x,y)");
+		assertEquals(UnicodeTranslator.toUnicode("partition(S,x,y)"), "partition(S,x,y)");
 	}
 
 	@Test
@@ -516,8 +511,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void GeneralizedUnion2() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION (z).(P | E)"),
-				"\u22c3 (z)\u00b7(P \u2223 E)");
+		assertEquals(UnicodeTranslator.toUnicode("UNION (z).(P | E)"), "\u22c3 (z)\u00b7(P \u2223 E)");
 	}
 
 	@Test
@@ -527,8 +521,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void QuantifiedUnion() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION z.P | S"),
-				"\u22c3 z\u00b7P \u2223 S");
+		assertEquals(UnicodeTranslator.toUnicode("UNION z.P | S"), "\u22c3 z\u00b7P \u2223 S");
 	}
 
 	@Test
@@ -538,8 +531,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void GeneralizedIntersection2() {
-		assertEquals(UnicodeTranslator.toUnicode("INTER (z).(P | E)"),
-				"\u22c2 (z)\u00b7(P \u2223 E)");
+		assertEquals(UnicodeTranslator.toUnicode("INTER (z).(P | E)"), "\u22c2 (z)\u00b7(P \u2223 E)");
 	}
 
 	@Test
@@ -626,15 +618,13 @@ public class ToUnicodeTest {
 	@Test
 	public void SetSummation() {
 		// SIGMA not provided (\u2211)
-		assertEquals(UnicodeTranslator.toUnicode("SIGMA(z).(P | E)"),
-				"SIGMA(z)\u00b7(P \u2223 E)");
+		assertEquals(UnicodeTranslator.toUnicode("SIGMA(z).(P | E)"), "SIGMA(z)\u00b7(P \u2223 E)");
 	}
 
 	@Test
 	public void SetProduct() {
 		// PI not provided (\u220F)
-		assertEquals(UnicodeTranslator.toUnicode("PI(z).(P | E)"),
-				"PI(z)\u00b7(P \u2223 E)");
+		assertEquals(UnicodeTranslator.toUnicode("PI(z).(P | E)"), "PI(z)\u00b7(P \u2223 E)");
 	}
 
 	@Test
@@ -735,8 +725,7 @@ public class ToUnicodeTest {
 	// XXX Iteration not provided? something like r^n
 	@Test
 	public void Iteration() {
-		assertEquals(UnicodeTranslator.toUnicode("iterate(r,n)"),
-				"iterate(r,n)");
+		assertEquals(UnicodeTranslator.toUnicode("iterate(r,n)"), "iterate(r,n)");
 	}
 
 	@Test
@@ -821,8 +810,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LambdaAbstraction() {
-		assertEquals(UnicodeTranslator.toUnicode("%z.(P|E)"),
-				"\u03bbz\u00b7(P\u2223E)");
+		assertEquals(UnicodeTranslator.toUnicode("%z.(P|E)"), "\u03bbz\u00b7(P\u2223E)");
 	}
 
 	@Test
@@ -925,8 +913,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void BooleanSubstitution() {
-		assertEquals(UnicodeTranslator.toUnicode("x := bool(P)"),
-				"x \u2254 bool(P)");
+		assertEquals(UnicodeTranslator.toUnicode("x := bool(P)"), "x \u2254 bool(P)");
 	}
 
 	@Test
@@ -955,8 +942,7 @@ public class ToUnicodeTest {
 
 	@Test
 	public void MultipleSubstitution() {
-		assertEquals(UnicodeTranslator.toUnicode("x,y := E,F"),
-				"x,y \u2254 E,F");
+		assertEquals(UnicodeTranslator.toUnicode("x,y := E,F"), "x,y \u2254 E,F");
 	}
 
 	@Test
@@ -1178,10 +1164,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123INTEGER"),
-				"abc123INTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("abc123integer"),
-				"abc123integer");
+		assertEquals(UnicodeTranslator.toUnicode("abc123INTEGER"), "abc123INTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("abc123integer"), "abc123integer");
 	}
 
 	@Test
@@ -1204,10 +1188,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123NATURAL"),
-				"abc123NATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("abc123natural"),
-				"abc123natural");
+		assertEquals(UnicodeTranslator.toUnicode("abc123NATURAL"), "abc123NATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("abc123natural"), "abc123natural");
 	}
 
 	@Test
@@ -1343,10 +1325,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterINTEGERDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER123"),
-				"abcINTEGER123");
-		assertEquals(UnicodeTranslator.toUnicode("abcinteger123"),
-				"abcinteger123");
+		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER123"), "abcINTEGER123");
+		assertEquals(UnicodeTranslator.toUnicode("abcinteger123"), "abcinteger123");
 	}
 
 	@Test
@@ -1369,10 +1349,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterNATURALDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL123"),
-				"abcNATURAL123");
-		assertEquals(UnicodeTranslator.toUnicode("abcnatural123"),
-				"abcnatural123");
+		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL123"), "abcNATURAL123");
+		assertEquals(UnicodeTranslator.toUnicode("abcnatural123"), "abcnatural123");
 	}
 
 	@Test
@@ -1497,26 +1475,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitUnderscoreFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123_FALSE"),
-				"abc123_FALSE");
-		assertEquals(UnicodeTranslator.toUnicode("abc123_false"),
-				"abc123_false");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_FALSE"), "abc123_FALSE");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_false"), "abc123_false");
 	}
 
 	@Test
 	public void LetterDigitUnderscoreINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123_INTEGER"),
-				"abc123_INTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("abc123_integer"),
-				"abc123_integer");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_INTEGER"), "abc123_INTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_integer"), "abc123_integer");
 	}
 
 	@Test
 	public void LetterDigitUnderscoreINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123_INTER"),
-				"abc123_INTER");
-		assertEquals(UnicodeTranslator.toUnicode("abc123_inter"),
-				"abc123_inter");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_INTER"), "abc123_INTER");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_inter"), "abc123_inter");
 	}
 
 	@Test
@@ -1533,10 +1505,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitUnderscoreNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123_NATURAL"),
-				"abc123_NATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("abc123_natural"),
-				"abc123_natural");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_NATURAL"), "abc123_NATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_natural"), "abc123_natural");
 	}
 
 	@Test
@@ -1571,10 +1541,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitUnderscoreUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123_UNION"),
-				"abc123_UNION");
-		assertEquals(UnicodeTranslator.toUnicode("abc123_union"),
-				"abc123_union");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_UNION"), "abc123_UNION");
+		assertEquals(UnicodeTranslator.toUnicode("abc123_union"), "abc123_union");
 	}
 
 	@Test
@@ -1585,26 +1553,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitFALSEUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123FALSE_"),
-				"abc123FALSE_");
-		assertEquals(UnicodeTranslator.toUnicode("abc123false_"),
-				"abc123false_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123FALSE_"), "abc123FALSE_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123false_"), "abc123false_");
 	}
 
 	@Test
 	public void LetterDigitINTEGERUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123INTEGER_"),
-				"abc123INTEGER_");
-		assertEquals(UnicodeTranslator.toUnicode("abc123integer_"),
-				"abc123integer_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123INTEGER_"), "abc123INTEGER_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123integer_"), "abc123integer_");
 	}
 
 	@Test
 	public void LetterDigitINTERUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123INTER_"),
-				"abc123INTER_");
-		assertEquals(UnicodeTranslator.toUnicode("abc123inter_"),
-				"abc123inter_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123INTER_"), "abc123INTER_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123inter_"), "abc123inter_");
 	}
 
 	@Test
@@ -1621,10 +1583,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitNATURALUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123NATURAL_"),
-				"abc123NATURAL_");
-		assertEquals(UnicodeTranslator.toUnicode("abc123natural_"),
-				"abc123natural_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123NATURAL_"), "abc123NATURAL_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123natural_"), "abc123natural_");
 	}
 
 	@Test
@@ -1659,10 +1619,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterDigitUNIONUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abc123UNION_"),
-				"abc123UNION_");
-		assertEquals(UnicodeTranslator.toUnicode("abc123union_"),
-				"abc123union_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123UNION_"), "abc123UNION_");
+		assertEquals(UnicodeTranslator.toUnicode("abc123union_"), "abc123union_");
 	}
 
 	@Test
@@ -1673,26 +1631,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreDigitFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_123FALSE"),
-				"abc_123FALSE");
-		assertEquals(UnicodeTranslator.toUnicode("abc_123false"),
-				"abc_123false");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123FALSE"), "abc_123FALSE");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123false"), "abc_123false");
 	}
 
 	@Test
 	public void LetterUnderscoreDigitINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_123INTEGER"),
-				"abc_123INTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("abc_123integer"),
-				"abc_123integer");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123INTEGER"), "abc_123INTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123integer"), "abc_123integer");
 	}
 
 	@Test
 	public void LetterUnderscoreDigitINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_123INTER"),
-				"abc_123INTER");
-		assertEquals(UnicodeTranslator.toUnicode("abc_123inter"),
-				"abc_123inter");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123INTER"), "abc_123INTER");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123inter"), "abc_123inter");
 	}
 
 	@Test
@@ -1709,10 +1661,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreDigitNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_123NATURAL"),
-				"abc_123NATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("abc_123natural"),
-				"abc_123natural");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123NATURAL"), "abc_123NATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123natural"), "abc_123natural");
 	}
 
 	@Test
@@ -1747,10 +1697,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreDigitUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_123UNION"),
-				"abc_123UNION");
-		assertEquals(UnicodeTranslator.toUnicode("abc_123union"),
-				"abc_123union");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123UNION"), "abc_123UNION");
+		assertEquals(UnicodeTranslator.toUnicode("abc_123union"), "abc_123union");
 	}
 
 	@Test
@@ -1761,26 +1709,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreFALSEDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_FALSE123"),
-				"abc_FALSE123");
-		assertEquals(UnicodeTranslator.toUnicode("abc_false123"),
-				"abc_false123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_FALSE123"), "abc_FALSE123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_false123"), "abc_false123");
 	}
 
 	@Test
 	public void LetterUnderscoreINTEGERDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_INTEGER123"),
-				"abc_INTEGER123");
-		assertEquals(UnicodeTranslator.toUnicode("abc_integer123"),
-				"abc_integer123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_INTEGER123"), "abc_INTEGER123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_integer123"), "abc_integer123");
 	}
 
 	@Test
 	public void LetterUnderscoreINTERDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_INTER123"),
-				"abc_INTER123");
-		assertEquals(UnicodeTranslator.toUnicode("abc_inter123"),
-				"abc_inter123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_INTER123"), "abc_INTER123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_inter123"), "abc_inter123");
 	}
 
 	@Test
@@ -1797,10 +1739,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreNATURALDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_NATURAL123"),
-				"abc_NATURAL123");
-		assertEquals(UnicodeTranslator.toUnicode("abc_natural123"),
-				"abc_natural123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_NATURAL123"), "abc_NATURAL123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_natural123"), "abc_natural123");
 	}
 
 	@Test
@@ -1835,10 +1775,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreUNIONDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_UNION123"),
-				"abc_UNION123");
-		assertEquals(UnicodeTranslator.toUnicode("abc_union123"),
-				"abc_union123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_UNION123"), "abc_UNION123");
+		assertEquals(UnicodeTranslator.toUnicode("abc_union123"), "abc_union123");
 	}
 
 	@Test
@@ -1849,26 +1787,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterFALSEDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abcFALSE123_"),
-				"abcFALSE123_");
-		assertEquals(UnicodeTranslator.toUnicode("abcfalse123_"),
-				"abcfalse123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcFALSE123_"), "abcFALSE123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcfalse123_"), "abcfalse123_");
 	}
 
 	@Test
 	public void LetterINTEGERDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER123_"),
-				"abcINTEGER123_");
-		assertEquals(UnicodeTranslator.toUnicode("abcinteger123_"),
-				"abcinteger123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER123_"), "abcINTEGER123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcinteger123_"), "abcinteger123_");
 	}
 
 	@Test
 	public void LetterINTERDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abcINTER123_"),
-				"abcINTER123_");
-		assertEquals(UnicodeTranslator.toUnicode("abcinter123_"),
-				"abcinter123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcINTER123_"), "abcINTER123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcinter123_"), "abcinter123_");
 	}
 
 	@Test
@@ -1885,10 +1817,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterNATURALDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL123_"),
-				"abcNATURAL123_");
-		assertEquals(UnicodeTranslator.toUnicode("abcnatural123_"),
-				"abcnatural123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL123_"), "abcNATURAL123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcnatural123_"), "abcnatural123_");
 	}
 
 	@Test
@@ -1923,10 +1853,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUNIONDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("abcUNION123_"),
-				"abcUNION123_");
-		assertEquals(UnicodeTranslator.toUnicode("abcunion123_"),
-				"abcunion123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcUNION123_"), "abcUNION123_");
+		assertEquals(UnicodeTranslator.toUnicode("abcunion123_"), "abcunion123_");
 	}
 
 	@Test
@@ -1937,26 +1865,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterFALSEUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcFALSE_123"),
-				"abcFALSE_123");
-		assertEquals(UnicodeTranslator.toUnicode("abcfalse_123"),
-				"abcfalse_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcFALSE_123"), "abcFALSE_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcfalse_123"), "abcfalse_123");
 	}
 
 	@Test
 	public void LetterINTEGERUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER_123"),
-				"abcINTEGER_123");
-		assertEquals(UnicodeTranslator.toUnicode("abcinteger_123"),
-				"abcinteger_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcINTEGER_123"), "abcINTEGER_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcinteger_123"), "abcinteger_123");
 	}
 
 	@Test
 	public void LetterINTERUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcINTER_123"),
-				"abcINTER_123");
-		assertEquals(UnicodeTranslator.toUnicode("abcinter_123"),
-				"abcinter_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcINTER_123"), "abcINTER_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcinter_123"), "abcinter_123");
 	}
 
 	@Test
@@ -1973,10 +1895,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterNATURALUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL_123"),
-				"abcNATURAL_123");
-		assertEquals(UnicodeTranslator.toUnicode("abcnatural_123"),
-				"abcnatural_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcNATURAL_123"), "abcNATURAL_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcnatural_123"), "abcnatural_123");
 	}
 
 	@Test
@@ -2011,10 +1931,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUNIONUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("abcUNION_123"),
-				"abcUNION_123");
-		assertEquals(UnicodeTranslator.toUnicode("abcunion_123"),
-				"abcunion_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcUNION_123"), "abcUNION_123");
+		assertEquals(UnicodeTranslator.toUnicode("abcunion_123"), "abcunion_123");
 	}
 
 	@Test
@@ -2129,10 +2047,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcINTEGER"),
-				"123abcINTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("123abcinteger"),
-				"123abcinteger");
+		assertEquals(UnicodeTranslator.toUnicode("123abcINTEGER"), "123abcINTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("123abcinteger"), "123abcinteger");
 	}
 
 	@Test
@@ -2155,10 +2071,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcNATURAL"),
-				"123abcNATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("123abcnatural"),
-				"123abcnatural");
+		assertEquals(UnicodeTranslator.toUnicode("123abcNATURAL"), "123abcNATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("123abcnatural"), "123abcnatural");
 	}
 
 	@Test
@@ -2294,10 +2208,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitINTEGERLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123INTEGERabc"),
-				"123INTEGERabc");
-		assertEquals(UnicodeTranslator.toUnicode("123integerabc"),
-				"123integerabc");
+		assertEquals(UnicodeTranslator.toUnicode("123INTEGERabc"), "123INTEGERabc");
+		assertEquals(UnicodeTranslator.toUnicode("123integerabc"), "123integerabc");
 	}
 
 	@Test
@@ -2320,10 +2232,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitNATURALLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123NATURALabc"),
-				"123NATURALabc");
-		assertEquals(UnicodeTranslator.toUnicode("123naturalabc"),
-				"123naturalabc");
+		assertEquals(UnicodeTranslator.toUnicode("123NATURALabc"), "123NATURALabc");
+		assertEquals(UnicodeTranslator.toUnicode("123naturalabc"), "123naturalabc");
 	}
 
 	@Test
@@ -2448,26 +2358,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterUnderscoreFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("123abc_FALSE"),
-				"123abc_FALSE");
-		assertEquals(UnicodeTranslator.toUnicode("123abc_false"),
-				"123abc_false");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_FALSE"), "123abc_FALSE");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_false"), "123abc_false");
 	}
 
 	@Test
 	public void DigitLetterUnderscoreINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("123abc_INTEGER"),
-				"123abc_INTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("123abc_integer"),
-				"123abc_integer");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_INTEGER"), "123abc_INTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_integer"), "123abc_integer");
 	}
 
 	@Test
 	public void DigitLetterUnderscoreINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("123abc_INTER"),
-				"123abc_INTER");
-		assertEquals(UnicodeTranslator.toUnicode("123abc_inter"),
-				"123abc_inter");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_INTER"), "123abc_INTER");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_inter"), "123abc_inter");
 	}
 
 	@Test
@@ -2484,10 +2388,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterUnderscoreNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("123abc_NATURAL"),
-				"123abc_NATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("123abc_natural"),
-				"123abc_natural");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_NATURAL"), "123abc_NATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_natural"), "123abc_natural");
 	}
 
 	@Test
@@ -2522,10 +2424,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterUnderscoreUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("123abc_UNION"),
-				"123abc_UNION");
-		assertEquals(UnicodeTranslator.toUnicode("123abc_union"),
-				"123abc_union");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_UNION"), "123abc_UNION");
+		assertEquals(UnicodeTranslator.toUnicode("123abc_union"), "123abc_union");
 	}
 
 	@Test
@@ -2536,26 +2436,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterFALSEUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcFALSE_"),
-				"123abcFALSE_");
-		assertEquals(UnicodeTranslator.toUnicode("123abcfalse_"),
-				"123abcfalse_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcFALSE_"), "123abcFALSE_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcfalse_"), "123abcfalse_");
 	}
 
 	@Test
 	public void DigitLetterINTEGERUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcINTEGER_"),
-				"123abcINTEGER_");
-		assertEquals(UnicodeTranslator.toUnicode("123abcinteger_"),
-				"123abcinteger_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcINTEGER_"), "123abcINTEGER_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcinteger_"), "123abcinteger_");
 	}
 
 	@Test
 	public void DigitLetterINTERUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcINTER_"),
-				"123abcINTER_");
-		assertEquals(UnicodeTranslator.toUnicode("123abcinter_"),
-				"123abcinter_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcINTER_"), "123abcINTER_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcinter_"), "123abcinter_");
 	}
 
 	@Test
@@ -2572,10 +2466,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterNATURALUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcNATURAL_"),
-				"123abcNATURAL_");
-		assertEquals(UnicodeTranslator.toUnicode("123abcnatural_"),
-				"123abcnatural_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcNATURAL_"), "123abcNATURAL_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcnatural_"), "123abcnatural_");
 	}
 
 	@Test
@@ -2610,10 +2502,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitLetterUNIONUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123abcUNION_"),
-				"123abcUNION_");
-		assertEquals(UnicodeTranslator.toUnicode("123abcunion_"),
-				"123abcunion_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcUNION_"), "123abcUNION_");
+		assertEquals(UnicodeTranslator.toUnicode("123abcunion_"), "123abcunion_");
 	}
 
 	@Test
@@ -2624,26 +2514,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreLetterFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("123_abcFALSE"),
-				"123_abcFALSE");
-		assertEquals(UnicodeTranslator.toUnicode("123_abcfalse"),
-				"123_abcfalse");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcFALSE"), "123_abcFALSE");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcfalse"), "123_abcfalse");
 	}
 
 	@Test
 	public void DigitUnderscoreLetterINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("123_abcINTEGER"),
-				"123_abcINTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("123_abcinteger"),
-				"123_abcinteger");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcINTEGER"), "123_abcINTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcinteger"), "123_abcinteger");
 	}
 
 	@Test
 	public void DigitUnderscoreLetterINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("123_abcINTER"),
-				"123_abcINTER");
-		assertEquals(UnicodeTranslator.toUnicode("123_abcinter"),
-				"123_abcinter");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcINTER"), "123_abcINTER");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcinter"), "123_abcinter");
 	}
 
 	@Test
@@ -2660,10 +2544,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreLetterNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("123_abcNATURAL"),
-				"123_abcNATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("123_abcnatural"),
-				"123_abcnatural");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcNATURAL"), "123_abcNATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcnatural"), "123_abcnatural");
 	}
 
 	@Test
@@ -2698,10 +2580,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreLetterUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("123_abcUNION"),
-				"123_abcUNION");
-		assertEquals(UnicodeTranslator.toUnicode("123_abcunion"),
-				"123_abcunion");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcUNION"), "123_abcUNION");
+		assertEquals(UnicodeTranslator.toUnicode("123_abcunion"), "123_abcunion");
 	}
 
 	@Test
@@ -2712,26 +2592,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreFALSELetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123_FALSEabc"),
-				"123_FALSEabc");
-		assertEquals(UnicodeTranslator.toUnicode("123_falseabc"),
-				"123_falseabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_FALSEabc"), "123_FALSEabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_falseabc"), "123_falseabc");
 	}
 
 	@Test
 	public void DigitUnderscoreINTEGERLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123_INTEGERabc"),
-				"123_INTEGERabc");
-		assertEquals(UnicodeTranslator.toUnicode("123_integerabc"),
-				"123_integerabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_INTEGERabc"), "123_INTEGERabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_integerabc"), "123_integerabc");
 	}
 
 	@Test
 	public void DigitUnderscoreINTERLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123_INTERabc"),
-				"123_INTERabc");
-		assertEquals(UnicodeTranslator.toUnicode("123_interabc"),
-				"123_interabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_INTERabc"), "123_INTERabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_interabc"), "123_interabc");
 	}
 
 	@Test
@@ -2748,10 +2622,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreNATURALLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123_NATURALabc"),
-				"123_NATURALabc");
-		assertEquals(UnicodeTranslator.toUnicode("123_naturalabc"),
-				"123_naturalabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_NATURALabc"), "123_NATURALabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_naturalabc"), "123_naturalabc");
 	}
 
 	@Test
@@ -2786,10 +2658,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreUNIONLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123_UNIONabc"),
-				"123_UNIONabc");
-		assertEquals(UnicodeTranslator.toUnicode("123_unionabc"),
-				"123_unionabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_UNIONabc"), "123_UNIONabc");
+		assertEquals(UnicodeTranslator.toUnicode("123_unionabc"), "123_unionabc");
 	}
 
 	@Test
@@ -2800,26 +2670,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitFALSELetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123FALSEabc_"),
-				"123FALSEabc_");
-		assertEquals(UnicodeTranslator.toUnicode("123falseabc_"),
-				"123falseabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123FALSEabc_"), "123FALSEabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123falseabc_"), "123falseabc_");
 	}
 
 	@Test
 	public void DigitINTEGERLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123INTEGERabc_"),
-				"123INTEGERabc_");
-		assertEquals(UnicodeTranslator.toUnicode("123integerabc_"),
-				"123integerabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123INTEGERabc_"), "123INTEGERabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123integerabc_"), "123integerabc_");
 	}
 
 	@Test
 	public void DigitINTERLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123INTERabc_"),
-				"123INTERabc_");
-		assertEquals(UnicodeTranslator.toUnicode("123interabc_"),
-				"123interabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123INTERabc_"), "123INTERabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123interabc_"), "123interabc_");
 	}
 
 	@Test
@@ -2836,10 +2700,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitNATURALLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123NATURALabc_"),
-				"123NATURALabc_");
-		assertEquals(UnicodeTranslator.toUnicode("123naturalabc_"),
-				"123naturalabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123NATURALabc_"), "123NATURALabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123naturalabc_"), "123naturalabc_");
 	}
 
 	@Test
@@ -2874,10 +2736,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUNIONLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("123UNIONabc_"),
-				"123UNIONabc_");
-		assertEquals(UnicodeTranslator.toUnicode("123unionabc_"),
-				"123unionabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123UNIONabc_"), "123UNIONabc_");
+		assertEquals(UnicodeTranslator.toUnicode("123unionabc_"), "123unionabc_");
 	}
 
 	@Test
@@ -2888,26 +2748,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitFALSEUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123FALSE_abc"),
-				"123FALSE_abc");
-		assertEquals(UnicodeTranslator.toUnicode("123false_abc"),
-				"123false_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123FALSE_abc"), "123FALSE_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123false_abc"), "123false_abc");
 	}
 
 	@Test
 	public void DigitINTEGERUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123INTEGER_abc"),
-				"123INTEGER_abc");
-		assertEquals(UnicodeTranslator.toUnicode("123integer_abc"),
-				"123integer_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123INTEGER_abc"), "123INTEGER_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123integer_abc"), "123integer_abc");
 	}
 
 	@Test
 	public void DigitINTERUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123INTER_abc"),
-				"123INTER_abc");
-		assertEquals(UnicodeTranslator.toUnicode("123inter_abc"),
-				"123inter_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123INTER_abc"), "123INTER_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123inter_abc"), "123inter_abc");
 	}
 
 	@Test
@@ -2924,10 +2778,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitNATURALUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123NATURAL_abc"),
-				"123NATURAL_abc");
-		assertEquals(UnicodeTranslator.toUnicode("123natural_abc"),
-				"123natural_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123NATURAL_abc"), "123NATURAL_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123natural_abc"), "123natural_abc");
 	}
 
 	@Test
@@ -2962,10 +2814,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUNIONUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("123UNION_abc"),
-				"123UNION_abc");
-		assertEquals(UnicodeTranslator.toUnicode("123union_abc"),
-				"123union_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123UNION_abc"), "123UNION_abc");
+		assertEquals(UnicodeTranslator.toUnicode("123union_abc"), "123union_abc");
 	}
 
 	@Test
@@ -3391,26 +3241,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterDigitFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("_abc123FALSE"),
-				"_abc123FALSE");
-		assertEquals(UnicodeTranslator.toUnicode("_abc123false"),
-				"_abc123false");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123FALSE"), "_abc123FALSE");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123false"), "_abc123false");
 	}
 
 	@Test
 	public void UnderscoreLetterDigitINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("_abc123INTEGER"),
-				"_abc123INTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("_abc123integer"),
-				"_abc123integer");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123INTEGER"), "_abc123INTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123integer"), "_abc123integer");
 	}
 
 	@Test
 	public void UnderscoreLetterDigitINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("_abc123INTER"),
-				"_abc123INTER");
-		assertEquals(UnicodeTranslator.toUnicode("_abc123inter"),
-				"_abc123inter");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123INTER"), "_abc123INTER");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123inter"), "_abc123inter");
 	}
 
 	@Test
@@ -3427,10 +3271,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterDigitNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("_abc123NATURAL"),
-				"_abc123NATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("_abc123natural"),
-				"_abc123natural");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123NATURAL"), "_abc123NATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123natural"), "_abc123natural");
 	}
 
 	@Test
@@ -3465,10 +3307,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterDigitUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("_abc123UNION"),
-				"_abc123UNION");
-		assertEquals(UnicodeTranslator.toUnicode("_abc123union"),
-				"_abc123union");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123UNION"), "_abc123UNION");
+		assertEquals(UnicodeTranslator.toUnicode("_abc123union"), "_abc123union");
 	}
 
 	@Test
@@ -3479,26 +3319,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterFALSEDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_abcFALSE123"),
-				"_abcFALSE123");
-		assertEquals(UnicodeTranslator.toUnicode("_abcfalse123"),
-				"_abcfalse123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcFALSE123"), "_abcFALSE123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcfalse123"), "_abcfalse123");
 	}
 
 	@Test
 	public void UnderscoreLetterINTEGERDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_abcINTEGER123"),
-				"_abcINTEGER123");
-		assertEquals(UnicodeTranslator.toUnicode("_abcinteger123"),
-				"_abcinteger123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcINTEGER123"), "_abcINTEGER123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcinteger123"), "_abcinteger123");
 	}
 
 	@Test
 	public void UnderscoreLetterINTERDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_abcINTER123"),
-				"_abcINTER123");
-		assertEquals(UnicodeTranslator.toUnicode("_abcinter123"),
-				"_abcinter123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcINTER123"), "_abcINTER123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcinter123"), "_abcinter123");
 	}
 
 	@Test
@@ -3515,10 +3349,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterNATURALDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_abcNATURAL123"),
-				"_abcNATURAL123");
-		assertEquals(UnicodeTranslator.toUnicode("_abcnatural123"),
-				"_abcnatural123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcNATURAL123"), "_abcNATURAL123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcnatural123"), "_abcnatural123");
 	}
 
 	@Test
@@ -3553,10 +3385,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreLetterUNIONDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_abcUNION123"),
-				"_abcUNION123");
-		assertEquals(UnicodeTranslator.toUnicode("_abcunion123"),
-				"_abcunion123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcUNION123"), "_abcUNION123");
+		assertEquals(UnicodeTranslator.toUnicode("_abcunion123"), "_abcunion123");
 	}
 
 	@Test
@@ -3567,26 +3397,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitLetterFALSE() {
-		assertEquals(UnicodeTranslator.toUnicode("_123abcFALSE"),
-				"_123abcFALSE");
-		assertEquals(UnicodeTranslator.toUnicode("_123abcfalse"),
-				"_123abcfalse");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcFALSE"), "_123abcFALSE");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcfalse"), "_123abcfalse");
 	}
 
 	@Test
 	public void UnderscoreDigitLetterINTEGER() {
-		assertEquals(UnicodeTranslator.toUnicode("_123abcINTEGER"),
-				"_123abcINTEGER");
-		assertEquals(UnicodeTranslator.toUnicode("_123abcinteger"),
-				"_123abcinteger");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcINTEGER"), "_123abcINTEGER");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcinteger"), "_123abcinteger");
 	}
 
 	@Test
 	public void UnderscoreDigitLetterINTER() {
-		assertEquals(UnicodeTranslator.toUnicode("_123abcINTER"),
-				"_123abcINTER");
-		assertEquals(UnicodeTranslator.toUnicode("_123abcinter"),
-				"_123abcinter");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcINTER"), "_123abcINTER");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcinter"), "_123abcinter");
 	}
 
 	@Test
@@ -3603,10 +3427,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitLetterNATURAL() {
-		assertEquals(UnicodeTranslator.toUnicode("_123abcNATURAL"),
-				"_123abcNATURAL");
-		assertEquals(UnicodeTranslator.toUnicode("_123abcnatural"),
-				"_123abcnatural");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcNATURAL"), "_123abcNATURAL");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcnatural"), "_123abcnatural");
 	}
 
 	@Test
@@ -3641,10 +3463,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitLetterUNION() {
-		assertEquals(UnicodeTranslator.toUnicode("_123abcUNION"),
-				"_123abcUNION");
-		assertEquals(UnicodeTranslator.toUnicode("_123abcunion"),
-				"_123abcunion");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcUNION"), "_123abcUNION");
+		assertEquals(UnicodeTranslator.toUnicode("_123abcunion"), "_123abcunion");
 	}
 
 	@Test
@@ -3655,26 +3475,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitFALSELetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_123FALSEabc"),
-				"_123FALSEabc");
-		assertEquals(UnicodeTranslator.toUnicode("_123falseabc"),
-				"_123falseabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123FALSEabc"), "_123FALSEabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123falseabc"), "_123falseabc");
 	}
 
 	@Test
 	public void UnderscoreDigitINTEGERLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_123INTEGERabc"),
-				"_123INTEGERabc");
-		assertEquals(UnicodeTranslator.toUnicode("_123integerabc"),
-				"_123integerabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123INTEGERabc"), "_123INTEGERabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123integerabc"), "_123integerabc");
 	}
 
 	@Test
 	public void UnderscoreDigitINTERLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_123INTERabc"),
-				"_123INTERabc");
-		assertEquals(UnicodeTranslator.toUnicode("_123interabc"),
-				"_123interabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123INTERabc"), "_123INTERabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123interabc"), "_123interabc");
 	}
 
 	@Test
@@ -3691,10 +3505,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitNATURALLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_123NATURALabc"),
-				"_123NATURALabc");
-		assertEquals(UnicodeTranslator.toUnicode("_123naturalabc"),
-				"_123naturalabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123NATURALabc"), "_123NATURALabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123naturalabc"), "_123naturalabc");
 	}
 
 	@Test
@@ -3729,10 +3541,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreDigitUNIONLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_123UNIONabc"),
-				"_123UNIONabc");
-		assertEquals(UnicodeTranslator.toUnicode("_123unionabc"),
-				"_123unionabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123UNIONabc"), "_123UNIONabc");
+		assertEquals(UnicodeTranslator.toUnicode("_123unionabc"), "_123unionabc");
 	}
 
 	@Test
@@ -3743,10 +3553,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreFALSELetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_FALSEabc123"),
-				"_FALSEabc123");
-		assertEquals(UnicodeTranslator.toUnicode("_falseabc123"),
-				"_falseabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_FALSEabc123"), "_FALSEabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_falseabc123"), "_falseabc123");
 	}
 
 	@Test
@@ -3763,10 +3571,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreINTERLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_INTERabc123"),
-				"_INTERabc123");
-		assertEquals(UnicodeTranslator.toUnicode("_interabc123"),
-				"_interabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_INTERabc123"), "_INTERabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_interabc123"), "_interabc123");
 	}
 
 	@Test
@@ -3783,10 +3589,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreNATURALLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_NATURALabc123"),
-				"_NATURALabc123");
-		assertEquals(UnicodeTranslator.toUnicode("_naturalabc123"),
-				"_naturalabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_NATURALabc123"), "_NATURALabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_naturalabc123"), "_naturalabc123");
 	}
 
 	@Test
@@ -3821,10 +3625,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreUNIONLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("_UNIONabc123"),
-				"_UNIONabc123");
-		assertEquals(UnicodeTranslator.toUnicode("_unionabc123"),
-				"_unionabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_UNIONabc123"), "_UNIONabc123");
+		assertEquals(UnicodeTranslator.toUnicode("_unionabc123"), "_unionabc123");
 	}
 
 	@Test
@@ -3835,26 +3637,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreFALSEDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_FALSE123abc"),
-				"_FALSE123abc");
-		assertEquals(UnicodeTranslator.toUnicode("_false123abc"),
-				"_false123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_FALSE123abc"), "_FALSE123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_false123abc"), "_false123abc");
 	}
 
 	@Test
 	public void UnderscoreINTEGERDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_INTEGER123abc"),
-				"_INTEGER123abc");
-		assertEquals(UnicodeTranslator.toUnicode("_integer123abc"),
-				"_integer123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_INTEGER123abc"), "_INTEGER123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_integer123abc"), "_integer123abc");
 	}
 
 	@Test
 	public void UnderscoreINTERDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_INTER123abc"),
-				"_INTER123abc");
-		assertEquals(UnicodeTranslator.toUnicode("_inter123abc"),
-				"_inter123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_INTER123abc"), "_INTER123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_inter123abc"), "_inter123abc");
 	}
 
 	@Test
@@ -3871,10 +3667,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreNATURALDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_NATURAL123abc"),
-				"_NATURAL123abc");
-		assertEquals(UnicodeTranslator.toUnicode("_natural123abc"),
-				"_natural123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_NATURAL123abc"), "_NATURAL123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_natural123abc"), "_natural123abc");
 	}
 
 	@Test
@@ -3909,10 +3703,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UnderscoreUNIONDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("_UNION123abc"),
-				"_UNION123abc");
-		assertEquals(UnicodeTranslator.toUnicode("_union123abc"),
-				"_union123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_UNION123abc"), "_UNION123abc");
+		assertEquals(UnicodeTranslator.toUnicode("_union123abc"), "_union123abc");
 	}
 
 	@Test
@@ -4169,10 +3961,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void INTEGERLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc123"),
-				"INTEGERabc123");
-		assertEquals(UnicodeTranslator.toUnicode("integerabc123"),
-				"integerabc123");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc123"), "INTEGERabc123");
+		assertEquals(UnicodeTranslator.toUnicode("integerabc123"), "integerabc123");
 	}
 
 	@Test
@@ -4195,10 +3985,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURALabc123"),
-				"NATURALabc123");
-		assertEquals(UnicodeTranslator.toUnicode("naturalabc123"),
-				"naturalabc123");
+		assertEquals(UnicodeTranslator.toUnicode("NATURALabc123"), "NATURALabc123");
+		assertEquals(UnicodeTranslator.toUnicode("naturalabc123"), "naturalabc123");
 	}
 
 	@Test
@@ -4329,10 +4117,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void INTEGERDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGER123abc"),
-				"INTEGER123abc");
-		assertEquals(UnicodeTranslator.toUnicode("integer123abc"),
-				"integer123abc");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGER123abc"), "INTEGER123abc");
+		assertEquals(UnicodeTranslator.toUnicode("integer123abc"), "integer123abc");
 	}
 
 	@Test
@@ -4355,10 +4141,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURAL123abc"),
-				"NATURAL123abc");
-		assertEquals(UnicodeTranslator.toUnicode("natural123abc"),
-				"natural123abc");
+		assertEquals(UnicodeTranslator.toUnicode("NATURAL123abc"), "NATURAL123abc");
+		assertEquals(UnicodeTranslator.toUnicode("natural123abc"), "natural123abc");
 	}
 
 	@Test
@@ -4639,26 +4423,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSELetterDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSEabc123_"),
-				"FALSEabc123_");
-		assertEquals(UnicodeTranslator.toUnicode("falseabc123_"),
-				"falseabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("FALSEabc123_"), "FALSEabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("falseabc123_"), "falseabc123_");
 	}
 
 	@Test
 	public void INTEGERLetterDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc123_"),
-				"INTEGERabc123_");
-		assertEquals(UnicodeTranslator.toUnicode("integerabc123_"),
-				"integerabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc123_"), "INTEGERabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("integerabc123_"), "integerabc123_");
 	}
 
 	@Test
 	public void INTERLetterDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("INTERabc123_"),
-				"INTERabc123_");
-		assertEquals(UnicodeTranslator.toUnicode("interabc123_"),
-				"interabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("INTERabc123_"), "INTERabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("interabc123_"), "interabc123_");
 	}
 
 	@Test
@@ -4675,10 +4453,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALLetterDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURALabc123_"),
-				"NATURALabc123_");
-		assertEquals(UnicodeTranslator.toUnicode("naturalabc123_"),
-				"naturalabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("NATURALabc123_"), "NATURALabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("naturalabc123_"), "naturalabc123_");
 	}
 
 	@Test
@@ -4713,10 +4489,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONLetterDigitUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("UNIONabc123_"),
-				"UNIONabc123_");
-		assertEquals(UnicodeTranslator.toUnicode("unionabc123_"),
-				"unionabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("UNIONabc123_"), "UNIONabc123_");
+		assertEquals(UnicodeTranslator.toUnicode("unionabc123_"), "unionabc123_");
 	}
 
 	@Test
@@ -4727,26 +4501,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSELetterUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSEabc_123"),
-				"FALSEabc_123");
-		assertEquals(UnicodeTranslator.toUnicode("falseabc_123"),
-				"falseabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("FALSEabc_123"), "FALSEabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("falseabc_123"), "falseabc_123");
 	}
 
 	@Test
 	public void INTEGERLetterUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc_123"),
-				"INTEGERabc_123");
-		assertEquals(UnicodeTranslator.toUnicode("integerabc_123"),
-				"integerabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGERabc_123"), "INTEGERabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("integerabc_123"), "integerabc_123");
 	}
 
 	@Test
 	public void INTERLetterUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("INTERabc_123"),
-				"INTERabc_123");
-		assertEquals(UnicodeTranslator.toUnicode("interabc_123"),
-				"interabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("INTERabc_123"), "INTERabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("interabc_123"), "interabc_123");
 	}
 
 	@Test
@@ -4763,10 +4531,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALLetterUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURALabc_123"),
-				"NATURALabc_123");
-		assertEquals(UnicodeTranslator.toUnicode("naturalabc_123"),
-				"naturalabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("NATURALabc_123"), "NATURALabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("naturalabc_123"), "naturalabc_123");
 	}
 
 	@Test
@@ -4801,10 +4567,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONLetterUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("UNIONabc_123"),
-				"UNIONabc_123");
-		assertEquals(UnicodeTranslator.toUnicode("unionabc_123"),
-				"unionabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("UNIONabc_123"), "UNIONabc_123");
+		assertEquals(UnicodeTranslator.toUnicode("unionabc_123"), "unionabc_123");
 	}
 
 	@Test
@@ -4815,26 +4579,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSEDigitLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSE123abc_"),
-				"FALSE123abc_");
-		assertEquals(UnicodeTranslator.toUnicode("false123abc_"),
-				"false123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("FALSE123abc_"), "FALSE123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("false123abc_"), "false123abc_");
 	}
 
 	@Test
 	public void INTEGERDigitLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGER123abc_"),
-				"INTEGER123abc_");
-		assertEquals(UnicodeTranslator.toUnicode("integer123abc_"),
-				"integer123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGER123abc_"), "INTEGER123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("integer123abc_"), "integer123abc_");
 	}
 
 	@Test
 	public void INTERDigitLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("INTER123abc_"),
-				"INTER123abc_");
-		assertEquals(UnicodeTranslator.toUnicode("inter123abc_"),
-				"inter123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("INTER123abc_"), "INTER123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("inter123abc_"), "inter123abc_");
 	}
 
 	@Test
@@ -4851,10 +4609,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALDigitLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURAL123abc_"),
-				"NATURAL123abc_");
-		assertEquals(UnicodeTranslator.toUnicode("natural123abc_"),
-				"natural123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("NATURAL123abc_"), "NATURAL123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("natural123abc_"), "natural123abc_");
 	}
 
 	@Test
@@ -4889,10 +4645,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONDigitLetterUnderscore() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION123abc_"),
-				"UNION123abc_");
-		assertEquals(UnicodeTranslator.toUnicode("union123abc_"),
-				"union123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("UNION123abc_"), "UNION123abc_");
+		assertEquals(UnicodeTranslator.toUnicode("union123abc_"), "union123abc_");
 	}
 
 	@Test
@@ -4903,26 +4657,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSEDigitUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSE123_abc"),
-				"FALSE123_abc");
-		assertEquals(UnicodeTranslator.toUnicode("false123_abc"),
-				"false123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("FALSE123_abc"), "FALSE123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("false123_abc"), "false123_abc");
 	}
 
 	@Test
 	public void INTEGERDigitUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGER123_abc"),
-				"INTEGER123_abc");
-		assertEquals(UnicodeTranslator.toUnicode("integer123_abc"),
-				"integer123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGER123_abc"), "INTEGER123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("integer123_abc"), "integer123_abc");
 	}
 
 	@Test
 	public void INTERDigitUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("INTER123_abc"),
-				"INTER123_abc");
-		assertEquals(UnicodeTranslator.toUnicode("inter123_abc"),
-				"inter123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("INTER123_abc"), "INTER123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("inter123_abc"), "inter123_abc");
 	}
 
 	@Test
@@ -4939,10 +4687,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALDigitUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURAL123_abc"),
-				"NATURAL123_abc");
-		assertEquals(UnicodeTranslator.toUnicode("natural123_abc"),
-				"natural123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("NATURAL123_abc"), "NATURAL123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("natural123_abc"), "natural123_abc");
 	}
 
 	@Test
@@ -4977,10 +4723,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONDigitUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION123_abc"),
-				"UNION123_abc");
-		assertEquals(UnicodeTranslator.toUnicode("union123_abc"),
-				"union123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("UNION123_abc"), "UNION123_abc");
+		assertEquals(UnicodeTranslator.toUnicode("union123_abc"), "union123_abc");
 	}
 
 	@Test
@@ -4991,26 +4735,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSEUnderscoreLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSE_abc123"),
-				"FALSE_abc123");
-		assertEquals(UnicodeTranslator.toUnicode("false_abc123"),
-				"false_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("FALSE_abc123"), "FALSE_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("false_abc123"), "false_abc123");
 	}
 
 	@Test
 	public void INTEGERUnderscoreLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGER_abc123"),
-				"INTEGER_abc123");
-		assertEquals(UnicodeTranslator.toUnicode("integer_abc123"),
-				"integer_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGER_abc123"), "INTEGER_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("integer_abc123"), "integer_abc123");
 	}
 
 	@Test
 	public void INTERUnderscoreLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("INTER_abc123"),
-				"INTER_abc123");
-		assertEquals(UnicodeTranslator.toUnicode("inter_abc123"),
-				"inter_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("INTER_abc123"), "INTER_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("inter_abc123"), "inter_abc123");
 	}
 
 	@Test
@@ -5027,10 +4765,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALUnderscoreLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURAL_abc123"),
-				"NATURAL_abc123");
-		assertEquals(UnicodeTranslator.toUnicode("natural_abc123"),
-				"natural_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("NATURAL_abc123"), "NATURAL_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("natural_abc123"), "natural_abc123");
 	}
 
 	@Test
@@ -5065,10 +4801,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONUnderscoreLetterDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION_abc123"),
-				"UNION_abc123");
-		assertEquals(UnicodeTranslator.toUnicode("union_abc123"),
-				"union_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("UNION_abc123"), "UNION_abc123");
+		assertEquals(UnicodeTranslator.toUnicode("union_abc123"), "union_abc123");
 	}
 
 	@Test
@@ -5079,26 +4813,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void FALSEUnderscoreDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("FALSE_123abc"),
-				"FALSE_123abc");
-		assertEquals(UnicodeTranslator.toUnicode("false_123abc"),
-				"false_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("FALSE_123abc"), "FALSE_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("false_123abc"), "false_123abc");
 	}
 
 	@Test
 	public void INTEGERUnderscoreDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("INTEGER_123abc"),
-				"INTEGER_123abc");
-		assertEquals(UnicodeTranslator.toUnicode("integer_123abc"),
-				"integer_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("INTEGER_123abc"), "INTEGER_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("integer_123abc"), "integer_123abc");
 	}
 
 	@Test
 	public void INTERUnderscoreDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("INTER_123abc"),
-				"INTER_123abc");
-		assertEquals(UnicodeTranslator.toUnicode("inter_123abc"),
-				"inter_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("INTER_123abc"), "INTER_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("inter_123abc"), "inter_123abc");
 	}
 
 	@Test
@@ -5115,10 +4843,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void NATURALUnderscoreDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("NATURAL_123abc"),
-				"NATURAL_123abc");
-		assertEquals(UnicodeTranslator.toUnicode("natural_123abc"),
-				"natural_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("NATURAL_123abc"), "NATURAL_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("natural_123abc"), "natural_123abc");
 	}
 
 	@Test
@@ -5153,10 +4879,8 @@ public class ToUnicodeTest {
 
 	@Test
 	public void UNIONUnderscoreDigitLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("UNION_123abc"),
-				"UNION_123abc");
-		assertEquals(UnicodeTranslator.toUnicode("union_123abc"),
-				"union_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("UNION_123abc"), "UNION_123abc");
+		assertEquals(UnicodeTranslator.toUnicode("union_123abc"), "union_123abc");
 	}
 
 	@Test
@@ -5265,26 +4989,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreFALSEUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_FALSE_abc"),
-				"abc_FALSE_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_false_abc"),
-				"abc_false_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_FALSE_abc"), "abc_FALSE_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_false_abc"), "abc_false_abc");
 	}
 
 	@Test
 	public void LetterUnderscoreINTEGERUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_INTEGER_abc"),
-				"abc_INTEGER_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_integer_abc"),
-				"abc_integer_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_INTEGER_abc"), "abc_INTEGER_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_integer_abc"), "abc_integer_abc");
 	}
 
 	@Test
 	public void LetterUnderscoreINTERUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_INTER_abc"),
-				"abc_INTER_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_inter_abc"),
-				"abc_inter_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_INTER_abc"), "abc_INTER_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_inter_abc"), "abc_inter_abc");
 	}
 
 	@Test
@@ -5295,18 +5013,14 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscoreNAT1UnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_NAT1_abc"),
-				"abc_NAT1_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_nat1_abc"),
-				"abc_nat1_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_NAT1_abc"), "abc_NAT1_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_nat1_abc"), "abc_nat1_abc");
 	}
 
 	@Test
 	public void LetterUnderscoreNATURALUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_NATURAL_abc"),
-				"abc_NATURAL_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_natural_abc"),
-				"abc_natural_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_NATURAL_abc"), "abc_NATURAL_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_natural_abc"), "abc_natural_abc");
 	}
 
 	@Test
@@ -5329,26 +5043,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void LetterUnderscorePOW1UnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_POW1_abc"),
-				"abc_POW1_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_pow1_abc"),
-				"abc_pow1_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_POW1_abc"), "abc_POW1_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_pow1_abc"), "abc_pow1_abc");
 	}
 
 	@Test
 	public void LetterUnderscoreTRUEUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_TRUE_abc"),
-				"abc_TRUE_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_true_abc"),
-				"abc_true_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_TRUE_abc"), "abc_TRUE_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_true_abc"), "abc_true_abc");
 	}
 
 	@Test
 	public void LetterUnderscoreUNIONUnderscoreLetter() {
-		assertEquals(UnicodeTranslator.toUnicode("abc_UNION_abc"),
-				"abc_UNION_abc");
-		assertEquals(UnicodeTranslator.toUnicode("abc_union_abc"),
-				"abc_union_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_UNION_abc"), "abc_UNION_abc");
+		assertEquals(UnicodeTranslator.toUnicode("abc_union_abc"), "abc_union_abc");
 	}
 
 	@Test
@@ -5369,26 +5077,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreFALSEUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_FALSE_123"),
-				"123_FALSE_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_false_123"),
-				"123_false_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_FALSE_123"), "123_FALSE_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_false_123"), "123_false_123");
 	}
 
 	@Test
 	public void DigitUnderscoreINTEGERUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_INTEGER_123"),
-				"123_INTEGER_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_integer_123"),
-				"123_integer_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_INTEGER_123"), "123_INTEGER_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_integer_123"), "123_integer_123");
 	}
 
 	@Test
 	public void DigitUnderscoreINTERUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_INTER_123"),
-				"123_INTER_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_inter_123"),
-				"123_inter_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_INTER_123"), "123_INTER_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_inter_123"), "123_inter_123");
 	}
 
 	@Test
@@ -5399,18 +5101,14 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscoreNAT1UnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_NAT1_123"),
-				"123_NAT1_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_nat1_123"),
-				"123_nat1_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_NAT1_123"), "123_NAT1_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_nat1_123"), "123_nat1_123");
 	}
 
 	@Test
 	public void DigitUnderscoreNATURALUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_NATURAL_123"),
-				"123_NATURAL_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_natural_123"),
-				"123_natural_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_NATURAL_123"), "123_NATURAL_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_natural_123"), "123_natural_123");
 	}
 
 	@Test
@@ -5433,26 +5131,20 @@ public class ToUnicodeTest {
 
 	@Test
 	public void DigitUnderscorePOW1UnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_POW1_123"),
-				"123_POW1_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_pow1_123"),
-				"123_pow1_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_POW1_123"), "123_POW1_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_pow1_123"), "123_pow1_123");
 	}
 
 	@Test
 	public void DigitUnderscoreTRUEUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_TRUE_123"),
-				"123_TRUE_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_true_123"),
-				"123_true_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_TRUE_123"), "123_TRUE_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_true_123"), "123_true_123");
 	}
 
 	@Test
 	public void DigitUnderscoreUNIONUnderscoreDigit() {
-		assertEquals(UnicodeTranslator.toUnicode("123_UNION_123"),
-				"123_UNION_123");
-		assertEquals(UnicodeTranslator.toUnicode("123_union_123"),
-				"123_union_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_UNION_123"), "123_UNION_123");
+		assertEquals(UnicodeTranslator.toUnicode("123_union_123"), "123_union_123");
 	}
 
 	/*--------------------------------------------------------------*/
@@ -5532,19 +5224,15 @@ public class ToUnicodeTest {
 	public void VarINTEGER() {
 		assertEquals(UnicodeTranslator.toUnicode("varINTEGER"), "varINTEGER");
 		assertEquals(UnicodeTranslator.toUnicode("varinteger"), "varinteger");
-		assertEquals(UnicodeTranslator.toUnicode("varINTEGERvar"),
-				"varINTEGERvar");
-		assertEquals(UnicodeTranslator.toUnicode("varintegervar"),
-				"varintegervar");
+		assertEquals(UnicodeTranslator.toUnicode("varINTEGERvar"), "varINTEGERvar");
+		assertEquals(UnicodeTranslator.toUnicode("varintegervar"), "varintegervar");
 		assertEquals(UnicodeTranslator.toUnicode("INTEGERvar"), "INTEGERvar");
 		assertEquals(UnicodeTranslator.toUnicode("integervar"), "integervar");
 
 		assertEquals(UnicodeTranslator.toUnicode("123INTEGER"), "123INTEGER");
 		assertEquals(UnicodeTranslator.toUnicode("123integer"), "123integer");
-		assertEquals(UnicodeTranslator.toUnicode("123INTEGER123"),
-				"123INTEGER123");
-		assertEquals(UnicodeTranslator.toUnicode("123integer123"),
-				"123integer123");
+		assertEquals(UnicodeTranslator.toUnicode("123INTEGER123"), "123INTEGER123");
+		assertEquals(UnicodeTranslator.toUnicode("123integer123"), "123integer123");
 		assertEquals(UnicodeTranslator.toUnicode("INTEGER123"), "INTEGER123");
 		assertEquals(UnicodeTranslator.toUnicode("integer123"), "integer123");
 
@@ -5632,19 +5320,15 @@ public class ToUnicodeTest {
 	public void VarNATURAL() {
 		assertEquals(UnicodeTranslator.toUnicode("varNATURAL"), "varNATURAL");
 		assertEquals(UnicodeTranslator.toUnicode("varnatural"), "varnatural");
-		assertEquals(UnicodeTranslator.toUnicode("varNATURALvar"),
-				"varNATURALvar");
-		assertEquals(UnicodeTranslator.toUnicode("varnaturalvar"),
-				"varnaturalvar");
+		assertEquals(UnicodeTranslator.toUnicode("varNATURALvar"), "varNATURALvar");
+		assertEquals(UnicodeTranslator.toUnicode("varnaturalvar"), "varnaturalvar");
 		assertEquals(UnicodeTranslator.toUnicode("NATURALvar"), "NATURALvar");
 		assertEquals(UnicodeTranslator.toUnicode("naturalvar"), "naturalvar");
 
 		assertEquals(UnicodeTranslator.toUnicode("123NATURAL"), "123NATURAL");
 		assertEquals(UnicodeTranslator.toUnicode("123natural"), "123natural");
-		assertEquals(UnicodeTranslator.toUnicode("123NATURAL123"),
-				"123NATURAL123");
-		assertEquals(UnicodeTranslator.toUnicode("123natural123"),
-				"123natural123");
+		assertEquals(UnicodeTranslator.toUnicode("123NATURAL123"), "123NATURAL123");
+		assertEquals(UnicodeTranslator.toUnicode("123natural123"), "123natural123");
 		assertEquals(UnicodeTranslator.toUnicode("NATURAL123"), "NATURAL123");
 		assertEquals(UnicodeTranslator.toUnicode("natural123"), "natural123");
 
@@ -5799,7 +5483,10 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("UNION_"), "UNION_");
 		assertEquals(UnicodeTranslator.toUnicode("union_"), "union_");
 	}
-	
-	
-	
+
+	@Test
+	public void testStringTranslation() {
+		assertEquals(UnicodeTranslator.toUnicode("\"ab.c\""), "\"ab.c\"");
+	}
+
 }
