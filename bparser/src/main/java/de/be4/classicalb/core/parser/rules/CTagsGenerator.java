@@ -22,9 +22,9 @@ public class CTagsGenerator {
 
 	public static void generateCtagsFile(RulesProject project, File ctagsFile) {
 		List<CTagsEntry> list = new ArrayList<>();
-		list.addAll(createFromOperations(project.getOperationsMap().values()));
-		list.addAll(createFromConstants(project));
-		list.addAll(createFromMachines(project));
+		list.addAll(createCTagsEntryFromOperations(project.getOperationsMap().values()));
+		list.addAll(createCTagsEntryFromConstants(project));
+		list.addAll(createCTagsFromMachines(project));
 
 		try (FileWriter fw = new FileWriter(ctagsFile);) {
 			for (CTagsEntry cTagsEntry : list) {
@@ -37,30 +37,30 @@ public class CTagsGenerator {
 		}
 	}
 
-	private static Collection<? extends CTagsEntry> createFromMachines(RulesProject project) {
+	private static Collection<? extends CTagsEntry> createCTagsFromMachines(RulesProject project) {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (IModel model : project.bModels) {
 			if (model instanceof RulesParseUnit) {
 				RulesParseUnit parseUnit = (RulesParseUnit) model;
 				if (null != parseUnit.getRulesMachineChecker()) {
 					TIdentifierLiteral literal = parseUnit.getRulesMachineChecker().getNameLiteral();
-					list.add(new CTagsEntry(literal.getText(), parseUnit.getFile().getAbsolutePath(),
-							literal.getStartPos(), TYPE_MACHINE));
+					list.add(new CTagsEntry(literal.getText(), parseUnit.getPath(), literal.getStartPos(),
+							TYPE_MACHINE));
 				}
 			}
 		}
 		return list;
 	}
 
-	private static Collection<? extends CTagsEntry> createFromConstants(RulesProject project) {
+	private static Collection<? extends CTagsEntry> createCTagsEntryFromConstants(RulesProject project) {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (IModel model : project.bModels) {
 			if (model instanceof RulesParseUnit) {
 				RulesParseUnit parseUnit = (RulesParseUnit) model;
 				if (null != parseUnit.getRulesMachineChecker()) {
 					for (TIdentifierLiteral literal : parseUnit.getRulesMachineChecker().getGlobalIdentifiers()) {
-						list.add(new CTagsEntry(literal.getText(), parseUnit.getFile().getAbsolutePath(),
-								literal.getStartPos(), TYPE_IDENTIFIER));
+						list.add(new CTagsEntry(literal.getText(), parseUnit.getPath(), literal.getStartPos(),
+								TYPE_IDENTIFIER));
 					}
 				}
 			}
@@ -68,7 +68,7 @@ public class CTagsGenerator {
 		return list;
 	}
 
-	private static List<CTagsEntry> createFromOperations(Collection<AbstractOperation> values) {
+	private static List<CTagsEntry> createCTagsEntryFromOperations(Collection<AbstractOperation> values) {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (AbstractOperation operation : values) {
 			list.add(new CTagsEntry(operation.getName(), operation.getFileName(),

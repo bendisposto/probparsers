@@ -569,7 +569,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 				|| node.getValue() instanceof ASymbolicComprehensionSetExpression) {
 			value = node.getValue();
 		} else {
-			// value = node.getValue();
 			addForceDefinition(iDefinitions);
 			value = new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(node.getValue()));
 			value.setStartPos(node.getValue().getStartPos());

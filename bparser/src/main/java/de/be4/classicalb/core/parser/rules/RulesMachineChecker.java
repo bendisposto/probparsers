@@ -530,7 +530,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			checkStringFormatOperator(node, parameters);
 			return;
 		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
-			checkGetTuleCounterExamplesOperator(node, parameters);
+			checkGetRuleCounterExamplesOperator(node, parameters);
 			return;
 		default:
 			throw new AssertionError("Unkown expression operator: " + operatorName);
@@ -577,7 +577,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return (content.length() - content.replace(subString, "").length()) / subStringLength;
 	}
 
-	private void checkGetTuleCounterExamplesOperator(AOperatorExpression node,
+	private void checkGetRuleCounterExamplesOperator(AOperatorExpression node,
 			final LinkedList<PExpression> parameters) {
 		// the grammar ensures at least one argument
 		if (parameters.size() > 2) {
@@ -1095,18 +1095,16 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
 				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
-				if (list.size() > 1) {
-					errorList.add(new CheckException("Renaming of constants is not allowed.", expression));
-					return;
-				}
+				// the size of list is zero; this ensured by the grammar
 				TIdentifierLiteral tIdentifierLiteral = list.get(0);
 				String constantName = tIdentifierLiteral.getText();
 				if (this.knownIdentifiers.containsKey(constantName)) {
-					errorList.add(new CheckException("Constant already exists.", expression));
+					errorList.add(new CheckException("Identifier already exists.", expression));
 					return;
 				}
 				knownIdentifiers.put(constantName, tIdentifierLiteral);
 			} else {
+				// should not occur
 				errorList.add(new CheckException("Identifier expected.", expression));
 			}
 		}
@@ -1120,9 +1118,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			for (PExpression expression : parameters) {
 				if (expression instanceof AIdentifierExpression) {
 					AIdentifierExpression identifier = (AIdentifierExpression) expression;
-					if (identifier.getIdentifier().size() > 1) {
-						errorList.add(new CheckException("Renaming of identifier is not allowed.", expression));
-					}
 					TIdentifierLiteral tIdentifierLiteral = identifier.getIdentifier().getFirst();
 					String identifierName = tIdentifierLiteral.getText();
 					set.add(identifierName);

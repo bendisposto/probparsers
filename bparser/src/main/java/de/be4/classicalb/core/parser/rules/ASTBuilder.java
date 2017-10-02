@@ -18,7 +18,6 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMultOrCartExpression;
 import de.be4.classicalb.core.parser.node.APowSubsetExpression;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASeqExpression;
 import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
 import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
@@ -27,7 +26,6 @@ import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.AStringSetExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ATotalFunctionExpression;
-import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
@@ -50,6 +48,7 @@ public final class ASTBuilder {
 	public static final String PREFERENCES_PREFIX = "SET_PREF_";
 
 	private ASTBuilder() {
+		// contains only static methods
 	}
 
 	public static PPredicate createConjunction(List<PPredicate> predList) {
@@ -95,11 +94,6 @@ public final class ASTBuilder {
 		node.setStartPos(pos.getStartPos());
 		node.setEndPos(pos.getEndPos());
 		return node;
-	}
-
-	public static void setPosition(PositionedNode newNode, PositionedNode oldNode) {
-		newNode.setStartPos(oldNode.getStartPos());
-		newNode.setEndPos(oldNode.getEndPos());
 	}
 
 	public static AStringExpression createStringExpression(String string) {
@@ -164,15 +158,6 @@ public final class ASTBuilder {
 			list.add(createIdentifier(strings[i]));
 		}
 		return list;
-	}
-
-	public static List<PPredicate> createPredicateListFromIdentifierLiterals(final List<TIdentifierLiteral> literals,
-			final String value) {
-		final List<PPredicate> predList = new ArrayList<>();
-		for (TIdentifierLiteral old : literals) {
-			predList.add(createEqualPredicate(old, value));
-		}
-		return predList;
 	}
 
 	public static AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
@@ -261,26 +246,6 @@ public final class ASTBuilder {
 		iDefinitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
 	}
 
-	public static void addStringAppendDefinition(IDefinitions iDefinitions) {
-		if (iDefinitions.containsDefinition(STRING_APPEND)) {
-			return;
-		}
-		AExpressionDefinitionDefinition typeDef = new AExpressionDefinitionDefinition();
-		typeDef.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_STRING_APPEND"));
-		typeDef.setParameters(new ArrayList<PExpression>());
-		// EXTERNAL_FUNCTION_STRING_APPEND == (STRING*STRING) --> STRING;
-		typeDef.setRhs(new ATotalFunctionExpression(
-				new AMultOrCartExpression(new AStringSetExpression(), new AStringSetExpression()),
-				new AStringSetExpression()));
-		iDefinitions.addDefinition(typeDef, IDefinitions.Type.Expression);
-
-		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition();
-		def.setName(new TIdentifierLiteral(STRING_APPEND));
-		def.setParameters(createIdentifierList("a", "b"));
-		def.setRhs(createStringExpression("abc"));
-		iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-	}
-
 	public static void addChooseDefinition(IDefinitions iDefinitions) {
 		if (iDefinitions.containsDefinition(CHOOSE)) {
 			return;
@@ -325,19 +290,6 @@ public final class ASTBuilder {
 				new ASeqExpression(createIdentifier("T"))));
 		iDefinitions.addDefinition(sortType, IDefinitions.Type.Expression);
 
-	}
-
-	public static void addDefinition(IDefinitions iDefinitions, PDefinition definition) {
-		if (definition instanceof APredicateDefinitionDefinition) {
-			APredicateDefinitionDefinition def = (APredicateDefinitionDefinition) definition;
-			iDefinitions.addDefinition(def, IDefinitions.Type.Predicate);
-		} else if (definition instanceof AExpressionDefinitionDefinition) {
-			AExpressionDefinitionDefinition def = (AExpressionDefinitionDefinition) definition;
-			iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-		} else if (definition instanceof ASubstitutionDefinitionDefinition) {
-			ASubstitutionDefinitionDefinition def = (ASubstitutionDefinitionDefinition) definition;
-			iDefinitions.addDefinition(def, IDefinitions.Type.Substitution);
-		}
 	}
 
 	public static void addFormatToStringDefinition(IDefinitions iDefinitions) {
@@ -385,7 +337,7 @@ public final class ASTBuilder {
 		} else if ("FALSE".equals(value)) {
 			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
 		} else {
-			if (isInteger(value)) {
+			if (isIntValue(value)) {
 				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
 						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
 						new AIntegerExpression(new TIntegerLiteral(value)));
@@ -400,28 +352,13 @@ public final class ASTBuilder {
 
 	}
 
-	public static boolean isInteger(String str) {
-		if (str == null) {
+	private static boolean isIntValue(String value) {
+		try {
+			Integer.parseInt(value);
+			return true;
+		} catch (Exception e) {
 			return false;
 		}
-		int length = str.length();
-		if (length == 0) {
-			return false;
-		}
-		int i = 0;
-		if (str.charAt(0) == '-') {
-			if (length == 1) {
-				return false;
-			}
-			i = 1;
-		}
-		for (; i < length; i++) {
-			char c = str.charAt(i);
-			if (c < '0' || c > '9') {
-				return false;
-			}
-		}
-		return true;
 	}
 
 }

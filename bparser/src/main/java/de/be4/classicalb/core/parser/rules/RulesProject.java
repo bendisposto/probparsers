@@ -26,6 +26,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
@@ -53,9 +54,6 @@ public class RulesProject {
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
 		project.checkAndTranslateProject();
-		if (parsingBehaviour.isGenerateCtagsFile()) {
-			project.generateCTagsFile(CTAGS_FILE_NAME);
-		}
 		return project.printPrologOutput(out, err);
 	}
 
@@ -83,15 +81,6 @@ public class RulesProject {
 		unit.setMachineAsString(mainMachineAsString);
 		unit.parse();
 		return unit;
-	}
-
-	public void generateCTagsFile(String outputFileName) {
-		RulesParseUnit first = (RulesParseUnit) this.bModels.get(0);
-		File projectDirectory = first.getProjectDirectory();
-		if (projectDirectory != null) {
-			File ctagsFile = new File(projectDirectory, outputFileName);
-			CTagsGenerator.generateCtagsFile(this, ctagsFile);
-		}
 	}
 
 	public void parseProject(File mainFile) {
@@ -170,7 +159,7 @@ public class RulesProject {
 		addFormatToStringDefinition(definitions);
 		addChooseDefinition(definitions);
 		if (goalDefinition != null) {
-			addDefinition(definitions, goalDefinition);
+			definitions.addDefinition((APredicateDefinitionDefinition) goalDefinition, IDefinitions.Type.Predicate);
 		}
 		addBooleanPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
 		mainMachine.replaceDefinition(definitions);
