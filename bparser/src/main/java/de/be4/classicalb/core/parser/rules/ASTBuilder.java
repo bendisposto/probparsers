@@ -205,9 +205,10 @@ public final class ASTBuilder {
 			return;
 		}
 
-		// PRINT(x) == skip;
-		// EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any
-		// type T */
+		/*-
+		 * PRINT(x) == skip; 
+		 * EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any type T
+		 */
 		ASubstitutionDefinitionDefinition printDef = new ASubstitutionDefinitionDefinition();
 		printDef.setName(new TDefLiteralSubstitution(PRINT));
 		printDef.setParameters(createIdentifierList("value"));
