@@ -209,7 +209,6 @@ task copyCoverage(){
 sonarqube {
   properties {
 
-    property("sonar.organization", "HHU")
     property("sonar.projectKey", "probparsers")
     property("sonar.projectName", "probparsers")
     property("sonar.projectVersion", global_version)
