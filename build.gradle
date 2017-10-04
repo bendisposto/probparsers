@@ -212,7 +212,7 @@ sonarqube {
     property("sonar.organization", "HHU")
     property("sonar.projectKey", "probparsers")
     property("sonar.projectName", "probparsers")
-
+    property("sonar.projectVersion", global_version)
     property("sonar.sources", "bparser")
     property("sonar.java.binaries", "bparser/build/classes")
     property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
