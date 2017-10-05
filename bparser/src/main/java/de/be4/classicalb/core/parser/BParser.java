@@ -544,10 +544,11 @@ public class BParser {
 
 			// Properties hashes = new Properties();
 
-			if (parsingBehaviour.getOutputFile() != null) {
-				if (hashesStillValid(parsingBehaviour.getOutputFile()))
-					return 0;
-			}
+//			if (parsingBehaviour.getOutputFile() != null) {
+//				if (hashesStillValid(parsingBehaviour.getOutputFile())){
+//					return 0;
+//				}
+//			}
 
 			final long start = System.currentTimeMillis();
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
