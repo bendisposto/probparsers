@@ -215,8 +215,8 @@ sonarqube {
     //property("sonar.sources", "bparser")
     property("sonar.java.binaries", "bparser/build/classes")
     property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
-    //property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
-    //property("sonar.junit.reportsPath", "bparser/build/test-results/test")
+    property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
+    property("sonar.junit.reportsPath", "bparser/build/test-results/test")
     property("sonar.login", System.getenv("SONAR_TOKEN"))
   }
 }
