@@ -338,7 +338,7 @@ public final class ASTBuilder {
 		} else if ("FALSE".equals(value)) {
 			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
 		} else {
-			if (isIntValue(value)) {
+			if (getIntegerFromString(value) != null) {
 				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
 						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
 						new AIntegerExpression(new TIntegerLiteral(value)));
@@ -353,12 +353,11 @@ public final class ASTBuilder {
 
 	}
 
-	private static boolean isIntValue(String value) {
+	private static Integer getIntegerFromString(String value) {
 		try {
-			Integer.parseInt(value);
-			return true;
-		} catch (Exception e) {
-			return false;
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return null;
 		}
 	}
 

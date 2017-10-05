@@ -26,7 +26,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 
 	private static final long serialVersionUID = -629922806578121593L;
 
-	public static final ListPrologTerm EMPTY_LIST = new ListPrologTerm(new PrologTerm[0]);
+	protected static final ListPrologTerm EMPTY_LIST = new ListPrologTerm((PrologTerm[]) new PrologTerm[0]);
 
 	private final PrologTerm[] elements;
 
