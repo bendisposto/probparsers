@@ -9,7 +9,7 @@ before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in gradle.properties.enc -out
   gradle.properties -d
 addons:
-  sonarqube:
+  sonarcloud:
     branches:
      - master
      - develop

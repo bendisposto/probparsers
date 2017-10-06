@@ -20,6 +20,12 @@ public class RulesMachineFilesTest {
 	public static final String dir = "src/test/resources/rules/";
 
 	@Test
+	public void testSyntax() throws Exception {
+		String output = RulesUtil.getFileAsPrologTerm(dir + "project/RulesMachineSyntax.rmch");
+		System.out.println(output);
+	}
+
+	@Test
 	public void testProject2() throws Exception {
 		File file = new File(dir + "project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
@@ -35,7 +41,7 @@ public class RulesMachineFilesTest {
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
 		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
-		
+
 	}
 
 	@Test

@@ -87,7 +87,6 @@ public class RulesLanguageTest {
 		String result2 = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result2);
 	}
-	
 
 	@Test
 	public void testRuleFailSequence() {
@@ -364,6 +363,41 @@ public class RulesLanguageTest {
 		testMachine += "END\n";
 		final String prologOutput = getRulesProjectAsPrologTerm(testMachine);
 		assertFalse(prologOutput.contains("exception"));
+	}
+
+	@Test
+	public void testPreferences() throws Exception {
+		final String testMachine = "RULES_MACHINE test DEFINITIONS SET_PREF_TIME_OUT == 1000; SET_PREF_COMPRESSION == FALSE; SET_PREF_TRY_FIND_ABORT == TRUE; SET_PREF_SOME_PREF == \"foo\" END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("SET_PREF_TIME_OUT"));
+		assertTrue(result.contains("SET_PREF_TIME_OUT"));
+	}
+
+	@Test
+	public void testDefineSymbolicLambda() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ %x.(x : INTEGER | x ) END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
+	public void testDefineSymbolicSetComprehension() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ {x| x : INTEGER}END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
+	public void testFailedRuleAllErrorTypes() throws Exception {
+		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY skip END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
 	}
 
 }

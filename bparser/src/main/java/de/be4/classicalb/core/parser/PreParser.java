@@ -233,7 +233,7 @@ public class PreParser {
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
 			StringBuilder sb = new StringBuilder();
-			for (Iterator< String>iterator = cycle.iterator(); iterator.hasNext();) {
+			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
 				if (iterator.hasNext()) {
 					sb.append(" -> ");
@@ -303,7 +303,7 @@ public class PreParser {
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
 		final LinkedList<Token> list = new LinkedList<Token>();
-		for (final Iterator< Token>iterator = definitions.keySet().iterator(); iterator.hasNext();) {
+		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator.hasNext();) {
 			final Token definition = iterator.next();
 			list.add(definition);
 
@@ -409,6 +409,8 @@ public class PreParser {
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
 				throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 						definition, rhsToken, e3.getMessage()));
+			} catch (IOException e1) {
+				throw new PreParseException(e.getMessage());
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
@@ -418,6 +420,8 @@ public class PreParser {
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 			throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 					definition, rhsToken, e.getMessage()));
+		} catch (IOException e) {
+			throw new PreParseException(e.getMessage());
 		}
 
 	}
@@ -454,18 +458,13 @@ public class PreParser {
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(final String prefix, final String definitionRhs)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
-			de.be4.classicalb.core.parser.parser.ParserException {
+			de.be4.classicalb.core.parser.parser.ParserException, IOException {
 
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new SabbleCCBParser(lexer);
-		try {
-			return parser.parse();
-		} catch (final IOException e) {
-			// IGNORE
-			return null;
-		}
+		return parser.parse();
 	}
 
 	public IDefinitions getDefFileDefinitions() {

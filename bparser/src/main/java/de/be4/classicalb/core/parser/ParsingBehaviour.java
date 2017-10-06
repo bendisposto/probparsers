@@ -15,7 +15,6 @@ public class ParsingBehaviour {
 	private boolean fastPrologOutput = false;
 	private File outputFile;
 	private boolean machineNameMustMatchFileName = false;
-	private boolean generateCtagsFile = false;
 
 	public boolean isPrologOutput() {
 		return prologOutput;
@@ -103,14 +102,6 @@ public class ParsingBehaviour {
 
 	public void setMachineNameMustMatchFileName(boolean machineNameMustMatchFileName) {
 		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
-	}
-
-	public void setGenerateCtagsFile(boolean b) {
-		this.generateCtagsFile = b;
-	}
-
-	public boolean isGenerateCtagsFile() {
-		return this.generateCtagsFile;
 	}
 
 }

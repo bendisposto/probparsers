@@ -31,11 +31,17 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public final class PrologExceptionPrinter {
-	static public void printException(final OutputStream out, final IOException e, final String filename) {
+	private static final String PARSE_EXCEPTION_PROLOG_TERM = "parse_exception";
+
+	private PrologExceptionPrinter() {
+		// this class contains only static methods
+	}
+
+	public static void printException(final OutputStream out, final IOException e, final String filename) {
 		printException(out, e, filename, true, false);
 	}
 
-	static public void printException(final OutputStream out, final IOException e, final String filename,
+	public static void printException(final OutputStream out, final IOException e, final String filename,
 			boolean useIndentation, boolean lineOneOff) {
 		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		pto.openTerm("io_exception");
@@ -45,20 +51,20 @@ public final class PrologExceptionPrinter {
 		pto.flush();
 	}
 
-	static public void printException(final OutputStream out, final BCompoundException e) {
+	public static void printException(final OutputStream out, final BCompoundException e) {
 		printException(out, e, true, false);
 	}
 
-	static public void printException(final OutputStream out, final BCompoundException e, boolean useIndentation,
+	public static void printException(final OutputStream out, final BCompoundException e, boolean useIndentation,
 			boolean lineOneOff) {
 		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
 		if (e.getBExceptions().size() > 1) {
 			pto.openTerm("compound_exception", true);
 			pto.openList();
-			BCompoundException comp = (BCompoundException) e;
+			BCompoundException comp = e;
 			for (Exception ex : comp.getBExceptions()) {
 				try {
-					printBException(out, pto, (BException) ex, useIndentation, lineOneOff);
+					printBException(pto, (BException) ex, useIndentation, lineOneOff);
 				} catch (ClassCastException e2) {
 					throw new IllegalStateException(
 							"Unexpected exception in compound exceptions:" + ex.getClass().getSimpleName());
@@ -72,7 +78,7 @@ public final class PrologExceptionPrinter {
 			return;
 		} else if (e.getBExceptions().size() == 1) {
 			// single BException
-			printBException(out, pto, e.getBExceptions().get(0), useIndentation, lineOneOff);
+			printBException(pto, e.getBExceptions().get(0), useIndentation, lineOneOff);
 			pto.fullstop();
 			pto.flush();
 		} else {
@@ -80,8 +86,8 @@ public final class PrologExceptionPrinter {
 		}
 	}
 
-	static public void printBException(final OutputStream out, IPrologTermOutput pto, final BException e,
-			boolean useIndentation, boolean lineOneOff) {
+	public static void printBException(IPrologTermOutput pto, final BException e, boolean useIndentation,
+			boolean lineOneOff) {
 		Throwable cause = e.getCause();
 		String filename = e.getFilename();
 		if (cause == null) {
@@ -110,7 +116,7 @@ public final class PrologExceptionPrinter {
 
 	private static void printLexerException(IPrologTermOutput pto, LexerException cause, String filename,
 			boolean useIndentation, boolean lineOneOff) {
-		pto.openTerm("parse_exception");
+		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
 		// there is no source information / position attached to lexer
 		// exceptions -> extract from message
 		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
@@ -138,13 +144,10 @@ public final class PrologExceptionPrinter {
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
 		final Node[] nodes = cause.getNodes();
 		final SourcePosition startPos;
-		// final SourcePosition endPos;
 		if (nodes != null && nodes.length > 0) {
 			startPos = nodes[0].getStartPos();
-			// endPos = nodes[0].getEndPos();
 		} else {
 			startPos = null;
-			// endPos = null;
 		}
 		printExceptionWithSourcePosition(pto, cause, filename, startPos, useIndentation, lineOneOff);
 	}
@@ -170,7 +173,7 @@ public final class PrologExceptionPrinter {
 				posFound = true;
 				pto.openTerm("pos");
 				if (lineOneOff) {
-					pto.printNumber(token.getLine() - 1);
+					pto.printNumber((long) token.getLine() - 1);
 				} else {
 					pto.printNumber(token.getLine());
 				}
@@ -202,19 +205,19 @@ public final class PrologExceptionPrinter {
 	private static void printExceptionWithSourceRange(final IPrologTermOutput pto, final Throwable e,
 			final String filename, final SourcePosition beginPos, final SourcePosition endPos,
 			final boolean useIndentation, final boolean lineOneOff) {
-		pto.openTerm("parse_exception");
+		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
 		if (beginPos == null) {
 			pto.printAtom("none");
 		} else {
 			pto.openTerm("pos");
 			if (lineOneOff) {
-				pto.printNumber(beginPos.getLine() - 1);
+				pto.printNumber((long) beginPos.getLine() - 1);
 			} else {
 				pto.printNumber(beginPos.getLine());
 			}
 			pto.printNumber(beginPos.getPos());
 			if (lineOneOff) {
-				pto.printNumber(endPos.getLine() - 1);
+				pto.printNumber((long) endPos.getLine() - 1);
 			} else {
 				pto.printNumber(endPos.getLine());
 			}
@@ -228,13 +231,13 @@ public final class PrologExceptionPrinter {
 
 	private static void printExceptionWithSourcePosition(final IPrologTermOutput pto, final Throwable e,
 			final String filename, final SourcePosition pos, final boolean useIndentation, final boolean lineOneOff) {
-		pto.openTerm("parse_exception");
+		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
 		if (pos == null) {
 			pto.printAtom("none");
 		} else {
 			pto.openTerm("pos");
 			if (lineOneOff) {
-				pto.printNumber(pos.getLine() - 1);
+				pto.printNumber((long) pos.getLine() - 1);
 			} else {
 				pto.printNumber(pos.getLine());
 			}

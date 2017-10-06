@@ -414,11 +414,49 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
+	public void testGetRuleCounterexamples3Exception() throws Exception {
+		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(foo) = {} END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals("parse_exception(pos(1,40,null),'\\'foo\\' does not match any rule visible to this machine.').\n",
+				result);
+	}
+
+	@Test
+	public void testIdentifierAlreadyExists() throws Exception {
+		final String testMachine = "RULES_MACHINE test CONSTANTS k, k PROPERTIES k = 1 END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,33,'UnknownFile'),'Identifier already exists.').\n",
+				result);
+	}
+	
+	@Test
+	public void testRenamingIsNotAllowed() throws Exception {
+		final String testMachine = "RULES_MACHINE test CONSTANTS k PROPERTIES k.a = 1 END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,43,'UnknownFile'),'Identifier renaming is not allowed in a RULES_MACHINE.').\n",
+				result);
+	}
+	
+	@Test
+	public void testRuleFailWithParameterButWithoutWHEN() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL x COUNTEREXAMPLE x END END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertEquals(
+				"parse_exception(pos(1,45,'UnknownFile'),'The WHEN predicate must be provided if RULE_FAIL has at least one parameter.').\n",
+				result);
+	}
+
+	@Test
 	public void testFunctionReturnValuesNoIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION a /*@desc dd */ <-- foo BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Identifier expected.').\n", result);
 	}
-
 }

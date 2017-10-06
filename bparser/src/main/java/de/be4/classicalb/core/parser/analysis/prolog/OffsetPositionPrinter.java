@@ -40,16 +40,16 @@ public class OffsetPositionPrinter implements PositionPrinter {
 				pout.openTerm("pos", true);
 				pout.printNumber(id);
 				if (positions.getSourcecodeRange(node) == null && node.getStartPos() != null) {
-					pout.printNumber(node.getStartPos().getLine() + lineOffset);
-					pout.printNumber(node.getStartPos().getPos() + columnOffset);
-					pout.printNumber(node.getEndPos().getLine() + lineOffset);
-					pout.printNumber(node.getEndPos().getPos() + columnOffset);
+					pout.printNumber((long) node.getStartPos().getLine() + lineOffset);
+					pout.printNumber((long) node.getStartPos().getPos() + columnOffset);
+					pout.printNumber((long) node.getEndPos().getLine() + lineOffset);
+					pout.printNumber((long) node.getEndPos().getPos() + columnOffset);
 				} else {
 					pout.printNumber(nodeIds.lookupFileNumber(node));
-					pout.printNumber(positions.getBeginLine(node) + lineOffset);
-					pout.printNumber(positions.getBeginColumn(node) + columnOffset);
-					pout.printNumber(positions.getEndLine(node) + lineOffset);
-					pout.printNumber(positions.getEndColumn(node) + columnOffset);
+					pout.printNumber((long) positions.getBeginLine(node) + lineOffset);
+					pout.printNumber((long) positions.getBeginColumn(node) + columnOffset);
+					pout.printNumber((long) positions.getEndLine(node) + lineOffset);
+					pout.printNumber((long) positions.getEndColumn(node) + columnOffset);
 				}
 				pout.closeTerm();
 			}

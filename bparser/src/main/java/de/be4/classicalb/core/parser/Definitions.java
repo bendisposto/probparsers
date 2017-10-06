@@ -15,6 +15,7 @@ import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
 
 public class Definitions extends IDefinitions {
+
 	private final Map<String, PDefinition> definitionsMap = new HashMap<>();
 	private final Map<String, Type> types = new HashMap<>();
 	private final File file;
@@ -31,7 +32,7 @@ public class Definitions extends IDefinitions {
 	public Map<String, Type> getTypes() {
 		final Map<String, Type> map = new HashMap<>();
 		map.putAll(types);
-		for (IDefinitions definitions : referencedDefinitions) {
+		for (IDefinitions definitions : referencedDefinitions) {	
 			map.putAll(definitions.getTypes());
 		}
 		return map;
@@ -93,7 +94,11 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError("Definition " + defName + " does not exist.");
+		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+	}
+
+	private String getErrorMessageDefinitionDoesNotExist(String defName) {
+		return String.format("Definition %s does not exist.", defName);
 	}
 
 	@Override
@@ -107,7 +112,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError("Definition " + defName + " does not exist.");
+		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
@@ -138,24 +143,24 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError("Definition " + defName + " does not exist.");
+		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
-	public void replaceDefinition(final String key, final Type type, final PDefinition node) {
-		if (types.containsKey(key)) {
-			types.put(key, type);
-			definitionsMap.put(key, node);
+	public void replaceDefinition(final String defName, final Type type, final PDefinition node) {
+		if (types.containsKey(defName)) {
+			types.put(defName, type);
+			definitionsMap.put(defName, node);
 			return;
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(key)) {
-					iDefinitions.replaceDefinition(key, type, node);
+				if (iDefinitions.containsDefinition(defName)) {
+					iDefinitions.replaceDefinition(defName, type, node);
 					return;
 				}
 			}
 		}
-		throw new AssertionError("Definition " + key + " does not exist.");
+		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override

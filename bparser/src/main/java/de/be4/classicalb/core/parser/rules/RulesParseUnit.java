@@ -70,10 +70,6 @@ public class RulesParseUnit implements IModel {
 		this.content = content;
 	}
 
-	public File getFile() {
-		return machineFile;
-	}
-
 	public RulesMachineChecker getRulesMachineChecker() {
 		return this.rulesMachineChecker;
 	}
@@ -197,13 +193,6 @@ public class RulesParseUnit implements IModel {
 	@Override
 	public BCompoundException getCompoundException() {
 		return this.bCompoundException;
-	}
-
-	public File getProjectDirectory() {
-		if (this.refFinder != null && this.refFinder.getProjectRootDirectory() != null) {
-			return this.refFinder.getProjectRootDirectory();
-		}
-		return this.machineFile.getParentFile();
 	}
 
 }
