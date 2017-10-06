@@ -1,6 +1,5 @@
 package de.prob.translator.types;
 
-import java.lang.String;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -129,10 +128,10 @@ public class Sequence implements List<BObject>, BObject {
 	}
 
 	public Sequence() {
-		this.list = new java.util.ArrayList<BObject>();
+		this.list = new java.util.ArrayList<>();
 	}
 
-	public String toString() {
+	public java.lang.String toString() {
 		return list.toString();
 	}
 }
