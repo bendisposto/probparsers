@@ -3,26 +3,21 @@ package de.prob.cliparser;
 import frege.language.CSPM.TranslateToProlog;
 import frege.main.ExecCommand;
 import frege.main.FregeInterface;
-import frege.language.CSPM.AST.TModule;
+import frege.prelude.PreludeBase;
 import frege.runtime.WrappedCheckedException;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static frege.main.FregeInterface.evaluateIOFunction;
-
 /**
  * Methods for communication with Frege CSP parser.
  * @author Markus Brenneis
  */
 class FregeCspParser {
-    private static ASTCache astCache = new ASTCache();
-
     static String addUnicode(BufferedReader in) {
         try {
             String inputCspFileName = in.readLine();
@@ -56,7 +51,7 @@ class FregeCspParser {
         try {
             final String inputCspFileName = in.readLine();
             final String outputPlFileName = in.readLine();
-            String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr$tick(astCache.getAst(inputCspFileName)));
+            String prologCode = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateToPrologStr(inputCspFileName));
             Files.write(Paths.get(outputPlFileName), prologCode.getBytes());
             String listOfFacts = getListOfFacts(prologCode);
             return asFregeFact(listOfFacts);
@@ -70,7 +65,7 @@ class FregeCspParser {
         try {
             String cspDeclaration = in.readLine();
             String inputCspFileName = in.readLine();
-            String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm$tick(astCache.getAst(inputCspFileName), cspDeclaration));
+            String prologDeclaration = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateDeclToPrologTerm(filePathParameter(inputCspFileName), cspDeclaration));
             String listOfFacts = getListOfFacts(prologDeclaration);
             return asFregeFact(listOfFacts);
         } catch (IOException e) {
@@ -85,7 +80,7 @@ class FregeCspParser {
         try {
             String cspExpression = in.readLine();
             String inputCspFileName = in.readLine();
-            String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExprToPrologTerm$tick(astCache.getAst(inputCspFileName), cspExpression));
+            String prologExpression = (String) FregeInterface.evaluateIOFunction(TranslateToProlog.translateExpToPrologTerm(filePathParameter(inputCspFileName), cspExpression));
             String listOfFacts = getListOfFacts(prologExpression);
             return asFregeFact(listOfFacts);
         } catch (IOException e) {
@@ -94,6 +89,16 @@ class FregeCspParser {
         } catch (frege.runtime.WrappedCheckedException e) {
             return asFregeFact(e);
         }
+    }
+
+    private static PreludeBase.TMaybe filePathParameter(String inputCspFileName) {
+        PreludeBase.TMaybe file;
+        if(inputCspFileName.equals("no-file")) {
+            file = FregeInterface.nothing();
+        } else {
+            file = FregeInterface.just(inputCspFileName);
+        }
+        return file;
     }
 
     private static String getListOfFacts(String prologCode) {
@@ -117,45 +122,5 @@ class FregeCspParser {
 
     private static String exceptionAsParseResult(Exception exception) {
         return "'parseResult'('exception','" + exception.getMessage() + "',0,0,0).";
-    }
-
-    private static class ASTCache {
-        private String lastInputCspFileName = "";
-        private long lastInputCspFileModificationTime = 0;
-        private TModule cachedCspAst;
-
-        TModule getAst(String filePath) {
-            long lastModified = new File(filePath).lastModified();
-            if (cacheCanBeUsed(filePath, lastModified)) {
-                System.out.println("using cached ast for " + filePath);
-                return cachedCspAst;
-            }
-            lastInputCspFileModificationTime = lastModified;
-            lastInputCspFileName = filePath;
-
-            System.out.println("Reading file ...");
-
-            String spec = "";
-            try {
-                spec = new String(Files.readAllBytes(Paths.get(filePath)));
-            } catch(IOException e) {
-                System.out.println(e.getMessage());
-            }
-
-            System.out.println("Tokenzing and parsing ...");
-
-            long start = System.currentTimeMillis();
-            cachedCspAst = (TModule)evaluateIOFunction(
-                    TranslateToProlog.translateToAst(spec)
-            );
-            long end = System.currentTimeMillis();
-
-            System.out.println("Done. (" + (end-start) + " ms)");
-            return cachedCspAst;
-        }
-
-        boolean cacheCanBeUsed(String filePath, long lastModified) {
-            return lastInputCspFileName.equals(filePath) && lastModified == lastInputCspFileModificationTime;
-        }
     }
 }

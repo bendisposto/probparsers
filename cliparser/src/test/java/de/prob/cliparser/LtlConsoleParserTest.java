@@ -1,10 +1,10 @@
 package de.prob.cliparser;
 
-import org.junit.Test;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+
+import org.junit.Test;
 
 public class LtlConsoleParserTest {
 
