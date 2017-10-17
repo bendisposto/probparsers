@@ -26,3 +26,7 @@ dependencies {
     compile 'commons-cli:commons-cli:1.4'
     compile project(path: ":CSPM-cspm-frontend")
 }
+
+test {
+    jvmArgs '-Xss80m'
+}
