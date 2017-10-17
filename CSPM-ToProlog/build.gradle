@@ -1,11 +1,11 @@
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'application'
+plugins {
+    id "org.frege-lang" version "0.8"
+}
 
-mainClassName = 'frege.main.Main'
+apply plugin: 'maven-publish'
 
 group = 'de.hhu.stups.frege'
-version = '0.1.0.0'
+version = '0.6.1.1'
 
 publishing {
     publications {
@@ -23,6 +23,5 @@ repositories {
 
 dependencies {
     compile 'org.frege-lang:frege:3.23.422-ga05a487'
-    compile 'commons-cli:commons-cli:1.4'
-    compile project(path: ":cspmparser/CSPM-cspm-frontend")
+    compile project(path: ":CSPM-Frontend")
 }

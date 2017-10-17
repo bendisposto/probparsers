@@ -1,8 +1,8 @@
-plugins {
-    id "org.frege-lang" version "0.8"
-}
-
+apply plugin: 'java'
 apply plugin: 'maven-publish'
+apply plugin: 'application'
+
+mainClassName = 'frege.main.Main'
 
 group = 'de.hhu.stups.frege'
 version = '0.1.0.0'
@@ -23,6 +23,6 @@ repositories {
 
 dependencies {
     compile 'org.frege-lang:frege:3.23.422-ga05a487'
-    compile project(path: ":cspmparser/CSPM-ToProlog")
-    compile project(path: ":cspmparser/XmlLight")
+    compile 'commons-cli:commons-cli:1.4'
+    compile project(path: ":CSPM-cspm-frontend")
 }

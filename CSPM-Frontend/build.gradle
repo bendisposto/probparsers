@@ -23,12 +23,12 @@ repositories {
 
 dependencies {
     compile 'org.frege-lang:frege:3.23.422-ga05a487'
-    compile project(path: ":cspmparser/Data")
-    compile project(path: ":cspmparser/Parsec")
-    compile project(path: ":cspmparser/PrettyPrint")
-    compile project(path: ":cspmparser/State")
-    compile project(path: ":cspmparser/syb")
-    compile project(path: ":cspmparser/System")
+    compile project(path: ":Data")
+    compile project(path: ":Parsec")
+    compile project(path: ":PrettyPrint")
+    compile project(path: ":State")
+    compile project(path: ":syb")
+    compile project(path: ":System")
 }
 
 configurations {
@@ -36,7 +36,7 @@ configurations {
 }
 
 dependencies {
-    dataDeriver project(path: ":cspmparser/DataDeriver")
+    dataDeriver project(path: ":DataDeriver")
 }
 
 task deriveDataTypeable(type: JavaExec) {
