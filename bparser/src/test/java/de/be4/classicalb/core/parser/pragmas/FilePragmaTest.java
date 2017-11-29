@@ -29,7 +29,7 @@ public class FilePragmaTest {
 		assertNotNull(ast);
 		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH, bparser.getContentProvider(),
 				new ParsingBehaviour());
-		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
+		rml.loadAllMachines(f, ast, bparser.getDefinitions());
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class FilePragmaTest {
 		Start ast = bparser.parseFile(f, false);
 		assertNotNull(ast);
 		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH, bparser.getContentProvider());
-		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
+		rml.loadAllMachines(f, ast, bparser.getDefinitions());
 	}
 
 	@Test

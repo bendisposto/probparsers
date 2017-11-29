@@ -18,8 +18,8 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.OffsetPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -291,8 +291,7 @@ public class CliBParser {
 			NodeIdAssignment na = new NodeIdAssignment();
 			start.apply(na);
 
-			OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
-			pprinter.setSourcePositions(parser.getSourcePositions());
+			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
@@ -335,8 +334,7 @@ public class CliBParser {
 			NodeIdAssignment na = new NodeIdAssignment();
 			start.apply(na);
 
-			OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
-			pprinter.setSourcePositions(parser.getSourcePositions());
+			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
 
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 

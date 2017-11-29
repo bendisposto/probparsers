@@ -9,6 +9,8 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
@@ -31,22 +33,22 @@ import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PSubstitution;
+import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
 
 /**
  * <p>
- * This visitor performs two AST transformations which need to be done in one DFS
- * cause they influence each other when definitions are involved. The reason is
- * that in some cases we cannot decide during preparsing and parsing, if the RHS
- * of a definition is an expression or a substitution. Function and operation
- * calls are syntactically the same in most cases. So we postpone the decision
- * until this DFS is made. The first usage of a definition determines which type
- * is assumed. All other uses need to follow this typing otherwise an error is
- * thrown.
+ * This visitor performs two AST transformations which need to be done in one
+ * DFS cause they influence each other when definitions are involved. The reason
+ * is that in some cases we cannot decide during preparsing and parsing, if the
+ * RHS of a definition is an expression or a substitution. Function and
+ * operation calls are syntactically the same in most cases. So we postpone the
+ * decision until this DFS is made. The first usage of a definition determines
+ * which type is assumed. All other uses need to follow this typing otherwise an
+ * error is thrown.
  * </p>
  * <p>
  * During parsing substitutions that are operation calls without return values
@@ -86,13 +88,20 @@ import de.hhu.stups.sablecc.patch.SourcePositions;
  */
 public class OpSubstitutions extends DepthFirstAdapter {
 
-	private final SourcePositions sourcePositions;
 	private final IDefinitions definitions;
 	private final Map<String, Integer> scopedVariables = new HashMap<>();
 
-	public OpSubstitutions(final SourcePositions sourcePositions, final IDefinitions definitions) {
-		this.sourcePositions = sourcePositions;
+	private OpSubstitutions(final IDefinitions definitions) {
 		this.definitions = definitions;
+	}
+
+	public static void transform(Start start, IDefinitions definitions) throws CheckException {
+		try {
+			start.apply(new OpSubstitutions(definitions));
+		} catch (VisitorException e) {
+			throw (CheckException) e.getException();
+		}
+
 	}
 
 	@Override
@@ -130,7 +139,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			parameters = new LinkedList<>();
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, sourcePositions.getSourcecodeRange(node), "Expecting operation");
+			throw new BParseException(null, "Expecting operation");
 		}
 
 		if (type != Type.NoDefinition && idToken != null) {
@@ -150,21 +159,19 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				final PositionedNode newPosNode = defSubst;
 				newPosNode.setStartPos(posNode.getStartPos());
 				newPosNode.setEndPos(posNode.getEndPos());
-				sourcePositions.replaceMapping(posNode, newPosNode);
 
 				node.replaceBy(defSubst);
 				defSubst.apply(this);
 			} else {
 				// finding some other type here is an error!
-				throw new BParseException(null, sourcePositions.getSourcecodeRange(node),
-						"Expecting substitution here but found definition with type '" + type + "'");
+				throw new VisitorException(new CheckException(
+						"Expecting substitution here but found definition with type '" + type + "'", node));
 			}
 		} else {
 			// no def, no problem ;-)
 			final AOpSubstitution opSubst = new AOpSubstitution(idExpr, parameters);
 			opSubst.setStartPos(idExpr.getStartPos());
 			opSubst.setEndPos(idExpr.getEndPos());
-			sourcePositions.replaceMapping(node, opSubst);
 			node.replaceBy(opSubst);
 			opSubst.apply(this);
 		}
@@ -300,8 +307,8 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				}
 			} else {
 				// finding some other type here is an error!
-				throw new BParseException(null, sourcePositions.getSourcecodeRange(node),
-						"Expecting expression here but found definition with type '" + type + "'");
+				throw new VisitorException(new CheckException(
+						"Expecting expression here but found definition with type '" + type + "'", node));
 			}
 		}
 	}
@@ -363,7 +370,6 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		final PositionedNode newPosNode = newNode;
 		newPosNode.setStartPos(posNode.getStartPos());
 		newPosNode.setEndPos(posNode.getEndPos());
-		sourcePositions.replaceMapping(posNode, newPosNode);
 
 		node.replaceBy(newNode);
 
@@ -424,7 +430,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 			rhsSubst.setEndPos(rhsIdent.getEndPos());
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, sourcePositions.getSourcecodeRange(node), "Expecting operation");
+			throw new VisitorException(new CheckException("Expecting operation", node));
 		}
 
 		final TIdentifierLiteral oldDefId = oldDefinition.getName();
@@ -432,9 +438,9 @@ public class OpSubstitutions extends DepthFirstAdapter {
 				oldDefId.getPos());
 		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(defId,
 				new LinkedList<PExpression>(oldDefinition.getParameters()), rhsSubst);
-
+		substDef.setStartPos(oldDefinition.getStartPos());
+		substDef.setEndPos(oldDefinition.getEndPos());
 		definitions.replaceDefinition(idString, Type.Substitution, substDef);
-		sourcePositions.replaceMapping(oldDefinition, substDef);
 		oldDefinition.replaceBy(substDef);
 	}
 }

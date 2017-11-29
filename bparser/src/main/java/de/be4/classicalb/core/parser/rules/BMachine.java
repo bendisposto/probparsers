@@ -100,12 +100,14 @@ public class BMachine implements IModel {
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
+		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		
 		pout.openTerm("machine");
-		if (parsingBehaviour.isAddLineNumbers()) {
-			pprinter.setSourcePositions(
-					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
-		}
+//		if (parsingBehaviour.isAddLineNumbers()) {
+//			pprinter.setSourcePositions(
+//					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
+//		}
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();

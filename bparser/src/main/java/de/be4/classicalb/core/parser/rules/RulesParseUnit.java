@@ -174,12 +174,13 @@ public class RulesParseUnit implements IModel {
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
+		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
-		if (parsingBehaviour.isAddLineNumbers()) {
-			final SourcePositions src = bParser.getSourcePositions();
-			pprinter.setSourcePositions(src);
-		}
+//		if (parsingBehaviour.isAddLineNumbers()) {
+//			final SourcePositions src = bParser.getSourcePositions();
+//			pprinter.setSourcePositions(src);
+//		}
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();

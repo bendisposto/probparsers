@@ -119,7 +119,7 @@ public class Helpers {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setPrologOutput(true);
 		parsingBehaviour.setUseIndention(false);
-		parsingBehaviour.setAddLineNumbers(false);
+		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setVerbose(true);
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		OutputStream output = new OutputStream() {

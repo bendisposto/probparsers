@@ -61,7 +61,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public static void printFormula(Start start, final IPrologTermOutput pout) {
 		NodeIdAssignment na = new NodeIdAssignment();
 		start.apply(na);
-		OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
 		ASTProlog printer = new ASTProlog(pout, pprinter);
 		start.apply(printer);
 	}
