@@ -113,7 +113,7 @@ public class RecursiveMachineLoader {
 		pout.printAtom(main);
 		pout.openList();
 
-		List<File> allFiles = new ArrayList<File>();
+		List<File> allFiles = new ArrayList<>();
 		allFiles.addAll(machineFilesLoaded);
 		allFiles.addAll(definitionFilesLoaded);
 		for (final File file : allFiles) {
