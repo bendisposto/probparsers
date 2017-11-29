@@ -11,7 +11,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
@@ -39,10 +38,6 @@ import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -54,7 +49,6 @@ public class BParser {
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
 
-	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
@@ -64,7 +58,6 @@ public class BParser {
 	private File directory;
 
 	private IDefinitionFileProvider contentProvider;
-	private Map<PositionedNode, SourcecodeRange> positions;
 
 	public static String getVersion() {
 		Properties p = loadProperties();
@@ -117,7 +110,7 @@ public class BParser {
 			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(), parser.getDefinitions());
+		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
@@ -126,7 +119,7 @@ public class BParser {
 			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
@@ -350,11 +343,7 @@ public class BParser {
 	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
-	 *             the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             the parser has finished.
 	 *             </li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
@@ -388,17 +377,7 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = lexer.getTokenList();
 
-			/*
-			 * Retrieving sourcecode positions which were found by ParserAspect
-			 */
-			/*
-			 * storing the positions in extra variable because the class
-			 * SourcePositions provides no access to the positions
-			 */
-			this.positions = parser.getMapping();
-			this.sourcePositions = new SourcePositions(tokenList, positions);
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now
@@ -416,7 +395,11 @@ public class BParser {
 			}
 
 			// perfom AST transformations that can't be done by SableCC
-			applyAstTransformations(rootNode);
+			try {
+				applyAstTransformations(rootNode);
+			} catch (CheckException e) {
+				throw new BCompoundException(new BException(getFileName(), e));
+			}
 
 			// perform some semantic checks which are not done in the parser
 			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
@@ -431,14 +414,12 @@ public class BParser {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			final SourcecodeRange range = sourcePositions == null ? null : sourcePositions.getSourcecodeRange(token);
 			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
 			if (msg == null) {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BCompoundException(
-					new BException(getFileName(), new BParseException(token, range, msg, realMsg, e)));
+			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
@@ -478,9 +459,9 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private void applyAstTransformations(final Start rootNode) {
+	private void applyAstTransformations(final Start rootNode) throws CheckException {
 		// default transformations
-		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
+		OpSubstitutions.transform(rootNode, getDefinitions());
 		rootNode.apply(new SyntaxExtensionTranslator());
 		// more AST transformations?
 
@@ -499,14 +480,6 @@ public class BParser {
 		}
 
 		return list;
-	}
-
-	public SourcePositions getSourcePositions() {
-		return sourcePositions;
-	}
-
-	public Map<PositionedNode, SourcecodeRange> getPositions() {
-		return this.positions;
 	}
 
 	public IDefinitions getDefinitions() {
@@ -544,11 +517,11 @@ public class BParser {
 
 			// Properties hashes = new Properties();
 
-//			if (parsingBehaviour.getOutputFile() != null) {
-//				if (hashesStillValid(parsingBehaviour.getOutputFile())){
-//					return 0;
-//				}
-//			}
+			// if (parsingBehaviour.getOutputFile() != null) {
+			// if (hashesStillValid(parsingBehaviour.getOutputFile())){
+			// return 0;
+			// }
+			// }
 
 			final long start = System.currentTimeMillis();
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());

@@ -63,6 +63,7 @@ public class ASTPrologTest {
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 		node.apply(prolog);
 		swriter.flush();
+		System.out.println(swriter.toString());
 		return swriter.toString();
 	}
 
@@ -74,7 +75,6 @@ public class ASTPrologTest {
 		final BParser parser = new BParser("testcase");
 		if (remove_restrictions) {
 			parser.getOptions().setRestrictProverExpressions(false);
-			;
 		}
 		final Start startNode = parser.parse(bspec, false, new NoContentProvider());
 		checkAST(counter, expected, startNode);

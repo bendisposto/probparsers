@@ -19,8 +19,8 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	private ArrayList<Node> nodes = new ArrayList<>(1000);
 	private int currentIdentifier = 0;
 
-	private int current_file_number = -1;
-	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<Node, Integer>();
+	private int currentFileNumber = -1;
+	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
 
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
@@ -45,9 +45,9 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		if (fileNumber < 1) {
 			throw new IllegalArgumentException("File number should be >= 1");
 		}
-		this.current_file_number = fileNumber;
+		this.currentFileNumber = fileNumber;
 		node.apply(this);
-		this.current_file_number = -1;
+		this.currentFileNumber = -1;
 	}
 
 	/**
@@ -84,8 +84,8 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		synchronized (nodeToIdentifierMap) {
 			nodeToIdentifierMap.put(node, currentIdentifier);
 			nodes.add(node);
-			if (current_file_number > 0) {
-				nodeToFileNumberMap.put(node, current_file_number);
+			if (currentFileNumber > 0) {
+				nodeToFileNumberMap.put(node, currentFileNumber);
 			}
 			currentIdentifier++;
 		}

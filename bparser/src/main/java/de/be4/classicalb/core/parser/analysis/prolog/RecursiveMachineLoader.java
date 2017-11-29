@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +33,6 @@ import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
-import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -52,11 +50,10 @@ public class RecursiveMachineLoader {
 	private final File rootDirectory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
 	private String main;
-	private final Map<String, Start> parsedMachines = new TreeMap<String, Start>();
-	private final Map<String, File> parsedFiles = new TreeMap<String, File>();
-	private final List<File> machineFilesLoaded = new ArrayList<File>();
-	private final List<File> definitionFilesLoaded = new ArrayList<File>();
-	private final Map<String, SourcePositions> positions = new HashMap<String, SourcePositions>();
+	private final Map<String, Start> parsedMachines = new TreeMap<>();
+	private final Map<String, File> parsedFiles = new TreeMap<>();
+	private final List<File> machineFilesLoaded = new ArrayList<>();
+	private final List<File> definitionFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
 	private final ParsingBehaviour parsingBehaviour;
 
@@ -76,9 +73,9 @@ public class RecursiveMachineLoader {
 		this(path, contentProvider, new ParsingBehaviour());
 	}
 
-	public void loadAllMachines(final File startFile, final Start start, final SourcePositions positions,
+	public void loadAllMachines(final File startFile, final Start start,
 			final IDefinitions definitions) throws BCompoundException {
-		recursivlyLoadMachine(startFile, start, new ArrayList<String>(), true, positions, rootDirectory, definitions);
+		recursivlyLoadMachine(startFile, start, new ArrayList<String>(), true, rootDirectory, definitions);
 	}
 
 	private void loadMachine(final List<String> ancestors, final File machineFile)
@@ -89,7 +86,7 @@ public class RecursiveMachineLoader {
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		Start tree;
 		tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose(), contentProvider);
-		recursivlyLoadMachine(machineFile, tree, ancestors, false, parser.getSourcePositions(),
+		recursivlyLoadMachine(machineFile, tree, ancestors, false,
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
 
@@ -100,6 +97,7 @@ public class RecursiveMachineLoader {
 
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
+		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		// parser version
@@ -113,7 +111,7 @@ public class RecursiveMachineLoader {
 		pout.printAtom(main);
 		pout.openList();
 
-		List<File> allFiles = new ArrayList<File>();
+		List<File> allFiles = new ArrayList<>();
 		allFiles.addAll(machineFilesLoaded);
 		allFiles.addAll(definitionFilesLoaded);
 		for (final File file : allFiles) {
@@ -128,10 +126,6 @@ public class RecursiveMachineLoader {
 		pout.fullstop();
 		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
 			pout.openTerm("machine");
-			if (parsingBehaviour.isAddLineNumbers()) {
-				final SourcePositions src = positions.get(entry.getKey());
-				pprinter.setSourcePositions(src);
-			}
 			entry.getValue().apply(prolog);
 			pout.closeTerm();
 			pout.fullstop();
@@ -160,9 +154,8 @@ public class RecursiveMachineLoader {
 			try {
 				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
 						: parentMachineDirectory.getAbsolutePath();
-				final File file = new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
+				return new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
 						.resolve();
-				return file;
 			} catch (FileNotFoundException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -184,7 +177,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<String> ancestors,
-			final boolean isMain, final SourcePositions sourcePositions, File directory, final IDefinitions definitions)
+			final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 
 		// make a copy of the referencing machines
@@ -225,7 +218,6 @@ public class RecursiveMachineLoader {
 		if (isMain) {
 			main = name;
 		}
-		positions.put(name, sourcePositions);
 
 		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
 		try {

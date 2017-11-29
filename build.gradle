@@ -20,6 +20,7 @@ task remind {
 allprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
+  apply plugin: 'eclipse'
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 

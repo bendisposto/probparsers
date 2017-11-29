@@ -1,8 +1,8 @@
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
+import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.OffsetPositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.parserbase.ProBParseException;
@@ -16,7 +16,7 @@ public class ClassicalBParser implements ProBParserBase {
 
 	@Override
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		try {
 			Start ast = new BParser().parseExpression(expression);
 			printAst(pto, ast, wrap, WRAPPER_EXPR);
@@ -27,7 +27,7 @@ public class ClassicalBParser implements ProBParserBase {
 
 	@Override
 	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		try {
 			Start ast = new BParser().parsePredicate(predicate);
 			printAst(pto, ast, wrap, WRAPPER_PRED);
@@ -38,7 +38,7 @@ public class ClassicalBParser implements ProBParserBase {
 
 	@Override
 	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		try {
 			Start ast = new BParser().parseTranstion(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);
@@ -50,7 +50,7 @@ public class ClassicalBParser implements ProBParserBase {
 	private void printAst(final IPrologTermOutput pto, Start ast, final boolean wrap, final String wrapper) {
 		NodeIdAssignment na = new NodeIdAssignment();
 		ast.apply(na);
-		OffsetPositionPrinter pprinter = new OffsetPositionPrinter(na, -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
 		final ASTProlog prologPrinter = new ASTProlog(pto, pprinter);
 		if (wrap) {
 			pto.openTerm(wrapper);
