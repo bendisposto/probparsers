@@ -126,10 +126,6 @@ public class RecursiveMachineLoader {
 		pout.fullstop();
 		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
 			pout.openTerm("machine");
-//			if (parsingBehaviour.isAddLineNumbers()) {
-//				final SourcePositions src = positions.get(entry.getKey());
-//				pprinter.setSourcePositions(src);
-//			}
 			entry.getValue().apply(prolog);
 			pout.closeTerm();
 			pout.fullstop();

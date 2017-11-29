@@ -38,9 +38,6 @@ import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -346,11 +343,7 @@ public class BParser {
 	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
-	 *             the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             the parser has finished.
 	 *             </li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
@@ -384,15 +377,7 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = lexer.getTokenList();
 
-			/*
-			 * Retrieving sourcecode positions which were found by ParserAspect
-			 */
-			/*
-			 * storing the positions in extra variable because the class
-			 * SourcePositions provides no access to the positions
-			 */
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now
