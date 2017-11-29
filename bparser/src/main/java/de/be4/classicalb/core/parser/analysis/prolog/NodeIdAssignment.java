@@ -20,7 +20,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	private int currentIdentifier = 0;
 
 	private int currentFileNumber = -1;
-	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<Node, Integer>();
+	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
 
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
