@@ -2,14 +2,12 @@ package de.be4.classicalb.core.parser.definitions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
 import static util.Helpers.getTreeAsString;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 public class DefinitionsTest {
@@ -230,11 +228,8 @@ public class DefinitionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BCompoundException e) {
-			final BParseException cause = (BParseException) e.getCause();
-			assertNull(cause.getToken());
-			assertEquals(25, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting substitution here but found definition with type 'Expression'",
+			final CheckException cause = (CheckException) e.getCause();
+			assertEquals("Expecting substitution here but found definition with type 'Expression'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -247,11 +242,8 @@ public class DefinitionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BCompoundException e) {
-			final BParseException cause = (BParseException) e.getCause();
-			assertNull(cause.getToken());
-			assertEquals(24, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting expression here but found definition with type 'Substitution'",
+			final CheckException cause = (CheckException) e.getCause();
+			assertEquals("Expecting expression here but found definition with type 'Substitution'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -284,11 +276,8 @@ public class DefinitionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BCompoundException e) {
-			final BParseException cause = (BParseException) e.getCause();
-			assertNull(cause.getToken());
-			assertEquals(31, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting substitution here but found definition with type 'Expression'",
+			final CheckException cause = (CheckException) e.getCause();
+			assertEquals("Expecting substitution here but found definition with type 'Expression'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -301,11 +290,8 @@ public class DefinitionsTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception was not thrown");
 		} catch (final BCompoundException e) {
-			final BParseException cause = (BParseException) e.getCause();
-			assertNull(cause.getToken());
-			assertEquals(30, cause.getRange().getBeginIndex());
-			assertEquals(
-					"Expecting expression here but found definition with type 'Substitution'",
+			final CheckException cause = (CheckException) e.getCause();
+			assertEquals("Expecting expression here but found definition with type 'Substitution'",
 					cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
@@ -321,9 +307,7 @@ public class DefinitionsTest {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(1, cause.getNodes().length);
 			assertNotNull(cause.getNodes()[0]);
-			assertEquals(
-					"Number of parameters doesn't match declaration of definition",
-					cause.getLocalizedMessage());
+			assertEquals("Number of parameters doesn't match declaration of definition", cause.getLocalizedMessage());
 			// IGNORE, is expected
 		}
 	}
@@ -340,21 +324,21 @@ public class DefinitionsTest {
 
 	@Test
 	public void testAssertInDefinition() throws BCompoundException {
-		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n"
-				+ "ABORT == ASSERT TRUE=FALSE THEN skip END\n" + "END\n";
+		final String testMachine = "MACHINE Test\n" + "DEFINITIONS\n" + "ABORT == ASSERT TRUE=FALSE THEN skip END\n"
+				+ "END\n";
 		final String result = getTreeAsString(testMachine);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([ASubstitutionDefinitionDefinition(ABORT,[],AAssertionSubstitution(AEqualPredicate(ABooleanTrueExpression(),ABooleanFalseExpression()),ASkipSubstitution()))])]))",
 				result);
 	}
-	
-	@Test (expected = BCompoundException.class)
+
+	@Test(expected = BCompoundException.class)
 	public void testDetectCycleInDefinitions() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS foo == 1=1 & foo END\n";
 		getTreeAsString(testMachine);
 	}
-	
-	@Test (expected = BCompoundException.class)
+
+	@Test(expected = BCompoundException.class)
 	public void testDetectCycleInDefinitions2() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS bar == foo; foo == 1=1 & bar END\n";
 		getTreeAsString(testMachine);

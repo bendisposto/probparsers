@@ -42,7 +42,13 @@ Helpers
   white_space = line_break | layout_char+;
 
   identifier_literal = letter (letter | digit | underscore)*;
-  pragma_identifier_literal = letter (letter | digit | underscore | minus | '.')*;
+  //pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$'| '|'| ':'| '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
+  pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
+  // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
+  // accepted due to the maximal munching
+  // versions below do not work:
+  // layout_char_with_ws = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  // pragma_identifier_literal = ([all_chars - [layout_char_with_ws + '*']]+ ('*' [all_chars - [layout_char_with_ws + '/']])?)* '*'?;
 
 /*******************************************************************
  * States                                                          *
@@ -85,7 +91,8 @@ Tokens
   {pragma} pragma_import_package = 'import-package' | 'import_package';
   {pragma->description} pragma_description = 'desc' | 'description';
   {pragma} pragma_conversion = 'conversion';
-  {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
+  //{pragma} pragma_label_string = pragma_label_chars; // not used yet, due to tests failing
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
   {unit} unit_content = string_literal;
@@ -338,7 +345,6 @@ Tokens
   {section->normal} kw_machine_clause = '#MACHINECLAUSE';
 
   {section->normal,normal} identifier_literal = identifier_literal;
-  {pragma} pragma_identifier_literal = pragma_identifier_literal;
   {normal} def_literal_substitution = '#literal_substitution' letter*;
   {normal} def_literal_predicate = '#literal_predicate' letter*;
   {normal} predicate_identifier = '#predicate_identifier' letter*;
@@ -362,7 +368,7 @@ Tokens
   {normal} kw_attribute_identifier = identifier_literal;
   {normal} kw_for = 'FOR';
   {normal} kw_rule_for_all = 'RULE_FORALL';
-  {normal} kw_rule_any = 'RULE_ANY';
+  {normal} kw_rule_fail = 'RULE_FAIL';
   {normal} kw_rule_error_type = 'ERROR_TYPE';
   {normal} kw_expect = 'EXPECT';
   {normal} kw_computation = 'COMPUTATION';
@@ -941,16 +947,18 @@ substitution_l3 {-> substitution} =
   {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
 
     // extensions for rules
-  {for_loop} kw_for [identifier]:identifier_declaration_expression in [set]:expression_in_par do [do_subst]:substitution_l0 end
-    {-> New substitution.for_loop(identifier.expression, set.expression, do_subst.substitution)} |
+  {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
+    {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
     {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression)} |
-  {rule_any_message_sub} kw_rule_any [identifiers]:identifier_list where [where_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
-    {-> New substitution.rule_any_sub_message([identifiers.expression], where_pred.predicate, error_type.integer_literal, message.expression)} |
+  {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate? [error_type]:error_type? kw_counterexample [message]:expression_top end
+    {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
   {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
   	{-> New substitution.define(name, type.expression, dummy.expression, value.expression)}
   ;
+  
+when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate };
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id };
@@ -1024,7 +1032,7 @@ identifier_declaration_expression {-> expression} =
   {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
   {unit} pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.unit(content,identifier.expression)} |
   {new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
-  {inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferredunit(content,identifier.expression)} |
+  {inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferred_unit(content,identifier.expression)} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 
@@ -1213,7 +1221,7 @@ expression =
   {description} [content]:pragma_free_text [expression]:expression |
   {unit} [content]:unit_content [identifier]:expression |
   {new_unit} [content]:unit_content [identifier]:expression |
-  {inferredunit} [content]:unit_content [identifier]:expression |
+  {inferred_unit} [content]:unit_content [identifier]:expression |
   {identifier} [identifier]:identifier_literal* |
   {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
   {string} [content]:string_literal |
@@ -1361,8 +1369,6 @@ expression =
 
 rec_entry = [identifier]:expression [value]:expression;
 
-
-
 /* Substitutions */
 substitution =
   {block} [substitution]:substitution |
@@ -1392,7 +1398,7 @@ substitution =
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
   {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
-  {rule_any_sub_message}  [identifiers]:expression* [where]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
-  {for_loop} [identifier]:expression [set]:expression [do_subst]:substitution | //extension for rules
+  {rule_fail_sub}  [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | //extension for rules
+  {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | //extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | //extension for rules
   {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression ; //extension for rules

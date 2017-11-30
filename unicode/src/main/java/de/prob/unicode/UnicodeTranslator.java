@@ -10,10 +10,15 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
+import de.prob.unicode.node.TDoubleQuote;
 import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
+	enum Encoding {
+		ASCII, UNICODE
+	}
+
 	private static final class Translation {
 
 		private final String unicode;
@@ -37,7 +42,7 @@ public class UnicodeTranslator {
 
 	}
 
-	private static final Map<String, Translation> m = new HashMap<String, Translation>();
+	private static final Map<String, Translation> m = new HashMap<>();
 
 	static {
 		m.put("TIn", new Translation(":", "\u2208"));
@@ -130,14 +135,14 @@ public class UnicodeTranslator {
 	}
 
 	public static String toAscii(final String s) {
-		return translate(s, "ascii");
+		return translate(s, Encoding.ASCII);
 	}
 
 	public static String toUnicode(final String s) {
-		return translate(s, "unicode");
+		return translate(s, Encoding.UNICODE);
 	}
 
-	private static String translate(final String input, final String target) {
+	private static String translate(final String input, final Encoding target) {
 		if (input.isEmpty()) {
 			return "";
 		}
@@ -147,26 +152,42 @@ public class UnicodeTranslator {
 		PushbackReader r = new PushbackReader(reader, input.length());
 		Lexer l = new Lexer(r);
 
-		Token t, last;
+		Token t;
+		Token last;
+		boolean insideDoubleQuouteComment = false;
 		try {
 			last = null;
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
-				String key = t.getClass().getSimpleName();
+				if (insideDoubleQuouteComment && !(t instanceof TDoubleQuote)) {
+					sb.append(t.getText());
+					continue;
+				} else if (insideDoubleQuouteComment && t instanceof TDoubleQuote) {
+					sb.append(t.getText());
+					insideDoubleQuouteComment = false;
+					continue;
+				} else if (!insideDoubleQuouteComment && t instanceof TDoubleQuote) {
+					sb.append(t.getText());
+					insideDoubleQuouteComment = true;
+					continue;
+				}
+
+				final String key = t.getClass().getSimpleName();
+
 				if (t instanceof TSeparator) {
 					sb.append(t.getText());
 				} else if (t instanceof TAnyChar) {
 					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
-					if (before && "ascii".equals(target)) {
+					if (before && target == Encoding.ASCII) {
 						sb.append(' ');
 					}
 					sb.append(t.getText());
 				} else {
 					String translated = "";
 					Translation translation = m.get(key);
-					if ("unicode".equals(target)) {
+					if (target == Encoding.UNICODE) {
 						translated = translation.getUnicode();
 					}
-					if ("ascii".equals(target)) {
+					if (target == Encoding.ASCII) {
 						boolean before = (last != null && last instanceof TAnyChar)
 								|| sb.length() > 0 && (Character.isLetter(sb.charAt(sb.length() - 1)));
 						translated = translation.getAscii(before);
@@ -175,10 +196,8 @@ public class UnicodeTranslator {
 				}
 				last = t;
 			}
-		} catch (LexerException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (LexerException | IOException e) {
+			throw new AssertionError(e);
 		}
 		return sb.toString();
 	}

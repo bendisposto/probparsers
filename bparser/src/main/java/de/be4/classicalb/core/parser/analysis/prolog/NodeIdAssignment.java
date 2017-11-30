@@ -15,12 +15,12 @@ import de.be4.classicalb.core.parser.node.Node;
  * @author plagge
  */
 public class NodeIdAssignment extends DepthFirstAdapter {
-	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<Node, Integer>();
-	private ArrayList<Node> nodes = new ArrayList<Node>(1000);
+	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();
+	private ArrayList<Node> nodes = new ArrayList<>(1000);
 	private int currentIdentifier = 0;
 
-	private int current_file_number = -1;
-	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<Node, Integer>();
+	private int currentFileNumber = -1;
+	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
 
 	/**
 	 * Assign identifiers to all elements of the syntax tree.
@@ -45,9 +45,9 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		if (fileNumber < 1) {
 			throw new IllegalArgumentException("File number should be >= 1");
 		}
-		this.current_file_number = fileNumber;
+		this.currentFileNumber = fileNumber;
 		node.apply(this);
-		this.current_file_number = -1;
+		this.currentFileNumber = -1;
 	}
 
 	/**
@@ -66,10 +66,10 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		try {
 			result = nodes.get(id);
 		} catch (IndexOutOfBoundsException e) {
-			throw new RuntimeException("Unknown id " + id);
+			throw new AssertionError("Unknown id " + id, e);
 		}
 		if (result == null) {
-			throw new RuntimeException("Unknown id " + id);
+			throw new AssertionError("Unknown id " + id);
 		}
 		return result;
 	}
@@ -84,8 +84,8 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		synchronized (nodeToIdentifierMap) {
 			nodeToIdentifierMap.put(node, currentIdentifier);
 			nodes.add(node);
-			if (current_file_number > 0) {
-				nodeToFileNumberMap.put(node, current_file_number);
+			if (currentFileNumber > 0) {
+				nodeToFileNumberMap.put(node, currentFileNumber);
 			}
 			currentIdentifier++;
 		}

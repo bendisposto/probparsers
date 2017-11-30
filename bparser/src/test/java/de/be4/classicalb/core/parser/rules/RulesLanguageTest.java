@@ -2,67 +2,67 @@ package de.be4.classicalb.core.parser.rules;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.rules.project.RulesParseUnit;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
+import static de.be4.classicalb.core.parser.rules.RulesUtil.*;
 
 public class RulesLanguageTest {
 
 	@Test
-	public void testSimpleRule() throws Exception {
+	public void testSimpleRule() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(!result.contains("exception"));
-	}
-	
-	@Test
-	public void testRuleClassification() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY skip END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(!result.contains("exception"));
-	}
-	
-	@Test
-	public void testRuleTags() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
+		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
 
 	@Test
-	public void testForAllPredicate() throws FileNotFoundException, IOException {
+	public void testRuleClassification() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY skip END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testRuleTags() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testEnumeratedSet() {
+		final String testMachine = "RULES_MACHINE Test SETS foo= {foo1, foo2} END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+
+		assertTrue(result.contains("sets(none,[enumerated_set(none,foo,[identifier(none,foo1),identifier(none,foo2)]"));
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testRulePrint() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("EXTERNAL_SUBSTITUTION_PRINT"));
+		assertTrue(!result.contains("exception"));
+	}
+
+	@Test
+	public void testForAllPredicate() {
 		String file = "src/test/resources/rules/ForAllPredicate.rmch";
 		String result = getFileAsPrologTerm(file);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
-	
-	
 
 	@Test
-	public void testStringFormat() throws FileNotFoundException, IOException {
-		final String testMachine = "RULES_MACHINE Test PROPERTIES STRING_FORMAT(\" ~w ~w \", 1) = \" 1 2 \" END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains(
-				"parse_exception(pos(1,31,'UnknownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.')"));
-	}
-
-	@Test
-	public void testRuleForall() throws FileNotFoundException, IOException {
+	public void testRuleForall() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id11 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 2 COUNTEREXAMPLE \"fail\"END END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
+		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 		String result2 = getRulesMachineAsBMachine(testMachine);
@@ -70,18 +70,18 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testDublicateRuleName() throws FileNotFoundException, IOException {
+	public void testDublicateRuleName() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY skip END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
+		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception"));
 		assertTrue(result.contains("Duplicate operation name"));
 	}
 
 	@Test
-	public void testRuleAny() throws FileNotFoundException, IOException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_ANY x WHERE x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
+	public void testRuleFailWithoutParametersAndPredicate() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FAIL COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 		String result2 = getRulesMachineAsBMachine(testMachine);
@@ -89,9 +89,40 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testDefinitionInjection() throws Exception {
+	public void testRuleFailSequence() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"fail1\"END; RULE_FAIL COUNTEREXAMPLE \"fail2\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		assertTrue(!result.contains("$ResultTuple"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testRuleFail2() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 RULEID id1 BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testRuleFailWithoutParametersButWitWhenPredicate() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL WHEN 1=1 COUNTEREXAMPLE \"fail\"END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(!result.contains("exception"));
+		String result2 = getRulesMachineAsBMachine(testMachine);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testDefinitionInjection() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 \n BODY RULE_FORALL r WHERE r : 1..3 EXPECT 1=2 COUNTEREXAMPLE \"foo\"  END END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
+		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue("Does not contain TO_STRING definition.", result.contains("expression_definition(none,'TO_STRING'"));
 		assertTrue("Does not contain EXTERNAL_FUNCTION_TO_STRING definition.",
@@ -99,9 +130,9 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testComputation() throws Exception {
+	public void testComputation() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION computeM1 BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue("Missing computation variable.", result.contains("variables(none,[identifier(none,computeM1)])"));
 		assertTrue("Missing invariant.", result.contains(
@@ -109,70 +140,46 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testDefine() throws Exception {
+	public void testDefine() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION computeM1 BODY DEFINE foo TYPE POW(INTEGER) VALUE {1} END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
 		assertTrue("Missing DEFINE variable",
-				result.contains("variables(none,[identifier(none,foo),identifier(none,computeM1)])"));
+				result.contains("variables(none,[identifier(none,computeM1),identifier(none,foo)])"));
 		System.out.println(result);
 	}
 
 	@Test
-	public void testDefine2() throws Exception {
+	public void testDefine2() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION computeM1 BODY DEFINE foo TYPE INTEGER DUMMY_VALUE 1 VALUE 2 END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		assertTrue("Missing DEFINE variable",
-				result.contains("variables(none,[identifier(none,foo),identifier(none,computeM1)])"));
+				result.contains("variables(none,[identifier(none,computeM1),identifier(none,foo)])"));
 		System.out.println(result);
 	}
 
 	@Test
-	public void testRuleOperation() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({}) END END";
-		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue("Invalid variables transformation",
-				result.contains("variables(none,[identifier(none,foo),identifier(none,foo_Counterexamples)])"));
-		assertTrue("Invalid invariant transformation", result.contains(
-				"invariant(none,conjunct(none,member(none,identifier(none,foo),set_extension(none,[string(none,'FAIL'),string(none,'SUCCESS'),string(none,'NOT_CHECKED'),string(none,'DISABLED')]))"));
-
-		assertTrue("Invalid invariant transformation", result.contains(
-				"member(none,identifier(none,foo_Counterexamples),pow_subset(none,mult_or_cart(none,natural_set(none),string_set(none)))"));
-
-	}
-
-	@Test
-	public void testRuleFailErrorType() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL(2, \"fail\") END END";
-		String result = getRulesMachineAsBMachine(testMachine);
-		System.out.println(result);
-		//TODO do not use the prettyprinter
-		assertTrue(result.contains("foo_Counterexamples := foo_Counterexamples\\/{2}*{\"fail\"}"));
-
-	}
-
-	@Test
-	public void testRuleCounterexmples() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL( \"fail\") END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+	public void testRuleCounterexmples() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"fail\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
 	}
 
 	@Test
-	public void testFunction() throws Exception {
+	public void testFunction() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER BODY out := x + 1 END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 		assertTrue(result.contains("precondition(none,member(none,identifier(none,x),integer_set(none))"));
 	}
-	
+
 	@Test
-	public void testFunctionPostcondition() throws Exception {
+	public void testFunctionPostcondition() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER POSTCONDITION out : INTEGER BODY out := x + 1 END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		System.out.println(getRulesMachineAsBMachine(testMachine));
 		assertFalse(result.contains("exception"));
@@ -180,9 +187,9 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleId() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL(\"Rule violated\") END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+	public void testRuleId() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY skip END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
@@ -191,149 +198,133 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testWritingDefineVariable() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		final String expected = "parse_exception(pos(1,95,'UnknownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence it can not be assigned here.').\n";
-		assertEquals(expected, result);
-	}
-
-	@Test
-	public void testRuleFail() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL({\"1\"});RULE_FAIL({\"2\"}) END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-	}
-
-	@Test
-	public void testActivation() throws Exception {
+	public void testActivation() {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
 		System.out.println(rulesMachineAsBMachine);
-		//TODO do not use the prettyprinter
+		// TODO do not use the prettyprinter
 		assertTrue(rulesMachineAsBMachine.contains("foo := IF k=TRUE THEN \"NOT_CHECKED\" ELSE \"DISABLED\" END"));
-		
+
 	}
 
 	@Test
-	public void testRulePredicates() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == DISABLED_RULE(rule1)\n"
-				+ "& NOT_CHECKED_RULE(rule1) & \nFAILED_RULE(rule1) & \nFAILED_RULE_ERROR_TYPE(rule1,1) \n"
-				+ "& SUCCEEDED_RULE(rule1) & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)\n"
-				+ "OPERATIONS RULE rule1 BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+	public void testRulePredicates() {
+		String testMachine = "RULES_MACHINE Test\n";
+		testMachine += "DEFINITIONS GOAL == \n";
+		testMachine += "  DISABLED_RULE(rule1)\n";
+		testMachine += "& NOT_CHECKED_RULE(rule1) \n";
+		testMachine += "& FAILED_RULE(rule1) \n";
+		testMachine += "& FAILED_RULE_ERROR_TYPE(rule1,1) \n";
+		testMachine += "& SUCCEEDED_RULE(rule1) & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)\n";
+		testMachine += "& SUCCEEDED_RULE(rule1)\n";
+		testMachine += "OPERATIONS RULE rule1 BODY skip END\n";
+		testMachine += "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
-	public void testDefineReadItself() throws Exception {
+	public void testDefineReadItself() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		String expected = "parse_exception(pos(1,86,'UnknownFile'),'Variable \\'xx\\' read before defined.').\n";
 		assertEquals(expected, result);
 	}
 
 	@Test
-	public void testVariableDefinedTwice() throws Exception {
+	public void testVariableDefinedTwice() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute_x BODY DEFINE x TYPE POW(INTEGER) VALUE {1} END; \n DEFINE x TYPE POW(INTEGER) VALUE {2} END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 
 	}
 
 	@Test
-	public void testInvalidComputation() throws Exception {
+	public void testInvalidComputation() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute_x_y BODY DEFINE x TYPE POW(STRING) VALUE y END \n; DEFINE y TYPE POW(STRING) VALUE {\"foo\"}END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 	}
 
 	@Test
-	public void testRuleFailNoMessage() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertEquals("parse_exception(pos(1,45,'UnknownFile'),'RULE_FAIL requires at least one argument.').\n", result);
-	}
-
-	@Test
-	public void testRuleIfThenElse() throws Exception {
+	public void testRuleIfThenElse() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 	}
 
 	@Test
-	public void testForLoop() throws Exception {
+	public void testNestedForLoop() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x IN 1..3 \nDO FOR y IN 1..3 \nDO skip END END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		assertTrue(result.contains("var(none,[identifier(none,'$SET0')"));
 		assertTrue(result.contains("var(none,[identifier(none,'$SET1')"));
 	}
 
 	@Test
-	public void testRuleSkip() throws Exception {
+	public void testForLoopTwoLoopVariables() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS foo = \nFOR x,y IN {1..3}*{TRUE} \nDO skip END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		// x,y:: {CHOOSE(..)}
+		assertTrue(result.contains(
+				"becomes_element_of(none,[identifier(none,x),identifier(none,y)],set_extension(none,[definition(none,'CHOOSE',[identifier(none,'$SET0')])"));
+	}
+
+	@Test
+	public void testRuleSkip() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 
 	}
 
 	@Test
-	public void testAllowedDefinitionCall() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS foo == skip OPERATIONS RULE rule1 BODY RULE_SUCCESS; foo END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+	public void testDependsOnRule() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY skip END\n;"
+				+ " RULE foo2 DEPENDS_ON_RULE foo BODY skip END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
-	public void testDependsOnRule() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_SUCCESS END\n;"
-				+ " RULE foo2 DEPENDS_ON_RULE foo BODY RULE_SUCCESS END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertFalse(result.contains("exception"));
-	}
-
-	@Test
-	public void testDependsOnComputation() throws Exception {
+	public void testDependsOnComputation() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute BODY skip END\n;"
 				+ " RULE foo2 DEPENDS_ON_COMPUTATION compute BODY skip END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
-	public void testDefinition() throws Exception {
+	public void testDefinition() {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS foo == 1 END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		assertTrue("Invalid definition injector", result.contains(
-				"machine(abstract_machine(none,machine(none),machine_header(none,test,[]),[definitions(none,[expression_definition(none,foo,[],integer(none,1))])]))."));
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue("Invalid definition injector",
+				result.contains("expression_definition(none,foo,[],integer(none,1))"));
+		assertFalse(result.contains("exception"));
+	}
+
+	@Test
+	public void testGoal() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY skip END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
-	public void testGoal() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY RULE_SUCCESS END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertFalse(result.contains("exception"));
-	}
-
-	@Test
-	public void testGetCounterexamples() throws Exception {
+	public void testGetCounterexamples() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1,2) = {} OPERATIONS RULE rule1 BODY skip END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
@@ -341,7 +332,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testSucceededRuleErrorType() throws Exception {
+	public void testSucceededRuleErrorType() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
@@ -349,7 +340,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testFailedRuleErrorType() throws Exception {
+	public void testFailedRuleErrorType() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
@@ -357,79 +348,56 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testVarSubstitution() throws Exception {
+	public void testVarSubstitution() {
 		final String testMachine = "RULES_MACHINE Test INITIALISATION VAR a,b IN a := 1; b:=1 END END";
-		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
+		final String result = getRulesProjectAsPrologTerm(testMachine);
 		assertFalse(result.contains("exception"));
 	}
 
-	public static String getFileAsPrologTerm(final String file) throws FileNotFoundException, IOException {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.readMachineFromFile(new File(file));
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
-		unit.setParsingBehaviour(pb);
-		unit.parse();
-		unit.translate();
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+	@Test
+	public void testReplaces() {
+		String testMachine = "RULES_MACHINE Test\n";
+		testMachine += "OPERATIONS\n";
+		testMachine += "COMPUTATION comp1 BODY skip END;\n";
+		testMachine += "COMPUTATION comp2 REPLACES comp1 BODY skip END\n";
+		testMachine += "END\n";
+		final String prologOutput = getRulesProjectAsPrologTerm(testMachine);
+		assertFalse(prologOutput.contains("exception"));
 	}
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
-		unit.setParsingBehaviour(pb);
-		unit.parse();
-		unit.translate();
-
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+	@Test
+	public void testPreferences() throws Exception {
+		final String testMachine = "RULES_MACHINE test DEFINITIONS SET_PREF_TIME_OUT == 1000; SET_PREF_COMPRESSION == FALSE; SET_PREF_TRY_FIND_ABORT == TRUE; SET_PREF_SOME_PREF == \"foo\" END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertTrue(result.contains("SET_PREF_TIME_OUT"));
+		assertTrue(result.contains("SET_PREF_TIME_OUT"));
 	}
 
-	public static String getRulesMachineAsBMachine(final String content) {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.addLineNumbers = false;
-		unit.setParsingBehaviour(pb);
-		unit.parse();
-		if (unit.getCompoundException() != null) {
-			throw new RuntimeException(unit.getCompoundException());
-		}
-		unit.translate();
-		if (unit.getCompoundException() != null) {
-			throw new RuntimeException(unit.getCompoundException());
-		}
-		PrettyPrinter pp = new PrettyPrinter();
-		unit.getStart().apply(pp);
-		return pp.getPrettyPrint();
+	@Test
+	public void testDefineSymbolicLambda() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ %x.(x : INTEGER | x ) END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
+	public void testDefineSymbolicSetComprehension() throws Exception {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ {x| x : INTEGER}END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
+	public void testFailedRuleAllErrorTypes() throws Exception {
+		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY skip END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
 	}
 
 }

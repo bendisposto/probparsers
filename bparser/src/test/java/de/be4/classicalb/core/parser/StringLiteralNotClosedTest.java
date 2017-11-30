@@ -8,11 +8,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
+import util.Ast2String;
 
 public class StringLiteralNotClosedTest {
 
@@ -44,7 +44,7 @@ public class StringLiteralNotClosedTest {
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
-		parser.getOptions().grammar = RulesGrammar.getInstance();
+		parser.getOptions().setGrammar(RulesGrammar.getInstance());
 		final Start startNode = parser.parse(testMachine, false);
 
 		// startNode.apply(new ASTPrinter());

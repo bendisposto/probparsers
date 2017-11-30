@@ -9,10 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 public final class BinaryOperator {
-	public static final List<BinaryOperator> OPS = createBinaryOperators();
+	protected static final List<BinaryOperator> OPS = createBinaryOperators();
 
-	private static void defineBinaryOperators(
-			final Collection<BinaryOperator> ops) {
+	private static void defineBinaryOperators(final Collection<BinaryOperator> ops) {
 		addOp(ops, "*", 190, LEFT, "multiplication or Cartesian product");
 		addOp(ops, "**", 200, RIGHT, "power");
 		addOp(ops, "+", 180, LEFT, "addition");
@@ -46,11 +45,9 @@ public final class BinaryOperator {
 		addOp(ops, "||", 20, LEFT, "relational parallel product");
 	}
 
-	private static void addOp(final Collection<BinaryOperator> ops,
-			final String symbol, final int priority, final EAssoc assoc,
-			final String name) {
-		final BinaryOperator op = new BinaryOperator(symbol, priority, assoc,
-				name);
+	private static void addOp(final Collection<BinaryOperator> ops, final String symbol, final int priority,
+			final EAssoc assoc, final String name) {
+		final BinaryOperator op = new BinaryOperator(symbol, priority, assoc, name);
 		ops.add(op);
 	}
 
@@ -65,8 +62,7 @@ public final class BinaryOperator {
 	private final EAssoc associatifity;
 	private final String name;
 
-	public BinaryOperator(final String symbol, final int priority,
-			final EAssoc associatifity, final String name) {
+	public BinaryOperator(final String symbol, final int priority, final EAssoc associatifity, final String name) {
 		this.symbol = symbol;
 		this.priority = priority;
 		this.associatifity = associatifity;
@@ -91,8 +87,7 @@ public final class BinaryOperator {
 
 	@Override
 	public String toString() {
-		return symbol + "(" + priority + ", " + associatifity + ", \"" + name
-				+ "\")";
+		return symbol + "(" + priority + ", " + associatifity + ", \"" + name + "\")";
 	}
 
 }

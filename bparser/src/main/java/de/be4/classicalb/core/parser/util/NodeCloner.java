@@ -18,14 +18,6 @@ public class NodeCloner extends DepthFirstAdapter {
 		sourceNode.apply(nodeIdSetter);
 	}
 
-	/**
-	 * Clones a node including position information.
-	 * 
-	 * @param node
-	 *            the node to be cloned
-	 * @return the cloned node including position information.
-	 */
-
 	@SuppressWarnings("unchecked")
 	public static <T extends Node> T cloneNode(T node) {
 		NodeCloner cloner = new NodeCloner(node);
@@ -34,6 +26,7 @@ public class NodeCloner extends DepthFirstAdapter {
 		return (T) copy;
 	}
 
+	@Override
 	public void defaultIn(Node node) {
 		NodePosition nodePosition = nodeIdSetter.getNodePosition(nodeIdCounter);
 		node.setStartPos(nodePosition.startPos);
@@ -51,6 +44,7 @@ class NodePositionCollector extends DepthFirstAdapter {
 		return positionMap.get(nodeIdCounter);
 	}
 
+	@Override
 	public void defaultIn(Node node) {
 		positionMap.put(nodeIdCounter, new NodePosition(node.getStartPos(), node.getEndPos()));
 		nodeIdCounter++;

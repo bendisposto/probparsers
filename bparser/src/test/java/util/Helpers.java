@@ -7,7 +7,6 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
@@ -32,9 +31,14 @@ public class Helpers {
 		return string;
 	}
 
-	public static String getPrettyPrint(final String testMachine) throws BCompoundException {
+	public static String getPrettyPrint(final String testMachine) {
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
+		Start startNode;
+		try {
+			startNode = parser.parse(testMachine, false);
+		} catch (BCompoundException e) {
+			throw new RuntimeException(e);
+		}
 		PrettyPrinter pp = new PrettyPrinter();
 		startNode.apply(pp);
 		return pp.getPrettyPrint();
@@ -62,6 +66,7 @@ public class Helpers {
 			PrintStream printStream = new PrintStream(output);
 			BParser.printASTasProlog(printStream, parser, machineFile, tree, new ParsingBehaviour(),
 					parser.getContentProvider());
+			output.close();
 			return output.toString();
 		} catch (BCompoundException e) {
 			e.printStackTrace();
@@ -72,11 +77,11 @@ public class Helpers {
 
 	public static String fullParsing(String filename) {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.prologOutput = true;
-		parsingBehaviour.useIndention = false;
-		parsingBehaviour.addLineNumbers = false;
-		parsingBehaviour.verbose = true;
-		parsingBehaviour.machineNameMustMatchFileName = true;
+		parsingBehaviour.setPrologOutput(true);
+		parsingBehaviour.setUseIndention(false);
+		parsingBehaviour.setAddLineNumbers(false);
+		parsingBehaviour.setVerbose(true);
+		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}
 
@@ -103,14 +108,20 @@ public class Helpers {
 		return output.toString();
 	}
 
-	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
+	public static String getMachineAsPrologTerm(String input) {
 		final BParser parser = new BParser("Test");
-		Start start = parser.parse(input, true);
+		Start start;
+		try {
+			start = parser.parse(input, true);
+		} catch (BCompoundException e) {
+			throw new RuntimeException(e);
+		}
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.prologOutput = true;
-		parsingBehaviour.useIndention = false;
-		parsingBehaviour.addLineNumbers = false;
-		parsingBehaviour.verbose = true;
+		parsingBehaviour.setPrologOutput(true);
+		parsingBehaviour.setUseIndention(false);
+		parsingBehaviour.setAddLineNumbers(true);
+		parsingBehaviour.setVerbose(true);
+		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -123,7 +134,7 @@ public class Helpers {
 				return this.string.toString();
 			}
 		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.useIndention);
+		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.isUseIndention());
 		printAsProlog(start, pout);
 		return output.toString();
 	}
@@ -155,7 +166,7 @@ public class Helpers {
 			Start tree = parser.parseFile(machineFile, false);
 
 			final ParsingBehaviour behaviour = new ParsingBehaviour();
-			behaviour.verbose = true;
+			behaviour.setVerbose(true);
 
 			PrintStream output = new PrintStream(probfilename);
 			BParser.printASTasProlog(output, parser, machineFile, tree, behaviour, parser.getContentProvider());

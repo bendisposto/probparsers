@@ -46,7 +46,7 @@ public class SyntaxExtensionTest {
 
 	@Test
 	public void testIfThenElseExpression() throws Exception {
-		final String testMachine = "MACHINE Test PROPERTIES 1= IF 1=1 THEN 1 ELSE 2END END";
+		final String testMachine = "MACHINE Test PROPERTIES 1 = IF 1=1 THEN 1 ELSE 2 END END";
 
 		final String result = Helpers.getTreeAsString(testMachine);
 		assertEquals(

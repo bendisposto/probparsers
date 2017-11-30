@@ -46,7 +46,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public IPrologTermOutput emptyList() {
-		addArgument(ListPrologTerm.EMPTY_LIST);
+		addArgument(ListPrologTerm.emptyList());
 		return this;
 	}
 
@@ -122,7 +122,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public List<PrologTerm> getSentences() {
-		return new ArrayList<PrologTerm>(sentences);
+		return new ArrayList<>(sentences);
 	}
 
 	public void clearSentences() {

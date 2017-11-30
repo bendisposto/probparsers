@@ -4,7 +4,7 @@ import java.io.File;
 
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.rules.project.IModelReference;
+import de.be4.classicalb.core.parser.rules.IModelReference;
 
 public class MachineReference implements IModelReference {
 
@@ -28,7 +28,7 @@ public class MachineReference implements IModelReference {
 			throw new CheckException("Declared path in file pragma is an directory and not a file: " + path, node);
 		} else {
 			String fileName = file.getName();
-			String baseName = fileName.substring(0, fileName.lastIndexOf("."));
+			String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
 			if (!baseName.equals(name)) {
 				throw new CheckException(
 						"Declared name in file pragma does not match with the name of the machine referenced: " + name

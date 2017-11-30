@@ -9,7 +9,7 @@ before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in gradle.properties.enc -out
   gradle.properties -d
 addons:
-  sonarqube: 
+  sonarcloud:
     branches:
      - master
      - develop
@@ -18,10 +18,10 @@ install: /bin/true
 sudo: false
 
 script:
-  - TERM=dumb gradle clean deploy uploadArchives
-  - sonar-scanner -Dsonar.login=$SONAR_TOKEN
-
-after_success: curl -L $JENKINS_URL
+  - TERM=dumb ./gradlew clean deploy uploadArchives
+after_success:
+  - curl -L $JENKINS_URL
+  - TERM=dumb ./gradlew sonarqube --info --stacktrace
 env:
   global:
   - secure: laGlF46pirAFs3xrBTm+7AFi0CubtBj0PRLqhAe2q9wEhyUvU+LOhJZiqeyuc2FBzGOSlfevGhVOgmWxph6g2EP/bxhwiFywXD/CCzjDhca2JahMdYW925006jGIfh+QmWnxb7hoXUb+DvOoDQdHoiTPmVom2oTEGTctjLB4BhI=

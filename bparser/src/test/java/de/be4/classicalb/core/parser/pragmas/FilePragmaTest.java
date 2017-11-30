@@ -8,10 +8,10 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import util.Ast2String;
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
@@ -27,9 +27,9 @@ public class FilePragmaTest {
 		BParser bparser = new BParser();
 		Start ast = bparser.parseFile(f, false);
 		assertNotNull(ast);
-		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH,
-				bparser.getContentProvider(), new ParsingBehaviour());
-		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
+		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH, bparser.getContentProvider(),
+				new ParsingBehaviour());
+		rml.loadAllMachines(f, ast, bparser.getDefinitions());
 	}
 
 	@Test
@@ -50,9 +50,8 @@ public class FilePragmaTest {
 		BParser bparser = new BParser();
 		Start ast = bparser.parseFile(f, false);
 		assertNotNull(ast);
-		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH,
-				bparser.getContentProvider());
-		rml.loadAllMachines(f, ast, null, bparser.getDefinitions());
+		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH, bparser.getContentProvider());
+		rml.loadAllMachines(f, ast, bparser.getDefinitions());
 	}
 
 	@Test
@@ -90,8 +89,7 @@ public class FilePragmaTest {
 		parseFile(file);
 	}
 
-	private static void parseFile(final String filename) throws IOException,
-			BCompoundException {
+	private static void parseFile(final String filename) throws IOException, BCompoundException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
 			final File machineFile = new File(filename);
@@ -101,18 +99,17 @@ public class FilePragmaTest {
 			Start tree = parser.parseFile(machineFile, false);
 
 			PrintStream output = new PrintStream(probfilename);
-			BParser.printASTasProlog(output, parser, machineFile, tree,
-					new ParsingBehaviour(), parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree, new ParsingBehaviour(),
+					parser.getContentProvider());
 			output.close();
 		} else
-			throw new IllegalArgumentException("Filename '" + filename
-					+ "' has no extension");
+			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
 		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
-		parser.getOptions().grammar = RulesGrammar.getInstance();
+		parser.getOptions().setGrammar(RulesGrammar.getInstance());
 		final Start startNode = parser.parse(testMachine, false);
 
 		// startNode.apply(new ASTPrinter());

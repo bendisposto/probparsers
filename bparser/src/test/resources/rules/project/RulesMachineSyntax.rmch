@@ -1,0 +1,98 @@
+RULES_MACHINE RulesMachineSyntax
+DEFINITIONS
+GOAL ==
+  SUCCEEDED_RULE(rule1)
+  & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)
+  & GET_RULE_COUNTEREXAMPLES(rule1) = {}
+  & FAILED_RULE(rule2)
+  & FAILED_RULE_ERROR_TYPE(rule2,1)
+  ;
+
+SubDefinition == skip
+ABSTRACT_CONSTANTS
+  AC_SuccessorFunction
+CONSTANTS
+  C_AInteger
+, C_ARecord
+PROPERTIES
+  AC_SuccessorFunction = %x.(x : INTEGER | x + 1)
+& C_AInteger = 1
+& C_ARecord = rec(foo: 1)
+
+OPERATIONS
+
+COMPUTATION COMP_LetOperator
+BODY
+  VAR res
+  IN
+    LET x
+    BE x = 1
+    IN
+      res := {x + LET y BE y = 1 + 1 IN y + y END};
+      res := {a| a : INTEGER & LET y BE y = 1 IN a = y END}
+    END
+  END
+END//COMPUTATION
+;
+COMPUTATION COMP_QuantifiedOperators
+BODY
+  DEFINE
+    Lambda
+  TYPE
+    INTEGER <-> BOOL
+  VALUE
+    %x.(x : INTEGER| TRUE)
+  END//DEFINE
+  ;
+  DEFINE
+    GeneralProduct
+  TYPE
+    INTEGER
+  DUMMY_VALUE 0
+  VALUE
+    PI(x).(x : 1..3| x)
+  END//DEFINE
+  ;
+  DEFINE
+    GeneralSum
+  TYPE
+    INTEGER
+  DUMMY_VALUE 0
+  VALUE
+    SIGMA(x).(x : 1..3| x)
+  END//DEFINE
+  ;
+  DEFINE
+    Inter
+  TYPE
+    POW(INTEGER)
+  VALUE
+    INTER(x).(x: 1..3 | {x})
+  END//DEFINE
+  ;
+  IF
+    #x.(x : 1..3)
+    & !x.(x : 1..3 => x > 0)
+  THEN skip
+  END
+END//COMPUTATION
+
+;
+RULE rule1
+BODY
+  skip
+END
+;
+RULE rule2
+ERROR_TYPES 2
+BODY
+  RULE_FAIL
+  COUNTEREXAMPLE "error1"
+  END
+  ;
+  RULE_FAIL
+  ERROR_TYPE 1
+  COUNTEREXAMPLE "error1"
+  END
+END
+END

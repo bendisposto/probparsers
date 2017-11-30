@@ -3,11 +3,12 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -51,8 +52,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	private final File mainFile;
 	private final Node start;
 	private final boolean isMachineNameMustMatchFileName;
-	private final List<String> pathList = new ArrayList<String>();
-	private final Hashtable<String, String> filePathTable = new Hashtable<>();
+	private final List<String> pathList = new ArrayList<>();
+	private final HashMap<String, String> filePathTable = new HashMap<>();
 	private String machineName;
 	private String packageName;
 	private File rootDirectory;
@@ -80,16 +81,16 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	}
 
 	public void findReferencedMachines() throws BException {
-		String fileName = null;
+		String fileName;
 		try {
 			fileName = mainFile.getCanonicalPath();
 		} catch (IOException e) {
-			fileName = mainFile.getAbsolutePath();
+			throw new BException(mainFile.getAbsolutePath(), e);
 		}
 		try {
 			this.start.apply(this);
 		} catch (VisitorException e) {
-			throw new BException(fileName, (CheckException) e.getException());
+			throw new BException(fileName, e);
 		}
 	}
 
@@ -99,8 +100,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	 * @return a set of machine names, never <code>null</code>
 	 */
 	public Set<String> getSetOfReferencedMachines() {
-		Set<String> set = new HashSet<>(referncesTable.keySet());
-		return set;
+		return new HashSet<>(referncesTable.keySet());
 	}
 
 	public List<String> getPathList() {
@@ -115,8 +115,12 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return machineName;
 	}
 
-	public Hashtable<String, MachineReference> getReferencesTable() {
-		return new Hashtable<>(referncesTable);
+	public String getPackage() {
+		return packageName;
+	}
+
+	public Map<String, MachineReference> getReferencesTable() {
+		return new HashMap<>(referncesTable);
 	}
 
 	public List<MachineReference> getReferences() {
@@ -143,7 +147,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	@Override
 	public void caseAPackageParseUnit(APackageParseUnit node) {
 		determineRootDirectory(node.getPackage(), node);
-		List<PImportPackage> copy = new ArrayList<PImportPackage>(node.getImports());
+		List<PImportPackage> copy = new ArrayList<>(node.getImports());
 		for (PImportPackage e : copy) {
 			e.apply(this);
 		}
@@ -185,7 +189,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
-			throw new VisitorException(new CheckException(e.getMessage(), (Node) null));
+			throw new VisitorException(e);
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
 			final String name1 = packageNameArray[i];
@@ -314,7 +318,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				}
 
 			} else {
-				throw new RuntimeException("Not supported class: " + machineExpression.getClass());
+				throw new AssertionError("Not supported class: " + machineExpression.getClass());
 			}
 		}
 	}
@@ -326,29 +330,36 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseALocalOperationsMachineClause(ALocalOperationsMachineClause node) {
+		// skip
 	}
 }

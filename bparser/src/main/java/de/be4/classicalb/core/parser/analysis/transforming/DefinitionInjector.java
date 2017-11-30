@@ -20,36 +20,31 @@ public class DefinitionInjector extends DepthFirstAdapter {
 	private AAbstractMachineParseUnit abstractMachineParseUnit = null;
 	private ADefinitionsMachineClause definitionsMachineClause = null;
 
-	public static void injectDefinitions(final Start start,
-			final IDefinitions definitions) {
+	public static void injectDefinitions(final Start start, final IDefinitions definitions) {
 		new DefinitionInjector(start, definitions);
 
 	}
 
 	private DefinitionInjector(Start start, final IDefinitions definitions) {
 		start.apply(this);
-		if (definitions.getDefinitionNames().size() == 0)
+		if (definitions.getDefinitionNames().isEmpty())
 			return;
-		if (definitionsMachineClause == null
-				&& abstractMachineParseUnit != null) {
+		if (definitionsMachineClause == null && abstractMachineParseUnit != null) {
 			definitionsMachineClause = new ADefinitionsMachineClause();
-			abstractMachineParseUnit.getMachineClauses().add(
-					definitionsMachineClause);
-		} else if (definitionsMachineClause == null
-				&& abstractMachineParseUnit == null) {
-			throw new RuntimeException(
-					"Only AAbstractMachineParseUnit are supported by the DefinitionsInjector.");
-		}else{
+			abstractMachineParseUnit.getMachineClauses().add(definitionsMachineClause);
+		} else if (abstractMachineParseUnit == null) {
+			throw new AssertionError("Only AAbstractMachineParseUnit are supported by the DefinitionsInjector.");
+		} else {
 			definitionsMachineClause.getDefinitions().clear();
 		}
-		LinkedList<PDefinition> existingDefintions = definitionsMachineClause
-				.getDefinitions();
+		LinkedList<PDefinition> existingDefintions = definitionsMachineClause.getDefinitions();
 		for (final String name : definitions.getDefinitionNames()) {
 			final PDefinition def = definitions.getDefinition(name);
 			existingDefintions.add(def);
 		}
 	}
 
+	@Override
 	public void inAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		abstractMachineParseUnit = node;
 	}
@@ -62,30 +57,36 @@ public class DefinitionInjector extends DepthFirstAdapter {
 	// IGNORE most machine parts
 	@Override
 	public void caseAConstantsMachineClause(final AConstantsMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAPropertiesMachineClause(final APropertiesMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAInvariantMachineClause(final AInvariantMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAAssertionsMachineClause(final AAssertionsMachineClause node) {
+		// skip
 	}
 
 	@Override
-	public void caseAInitialisationMachineClause(
-			final AInitialisationMachineClause node) {
+	public void caseAInitialisationMachineClause(final AInitialisationMachineClause node) {
+		// skip
 	}
 
 	@Override
 	public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
+		// skip
 	}
 }

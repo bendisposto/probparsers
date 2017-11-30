@@ -11,7 +11,7 @@ public class DefaultGrammar implements IGrammar {
 
 	@Override
 	public Token createNewToken(Token token) {
-		throw new RuntimeException("No rewrite rules prepared in default grammar.");
+		throw new AssertionError("No rewrite rules prepared in default grammar.");
 	}
 
 }

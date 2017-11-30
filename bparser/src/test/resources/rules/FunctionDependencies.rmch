@@ -1,0 +1,35 @@
+RULES_MACHINE FunctionDependencies
+OPERATIONS
+COMPUTATION COMP_xx
+BODY
+  DEFINE xx TYPE POW(INTEGER) VALUE{1} END
+END
+;
+FUNCTION out <-- FUNC_Add
+BODY
+  out := xx \/ {2}
+END//FUNCTION
+;
+COMPUTATION COMP_yy
+BODY
+  DEFINE yy TYPE POW(INTEGER) VALUE {3} END
+END//COMPUTATION
+;
+FUNCTION out <-- FUNC_Add2
+BODY
+  out <-- FUNC_Add;
+  out := out \/ yy
+END//FUNCTION
+
+;
+RULE RULE_rule1
+RULEID id1
+BODY
+  VAR res
+  IN
+    res <-- FUNC_Add2
+  END
+END
+
+
+END

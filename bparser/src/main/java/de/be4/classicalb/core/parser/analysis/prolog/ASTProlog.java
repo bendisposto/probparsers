@@ -29,22 +29,42 @@ public class ASTProlog extends DepthFirstAdapter {
 	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
-	private static final List<String> SUM_TYPE = new LinkedList<String>(Arrays.asList("expression", "predicate",
+	private static final List<String> SUM_TYPE = new LinkedList<>(Arrays.asList("expression", "predicate",
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<String>(Arrays.asList("event", "freetype",
+	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
 			"machine_header", "machine_reference", "operation", "rec_entry", "values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
-	private final Map<String, String> simpleFormats = new HashMap<String, String>();
+	private final Map<String, String> simpleFormats = new HashMap<>();
 
 	// to look up the identifier of each node
 	private final PositionPrinter positionPrinter;
 
 	// helper object to print the prolog terms
 	private final IPrologTermOutput pout;
+
+	/**
+	 * @param start
+	 *            the AST node which should contain an
+	 *            {@link AExpressionParseUnit}, an {@link APredicateParseUnit}
+	 *            or an {@link ASubstitutionParseUnit}. The {@code start} node
+	 *            should have been created by
+	 *            {@link de.be4.classicalb.core.parser.BParser#parseFormula(String input)
+	 *            parseFormula}.
+	 * @param pout
+	 *            the IPrologTermOutput to which the formula is printed
+	 * 
+	 */
+	public static void printFormula(Start start, final IPrologTermOutput pout) {
+		NodeIdAssignment na = new NodeIdAssignment();
+		start.apply(na);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+		ASTProlog printer = new ASTProlog(pout, pprinter);
+		start.apply(printer);
+	}
 
 	public ASTProlog(final IPrologTermOutput pout, final PositionPrinter positionPrinter) {
 		this.positionPrinter = positionPrinter;
@@ -227,7 +247,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		// There is no rule to translate the class name to a prolog functor.
 		// Probably the class name is missing in table SUM_TYPE or in table
 		// ATOMIC_TYPE.
-		throw new RuntimeException("cannot determine functor name: " + className);
+		throw new AssertionError("cannot determine functor name: " + className);
 	}
 
 	/**

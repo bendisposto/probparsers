@@ -27,22 +27,20 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 		out = new PrintStream(baos);
 
 		behaviour = new ParsingBehaviour();
-		behaviour.prologOutput = true;
+		behaviour.setPrologOutput(true);
 	}
 
 	@Test
-	public void testExceptionCaughtAndPrintedToProlog() throws IOException,
-			BException {
+	public void testExceptionCaughtAndPrintedToProlog() throws IOException, BException {
 		machine = new File(PATH);
 
 		final BParser parser = new BParser(machine.getName());
 		int returnValue = parser.fullParsing(machine, behaviour, out, out);
 
-		
 		System.out.println(baos.toString());
-		
+
 		assertEquals(returnValue, -3);
-		assertEquals("exception('Expecting a B machine but was a definition file in file: \\'LibraryIO.def\\'').", baos
-				.toString().trim());
+		assertEquals("exception('Expecting a B machine but was a definition file in file: \\'LibraryIO.def\\'').",
+				baos.toString().trim());
 	}
 }

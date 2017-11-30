@@ -58,48 +58,41 @@ public class ASTPrologTest {
 		final StringWriter swriter = new StringWriter();
 		NodeIdAssignment nodeids = new NodeIdAssignment();
 		node.apply(nodeids);
-		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter),
-				false);
+		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 		node.apply(prolog);
 		swriter.flush();
+		System.out.println(swriter.toString());
 		return swriter.toString();
 	}
 
-	private void checkAST(final int counter, final String expected,
-			final Node ast) {
+	private void checkAST(final int counter, final String expected, final Node ast) {
 		assertEquals(insertNumbers(counter, expected), printAST(ast));
 	}
 
-	private void checkProlog(final int counter, final String bspec,
-			final String expected) throws BCompoundException {
+	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		if (remove_restrictions) {
-			parser.getOptions().restrictProverExpressions = false;
+			parser.getOptions().setRestrictProverExpressions(false);
 		}
-		final Start startNode = parser.parse(bspec, false,
-				new NoContentProvider());
+		final Start startNode = parser.parse(bspec, false, new NoContentProvider());
 		checkAST(counter, expected, startNode);
 	}
 
-	private void checkPredicate(final String pred, final String expected)
-			throws BCompoundException {
+	private void checkPredicate(final String pred, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.PREDICATE_PREFIX + pred, expected);
 	}
 
-	private void checkExpression(final String expr, final String expected)
-			throws BCompoundException {
+	private void checkExpression(final String expr, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.EXPRESSION_PREFIX + expr, expected);
 	}
 
-	private void checkSubstitution(final String subst, final String expected)
-			throws BCompoundException {
+	private void checkSubstitution(final String subst, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.SUBSTITUTION_PREFIX + subst, expected);
 	}
 
-	private void checkOppatterns(final String pattern, final String expected)
-			throws BCompoundException {
+	private void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
 		checkProlog(1, BParser.OPERATION_PATTERN_PREFIX + pattern, expected);
 	}
 
@@ -138,15 +131,12 @@ public class ASTPrologTest {
 
 	@Test
 	public void testMachine2() throws BCompoundException {
-		String m = "MACHINE mname(P)  SETS S; E={e1,e2}"
-				+ "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
-				+ "  INVARIANT x:NAT  INITIALISATION x:=5"
-				+ "  OPERATIONS op=skip; r,s <-- op2(a,b) = skip  END";
+		String m = "MACHINE mname(P)  SETS S; E={e1,e2}" + "  INCLUDES inc(x),rn.inc2  SEES see,s.see2  VARIABLES x"
+				+ "  INVARIANT x:NAT  INITIALISATION x:=5" + "  OPERATIONS op=skip; r,s <-- op2(a,b) = skip  END";
 		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
-				+ "sees($,[identifier($,see),identifier($,'s.see2')]),"
-				+ "variables($,[identifier($,x)]),"
+				+ "sees($,[identifier($,see),identifier($,'s.see2')])," + "variables($,[identifier($,x)]),"
 				+ "invariant($,member($,identifier($,x),nat_set($))),"
 				+ "initialisation($,assign($,[identifier($,x)],[integer($,5)])),"
 				+ "operations($,[operation($,identifier(%,op),[],[],skip($)),"
@@ -171,15 +161,13 @@ public class ASTPrologTest {
 	@Test
 	public void testPredicates() throws BCompoundException {
 		checkPredicate("5>r.j", "greater($,integer($,5),identifier($,'r.j'))");
-		checkPredicate(
-				"!x,y.(x<y)",
+		checkPredicate("!x,y.(x<y)",
 				"forall($,[identifier($,x),identifier($,y)],less($,identifier($,x),identifier($,y)))");
 	}
 
 	@Test
 	public void testExpressions() throws BCompoundException {
-		checkExpression(
-				"SIGMA x,y.(x:NAT & y:INT | x+y)",
+		checkExpression("SIGMA x,y.(x:NAT & y:INT | x+y)",
 				"general_sum($,[identifier($,x),identifier($,y)],"
 						+ "conjunct($,member($,identifier($,x),nat_set($)),member($,identifier($,y),int_set($))),"
 						+ "add($,identifier($,x),identifier($,y)))");
@@ -187,16 +175,13 @@ public class ASTPrologTest {
 
 	@Test
 	public void testSubstitutions() throws BCompoundException {
-		checkSubstitution("x,y :: BOOL",
-				"becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
+		checkSubstitution("x,y :: BOOL", "becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
 	}
 
 	@Test
 	public void testDefinitions() throws BCompoundException {
-		String m = "MACHINE Defs  DEFINITIONS  INV == x:INT;"
-				+ "  lt(a) == x<7;  dbl(a) == 2*x*a;  ax(a) == x:=a"
-				+ "  VARIABLES x  INVARIANT INV & lt(7)"
-				+ "  INITIALISATION x:=dbl(3)  OPERATIONS  op1 = ax(6)"
+		String m = "MACHINE Defs  DEFINITIONS  INV == x:INT;" + "  lt(a) == x<7;  dbl(a) == 2*x*a;  ax(a) == x:=a"
+				+ "  VARIABLES x  INVARIANT INV & lt(7)" + "  INITIALISATION x:=dbl(3)  OPERATIONS  op1 = ax(6)"
 				+ "  END";
 		String expected = "abstract_machine($,machine($),machine_header($,'Defs',[]),"
 				+ "[definitions($,[predicate_definition($,'INV',[],member($,identifier($,x),int_set($))),"
@@ -212,18 +197,12 @@ public class ASTPrologTest {
 
 	@Test
 	public void testRewrite() throws BCompoundException {
-		checkPredicate("0 /= -1",
-				"not_equal($,integer($,0),unary_minus($,integer($,1)))");
-		checkPredicate("NATURAL <: INTEGER",
-				"subset($,natural_set($),integer_set($))");
-		checkPredicate("NATURAL /<: INTEGER",
-				"not_subset($,natural_set($),integer_set($))");
-		checkPredicate("NATURAL <<: INTEGER",
-				"subset_strict($,natural_set($),integer_set($))");
-		checkPredicate("NATURAL /<<: INTEGER",
-				"not_subset_strict($,natural_set($),integer_set($))");
-		checkPredicate("#x.(x>0)",
-				"exists($,[identifier($,x)],greater($,identifier($,x),integer($,0)))");
+		checkPredicate("0 /= -1", "not_equal($,integer($,0),unary_minus($,integer($,1)))");
+		checkPredicate("NATURAL <: INTEGER", "subset($,natural_set($),integer_set($))");
+		checkPredicate("NATURAL /<: INTEGER", "not_subset($,natural_set($),integer_set($))");
+		checkPredicate("NATURAL <<: INTEGER", "subset_strict($,natural_set($),integer_set($))");
+		checkPredicate("NATURAL /<<: INTEGER", "not_subset_strict($,natural_set($),integer_set($))");
+		checkPredicate("#x.(x>0)", "exists($,[identifier($,x)],greater($,identifier($,x),integer($,0)))");
 	}
 
 	@Test
@@ -247,17 +226,14 @@ public class ASTPrologTest {
 	@Test
 	public void testProverSET() throws BCompoundException {
 		remove_restrictions = true;
-		checkExpression(
-				"SET(x).(x>0)",
+		checkExpression("SET(x).(x>0)",
 				"comprehension_set($,[identifier($,x)],greater($,identifier($,x),integer($,0)))");
 	}
 
 	@Test
 	public void testOperationCalls() throws BCompoundException {
-		checkSubstitution("do(x)",
-				"operation_call($,identifier($,do),[],[identifier($,x)])");
-		checkSubstitution("r <-- do(x)",
-				"operation_call($,identifier(%,do),[identifier($,r)],[identifier($,x)])");
+		checkSubstitution("do(x)", "operation_call($,identifier($,do),[],[identifier($,x)])");
+		checkSubstitution("r <-- do(x)", "operation_call($,identifier(%,do),[identifier($,r)],[identifier($,x)])");
 	}
 
 	@Test
@@ -271,17 +247,14 @@ public class ASTPrologTest {
 		event.setEventName(new TIdentifierLiteral("testevent"));
 		event.setVariables(Arrays.asList(createId("param")));
 		event.setGuards(Arrays.asList((PPredicate) new ATruthPredicate()));
-		PSubstitution subst1 = new AAssignSubstitution(
-				Arrays.asList(createId("x")), Arrays.asList(createId("param")));
+		PSubstitution subst1 = new AAssignSubstitution(Arrays.asList(createId("x")), Arrays.asList(createId("param")));
 		event.setAssignments(Arrays.asList(subst1));
 		PWitness witness = new AWitness(new TIdentifierLiteral("ab"),
 				new AEqualPredicate(createId("ab"), createId("y")));
 		event.setWitness(Arrays.asList(witness));
-		event.setRefines(Arrays.asList(new TIdentifierLiteral("abstract1"),
-				new TIdentifierLiteral("abstract2")));
+		event.setRefines(Arrays.asList(new TIdentifierLiteral("abstract1"), new TIdentifierLiteral("abstract2")));
 
-		checkAST(
-				0,
+		checkAST(0,
 				"event_b_model($,mm,[events($,["
 						+ "event($,testevent,[abstract1,abstract2],[identifier($,param)],[truth($)],[],"
 						+ "[assign($,[identifier($,x)],[identifier($,param)])],"
@@ -294,10 +267,8 @@ public class ASTPrologTest {
 		final PExpression set = createId("set");
 		final PExpression one = new AIntegerExpression(new TIntegerLiteral("1"));
 		final PExpression two = new AIntegerExpression(new TIntegerLiteral("2"));
-		final PExpression three = new AIntegerExpression(new TIntegerLiteral(
-				"3"));
-		final APartitionPredicate pred = new APartitionPredicate(set,
-				Arrays.asList(one, two, three));
+		final PExpression three = new AIntegerExpression(new TIntegerLiteral("3"));
+		final APartitionPredicate pred = new APartitionPredicate(set, Arrays.asList(one, two, three));
 		final String expected = "partition($,identifier($,set),[integer($,1),integer($,2),integer($,3)])";
 		checkAST(0, expected, pred);
 	}
@@ -311,8 +282,7 @@ public class ASTPrologTest {
 
 	@Test
 	public void testLargeInteger() throws BCompoundException {
-		checkExpression("922337203685477580756",
-				"integer($,922337203685477580756)");
+		checkExpression("922337203685477580756", "integer($,922337203685477580756)");
 	}
 
 	@Test
@@ -324,16 +294,14 @@ public class ASTPrologTest {
 	}
 
 	private PExpression createId(final String name) {
-		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(
-				name)));
+		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(name)));
 	}
 
 	@Test
 	public void testFreeType() throws BCompoundException {
 		final AConstructorFreetypeConstructor multi = new AConstructorFreetypeConstructor(
 
-		new TIdentifierLiteral("multi"), new APowSubsetExpression(
-				new AIntegerSetExpression()));
+				new TIdentifierLiteral("multi"), new APowSubsetExpression(new AIntegerSetExpression()));
 
 		final AConstructorFreetypeConstructor single = new AConstructorFreetypeConstructor(
 				new TIdentifierLiteral("single"),
@@ -341,16 +309,14 @@ public class ASTPrologTest {
 				new AIntegerSetExpression());
 
 		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"),
-				Arrays.<PFreetypeConstructor> asList(multi, single));
+				Arrays.<PFreetypeConstructor>asList(multi, single));
 
-		AFreetypesMachineClause clause = new AFreetypesMachineClause(
-				Arrays.<PFreetype> asList(freetype));
+		AFreetypesMachineClause clause = new AFreetypesMachineClause(Arrays.<PFreetype>asList(freetype));
 
 		final StringWriter swriter = new StringWriter();
 		NodeIdAssignment nodeids = new NodeIdAssignment();
 		clause.apply(nodeids);
-		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter),
-				false);
+		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 

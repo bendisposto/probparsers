@@ -11,7 +11,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
@@ -39,10 +38,6 @@ import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -53,31 +48,43 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
-	public static final String CSP_PATTERN_PREFIX = "#CSPPATTERN";
 
-	private Parser parser;
-	private SourcePositions sourcePositions;
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
-	private List<String> doneDefFiles = new ArrayList<String>();
+	private List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
 	private File directory;
 
 	private IDefinitionFileProvider contentProvider;
-	private Map<PositionedNode, SourcecodeRange> positions;
 
-	public static String getVersion() throws IOException {
-		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
-		return p.getProperty("version");
+	public static String getVersion() {
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("version");
+		} else {
+			return "UNKNOWN";
+		}
 	}
 
-	public static String getGitSha() throws IOException {
+	public static String getGitSha() {
+		Properties p = loadProperties();
+		if (p != null) {
+			return p.getProperty("git");
+		} else {
+			return "UNKNOWN";
+		}
+	}
+
+	private static Properties loadProperties() {
 		Properties p = new Properties();
-		p.load(BParser.class.getResourceAsStream("/build.properties"));
-		return p.getProperty("git");
+		try {
+			p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
+		} catch (Exception e) {
+			return null;
+		}
+		return p;
 	}
 
 	public BParser() {
@@ -103,7 +110,7 @@ public class BParser {
 			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser.getSourcePositions(), parser.getDefinitions());
+		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
@@ -112,7 +119,7 @@ public class BParser {
 			throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, null, parser.getDefinitions());
+		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
@@ -177,7 +184,9 @@ public class BParser {
 	/**
 	 * Use this method, if you only need to parse small inputs. This only gives
 	 * the AST or an Exception, but no information about source positions. If
-	 * you need those, call the instance method of BParser instead
+	 * you need those, call the instance method of BParser instead. Do NOT use
+	 * this method to parse formulas, predicates and expression. Use the
+	 * corresponding instance methods instead.
 	 * 
 	 * @param input
 	 *            the B machine as input string
@@ -190,13 +199,37 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
+	public Start parseFormula(final String input) throws BCompoundException {
+		final String theFormula = FORMULA_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseExpression(final String input) throws BCompoundException {
+		final String theFormula = EXPRESSION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseSubstitution(final String input) throws BCompoundException {
+		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseTranstion(final String input) throws BCompoundException {
+		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parsePredicate(final String input) throws BCompoundException {
+		final String theFormula = PREDICATE_PREFIX + "\n" + input;
+		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
 		final Reader reader = new StringReader(input);
 
 		Start ast = null;
-		boolean ok = false;
 
-		List<String> ids = new ArrayList<String>();
+		List<String> ids = new ArrayList<>();
 
 		final DefinitionTypes defTypes = new DefinitionTypes();
 		defTypes.addAll(context.getTypes());
@@ -214,11 +247,13 @@ public class BParser {
 		} while (!(t instanceof EOF));
 
 		Parser p = new Parser(new EBLexer(input, BigInteger.ZERO, ids, defTypes));
+		boolean ok;
 		try {
 			ast = p.parse();
 			ok = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			handleException(e);
+			ok = false;
 		}
 
 		BigInteger b = new BigInteger("2");
@@ -230,12 +265,17 @@ public class BParser {
 			try {
 				ast = p.parse();
 				ok = true;
-			} catch (Exception e) {
+			} catch (ParserException e) {
 				b = b.subtract(BigInteger.ONE);
+				handleException(e);
 			}
 		}
 
 		return ast;
+	}
+
+	private void handleException(Exception e) {
+		// do nothing
 	}
 
 	/**
@@ -303,11 +343,7 @@ public class BParser {
 	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
-	 *             the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
+	 *             the parser has finished.
 	 *             </li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
@@ -339,19 +375,9 @@ public class BParser {
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
-			parser = new SabbleCCBParser(lexer);
+			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = lexer.getTokenList();
 
-			/*
-			 * Retrieving sourcecode positions which were found by ParserAspect
-			 */
-			/*
-			 * storing the positions in extra variable because the class
-			 * SourcePositions provides no access to the positions
-			 */
-			this.positions = parser.getMapping();
-			this.sourcePositions = new SourcePositions(tokenList, positions);
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
 			 * Collect available definition declarations. Needs to be done now
@@ -369,30 +395,31 @@ public class BParser {
 			}
 
 			// perfom AST transformations that can't be done by SableCC
-			applyAstTransformations(rootNode);
+			try {
+				applyAstTransformations(rootNode);
+			} catch (CheckException e) {
+				throw new BCompoundException(new BException(getFileName(), e));
+			}
 
 			// perform some semantic checks which are not done in the parser
 			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
 			for (CheckException checkException : checkExceptions) {
 				bExceptionList.add(new BException(getFileName(), checkException));
 			}
-			if (bExceptionList.size() > 0) {
-				BCompoundException comp = new BCompoundException(bExceptionList);
-				throw comp;
+			if (!bExceptionList.isEmpty()) {
+				throw new BCompoundException(bExceptionList);
 			}
 			return rootNode;
 		} catch (final LexerException | BParseException | IOException | PreParseException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			final SourcecodeRange range = sourcePositions == null ? null : sourcePositions.getSourcecodeRange(token);
 			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
 			if (msg == null) {
 				msg = e.getLocalizedMessage();
 			}
 			final String realMsg = e.getRealMsg();
-			throw new BCompoundException(
-					new BException(getFileName(), new BParseException(token, range, msg, realMsg)));
+			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
@@ -405,7 +432,7 @@ public class BParser {
 		File f = new File(fileName);
 		if (f.exists()) {
 			try {
-				return f.getCanonicalFile().getAbsolutePath();
+				return f.getCanonicalPath();
 			} catch (IOException e) {
 				return fileName;
 			}
@@ -432,9 +459,9 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private void applyAstTransformations(final Start rootNode) {
+	private void applyAstTransformations(final Start rootNode) throws CheckException {
 		// default transformations
-		rootNode.apply(new OpSubstitutions(sourcePositions, getDefinitions()));
+		OpSubstitutions.transform(rootNode, getDefinitions());
 		rootNode.apply(new SyntaxExtensionTranslator());
 		// more AST transformations?
 
@@ -453,14 +480,6 @@ public class BParser {
 		}
 
 		return list;
-	}
-
-	public SourcePositions getSourcePositions() {
-		return sourcePositions;
-	}
-
-	public Map<PositionedNode, SourcecodeRange> getPositions() {
-		return this.positions;
 	}
 
 	public IDefinitions getDefinitions() {
@@ -498,49 +517,50 @@ public class BParser {
 
 			// Properties hashes = new Properties();
 
-			if (parsingBehaviour.outputFile != null) {
-				if (hashesStillValid(parsingBehaviour.outputFile))
-					return 0;
-			}
+			// if (parsingBehaviour.getOutputFile() != null) {
+			// if (hashesStillValid(parsingBehaviour.getOutputFile())){
+			// return 0;
+			// }
+			// }
 
 			final long start = System.currentTimeMillis();
-			final Start tree = parseFile(bfile, parsingBehaviour.verbose);
+			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
 			final long end = System.currentTimeMillis();
 
-			if (parsingBehaviour.printTime) {
+			if (parsingBehaviour.isPrintTime()) {
 				out.println("Time for parsing: " + (end - start) + "ms");
 			}
 
-			if (parsingBehaviour.printAST) {
+			if (parsingBehaviour.isPrintAST()) {
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
 
-			if (parsingBehaviour.displayGraphically) {
+			if (parsingBehaviour.isDisplayGraphically()) {
 				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.prologOutput) {
+			if (parsingBehaviour.isPrologOutput()) {
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.printTime) {
+			if (parsingBehaviour.isPrintTime()) {
 				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 
-			if (parsingBehaviour.fastPrologOutput) {
+			if (parsingBehaviour.isFastPrologOutput()) {
 				try {
 					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
 					out.println(fp);
-				} catch (Throwable e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
 			}
 		} catch (final IOException e) {
-			if (parsingBehaviour.prologOutput) {
+			if (parsingBehaviour.isPrologOutput()) {
 				PrologExceptionPrinter.printException(err, e, bfile.getAbsolutePath());
 			} else {
 				err.println();
@@ -548,8 +568,8 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.prologOutput) {
-				PrologExceptionPrinter.printException(err, e, parsingBehaviour.useIndention, false);
+			if (parsingBehaviour.isPrologOutput()) {
+				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();

@@ -2,18 +2,15 @@ package de.be4.classicalb.core.parser.prolog;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.BException;
 import util.Helpers;
 
 public class StringTest {
 
 	@Test
-	public void testFile() throws IOException, BException {
+	public void testFile() {
 		String file = "src/test/resources/strings/StringIncludingQuotes.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -21,7 +18,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testString() throws Exception {
+	public void testString() {
 		final String testMachine = "MACHINE Test PROPERTIES \"a\\\"b\" = \"a\" END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -29,21 +26,22 @@ public class StringTest {
 	}
 
 	@Test
-	public void testNewlineInSingleLineString() throws Exception {
+	public void testNewlineInSingleLineString() {
 		final String testMachine = "MACHINE Test PROPERTIES k = \" \n \" END";
 		System.out.println(testMachine);
 		try {
 			Helpers.getMachineAsPrologTerm(testMachine);
 			fail("Should raise a parser exception");
-		} catch (BCompoundException e) {
-			String message = e.getFirstException().getMessage();
+		} catch (RuntimeException e) {
+			BCompoundException cause = (BCompoundException) e.getCause();
+			String message = cause.getFirstException().getMessage();
 			assertTrue(message.contains("Unknown token: \""));
 			System.out.println(message);
 		}
 	}
 
 	@Test
-	public void testDoubleBackslash() throws Exception {
+	public void testDoubleBackslash() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\ ''' = ''' \\\\ ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -52,7 +50,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testNewline() throws Exception {
+	public void testNewline() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\n ''' = ''' \n ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -61,43 +59,43 @@ public class StringTest {
 	}
 
 	@Test
-	public void testTab() throws Exception {
+	public void testTab() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\t ''' = ''' \t ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("string(6,' \\11\\ '),string(7,' \\11\\ '))"));
 	}
-	
+
 	@Test
-	public void testCarriageReturn() throws Exception {
+	public void testCarriageReturn() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\r ''' = ''' \r ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("equal(5,string(6,' \\15\\ '),string(7,' \\15\\ '))"));
 	}
-	
+
 	@Test
-	public void testSignleQuote() throws Exception {
+	public void testSignleQuote() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \' ''' = ''' ' ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("equal(5,string(6,' \\' '),string(7,' \\' '))"));
 	}
-	
+
 	@Test
-	public void testDoubleQuote() throws Exception {
+	public void testDoubleQuote() {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\\" ''' = ''' \" ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("equal(5,string(6,' \" '),string(7,' \" '))"));
 	}
-	
+
 	@Test
-	public void testMultiLineString() throws Exception {
+	public void testMultiLineString() {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a\" ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -106,7 +104,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testMultiLineString2() throws Exception {
+	public void testMultiLineString2() {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);

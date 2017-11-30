@@ -1,0 +1,35 @@
+RULES_MACHINE ImplicitDependencyDueFunctionCall
+OPERATIONS
+
+COMPUTATION COMP_V1
+BODY
+  DEFINE
+    V1
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {x + x })
+  END//DEFINE
+END//COMPUTATION
+;
+FUNCTION out <-- FUNC_add2(p)
+PRECONDITION p : 1..100
+BODY
+  out := V1 \/ {p}
+END//FUNCTION
+;
+FUNCTION out <-- FUNC_add(p)
+PRECONDITION p : 1..100
+BODY
+  out <-- FUNC_add2(p)
+END//FUNCTION
+;
+RULE rule1
+BODY
+  VAR v
+  IN
+    v <-- FUNC_add(12)
+  END
+END
+
+END

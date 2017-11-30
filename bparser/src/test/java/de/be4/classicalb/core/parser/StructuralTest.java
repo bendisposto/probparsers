@@ -9,7 +9,6 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.analysis.Ast2String;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -18,6 +17,7 @@ import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
+import util.Ast2String;
 
 public class StructuralTest {
 

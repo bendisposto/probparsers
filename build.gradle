@@ -1,8 +1,11 @@
-def global_version = '2.9.3-SNAPSHOT'
+plugins {
+	id "org.sonarqube" version "2.5"
+}
+
+def global_version = '2.9.10-SNAPSHOT'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
-
 
 defaultTasks 'remind', 'clean', 'deploy'
 
@@ -19,6 +22,7 @@ allprojects {
   apply plugin: 'maven'
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+  apply plugin: 'eclipse'
 
   clean {
 	doLast {
@@ -64,25 +68,30 @@ configurations.all {
 
 dependencies {
     sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
-    compile 'com.google.code.findbugs:jsr305:1.3.9'
+    //compile 'com.google.code.findbugs:jsr305:1.3.9'
     testCompile 'junit:junit:4.8.2'
  }
 
  task deploy(dependsOn: [build])
 
 
- cleanEclipseJdt << {
-	file(".settings/org.eclipse.jdt.ui.prefs").delete()
+ cleanEclipseJdt  {
+   doLast {
+	   file(".settings/org.eclipse.jdt.ui.prefs").delete()
+   }
  }
 
  eclipseJdt {
 	inputFile = file("scripts/org.eclipse.jdt.core.prefs")
  }
 
- eclipseJdt << {
-	copy {  from 'scripts'
-		into '.settings'
-		include 'org.eclipse.jdt.ui.prefs'
+ eclipseJdt  {
+    doLast {
+    	copy {
+        from 'scripts'
+	  	  into '.settings'
+		    include 'org.eclipse.jdt.ui.prefs'
+      }
     }
  }
 
@@ -196,6 +205,21 @@ task copyCoverage(){
     into "build/parser_coverage/prologlib"
   }
 
+}
+
+sonarqube {
+  properties {
+    //property("sonar.organization", "prob2")
+    property("sonar.projectKey", "probparsers")
+    property("sonar.projectName", "probparsers")
+    property("sonar.projectVersion", global_version)
+    property("sonar.java.binaries", "bparser/build/classes")
+    property("sonar.inclusions", "**/classicalb/core/parser/**")
+    property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
+    property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
+    property("sonar.junit.reportsPath", "bparser/build/test-results/test")
+    property("sonar.login", System.getenv("SONAR_TOKEN"))
+  }
 }
 
 
