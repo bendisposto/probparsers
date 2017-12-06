@@ -343,8 +343,7 @@ public class BParser {
 	 *             {@link ParserException} we convert it into a
 	 *             {@link BParseException}. On the other hand it can be thrown
 	 *             if any error is found during the AST transformations after
-	 *             the parser has finished.
-	 *             </li>
+	 *             the parser has finished.</li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
@@ -385,13 +384,9 @@ public class BParser {
 			 */
 			final DefinitionCollector collector = new DefinitionCollector(defTypes, this.definitions);
 			collector.collectDefinitions(rootNode);
-			List<Exception> definitionsCollectorExceptions = collector.getExceptions();
-			for (Exception exception : definitionsCollectorExceptions) {
-				if (exception instanceof BException) {
-					bExceptionList.add((BException) exception);
-				} else {
-					bExceptionList.add(new BException(getFileName(), exception));
-				}
+			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
+			for (CheckException checkException : definitionsCollectorExceptions) {
+				bExceptionList.add(new BException(getFileName(), checkException));
 			}
 
 			// perfom AST transformations that can't be done by SableCC
@@ -410,7 +405,13 @@ public class BParser {
 				throw new BCompoundException(bExceptionList);
 			}
 			return rootNode;
-		} catch (final LexerException | BParseException | IOException | PreParseException e) {
+		} catch (final LexerException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		} catch (final BParseException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		} catch (final IOException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		} catch (final PreParseException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();

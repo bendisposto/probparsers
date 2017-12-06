@@ -35,7 +35,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 
 	private final IDefinitions definitions;
 	private final DefinitionTypes defTypes;
-	private List<Exception> exceptions = new ArrayList<>();
+	private List<CheckException> exceptions = new ArrayList<>();
 
 	public DefinitionCollector(final DefinitionTypes defTypes, IDefinitions definitions) {
 		this.defTypes = defTypes;
@@ -46,7 +46,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		rootNode.apply(this);
 	}
 
-	public List<Exception> getExceptions() {
+	public List<CheckException> getExceptions() {
 		return this.exceptions;
 	}
 
@@ -98,11 +98,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 			sb.append(")\n");
 			CheckException e = new CheckException(sb.toString(), def);
 
-			if (file != null) {
-				this.exceptions.add(new BException(file.getAbsolutePath(), e));
-			} else {
-				this.exceptions.add(e);
-			}
+			this.exceptions.add(e);
 
 		} else {
 			definitions.addDefinition(def, type, name);

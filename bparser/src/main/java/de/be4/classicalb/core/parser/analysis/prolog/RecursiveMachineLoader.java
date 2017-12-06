@@ -262,18 +262,16 @@ public class RecursiveMachineLoader {
 				// throw new BException(machineFile.getName(), e);
 				// we do not longer wrap a B Exception in a B Exception
 				throw new BCompoundException(e);
-			} catch (final IOException | CheckException e) {
-				try {
-					throw new BCompoundException(new BException(machineFile.getCanonicalPath(), e));
-				} catch (IOException e1) {
-					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e1));
-				}
+			} catch (final IOException e) {
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+			} catch(final CheckException e) {
+				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 			}
 		}
 	}
 
 	private void checkForCycles(final List<String> ancestors, final Set<String> references) throws BException {
-		final Set<String> cycles = new TreeSet<String>(ancestors);
+		final Set<String> cycles = new TreeSet<>(ancestors);
 		intersect(cycles, references);
 		if (!cycles.isEmpty()) {
 			StringBuilder sb = new StringBuilder();

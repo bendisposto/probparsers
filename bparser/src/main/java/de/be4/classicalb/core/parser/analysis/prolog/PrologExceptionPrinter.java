@@ -249,19 +249,9 @@ public final class PrologExceptionPrinter {
 		pto.closeTerm();
 	}
 
-	private static void printMsg(final IPrologTermOutput pto, final Throwable cause, final String filename,
+	private static void printMsg(final IPrologTermOutput pto, final Throwable cause, final String fileName,
 			final boolean useIndentation, final boolean lineOneOff, final boolean includeFileNameInMessage) {
-		final Exception wrapper = new BException(filename, cause);
-		String message;
-		if (lineOneOff) {
-			message = fixMessageLineOneOff(wrapper.getLocalizedMessage());
-		} else {
-			message = wrapper.getLocalizedMessage();
-		}
-		if (includeFileNameInMessage && !message.contains("in file:")) {
-			message = message + " in file: " + filename;
-
-		}
+		String message = cause.getMessage();
 		if (useIndentation) {
 			pto.printAtom(message);
 		} else {
