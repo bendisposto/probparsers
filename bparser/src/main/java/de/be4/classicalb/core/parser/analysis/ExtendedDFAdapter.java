@@ -27,6 +27,7 @@ import de.be4.classicalb.core.parser.node.*;
  * @author Fabian
  * 
  */
+@Deprecated
 public class ExtendedDFAdapter extends DepthFirstAdapter {
 
 	/**

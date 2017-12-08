@@ -180,6 +180,8 @@ Tokens
   {normal} constants = 'CONSTANTS';
   {normal} constraints = 'CONSTRAINTS';
   {section->normal,normal} definitions = 'DEFINITIONS';
+  {normal} expressions = 'EXPRESSIONS';
+  {normal} predicates = 'PREDICATES';
   {normal} do = 'DO';
   {normal} either = 'EITHER';
   {normal} else = 'ELSE';
@@ -471,14 +473,30 @@ machine_clause {-> machine_clause} =
   {values} [clause]:values_clause {-> clause.machine_clause} |
   {invariant} [clause]:invariant_clause {-> clause.machine_clause} |
   {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} |
-  {references} [clause]:references_clause {-> clause.machine_clause}
+  {references} [clause]:references_clause {-> clause.machine_clause} |
+  {expressions} [clause]:expressions_clause {-> clause.machine_clause} |
+  {predicate} [clause]:predicates_clause {-> clause.machine_clause} 
   ;
+
+expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon? {-> New machine_clause.expressions([expression_def_list.expression_definition])} ;
+predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon? {-> New machine_clause.predicates([predicate_def_list.predicate_definition])} ;
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
 
+expression_def_list {-> expression_definition*} = 
+  {single} [def]:expression_def {-> [def.expression_definition]} |
+  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.expression_definition, def.expression_definition]} ;
+
+predicate_def_list {-> predicate_definition*} = 
+  {single} [def]:predicate_def {-> [def.predicate_definition]} |
+  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.predicate_definition, def.predicate_definition]} ;
+  
 definition_list {-> definition*} =
   {single} [def]:definition {-> [def.definition]} |
   {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
+
+expression_def {-> expression_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New expression_definition(name, [parameters.expression], rhs.expression)} ;
+predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)} ;
 
 definition {-> definition} =
   {conversion} pragma_conversion definition_x {-> New definition.conversion(definition_x.definition)} |
@@ -1134,12 +1152,18 @@ machine_clause =
   {local_operations} [operations]:operation* |
   {operations} [operations]:operation* |
   {references} [machine_references]:machine_reference* |
-  {invalid_operations_clause} semicolon ;
+  {invalid_operations_clause} semicolon |
+  {expressions} [expressions]:expression_definition* |
+  {predicates} [predicates]:predicate_definition*  
+  ;
 
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |
   {file} [reference]:machine_reference [file]:pragma_id_or_string ;
 
+
+expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression ;
+predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate ;
 
 definition =
   {conversion} definition |
