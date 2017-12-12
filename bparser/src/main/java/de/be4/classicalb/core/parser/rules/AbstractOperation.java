@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
-public abstract class AbstractOperation {
+public abstract class AbstractOperation implements Comparable<AbstractOperation> {
 
 	private final TIdentifierLiteral name;
 	private final String fileName; // can be null
@@ -101,7 +102,10 @@ public abstract class AbstractOperation {
 	}
 
 	public Set<AbstractOperation> getTransitiveDependencies() {
-		return transitiveDependencies;
+		if(this.transitiveDependencies == null) {
+			return null;
+		}
+		return new HashSet<>(this.transitiveDependencies);
 	}
 
 	public Set<AbstractOperation> getRequiredDependencies() {
@@ -204,6 +208,23 @@ public abstract class AbstractOperation {
 			}
 		}
 		return set;
+	}
+
+	public List<AbstractOperation> getSortedListOfTransitiveDependencies() {
+		List<AbstractOperation> result = new ArrayList<>(getTransitiveDependencies());
+		Collections.sort(result);
+		return result;
+	}
+
+	@Override
+	public int compareTo(AbstractOperation other) {
+		if (this.getTransitiveDependencies().contains(other)) {
+			return 1;
+		} else if (other.getTransitiveDependencies().contains(this)) {
+			return 0;
+		} else {
+			return 0;
+		}
 	}
 
 }
