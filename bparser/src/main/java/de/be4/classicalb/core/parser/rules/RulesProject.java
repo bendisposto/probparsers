@@ -122,29 +122,6 @@ public class RulesProject {
 		return new HashMap<>(this.allOperations);
 	}
 
-	public Set<RuleOperation> getRulesOperations() {
-		return filterOperations(allOperations.values(), RuleOperation.class);
-	}
-
-	public Set<ComputationOperation> getComputationOperations() {
-		return filterOperations(allOperations.values(), ComputationOperation.class);
-	}
-
-	public Set<FunctionOperation> getFunctionOperations() {
-		return filterOperations(allOperations.values(), FunctionOperation.class);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends AbstractOperation> Set<T> filterOperations(Collection<AbstractOperation> in, Class<T> clazz) {
-		Set<T> set = new HashSet<>();
-		for (AbstractOperation abstractOperation : in) {
-			if (abstractOperation.getClass() == clazz) {
-				set.add((T) abstractOperation);
-			}
-		}
-		return set;
-	}
-
 	private void flattenProject() {
 		if (!this.bExceptionList.isEmpty()) {
 			return;

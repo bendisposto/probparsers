@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -191,6 +192,18 @@ public abstract class AbstractOperation {
 			result.add(nameLiteral);
 		}
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends AbstractOperation> Set<T> filterOperations(Collection<AbstractOperation> in,
+			Class<T> clazz) {
+		Set<T> set = new HashSet<>();
+		for (AbstractOperation abstractOperation : in) {
+			if (abstractOperation.getClass() == clazz) {
+				set.add((T) abstractOperation);
+			}
+		}
+		return set;
 	}
 
 }
