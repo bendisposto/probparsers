@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -177,10 +176,6 @@ public class RulesParseUnit implements IModel {
 		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
-//		if (parsingBehaviour.isAddLineNumbers()) {
-//			final SourcePositions src = bParser.getSourcePositions();
-//			pprinter.setSourcePositions(src);
-//		}
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();
