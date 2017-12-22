@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,7 +13,7 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
-public abstract class AbstractOperation implements Comparable<AbstractOperation> {
+public abstract class AbstractOperation {
 
 	private final TIdentifierLiteral name;
 	private final String fileName; // can be null
@@ -102,7 +101,7 @@ public abstract class AbstractOperation implements Comparable<AbstractOperation>
 	}
 
 	public Set<AbstractOperation> getTransitiveDependencies() {
-		if(this.transitiveDependencies == null) {
+		if (this.transitiveDependencies == null) {
 			return null;
 		}
 		return new HashSet<>(this.transitiveDependencies);
@@ -211,20 +210,29 @@ public abstract class AbstractOperation implements Comparable<AbstractOperation>
 	}
 
 	public List<AbstractOperation> getSortedListOfTransitiveDependencies() {
-		List<AbstractOperation> result = new ArrayList<>(getTransitiveDependencies());
-		Collections.sort(result);
-		return result;
+		return sortList(this.getTransitiveDependencies());
 	}
 
-	@Override
-	public int compareTo(AbstractOperation other) {
-		if (this.getTransitiveDependencies().contains(other)) {
-			return 1;
-		} else if (other.getTransitiveDependencies().contains(this)) {
-			return 0;
-		} else {
-			return 0;
+	public static List<AbstractOperation> sortList(final Collection<AbstractOperation> operations) {
+		List<AbstractOperation> result = new ArrayList<>();
+		List<AbstractOperation> todo = new ArrayList<>(operations);
+		boolean change = true;
+		while (change) {
+			change = false;
+			for (AbstractOperation abstractOperation : new ArrayList<>(todo)) {
+				Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
+				transitiveDependencies.removeAll(result);
+				if (transitiveDependencies.isEmpty()) {
+					result.add(abstractOperation);
+					todo.remove(abstractOperation);
+					change = true;
+				}
+			}
 		}
+		if (!todo.isEmpty()) {
+			throw new IllegalArgumentException();
+		}
+		return result;
 	}
 
 }
