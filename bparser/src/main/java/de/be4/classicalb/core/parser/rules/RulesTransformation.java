@@ -743,19 +743,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 		 */
 		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
+		final String localLoopCounter = "$c" + nestedForLoopCount;
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
 				createExpressionList((PExpression) cloneNode(node.getSet())));
+		final PSubstitution assignCVariable = new AAssignSubstitution(
+				createExpressionList(createIdentifier(localLoopCounter)),
+				createExpressionList(new ACardExpression(createIdentifier(localSetVariableName, node.getSet()))));
 
 		final AWhileSubstitution whileSub = createPositinedNode(new AWhileSubstitution(), node);
 		final List<PSubstitution> subList = new ArrayList<>();
 		subList.add(assignSetVariable);
+		subList.add(assignCVariable);
 		subList.add(whileSub);
 		final AVarSubstitution varSub = createPositinedNode(
-				new AVarSubstitution(createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
-						new ASequenceSubstitution(subList)),
+				new AVarSubstitution(createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
+						createIdentifier(localLoopCounter)), new ASequenceSubstitution(subList)),
 				node);
 
 		// WHILE set /= {}
@@ -767,8 +772,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		whileSub.setInvariant(eq);
 
 		// VARIANT card(set)
-		final PExpression whileVariant = new ACardExpression(createIdentifier(localSetVariableName, node.getSet()));
-		whileSub.setVariant(whileVariant);
+		whileSub.setVariant(createIdentifier(localLoopCounter));
 
 		// VAR x IN ...
 		final AVarSubstitution varSub2 = new AVarSubstitution();
@@ -805,7 +809,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 				new ASetExtensionExpression(createExpressionList(chooseCall2)));
 
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
+				createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
+						createIdentifier(localLoopCounter)),
+				createExpressionList(rhs, new AMinusOrSetSubtractExpression(createIdentifier(localLoopCounter),
+						createAIntegerExpression(1))));
+
 		List<PSubstitution> var2List = new ArrayList<>();
 		var2List.add(assignSub);
 		var2List.add(node.getDoSubst());
