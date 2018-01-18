@@ -758,16 +758,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 						new ASequenceSubstitution(subList)),
 				node);
 
-		// WHILE card(set) > 0
-		final PPredicate whileCon = new AGreaterPredicate(
-				new ACardExpression(createIdentifier(localSetVariableName, node.getSet())),
-				new AIntegerExpression(new TIntegerLiteral("0")));
+		// WHILE set /= {}
+		final ANotEqualPredicate whileCon = new ANotEqualPredicate(
+				createIdentifier(localSetVariableName, node.getSet()), new AEmptySetExpression());
 		whileSub.setCondition(whileCon);
-		// INVARIANT card(set) : NATURAL
-		final PPredicate whileInvariant = new AMemberPredicate(
-				new ACardExpression(createIdentifier(localSetVariableName, node.getSet())),
-				new ANaturalSetExpression());
-		whileSub.setInvariant(whileInvariant);
+		// INVARIANT 1=1
+		AEqualPredicate eq = new AEqualPredicate(createAIntegerExpression(1), createAIntegerExpression(1));
+		whileSub.setInvariant(eq);
 
 		// VARIANT card(set)
 		final PExpression whileVariant = new ACardExpression(createIdentifier(localSetVariableName, node.getSet()));
@@ -845,18 +842,19 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	}
 
-//	@Override
-//	public void caseAMemberPredicate(AMemberPredicate node) {
-//		node.getLeft().apply(this);
-//		node.getRight().apply(this);
-//		if (node.getLeft() instanceof ARecordFieldExpression) {
-//			// rewrite r'a : S to {r'a} /\ S /= {} in order to prevent an
-//			// enumeration point
-//			AIntersectionExpression inter = new AIntersectionExpression(createSetOfPExpression(node.getLeft()),
-//					node.getRight());
-//			node.replaceBy(new ANotEqualPredicate(inter, new AEmptySetExpression()));
-//		}
-//	}
+	// @Override
+	// public void caseAMemberPredicate(AMemberPredicate node) {
+	// node.getLeft().apply(this);
+	// node.getRight().apply(this);
+	// if (node.getLeft() instanceof ARecordFieldExpression) {
+	// // rewrite r'a : S to {r'a} /\ S /= {} in order to prevent an
+	// // enumeration point
+	// AIntersectionExpression inter = new
+	// AIntersectionExpression(createSetOfPExpression(node.getLeft()),
+	// node.getRight());
+	// node.replaceBy(new ANotEqualPredicate(inter, new AEmptySetExpression()));
+	// }
+	// }
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
 			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression message,
