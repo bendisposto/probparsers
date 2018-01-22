@@ -801,12 +801,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 					createExpressionList(chooseCall));
 		}
 
-		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
-		PExpression chooseCall2 = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
+		// <code> G_Set := G_Set \ {x} </code>
+		PExpression element = null;
+		if (varIdList.size() >= 2) {
+			List<PExpression> ids = new ArrayList<>();
+			for (PExpression pExpression : node.getIdentifiers()) {
+				ids.add(cloneNode(pExpression));
+			}
+			element = createNestedCouple(ids);
+		} else {
+			element = cloneNode(node.getIdentifiers().get(0));
+		}
 
 		// <code> G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
-				new ASetExtensionExpression(createExpressionList(chooseCall2)));
+				new ASetExtensionExpression(createExpressionList(element)));
 
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet()),

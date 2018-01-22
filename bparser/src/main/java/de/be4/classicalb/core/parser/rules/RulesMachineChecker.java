@@ -477,11 +477,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		currentOperation = new FunctionOperation(node.getName(), this.fileName, this.machineName, machineReferences);
 		functionMap.put(node, (FunctionOperation) currentOperation);
 
-		final LinkedList<PExpression> localVariables = new LinkedList<>();
-		localVariables.addAll(node.getReturnValues());
-		localVariables.addAll(node.getParameters());
-
-		this.identifierScope.createNewScope(localVariables);
+		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getReturnValues()), true);
 		visitOperationAttributes(node.getAttributes());
 		node.getBody().apply(this);
 		currentOperation = null;
@@ -516,7 +513,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()), true);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -621,7 +618,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (e instanceof AIdentifierExpression) {
 				AIdentifierExpression id = (AIdentifierExpression) e;
 				String name = id.getIdentifier().get(0).getText();
-				if (!this.identifierScope.contains(name)) {
+				if (!this.identifierScope.isAssignableVariable(name)) {
 					errorList.add(new CheckException("Identifier '" + name
 							+ "' is not a local variable (VAR). Hence, it can not be assigned here.", id));
 				}
@@ -1015,7 +1012,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				} catch (SAXParseException e) {
 					final int line = content.getLine() + numberOfNewLines + e.getLineNumber() - 1;
 					final int column = (numberOfNewLines == 0 && e.getLineNumber() == 1)
-							? content.getPos() + e.getColumnNumber() : e.getColumnNumber();
+							? content.getPos() + e.getColumnNumber()
+							: e.getColumnNumber();
 					TStringLiteral dummy = new TStringLiteral("", line, column);
 					String message = e.getMessage();
 					errorList.add(new CheckException(message, dummy, e));
@@ -1111,9 +1109,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class LocalIdentifierScope {
-		private final LinkedList<Set<String>> localVariablesScope = new LinkedList<>();
+		private final LinkedList<Scope> localVariablesScope = new LinkedList<>();
 
 		public void createNewScope(final List<PExpression> parameters) {
+			createNewScope(parameters, false);
+		}
+
+		public void createNewScope(final List<PExpression> parameters, boolean assignable) {
 			final HashSet<String> set = new HashSet<>();
 			for (PExpression expression : parameters) {
 				if (expression instanceof AIdentifierExpression) {
@@ -1125,7 +1127,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					errorList.add(new CheckException("Identifier expected.", expression));
 				}
 			}
-			localVariablesScope.add(set);
+			localVariablesScope.add(new Scope(set, assignable));
 		}
 
 		public void removeScope() {
@@ -1133,13 +1135,36 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public boolean contains(String identifier) {
+			return contains(identifier, false);
+		}
+
+		public boolean isAssignableVariable(String name) {
+			return contains(name, true);
+		}
+
+		public boolean contains(String identifier, boolean checkAssignable) {
 			for (int i = localVariablesScope.size() - 1; i >= 0; i--) {
-				Set<String> ids = localVariablesScope.get(i);
-				if (ids.contains(identifier)) {
-					return true;
+				Scope scope = localVariablesScope.get(i);
+				if (scope.identifiers.contains(identifier)) {
+					if (checkAssignable) {
+						return scope.assignable;
+					} else {
+						return true;
+					}
 				}
 			}
 			return false;
 		}
 	}
+
+	class Scope {
+		Set<String> identifiers;
+		boolean assignable;
+
+		Scope(Set<String> identifiers, boolean assignable) {
+			this.identifiers = identifiers;
+			this.assignable = assignable;
+		}
+	}
+
 }

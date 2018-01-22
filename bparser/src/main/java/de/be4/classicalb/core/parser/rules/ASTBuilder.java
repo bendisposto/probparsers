@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
 import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.ACoupleExpression;
 import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
@@ -77,6 +78,17 @@ public final class ASTBuilder {
 			list.add((PExpression) cloneNode(pExpression));
 		}
 		return new ASetExtensionExpression(list);
+	}
+
+	public static PExpression createNestedCouple(List<PExpression> pExpressions) {
+		if (pExpressions.size() == 1) {
+			return pExpressions.get(0);
+		}
+		final ArrayList<PExpression> list = new ArrayList<>();
+		for (PExpression pExpression : pExpressions) {
+			list.add((PExpression) cloneNode(pExpression));
+		}
+		return new ACoupleExpression(list);
 	}
 
 	public static PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2,
