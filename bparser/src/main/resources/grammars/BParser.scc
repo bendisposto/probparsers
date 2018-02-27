@@ -31,9 +31,11 @@ Helpers
 
   line_break = [lf + cr];
   all_chars = [0 .. 0xffff];
-
-  all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
-  string_literal = double_quotation  (all_chars_without_quote_and_newline | '\' double_quotation)* double_quotation;
+  
+ //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
+  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break ] - '\'];
+  all_chars_without_newline = [all_chars - line_break ];
+  string_literal = double_quotation  (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
 
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' 39)*;
