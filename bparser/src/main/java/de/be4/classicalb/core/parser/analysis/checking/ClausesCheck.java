@@ -88,7 +88,7 @@ public class ClausesCheck implements SemanticCheck {
 
 		if (!clauses.containsKey(NAME_CONSTRAINTS)) {
 			exceptions.add(new CheckException("Specification has formal scalar parameter and no CONSTRAINTS clause.",
-					rootNode));
+					rootNode.getPParseUnit()));
 		}
 	}
 

@@ -4,7 +4,7 @@ import de.be4.classicalb.core.parser.analysis.ExtendedDFAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;
-
+@Deprecated
 public class Ast2String extends ExtendedDFAdapter {
 	private final StringBuilder builder = new StringBuilder();
 

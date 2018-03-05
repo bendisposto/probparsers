@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -100,7 +101,10 @@ public abstract class AbstractOperation {
 	}
 
 	public Set<AbstractOperation> getTransitiveDependencies() {
-		return transitiveDependencies;
+		if (this.transitiveDependencies == null) {
+			return null;
+		}
+		return new HashSet<>(this.transitiveDependencies);
 	}
 
 	public Set<AbstractOperation> getRequiredDependencies() {
@@ -189,6 +193,44 @@ public abstract class AbstractOperation {
 		for (ComputationOperation comp : implicitDependenciesToComputations) {
 			TIdentifierLiteral nameLiteral = comp.getNameLiteral();
 			result.add(nameLiteral);
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends AbstractOperation> Set<T> filterOperations(Collection<AbstractOperation> in,
+			Class<T> clazz) {
+		Set<T> set = new HashSet<>();
+		for (AbstractOperation abstractOperation : in) {
+			if (abstractOperation.getClass() == clazz) {
+				set.add((T) abstractOperation);
+			}
+		}
+		return set;
+	}
+
+	public List<AbstractOperation> getSortedListOfTransitiveDependencies() {
+		return sortList(this.getTransitiveDependencies());
+	}
+
+	public static List<AbstractOperation> sortList(final Collection<AbstractOperation> operations) {
+		List<AbstractOperation> result = new ArrayList<>();
+		List<AbstractOperation> todo = new ArrayList<>(operations);
+		boolean change = true;
+		while (change) {
+			change = false;
+			for (AbstractOperation abstractOperation : new ArrayList<>(todo)) {
+				Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
+				transitiveDependencies.removeAll(result);
+				if (transitiveDependencies.isEmpty()) {
+					result.add(abstractOperation);
+					todo.remove(abstractOperation);
+					change = true;
+				}
+			}
+		}
+		if (!todo.isEmpty()) {
+			throw new IllegalArgumentException();
 		}
 		return result;
 	}

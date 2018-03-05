@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
+import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
 import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileExpression;
@@ -90,7 +91,9 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			this.start.apply(this);
 		} catch (VisitorException e) {
-			throw new BException(fileName, e);
+			throw new BException(fileName, (CheckException) e.getException());
+		}catch(VisitorIOException e) {
+			throw new BException(fileName, e.getException());
 		}
 	}
 
@@ -189,7 +192,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			dir = mainFile.getCanonicalFile();
 		} catch (IOException e) {
-			throw new VisitorException(e);
+			throw new VisitorIOException(e);
 		}
 		for (int i = packageNameArray.length - 1; i >= 0; i--) {
 			final String name1 = packageNameArray[i];

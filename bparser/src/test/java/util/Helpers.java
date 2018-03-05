@@ -116,12 +116,6 @@ public class Helpers {
 		} catch (BCompoundException e) {
 			throw new RuntimeException(e);
 		}
-		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setPrologOutput(true);
-		parsingBehaviour.setUseIndention(false);
-		parsingBehaviour.setAddLineNumbers(false);
-		parsingBehaviour.setVerbose(true);
-		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
@@ -134,7 +128,7 @@ public class Helpers {
 				return this.string.toString();
 			}
 		};
-		final IPrologTermOutput pout = new PrologTermOutput(output, parsingBehaviour.isUseIndention());
+		final IPrologTermOutput pout = new PrologTermOutput(output, false);
 		printAsProlog(start, pout);
 		return output.toString();
 	}
@@ -146,10 +140,6 @@ public class Helpers {
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		pout.openTerm("machine");
-		// if (lineNumbers) {
-		// final SourcePositions src = positions.get(entry.getKey());
-		// pprinter.setSourcePositions(src);
-		// }
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();

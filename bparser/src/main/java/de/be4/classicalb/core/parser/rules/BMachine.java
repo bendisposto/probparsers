@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.rules;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,10 +32,6 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import de.prob.prolog.output.IPrologTermOutput;
 
 public class BMachine implements IModel {
@@ -100,12 +95,14 @@ public class BMachine implements IModel {
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
+		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		
 		pout.openTerm("machine");
-		if (parsingBehaviour.isAddLineNumbers()) {
-			pprinter.setSourcePositions(
-					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
-		}
+//		if (parsingBehaviour.isAddLineNumbers()) {
+//			pprinter.setSourcePositions(
+//					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
+//		}
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();

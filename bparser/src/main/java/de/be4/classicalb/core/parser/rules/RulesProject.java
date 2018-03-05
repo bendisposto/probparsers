@@ -122,6 +122,14 @@ public class RulesProject {
 		return new HashMap<>(this.allOperations);
 	}
 
+	public Set<AbstractOperation> getOperationsWithNoSuccessor() {
+		Set<AbstractOperation> values = new HashSet<>(getOperationsMap().values());
+		for (AbstractOperation op : getOperationsMap().values()) {
+			values.removeAll(op.getTransitiveDependencies());
+		}
+		return values;
+	}
+
 	private void flattenProject() {
 		if (!this.bExceptionList.isEmpty()) {
 			return;

@@ -3,13 +3,13 @@ package de.be4.classicalb.core.parser.exceptions;
 @SuppressWarnings("serial")
 public class VisitorException extends RuntimeException {
 
-	private final Exception exception;
+	private final CheckException exception;
 
-	public VisitorException(Exception e) {
+	public VisitorException(CheckException e) {
 		this.exception = e;
 	}
 
-	public Exception getException() {
+	public CheckException getException() {
 		return this.exception;
 	}
 

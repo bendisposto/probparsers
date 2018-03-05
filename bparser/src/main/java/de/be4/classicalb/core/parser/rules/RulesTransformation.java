@@ -743,34 +743,36 @@ public class RulesTransformation extends DepthFirstAdapter {
 		 */
 		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
+		final String localLoopCounter = "$c" + nestedForLoopCount;
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
 				createExpressionList((PExpression) cloneNode(node.getSet())));
+		final PSubstitution assignCVariable = new AAssignSubstitution(
+				createExpressionList(createIdentifier(localLoopCounter)),
+				createExpressionList(new ACardExpression(createIdentifier(localSetVariableName, node.getSet()))));
 
-		final AWhileSubstitution whileSub = new AWhileSubstitution();
+		final AWhileSubstitution whileSub = createPositinedNode(new AWhileSubstitution(), node);
 		final List<PSubstitution> subList = new ArrayList<>();
 		subList.add(assignSetVariable);
+		subList.add(assignCVariable);
 		subList.add(whileSub);
-		final AVarSubstitution varSub = new AVarSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
-				new ASequenceSubstitution(subList));
+		final AVarSubstitution varSub = createPositinedNode(
+				new AVarSubstitution(createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
+						createIdentifier(localLoopCounter)), new ASequenceSubstitution(subList)),
+				node);
 
-		// WHILE card(set) > 0
-		final PPredicate whileCon = new AGreaterPredicate(
-				new ACardExpression(createIdentifier(localSetVariableName, node.getSet())),
-				new AIntegerExpression(new TIntegerLiteral("0")));
+		// WHILE set /= {}
+		final ANotEqualPredicate whileCon = new ANotEqualPredicate(
+				createIdentifier(localSetVariableName, node.getSet()), new AEmptySetExpression());
 		whileSub.setCondition(whileCon);
-		// INVARIANT card(set) : NATURAL
-		final PPredicate whileInvariant = new AMemberPredicate(
-				new ACardExpression(createIdentifier(localSetVariableName, node.getSet())),
-				new ANaturalSetExpression());
-		whileSub.setInvariant(whileInvariant);
+		// INVARIANT 1=1
+		AEqualPredicate eq = new AEqualPredicate(createAIntegerExpression(1), createAIntegerExpression(1));
+		whileSub.setInvariant(eq);
 
 		// VARIANT card(set)
-		final PExpression whileVariant = new ACardExpression(createIdentifier(localSetVariableName, node.getSet()));
-		whileSub.setVariant(whileVariant);
+		whileSub.setVariant(createIdentifier(localLoopCounter));
 
 		// VAR x IN ...
 		final AVarSubstitution varSub2 = new AVarSubstitution();
@@ -799,15 +801,28 @@ public class RulesTransformation extends DepthFirstAdapter {
 					createExpressionList(chooseCall));
 		}
 
-		// <code> G_Set := G_Set \ {CHOOSE(G_Set)} </code>
-		PExpression chooseCall2 = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
+		// <code> G_Set := G_Set \ {x} </code>
+		PExpression element = null;
+		if (varIdList.size() >= 2) {
+			List<PExpression> ids = new ArrayList<>();
+			for (PExpression pExpression : node.getIdentifiers()) {
+				ids.add(cloneNode(pExpression));
+			}
+			element = createNestedCouple(ids);
+		} else {
+			element = cloneNode(node.getIdentifiers().get(0));
+		}
 
 		// <code> G_Set \ {CHOOSE(G_Set)} </code>
 		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
-				new ASetExtensionExpression(createExpressionList(chooseCall2)));
+				new ASetExtensionExpression(createExpressionList(element)));
 
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet())), createExpressionList(rhs));
+				createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
+						createIdentifier(localLoopCounter)),
+				createExpressionList(rhs, new AMinusOrSetSubtractExpression(createIdentifier(localLoopCounter),
+						createAIntegerExpression(1))));
+
 		List<PSubstitution> var2List = new ArrayList<>();
 		var2List.add(assignSub);
 		var2List.add(node.getDoSubst());
@@ -843,6 +858,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(newNode);
 
 	}
+
+	// @Override
+	// public void caseAMemberPredicate(AMemberPredicate node) {
+	// node.getLeft().apply(this);
+	// node.getRight().apply(this);
+	// if (node.getLeft() instanceof ARecordFieldExpression) {
+	// // rewrite r'a : S to {r'a} /\ S /= {} in order to prevent an
+	// // enumeration point
+	// AIntersectionExpression inter = new
+	// AIntersectionExpression(createSetOfPExpression(node.getLeft()),
+	// node.getRight());
+	// node.replaceBy(new ANotEqualPredicate(inter, new AEmptySetExpression()));
+	// }
+	// }
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
 			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression message,
