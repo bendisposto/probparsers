@@ -117,4 +117,9 @@ public class MockedDefinitions extends IDefinitions {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void addDefinition(PDefinition defNode) {
+		throw new UnsupportedOperationException();
+	}
+
 }

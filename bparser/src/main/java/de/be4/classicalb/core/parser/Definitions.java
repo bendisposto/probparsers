@@ -32,7 +32,7 @@ public class Definitions extends IDefinitions {
 	public Map<String, Type> getTypes() {
 		final Map<String, Type> map = new HashMap<>();
 		map.putAll(types);
-		for (IDefinitions definitions : referencedDefinitions) {	
+		for (IDefinitions definitions : referencedDefinitions) {
 			map.putAll(definitions.getTypes());
 		}
 		return map;
@@ -161,6 +161,17 @@ public class Definitions extends IDefinitions {
 			}
 		}
 		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+	}
+
+	@Override
+	public void addDefinition(PDefinition defNode) {
+		if (defNode instanceof APredicateDefinitionDefinition) {
+			addDefinition((APredicateDefinitionDefinition) defNode, Type.Predicate);
+		} else if (defNode instanceof AExpressionDefinitionDefinition) {
+			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
+		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
+			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
+		}
 	}
 
 	@Override

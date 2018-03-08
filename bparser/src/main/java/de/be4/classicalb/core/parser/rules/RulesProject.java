@@ -26,7 +26,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
@@ -152,25 +151,28 @@ public class RulesProject {
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 		bModels.add(compositionMachine);
-		bModels.add(createMainMachine(injector.getGoalDefinition()));
+		bModels.add(createMainMachine(injector.getGoalDefinition(), injector.getMainMachineDefinitions()));
 	}
 
-	private BMachine createMainMachine(PDefinition goalDefinition) {
+	private BMachine createMainMachine(PDefinition goalDefinition, List<PDefinition> mainDefinitions) {
 		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
-		IDefinitions definitions = new Definitions();
-		addGeneralPreferenceDefinitions(definitions, this.rulesMachineRunConfiguration.getPreferencesInModel());
-		addToStringDefinition(definitions);
-		addSortDefinition(definitions);
-		addFormatToStringDefinition(definitions);
-		addChooseDefinition(definitions);
-		if (goalDefinition != null) {
-			definitions.addDefinition((APredicateDefinitionDefinition) goalDefinition, IDefinitions.Type.Predicate);
+		IDefinitions idefinitions = new Definitions();
+
+		if (mainDefinitions != null) {
+			for (PDefinition pDefinition : mainDefinitions) {
+				idefinitions.addDefinition(pDefinition);
+			}
 		}
-		addBooleanPreferenceDefinition(definitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
-		mainMachine.replaceDefinition(definitions);
+		addGeneralPreferenceDefinitions(idefinitions, this.rulesMachineRunConfiguration.getPreferencesInModel());
+		addToStringDefinition(idefinitions);
+		addSortDefinition(idefinitions);
+		addFormatToStringDefinition(idefinitions);
+		addChooseDefinition(idefinitions);
+		addBooleanPreferenceDefinition(idefinitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		mainMachine.replaceDefinition(idefinitions);
 		return mainMachine;
 	}
 
