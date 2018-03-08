@@ -128,10 +128,13 @@ public class RulesMachineRunConfiguration {
 			final String operatorName = node.getName().getText();
 			switch (operatorName) {
 			case RulesGrammar.SUCCEEDED_RULE:
-				getRuleCoverage(arguments.get(0)).setSuccessCompletelyTested();
+				getRuleCoverage(arguments.get(0)).setSuccessForAllErrorTypes();
 				return;
 			case RulesGrammar.FAILED_RULE:
-				getRuleCoverage(arguments.get(0)).setRuleFailedWithoutSpecificErrorType();
+				getRuleCoverage(arguments.get(0)).setFailedWithoutSpecificErrorType();
+				return;
+			case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
+				getRuleCoverage(arguments.get(0)).setFailedForAllErrorTypes();
 				return;
 			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
 			case RulesGrammar.FAILED_RULE_ERROR_TYPE:
@@ -169,15 +172,22 @@ public class RulesMachineRunConfiguration {
 			this.checkedForCounterexamples = true;
 		}
 
-		public void setRuleFailedWithoutSpecificErrorType() {
+		public void setFailedWithoutSpecificErrorType() {
 			Integer n = ruleOperation.getNumberOfErrorTypes();
-			if(n == 1) {
+			if (n == 1) {
 				errorTypesAssumedToFail.add(1);
 			}
-			//otherwise we have no information about the error type
+			// otherwise we have no information about the error type
 		}
 
-		public void setSuccessCompletelyTested() {
+		public void setFailedForAllErrorTypes() {
+			Integer n = ruleOperation.getNumberOfErrorTypes();
+			for (int i = 1; i <= n; i++) {
+				errorTypesAssumedToFail.add(i);
+			}
+		}
+
+		public void setSuccessForAllErrorTypes() {
 			Integer n = ruleOperation.getNumberOfErrorTypes();
 			for (int i = 1; i <= n; i++) {
 				errorTypesAssumedToSucceed.add(i);
