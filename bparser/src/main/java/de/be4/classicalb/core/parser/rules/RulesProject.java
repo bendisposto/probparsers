@@ -166,7 +166,6 @@ public class RulesProject {
 				idefinitions.addDefinition(pDefinition);
 			}
 		}
-		addGeneralPreferenceDefinitions(idefinitions, this.rulesMachineRunConfiguration.getPreferencesInModel());
 		addToStringDefinition(idefinitions);
 		addSortDefinition(idefinitions);
 		addFormatToStringDefinition(idefinitions);

@@ -371,7 +371,6 @@ public class RulesLanguageTest {
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("SET_PREF_TIME_OUT"));
-		assertTrue(result.contains("SET_PREF_TIME_OUT"));
 	}
 
 	@Test
