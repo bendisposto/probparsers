@@ -131,7 +131,7 @@ public class RulesMachineRunConfiguration {
 				getRuleCoverage(arguments.get(0)).setSuccessCompletelyTested();
 				return;
 			case RulesGrammar.FAILED_RULE:
-				getRuleCoverage(arguments.get(0)).setFailCompletelyTested();
+				getRuleCoverage(arguments.get(0)).setRuleFailedWithoutSpecificErrorType();
 				return;
 			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
 			case RulesGrammar.FAILED_RULE_ERROR_TYPE:
@@ -169,11 +169,12 @@ public class RulesMachineRunConfiguration {
 			this.checkedForCounterexamples = true;
 		}
 
-		public void setFailCompletelyTested() {
+		public void setRuleFailedWithoutSpecificErrorType() {
 			Integer n = ruleOperation.getNumberOfErrorTypes();
-			for (int i = 1; i <= n; i++) {
-				errorTypesAssumedToFail.add(i);
+			if(n == 1) {
+				errorTypesAssumedToFail.add(1);
 			}
+			//otherwise we have no information about the error type
 		}
 
 		public void setSuccessCompletelyTested() {
