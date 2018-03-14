@@ -105,6 +105,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final List<RulesMachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
+
+	// this map is used to track if all error types are implemented
+	private final HashMap<RuleOperation, Set<Integer>> implementedErrorTypes = new HashMap<>();
 	private final Start start;
 	private TIdentifierLiteral nameLiteral;
 
@@ -457,10 +460,23 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
 					node.getRuleName()));
 		}
-		rulesMap.put(node, (RuleOperation) currentOperation);
+		RuleOperation ruleOp = (RuleOperation) currentOperation;
+		rulesMap.put(node, ruleOp);
 		visitOperationAttributes(node.getAttributes());
 		node.getRuleBody().apply(this);
+		checkAllErrorTypesImplemented(ruleOp);
 		currentOperation = null;
+	}
+
+	private void checkAllErrorTypesImplemented(RuleOperation ruleOp) {
+		Set<Integer> implemented = this.implementedErrorTypes.get(ruleOp);
+		for (int i = 1; i <= ruleOp.getNumberOfErrorTypes(); i++) {
+			if (implemented == null || !implemented.contains(i)) {
+				errorList.add(new CheckException(
+						String.format("Error type '%s' is not implemented in rule '%s'.", i, ruleOp.getName()),
+						ruleOp.getNameLiteral()));
+			}
+		}
 	}
 
 	@Override
@@ -789,6 +805,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
 			return;
 		}
+		checkErrorType(node.getErrorType());
 		if (!node.getIdentifiers().isEmpty() && node.getWhen() == null) {
 			this.errorList.add(new CheckException(
 					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
@@ -800,7 +817,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		node.getMessage().apply(this);
 		this.identifierScope.removeScope();
-		checkErrorType(node.getErrorType());
+
 	}
 
 	@Override
@@ -818,17 +835,34 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkErrorType(TIntegerLiteral node) {
-		if (node != null && currentOperation instanceof RuleOperation) {
-			final RuleOperation rule = (RuleOperation) currentOperation;
+		if (!(currentOperation instanceof RuleOperation)) {
+			return;
+		}
+		final RuleOperation ruleOp = (RuleOperation) currentOperation;
+		if (node != null) {
 			int errorType = Integer.parseInt(node.getText());
-			if (rule.getNumberOfErrorTypes() == null) {
-				errorList.add(new CheckException("Define the number of error types of the rule operation.", node));
-			} else if (errorType > rule.getNumberOfErrorTypes()) {
+
+			if (errorType > ruleOp.getNumberOfErrorTypes()) {
 				errorList.add(new CheckException(
 						"The error type exceeded the number of error types specified for this rule operation.", node));
 			} else if (errorType < 1) {
 				errorList.add(new CheckException("The ERROR_TYPE must be a natural number greater than zero.", node));
+			} else {
+				addImplementedErrorType(ruleOp, errorType);
 			}
+		} else {
+			addImplementedErrorType(ruleOp, 1);
+		}
+	}
+
+	private void addImplementedErrorType(RuleOperation ruleOp, int errorType) {
+		if (implementedErrorTypes.containsKey(ruleOp)) {
+			Set<Integer> set = implementedErrorTypes.get(ruleOp);
+			set.add(errorType);
+		} else {
+			Set<Integer> set = new HashSet<>();
+			set.add(errorType);
+			implementedErrorTypes.put(ruleOp, set);
 		}
 	}
 

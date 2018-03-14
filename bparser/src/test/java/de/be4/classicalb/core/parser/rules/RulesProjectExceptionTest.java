@@ -17,15 +17,15 @@ public class RulesProjectExceptionTest {
 
 	@Test
 	public void testDuplicateOperationNameException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY skip END; COMPUTATION foo BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION foo BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,67,null),'Duplicate operation name: \\'foo\\'.').\n", result);
+		assertEquals("parse_exception(pos(1,99,null),'Duplicate operation name: \\'foo\\'.').\n", result);
 	}
 
 	@Test
 	public void testDependsOnRuleIsNotARuleException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY skip END; COMPUTATION bar BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION bar BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,56,null),'Operation \\'bar\\' is not a RULE operation.').\n", result);
@@ -41,7 +41,7 @@ public class RulesProjectExceptionTest {
 
 	@Test
 	public void testUnknownFunction() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END;RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,59,null),'Unknown FUNCTION name \\'Foo\\'').\n", result);

@@ -8,7 +8,10 @@ OPERATIONS
 RULE rule1
 ACTIVATION k = 2
 BODY
-  skip
+  RULE_FAIL
+  WHEN 1=2
+  COUNTEREXAMPLE "never"
+  END
 END
 ;
 COMPUTATION compute_x

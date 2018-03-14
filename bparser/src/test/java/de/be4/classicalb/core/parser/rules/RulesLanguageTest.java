@@ -10,7 +10,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testSimpleRule() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -18,7 +18,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleClassification() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -26,7 +26,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleTags() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -44,7 +44,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRulePrint() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("EXTERNAL_SUBSTITUTION_PRINT"));
@@ -71,7 +71,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testDublicateRuleName() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception"));
@@ -188,7 +188,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleId() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
@@ -199,7 +199,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testActivation() {
-		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
@@ -220,7 +220,7 @@ public class RulesLanguageTest {
 		testMachine += "& FAILED_RULE_ERROR_TYPE(rule1,1) \n";
 		testMachine += "& SUCCEEDED_RULE(rule1) & SUCCEEDED_RULE_ERROR_TYPE(rule1,1)\n";
 		testMachine += "& SUCCEEDED_RULE(rule1)\n";
-		testMachine += "OPERATIONS RULE rule1 BODY skip END\n";
+		testMachine += "OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END\n";
 		testMachine += "END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
@@ -279,18 +279,9 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleSkip() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS \nRULE foo BODY skip END END";
-		final String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertFalse(result.contains("exception"));
-
-	}
-
-	@Test
 	public void testDependsOnRule() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY skip END\n;"
-				+ " RULE foo2 DEPENDS_ON_RULE foo BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END\n;"
+				+ " RULE foo2 DEPENDS_ON_RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
@@ -299,7 +290,7 @@ public class RulesLanguageTest {
 	@Test
 	public void testDependsOnComputation() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute BODY skip END\n;"
-				+ " RULE foo2 DEPENDS_ON_COMPUTATION compute BODY skip END END";
+				+ " RULE foo2 DEPENDS_ON_COMPUTATION compute BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
@@ -317,7 +308,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testGoal() {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule1) & 1=1 OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
@@ -325,7 +316,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testGetCounterexamples() {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1,2) = {} OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1,2) = {} OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={}"));
@@ -333,7 +324,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testSucceededRuleErrorType() {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={};"));
@@ -341,7 +332,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testFailedRuleErrorType() {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesMachineAsBMachine(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)/={};"));
@@ -393,7 +384,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testFailedRuleAllErrorTypes() throws Exception {
-		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY skip END END";
+		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));

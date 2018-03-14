@@ -36,7 +36,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testOperatorFailedRulesErrorTypeWithSecondArgumentNotAnIntegerLiteral() throws Exception {
-		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule, 1+1) OPERATIONS RULE rule BODY skip END  END";
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule, 1+1) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -46,7 +46,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testChoiceSubstitutionException() throws Exception {
-		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE skip OR skip END  END";
+		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE RULE_FAIL COUNTEREXAMPLE \"never\" END OR RULE_FAIL COUNTEREXAMPLE \"never\" END END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -75,14 +75,30 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
+		assertTrue(result.contains(
+				"parse_exception(pos(1,66,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.')"));
+	}
+
+	@Test
+	public void testErrorTypeIsNotImplemented() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"abc\" END END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
 		assertEquals(
-				"parse_exception(pos(1,66,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
+				"parse_exception(pos(1,36,'UnknownFile'),'Error type \\'1\\' is not implemented in rule \\'foo\\'.').\n",
 				result);
 	}
 
 	@Test
+	public void testErrorTypeIsNotImplemented2() throws Exception {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		String result = getRulesMachineAsPrologTerm(testMachine);
+		System.out.println(result);
+	}
+
+	@Test
 	public void testInvalidRuleTag() throws Exception {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS 1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -95,9 +111,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 0 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals(
-				"parse_exception(pos(1,80,'UnknownFile'),'The ERROR_TYPE must be a natural number greater than zero.').\n",
-				result);
+		assertTrue(result.contains(
+				"parse_exception(pos(1,80,'UnknownFile'),'The ERROR_TYPE must be a natural number greater than zero.')"));
 	}
 
 	@Test
@@ -123,9 +138,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 3 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals(
-				"parse_exception(pos(1,80,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.').\n",
-				result);
+		assertTrue(result.contains(
+				"parse_exception(pos(1,80,'UnknownFile'),'The error type exceeded the number of error types specified for this rule operation.')"));
 	}
 
 	@Test(expected = AssertionError.class)
@@ -233,7 +247,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testActivationClauseIsUsedMoreThanOnceException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ACTIVATION 1=1 ACTIVATION 1=1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ACTIVATION 1=1 ACTIVATION 1=1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -243,7 +257,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testPreconditionInRuleOperationException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo PRECONDITION 1=1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo PRECONDITION 1=1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -263,7 +277,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testDependsOnRuleUsedMoreThanOnceException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar DEPENDS_ON_RULE bazz BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar DEPENDS_ON_RULE bazz BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -273,7 +287,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testDependsOnRuleInvalidIdentifierException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE 1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -292,7 +306,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testDependsOnComputationUsedMoreThanOnceException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION bar DEPENDS_ON_COMPUTATION bazz BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION bar DEPENDS_ON_COMPUTATION bazz BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -302,7 +316,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testDependsOnComputationInvalidIdentifierException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION 1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -312,7 +326,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testRuleIdAttributeIsUsedMoreThanOnceException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1 RULEID req2 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1 RULEID req2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals(
@@ -322,7 +336,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testRuleIdAttributeInvalidIdentifierException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID 1 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Expected exactly one identifier behind RULEID').\n",
@@ -331,7 +345,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testRuleIdAttributeTwoIdentifierException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1, req2 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1, req2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Expected exactly one identifier behind RULEID').\n",
@@ -350,7 +364,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testErrorTypesAttributeNoIntegerValueException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES k BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES k BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Expected exactly one integer after ERROR_TYPES.').\n",
@@ -359,7 +373,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testErrorTypesAttributeTwoIntegersException() throws Exception {
-		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES 1,2 BODY skip END END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES 1,2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertEquals("parse_exception(pos(1,40,'UnknownFile'),'Expected exactly one integer after ERROR_TYPES.').\n",
@@ -427,11 +441,9 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test CONSTANTS k, k PROPERTIES k = 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals(
-				"parse_exception(pos(1,33,'UnknownFile'),'Identifier already exists.').\n",
-				result);
+		assertEquals("parse_exception(pos(1,33,'UnknownFile'),'Identifier already exists.').\n", result);
 	}
-	
+
 	@Test
 	public void testRenamingIsNotAllowed() throws Exception {
 		final String testMachine = "RULES_MACHINE test CONSTANTS k PROPERTIES k.a = 1 END";
@@ -441,7 +453,7 @@ public class RulesLanguageExceptionTest {
 				"parse_exception(pos(1,43,'UnknownFile'),'Identifier renaming is not allowed in a RULES_MACHINE.').\n",
 				result);
 	}
-	
+
 	@Test
 	public void testRuleFailWithParameterButWithoutWHEN() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL x COUNTEREXAMPLE x END END END";

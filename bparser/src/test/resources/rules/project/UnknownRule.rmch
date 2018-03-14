@@ -5,7 +5,10 @@ RULE rule
 RULEID id1
 DEPENDS_ON_RULE otherRule
 BODY
-  skip
+  RULE_FAIL
+  WHEN 1=2
+  COUNTEREXAMPLE "never"
+  END
 END
 
 END

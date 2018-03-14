@@ -9,7 +9,10 @@ END
 RULE rule2
 DEPENDS_ON_RULE rule1
 BODY
-  skip
+  RULE_FAIL
+  WHEN 1=2
+  COUNTEREXAMPLE "never"
+  END
 END
 
 END

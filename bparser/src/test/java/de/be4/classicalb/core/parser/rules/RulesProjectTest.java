@@ -12,7 +12,7 @@ public class RulesProjectTest {
 	public void testRuleDependencies() {
 		String testMachine = "RULES_MACHINE Test OPERATIONS\n";
 		testMachine += "COMPUTATION c1 DEPENDS_ON_RULE r1 BODY DEFINE x2 TYPE POW(INTEGER) VALUE x1 END END;\n";
-		testMachine += "RULE r1 BODY VAR foo IN foo := x1 END END;\n";
+		testMachine += "RULE r1 BODY VAR foo IN foo := x1 END;RULE_FAIL COUNTEREXAMPLE \"never\" END END;\n";
 		testMachine += "COMPUTATION c2 BODY DEFINE x3 TYPE POW(INTEGER) VALUE x1 \\/ x2  END END;\n";
 		testMachine += "COMPUTATION c3 BODY DEFINE x1 TYPE POW(INTEGER) VALUE {} END END\n";
 		testMachine += "END";
