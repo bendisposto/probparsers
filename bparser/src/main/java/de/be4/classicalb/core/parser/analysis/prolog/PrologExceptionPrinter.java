@@ -260,6 +260,7 @@ public final class PrologExceptionPrinter {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static String fixMessageLineOneOff(String message) {
 		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\](.*)", Pattern.DOTALL);
 		Matcher m = p.matcher(message);
