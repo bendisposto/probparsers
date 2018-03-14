@@ -581,6 +581,8 @@ public class BParser {
 		return 0;
 	}
 
+	
+	@SuppressWarnings("unused")
 	private boolean hashesStillValid(final File outputFile) {
 		// File dir = outputFile.getParentFile();
 		// Properties hashValues = readHashValues(outputFile, dir);
