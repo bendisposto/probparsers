@@ -151,10 +151,10 @@ public class RulesProject {
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 		bModels.add(compositionMachine);
-		bModels.add(createMainMachine(injector.getGoalDefinition(), injector.getMainMachineDefinitions()));
+		bModels.add(createMainMachine(injector.getMainMachineDefinitions()));
 	}
 
-	private BMachine createMainMachine(PDefinition goalDefinition, List<PDefinition> mainDefinitions) {
+	private BMachine createMainMachine(List<PDefinition> mainDefinitions) {
 		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(getPromotesList());
