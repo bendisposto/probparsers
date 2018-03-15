@@ -39,6 +39,8 @@ public abstract class IDefinitions {
 
 	public abstract void addDefinition(PDefinition defNode, Type type, String key);
 
+	public abstract void addDefinition(PDefinition defNode);
+	
 	public void addDefinitions(IDefinitions defs) {
 		referencedDefinitions.add(defs);
 	}

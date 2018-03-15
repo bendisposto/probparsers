@@ -86,7 +86,7 @@ public class RulesMachineFilesTest {
 				assertEquals("rule1", next.getRuleOperation().getName());
 			} else {
 				assertEquals("rule2", next.getRuleName());
-				assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), next.getErrorTypesAssumedToFail());
+				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToFail());
 				assertEquals(false, next.isCheckedForCounterexamples());
 			}
 		}

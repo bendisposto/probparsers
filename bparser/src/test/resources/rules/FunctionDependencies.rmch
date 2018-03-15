@@ -29,6 +29,11 @@ BODY
   IN
     res <-- FUNC_Add2
   END
+  ;
+  RULE_FAIL
+  WHEN 1=2
+  COUNTEREXAMPLE "never"
+  END
 END
 
 

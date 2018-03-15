@@ -31,6 +31,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;
+		this.printSourcePositions = true;
 	}
 
 	public void printSourcePositions(boolean b) {

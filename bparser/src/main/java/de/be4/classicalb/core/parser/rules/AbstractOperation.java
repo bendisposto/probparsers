@@ -117,13 +117,15 @@ public abstract class AbstractOperation {
 			for (AIdentifierExpression aIdentifier : aIdentifierSet) {
 				directDependencies.add(aIdentifier.getIdentifier().get(0).getText());
 			}
-			for (AbstractOperation abstractOperation : this.transitiveDependencies) {
-				String opName = abstractOperation.getName();
-				if (this.implicitDependenciesToComputations.contains(abstractOperation)
-						|| directDependencies.contains(opName)) {
-					requiredDependencies.add(abstractOperation);
-				} else if (functionCallMap.containsKey(opName)) {
-					requiredDependencies.addAll(abstractOperation.getRequiredDependencies());
+			if (transitiveDependencies != null) {
+				for (AbstractOperation abstractOperation : this.transitiveDependencies) {
+					String opName = abstractOperation.getName();
+					if (this.implicitDependenciesToComputations.contains(abstractOperation)
+							|| directDependencies.contains(opName)) {
+						requiredDependencies.add(abstractOperation);
+					} else if (functionCallMap.containsKey(opName)) {
+						requiredDependencies.addAll(abstractOperation.getRequiredDependencies());
+					}
 				}
 			}
 		}
@@ -137,10 +139,10 @@ public abstract class AbstractOperation {
 
 	public void addReadVariable(AIdentifierExpression identifier) {
 		LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
-		String name = list.get(0).getText();
+		String varName = list.get(0).getText();
 		// storing the first occurrence an identifier read
-		if (!readMap.containsKey(name)) {
-			readMap.put(name, identifier);
+		if (!readMap.containsKey(varName)) {
+			readMap.put(varName, identifier);
 		}
 	}
 

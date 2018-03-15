@@ -48,6 +48,7 @@ public class MachineInjector extends DepthFirstAdapter {
 	ADefinitionsMachineClause definitionsClause;
 	HashSet<String> definitionNames = new HashSet<>();
 	private APredicateDefinitionDefinition goalDefinition;
+	private List<PDefinition> mainMachineDefinitions;
 
 	public MachineInjector(Start start) {
 		start.apply(this);
@@ -60,6 +61,10 @@ public class MachineInjector extends DepthFirstAdapter {
 
 	public APredicateDefinitionDefinition getGoalDefinition() {
 		return this.goalDefinition;
+	}
+
+	public List<PDefinition> getMainMachineDefinitions() {
+		return this.mainMachineDefinitions;
 	}
 
 	@Override
@@ -265,6 +270,12 @@ public class MachineInjector extends DepthFirstAdapter {
 				definitionsClause = new ADefinitionsMachineClause(new ArrayList<PDefinition>());
 				clausesList.add(definitionsClause);
 			}
+			boolean first = false;
+			if (mainMachineDefinitions == null) {
+				first = true;
+				mainMachineDefinitions = new ArrayList<>();
+			}
+
 			for (PDefinition def : node.getDefinitions()) {
 				def.apply(this);
 				// using the first GOAL definition
@@ -273,9 +284,12 @@ public class MachineInjector extends DepthFirstAdapter {
 					if ("GOAL".equals(name.getText())) {
 						goalDefinition = (APredicateDefinitionDefinition) def;
 					}
-
+				}
+				if (first) {
+					mainMachineDefinitions.add(def);
 				}
 			}
+
 		}
 
 		@Override

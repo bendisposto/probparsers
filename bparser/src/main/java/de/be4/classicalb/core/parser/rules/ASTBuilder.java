@@ -129,7 +129,10 @@ public final class ASTBuilder {
 	public static List<PExpression> createExpressionList(PExpression... pExpressions) {
 		final List<PExpression> list = new ArrayList<>();
 		for (int i = 0; i < pExpressions.length; i++) {
+			PExpression oldNode = pExpressions[i];
 			PExpression node = cloneNode(pExpressions[i]);
+			node.setStartPos(oldNode.getStartPos());
+			node.setEndPos(oldNode.getEndPos());
 			list.add(node);
 		}
 		return list;

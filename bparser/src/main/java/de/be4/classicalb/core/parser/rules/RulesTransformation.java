@@ -503,8 +503,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(stringValue);
 		final List<PExpression> seqList = new ArrayList<>();
 		for (int i = 1; i < parameters.size(); i++) {
+			PExpression param = parameters.get(i);
 			ADefinitionExpression toStringCall = new ADefinitionExpression(new TIdentifierLiteral(TO_STRING),
-					createExpressionList(parameters.get(i)));
+					createExpressionList(param));
+			toStringCall.setStartPos(param.getStartPos());
+			toStringCall.setEndPos(param.getEndPos());
 			seqList.add(toStringCall);
 		}
 		final ASequenceExtensionExpression seq = new ASequenceExtensionExpression(seqList);
