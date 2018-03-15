@@ -8,6 +8,8 @@ deploy:
 uberjar:
 	echo "Building Uberjar"
 	gradle clean uberjar
+install:
+	cp build/libs/probcliparser-*.jar ../../prob_prolog/lib/probcliparser.jar
 clean:
 	echo "Cleaning; useful if you encounter weird syntax errors during building"
 	gradle clean
