@@ -15,11 +15,11 @@ public class TestTypeAPI {
 	@Test
 	public void testSetIteration() throws Exception {
 		Set s = (Set) Translator.translate("{1,2,3, \"a\"}");
-		assertEquals(s.size(), 4);
+		assertEquals(4, s.size());
 
 		assertTrue(s.contains(new String("a")));
 		BObject[] c = s.toArray(new BObject[] {});
-		assertEquals(c.length, 4);
+		assertEquals(4, c.length);
 		for (BObject bObject : c) {
 			assertTrue(s.contains(bObject));
 		}
@@ -27,7 +27,7 @@ public class TestTypeAPI {
 		for (BObject bObject : s) {
 			bo.add(bObject);
 		}
-		assertEquals(bo.size(), 4);
+		assertEquals(4, bo.size());
 	}
 
 	@Test
@@ -40,9 +40,10 @@ public class TestTypeAPI {
 		assertEquals(s1, s3);
 		assertSame(s1, s1);
 		assertFalse(s1.equals(s2));
-		assertEquals(s2.length(), 4);
+		assertEquals(4, s2.length());
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void testTuple() throws Exception {
 		Tuple t1 = (Tuple) Translator.translate("(1,2)");
@@ -180,6 +181,7 @@ public class TestTypeAPI {
 		}
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void testSequence() throws Exception {
 		Sequence s1 = (Sequence) Translator.translate("[1,2,3]");
@@ -225,11 +227,11 @@ public class TestTypeAPI {
 		} catch (UnsupportedOperationException e) {
 		}
 		try {
-			s.addAll(1,null);
+			s.addAll(1, null);
 			fail("expecting exception");
 		} catch (UnsupportedOperationException e) {
 		}
-		
+
 	}
 
 }
