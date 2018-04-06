@@ -562,7 +562,7 @@ public class BParser {
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput()) {
-				PrologExceptionPrinter.printException(err, e, bfile.getAbsolutePath());
+				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
@@ -581,7 +581,6 @@ public class BParser {
 		return 0;
 	}
 
-	
 	@SuppressWarnings("unused")
 	private boolean hashesStillValid(final File outputFile) {
 		// File dir = outputFile.getParentFile();

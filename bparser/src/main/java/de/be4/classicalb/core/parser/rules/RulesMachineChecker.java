@@ -367,10 +367,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 				rule.setRuleId((AIdentifierExpression) arguments.get(0));
 			} else {
-				errorList.add(new CheckException("Expected exactly one identifier behind RULEID", pOperationAttribute));
+				errorList
+						.add(new CheckException("Expected exactly one identifier behind RULEID.", pOperationAttribute));
 			}
 		} else {
-			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation",
+			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation.",
 					pOperationAttribute));
 		}
 		return;
@@ -426,8 +427,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				FunctionOperation func = (FunctionOperation) currentOperation;
 				func.setPreconditionPredicate(predicate);
 			} else {
-				errorList.add(new CheckException(
-						"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation", pOperationAttribute));
+				errorList.add(
+						new CheckException("PRECONDITION clause is not allowed for a RULE or COMPUTATION operation.",
+								pOperationAttribute));
 			}
 			break;
 		case RulesGrammar.POSTCONDITION:

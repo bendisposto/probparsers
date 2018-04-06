@@ -20,7 +20,7 @@ public class RulesProjectExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION foo BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,99,null),'Duplicate operation name: \\'foo\\'.').\n", result);
+		assertTrue(result.contains("'Duplicate operation name: \\'foo\\'"));
 	}
 
 	@Test
@@ -28,7 +28,7 @@ public class RulesProjectExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION bar BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,56,null),'Operation \\'bar\\' is not a RULE operation.').\n", result);
+		assertTrue(result.contains("'Operation \\'bar\\' is not a RULE operation.'"));
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class RulesProjectExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END;RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertEquals("parse_exception(pos(1,59,null),'Unknown FUNCTION name \\'Foo\\'').\n", result);
+		assertTrue(result.contains("'Unknown FUNCTION name \\'Foo\\''"));
 	}
 
 	@Test
@@ -52,8 +52,8 @@ public class RulesProjectExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		final String expected = "parse_exception(pos(1,95,'UnknownFile'),'Identifier \\'v1\\' is not a local variable (VAR). Hence, it can not be assigned here.').\n";
-		assertEquals(expected, result);
+		assertTrue(result
+				.contains("'Identifier \\'v1\\' is not a local variable (VAR). Hence, it can not be assigned here.'"));
 	}
 
 	@Test
