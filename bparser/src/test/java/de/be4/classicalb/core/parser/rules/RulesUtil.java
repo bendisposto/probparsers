@@ -75,8 +75,12 @@ public class RulesUtil {
 	}
 
 	public static String getFileAsPrologTerm(final String file) {
+		return getFileAsPrologTerm(file, false);
+	}
+
+	public static String getFileAsPrologTerm(final String file, boolean addLineNumbers) {
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
+		pb.setAddLineNumbers(addLineNumbers);
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();
 
