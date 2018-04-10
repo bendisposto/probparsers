@@ -12,10 +12,11 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.util.Utils;
 
 public abstract class AbstractOperation {
 
-	private final TIdentifierLiteral name;
+	private final TIdentifierLiteral originalName;
 	private final String fileName; // can be null
 	private final String machineName;
 	private final List<RulesMachineReference> machineReferences;
@@ -34,7 +35,7 @@ public abstract class AbstractOperation {
 
 	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,
 			List<RulesMachineReference> machineReferences2) {
-		this.name = name;
+		this.originalName = name;
 		this.fileName = fileName;
 		this.machineName = machineName;
 		this.machineReferences = machineReferences2;
@@ -80,8 +81,16 @@ public abstract class AbstractOperation {
 		return this.postconditionPredicate;
 	}
 
+	public String getOriginalName() {
+		return this.originalName.getText();
+	}
+
 	public String getName() {
-		return this.name.getText();
+		if (replacesOperation()) {
+			return getReplacedOperationName();
+		} else {
+			return this.originalName.getText();
+		}
 	}
 
 	public void addTags(List<String> list) {
@@ -93,7 +102,7 @@ public abstract class AbstractOperation {
 	}
 
 	public TIdentifierLiteral getNameLiteral() {
-		return this.name;
+		return this.originalName;
 	}
 
 	public void setTransitiveDependencies(Set<AbstractOperation> dependencies) {
@@ -119,7 +128,7 @@ public abstract class AbstractOperation {
 			}
 			if (transitiveDependencies != null) {
 				for (AbstractOperation abstractOperation : this.transitiveDependencies) {
-					String opName = abstractOperation.getName();
+					String opName = abstractOperation.getOriginalName();
 					if (this.implicitDependenciesToComputations.contains(abstractOperation)
 							|| directDependencies.contains(opName)) {
 						requiredDependencies.add(abstractOperation);
@@ -134,7 +143,7 @@ public abstract class AbstractOperation {
 
 	@Override
 	public String toString() {
-		return this.getName();
+		return this.getOriginalName();
 	}
 
 	public void addReadVariable(AIdentifierExpression identifier) {
@@ -235,6 +244,14 @@ public abstract class AbstractOperation {
 			throw new IllegalArgumentException();
 		}
 		return result;
+	}
+
+	public String getReplacedOperationName() {
+		if (this.replacesOperation()) {
+			return Utils.getAIdentifierAsString(this.replacesIdentifier);
+		} else {
+			return null;
+		}
 	}
 
 }

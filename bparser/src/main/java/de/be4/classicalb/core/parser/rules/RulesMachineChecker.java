@@ -245,7 +245,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		public void add(String attrName, POperationAttribute node) {
 			if (map.containsKey(attrName)) {
 				errorList.add(new CheckException(String.format("%s clause is used more than once in operation '%s'.",
-						attrName, currentOperation.getName()), node));
+						attrName, currentOperation.getOriginalName()), node));
 			}
 			map.put(attrName, node);
 		}
@@ -448,7 +448,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private boolean containsRule(String name) {
 		for (RuleOperation rule : this.rulesMap.values()) {
-			if (name.equals(rule.getName())) {
+			if (name.equals(rule.getOriginalName())) {
 				return true;
 			}
 		}
@@ -458,8 +458,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
 		currentOperation = new RuleOperation(node.getRuleName(), this.fileName, this.machineName, machineReferences);
-		if (containsRule(currentOperation.getName())) {
-			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
+		if (containsRule(currentOperation.getOriginalName())) {
+			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getOriginalName() + "'.",
 					node.getRuleName()));
 		}
 		RuleOperation ruleOp = (RuleOperation) currentOperation;
@@ -475,7 +475,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (int i = 1; i <= ruleOp.getNumberOfErrorTypes(); i++) {
 			if (implemented == null || !implemented.contains(i)) {
 				errorList.add(new CheckException(
-						String.format("Error type '%s' is not implemented in rule '%s'.", i, ruleOp.getName()),
+						String.format("Error type '%s' is not implemented in rule '%s'.", i, ruleOp.getOriginalName()),
 						ruleOp.getNameLiteral()));
 			}
 		}

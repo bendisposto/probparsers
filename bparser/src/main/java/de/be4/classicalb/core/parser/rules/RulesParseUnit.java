@@ -122,7 +122,7 @@ public class RulesParseUnit implements IModel {
 	public void translate() {
 		final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
 		for (AbstractOperation op : operationList) {
-			allOperations.put(op.getName(), op);
+			allOperations.put(op.getOriginalName(), op);
 		}
 		this.translate(allOperations);
 	}

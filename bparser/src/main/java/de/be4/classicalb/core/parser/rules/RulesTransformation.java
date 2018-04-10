@@ -312,7 +312,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
-		if (operationsToBeDeleted.contains(this.rulesMachineChecker.getRuleOperation(node).getName())) {
+		if (operationsToBeDeleted.contains(this.rulesMachineChecker.getRuleOperation(node).getOriginalName())) {
 			node.replaceBy(null);
 			return;
 		} else {
@@ -329,7 +329,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outARuleOperation(ARuleOperation node) {
-		final String ruleName = currentRule.getName();
+		final String ruleName = currentRule.getOriginalName();
 		currentRule.getReplacesIdentifier();
 		ruleOperationLiteralList.add(node.getRuleName());
 		ruleNames.add(ruleName);
@@ -546,7 +546,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		exprList.add(new AStringExpression(new TStringLiteral(RULE_FAIL)));
 		nameList.add(createIdentifier(RULE_COUNTEREXAMPLE_OUTPUT_PARAMETER_NAME));
-		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		final String ctName = currentRule.getOriginalName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		exprList.add(createIdentifier(ctName));
 		return new AAssignSubstitution(nameList, exprList);
 	}
@@ -584,7 +584,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples,
 			boolean conditionalFail) {
-		final String ctName = currentRule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		final String ctName = currentRule.getOriginalName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 
 		final AUnionExpression union = new AUnionExpression(createIdentifier(ctName),
 				createPositinedNode(new AMultOrCartExpression(
@@ -694,7 +694,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	private void replaceFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final RuleOperation rule) {
 		// dom(rule_cts) = 1..n
-		String name = rule.getName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
+		String name = rule.getOriginalName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		AEqualPredicate equal = new AEqualPredicate(new ADomainExpression(createIdentifier(name)),
 				new AIntervalExpression(createAIntegerExpression(1),
 						createAIntegerExpression(rule.getNumberOfErrorTypes())));

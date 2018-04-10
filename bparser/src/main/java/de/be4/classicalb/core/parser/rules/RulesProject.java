@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -46,6 +47,7 @@ public class RulesProject {
 	protected final NodeIdAssignment nodeIdAssignment = new NodeIdAssignment();
 	private HashMap<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
+	private HashMap<String, String> operationReplacementMap = new HashMap<>();
 
 	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
 			final PrintStream err) {
@@ -118,7 +120,14 @@ public class RulesProject {
 	}
 
 	public Map<String, AbstractOperation> getOperationsMap() {
-		return new HashMap<>(this.allOperations);
+		Map<String, AbstractOperation> result = new HashMap<>();
+		for (Entry<String, AbstractOperation> entry : this.allOperations.entrySet()) {
+			AbstractOperation op = entry.getValue();
+			if (!this.operationReplacementMap.containsValue(op.getOriginalName())) {
+				result.put(op.getName(), op);
+			}
+		}
+		return result;
 	}
 
 	public Set<AbstractOperation> getOperationsWithNoSuccessor() {
@@ -179,27 +188,61 @@ public class RulesProject {
 		final List<String> promotesList = new ArrayList<>();
 		for (AbstractOperation abstractOperation : allOperations.values()) {
 			if (abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation) {
-				if (null != abstractOperation.getReplacesIdentifier()) {
-					// replacement operations are not add here because its
-					// original rule will be added
+				if (abstractOperation.replacesOperation()) {
+					// replacement operations are not added here because the
+					// replaced operation will be added
 					continue;
 				}
-				promotesList.add(abstractOperation.getName());
+				promotesList.add(abstractOperation.getOriginalName());
 			}
 		}
 		return promotesList;
 	}
 
 	private void checkProject() {
-		if (this.hasErrors()) {
-			return;
-		}
+
 		collectAllOperations();
 		checkDependencies();
 		findImplicitDependenciesToComputations();
 		checkIdentifiers();
 		findTransitiveDependencies();
 		checkReferencedRuleOperations();
+		checkReplacements();
+	}
+
+	private void checkReplacements() {
+		if (this.hasErrors()) {
+			return;
+		}
+
+		for (Entry<String, String> entry : this.operationReplacementMap.entrySet()) {
+			final String newOpName = entry.getKey();
+			final String replacedOperationName = entry.getValue();
+			AbstractOperation newOp = this.allOperations.get(newOpName);
+			AbstractOperation replacedOp = this.allOperations.get(replacedOperationName);
+
+			if (newOp.getClass() != replacedOp.getClass()) {
+				this.bExceptionList.add(new BException(newOp.getFileName(),
+						new CheckException(String.format("Operation '%s' is an invalid replacement for operation '%s'.",
+								newOpName, replacedOperationName), newOp.getNameLiteral())));
+			} else {
+				if (replacedOp instanceof ComputationOperation) {
+					ComputationOperation oldComp = (ComputationOperation) replacedOp;
+					ComputationOperation newComp = (ComputationOperation) newOp;
+					Set<String> oldVariables = oldComp.getDefineVariables();
+					Set<String> newVariables = newComp.getDefineVariables();
+					if (!oldVariables.containsAll(newVariables) || !newVariables.containsAll(oldVariables)) {
+						this.bExceptionList
+								.add(new BException(newOp.getFileName(),
+										new CheckException(String.format(
+												"Operation '%s' is an invalid replacement for operation '%s'.",
+												newOpName, replacedOperationName), newOp.getNameLiteral())));
+					}
+				}
+			}
+
+		}
+
 	}
 
 	private void collectAllOperations() {
@@ -207,12 +250,24 @@ public class RulesProject {
 			final RulesParseUnit unit = (RulesParseUnit) iModel;
 			final List<AbstractOperation> operations = unit.getOperations();
 			for (AbstractOperation abstractOperation : operations) {
-				final String name = abstractOperation.getName();
+				final String name = abstractOperation.getOriginalName();
 				if (allOperations.containsKey(name)) {
 					this.bExceptionList.add(new BException(abstractOperation.getFileName(), new CheckException(
 							"Duplicate operation name: '" + name + "'.", abstractOperation.getNameLiteral())));
 				}
 				allOperations.put(name, abstractOperation);
+				if (abstractOperation.replacesOperation()) {
+					String replacedOperationName = abstractOperation.getReplacedOperationName();
+					if (operationReplacementMap.containsValue(replacedOperationName)) {
+						this.bExceptionList.add(new BException(abstractOperation.getFileName(),
+								new CheckException(
+										"Operation '" + replacedOperationName + "' is replcaed more than once.",
+										abstractOperation.getNameLiteral())));
+					} else {
+						this.operationReplacementMap.put(name, replacedOperationName);
+					}
+
+				}
 			}
 		}
 	}
@@ -442,13 +497,13 @@ public class RulesProject {
 						.getReferencedRuleOperations();
 				final HashSet<String> knownRules = new HashSet<>();
 				for (RuleOperation ruleOperation : rulesParseUnit.getRulesMachineChecker().getRuleOperations()) {
-					knownRules.add(ruleOperation.getName());
+					knownRules.add(ruleOperation.getOriginalName());
 				}
 				for (RulesMachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
 					String referenceName = rulesMachineReference.getName();
 					RulesParseUnit otherParseUnit = map.get(referenceName);
 					for (RuleOperation ruleOperation : otherParseUnit.getRulesMachineChecker().getRuleOperations()) {
-						knownRules.add(ruleOperation.getName());
+						knownRules.add(ruleOperation.getOriginalName());
 					}
 				}
 
@@ -520,7 +575,7 @@ public class RulesProject {
 			List<AbstractOperation> ancestors) {
 		List<String> ancestorsNames = new ArrayList<>();
 		for (AbstractOperation op : ancestors) {
-			String opName = op.getName();
+			String opName = op.getOriginalName();
 			ancestorsNames.add(opName);
 		}
 		for (TIdentifierLiteral id : directDependencies) {
@@ -528,7 +583,7 @@ public class RulesProject {
 			if (ancestorsNames.contains(opName)) {
 				StringBuilder sb = new StringBuilder();
 				for (int index = ancestorsNames.indexOf(opName); index < ancestors.size(); index++) {
-					final String name = ancestors.get(index).getName();
+					final String name = ancestors.get(index).getOriginalName();
 					sb.append(name);
 					sb.append(" -> ");
 				}
