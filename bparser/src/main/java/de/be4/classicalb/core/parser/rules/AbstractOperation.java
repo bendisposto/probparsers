@@ -81,7 +81,7 @@ public abstract class AbstractOperation {
 		return this.postconditionPredicate;
 	}
 
-	public String getOriginalName() {
+	protected String getOriginalName() {
 		return this.originalName.getText();
 	}
 
