@@ -2,7 +2,7 @@ package de.prob.parser;
 
 import org.junit.Test;
 
-import de.prob.parser.antlr.Antlr4Parser;
+import de.prob.parser.antlr.Antlr4BParser;
 
 public class SimpleMachinesTest {
 
@@ -16,7 +16,7 @@ public class SimpleMachinesTest {
 		machine += "INITIALISATION x := 1 ; y := TRUE \n";
 		machine += "OPERATIONS IncX = SELECT x < 10 THEN x := x + 1 END \n";
 		machine += "END";
-		Antlr4Parser.prettyPrint(machine);
+		Antlr4BParser.prettyPrint(machine);
 	}
 
 }

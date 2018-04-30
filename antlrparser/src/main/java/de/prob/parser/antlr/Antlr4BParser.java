@@ -1,6 +1,8 @@
 package de.prob.parser.antlr;
 
 import files.*;
+import files.BParser.StartContext;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -21,7 +23,7 @@ import de.prob.parser.antlr.rules.RulesSableCCAstBuilder;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
-public class Antlr4Parser {
+public class Antlr4BParser {
 
 	public static void main(String args[]) throws IOException {
 		String input = "#EXPRESSION foo + 1 ";
@@ -62,7 +64,13 @@ public class Antlr4Parser {
 		System.out.println(pp.getPrettyPrint());
 	}
 
-	public static ParseTree parse(String bString) {
+	public static void getMachineAst(String input) throws ScopeException, ParseErrorException {
+		StartContext tree = parse(input);
+		MachineAnalyser machineAnalyser = new MachineAnalyser(tree);
+		SemanticAstCreator astCreator = new SemanticAstCreator(machineAnalyser);
+	}
+
+	public static StartContext parse(String bString) {
 		CodePointCharStream charStream = CharStreams.fromString(bString);
 
 		BLexer lexer = new BLexer(charStream);
@@ -81,7 +89,7 @@ public class Antlr4Parser {
 		parser.addErrorListener(new DiagnosticErrorListener());
 		MyErrorListener myErrorListener = new MyErrorListener();
 		parser.addErrorListener(myErrorListener);
-		ParseTree tree = null;
+		StartContext tree = null;
 
 		tree = parser.start();
 
