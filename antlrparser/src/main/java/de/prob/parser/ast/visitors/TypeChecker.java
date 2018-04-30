@@ -1,9 +1,8 @@
-package de.prob.parser.ast;
+package de.prob.parser.ast.visitors;
 
 import de.prob.parser.ast.nodes.*;
 import de.prob.parser.ast.nodes.ltl.*;
 import de.prob.parser.ast.types.*;
-import de.prob.parser.ast.visitors.AbstractVisitor;
 
 import java.util.HashSet;
 import java.util.List;

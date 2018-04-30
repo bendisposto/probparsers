@@ -1,7 +1,5 @@
 package de.prob.parser.ast.visitors;
 
-import de.prob.parser.ast.TypeChecker;
-import de.prob.parser.ast.TypeErrorException;
 import de.prob.parser.ast.nodes.*;
 import de.prob.parser.ast.nodes.ltl.*;
 

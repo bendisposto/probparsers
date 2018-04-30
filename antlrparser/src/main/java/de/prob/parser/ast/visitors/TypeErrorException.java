@@ -1,4 +1,4 @@
-package de.prob.parser.ast;
+package de.prob.parser.ast.visitors;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
