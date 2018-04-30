@@ -1,7 +1,7 @@
 package de.prob.parser.ast.nodes;
 
-public interface OperatorNode<T> extends Node {
-    T getOperator();
+public interface OperatorNode<T> {
+	T getOperator();
 
-    void setOperator(T operator);
+	void setOperator(T operator);
 }

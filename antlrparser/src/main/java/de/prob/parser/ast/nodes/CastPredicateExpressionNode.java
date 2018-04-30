@@ -1,12 +1,13 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+
+import de.prob.parser.ast.SourceCodePosition;
 
 public class CastPredicateExpressionNode extends ExprNode {
 	private PredicateNode predicate;
 
-	public CastPredicateExpressionNode(ParseTree ctx, PredicateNode predicate) {
-		super(ctx);
+	public CastPredicateExpressionNode(SourceCodePosition sourceCodePosition, PredicateNode predicate) {
+		super(sourceCodePosition);
 		this.predicate = predicate;
 	}
 

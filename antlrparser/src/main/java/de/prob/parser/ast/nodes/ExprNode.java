@@ -1,11 +1,11 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
-public abstract class ExprNode extends TypedNode implements Node {
+public abstract class ExprNode extends TypedNode {
 
-    public ExprNode(ParseTree parseTree) {
-        super(parseTree);
-    }
+	public ExprNode(SourceCodePosition sourceCodePosition) {
+		super(sourceCodePosition);
+	}
 
 }

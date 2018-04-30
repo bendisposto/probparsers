@@ -2,59 +2,61 @@ package de.prob.parser.ast.nodes;
 
 import java.util.List;
 
-public class FormulaNode implements Node {
+import de.prob.parser.ast.SourceCodePosition;
 
-    public enum FormulaType {
-        EXPRESSION_FORMULA, PREDICATE_FORMULA
-    }
+public class FormulaNode extends Node {
 
-    private final FormulaType type;
-    private List<DeclarationNode> implicitDeclarations;
-    private Node formula;
-    private List<String> warnings;
+	public enum FormulaType {
+		EXPRESSION_FORMULA, PREDICATE_FORMULA
+	}
 
-    public FormulaNode(FormulaType type) {
-        this.type = type;
-    }
+	private final FormulaType type;
+	private List<DeclarationNode> implicitDeclarations;
+	private Node formula;
+	private List<String> warnings;
 
-    public void setImplicitDeclarations(List<DeclarationNode> implicitDeclarations) {
-        this.implicitDeclarations = implicitDeclarations;
-    }
+	public FormulaNode(SourceCodePosition sourceCodePosition, FormulaType type) {
+		super(sourceCodePosition);
+		this.type = type;
+	}
 
-    public List<DeclarationNode> getImplicitDeclarations() {
-        return implicitDeclarations;
-    }
+	public void setImplicitDeclarations(List<DeclarationNode> implicitDeclarations) {
+		this.implicitDeclarations = implicitDeclarations;
+	}
 
-    public Node getFormula() {
-        return formula;
-    }
+	public List<DeclarationNode> getImplicitDeclarations() {
+		return implicitDeclarations;
+	}
 
-    public void setFormula(Node formula) {
-        this.formula = formula;
-    }
+	public Node getFormula() {
+		return formula;
+	}
 
-    public FormulaType getFormulaType() {
-        return type;
-    }
+	public void setFormula(Node formula) {
+		this.formula = formula;
+	}
 
-    public void setWarnings(List<String> warnings) {
-        this.warnings = warnings;
-    }
+	public FormulaType getFormulaType() {
+		return type;
+	}
 
-    public List<String> getWarnings() {
-        return this.warnings;
-    }
+	public void setWarnings(List<String> warnings) {
+		this.warnings = warnings;
+	}
 
-    @Override
-    public boolean equalAst(Node other) {
-        if (!NodeUtil.isSameClass(this, other)) {
-            return false;
-        }
+	public List<String> getWarnings() {
+		return this.warnings;
+	}
 
-        FormulaNode that = (FormulaNode) other;
-        return this.type.equals(that.type)
-            && this.formula.equalAst(that.formula)
-            && NodeUtil.equalAst(this.implicitDeclarations, that.implicitDeclarations);
-    }
+	@Override
+	public boolean equalAst(Node other) {
+		if (!NodeUtil.isSameClass(this, other)) {
+			return false;
+		}
+
+		FormulaNode that = (FormulaNode) other;
+		return this.type.equals(that.type) && this.formula.equalAst(that.formula)
+				&& NodeUtil.equalAst(this.implicitDeclarations, that.implicitDeclarations);
+	}
 
 }

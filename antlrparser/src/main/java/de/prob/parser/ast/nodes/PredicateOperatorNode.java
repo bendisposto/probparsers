@@ -1,74 +1,71 @@
 package de.prob.parser.ast.nodes;
 
-
 import java.util.Iterator;
 import java.util.List;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
-public class PredicateOperatorNode extends PredicateNode implements OperatorNode<PredicateOperatorNode.PredicateOperator> {
-    public enum PredicateOperator {
-        AND, OR, IMPLIES, EQUIVALENCE, NOT, TRUE, FALSE
-    }
+public class PredicateOperatorNode extends PredicateNode
+		implements OperatorNode<PredicateOperatorNode.PredicateOperator> {
+	public enum PredicateOperator {
+		AND, OR, IMPLIES, EQUIVALENCE, NOT, TRUE, FALSE
+	}
 
+	private List<PredicateNode> predicateArguments;
+	private PredicateOperator operator;
 
-    private List<PredicateNode> predicateArguments;
-    private PredicateOperator operator;
+	public PredicateOperatorNode(SourceCodePosition sourceCodePosition, PredicateOperator operator,
+			List<PredicateNode> predicateArguments) {
+		super(sourceCodePosition);
+		this.predicateArguments = predicateArguments;
+		this.operator = operator;
+	}
 
+	public List<PredicateNode> getPredicateArguments() {
+		return predicateArguments;
+	}
 
-    public PredicateOperatorNode(ParseTree ctx, PredicateOperator operator,
-            List<PredicateNode> predicateArguments) {
-        super(ctx);
-        this.predicateArguments = predicateArguments;
-        this.operator = operator;
-    }
+	@Override
+	public PredicateOperator getOperator() {
+		return operator;
+	}
 
+	@Override
+	public void setOperator(PredicateOperator operator) {
+		this.operator = operator;
+	}
 
-    public List<PredicateNode> getPredicateArguments() {
-        return predicateArguments;
-    }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.operator.name());
+		Iterator<PredicateNode> iter = predicateArguments.iterator();
+		if (iter.hasNext()) {
+			sb.append("(");
+			while (iter.hasNext()) {
+				sb.append(iter.next().toString());
+				if (iter.hasNext()) {
+					sb.append(",");
+				}
+			}
+			sb.append(")");
+		}
+		return sb.toString();
+	}
 
-    @Override
-    public PredicateOperator getOperator() {
-        return operator;
-    }
+	public void setPredicateList(List<PredicateNode> list) {
+		this.predicateArguments = list;
+	}
 
-    @Override
-    public void setOperator(PredicateOperator operator) {
-        this.operator = operator;
-    }
+	@Override
+	public boolean equalAst(Node other) {
+		if (!NodeUtil.isSameClass(this, other)) {
+			return false;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.operator.name());
-        Iterator<PredicateNode> iter = predicateArguments.iterator();
-        if (iter.hasNext()) {
-            sb.append("(");
-            while (iter.hasNext()) {
-                sb.append(iter.next().toString());
-                if (iter.hasNext()) {
-                    sb.append(",");
-                }
-            }
-            sb.append(")");
-        }
-        return sb.toString();
-    }
+		PredicateOperatorNode that = (PredicateOperatorNode) other;
+		return this.operator.equals(that.operator)
+				&& NodeUtil.equalAst(this.predicateArguments, that.predicateArguments);
 
-    public void setPredicateList(List<PredicateNode> list) {
-        this.predicateArguments = list;
-    }
-
-    @Override
-    public boolean equalAst(Node other) {
-        if (!NodeUtil.isSameClass(this, other)) {
-            return false;
-        }
-
-        PredicateOperatorNode that = (PredicateOperatorNode) other;
-        return this.operator.equals(that.operator)
-            && NodeUtil.equalAst(this.predicateArguments, that.predicateArguments);
-
-    }
+	}
 }

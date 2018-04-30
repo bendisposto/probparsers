@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import de.prob.parser.ast.SourceCodePosition;
+
 public class QuantifiedPredicateNode extends PredicateNode {
 
 	public enum QuantifiedPredicateOperator {
@@ -15,13 +17,14 @@ public class QuantifiedPredicateNode extends PredicateNode {
 	private PredicateNode predicateNode;
 	private QuantifiedPredicateOperator operator;
 
-	public QuantifiedPredicateNode(ParseTree ctx, List<DeclarationNode> declarationList, PredicateNode predNode,
-			QuantifiedPredicateOperator operator) {
-		super(ctx);
+	public QuantifiedPredicateNode(SourceCodePosition sourceCodePosition, List<DeclarationNode> declarationList,
+			PredicateNode predNode, QuantifiedPredicateOperator operator) {
+		super(sourceCodePosition);
 		this.declarationList = declarationList;
 		this.predicateNode = predNode;
 		this.operator = operator;
 	}
+
 
 	public List<DeclarationNode> getDeclarationList() {
 		return declarationList;

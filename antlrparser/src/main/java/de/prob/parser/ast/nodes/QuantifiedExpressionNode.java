@@ -1,6 +1,6 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
 import java.util.List;
 
@@ -21,11 +21,11 @@ public class QuantifiedExpressionNode extends SetComprehensionNode {
 		this.expressionNode = expr;
 	}
 
-	public QuantifiedExpressionNode(ParseTree ctx, List<DeclarationNode> declarationList, PredicateNode predNode,
-			ExprNode expressionNode, QuantifiedExpressionOperator operator2) {
-		super(ctx, declarationList, predNode);
+	public QuantifiedExpressionNode(SourceCodePosition sourceCodePosition, QuantifiedExpressionOperator operator,
+			List<DeclarationNode> declarationList, PredicateNode predNode, ExprNode expressionNode) {
+		super(sourceCodePosition, declarationList, predNode);
 		this.expressionNode = expressionNode;
-		this.operator = operator2;
+		this.operator = operator;
 	}
 
 	public QuantifiedExpressionOperator getOperator() {

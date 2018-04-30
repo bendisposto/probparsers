@@ -3,14 +3,15 @@ package de.prob.parser.ast.nodes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
 public class SetComprehensionNode extends ExprNode {
 	private List<DeclarationNode> declarationList;
 	private PredicateNode predicateNode;
 
-	public SetComprehensionNode(ParseTree ctx, List<DeclarationNode> declarationList, PredicateNode predicateNode) {
-		super(ctx);
+	public SetComprehensionNode(SourceCodePosition sourceCodePosition, List<DeclarationNode> declarationList,
+			PredicateNode predicateNode) {
+		super(sourceCodePosition);
 		this.declarationList = declarationList;
 		this.predicateNode = predicateNode;
 	}

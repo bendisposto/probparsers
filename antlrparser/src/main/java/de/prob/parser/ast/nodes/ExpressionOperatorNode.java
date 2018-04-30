@@ -1,6 +1,7 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.ParserRuleContext;
+
+import de.prob.parser.ast.SourceCodePosition;
 
 import java.util.Iterator;
 import java.util.List;
@@ -38,10 +39,10 @@ public class ExpressionOperatorNode extends ExprNode
 
 	private ExpressionOperator operator;
 
-	public ExpressionOperatorNode(ParserRuleContext parseTree, List<ExprNode> expressionNodes,
+	public ExpressionOperatorNode(SourceCodePosition sourceCodePosition, List<ExprNode> expressionNodes,
 			ExpressionOperator operator) {
 		// used for set enumeration, e.g. {1,2,3}
-		super(parseTree);
+		super(sourceCodePosition);
 		this.expressionNodes = expressionNodes;
 		this.operator = operator;
 	}

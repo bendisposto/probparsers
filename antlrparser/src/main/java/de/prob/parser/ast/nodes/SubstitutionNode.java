@@ -2,14 +2,20 @@ package de.prob.parser.ast.nodes;
 
 import java.util.Set;
 
-public abstract class SubstitutionNode implements Node {
-    private Set<DeclarationNode> assignedVariables;
+import de.prob.parser.ast.SourceCodePosition;
 
-    public Set<DeclarationNode> getAssignedVariables() {
-        return assignedVariables;
-    }
+public abstract class SubstitutionNode extends Node {
+	private Set<DeclarationNode> assignedVariables;
 
-    public void setAssignedVariables(Set<DeclarationNode> assignedVariables) {
-        this.assignedVariables = assignedVariables;
-    }
+	public Set<DeclarationNode> getAssignedVariables() {
+		return assignedVariables;
+	}
+
+	public SubstitutionNode(SourceCodePosition sourceCodePosition) {
+		super(sourceCodePosition);
+	}
+
+	public void setAssignedVariables(Set<DeclarationNode> assignedVariables) {
+		this.assignedVariables = assignedVariables;
+	}
 }

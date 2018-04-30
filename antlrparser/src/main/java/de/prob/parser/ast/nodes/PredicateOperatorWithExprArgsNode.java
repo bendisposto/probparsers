@@ -3,7 +3,7 @@ package de.prob.parser.ast.nodes;
 import java.util.Iterator;
 import java.util.List;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
 public class PredicateOperatorWithExprArgsNode extends PredicateNode
 		implements OperatorNode<PredicateOperatorWithExprArgsNode.PredOperatorExprArgs> {
@@ -16,9 +16,9 @@ public class PredicateOperatorWithExprArgsNode extends PredicateNode
 	private List<ExprNode> expressionNodes;
 	private PredOperatorExprArgs operator;
 
-	public PredicateOperatorWithExprArgsNode(ParseTree ctx, PredOperatorExprArgs operator,
+	public PredicateOperatorWithExprArgsNode(SourceCodePosition sourceCodePosition, PredOperatorExprArgs operator,
 			List<ExprNode> expressionNodes) {
-		super(ctx);
+		super(sourceCodePosition);
 		this.expressionNodes = expressionNodes;
 	}
 

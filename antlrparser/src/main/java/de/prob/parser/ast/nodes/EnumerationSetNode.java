@@ -1,34 +1,35 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import de.prob.parser.ast.SourceCodePosition;
 
 public class EnumerationSetNode extends ExprNode {
 
-    final EnumeratedSetDeclarationNode enumeratedSetDeclarationNode;
-    final String name;
+	final EnumeratedSetDeclarationNode enumeratedSetDeclarationNode;
+	final String name;
 
-    public EnumerationSetNode(ParseTree parseTree, EnumeratedSetDeclarationNode enumeratedSetNode, String name) {
-        super(parseTree);
-        this.enumeratedSetDeclarationNode = enumeratedSetNode;
-        this.name = name;
-    }
+	public EnumerationSetNode(SourceCodePosition sourceCodePosition, EnumeratedSetDeclarationNode enumeratedSetNode,
+			String name) {
+		super(sourceCodePosition);
+		this.enumeratedSetDeclarationNode = enumeratedSetNode;
+		this.name = name;
+	}
 
-    public String getName() {
-        return this.name;
-    }
+	public String getName() {
+		return this.name;
+	}
 
-    public EnumeratedSetDeclarationNode getEnumeratedSetDeclarationNode() {
-        return this.enumeratedSetDeclarationNode;
-    }
+	public EnumeratedSetDeclarationNode getEnumeratedSetDeclarationNode() {
+		return this.enumeratedSetDeclarationNode;
+	}
 
-    @Override
-    public boolean equalAst(Node other) {
-        if (!NodeUtil.isSameClass(this, other)) {
-            return false;
-        }
+	@Override
+	public boolean equalAst(Node other) {
+		if (!NodeUtil.isSameClass(this, other)) {
+			return false;
+		}
 
-        EnumerationSetNode that = (EnumerationSetNode) other;
-        return this.name.equals(that.name)
-            && this.enumeratedSetDeclarationNode.equalAst(that.enumeratedSetDeclarationNode);
-    }
+		EnumerationSetNode that = (EnumerationSetNode) other;
+		return this.name.equals(that.name)
+				&& this.enumeratedSetDeclarationNode.equalAst(that.enumeratedSetDeclarationNode);
+	}
 }

@@ -3,11 +3,14 @@ package de.prob.parser.ast.nodes;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.prob.parser.ast.SourceCodePosition;
+
 public class BecomesElementOfSubstitutionNode extends SubstitutionNode {
     private List<IdentifierExprNode> identifiers;
     private ExprNode expression;
 
-    public BecomesElementOfSubstitutionNode(List<IdentifierExprNode> identifiers, ExprNode expression) {
+    public BecomesElementOfSubstitutionNode(SourceCodePosition sourceCodePosition, List<IdentifierExprNode> identifiers, ExprNode expression) {
+    	super(sourceCodePosition);
         this.identifiers = identifiers;
         this.expression = expression;
         super.setAssignedVariables(

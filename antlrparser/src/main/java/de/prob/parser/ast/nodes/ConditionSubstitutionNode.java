@@ -1,5 +1,7 @@
 package de.prob.parser.ast.nodes;
 
+import de.prob.parser.ast.SourceCodePosition;
+
 public class ConditionSubstitutionNode extends SubstitutionNode {
     private Kind kind;
     private PredicateNode condition;
@@ -9,8 +11,9 @@ public class ConditionSubstitutionNode extends SubstitutionNode {
         PRECONDITION, ASSERT
     }
 
-    public ConditionSubstitutionNode(Kind kind, PredicateNode condition, SubstitutionNode substitution) {
-        this.condition = condition;
+    public ConditionSubstitutionNode(SourceCodePosition sourceCodePosition, Kind kind, PredicateNode condition, SubstitutionNode substitution) {
+    	super(sourceCodePosition);
+    	this.condition = condition;
         this.substitution = substitution;
         this.kind = kind;
         super.setAssignedVariables(substitution.getAssignedVariables());

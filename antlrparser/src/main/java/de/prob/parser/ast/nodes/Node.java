@@ -1,7 +1,18 @@
 package de.prob.parser.ast.nodes;
 
-public interface Node {
+import de.prob.parser.ast.SourceCodePosition;
 
-    boolean equalAst(Node other);
+public abstract class Node {
+	private final SourceCodePosition sourceCodePosition;
+
+	public Node(SourceCodePosition sourceCodePosition) {
+		this.sourceCodePosition = sourceCodePosition;
+	}
+	
+	public SourceCodePosition getSourceCodePosition() {
+		return this.sourceCodePosition;
+	}
+
+	public abstract boolean equalAst(Node other);
 
 }

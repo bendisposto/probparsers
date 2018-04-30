@@ -54,7 +54,9 @@ public class Antlr4BParser {
 	}
 
 	public static void prettyPrint(String input) {
-		ParseTree tree = parse(input);
+		StartContext tree = parse(input);
+		AstCreator astCreator = new AstCreator(tree);
+
 		DefinitionsAnalyser definitionAnalyser = new DefinitionsAnalyser(tree);
 		definitionAnalyser.analyse();
 		BLanguageSableCCAstBuilder astBuilder = new BLanguageSableCCAstBuilder(definitionAnalyser);
@@ -66,8 +68,7 @@ public class Antlr4BParser {
 
 	public static void getMachineAst(String input) throws ScopeException, ParseErrorException {
 		StartContext tree = parse(input);
-		MachineAnalyser machineAnalyser = new MachineAnalyser(tree);
-		SemanticAstCreator astCreator = new SemanticAstCreator(machineAnalyser);
+		AstCreator astCreator = new AstCreator(tree);
 	}
 
 	public static StartContext parse(String bString) {

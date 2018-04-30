@@ -3,44 +3,38 @@ package de.prob.parser.ast.nodes;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
+import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.types.BType;
 
-public abstract class TypedNode implements Node, Observer {
+public abstract class TypedNode extends Node implements Observer {
 
-    private BType type;
-    private final ParseTree parseTree;
+	private BType type;
 
-    public TypedNode(ParseTree parseTree) {
-        this.parseTree = parseTree;
-    }
+	public TypedNode(SourceCodePosition sourceCodePosition) {
+		super(sourceCodePosition);
+	}
 
-    public ParseTree getParseTree() {
-        return this.parseTree;
-    }
+	public BType getType() {
+		return type;
+	}
 
-    public BType getType() {
-        return type;
-    }
+	public boolean isUntyped() {
+		return type.isUntyped();
+	}
 
-    public boolean isUntyped() {
-        return type.isUntyped();
-    }
+	public void setType(BType type) {
+		if (type != null && type instanceof Observable) {
+			((Observable) type).deleteObserver(this);
+		}
+		this.type = type;
+		if (type instanceof Observable) {
+			((Observable) type).addObserver(this);
+		}
+	}
 
-    public void setType(BType type) {
-        if (type != null && type instanceof Observable) {
-            ((Observable) type).deleteObserver(this);
-        }
-        this.type = type;
-        if (type instanceof Observable) {
-            ((Observable) type).addObserver(this);
-        }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        o.deleteObserver(this);
-        setType((BType) arg);
-    }
+	@Override
+	public void update(Observable o, Object arg) {
+		o.deleteObserver(this);
+		setType((BType) arg);
+	}
 }

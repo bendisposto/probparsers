@@ -4,60 +4,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class OperationNode implements Node {
+import de.prob.parser.ast.SourceCodePosition;
 
-    private final String name;
-    private final List<DeclarationNode> outputParams;
-    private final List<DeclarationNode> params;
-    private SubstitutionNode substitution;
+public class OperationNode extends Node {
 
-    public OperationNode(String name, List<DeclarationNode> outputParamNodes, SubstitutionNode substitution,
-            List<DeclarationNode> paramNodes) {
-        this.name = name;
-        this.substitution = substitution;
-        this.outputParams = outputParamNodes;
-        this.params = paramNodes;
-    }
+	private final String name;
+	private final List<DeclarationNode> outputParams;
+	private final List<DeclarationNode> params;
+	private SubstitutionNode substitution;
 
-    public String getName() {
-        return name;
-    }
+	public OperationNode(SourceCodePosition sourceCodePosition, String name, List<DeclarationNode> outputParamNodes,
+			SubstitutionNode substitution, List<DeclarationNode> paramNodes) {
+		super(sourceCodePosition);
+		this.name = name;
+		this.substitution = substitution;
+		this.outputParams = outputParamNodes;
+		this.params = paramNodes;
+	}
 
-    public SubstitutionNode getSubstitution() {
-        return substitution;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setSubstitution(SubstitutionNode substitution) {
-        this.substitution = substitution;
-    }
+	public SubstitutionNode getSubstitution() {
+		return substitution;
+	}
 
-    @Override
-    public String toString() {
-        if (substitution instanceof SingleAssignSubstitutionNode) {
-            return name + " = BEGIN " + substitution + " END";
-        } else {
-            return name + " = " + substitution;
-        }
-    }
+	public void setSubstitution(SubstitutionNode substitution) {
+		this.substitution = substitution;
+	}
 
-    public Set<DeclarationNode> getAssignedDeclarationNodes() {
-        return new HashSet<>(this.substitution.getAssignedVariables());
-    }
+	@Override
+	public String toString() {
+		if (substitution instanceof SingleAssignSubstitutionNode) {
+			return name + " = BEGIN " + substitution + " END";
+		} else {
+			return name + " = " + substitution;
+		}
+	}
 
-    @Override
-    public boolean equalAst(Node other) {
-        if (!NodeUtil.isSameClass(this, other)) {
-            return false;
-        }
-        OperationNode that = (OperationNode) other;
-        return this.name.equals(that.name) && this.substitution.equalAst(that.substitution);
-    }
+	public Set<DeclarationNode> getAssignedDeclarationNodes() {
+		return new HashSet<>(this.substitution.getAssignedVariables());
+	}
 
-    public List<DeclarationNode> getOutputParams() {
-        return outputParams;
-    }
+	@Override
+	public boolean equalAst(Node other) {
+		if (!NodeUtil.isSameClass(this, other)) {
+			return false;
+		}
+		OperationNode that = (OperationNode) other;
+		return this.name.equals(that.name) && this.substitution.equalAst(that.substitution);
+	}
 
-    public List<DeclarationNode> getParams() {
-        return params;
-    }
+	public List<DeclarationNode> getOutputParams() {
+		return outputParams;
+	}
+
+	public List<DeclarationNode> getParams() {
+		return params;
+	}
 }
