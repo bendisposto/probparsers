@@ -51,15 +51,25 @@ public class Antlr4Parser {
 
 	}
 
-	public static ParseTree parse(String input1) {
-		// System.out.println(input1);
-		CodePointCharStream fromString = CharStreams.fromString(input1);
+	public static void prettyPrint(String input) {
+		ParseTree tree = parse(input);
+		DefinitionsAnalyser definitionAnalyser = new DefinitionsAnalyser(tree);
+		definitionAnalyser.analyse();
+		BLanguageSableCCAstBuilder astBuilder = new BLanguageSableCCAstBuilder(definitionAnalyser);
+		Node ast = tree.accept(astBuilder);
+		PrettyPrinter pp = new PrettyPrinter();
+		ast.apply(pp);
+		System.out.println(pp.getPrettyPrint());
+	}
 
-		// BLexer lexer = new BLexer(input);
-		MyLexer myLexer = new MyLexer(fromString);
+	public static ParseTree parse(String bString) {
+		CodePointCharStream charStream = CharStreams.fromString(bString);
+
+		BLexer lexer = new BLexer(charStream);
+		// MyLexer myLexer = new MyLexer(fromString);
 
 		// create a buffer of tokens pulled from the lexer
-		CommonTokenStream tokens = new CommonTokenStream(myLexer);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		// BLexer.rulesGrammar = true;
 		// create a parser that feeds off the tokens buffer
 
@@ -75,8 +85,6 @@ public class Antlr4Parser {
 
 		tree = parser.start();
 
-		System.out.println("----------- Parsing completed");
-		System.out.println(tree.getClass());
 		// begin parsing at start rule
 		// if (myErrorListener.exception != null) {
 		// throw new RuntimeException(myErrorListener.exception);
