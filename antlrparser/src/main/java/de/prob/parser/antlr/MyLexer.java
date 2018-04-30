@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.prob.parser.antlr;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;

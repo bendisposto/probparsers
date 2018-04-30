@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.prob.parser.antlr;
 
 import files.*;
 import java.io.IOException;
@@ -11,13 +11,13 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.antlr.rules.AbstractRulesSableCCAstBuilder;
-import de.be4.classicalb.core.parser.antlr.rules.MyRulesLexer;
-import de.be4.classicalb.core.parser.antlr.rules.RulesDefinitionAnalyser;
-import de.be4.classicalb.core.parser.antlr.rules.RulesSableCCAstBuilder;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
+import de.prob.parser.antlr.rules.AbstractRulesSableCCAstBuilder;
+import de.prob.parser.antlr.rules.MyRulesLexer;
+import de.prob.parser.antlr.rules.RulesDefinitionAnalyser;
+import de.prob.parser.antlr.rules.RulesSableCCAstBuilder;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 

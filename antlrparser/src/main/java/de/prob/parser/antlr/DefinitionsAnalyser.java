@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr;
+package de.prob.parser.antlr;
 
 import java.util.HashMap;
 import java.util.HashSet;

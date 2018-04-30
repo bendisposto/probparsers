@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr.rules;
+package de.prob.parser.antlr.rules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static de.be4.classicalb.core.parser.antlr.StaticSableCCAstBuilder.*;
+import static de.prob.parser.antlr.StaticSableCCAstBuilder.*;
 import static files.RulesGrammar.*;
 
 import de.be4.classicalb.core.parser.node.*;

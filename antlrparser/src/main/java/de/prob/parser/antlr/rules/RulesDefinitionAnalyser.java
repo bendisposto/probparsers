@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.antlr.rules;
+package de.prob.parser.antlr.rules;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,11 +10,11 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import de.be4.classicalb.core.parser.antlr.DefinitionsAnalyser;
-import de.be4.classicalb.core.parser.antlr.IDefinitions;
-import de.be4.classicalb.core.parser.antlr.IDefinitions.DefinitionType;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
+import de.prob.parser.antlr.DefinitionsAnalyser;
+import de.prob.parser.antlr.IDefinitions;
+import de.prob.parser.antlr.IDefinitions.DefinitionType;
 import files.RulesGrammarBaseVisitor;
 import files.RulesGrammar.*;
 

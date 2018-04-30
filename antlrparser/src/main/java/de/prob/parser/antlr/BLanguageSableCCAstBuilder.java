@@ -1,34 +1,32 @@
-package de.be4.classicalb.core.parser.antlr.rules;
+package de.prob.parser.antlr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.be4.classicalb.core.parser.antlr.StaticSableCCAstBuilder.*;
+import static de.prob.parser.antlr.StaticSableCCAstBuilder.*;
+import static files.BParser.*;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import de.be4.classicalb.core.parser.antlr.IDefinitions.*;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
-import files.RulesGrammar.*;
-import files.RulesGrammarBaseVisitor;
+import de.prob.parser.antlr.IDefinitions.*;
+import files.BParserBaseVisitor;
 
-import static files.RulesGrammar.*;
+public class BLanguageSableCCAstBuilder extends BParserBaseVisitor<Node> {
+	private final DefinitionsAnalyser definitionsAnalyser;
 
-public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node> {
-	private final RulesDefinitionAnalyser definitionsAnalyser;
-
-	public AbstractRulesSableCCAstBuilder(RulesDefinitionAnalyser definitionsAnalyser) {
+	public BLanguageSableCCAstBuilder(DefinitionsAnalyser definitionsAnalyser) {
 		this.definitionsAnalyser = definitionsAnalyser;
 	}
 
 	@Override
 	public Node visitParseUnit(ParseUnitContext ctx) {
 		PParseUnit parseUnit = (PParseUnit) ctx.parse_unit().accept(this);
-		return new Start(parseUnit, new EOF()); // start does not position info
+		return new Start(parseUnit, new EOF());
 	}
 
 	@Override
@@ -115,18 +113,17 @@ public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node
 		PMachineVariant variant;
 		switch (ctx.variant.getType()) {
 		case MACHINE:
-			variant = new AMachineMachineVariant();
+			variant = createPositionedNode(new AMachineMachineVariant(), ctx.variant);
 			break;
 		case MODEL:
-			variant = new AModelMachineVariant();
+			variant = createPositionedNode(new AModelMachineVariant(), ctx.variant);
 			break;
 		case SYSTEM:
-			variant = new ASystemMachineVariant();
+			variant = createPositionedNode(new ASystemMachineVariant(), ctx.variant);
 			break;
 		default:
 			throw new RuntimeException("unexpected");
 		}
-		variant = createPositionedNode(variant, ctx.variant);
 		return createPositionedNode(new AAbstractMachineParseUnit(variant, header, list), ctx);
 	}
 
@@ -1029,7 +1026,13 @@ public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node
 				ctx.quantified_variables_list().identifier_list());
 		PPredicate predicate = (PPredicate) ctx.predicate().accept(this);
 		PExpression expression = (PExpression) ctx.expression_in_par().accept(this);
-		return createPositionedNode(new ALambdaExpression(identifierList, predicate, expression), ctx);
+		Node node;
+		if (null == ctx.PRAGMA_SYMBOLIC()) {
+			node = new ALambdaExpression(identifierList, predicate, expression);
+		} else {
+			node = new ASymbolicLambdaExpression(identifierList, predicate, expression);
+		}
+		return createPositionedNode(node, ctx);
 	}
 
 	@Override
@@ -1351,16 +1354,9 @@ public class AbstractRulesSableCCAstBuilder extends RulesGrammarBaseVisitor<Node
 		return createPositionedNode(new ACoupleExpression(list), ctx);
 	}
 
-	private List<PExpression> createPExpressionList(PExpression... pExpressions) {
-		final List<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add(pExpression);
-		}
-		return list;
-	}
-
 	@Override
 	public Node visitNumber(NumberContext ctx) {
+		TerminalNode number2 = ctx.Number();
 		String number = ctx.Number().getText();
 		return createPositionedNode(
 				new AIntegerExpression(
