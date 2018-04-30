@@ -1,0 +1,80 @@
+// BParser
+
+//dependsOn(':prologlib')
+//dependsOn(':parserbase')
+//dependsOn(':bparser')
+apply plugin: 'jacoco'
+apply plugin: 'java'
+apply plugin: 'antlr'
+
+
+dependencies {
+    antlr "org.antlr:antlr4:4.7.1" // use ANTLR version 4
+    compile project(path: ":bparser", configuration: "archives")
+    compile project(path: ":prologlib", configuration: "archives")
+    compile project(path: ":parserbase", configuration: "archives")
+}
+
+sourceSets {
+    main {
+        java {
+          	srcDirs = ['build/temp','src/main/java', 'build/generated-src/antlr/main']
+        }
+    }
+}
+
+def getCheckedOutGitCommitHash() {
+    def gitFolder = "$projectDir/../.git/"
+    def takeFromHash = 40
+    try{
+     def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
+     def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+     if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+     def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+     refHead.text.trim().take takeFromHash
+    } catch (Exception e) { "unknown" }
+}
+
+task createBuildConstants  {
+  doFirst {
+    def buildconstants_class = """
+version=${project.version}
+git=${getCheckedOutGitCommitHash()}"""
+    File f = file("src/main/resources/build.properties")
+    f.delete()
+    f.getParentFile().mkdirs()
+    f <<  buildconstants_class
+  }
+}
+
+// gradle generateGrammarSource
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages"]
+    outputDirectory = file('build/generated-src/antlr/main/files')
+}
+
+
+jar {
+ include '**/*.class'
+ include '**/*.java'
+ exclude '**.*.scc'
+ from 'build/temp'
+ include '**/*.dat'
+ include '**/*.properties'
+ from sourceSets.main.toString()
+ include '**/*.java'
+}
+
+compileJava {
+ dependsOn = ['createBuildConstants',':prologlib:deploy',':parserbase:deploy','generateGrammarSource']
+ doFirst {
+	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
+	File f = file("src/main/resources/revision.properties")
+    f.delete()
+    f <<  buildconstants_class
+  }
+}
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+
