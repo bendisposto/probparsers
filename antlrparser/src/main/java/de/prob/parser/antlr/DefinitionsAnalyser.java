@@ -42,7 +42,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 		this.parseTree.accept(definitionUsage);
 
 		HashSet<String> defsWithUnknownType = new HashSet<>();
-		for (Iterator< String>iterator = definitionTypes.keySet().iterator(); iterator.hasNext();) {
+		for (Iterator<String> iterator = definitionTypes.keySet().iterator(); iterator.hasNext();) {
 			String defName = (String) iterator.next();
 			DefinitionType definitionType = this.getDefinitionType(defName);
 			if (definitionType == DefinitionType.UNKNOWN_TYPE) {
@@ -53,7 +53,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 		boolean progress = true;
 		while (!defsWithUnknownType.isEmpty() && progress) {
 			progress = false;
-			for (Iterator< String>iterator = new HashSet<String>(defsWithUnknownType).iterator(); iterator.hasNext();) {
+			for (Iterator<String> iterator = new HashSet<String>(defsWithUnknownType).iterator(); iterator.hasNext();) {
 				String defName = iterator.next();
 				String dependency = definitionDependencies.get(defName);
 				if (this.isDefinition(dependency)) {
@@ -67,7 +67,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 			}
 		}
 
-		for (Iterator< String>iterator = definitionTypes.keySet().iterator(); iterator.hasNext();) {
+		for (Iterator<String> iterator = definitionTypes.keySet().iterator(); iterator.hasNext();) {
 			String defName = (String) iterator.next();
 			DefinitionType definitionType = this.getDefinitionType(defName);
 			System.out.println(defName + " " + definitionType);
@@ -105,9 +105,8 @@ public class DefinitionsAnalyser implements IDefinitions {
 				definitionTypes.put(name, DefinitionType.UNKNOWN_TYPE);
 
 				FormulaAmbiguousCallContext call = (FormulaAmbiguousCallContext) formula;
-				ComposedIdentifierContext composedIdentifier = (ComposedIdentifierContext) call.composed_identifier();
 
-				List<TerminalNode> tokens = composedIdentifier.IDENTIFIER();
+				List<TerminalNode> tokens = call.composed_identifier().IDENTIFIER();
 				String otherName = tokens.get(0).getText();
 
 				if (tokens.size() == 1) {
@@ -122,14 +121,13 @@ public class DefinitionsAnalyser implements IDefinitions {
 	class DefinitionUsage extends BParserBaseVisitor<Void> {
 		@Override
 		public Void visitSubstitutionIdentifierCall(SubstitutionIdentifierCallContext ctx) {
-			final ComposedIdentifierContext subNode = (ComposedIdentifierContext) ctx.composed_identifier();
-			final List<TerminalNode> identifiers = subNode.IDENTIFIER();
+			final List<TerminalNode> identifiers = ctx.composed_identifier().IDENTIFIER();
 			final TerminalNode id = identifiers.get(0);
 			Expression_listContext expression_list = ctx.expression_list();
 			int numberOfArguments = (expression_list == null) ? 0 : expression_list.exprs.size();
 
 			if (identifiers.size() == 1 && DefinitionsAnalyser.this.isDefinition(id.getText())) {
-				addDefinitionTypeUsage(id.getText(), DefinitionType.SUBSTITUTION_DEFINITION, subNode,
+				addDefinitionTypeUsage(id.getText(), DefinitionType.SUBSTITUTION_DEFINITION, ctx.composed_identifier(),
 						numberOfArguments);
 			}
 			visitChildren(ctx);
@@ -138,8 +136,7 @@ public class DefinitionsAnalyser implements IDefinitions {
 
 		@Override
 		public Void visitExpressionIdentifier(ExpressionIdentifierContext ctx) {
-			ComposedIdentifierContext subNode = (ComposedIdentifierContext) ctx.composed_identifier();
-			List<TerminalNode> identifiers = subNode.IDENTIFIER();
+			List<TerminalNode> identifiers = ctx.composed_identifier().IDENTIFIER();
 			final String firstName = identifiers.get(0).getText();
 			if (identifiers.size() == 1 && DefinitionsAnalyser.this.isDefinition(firstName)) {
 				addDefinitionTypeUsage(firstName, DefinitionType.EXPRESSION_DEFINITION, ctx, 0);
@@ -153,14 +150,13 @@ public class DefinitionsAnalyser implements IDefinitions {
 			final List<Expression_in_parContext> arguments = ctx.arguments;
 			if (function instanceof ExpressionIdentifierContext) {
 				ExpressionIdentifierContext identifierContext = (ExpressionIdentifierContext) function;
-				ComposedIdentifierContext subNode = (ComposedIdentifierContext) identifierContext.composed_identifier();
-				List<TerminalNode> tokens = subNode.IDENTIFIER();
+				List<TerminalNode> tokens = identifierContext.composed_identifier().IDENTIFIER();
 				final TerminalNode id = tokens.get(0);
 				if (tokens.size() == 1 && DefinitionsAnalyser.this.isDefinition(id.getText())) {
 					addDefinitionTypeUsage(id.getText(), DefinitionType.EXPRESSION_DEFINITION, function,
 							arguments.size());
 				}
-				//do not visit function again
+				// do not visit function again
 				for (Expression_in_parContext expression_in_parContext : ctx.arguments) {
 					expression_in_parContext.accept(this);
 				}

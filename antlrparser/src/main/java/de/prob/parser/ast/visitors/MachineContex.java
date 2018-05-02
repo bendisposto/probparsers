@@ -16,16 +16,21 @@ import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
 import de.prob.parser.ast.visitors.generic.ASTVisitor;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ScopeChecker {
+public class MachineContex {
 	private final LinkedList<LinkedHashMap<String, DeclarationNode>> scopeTable = new LinkedList<>();
 	private final LinkedHashMap<Node, DeclarationNode> declarationReferences = new LinkedHashMap<>();
 	private MachineNode machineNode;
 
-	public ScopeChecker(MachineNode machineNode) {
+	public MachineContex(MachineNode machineNode) {
+		this(machineNode, new ArrayList<>());
+	}
+
+	public MachineContex(MachineNode machineNode, List<MachineContex> scopeList) {
 		this.machineNode = machineNode;
 		check();
 	}

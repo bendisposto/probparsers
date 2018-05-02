@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.InstanceNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
@@ -17,6 +18,7 @@ import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
 import files.BParserBaseVisitor;
 import files.BParser.DeclarationClauseContext;
+import files.BParser.Machine_instantiationContext;
 import files.BParser.StartContext;
 
 public class AstCreator {
@@ -38,6 +40,16 @@ public class AstCreator {
 
 		MachineConstructor(StartContext start) {
 			start.accept(this);
+		}
+
+		@Override
+		public Void visitInstanceClause(BParser.InstanceClauseContext ctx) {
+			for (Machine_instantiationContext instance : ctx.machine_instantiation()) {
+				String prefix = instance.prefix == null ? null : instance.prefix.getText();
+				String name = ctx.name.getText();
+				machineNode.addInstance(new InstanceNode(Util.createSourceCodePosition(ctx), name, prefix));
+			}
+			return null;
 		}
 
 		@Override

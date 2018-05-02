@@ -20,6 +20,16 @@ public class MachineNode extends Node {
 	private List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
 	private List<DeclarationNode> deferredSets = new ArrayList<>();
 	private List<LTLFormula> ltlFormulas = new ArrayList<>();
+	private String name;
+
+	public MachineNode(SourceCodePosition sourceCodePosition, String name) {
+		super(sourceCodePosition);
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
+	}
 
 	public List<DeclarationNode> getVariables() {
 		return variables;
@@ -105,8 +115,11 @@ public class MachineNode extends Node {
 		return new ArrayList<>(this.ltlFormulas);
 	}
 
-
 	public void addOperation(OperationNode operationNode) {
 		this.operations.add(operationNode);
+	}
+
+	public void addInstance(InstanceNode instanceNode) {
+		
 	}
 }

@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
@@ -25,6 +25,7 @@ import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
 import files.BParserBaseVisitor;
@@ -42,20 +43,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitChildren(RuleNode node) {
-		System.out.println("Not implemented: " + node.getClass().getSimpleName());
-		Node result = defaultResult();
-		int n = node.getChildCount();
-		for (int i = 0; i < n; i++) {
-			if (!shouldVisitNextChild(node, result)) {
-				break;
-			}
-
-			ParseTree c = node.getChild(i);
-			Node childResult = c.accept(this);
-			result = aggregateResult(result, childResult);
-		}
-
-		return result;
+		throw new RuntimeException("Not implemented: " + node.getClass().getSimpleName());
 	}
 
 	// Predicates
@@ -309,6 +297,18 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		}
 
 		return new ListSubstitutionNode(Util.createSourceCodePosition(ctx), operator, result);
+	}
+
+	@Override
+	public Node visitSubstitutionIdentifierCall(BParser.SubstitutionIdentifierCallContext ctx) {
+		List<String> names = new ArrayList<>();
+		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
+			names.add(tNode.getText());
+		}
+
+		List<ExprNode> arguments = ctx.expression_list() == null ? new ArrayList<>()
+				: visitExpressionList(ctx.expression_list());
+		return new SubstitutionIdentifierCallNode(Util.createSourceCodePosition(ctx), names, arguments);
 	}
 
 	@Override

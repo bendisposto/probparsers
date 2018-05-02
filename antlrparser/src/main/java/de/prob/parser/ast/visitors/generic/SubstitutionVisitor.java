@@ -8,6 +8,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 
 public interface SubstitutionVisitor {
@@ -29,11 +30,15 @@ public interface SubstitutionVisitor {
 			visitSkipSubstitutionNode((SkipSubstitutionNode) node);
 		} else if (node instanceof AssignSubstitutionNode) {
 			visitAssignSubstitutionNode((AssignSubstitutionNode) node);
+		} else if (node instanceof SubstitutionIdentifierCallNode) {
+			visitSubstitutionIdentifierCallNode((SubstitutionIdentifierCallNode) node);
 		} else {
 			throw new AssertionError(node.getClass());
 		}
 
 	}
+
+	void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node);
 
 	void visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node);
 

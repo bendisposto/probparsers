@@ -69,7 +69,7 @@ definition_clause
   ;
 
 machine_instantiation
-  : ident=composed_identifier ( '(' exprs+=expression (','  exprs+=expression)* ')' )?
+  : (prefix=IDENTIFIER)? name=IDENTIFIER ( '(' exprs+=expression (','  exprs+=expression)* ')' )?
   ;
 
 set_definition
@@ -380,9 +380,9 @@ expressionOperatorP160
 
 
 composed_identifier
-  : IDENTIFIER ('.' IDENTIFIER)*      # ComposedIdentifier
+  : IDENTIFIER ('.' IDENTIFIER)*
   ;
 
 identifier
-  : IDENTIFIER                        # IdentifierNode
+  : IDENTIFIER
   ;
