@@ -1,9 +1,14 @@
 package de.prob.parser.antlr;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+
+import de.prob.parser.ast.SourceCodePosition;
 
 public class Util {
 
@@ -34,6 +39,10 @@ public class Util {
 		}
 
 		return content.replaceAll("\r\n", "\n");
+	}
+
+	public static final SourceCodePosition createSourceCodePosition(ParserRuleContext ctx) {
+		return new SourceCodePosition();
 	}
 
 }

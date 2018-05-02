@@ -56,14 +56,7 @@ public class Antlr4BParser {
 	public static void prettyPrint(String input) {
 		StartContext tree = parse(input);
 		AstCreator astCreator = new AstCreator(tree);
-
-		DefinitionsAnalyser definitionAnalyser = new DefinitionsAnalyser(tree);
-		definitionAnalyser.analyse();
-		BLanguageSableCCAstBuilder astBuilder = new BLanguageSableCCAstBuilder(definitionAnalyser);
-		Node ast = tree.accept(astBuilder);
-		PrettyPrinter pp = new PrettyPrinter();
-		ast.apply(pp);
-		System.out.println(pp.getPrettyPrint());
+		ScopeChecker scopeChecker = new ScopeChecker();
 	}
 
 	public static void getMachineAst(String input) throws ScopeException, ParseErrorException {

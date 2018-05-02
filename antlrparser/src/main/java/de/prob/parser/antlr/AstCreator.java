@@ -31,11 +31,11 @@ public class AstCreator {
 	}
 
 	public SourceCodePosition createSourceCodePosition(ParserRuleContext ctx) {
-		return null;
+		return new SourceCodePosition();
 	}
 
 	class MachineConstructor extends BParserBaseVisitor<Void> {
-		ParseTreeVisitor formulaVisitor;
+		ASTFormulaCreator formulaVisitor = new ASTFormulaCreator();
 
 		MachineConstructor(StartContext start) {
 			start.accept(this);
@@ -55,7 +55,7 @@ public class AstCreator {
 				machineNode.setVariables(createDeclarationList(ctx.identifier_list().IDENTIFIER()));
 				break;
 			default:
-				// unreachable();
+				unreachable();
 			}
 			return null;
 		}
@@ -65,7 +65,6 @@ public class AstCreator {
 			PredicateNode pred = (PredicateNode) ctx.pred.accept(formulaVisitor);
 			switch (ctx.name.getText()) {
 			case "INVARIANT":
-
 				if (machineNode.getInvariant() == null) {
 					machineNode.setInvariant(pred);
 				} else {

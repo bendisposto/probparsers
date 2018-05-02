@@ -1,19 +1,18 @@
 package de.prob.parser.antlr;
 
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import files.BParserBaseVisitor;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 
-public abstract class ScopeChecker extends BParserBaseVisitor<Void> {
-    final LinkedList<LinkedHashMap<String, TerminalNode>> scopeTable = new LinkedList<>();
-    final LinkedHashMap<TerminalNode, TerminalNode> declarationReferences = new LinkedHashMap<>();
+public  class ScopeChecker {
+    final LinkedList<LinkedHashMap<String, DeclarationNode>> scopeTable = new LinkedList<>();
+    final LinkedHashMap<Node, DeclarationNode> declarationReferences = new LinkedHashMap<>();
 
     public class ScopeCheckerVisitorException extends RuntimeException {
         private static final long serialVersionUID = 5003348008806300117L;
@@ -94,13 +93,11 @@ public abstract class ScopeChecker extends BParserBaseVisitor<Void> {
 //        return null;
 //    }
 //
-    public void lookUpTerminalNode(TerminalNode terminalNode) {
-        Token identifierToken = terminalNode.getSymbol();
-        String name = identifierToken.getText();
+    public void lookUpTerminalNode(String name, Node terminalNode) {
         for (int i = scopeTable.size() - 1; i >= 0; i--) {
-            LinkedHashMap<String, TerminalNode> map = scopeTable.get(i);
+            LinkedHashMap<String, DeclarationNode> map = scopeTable.get(i);
             if (map.containsKey(name)) {
-                TerminalNode declarationToken = map.get(name);
+            	DeclarationNode declarationToken = map.get(name);
                 addDeclarationReference(terminalNode, declarationToken);
                 return;
             }
@@ -121,13 +118,13 @@ public abstract class ScopeChecker extends BParserBaseVisitor<Void> {
 //        return null;
 //    }
 //
-    public void addDeclarationReference(TerminalNode identifierToken, TerminalNode declarationToken) {
+    public void addDeclarationReference(Node identifierToken, DeclarationNode declarationToken) {
         this.declarationReferences.put(identifierToken, declarationToken);
     }
 
-    public void identifierNodeNotFound(TerminalNode terminalNode) {
+    public void identifierNodeNotFound(Node node) {
         throw new ScopeCheckerVisitorException(
-                new ScopeException("Unknown identifier: " + terminalNode.getSymbol().getText()));
+                new ScopeException("Unknown identifier: " + node.getSourceCodePosition().getText()));
     }
 
 }

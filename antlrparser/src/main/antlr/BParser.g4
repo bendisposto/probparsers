@@ -241,9 +241,9 @@ expression
   | PRAGMA_SYMBOLIC? LAMBDA quantified_variables_list
       DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # LambdaExpression
   | operator=(QUANTIFIED_UNION|QUANTIFIED_INTER|SIGMA|PI)  quantified_variables_list
-      DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR       # QuantifiedExpression
-  | QUANTIFIED_SET quantified_variables_list DOT LEFT_PAR predicate RIGHT_PAR          # QuantifiedSet
-  | '{' identifier_list  VERTICAL_BAR predicate '}'                         # SetComprehension
+      DOT LEFT_PAR predicate VERTICAL_BAR expression_in_par RIGHT_PAR                   # QuantifiedExpression
+  | QUANTIFIED_SET quantified_variables_list DOT LEFT_PAR predicate RIGHT_PAR           # QuantifiedSet
+  | '{' identifier_list  VERTICAL_BAR predicate '}'                                     # SetComprehension
 
   // extensions
   | LET identifier_list BE predicate IN expression_in_par END                           # LetExpression
@@ -257,7 +257,7 @@ expression
   | MINUS expression                                                                    # UnaryMinus  //P210
   | <assoc=right> left=expression operator=POWER_OF right=expression                    # BinOperator //p200
   | left=expression operator=(MULT|DIVIDE|MOD) right=expression                         # BinOperator //p190
-  | left=expression operator=(PLUS|MINUS|SET_SUBTRACTION) right=expression                              # BinOperator //p180
+  | left=expression operator=(PLUS|MINUS|SET_SUBTRACTION) right=expression              # BinOperator //p180
   | left=expression operator=INTERVAL right=expression                                  # BinOperator //p170
   | left=expression expressionOperatorP160 right=expression                             # BinOperatorP160 //p160
   | left=expression expression_bin_operator_p125 right=expression                       # ExpressionBinOperatorP125 //p125
