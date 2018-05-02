@@ -8,11 +8,9 @@ public abstract class Node {
 	public Node(SourceCodePosition sourceCodePosition) {
 		this.sourceCodePosition = sourceCodePosition;
 	}
-	
+
 	public SourceCodePosition getSourceCodePosition() {
 		return this.sourceCodePosition;
 	}
-
-	public abstract boolean equalAst(Node other);
 
 }

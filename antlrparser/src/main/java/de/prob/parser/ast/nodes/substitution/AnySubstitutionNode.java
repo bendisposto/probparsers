@@ -4,8 +4,6 @@ import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class AnySubstitutionNode extends SubstitutionNode {
@@ -20,7 +18,6 @@ public class AnySubstitutionNode extends SubstitutionNode {
 		this.parameters = parameters;
 		this.wherePredicate = wherePredicate;
 		this.thenSubstitution = thenSubstitution;
-		super.setAssignedVariables(thenSubstitution.getAssignedVariables());
 	}
 
 	public List<DeclarationNode> getParameters() {
@@ -48,14 +45,4 @@ public class AnySubstitutionNode extends SubstitutionNode {
 		return "ANY " + parameters + " WHERE " + wherePredicate + " THEN " + thenSubstitution + " END";
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		AnySubstitutionNode that = (AnySubstitutionNode) other;
-		return NodeUtil.equalAst(this.parameters, that.parameters) && this.wherePredicate.equalAst(that.wherePredicate)
-				&& this.thenSubstitution.equalAst(that.thenSubstitution);
-	}
 }

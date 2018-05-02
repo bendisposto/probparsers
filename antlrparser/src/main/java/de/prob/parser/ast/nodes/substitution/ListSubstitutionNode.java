@@ -4,12 +4,19 @@ import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
 
-public abstract class ListSubstitutionNode extends SubstitutionNode {
+public class ListSubstitutionNode extends SubstitutionNode {
 
+	private final ListOperator operator;
 	private List<SubstitutionNode> substitutions;
 
-	public ListSubstitutionNode(SourceCodePosition sourceCodePosition, List<SubstitutionNode> substitutions) {
+	public enum ListOperator {
+		Parallel, Sequential
+	}
+
+	public ListSubstitutionNode(SourceCodePosition sourceCodePosition, ListOperator operator,
+			List<SubstitutionNode> substitutions) {
 		super(sourceCodePosition);
+		this.operator = operator;
 		this.substitutions = substitutions;
 	}
 
@@ -20,5 +27,9 @@ public abstract class ListSubstitutionNode extends SubstitutionNode {
 	public void setSubstitutions(List<SubstitutionNode> substitutions) {
 		this.substitutions = substitutions;
 	}
-	
+
+	public ListOperator getOperator() {
+		return this.operator;
+	}
+
 }

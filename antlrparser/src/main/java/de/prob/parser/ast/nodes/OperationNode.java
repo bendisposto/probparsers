@@ -1,11 +1,8 @@
 package de.prob.parser.ast.nodes;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 
 public class OperationNode extends Node {
@@ -38,24 +35,7 @@ public class OperationNode extends Node {
 
 	@Override
 	public String toString() {
-		if (substitution instanceof SingleAssignSubstitutionNode) {
-			return name + " = BEGIN " + substitution + " END";
-		} else {
-			return name + " = " + substitution;
-		}
-	}
-
-	public Set<DeclarationNode> getAssignedDeclarationNodes() {
-		return new HashSet<>(this.substitution.getAssignedVariables());
-	}
-
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-		OperationNode that = (OperationNode) other;
-		return this.name.equals(that.name) && this.substitution.equalAst(that.substitution);
+		return name + " = " + substitution;
 	}
 
 	public List<DeclarationNode> getOutputParams() {

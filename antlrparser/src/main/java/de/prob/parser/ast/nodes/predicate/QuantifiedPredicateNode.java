@@ -3,12 +3,8 @@ package de.prob.parser.ast.nodes.predicate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 
 public class QuantifiedPredicateNode extends PredicateNode {
 
@@ -27,7 +23,6 @@ public class QuantifiedPredicateNode extends PredicateNode {
 		this.predicateNode = predNode;
 		this.operator = operator;
 	}
-
 
 	public List<DeclarationNode> getDeclarationList() {
 		return declarationList;
@@ -60,15 +55,4 @@ public class QuantifiedPredicateNode extends PredicateNode {
 		this.predicateNode = pred;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		QuantifiedPredicateNode that = (QuantifiedPredicateNode) other;
-		return this.operator.equals(that.operator) && this.predicateNode.equalAst(that.predicateNode)
-				&& NodeUtil.equalAst(this.declarationList, that.declarationList);
-
-	}
 }

@@ -21,6 +21,7 @@ import de.prob.parser.antlr.rules.MyRulesLexer;
 import de.prob.parser.antlr.rules.RulesDefinitionAnalyser;
 import de.prob.parser.antlr.rules.RulesSableCCAstBuilder;
 import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.visitors.ScopeChecker;
 import de.prob.parser.ast.visitors.TypeChecker;
 import de.prob.parser.ast.visitors.TypeErrorException;
 import de.prob.prolog.output.IPrologTermOutput;

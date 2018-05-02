@@ -21,8 +21,4 @@ public class DeclarationNode extends TypedNode {
 		return name;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		return NodeUtil.isSameClass(this, other) && this.name.equals(((DeclarationNode) other).name);
-	}
 }

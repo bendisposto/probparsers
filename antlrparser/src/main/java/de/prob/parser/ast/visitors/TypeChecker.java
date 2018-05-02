@@ -14,17 +14,13 @@ import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
 import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
-import de.prob.parser.ast.nodes.substitution.AbstractIfAndSelectSubstitutionsNode;
+import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
+import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.IfSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.ParallelSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SelectSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SequentialCompositionNode;
-import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.types.*;
@@ -634,24 +630,13 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 	 */
 
 	@Override
-	public BType visitSelectSubstitutionNode(SelectSubstitutionNode node, BType expected) {
-		visitConditionsAndSubstitionsNode(node);
-		return null;
-	}
-
-	@Override
-	public BType visitIfSubstitutionNode(IfSubstitutionNode node, BType expected) {
-		visitConditionsAndSubstitionsNode(node);
-		return null;
-	}
-
-	private void visitConditionsAndSubstitionsNode(AbstractIfAndSelectSubstitutionsNode node) {
+	public BType visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, BType expected) {
 		node.getConditions().forEach(t -> visitPredicateNode(t, BoolType.getInstance()));
 		node.getSubstitutions().forEach(t -> visitSubstitutionNode(t, null));
 		if (node.getElseSubstitution() != null) {
 			visitSubstitutionNode(node.getElseSubstitution(), null);
 		}
-
+		return null;
 	}
 
 	@Override
@@ -662,25 +647,10 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 	}
 
 	@Override
-	public BType visitSingleAssignSubstitution(SingleAssignSubstitutionNode node, BType expected) {
-		BType type = visitIdentifierExprNode(node.getIdentifier(), new UntypedType());
-		visitExprNode(node.getValue(), type);
-		return null;
-	}
-
-	@Override
 	public BType visitAssignSubstitutionNode(AssignSubstitutionNode node, BType expected) {
 		for (int i = 0; i < node.getLeftSide().size(); i++) {
 			BType type = visitExprNode(node.getLeftSide().get(i), new UntypedType());
 			visitExprNode(node.getRightSide().get(i), type);
-		}
-		return null;
-	}
-
-	@Override
-	public BType visitParallelSubstitutionNode(ParallelSubstitutionNode node, BType expected) {
-		for (SubstitutionNode sub : node.getSubstitutions()) {
-			visitSubstitutionNode(sub, null);
 		}
 		return null;
 	}
@@ -722,20 +692,24 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 		return null;
 	}
 
-	@Override
-	public BType visitEnumerationSetNode(EnumerationSetNode node, BType expected) {
-		return unify(expected, node.getEnumeratedSetDeclarationNode().getSetDeclaration().getType(), node);
-	}
-
-	@Override
-	public BType visitDeferredSetNode(DeferredSetNode node, BType expected) {
-		return unify(expected, node.getDeclarationNode().getType(), node);
-	}
-
-	@Override
-	public BType visitEnumeratedSetElementNode(EnumeratedSetElementNode node, BType expected) {
-		return unify(expected, node.getDeclarationNode().getType(), node);
-	}
+	// @Override
+	// public BType visitEnumerationSetNode(EnumerationSetNode node, BType
+	// expected) {
+	// return unify(expected,
+	// node.getEnumeratedSetDeclarationNode().getSetDeclaration().getType(),
+	// node);
+	// }
+	//
+	// @Override
+	// public BType visitDeferredSetNode(DeferredSetNode node, BType expected) {
+	// return unify(expected, node.getDeclarationNode().getType(), node);
+	// }
+	//
+	// @Override
+	// public BType visitEnumeratedSetElementNode(EnumeratedSetElementNode node,
+	// BType expected) {
+	// return unify(expected, node.getDeclarationNode().getType(), node);
+	// }
 
 	@Override
 	public BType visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, BType expected) {
@@ -762,10 +736,9 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 	}
 
 	@Override
-	public BType visitSequentialCompositionNode(SequentialCompositionNode node, BType expected) {
-
+	public BType visitListSubstitutionNode(ListSubstitutionNode node, BType expected) {
 		for (SubstitutionNode sub : node.getSubstitutions()) {
-			visitSubstitutionNode(sub, null);
+			visitSubstitutionNode(sub, expected);
 		}
 		return null;
 	}

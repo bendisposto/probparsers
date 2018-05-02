@@ -1,8 +1,6 @@
 package de.prob.parser.ast.nodes.expression;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.OperatorNode;
 
 import java.util.ArrayList;
@@ -94,16 +92,6 @@ public class ExpressionOperatorNode extends ExprNode
 
 	public void setExpressionList(List<ExprNode> list) {
 		this.expressionNodes = list;
-	}
-
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		ExpressionOperatorNode that = (ExpressionOperatorNode) other;
-		return this.operator.equals(that.operator) && NodeUtil.equalAst(this.expressionNodes, that.expressionNodes);
 	}
 
 }

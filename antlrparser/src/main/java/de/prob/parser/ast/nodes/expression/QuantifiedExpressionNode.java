@@ -2,8 +2,6 @@ package de.prob.parser.ast.nodes.expression;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 import java.util.List;
@@ -36,16 +34,4 @@ public class QuantifiedExpressionNode extends SetComprehensionNode {
 		return operator;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		QuantifiedExpressionNode that = (QuantifiedExpressionNode) other;
-		return this.operator.equals(that.operator) && getExpressionNode().equalAst(that.getExpressionNode())
-				&& this.expressionNode.equalAst(that.expressionNode)
-				&& NodeUtil.equalAst(getDeclarationList(), that.getDeclarationList());
-
-	}
 }

@@ -2,8 +2,6 @@ package de.prob.parser.ast.nodes.predicate;
 
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 
 public class CastPredicateExpressionNode extends ExprNode {
@@ -31,9 +29,4 @@ public class CastPredicateExpressionNode extends ExprNode {
 		this.predicate = arg;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		return NodeUtil.isSameClass(this, other)
-				&& this.predicate.equalAst(((CastPredicateExpressionNode) other).predicate);
-	}
 }

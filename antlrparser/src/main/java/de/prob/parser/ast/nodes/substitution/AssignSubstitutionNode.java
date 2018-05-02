@@ -3,7 +3,6 @@ package de.prob.parser.ast.nodes.substitution;
 import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 
 public class AssignSubstitutionNode extends SubstitutionNode {
@@ -17,12 +16,6 @@ public class AssignSubstitutionNode extends SubstitutionNode {
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
 
-	}
-
-	@Override
-	public boolean equalAst(Node other) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public List<ExprNode> getLeftSide() {

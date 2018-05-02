@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class SetComprehensionNode extends ExprNode {
@@ -42,17 +40,5 @@ public class SetComprehensionNode extends ExprNode {
 		sb.append(predicateNode);
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		SetComprehensionNode that = (SetComprehensionNode) other;
-		return this.predicateNode.equalAst(that.predicateNode)
-				&& NodeUtil.equalAst(this.declarationList, that.declarationList);
-
 	}
 }

@@ -1,8 +1,6 @@
 package de.prob.parser.ast.nodes.ltl;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 
 public class LTLInfixOperatorNode extends LTLNode {
 
@@ -44,15 +42,5 @@ public class LTLInfixOperatorNode extends LTLNode {
 	@Override
 	public String toString() {
 		return this.kind + "(" + this.left + "," + this.right + ")";
-	}
-
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		LTLInfixOperatorNode that = (LTLInfixOperatorNode) other;
-		return this.kind.equals(that.kind) && this.left.equalAst(that.left) && this.right.equalAst(that.right);
 	}
 }

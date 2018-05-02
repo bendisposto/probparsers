@@ -23,14 +23,4 @@ public class EnumerationSetNode extends ExprNode {
 		return this.enumeratedSetDeclarationNode;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		EnumerationSetNode that = (EnumerationSetNode) other;
-		return this.name.equals(that.name)
-				&& this.enumeratedSetDeclarationNode.equalAst(that.enumeratedSetDeclarationNode);
-	}
 }

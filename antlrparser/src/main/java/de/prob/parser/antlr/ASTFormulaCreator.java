@@ -22,9 +22,9 @@ import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode.PredicateOperato
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode.PredOperatorExprArgs;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.ParallelSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SelectSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SequentialCompositionNode;
+import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
+import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
 import files.BParserBaseVisitor;
@@ -301,11 +301,14 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 			result.add(sub);
 		}
 
+		ListOperator operator = null;
 		if (token == BParser.SEMICOLON) {
-			return new SequentialCompositionNode(Util.createSourceCodePosition(ctx), result);
+			operator = ListOperator.Sequential;
 		} else {
-			return new ParallelSubstitutionNode(Util.createSourceCodePosition(ctx), result);
+			operator = ListOperator.Parallel;
 		}
+
+		return new ListSubstitutionNode(Util.createSourceCodePosition(ctx), operator, result);
 	}
 
 	@Override
@@ -326,7 +329,8 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		if (ctx.else_sub != null) {
 			elseSubstitution = (SubstitutionNode) ctx.else_sub.accept(this);
 		}
-		return new SelectSubstitutionNode(Util.createSourceCodePosition(ctx), predList, subList, elseSubstitution);
+		return new IfOrSelectSubstitutionsNode(Util.createSourceCodePosition(ctx),
+				IfOrSelectSubstitutionsNode.Operator.SELECT, predList, subList, elseSubstitution);
 	}
 
 	@Override

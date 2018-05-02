@@ -48,15 +48,4 @@ public class FormulaNode extends Node {
 		return this.warnings;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		FormulaNode that = (FormulaNode) other;
-		return this.type.equals(that.type) && this.formula.equalAst(that.formula)
-				&& NodeUtil.equalAst(this.implicitDeclarations, that.implicitDeclarations);
-	}
-
 }

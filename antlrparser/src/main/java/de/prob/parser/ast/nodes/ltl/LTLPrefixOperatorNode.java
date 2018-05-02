@@ -1,8 +1,6 @@
 package de.prob.parser.ast.nodes.ltl;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 
 public class LTLPrefixOperatorNode extends LTLNode {
 
@@ -36,13 +34,4 @@ public class LTLPrefixOperatorNode extends LTLNode {
 		return this.kind + "(" + this.argument + ")";
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		LTLPrefixOperatorNode that = (LTLPrefixOperatorNode) other;
-		return this.kind.equals(that.kind) && this.argument.equalAst(that.argument);
-	}
 }

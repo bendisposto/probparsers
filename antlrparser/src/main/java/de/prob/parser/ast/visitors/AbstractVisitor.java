@@ -2,32 +2,16 @@ package de.prob.parser.ast.visitors;
 
 import de.prob.parser.ast.nodes.*;
 import de.prob.parser.ast.nodes.expression.ExprNode;
-import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
-import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
-import de.prob.parser.ast.nodes.expression.NumberNode;
-import de.prob.parser.ast.nodes.expression.QuantifiedExpressionNode;
-import de.prob.parser.ast.nodes.expression.SetComprehensionNode;
 import de.prob.parser.ast.nodes.ltl.*;
-import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
-import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
-import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
-import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
-import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
-import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.IfSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.ParallelSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SelectSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SequentialCompositionNode;
-import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+import de.prob.parser.ast.visitors.generic.ParametrisedLTLVisitor;
+import de.prob.parser.ast.visitors.generic.ParametrisedExpressionVisitor;
+import de.prob.parser.ast.visitors.generic.ParametrisedPredicateVisitor;
+import de.prob.parser.ast.visitors.generic.ParametrisedSubstitutionVisitor;
 
-public interface AbstractVisitor<R, P> {
+public interface AbstractVisitor<R, P>
+		extends ParametrisedPredicateVisitor<R, P>, ParametrisedExpressionVisitor<R, P>, ParametrisedSubstitutionVisitor<R, P>, ParametrisedLTLVisitor<R, P> {
 
 	default R visitNode(Node node, P expected) {
 		if (node instanceof ExprNode) {
@@ -41,152 +25,5 @@ public interface AbstractVisitor<R, P> {
 		}
 		throw new AssertionError();
 	}
-
-	/*
-	 * Expressions
-	 */
-	default R visitExprNode(ExprNode node, P expected) {
-		if (node instanceof ExpressionOperatorNode) {
-			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
-		} else if (node instanceof IdentifierExprNode) {
-			return visitIdentifierExprNode((IdentifierExprNode) node, expected);
-		} else if (node instanceof NumberNode) {
-			return visitNumberNode((NumberNode) node, expected);
-		} else if (node instanceof QuantifiedExpressionNode) {
-			return visitQuantifiedExpressionNode((QuantifiedExpressionNode) node, expected);
-		} else if (node instanceof SetComprehensionNode) {
-			return visitSetComprehensionNode((SetComprehensionNode) node, expected);
-		} else if (node instanceof CastPredicateExpressionNode) {
-			return visitCastPredicateExpressionNode((CastPredicateExpressionNode) node, expected);
-		} else if (node instanceof EnumeratedSetElementNode) {
-			return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node, expected);
-		} else if (node instanceof DeferredSetNode) {
-			return visitDeferredSetNode((DeferredSetNode) node, expected);
-		} else if (node instanceof EnumerationSetNode) {
-			return visitEnumerationSetNode((EnumerationSetNode) node, expected);
-		}
-		throw new AssertionError();
-	}
-
-	R visitEnumerationSetNode(EnumerationSetNode node, P expected);
-
-	R visitDeferredSetNode(DeferredSetNode node, P expected);
-
-	R visitEnumeratedSetElementNode(EnumeratedSetElementNode node, P expected);
-
-	R visitExprOperatorNode(ExpressionOperatorNode node, P expected);
-
-	R visitIdentifierExprNode(IdentifierExprNode node, P expected);
-
-	R visitCastPredicateExpressionNode(CastPredicateExpressionNode node, P expected);
-
-	R visitNumberNode(NumberNode node, P expected);
-
-	R visitQuantifiedExpressionNode(QuantifiedExpressionNode node, P expected);
-
-	R visitSetComprehensionNode(SetComprehensionNode node, P expected);
-
-	/*
-	 * Predicates
-	 */
-
-	default R visitPredicateNode(PredicateNode node, P expected) {
-		if (node instanceof PredicateOperatorNode) {
-			return visitPredicateOperatorNode((PredicateOperatorNode) node, expected);
-		} else if (node instanceof PredicateOperatorWithExprArgsNode) {
-			return visitPredicateOperatorWithExprArgs((PredicateOperatorWithExprArgsNode) node, expected);
-		} else if (node instanceof IdentifierPredicateNode) {
-			return visitIdentifierPredicateNode((IdentifierPredicateNode) node, expected);
-		} else if (node instanceof QuantifiedPredicateNode) {
-			return visitQuantifiedPredicateNode((QuantifiedPredicateNode) node, expected);
-		}
-		throw new AssertionError(node);
-	}
-
-	R visitIdentifierPredicateNode(IdentifierPredicateNode node, P expected);
-
-	R visitPredicateOperatorNode(PredicateOperatorNode node, P expected);
-
-	R visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, P expected);
-
-	R visitQuantifiedPredicateNode(QuantifiedPredicateNode node, P expected);
-
-	/*
-	 * Substitutions
-	 */
-
-	default R visitSubstitutionNode(SubstitutionNode node, P expected) {
-		if (node instanceof SelectSubstitutionNode) {
-			return visitSelectSubstitutionNode((SelectSubstitutionNode) node, expected);
-		} else if (node instanceof SingleAssignSubstitutionNode) {
-			return visitSingleAssignSubstitution((SingleAssignSubstitutionNode) node, expected);
-		} else if (node instanceof ParallelSubstitutionNode) {
-			return visitParallelSubstitutionNode((ParallelSubstitutionNode) node, expected);
-		} else if (node instanceof AnySubstitutionNode) {
-			return visitAnySubstitution((AnySubstitutionNode) node, expected);
-		} else if (node instanceof BecomesSuchThatSubstitutionNode) {
-			return visitBecomesSuchThatSubstitutionNode((BecomesSuchThatSubstitutionNode) node, expected);
-		} else if (node instanceof BecomesElementOfSubstitutionNode) {
-			return visitBecomesElementOfSubstitutionNode((BecomesElementOfSubstitutionNode) node, expected);
-		} else if (node instanceof ConditionSubstitutionNode) {
-			return visitConditionSubstitutionNode((ConditionSubstitutionNode) node, expected);
-		} else if (node instanceof IfSubstitutionNode) {
-			return visitIfSubstitutionNode((IfSubstitutionNode) node, expected);
-		} else if (node instanceof SkipSubstitutionNode) {
-			return visitSkipSubstitutionNode((SkipSubstitutionNode) node, expected);
-		} else if (node instanceof SequentialCompositionNode) {
-			return visitSequentialCompositionNode((SequentialCompositionNode) node, expected);
-		} else if (node instanceof AssignSubstitutionNode) {
-			return visitAssignSubstitutionNode((AssignSubstitutionNode) node, expected);
-		}
-		throw new AssertionError(node.getClass());
-	}
-
-	R visitAssignSubstitutionNode(AssignSubstitutionNode node, P expected);
-
-	R visitSkipSubstitutionNode(SkipSubstitutionNode node, P expected);
-
-	R visitIfSubstitutionNode(IfSubstitutionNode node, P expected);
-
-	R visitConditionSubstitutionNode(ConditionSubstitutionNode node, P expected);
-
-	R visitAnySubstitution(AnySubstitutionNode node, P expected);
-
-	R visitSelectSubstitutionNode(SelectSubstitutionNode node, P expected);
-
-	R visitSingleAssignSubstitution(SingleAssignSubstitutionNode node, P expected);
-
-	R visitParallelSubstitutionNode(ParallelSubstitutionNode node, P expected);
-
-	R visitSequentialCompositionNode(SequentialCompositionNode node, P expected);
-
-	R visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, P expected);
-
-	R visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, P expected);
-
-	/*
-	 * Substitutions
-	 */
-
-	default R visitLTLNode(LTLNode node, P expected) {
-		if (node instanceof LTLBPredicateNode) {
-			return visitLTLBPredicateNode((LTLBPredicateNode) node, expected);
-		} else if (node instanceof LTLInfixOperatorNode) {
-			return visitLTLInfixOperatorNode((LTLInfixOperatorNode) node, expected);
-		} else if (node instanceof LTLKeywordNode) {
-			return visitLTLKeywordNode((LTLKeywordNode) node, expected);
-		} else if (node instanceof LTLPrefixOperatorNode) {
-			return visitLTLPrefixOperatorNode((LTLPrefixOperatorNode) node, expected);
-		}
-		throw new AssertionError(node.getClass());
-	}
-
-	R visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, P expected);
-
-	R visitLTLKeywordNode(LTLKeywordNode node, P expected);
-
-	R visitLTLInfixOperatorNode(LTLInfixOperatorNode node, P expected);
-
-	R visitLTLBPredicateNode(LTLBPredicateNode node, P expected);
 
 }

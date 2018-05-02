@@ -1,9 +1,6 @@
 package de.prob.parser.ast.nodes.expression;
 
-
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 
 import java.math.BigInteger;
 
@@ -25,8 +22,4 @@ public class NumberNode extends ExprNode {
 		return String.valueOf(value);
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		return NodeUtil.isSameClass(this, other) && this.value.equals(((NumberNode) other).value);
-	}
 }

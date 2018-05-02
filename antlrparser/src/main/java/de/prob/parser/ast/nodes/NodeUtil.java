@@ -1,7 +1,5 @@
 package de.prob.parser.ast.nodes;
 
-import java.util.List;
-
 public class NodeUtil {
     private NodeUtil() {
     }
@@ -13,17 +11,4 @@ public class NodeUtil {
             && node1.getClass() == node2.getClass());
     }
 
-    public static boolean equalAst(List<? extends Node> first, List<? extends Node> second) {
-        if (first.size() != second.size()) {
-            return false;
-        }
-
-        // relies on same ordering of elements, e.g. x+1 != 1+x
-        for (int i = 0; i < first.size(); i++) {
-            if (!first.get(i).equalAst(second.get(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
 }

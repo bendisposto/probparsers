@@ -1,23 +1,19 @@
 package de.prob.parser.ast.nodes.substitution;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
-/**
- * Super class of {@link IfSubstitutionNode} and {@link SelectSubstitutionNode}.
- * Both lists {@code conditions} and {@code substitutions} have the same size
- * and at least one element. {@code elseSubstitution} can be {@code null}.
- * 
- **/
-public abstract class AbstractIfAndSelectSubstitutionsNode extends SubstitutionNode {
+public class IfOrSelectSubstitutionsNode extends SubstitutionNode {
 	protected List<PredicateNode> conditions;
 	protected List<SubstitutionNode> substitutions;
 	protected SubstitutionNode elseSubstitution;
+	private Operator operator;
+
+	public enum Operator {
+		IF, SELECT
+	}
 
 	/**
 	 * Constructor called by the subclasses.
@@ -29,12 +25,17 @@ public abstract class AbstractIfAndSelectSubstitutionsNode extends SubstitutionN
 	 * @param elseSubstitution
 	 *            the else substitution; maybe {@code null}
 	 */
-	public AbstractIfAndSelectSubstitutionsNode(SourceCodePosition sourceCodePosition, List<PredicateNode> conditions,
-			List<SubstitutionNode> substitutions, SubstitutionNode elseSubstitution) {
+	public IfOrSelectSubstitutionsNode(SourceCodePosition sourceCodePosition, Operator operator,
+			List<PredicateNode> conditions, List<SubstitutionNode> substitutions, SubstitutionNode elseSubstitution) {
 		super(sourceCodePosition);
+		this.operator = operator;
 		this.conditions = conditions;
 		this.substitutions = substitutions;
 		this.elseSubstitution = elseSubstitution;
+	}
+
+	public Operator getOperator() {
+		return this.operator;
 	}
 
 	public List<SubstitutionNode> getSubstitutions() {

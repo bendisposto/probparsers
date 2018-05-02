@@ -2,8 +2,6 @@ package de.prob.parser.ast.nodes.expression;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 
 public class IdentifierExprNode extends ExprNode {
 
@@ -32,13 +30,4 @@ public class IdentifierExprNode extends ExprNode {
 		return name;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		IdentifierExprNode that = (IdentifierExprNode) other;
-		return this.name.equals(that.name) && this.declarationNode.equalAst(that.declarationNode);
-	}
 }

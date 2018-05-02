@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.Node;
-import de.prob.parser.ast.nodes.NodeUtil;
 import de.prob.parser.ast.nodes.OperatorNode;
 
 public class PredicateOperatorNode extends PredicateNode
@@ -60,15 +58,4 @@ public class PredicateOperatorNode extends PredicateNode
 		this.predicateArguments = list;
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		PredicateOperatorNode that = (PredicateOperatorNode) other;
-		return this.operator.equals(that.operator)
-				&& NodeUtil.equalAst(this.predicateArguments, that.predicateArguments);
-
-	}
 }

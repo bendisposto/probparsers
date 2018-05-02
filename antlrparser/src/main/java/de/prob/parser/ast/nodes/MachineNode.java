@@ -105,21 +105,6 @@ public class MachineNode extends Node {
 		return new ArrayList<>(this.ltlFormulas);
 	}
 
-	@Override
-	public boolean equalAst(Node other) {
-		if (!NodeUtil.isSameClass(this, other)) {
-			return false;
-		}
-
-		MachineNode that = (MachineNode) other;
-		return NodeUtil.equalAst(this.setEnumerations, that.setEnumerations)
-				&& NodeUtil.equalAst(this.deferredSets, that.deferredSets)
-				&& NodeUtil.equalAst(this.constants, that.constants)
-				&& NodeUtil.equalAst(this.variables, that.variables)
-				&& NodeUtil.equalAst(this.operations, that.operations) && this.properties.equalAst(that.properties)
-				&& this.initialisation.equalAst(that.initialisation) && this.invariant.equalAst(that.invariant);
-
-	}
 
 	public void addOperation(OperationNode operationNode) {
 		this.operations.add(operationNode);
