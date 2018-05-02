@@ -1,4 +1,4 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.predicate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
 
 public class QuantifiedPredicateNode extends PredicateNode {
 

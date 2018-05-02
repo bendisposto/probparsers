@@ -1,8 +1,6 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import de.prob.parser.ast.SourceCodePosition;
 
@@ -12,11 +10,6 @@ public abstract class ListSubstitutionNode extends SubstitutionNode {
 
 	public ListSubstitutionNode(SourceCodePosition sourceCodePosition, List<SubstitutionNode> substitutions) {
 		super(sourceCodePosition);
-		Set<DeclarationNode> set = new HashSet<>();
-		for (SubstitutionNode sub : substitutions) {
-			set.addAll(sub.getAssignedVariables());
-		}
-		super.setAssignedVariables(set);
 		this.substitutions = substitutions;
 	}
 
@@ -27,5 +20,5 @@ public abstract class ListSubstitutionNode extends SubstitutionNode {
 	public void setSubstitutions(List<SubstitutionNode> substitutions) {
 		this.substitutions = substitutions;
 	}
-
+	
 }

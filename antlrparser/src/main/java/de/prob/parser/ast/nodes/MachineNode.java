@@ -1,9 +1,9 @@
 package de.prob.parser.ast.nodes;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.ltl.LTLFormula;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +15,11 @@ public class MachineNode extends Node {
 	private PredicateNode properties;
 	private PredicateNode invariant;
 	private SubstitutionNode initialisation;
-	private List<OperationNode> operations;
-	private final List<String> warnings = new ArrayList<>();
-	private final List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
-	private final List<DeclarationNode> deferredSets = new ArrayList<>();
-	private final List<LTLFormula> ltlFormulas = new ArrayList<>();
+	private List<OperationNode> operations = new ArrayList<>();
+	private List<String> warnings = new ArrayList<>();
+	private List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
+	private List<DeclarationNode> deferredSets = new ArrayList<>();
+	private List<LTLFormula> ltlFormulas = new ArrayList<>();
 
 	public List<DeclarationNode> getVariables() {
 		return variables;
@@ -119,5 +119,9 @@ public class MachineNode extends Node {
 				&& NodeUtil.equalAst(this.operations, that.operations) && this.properties.equalAst(that.properties)
 				&& this.initialisation.equalAst(that.initialisation) && this.invariant.equalAst(that.invariant);
 
+	}
+
+	public void addOperation(OperationNode operationNode) {
+		this.operations.add(operationNode);
 	}
 }

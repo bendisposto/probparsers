@@ -3,7 +3,7 @@ package de.prob.parser.ast.nodes.ltl;
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.NodeUtil;
-import de.prob.parser.ast.nodes.PredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class LTLBPredicateNode extends LTLNode {
 

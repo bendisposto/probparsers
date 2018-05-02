@@ -1,10 +1,12 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 /**
  * Super class of {@link IfSubstitutionNode} and {@link SelectSubstitutionNode}.
@@ -33,9 +35,6 @@ public abstract class AbstractIfAndSelectSubstitutionsNode extends SubstitutionN
 		this.conditions = conditions;
 		this.substitutions = substitutions;
 		this.elseSubstitution = elseSubstitution;
-		Set<DeclarationNode> assignedVariables = new HashSet<>();
-		substitutions.forEach(t -> assignedVariables.addAll(t.getAssignedVariables()));
-		setAssignedVariables(assignedVariables);
 	}
 
 	public List<SubstitutionNode> getSubstitutions() {

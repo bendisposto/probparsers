@@ -1,8 +1,12 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
 import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class AnySubstitutionNode extends SubstitutionNode {
 

@@ -1,6 +1,9 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.predicate;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
 
 public class IdentifierPredicateNode extends PredicateNode {
 

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 
 public class OperationNode extends Node {
 

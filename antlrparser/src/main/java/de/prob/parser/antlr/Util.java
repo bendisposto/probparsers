@@ -41,8 +41,13 @@ public class Util {
 		return content.replaceAll("\r\n", "\n");
 	}
 
-	public static final SourceCodePosition createSourceCodePosition(ParserRuleContext ctx) {
-		return new SourceCodePosition();
+	public static SourceCodePosition createSourceCodePosition(ParserRuleContext ctx) {
+		SourceCodePosition sourceCodePosition = new SourceCodePosition();
+		sourceCodePosition.setText(ctx.getText());
+		sourceCodePosition.setStartLine(ctx.getStart().getLine());
+		sourceCodePosition.setStartColumn(ctx.getStart().getCharPositionInLine());
+		return sourceCodePosition;
 	}
+	
 
 }

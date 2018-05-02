@@ -1,9 +1,13 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
+import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class BecomesSuchThatSubstitutionNode extends SubstitutionNode {
 	private List<IdentifierExprNode> identifiers;

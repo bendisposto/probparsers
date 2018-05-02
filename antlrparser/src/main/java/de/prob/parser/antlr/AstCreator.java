@@ -12,30 +12,29 @@ import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.OperationNode;
-import de.prob.parser.ast.nodes.PredicateNode;
-import de.prob.parser.ast.nodes.SubstitutionNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
 import files.BParserBaseVisitor;
 import files.BParser.DeclarationClauseContext;
 import files.BParser.StartContext;
 
 public class AstCreator {
-	final StartContext startContext;
 	private final MachineNode machineNode;
 
-	public AstCreator(StartContext startContext) {
-		this.startContext = startContext;
-		this.machineNode = new MachineNode(createSourceCodePosition(startContext));
-
-		MachineConstructor machineConstructor = new MachineConstructor(startContext);
+	public MachineNode getMachineNode() {
+		return this.machineNode;
 	}
 
-	public SourceCodePosition createSourceCodePosition(ParserRuleContext ctx) {
-		return new SourceCodePosition();
+	public AstCreator(StartContext startContext) {
+		this.machineNode = new MachineNode(Util.createSourceCodePosition(startContext));
+
+		MachineConstructor machineConstructor = new MachineConstructor(startContext);
+
 	}
 
 	class MachineConstructor extends BParserBaseVisitor<Void> {
-		ASTFormulaCreator formulaVisitor = new ASTFormulaCreator();
+		ASTFormulaCreator formulaAstCreator = new ASTFormulaCreator();
 
 		MachineConstructor(StartContext start) {
 			start.accept(this);
@@ -61,22 +60,21 @@ public class AstCreator {
 		}
 
 		@Override
+		public Void visitInitialisationClause(BParser.InitialisationClauseContext ctx) {
+			SubstitutionNode subNode = (SubstitutionNode) ctx.substitution().accept(formulaAstCreator);
+			machineNode.setInitialisation(subNode);
+			return null;
+		}
+
+		@Override
 		public Void visitPredicateClause(BParser.PredicateClauseContext ctx) {
-			PredicateNode pred = (PredicateNode) ctx.pred.accept(formulaVisitor);
+			PredicateNode pred = (PredicateNode) ctx.pred.accept(formulaAstCreator);
 			switch (ctx.name.getText()) {
 			case "INVARIANT":
-				if (machineNode.getInvariant() == null) {
-					machineNode.setInvariant(pred);
-				} else {
-					throw new VisitorException(new ScopeException("Duplicate INVARIANT clause."));
-				}
+				machineNode.setInvariant(pred);
 				break;
 			case "PROPERTIES":
-				if (machineNode.getProperties() == null) {
-					machineNode.setProperties(pred);
-				} else {
-					throw new VisitorException(new ScopeException("Duplicate PROPERTIES clause."));
-				}
+				machineNode.setProperties(pred);
 				break;
 			default:
 				unreachable();
@@ -94,11 +92,11 @@ public class AstCreator {
 			if (ctx.parameters != null) {
 				paramNodes = createDeclarationList(ctx.parameters.IDENTIFIER());
 			}
-			SubstitutionNode sub = (SubstitutionNode) ctx.substitution().accept(formulaVisitor);
+			SubstitutionNode sub = (SubstitutionNode) ctx.substitution().accept(formulaAstCreator);
 
-			OperationNode operationNode = new OperationNode(createSourceCodePosition(ctx), ctx.IDENTIFIER().getText(),
-					outputParamNodes, sub, paramNodes);
-
+			OperationNode operationNode = new OperationNode(Util.createSourceCodePosition(ctx),
+					ctx.IDENTIFIER().getText(), outputParamNodes, sub, paramNodes);
+			machineNode.addOperation(operationNode);
 			return null;
 		}
 

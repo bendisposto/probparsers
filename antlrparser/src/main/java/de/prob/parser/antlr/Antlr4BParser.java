@@ -20,6 +20,9 @@ import de.prob.parser.antlr.rules.AbstractRulesSableCCAstBuilder;
 import de.prob.parser.antlr.rules.MyRulesLexer;
 import de.prob.parser.antlr.rules.RulesDefinitionAnalyser;
 import de.prob.parser.antlr.rules.RulesSableCCAstBuilder;
+import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.visitors.TypeChecker;
+import de.prob.parser.ast.visitors.TypeErrorException;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -53,10 +56,13 @@ public class Antlr4BParser {
 
 	}
 
-	public static void prettyPrint(String input) {
+	public static MachineNode createSemanticAST(String input) throws TypeErrorException {
 		StartContext tree = parse(input);
 		AstCreator astCreator = new AstCreator(tree);
-		ScopeChecker scopeChecker = new ScopeChecker();
+		MachineNode machineNode = astCreator.getMachineNode();
+		new ScopeChecker(machineNode);
+		TypeChecker.typecheckMachineNode(machineNode);
+		return machineNode;
 	}
 
 	public static void getMachineAst(String input) throws ScopeException, ParseErrorException {

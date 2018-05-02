@@ -1,6 +1,18 @@
 package de.prob.parser.ast.visitors;
 
 import de.prob.parser.ast.nodes.*;
+import de.prob.parser.ast.nodes.expression.ExprNode;
+import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
+import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
+import de.prob.parser.ast.nodes.expression.NumberNode;
+import de.prob.parser.ast.nodes.expression.QuantifiedExpressionNode;
+import de.prob.parser.ast.nodes.expression.SetComprehensionNode;
+import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
+import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
+import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
+import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
 
 public interface SubstitutionVisitor<R, P> extends FormulaAndSubstitutionVisitor<R, P> {
 

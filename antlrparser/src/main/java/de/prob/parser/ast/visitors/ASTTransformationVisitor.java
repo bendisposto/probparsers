@@ -1,7 +1,32 @@
 package de.prob.parser.ast.visitors;
 
 import de.prob.parser.ast.nodes.*;
+import de.prob.parser.ast.nodes.expression.ExprNode;
+import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
+import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
+import de.prob.parser.ast.nodes.expression.NumberNode;
+import de.prob.parser.ast.nodes.expression.QuantifiedExpressionNode;
+import de.prob.parser.ast.nodes.expression.SetComprehensionNode;
 import de.prob.parser.ast.nodes.ltl.*;
+import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
+import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
+import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
+import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
+import de.prob.parser.ast.nodes.substitution.AbstractIfAndSelectSubstitutionsNode;
+import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.IfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ParallelSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SelectSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SequentialCompositionNode;
+import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -276,6 +301,12 @@ public class ASTTransformationVisitor {
         public Node visitSequentialCompositionNode(SequentialCompositionNode node, Void expected) {
             return node;
         }
+
+		@Override
+		public Node visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 
     }
 

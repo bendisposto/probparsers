@@ -1,8 +1,11 @@
-package de.prob.parser.ast.nodes;
-
+package de.prob.parser.ast.nodes.expression;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
+import de.prob.parser.ast.nodes.OperatorNode;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +47,12 @@ public class ExpressionOperatorNode extends ExprNode
 		// used for set enumeration, e.g. {1,2,3}
 		super(sourceCodePosition);
 		this.expressionNodes = expressionNodes;
+		this.operator = operator;
+	}
+
+	public ExpressionOperatorNode(SourceCodePosition sourceCodePosition, ExpressionOperator operator) {
+		super(sourceCodePosition);
+		this.expressionNodes = new ArrayList<>();
 		this.operator = operator;
 	}
 

@@ -1,6 +1,9 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.expression;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
 
 public class IdentifierExprNode extends ExprNode {
 
@@ -10,6 +13,10 @@ public class IdentifierExprNode extends ExprNode {
 	public IdentifierExprNode(SourceCodePosition sourceCodePosition, String name) {
 		super(sourceCodePosition);
 		this.name = name;
+	}
+
+	public void setDeclarationNode(DeclarationNode declarationNode) {
+		this.declarationNode = declarationNode;
 	}
 
 	public DeclarationNode getDeclarationNode() {

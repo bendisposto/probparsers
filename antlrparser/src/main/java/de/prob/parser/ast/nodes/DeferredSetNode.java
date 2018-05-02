@@ -2,6 +2,7 @@ package de.prob.parser.ast.nodes;
 
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.expression.ExprNode;
 
 public class DeferredSetNode extends ExprNode {
 

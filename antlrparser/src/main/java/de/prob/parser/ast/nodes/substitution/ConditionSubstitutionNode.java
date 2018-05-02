@@ -1,6 +1,9 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 
 public class ConditionSubstitutionNode extends SubstitutionNode {
     private Kind kind;

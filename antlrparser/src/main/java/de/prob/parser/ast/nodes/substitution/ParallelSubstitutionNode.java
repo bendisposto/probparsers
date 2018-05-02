@@ -1,12 +1,12 @@
-package de.prob.parser.ast.nodes;
+package de.prob.parser.ast.nodes.substitution;
 
 import java.util.List;
 
 import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.Node;
+import de.prob.parser.ast.nodes.NodeUtil;
 
 public class ParallelSubstitutionNode extends ListSubstitutionNode {
-
-	private List<SubstitutionNode> substitutions;
 
 	public ParallelSubstitutionNode(SourceCodePosition sourceCodePosition, List<SubstitutionNode> substitutions) {
 		super(sourceCodePosition, substitutions);
@@ -15,7 +15,8 @@ public class ParallelSubstitutionNode extends ListSubstitutionNode {
 	@Override
 	public boolean equalAst(Node other) {
 		return NodeUtil.isSameClass(this, other)
-				&& NodeUtil.equalAst(substitutions, ((ParallelSubstitutionNode) other).substitutions);
+				&& NodeUtil.equalAst(super.getSubstitutions(), ((ParallelSubstitutionNode) other).getSubstitutions());
 
 	}
+
 }

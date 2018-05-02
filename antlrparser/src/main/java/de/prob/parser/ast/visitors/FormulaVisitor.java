@@ -1,15 +1,15 @@
 package de.prob.parser.ast.visitors;
 
-import de.prob.parser.ast.nodes.AnySubstitutionNode;
-import de.prob.parser.ast.nodes.BecomesElementOfSubstitutionNode;
-import de.prob.parser.ast.nodes.BecomesSuchThatSubstitutionNode;
-import de.prob.parser.ast.nodes.ConditionSubstitutionNode;
-import de.prob.parser.ast.nodes.IfSubstitutionNode;
-import de.prob.parser.ast.nodes.ParallelSubstitutionNode;
-import de.prob.parser.ast.nodes.SelectSubstitutionNode;
-import de.prob.parser.ast.nodes.SequentialCompositionNode;
-import de.prob.parser.ast.nodes.SingleAssignSubstitutionNode;
-import de.prob.parser.ast.nodes.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.IfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ParallelSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SelectSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SequentialCompositionNode;
+import de.prob.parser.ast.nodes.substitution.SingleAssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 
 public interface FormulaVisitor<R, P> extends FormulaAndSubstitutionVisitor<R, P> {
 
