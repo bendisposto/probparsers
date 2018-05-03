@@ -23,4 +23,9 @@ public class DeferredSetNode extends ExprNode {
 		return this.declarationNode;
 	}
 
+	@Override
+	public void removeChild(Node child) {
+		// TODO Auto-generated method stub
+	}
+
 }

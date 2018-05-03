@@ -14,6 +14,7 @@ import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.visitors.generic.ASTVisitor;
 
 import java.util.ArrayList;
@@ -32,15 +33,16 @@ public class MachineContex {
 
 	public MachineContex(MachineNode machineNode, List<MachineContex> scopeList) {
 		this.machineNode = machineNode;
-		check();
+		check(scopeList);
 	}
 
-	private void check() {
+	private void check(List<MachineContex> scopeList) {
 		FormulaScopeChecker formulaScopeChecker = new FormulaScopeChecker();
 
 		if (machineNode.getProperties() != null) {
 			scopeTable.clear();
 			createNewScope(machineNode.getConstants());
+			createNewScope2(getConstants(scopeList));
 			formulaScopeChecker.visitPredicateNode(machineNode.getProperties());
 		}
 
@@ -66,6 +68,20 @@ public class MachineContex {
 
 	}
 
+	private List<List<DeclarationNode>> getConstants(List<MachineContex> scopeList) {
+		List<List<DeclarationNode>> result = new ArrayList<>();
+		for (MachineContex ct : scopeList) {
+			result.add(ct.machineNode.getConstants());
+		}
+		return result;
+	}
+
+	private void createNewScope2(List<List<DeclarationNode>> list) {
+		for (List<DeclarationNode> l : list) {
+			createNewScope(l);
+		}
+	}
+
 	private void createNewScope(List<DeclarationNode> list) {
 		LinkedHashMap<String, DeclarationNode> scope = new LinkedHashMap<>();
 		for (DeclarationNode declarationNode : list) {
@@ -81,6 +97,13 @@ public class MachineContex {
 			DeclarationNode declarationNode = lookUpIdentifier(node.getName(), node);
 			node.setDeclarationNode(declarationNode);
 
+		}
+
+		@Override
+		public void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node) {
+			for (ExprNode arg : node.getArguments()) {
+				visitExprNode(arg);
+			}
 		}
 
 		@Override

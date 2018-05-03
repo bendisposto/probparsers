@@ -44,6 +44,7 @@ public class ExpressionOperatorNode extends ExprNode
 			ExpressionOperator operator) {
 		// used for set enumeration, e.g. {1,2,3}
 		super(sourceCodePosition);
+		setExpressionNodes(expressionNodes);
 		this.expressionNodes = expressionNodes;
 		this.operator = operator;
 	}
@@ -62,6 +63,15 @@ public class ExpressionOperatorNode extends ExprNode
 	@Override
 	public void setOperator(ExpressionOperator operator) {
 		this.operator = operator;
+	}
+
+	
+	
+	public void setExpressionNodes(List<ExprNode> expressionNodes2) {
+		this.expressionNodes = expressionNodes2;
+		for (ExprNode exprNode : expressionNodes2) {
+			exprNode.setParent(this);
+		}
 	}
 
 	public List<ExprNode> getExpressionNodes() {

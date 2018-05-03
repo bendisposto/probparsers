@@ -28,4 +28,9 @@ public class EnumeratedSetDeclarationNode extends Node {
 		return elements.stream().map(DeclarationNode::getName).collect(Collectors.toList());
 	}
 
+	@Override
+	public void removeChild(Node child) {
+		elements.remove(child);
+	}
+
 }

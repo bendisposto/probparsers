@@ -1,6 +1,5 @@
 package de.prob.parser.ast.nodes;
 
-
 import de.prob.parser.ast.SourceCodePosition;
 
 public class DeclarationNode extends TypedNode {
@@ -19,6 +18,11 @@ public class DeclarationNode extends TypedNode {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	@Override
+	public void removeChild(Node child) {
+		// no child
 	}
 
 }

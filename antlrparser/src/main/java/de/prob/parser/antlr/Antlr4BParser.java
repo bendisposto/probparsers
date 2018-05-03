@@ -45,14 +45,17 @@ public class Antlr4BParser {
 			StartContext tree2 = parse(string);
 			AstCreator astCreator2 = new AstCreator(tree2);
 			MachineNode mNode = astCreator2.getMachineNode();
+			machineNodeList.add(mNode);
 		}
 
-		// determine order
+		// TODO determine order
+
 		List<MachineContex> scopeList = new ArrayList<>();
 		for (MachineNode machineNode : machineNodeList) {
 			MachineContex machineContex = new MachineContex(machineNode, scopeList);
 			scopeList.add(machineContex);
 		}
+		MachineContex machineContex = new MachineContex(main, scopeList);
 	}
 
 	public static StartContext parse(String bString) {

@@ -122,4 +122,9 @@ public class MachineNode extends Node {
 	public void addInstance(InstanceNode instanceNode) {
 		
 	}
+
+	@Override
+	public void removeChild(Node child) {
+		
+	}
 }
