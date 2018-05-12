@@ -1,21 +1,11 @@
 package de.prob.parser.antlr;
 
-import static files.BParser.AND;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
+import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.expression.NumberNode;
-import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode.PredicateOperator;
@@ -28,7 +18,6 @@ import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
 import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
-import files.BParserBaseVisitor;
 import files.BParser.AndOrListContext;
 import files.BParser.BooleanValueContext;
 import files.BParser.ExpressionContext;
@@ -38,6 +27,16 @@ import files.BParser.PredicateContext;
 import files.BParser.Predicate_atomicContext;
 import files.BParser.SubstitutionContext;
 import files.BParser.Substitution_l1Context;
+import files.BParserBaseVisitor;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.RuleNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import static files.BParser.AND;
 
 public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
@@ -82,11 +81,35 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitBinOperatorP160(BParser.BinOperatorP160Context ctx) {
+		ExprNode left = (ExprNode) ctx.left.accept(this);
+		ExprNode right = (ExprNode) ctx.right.accept(this);
+		ExpressionOperator op = null;
+
+		int type = ctx.expressionOperatorP160().operator.getType();
+		switch (type) {
+			case BParser.INTERSECTION:
+				op = ExpressionOperator.INTERSECTION;
+				break;
+			case BParser.UNION:
+				op = ExpressionOperator.UNION;
+				break;
+			case BParser.SET_SUBTRACTION:
+				op = ExpressionOperator.SET_SUBTRACTION;
+				break;
+			default:
+				break;
+		}
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
+	}
+
+	@Override
 	public Node visitPredicateBinExpression(BParser.PredicateBinExpressionContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
 		PredOperatorExprArgs op = null;
 		int type = ctx.predicate_expression_operator().operator.getType();
+
 		switch (type) {
 		case BParser.EQUAL:
 			op = PredOperatorExprArgs.EQUAL;
@@ -127,7 +150,6 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		case BParser.STRICT_NON_INCLUSION:
 			op = PredOperatorExprArgs.STRICT_NON_INCLUSION;
 			break;
-
 		default:
 			throw new RuntimeException();
 		}
@@ -143,16 +165,18 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		int type = ctx.expression_keyword().operator.getType();
 		ExpressionOperator op = null;
 		switch (type) {
-		case BParser.NATURAL:
-			op = ExpressionOperator.NATURAL;
-			break;
-		case BParser.INTEGER:
-			op = ExpressionOperator.INTEGER;
-			break;
-		case BParser.BOOL:
-			op = ExpressionOperator.BOOL;
-			break;
-
+			case BParser.NATURAL:
+				op = ExpressionOperator.NATURAL;
+				break;
+			case BParser.INTEGER:
+				op = ExpressionOperator.INTEGER;
+				break;
+			case BParser.BOOL:
+				op = ExpressionOperator.BOOL;
+				break;
+			case BParser.INT:
+				op = ExpressionOperator.INT;
+				break;
 		default:
 			throw new RuntimeException(ctx.expression_keyword().operator.getText());
 		}
@@ -166,9 +190,21 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		ExpressionOperator op = null;
 		int type = ctx.operator.getType();
 		switch (type) {
-		case BParser.PLUS:
-			op = ExpressionOperator.PLUS;
-			break;
+			case BParser.PLUS:
+				op = ExpressionOperator.PLUS;
+				break;
+			case BParser.MINUS:
+				op = ExpressionOperator.MINUS;
+				break;
+			case BParser.MULT:
+				op = ExpressionOperator.MULT;
+				break;
+			case BParser.DIVIDE:
+				op = ExpressionOperator.DIVIDE;
+				break;
+			case BParser.MOD:
+				op = ExpressionOperator.MOD;
+				break;
 		default:
 			break;
 		}
@@ -364,5 +400,10 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	private Node notReachable(BooleanValueContext ctx) {
 
 		return null;
+	}
+
+	@Override
+	public Node visitConditionSubstitution(BParser.ConditionSubstitutionContext ctx) {
+		return ctx.substitution().accept(this);
 	}
 }

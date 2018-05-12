@@ -1,23 +1,23 @@
 package de.prob.parser.antlr;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.InstanceNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
-import files.BParserBaseVisitor;
 import files.BParser.DeclarationClauseContext;
 import files.BParser.Machine_instantiationContext;
 import files.BParser.StartContext;
+import files.BParserBaseVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class AstCreator {
 	private final MachineNode machineNode;
@@ -41,12 +41,27 @@ public class AstCreator {
 		}
 
 		@Override
+		public Void visitMachine_header(BParser.Machine_headerContext ctx) {
+			machineNode.setName(ctx.IDENTIFIER().getText());
+			return null;
+		}
+
+		@Override
 		public Void visitInstanceClause(BParser.InstanceClauseContext ctx) {
 			for (Machine_instantiationContext instance : ctx.machine_instantiation()) {
 				String prefix = instance.prefix == null ? null : instance.prefix.getText();
-				String name = ctx.name.getText();
+				String name = instance.name.getText();
 				machineNode.addInstance(new InstanceNode(Util.createSourceCodePosition(ctx), name, prefix));
 			}
+			return null;
+		}
+
+		@Override
+		public Void visitEnumeratedSet(BParser.EnumeratedSetContext ctx) {
+			SourceCodePosition position = getSourcePositionFromTerminalNode(ctx.IDENTIFIER());
+			DeclarationNode declarationNode = new DeclarationNode(position, ctx.IDENTIFIER().getSymbol().getText());
+			machineNode.addSetEnumeration(new EnumeratedSetDeclarationNode(
+					position, declarationNode, createEnumeratedSetDeclarationList(ctx.identifier_list().IDENTIFIER())));
 			return null;
 		}
 
@@ -116,6 +131,16 @@ public class AstCreator {
 		}
 
 		private List<DeclarationNode> createDeclarationList(List<TerminalNode> list) {
+			List<DeclarationNode> declarationList = new ArrayList<>();
+			for (TerminalNode terminalNode : list) {
+				DeclarationNode declNode = new DeclarationNode(getSourcePositionFromTerminalNode(terminalNode),
+						terminalNode.getSymbol().getText());
+				declarationList.add(declNode);
+			}
+			return declarationList;
+		}
+
+		private List<DeclarationNode> createEnumeratedSetDeclarationList(List<TerminalNode> list) {
 			List<DeclarationNode> declarationList = new ArrayList<>();
 			for (TerminalNode terminalNode : list) {
 				DeclarationNode declNode = new DeclarationNode(getSourcePositionFromTerminalNode(terminalNode),

@@ -1,6 +1,7 @@
 package de.prob.parser.ast.visitors;
 
 import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.OperationNode;
@@ -43,6 +44,7 @@ public class MachineContex {
 			scopeTable.clear();
 			createNewScope(machineNode.getConstants());
 			createNewScope2(getConstants(scopeList));
+			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitPredicateNode(machineNode.getProperties());
 		}
 
@@ -50,6 +52,7 @@ public class MachineContex {
 			scopeTable.clear();
 			createNewScope(machineNode.getConstants());
 			createNewScope(machineNode.getVariables());
+			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitPredicateNode(machineNode.getInvariant());
 		}
 
@@ -57,12 +60,16 @@ public class MachineContex {
 			scopeTable.clear();
 			createNewScope(machineNode.getConstants());
 			createNewScope(machineNode.getVariables());
+			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitSubstitutionNode(machineNode.getInitialisation());
 		}
 
 		for (OperationNode op : machineNode.getOperations()) {
+			createNewScope(op.getParams());
 			createNewScope(machineNode.getConstants());
 			createNewScope(machineNode.getVariables());
+			createNewScope(op.getOutputParams());
+			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitSubstitutionNode(op.getSubstitution());
 		}
 
@@ -86,6 +93,14 @@ public class MachineContex {
 		LinkedHashMap<String, DeclarationNode> scope = new LinkedHashMap<>();
 		for (DeclarationNode declarationNode : list) {
 			scope.put(declarationNode.getName(), declarationNode);
+		}
+		this.scopeTable.add(scope);
+	}
+
+	private void createNewScope3(List<EnumeratedSetDeclarationNode> list) {
+		LinkedHashMap<String, DeclarationNode> scope = new LinkedHashMap<>();
+		for (EnumeratedSetDeclarationNode declarationNode : list) {
+			scope.put(declarationNode.getSetDeclaration().getName(), declarationNode.getSetDeclaration());
 		}
 		this.scopeTable.add(scope);
 	}

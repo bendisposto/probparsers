@@ -1,29 +1,20 @@
 package de.prob.parser.antlr;
 
-import files.*;
-import files.BParser.StartContext;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-
-import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.visitors.MachineContex;
 import de.prob.parser.ast.visitors.TypeChecker;
 import de.prob.parser.ast.visitors.TypeErrorException;
-import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
+import files.BLexer;
+import files.BParser;
+import files.BParser.StartContext;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DiagnosticErrorListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Antlr4BParser {
 

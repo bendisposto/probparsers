@@ -1,9 +1,9 @@
 package de.prob.parser.ast.nodes;
 
-import java.util.List;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+
+import java.util.List;
 
 public class OperationNode extends Node {
 

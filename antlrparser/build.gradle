@@ -6,6 +6,7 @@
 apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'antlr'
+apply plugin: 'idea'
 
 
 dependencies {
