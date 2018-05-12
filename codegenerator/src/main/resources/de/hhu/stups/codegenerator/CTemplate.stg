@@ -1,0 +1,139 @@
+machine(stdint, stdio, imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+#include <stdint>
+#include <stdio>
+<imports; separator="\n">
+
+<enums>
+
+<sets>
+
+<declarations; separator="\n">
+
+<initialization>
+
+<operations; separator="\n">
+
+>>
+
+initialization(body) ::= <<
+void initialize(void) {
+    <body>
+}
+>>
+
+operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+void <operationName>(<parameters; separator=", "><returnParameters>) {
+    <body>
+}
+>>
+
+parameter(type, identifier) ::= <<
+<type> <identifier>
+>>
+
+set_declaration(type, identifier) ::= <<
+>>
+
+set_enum_declaration(name,enums) ::= <<
+>>
+
+
+global_declaration(type, identifier) ::= <<
+static <type> <identifier>;
+>>
+
+local_declaration(type, identifier) ::= <<
+<type> <identifier>;
+>>
+
+assignment(identifier, val) ::= <<
+<identifier> = <val>;
+>>
+
+boolean() ::= <<
+BBoolean
+>>
+
+boolean_cast() ::= <<
+>>
+
+boolean_import() ::= <<
+#include "BBoolean.c"
+>>
+
+integer() ::= <<
+BInteger
+>>
+
+integer_cast() ::= <<
+>>
+
+integer_import() ::= <<
+#include "BInteger.c"
+>>
+
+set() ::= <<
+BSet
+>>
+
+set_cast() ::= <<
+>>
+
+set_import() ::= <<
+#include "BSet.c"
+>>
+
+
+object() ::= <<
+BObject
+>>
+
+object_cast() ::= <<
+>>
+
+plus(arg1,arg2) ::= <<
+plus(<arg1>,<arg2>)
+>>
+
+
+minus(arg1,arg2) ::= <<
+minus(<arg1>,<arg2>)
+>>
+
+
+mult(arg1,arg2) ::= <<
+mult(<arg1>,<arg2>)
+>>
+
+div(arg1,arg2) ::= <<
+divide(<arg1>,<arg2>)
+>>
+
+mod(arg1,arg2) ::= <<
+mod(<arg1>,<arg2>)
+>>
+
+unary_minus(arg) ::= <<
+negative(<arg>)
+>>
+
+false_val() ::= <<
+create_boolean(0)
+>>
+
+true_val() ::= <<
+create_boolean(1)
+>>
+
+identifier(identifier) ::= <<
+<identifier>
+>>
+
+return_identifier(identifier) ::= <<
+(*<identifier>)
+>>
+
+number(number) ::= <<
+create_integer(<number>)
+>>
+

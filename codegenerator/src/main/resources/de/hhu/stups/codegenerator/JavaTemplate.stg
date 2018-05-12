@@ -1,0 +1,171 @@
+machine(stdint, stdio, imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+<imports; separator="\n">
+
+public class <machine> {
+
+    <enums>
+
+    <sets>
+
+    <declarations; separator="\n">
+
+    <initialization>
+
+    <operations; separator="\n">
+
+}
+
+>>
+
+initialization(body) ::= <<
+public void initialize() {
+    <body>
+}
+>>
+
+operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+public <returnType> <operationName>(<parameters; separator=", ">) {
+    <locals; separator="\n">
+    <body>
+    <return>;
+}
+>>
+
+parameter(type, identifier) ::= <<
+<type> <identifier>
+>>
+
+set_declaration(identifier, enums) ::= <<
+private BSet <identifier> = new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)));
+>>
+
+enum_call(class, identifier) ::= <<
+<class>.<identifier>
+>>
+
+set_enum_declaration(name,enums) ::= <<
+public enum <name> implements BObject {
+    <enums; separator=", \n">
+}
+>>
+
+
+global_declaration(type, identifier) ::= <<
+private <type> <identifier>;
+>>
+
+local_declaration(type, identifier) ::= <<
+<type> <identifier>;
+>>
+
+assignment(identifier, val) ::= <<
+<identifier> = <val>;
+>>
+
+boolean() ::= <<
+BBoolean
+>>
+
+boolean_cast() ::= <<
+(BBoolean)
+>>
+
+boolean_import() ::= <<
+>>
+
+integer() ::= <<
+BInteger
+>>
+
+integer_cast() ::= <<
+(BInteger)
+>>
+
+integer_import() ::= <<
+>>
+
+set() ::= <<
+BSet
+>>
+
+set_cast() ::= <<
+(BSet)
+>>
+
+set_import() ::= <<
+>>
+
+hashset_import() ::= <<
+import java.util.HashSet;
+>>
+
+arrays_import() ::= <<
+import java.util.Arrays;
+>>
+
+object() ::= <<
+BObject
+>>
+
+object_cast() ::= <<
+(BObject)
+>>
+
+plus(arg1,arg2) ::= <<
+<arg1>.plus(<arg2>)
+>>
+
+
+minus(arg1,arg2) ::= <<
+<arg1>.minus(<arg2>)
+>>
+
+
+mult(arg1,arg2) ::= <<
+<arg1>.multiply(<arg2>)
+>>
+
+div(arg1,arg2) ::= <<
+<arg1>.div(<arg2>)
+>>
+
+mod(arg1,arg2) ::= <<
+<arg1>.mod(<arg2>)
+>>
+
+intersect(arg1,arg2) ::= <<
+<arg1>.intersect(<arg2>)
+>>
+
+union(arg1,arg2) ::= <<
+<arg1>.union(<arg2>)
+>>
+
+complement(arg1,arg2) ::= <<
+<arg1>.complement(<arg2>)
+>>
+
+unary_minus(arg) ::= <<
+<arg>.negative()
+>>
+
+false_val() ::= <<
+new BBoolean(false)
+>>
+
+true_val() ::= <<
+new BBoolean(true)
+>>
+
+identifier(identifier) ::= <<
+<identifier>
+>>
+
+return_identifier(identifier) ::= <<
+<identifier>
+>>
+
+number(number) ::= <<
+new BInteger(new java.math.BigInteger("<number>"))
+>>
+

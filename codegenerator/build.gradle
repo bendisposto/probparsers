@@ -1,0 +1,50 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'antlr'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        name "snapshots"
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        name "release"
+        url "https://oss.sonatype.org/content/repositories/releases/"
+    }
+
+}
+
+dependencies {
+    antlr "org.antlr:antlr4:4.7"
+    compile project(path: ":antlrparser", configuration: "archives")
+    compile project(path: ":bparser", configuration: "archives")
+    compile project(path: ":prologlib", configuration: "archives")
+    compile project(path: ":parserbase", configuration: "archives")
+    compile group: 'org.antlr', name: 'stringtemplate', version: '3.2'
+}
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+
+
+mainClassName = 'de.hhu.stups.codegenerator.CodeGenerator'
+
+sourceSets.main.java.srcDirs = ['src/main/java']
+
+tasks.withType(JavaExec) {
+    def env_vars = ['LD_LIBRARY_PATH'  : ("$System.env.LD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
+                    'DYLD_LIBRARY_PATH': ("$System.env.DYLD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
+                    'PATH'             : ("$System.env.PATH" + System.getProperty("path.separator") + "$projectDir/")]
+    environment env_vars
+
+    systemProperty "java.library.path", "./"
+}
+
+
