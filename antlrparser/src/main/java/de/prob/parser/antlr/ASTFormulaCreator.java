@@ -70,6 +70,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		return temp;
 	}
 
+
 	@Override
 	public Node visitPredicateP30Next(BParser.PredicateP30NextContext ctx) {
 		return ctx.predicate_p40().accept(this);
@@ -199,6 +200,11 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitExpressionInParNext(BParser.ExpressionInParNextContext ctx) {
+		return ctx.expression().accept(this);
+	}
+
+	@Override
 	public ExprNode visitBinOperator(BParser.BinOperatorContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
@@ -285,6 +291,12 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		map.put(BMoThParser.ISEQ1, ExpressionOperator.ISEQ1);
 		 */
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
+	}
+
+	@Override
+	public Node visitSetEnumeration(BParser.SetEnumerationContext ctx) {
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), visitExpressionList(ctx.expression_list()),
+				ExpressionOperator.SET_ENUMERATION);
 	}
 
 	@Override

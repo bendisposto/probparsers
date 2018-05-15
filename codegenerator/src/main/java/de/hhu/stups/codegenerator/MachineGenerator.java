@@ -133,6 +133,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         } else if(node instanceof EnumeratedSetElementNode) {
             return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node, expected);
         }
+
         return visitIdentifierExprNode((IdentifierExprNode) node, expected);
     }
 
@@ -171,6 +172,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         setDeclaration.add("enums", enums);
         return setDeclaration.render();
     }
+
 
     public String callEnum(EnumeratedSetDeclarationNode setDeclarationNode, DeclarationNode enumNode) {
         ST enumST = currentGroup.getInstanceOf("enum_call");

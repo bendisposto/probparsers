@@ -531,6 +531,13 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 			visitExprNode(node.getExpressionNodes().get(1), new SetType(couple.getRight()));
 			return node.getType();
 		}
+		case POW:
+			SetType found = (SetType) unify(expected, new SetType(new UntypedType()), node);
+			BType subtype = found.getSubType();
+			for (ExprNode exprNode : expressionNodes) {
+				subtype = visitExprNode(exprNode, subtype);
+			}
+			return node.getType();
 		default:
 			throw new AssertionError();
 		}

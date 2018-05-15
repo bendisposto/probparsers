@@ -12,6 +12,7 @@ public class MachineNode extends Node {
 
 	private List<DeclarationNode> constants = new ArrayList<>();
 	private List<DeclarationNode> variables = new ArrayList<>();
+	private List<InstanceNode> instances = new ArrayList<>();
 	private PredicateNode properties;
 	private PredicateNode invariant;
 	private SubstitutionNode initialisation;
@@ -120,7 +121,11 @@ public class MachineNode extends Node {
 	}
 
 	public void addInstance(InstanceNode instanceNode) {
+		instances.add(instanceNode);
+	}
 
+	public List<InstanceNode> getInstances() {
+		return instances;
 	}
 
 	public void setName(String name) {

@@ -1,12 +1,12 @@
 MACHINE
     AbstractMachine3
 
-SETS cars = {red, redyellow, yellow, green}; peds = {red, green}
+SETS cars = {red,yellow,redyellow,green}; peds = {green, red}
 
 VARIABLES xx, yy
 
-INVARIANT xx : INT && yy <: peds
-INITIALISATION xx := 1 || yy := cars /\ peds
+INVARIANT xx : INT & yy : POW(INTEGER)
+INITIALISATION xx := 1 || yy := {1,2,3} /\ {2}
 
 OPERATIONS
 out <-- Inc(pp) =

@@ -3,9 +3,9 @@ machine(stdint, stdio, imports, machine, enums, sets, declarations, initializati
 
 public class <machine> {
 
-    <enums>
+    <enums; separator="\n">
 
-    <sets>
+    <sets; separator="\n">
 
     <declarations; separator="\n">
 
@@ -37,6 +37,10 @@ parameter(type, identifier) ::= <<
 
 set_declaration(identifier, enums) ::= <<
 private BSet <identifier> = new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)));
+>>
+
+set_enumeration(identifier, enums) ::= <<
+new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)));
 >>
 
 enum_call(class, identifier) ::= <<
