@@ -160,6 +160,21 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitExpressionPrefixOperator(BParser.ExpressionPrefixOperatorContext ctx) {
+		int type = ctx.expression_prefix_operator().operator.getType();
+		ExpressionOperator op = null;
+		switch (type) {
+		case BParser.POW:
+			op = ExpressionOperator.POW;
+			break;
+		default:
+			throw new RuntimeException(ctx.expression_prefix_operator().operator.getText());
+		}
+		ExprNode argument = (ExprNode) ctx.expression_in_par().accept(this);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(argument), op);
+	}
+
+	@Override
 	public ExprNode visitBinOperator(BParser.BinOperatorContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
