@@ -34,6 +34,8 @@ public class ExpressionOperatorNode extends ExprNode
 		, SEQ, SEQ1, ISEQ, ISEQ1
 		// special
 		, COUPLE
+		//prefix operators
+		, POW
 	}
 
 	private List<ExprNode> expressionNodes;
@@ -64,7 +66,6 @@ public class ExpressionOperatorNode extends ExprNode
 	public void setOperator(ExpressionOperator operator) {
 		this.operator = operator;
 	}
-
 	
 	
 	public void setExpressionNodes(List<ExprNode> expressionNodes2) {
