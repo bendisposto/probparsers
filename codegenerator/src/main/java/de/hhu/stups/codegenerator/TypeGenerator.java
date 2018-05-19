@@ -12,62 +12,33 @@ import java.util.Set;
 
 public class TypeGenerator {
 
-    public static String generate(BType type, STGroup template) {
+    public static String generate(BType type, STGroup template, boolean cast) {
         if(type instanceof IntegerType) {
-            return generateInteger(template);
+            return generateInteger(template, cast);
         } else if(type instanceof BoolType) {
-            return generateBoolean(template);
+            return generateBoolean(template, cast);
         } else if(type instanceof SetType) {
-            return generateSet(template);
+            return generateSet(template, cast);
         } else if(type instanceof EnumeratedSetElementType) {
-          return generateObject(template);
+          return generateObject(template, cast);
         }
         return "";
     }
 
-    public static String generateCast(BType type, STGroup template) {
-        if(type instanceof IntegerType) {
-            return generateIntegerCast(template);
-        } else if(type instanceof BoolType) {
-            return generateBooleanCast(template);
-        } else if(type instanceof SetType) {
-            return generateSetCast(template);
-        } else if(type instanceof EnumeratedSetElementType) {
-            return generateObjectCast(template);
-        }
-        return "";
+    private static String generateInteger(STGroup template, boolean cast) {
+        return template.getInstanceOf("integer").add("cast", cast).render();
     }
 
-    private static String generateInteger(STGroup template) {
-        return template.getInstanceOf("integer").render();
+    private static String generateBoolean(STGroup template, boolean cast) {
+        return template.getInstanceOf("boolean").add("cast", cast).render();
     }
 
-    private static String generateBoolean(STGroup template) {
-        return template.getInstanceOf("boolean").render();
+    private static String generateSet(STGroup template, boolean cast) {
+        return template.getInstanceOf("set").add("cast", cast).render();
     }
 
-    private static String generateSet(STGroup template) {
-        return template.getInstanceOf("set").render();
-    }
-
-    private static String generateIntegerCast(STGroup template) {
-        return template.getInstanceOf("integer_cast").render();
-    }
-
-    private static String generateBooleanCast(STGroup template) {
-        return template.getInstanceOf("boolean_cast").render();
-    }
-
-    private static String generateSetCast(STGroup template) {
-        return template.getInstanceOf("set_cast").render();
-    }
-
-    private static String generateObject(STGroup template) {
-        return template.getInstanceOf("object").render();
-    }
-
-    private static String generateObjectCast(STGroup template) {
-        return template.getInstanceOf("object_cast").render();
+    private static String generateObject(STGroup template, boolean cast) {
+        return template.getInstanceOf("object").add("cast", cast).render();
     }
 
     public static void addImport(BType type, Set<String> imports, STGroup template) {

@@ -17,21 +17,16 @@ public class IdentifierGeneratorHandler {
             .map(DeclarationNode::getName)
             .collect(Collectors.toList())
             .contains(node.toString())) {
-            return generateReturnIdentifier(node, template);
+            return generate(node, template, true);
         } else {
-            return generate(node, template);
+            return generate(node, template, false);
         }
     }
 
-    private static String generate(IdentifierExprNode node, STGroup template) {
+    private static String generate(IdentifierExprNode node, STGroup template, boolean isReturn) {
         ST identifier = template.getInstanceOf("identifier");
         identifier.add("identifier", node.getName());
-        return identifier.render();
-    }
-
-    public static String generateReturnIdentifier(IdentifierExprNode node, STGroup template) {
-        ST identifier = template.getInstanceOf("return_identifier");
-        identifier.add("identifier", node.getName());
+        identifier.add("isReturn", isReturn);
         return identifier.render();
     }
 

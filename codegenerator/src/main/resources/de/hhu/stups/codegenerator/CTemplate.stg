@@ -28,7 +28,7 @@ void <operationName>(<parameters; separator=", "><returnParameters>) {
 >>
 
 parameter(type, identifier) ::= <<
-<type> <identifier>
+<declaration(type, identifier)>
 >>
 
 set_declaration(type, identifier) ::= <<
@@ -39,44 +39,39 @@ set_enum_declaration(name,enums) ::= <<
 
 
 global_declaration(type, identifier) ::= <<
-static <type> <identifier>;
+static <declaration(type, identifier)>;
 >>
 
 local_declaration(type, identifier) ::= <<
-<type> <identifier>;
+<declaration(type, identifier)>;
+>>
+
+declaration(type, identifier) ::= <<
+<type> <identifier>
 >>
 
 assignment(identifier, val) ::= <<
 <identifier> = <val>;
 >>
 
-boolean() ::= <<
-BBoolean
->>
-
-boolean_cast() ::= <<
+boolean(cast) ::= <<
+<if(!cast)>BBoolean<endif>
 >>
 
 boolean_import() ::= <<
 #include "BBoolean.c"
 >>
 
-integer() ::= <<
-BInteger
->>
-
-integer_cast() ::= <<
+integer(cast) ::= <<
+<if(!cast)>BInteger<endif>
 >>
 
 integer_import() ::= <<
 #include "BInteger.c"
 >>
 
-set() ::= <<
-BSet
->>
-
-set_cast() ::= <<
+set(cast) ::= <<
+<if(!cast)>BSet<endif>
 >>
 
 set_import() ::= <<
@@ -84,11 +79,8 @@ set_import() ::= <<
 >>
 
 
-object() ::= <<
-BObject
->>
-
-object_cast() ::= <<
+object(cast) ::= <<
+<if(!cast)>BObject<endif>
 >>
 
 plus(arg1,arg2) ::= <<
@@ -117,20 +109,13 @@ unary_minus(arg) ::= <<
 negative(<arg>)
 >>
 
-false_val() ::= <<
-create_boolean(0)
+
+boolean_val(val) ::= <<
+<if(val)>create_boolean(1)<else>create_boolean(0)<endif>
 >>
 
-true_val() ::= <<
-create_boolean(1)
->>
-
-identifier(identifier) ::= <<
-<identifier>
->>
-
-return_identifier(identifier) ::= <<
-(*<identifier>)
+identifier(identifier, isReturn) ::= <<
+<if(isReturn)>(*<identifier>)<else><identifier><endif>
 >>
 
 number(number) ::= <<

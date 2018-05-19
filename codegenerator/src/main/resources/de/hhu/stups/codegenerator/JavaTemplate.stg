@@ -18,29 +18,27 @@ public class <machine> {
 >>
 
 initialization(body) ::= <<
-public void initialize() {
-    <body>
-}
+<operation(returnType = "void", operationName = "initialize", parameters = {}, returnParameters = {}, locals = {}, body = body, return = {})>
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
     <locals; separator="\n">
     <body>
-    <return>;
+    <return>
 }
 >>
 
 parameter(type, identifier) ::= <<
-<type> <identifier>
+<declaration(type, identifier)>
 >>
 
 set_declaration(identifier, enums) ::= <<
-private BSet <identifier> = new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)));
+private BSet <identifier> = <set_enumeration(enums)>;
 >>
 
-set_enumeration(identifier, enums) ::= <<
-new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)));
+set_enumeration(enums) ::= <<
+new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)))
 >>
 
 enum_call(class, identifier) ::= <<
@@ -55,45 +53,37 @@ public enum <name> implements BObject {
 
 
 global_declaration(type, identifier) ::= <<
-private <type> <identifier>;
+private <declaration(type, identifier)>;
 >>
 
 local_declaration(type, identifier) ::= <<
-<type> <identifier>;
+<declaration(type, identifier)>;
+>>
+
+declaration(type, identifier) ::= <<
+<type> <identifier>
 >>
 
 assignment(identifier, val) ::= <<
 <identifier> = <val>;
 >>
 
-boolean() ::= <<
-BBoolean
->>
-
-boolean_cast() ::= <<
-(BBoolean)
+boolean(cast) ::= <<
+<if(cast)>(BBoolean)<else>BBoolean<endif>
 >>
 
 boolean_import() ::= <<
 >>
 
-integer() ::= <<
-BInteger
->>
-
-integer_cast() ::= <<
-(BInteger)
+integer(cast) ::= <<
+<if(cast)>(BInteger)<else>BInteger<endif>
 >>
 
 integer_import() ::= <<
 >>
 
-set() ::= <<
-BSet
->>
-
-set_cast() ::= <<
-(BSet)
+set(cast) ::= <<
+<if(cast)>(BSet)<else>BSet<endif>
 >>
 
 set_import() ::= <<
@@ -107,13 +97,10 @@ arrays_import() ::= <<
 import java.util.Arrays;
 >>
 
-object() ::= <<
-BObject
+object(cast) ::= <<
+<if(cast)>(BObject)<else>BObject<endif>
 >>
 
-object_cast() ::= <<
-(BObject)
->>
 
 plus(arg1,arg2) ::= <<
 <arg1>.plus(<arg2>)
@@ -153,19 +140,11 @@ unary_minus(arg) ::= <<
 <arg>.negative()
 >>
 
-false_val() ::= <<
-new BBoolean(false)
+boolean_val(val) ::= <<
+<if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
 
-true_val() ::= <<
-new BBoolean(true)
->>
-
-identifier(identifier) ::= <<
-<identifier>
->>
-
-return_identifier(identifier) ::= <<
+identifier(identifier, isReturn) ::= <<
 <identifier>
 >>
 

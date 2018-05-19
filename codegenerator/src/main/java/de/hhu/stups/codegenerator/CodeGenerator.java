@@ -17,7 +17,7 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 public class CodeGenerator {
 
     public static void main(String[] args) throws URISyntaxException {
-        generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/AbstractMachine3.mch").toURI()),GeneratorMode.JAVA);
+        generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/AbstractMachine.mch").toURI()),GeneratorMode.JAVA);
     }
 
     public static void generate(Path path, GeneratorMode mode) {

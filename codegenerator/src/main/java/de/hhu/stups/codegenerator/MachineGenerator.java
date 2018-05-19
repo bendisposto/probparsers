@@ -98,7 +98,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     private String generateGlobalDeclaration(DeclarationNode node) {
         ST declaration = currentGroup.getInstanceOf("global_declaration");
-        declaration.add("type", TypeGenerator.generate(node.getType(), currentGroup));
+        declaration.add("type", TypeGenerator.generate(node.getType(), currentGroup, false));
         declaration.add("identifier", node.getName());
         return declaration.render();
     }
@@ -271,7 +271,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     public String visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
         ST substitution = currentGroup.getInstanceOf("assignment");
         substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) node.getLeftSide().get(0), expected));
-        String typeCast = TypeGenerator.generateCast(node.getRightSide().get(0).getType(), currentGroup);
+        String typeCast = TypeGenerator.generate(node.getRightSide().get(0).getType(), currentGroup, true);
         substitution.add("val", typeCast + visitExprNode(node.getRightSide().get(0), expected));
         return substitution.render();
     }

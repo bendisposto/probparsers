@@ -20,9 +20,10 @@ public class OperationGenerator {
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, template) + "* " + identifier);
-            operation.add("returnType", TypeGenerator.generate(type, template));
-            operation.add("return", "return " + identifier);
+            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, template, false) + "* " + identifier);
+            operation.add("returnType", TypeGenerator.generate(type, template, false));
+            //TODO
+            operation.add("return", "return " + identifier + ";");
         }
         operation.add("operationName", node.getName().toLowerCase());
         operation.add("parameters", generateParameters(node.getParams(), template));
@@ -37,7 +38,7 @@ public class OperationGenerator {
 
     private static String generateLocalDeclaration(DeclarationNode node, STGroup template) {
         ST declaration = template.getInstanceOf("local_declaration");
-        declaration.add("type", TypeGenerator.generate(node.getType(), template));
+        declaration.add("type", TypeGenerator.generate(node.getType(), template, false));
         declaration.add("identifier", node.getName());
         return declaration.render();
     }
@@ -50,7 +51,7 @@ public class OperationGenerator {
 
     public static String generateParameter(DeclarationNode node, STGroup template) {
         ST parameter = template.getInstanceOf("parameter");
-        parameter.add("type", TypeGenerator.generate(node.getType(), template));
+        parameter.add("type", TypeGenerator.generate(node.getType(), template, false));
         parameter.add("identifier", node.getName());
         return parameter.render();
     }

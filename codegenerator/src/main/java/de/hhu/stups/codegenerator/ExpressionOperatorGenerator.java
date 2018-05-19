@@ -96,11 +96,7 @@ public class ExpressionOperatorGenerator {
     }
 
     private static String generateBoolean(ExpressionOperatorNode.ExpressionOperator operator, STGroup template) {
-        if(operator == TRUE) {
-            return template.getInstanceOf("true_val").render();
-        } else {
-            return template.getInstanceOf("false_val").render();
-        }
+        return template.getInstanceOf("boolean_val").add("val", operator == TRUE).render();
     }
 
 }
