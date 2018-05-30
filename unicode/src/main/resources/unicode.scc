@@ -14,7 +14,7 @@ Tokens
 	subseteq = '<:' | '\subseteq' | 0x2286;
 	setminus = '\' | '\setminus' | 0x2216;
 	dotdot = '..' | '\0xpto' | 0x2025;
-	dotdotdot = '...'; 
+	dotdotdot = '...' | '\ldots' | 0x2026; 
 	nat1 = 'NAT1' | '\nat1'| 0x2115 0x0031;
 	nat = 'NAT' | '\nat'| 0x2115;
 	emptyset = '{}' | '\emptyset'| 0x2205;
