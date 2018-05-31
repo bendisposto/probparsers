@@ -1,4 +1,4 @@
-machine(stdint, stdio, imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, enums, sets, declarations, initialization, operations) ::= <<
 <imports; separator="\n">
 
 public class <machine> {
@@ -18,19 +18,23 @@ public class <machine> {
 >>
 
 initialization(body) ::= <<
-<operation(returnType = "void", operationName = "initialize", parameters = {}, returnParameters = {}, locals = {}, body = body, return = {})>
+<operation(returnType = "void", operationName = "initialize", parameters = {}, returnParameters = {}, locals = {}, body = body, returnIdentifier = {})>
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(returnType, operationName, parameters, returnParameters, locals, body, returnIdentifier) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
     <locals; separator="\n">
     <body>
-    <return>
+    <return(returnIdentifier)>
 }
 >>
 
 parameter(type, identifier) ::= <<
 <declaration(type, identifier)>
+>>
+
+return(identifier) ::= <<
+return <identifier>;
 >>
 
 set_declaration(identifier, enums) ::= <<
@@ -138,6 +142,18 @@ complement(arg1,arg2) ::= <<
 
 unary_minus(arg) ::= <<
 <arg>.negative()
+>>
+
+equal(arg1, arg2) ::= <<
+<arg1> == <arg2>
+>>
+
+greater(arg1, arg2) ::= <<
+<arg1> > <arg2>
+>>
+
+less(arg1, arg2) ::= <<
+<arg1> \< <arg2>
 >>
 
 boolean_val(val) ::= <<

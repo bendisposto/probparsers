@@ -62,6 +62,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     private List<DeclarationNode> locals;
 
+    private List<String> errors;
+
     private Set<String> imports;
 
     private STGroup currentGroup;
@@ -70,12 +72,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         this.currentGroup = TEMPLATE_MAP.get(mode);
         this.locals = new ArrayList<>();
         this.imports = new HashSet<>();
+        this.errors = new ArrayList<>();
     }
 
     public String generateMachine(MachineNode node) {
         ST machine = currentGroup.getInstanceOf("machine");
-        machine.add("stdint", "<stdint.h>");
-        machine.add("stdio", "<stdio.h>");
         machine.add("imports", imports);
         machine.add("machine", node.getName());
         generateBody(node, machine);
@@ -133,7 +134,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         } else if(node instanceof EnumeratedSetElementNode) {
             return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node, expected);
         }
-
         return visitIdentifierExprNode((IdentifierExprNode) node, expected);
     }
 
@@ -219,6 +219,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     @Override
     public String visitQuantifiedExpressionNode(QuantifiedExpressionNode node, Void expected) {
+        errors.add("Quantified expressions cannot be generated");
         return null;
     }
 
@@ -234,22 +235,36 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     @Override
     public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
-        return null;
+        List<String> expressionList = node.getPredicateArguments()
+                .stream()
+                .map(expr -> visitPredicateNode(expr, expected))
+                .collect(Collectors.toList());
+        return PredicateOperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
     }
 
     @Override
     public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
-        return null;
+        List<String> expressionList = node.getExpressionNodes()
+                .stream()
+                .map(expr -> visitExprNode(expr, expected))
+                .collect(Collectors.toList());
+        return PredicateOperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
     }
 
     @Override
     public String visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
+        errors.add("Quantified predicates cannot be generated");
         return null;
     }
 
     @Override
     public String visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
-        return null;
+        ST ifST = currentGroup.getInstanceOf("if");
+        List<String> conditions = node.getConditions().stream()
+                .map(condition -> visitPredicateNode(condition, expected))
+                .collect(Collectors.toList());
+        ifST.add("predicate", conditions);
+        return ifST.render();
     }
 
     @Override
@@ -279,14 +294,15 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     @Override
     public String visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
-        if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
-            return visitParallelSubstitutionNode(node);
+        if(node.getOperator() == ListSubstitutionNode.ListOperator.Sequential) {
+            return visitSequentialSubstitutionNode(node);
+        } else {
+            errors.add("Parallel substitution cannot be generated");
+            return "";
         }
-        //TODO
-        return "";
     }
 
-    public String visitParallelSubstitutionNode(ListSubstitutionNode node) {
+    public String visitSequentialSubstitutionNode(ListSubstitutionNode node) {
         List<String> substitutionCodes = node.getSubstitutions().stream()
                 .map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
                 .collect(Collectors.toList());
@@ -295,11 +311,13 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     @Override
     public String visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
+        errors.add("Becomes element of cannot be generated");
         return null;
     }
 
     @Override
     public String visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, Void expected) {
+        errors.add("Such that cannot be generated");
         return null;
     }
 
@@ -328,4 +346,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
             .filter(outputParams::contains)
             .collect(Collectors.toList());
     }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
 }

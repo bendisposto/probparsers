@@ -16,11 +16,11 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 public class CodeGenerator {
 
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
         generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/AbstractMachine.mch").toURI()),GeneratorMode.JAVA);
     }
 
-    public static void generate(Path path, GeneratorMode mode) {
+    public static void generate(Path path, GeneratorMode mode) throws CodeGenerationException {
         String file = "";
         MachineNode node = null;
         try {
@@ -29,7 +29,13 @@ public class CodeGenerator {
         } catch(TypeErrorException | IOException e) {
             e.printStackTrace();
         }
-        String code = new MachineGenerator(mode).generateMachine(node);
+        MachineGenerator generator = new MachineGenerator(mode);
+        String code = generator.generateMachine(node);
+
+        if(generator.getErrors().size() > 0) {
+            throw new CodeGenerationException(String.join("\n", generator.getErrors()));
+        }
+
         int lastIndexDot = path.toString().lastIndexOf(".");
         Path newPath = Paths.get(path.toString().substring(0, lastIndexDot + 1) + mode.name().toLowerCase());
         try {

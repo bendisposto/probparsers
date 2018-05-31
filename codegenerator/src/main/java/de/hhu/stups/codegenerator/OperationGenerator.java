@@ -22,8 +22,7 @@ public class OperationGenerator {
             String identifier = node.getOutputParams().get(0).getName();
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, template, false) + "* " + identifier);
             operation.add("returnType", TypeGenerator.generate(type, template, false));
-            //TODO
-            operation.add("return", "return " + identifier + ";");
+            operation.add("returnIdentifier", identifier);
         }
         operation.add("operationName", node.getName().toLowerCase());
         operation.add("parameters", generateParameters(node.getParams(), template));

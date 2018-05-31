@@ -1,6 +1,6 @@
-machine(stdint, stdio, imports, machine, enums, sets, declarations, initialization, operations) ::= <<
-#include <stdint>
-#include <stdio>
+machine(imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+#include \<stdint.h>
+#include \<stdio.h>
 <imports; separator="\n">
 
 <enums>
@@ -21,7 +21,7 @@ void initialize(void) {
 }
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(returnType, operationName, parameters, returnParameters, locals, body, returnIdentifier) ::= <<
 void <operationName>(<parameters; separator=", "><returnParameters>) {
     <body>
 }
