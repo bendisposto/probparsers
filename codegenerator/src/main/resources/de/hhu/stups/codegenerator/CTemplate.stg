@@ -83,32 +83,13 @@ object(cast) ::= <<
 <if(!cast)>BObject<endif>
 >>
 
-plus(arg1,arg2) ::= <<
-plus(<arg1>,<arg2>)
+binary_arithmetic(arg1,operator,arg2) ::= <<
+<operator>(<arg1>,<arg2>)
 >>
 
-
-minus(arg1,arg2) ::= <<
-minus(<arg1>,<arg2>)
+unary_arithmetic(operator, arg) ::= <<
+<operator>(<arg>)
 >>
-
-
-mult(arg1,arg2) ::= <<
-mult(<arg1>,<arg2>)
->>
-
-div(arg1,arg2) ::= <<
-divide(<arg1>,<arg2>)
->>
-
-mod(arg1,arg2) ::= <<
-mod(<arg1>,<arg2>)
->>
-
-unary_minus(arg) ::= <<
-negative(<arg>)
->>
-
 
 boolean_val(val) ::= <<
 <if(val)>create_boolean(1)<else>create_boolean(0)<endif>

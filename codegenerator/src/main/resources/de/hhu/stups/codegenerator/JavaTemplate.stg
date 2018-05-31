@@ -106,43 +106,14 @@ object(cast) ::= <<
 >>
 
 
-plus(arg1,arg2) ::= <<
-<arg1>.plus(<arg2>)
+binary_arithmetic(arg1,operator,arg2) ::= <<
+<arg1>.<operator>(<arg2>)
 >>
 
-
-minus(arg1,arg2) ::= <<
-<arg1>.minus(<arg2>)
+unary_arithmetic(operator, arg1) ::= <<
+<arg1>.<operator>()
 >>
 
-
-mult(arg1,arg2) ::= <<
-<arg1>.multiply(<arg2>)
->>
-
-div(arg1,arg2) ::= <<
-<arg1>.div(<arg2>)
->>
-
-mod(arg1,arg2) ::= <<
-<arg1>.mod(<arg2>)
->>
-
-intersect(arg1,arg2) ::= <<
-<arg1>.intersect(<arg2>)
->>
-
-union(arg1,arg2) ::= <<
-<arg1>.union(<arg2>)
->>
-
-complement(arg1,arg2) ::= <<
-<arg1>.complement(<arg2>)
->>
-
-unary_minus(arg) ::= <<
-<arg>.negative()
->>
 
 equal(arg1, arg2) ::= <<
 <arg1> == <arg2>
