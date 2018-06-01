@@ -146,41 +146,45 @@ public class RulesProject {
 				.extractConfigurationOfMainModel(this.bModels.get(0), this.allOperations);
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
-		for (int i = 0; i < bModels.size(); i++) {
-			RulesParseUnit rulesParseUnit = (RulesParseUnit) bModels.get(i);
+		int fileNumber = 1;
+		for (IModel model : bModels) {
+			RulesParseUnit rulesParseUnit = (RulesParseUnit) model;
 			rulesParseUnit.translate(allOperations);
 			if (!rulesParseUnit.hasError()) {
 				Start start = rulesParseUnit.getStart();
-				nodeIdAssignment.assignIdentifiers(i + 1, start);
+				nodeIdAssignment.assignIdentifiers(fileNumber, start);
 			} else {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
 			Start otherStart = rulesParseUnit.getStart();
 			injector.injectMachine(otherStart);
+			fileNumber++;
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 		bModels.add(compositionMachine);
-		bModels.add(createMainMachine(injector.getMainMachineDefinitions()));
+		final BMachine mainMachine = createMainMachine(injector.getMainMachineDefinitions());
+		bModels.add(mainMachine);
 	}
 
 	private BMachine createMainMachine(List<PDefinition> mainDefinitions) {
 		BMachine mainMachine = new BMachine(MAIN_MACHINE_NAME);
+		mainMachine.setParsingBehaviour(this.parsingBehaviour);
 		mainMachine.addIncludesClause(COMPOSITION_MACHINE_NAME);
 		mainMachine.addPromotesClause(getPromotesList());
 		mainMachine.addPropertiesPredicates(this.constantStringValues);
-		IDefinitions idefinitions = new Definitions();
+		IDefinitions iDefinitions = new Definitions();
 
 		if (mainDefinitions != null) {
 			for (PDefinition pDefinition : mainDefinitions) {
-				idefinitions.addDefinition(pDefinition);
+				iDefinitions.addDefinition(pDefinition);
 			}
 		}
-		addToStringDefinition(idefinitions);
-		addSortDefinition(idefinitions);
-		addFormatToStringDefinition(idefinitions);
-		addChooseDefinition(idefinitions);
-		addBooleanPreferenceDefinition(idefinitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
-		mainMachine.replaceDefinition(idefinitions);
+		addToStringDefinition(iDefinitions);
+		addSortDefinition(iDefinitions);
+		addFormatToStringDefinition(iDefinitions);
+		addChooseDefinition(iDefinitions);
+		addBooleanPreferenceDefinition(iDefinitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		mainMachine.replaceDefinition(iDefinitions);
 		return mainMachine;
 	}
 
