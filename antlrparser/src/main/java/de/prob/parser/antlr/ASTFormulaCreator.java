@@ -70,7 +70,6 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		return temp;
 	}
 
-
 	@Override
 	public Node visitPredicateP30Next(BParser.PredicateP30NextContext ctx) {
 		return ctx.predicate_p40().accept(this);
@@ -89,17 +88,17 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
 		int type = ctx.expressionOperatorP160().operator.getType();
 		switch (type) {
-			case BParser.INTERSECTION:
-				op = ExpressionOperator.INTERSECTION;
-				break;
-			case BParser.UNION:
-				op = ExpressionOperator.UNION;
-				break;
-			case BParser.SET_SUBTRACTION:
-				op = ExpressionOperator.SET_SUBTRACTION;
-				break;
-			default:
-				break;
+		case BParser.INTERSECTION:
+			op = ExpressionOperator.INTERSECTION;
+			break;
+		case BParser.UNION:
+			op = ExpressionOperator.UNION;
+			break;
+		case BParser.SET_SUBTRACTION:
+			op = ExpressionOperator.SET_SUBTRACTION;
+			break;
+		default:
+			break;
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
 	}
@@ -166,18 +165,18 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		int type = ctx.expression_keyword().operator.getType();
 		ExpressionOperator op = null;
 		switch (type) {
-			case BParser.NATURAL:
-				op = ExpressionOperator.NATURAL;
-				break;
-			case BParser.INTEGER:
-				op = ExpressionOperator.INTEGER;
-				break;
-			case BParser.BOOL:
-				op = ExpressionOperator.BOOL;
-				break;
-			case BParser.INT:
-				op = ExpressionOperator.INT;
-				break;
+		case BParser.NATURAL:
+			op = ExpressionOperator.NATURAL;
+			break;
+		case BParser.INTEGER:
+			op = ExpressionOperator.INTEGER;
+			break;
+		case BParser.BOOL:
+			op = ExpressionOperator.BOOL;
+			break;
+		case BParser.INT:
+			op = ExpressionOperator.INT;
+			break;
 		default:
 			throw new RuntimeException(ctx.expression_keyword().operator.getText());
 		}
@@ -211,21 +210,21 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		ExpressionOperator op = null;
 		int type = ctx.operator.getType();
 		switch (type) {
-			case BParser.PLUS:
-				op = ExpressionOperator.PLUS;
-				break;
-			case BParser.MINUS:
-				op = ExpressionOperator.MINUS;
-				break;
-			case BParser.MULT:
-				op = ExpressionOperator.MULT;
-				break;
-			case BParser.DIVIDE:
-				op = ExpressionOperator.DIVIDE;
-				break;
-			case BParser.MOD:
-				op = ExpressionOperator.MOD;
-				break;
+		case BParser.PLUS:
+			op = ExpressionOperator.PLUS;
+			break;
+		case BParser.MINUS:
+			op = ExpressionOperator.MINUS;
+			break;
+		case BParser.MULT:
+			op = ExpressionOperator.MULT;
+			break;
+		case BParser.DIVIDE:
+			op = ExpressionOperator.DIVIDE;
+			break;
+		case BParser.MOD:
+			op = ExpressionOperator.MOD;
+			break;
 		default:
 			break;
 		}
@@ -295,8 +294,8 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitSetEnumeration(BParser.SetEnumerationContext ctx) {
-		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), visitExpressionList(ctx.expression_list()),
-				ExpressionOperator.SET_ENUMERATION);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx),
+				visitExpressionList(ctx.expression_list()), ExpressionOperator.SET_ENUMERATION);
 	}
 
 	@Override
@@ -375,15 +374,49 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitSelectSubstitution(BParser.SelectSubstitutionContext ctx) {
+	public Node visitIfSubstitution(BParser.IfSubstitutionContext ctx) {
 		List<PredicateNode> predList = new ArrayList<>();
-		for (PredicateContext predCtx : ctx.predicate()) {
+		List<SubstitutionNode> subList = new ArrayList<>();
+
+		PredicateNode firstPred = (PredicateNode) ctx.pred.accept(this);
+		predList.add(firstPred);
+		SubstitutionNode firstSub = (SubstitutionNode) ctx.thenSub.accept(this);
+		subList.add(firstSub);
+
+		for (PredicateContext predCtx : ctx.elsifPred) {
 			PredicateNode pred = (PredicateNode) predCtx.accept(this);
 			predList.add(pred);
 		}
 
+		for (SubstitutionContext subCtx : ctx.elsifSub) {
+			SubstitutionNode sub = (SubstitutionNode) subCtx.accept(this);
+			subList.add(sub);
+		}
+
+		SubstitutionNode elseSubstitution = null;
+		if (ctx.elseSub != null) {
+			elseSubstitution = (SubstitutionNode) ctx.elseSub.accept(this);
+		}
+		return new IfOrSelectSubstitutionsNode(Util.createSourceCodePosition(ctx),
+				IfOrSelectSubstitutionsNode.Operator.IF, predList, subList, elseSubstitution);
+	}
+
+	@Override
+	public Node visitSelectSubstitution(BParser.SelectSubstitutionContext ctx) {
+		List<PredicateNode> predList = new ArrayList<>();
 		List<SubstitutionNode> subList = new ArrayList<>();
-		for (SubstitutionContext subCtx : ctx.substitution()) {
+
+		PredicateNode firstPred = (PredicateNode) ctx.pred.accept(this);
+		predList.add(firstPred);
+		SubstitutionNode firstSub = (SubstitutionNode) ctx.sub.accept(this);
+		subList.add(firstSub);
+
+		for (PredicateContext predCtx : ctx.when_pred) {
+			PredicateNode pred = (PredicateNode) predCtx.accept(this);
+			predList.add(pred);
+		}
+
+		for (SubstitutionContext subCtx : ctx.when_sub) {
 			SubstitutionNode sub = (SubstitutionNode) subCtx.accept(this);
 			subList.add(sub);
 		}

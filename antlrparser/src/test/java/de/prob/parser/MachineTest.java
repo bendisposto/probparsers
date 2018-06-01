@@ -33,7 +33,8 @@ public class MachineTest {
 		machine += "VARIABLES a \n";
 		machine += "INVARIANT a : INTEGER \n";
 		machine += "INITIALISATION a := 1 \n";
-		machine += "OPERATIONS IncX = SELECT a < 10 THEN IncX END \n";
+		machine += "OPERATIONS IncX = SELECT a < 10 THEN IncX END;\n";
+		machine += "IncX2 = IF a < 10 THEN IncX END \n";
 		machine += "END";
 
 		Antlr4BParser.createProject(machine, getTestMachine());
