@@ -24,7 +24,7 @@ public class OperationGenerator {
             operation.add("returnType", TypeGenerator.generate(type, template, false));
             operation.add("returnIdentifier", identifier);
         }
-        operation.add("operationName", node.getName().toLowerCase());
+        operation.add("operationName", NameHandler.handle(node.getName().toLowerCase(), template));
         operation.add("parameters", generateParameters(node.getParams(), template));
         return operation;
     }
@@ -38,7 +38,7 @@ public class OperationGenerator {
     private static String generateLocalDeclaration(DeclarationNode node, STGroup template) {
         ST declaration = template.getInstanceOf("local_declaration");
         declaration.add("type", TypeGenerator.generate(node.getType(), template, false));
-        declaration.add("identifier", node.getName());
+        declaration.add("identifier", NameHandler.handle(node.getName(), template));
         return declaration.render();
     }
 
@@ -51,7 +51,7 @@ public class OperationGenerator {
     public static String generateParameter(DeclarationNode node, STGroup template) {
         ST parameter = template.getInstanceOf("parameter");
         parameter.add("type", TypeGenerator.generate(node.getType(), template, false));
-        parameter.add("identifier", node.getName());
+        parameter.add("identifier", NameHandler.handle(node.getName(), template));
         return parameter.render();
     }
 

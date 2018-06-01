@@ -78,7 +78,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     public String generateMachine(MachineNode node) {
         ST machine = currentGroup.getInstanceOf("machine");
         machine.add("imports", imports);
-        machine.add("machine", node.getName());
+        machine.add("machine", NameHandler.handleMachineName(node.getName()));
         generateBody(node, machine);
         return machine.render();
     }
@@ -100,7 +100,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     private String generateGlobalDeclaration(DeclarationNode node) {
         ST declaration = currentGroup.getInstanceOf("global_declaration");
         declaration.add("type", TypeGenerator.generate(node.getType(), currentGroup, false));
-        declaration.add("identifier", node.getName());
+        declaration.add("identifier", NameHandler.handle(node.getName(), currentGroup));
         return declaration.render();
     }
 
@@ -151,7 +151,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     private String declareEnums(EnumeratedSetDeclarationNode node) {
         ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-        String name = node.getSetDeclaration().getName();
+        String name = NameHandler.handle(node.getSetDeclaration().getName(), currentGroup);
         enumDeclaration.add("name", name.substring(0, 1).toUpperCase() + name.substring(1));
         List<String> enums = node.getElements().stream()
             .map(declaration -> declaration.getName().toUpperCase())
@@ -165,7 +165,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         imports.add(currentGroup.getInstanceOf("hashset_import").render());
         imports.add(currentGroup.getInstanceOf("arrays_import").render());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-        setDeclaration.add("identifier", node.getSetDeclaration().getName());
+        setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclaration().getName(), currentGroup));
         List<String> enums = node.getElements().stream()
                 .map(declaration -> callEnum(node, declaration))
                 .collect(Collectors.toList());

@@ -14,7 +14,7 @@ public class IdentifierGeneratorHandler {
 
     public static String generate(IdentifierExprNode node, List<DeclarationNode> locals, STGroup template) {
         if(locals.stream()
-            .map(DeclarationNode::getName)
+            .map(declarationNode -> NameHandler.handle(declarationNode.getName(), template))
             .collect(Collectors.toList())
             .contains(node.toString())) {
             return generate(node, template, true);
@@ -25,7 +25,7 @@ public class IdentifierGeneratorHandler {
 
     private static String generate(IdentifierExprNode node, STGroup template, boolean isReturn) {
         ST identifier = template.getInstanceOf("identifier");
-        identifier.add("identifier", node.getName());
+        identifier.add("identifier", NameHandler.handle(node.getName(), template));
         identifier.add("isReturn", isReturn);
         return identifier.render();
     }

@@ -1,12 +1,12 @@
 MACHINE
     AbstractMachine4
 
-SETS cars = {red,yellow,redyellow,green}; peds = {green, red}
+SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
 
-VARIABLES xx, yy
+VARIABLES xx, yy, switch
 
-INVARIANT xx : INT & yy : POW(INTEGER)
-INITIALISATION xx := 1; yy := {1,2,3} \/ {2}
+INVARIANT xx : INT & yy : POW(INTEGER) & switch : BOOL
+INITIALISATION xx := 1; yy := {1,2,3} \/ {2}; switch := TRUE
 
 OPERATIONS
 out <-- Inc(pp) =
