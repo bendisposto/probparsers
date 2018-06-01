@@ -18,7 +18,9 @@ public class <machine> {
 >>
 
 initialization(body) ::= <<
-<operation(returnType = "void", operationName = "initialize", parameters = {}, returnParameters = {}, locals = {}, body = body, returnIdentifier = {})>
+public void initialize() {
+    <body>
+}
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, returnIdentifier) ::= <<
@@ -114,17 +116,34 @@ unary_arithmetic(operator, arg1) ::= <<
 <arg1>.<operator>()
 >>
 
+if(predicate, then, else1) ::= <<
+if(<predicate>) {
+    <then>
+} <else1; separator=" ">
+>>
+
+elseif(predicate, then) ::= <<
+else if(<predicate>) {
+    <then>
+}
+>>
+
+else(then) ::= <<
+else {
+    <then>
+}
+>>
 
 equal(arg1, arg2) ::= <<
-<arg1> == <arg2>
+<arg1>.equals(<arg2>)
 >>
 
 greater(arg1, arg2) ::= <<
-<arg1> > <arg2>
+<arg1>.greater(<arg2>)
 >>
 
 less(arg1, arg2) ::= <<
-<arg1> \< <arg2>
+<arg1>.less(<arg2>)
 >>
 
 boolean_val(val) ::= <<

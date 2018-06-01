@@ -561,6 +561,10 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 
 	@Override
 	public BType visitIdentifierExprNode(IdentifierExprNode node, BType expected) {
+		if(node.getDeclarationNode() == null) {
+			//TODO: Check whether semantic is correct or not
+			return unify(expected, new UntypedType(), node);
+		}
 		return unify(expected, node.getDeclarationNode().getType(), node);
 	}
 

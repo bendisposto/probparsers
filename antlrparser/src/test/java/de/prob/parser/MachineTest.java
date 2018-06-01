@@ -40,4 +40,20 @@ public class MachineTest {
 		Antlr4BParser.createProject(machine, getTestMachine());
 	}
 
+	@Test
+	public void testMachines2() throws TypeErrorException {
+		String machine = "MACHINE test2\n";
+		machine += "INCLUDES test\n";
+		machine += "CONSTANTS k2\n";
+		machine += "PROPERTIES k2 : k \n";
+		machine += "VARIABLES a \n";
+		machine += "INVARIANT a : INTEGER \n";
+		machine += "INITIALISATION a := 1 \n";
+		machine += "OPERATIONS IncX = SELECT a < 10 THEN IncX END;\n";
+		machine += "IncX2 = IF a < 10 THEN IncX ELSE IncX END \n";
+		machine += "END";
+
+		Antlr4BParser.createProject(machine, getTestMachine());
+	}
+
 }

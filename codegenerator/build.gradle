@@ -25,6 +25,7 @@ dependencies {
     compile project(path: ":prologlib", configuration: "archives")
     compile project(path: ":parserbase", configuration: "archives")
     compile group: 'org.antlr', name: 'stringtemplate', version: '3.2'
+    testCompile 'junit:junit:4.8.2'
 }
 
 
@@ -32,11 +33,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 
-
-
 mainClassName = 'de.hhu.stups.codegenerator.CodeGenerator'
 
 sourceSets.main.java.srcDirs = ['src/main/java']
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 
 tasks.withType(JavaExec) {
     def env_vars = ['LD_LIBRARY_PATH'  : ("$System.env.LD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),

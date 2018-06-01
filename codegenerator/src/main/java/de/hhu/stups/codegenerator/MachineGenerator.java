@@ -259,12 +259,44 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     @Override
     public String visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
+        if(node.getOperator() == IfOrSelectSubstitutionsNode.Operator.SELECT) {
+            return "";
+        }
         ST ifST = currentGroup.getInstanceOf("if");
-        List<String> conditions = node.getConditions().stream()
-                .map(condition -> visitPredicateNode(condition, expected))
-                .collect(Collectors.toList());
-        ifST.add("predicate", conditions);
+        ifST.add("predicate", visitPredicateNode(node.getConditions().get(0), expected));
+        ifST.add("then", visitSubstitutionNode(node.getSubstitutions().get(0), expected));
+        ifST.add("else1", generateElseIfs(node));
+
+        if(node.getElseSubstitution() != null) {
+            ifST.add("else1", generateElse(node));
+        }
         return ifST.render();
+    }
+
+    private List<String> generateElseIfs(IfOrSelectSubstitutionsNode node) {
+        List<String> conditions = node.getConditions().subList(1, node.getConditions().size()).stream()
+                .map(condition -> visitPredicateNode(condition, null))
+                .collect(Collectors.toList());
+        List<String> then = node.getSubstitutions().subList(1, node.getSubstitutions().size()).stream()
+                .map(substituionNode -> visitSubstitutionNode(substituionNode, null))
+                .collect(Collectors.toList());
+
+        List<String> elseIfs = new ArrayList<>();
+
+        for(int i = 0; i < conditions.size(); i++) {
+            ST elseST = currentGroup.getInstanceOf("elseif");
+            elseST.add("predicate", conditions.get(i));
+            elseST.add("then", then.get(i));
+            elseIfs.add(elseST.render());
+        }
+
+        return elseIfs;
+    }
+
+    private String generateElse(IfOrSelectSubstitutionsNode node) {
+        ST elseST = currentGroup.getInstanceOf("else");
+        elseST.add("then", visitSubstitutionNode(node.getElseSubstitution(), null));
+        return elseST.render();
     }
 
     @Override
