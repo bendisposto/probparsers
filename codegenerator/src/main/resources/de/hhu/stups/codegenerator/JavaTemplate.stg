@@ -146,6 +146,18 @@ less(arg1, arg2) ::= <<
 <arg1>.less(<arg2>)
 >>
 
+and(arg1, arg2) ::= <<
+<arg1> && <arg2>
+>>
+
+or(arg1, arg2) ::= <<
+<arg1> || <arg2>
+>>
+
+implies(arg1, arg2) ::= <<
+!(<arg1>) || <arg2>
+>>
+
 boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>

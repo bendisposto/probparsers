@@ -10,11 +10,11 @@ INITIALISATION xx := 1; yy := {1,2,3} \/ {2}
 
 OPERATIONS
 out <-- Inc(pp) =
-    IF xx = 1 THEN
+    IF xx = 1 & xx < 10 THEN
         xx := xx + pp; out := xx
-    ELSIF xx = 2 THEN
+    ELSIF xx < 2 THEN
         xx := xx - pp; out := xx + 1
-    ELSIF xx = 3 THEN
+    ELSIF xx > 3 THEN
         xx := 1
     ELSE
         xx := 2

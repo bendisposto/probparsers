@@ -25,17 +25,6 @@ public class PredicateOperatorGenerator {
     private static final List<PredicateOperatorWithExprArgsNode.PredOperatorExprArgs> PREDICATE_OPERATIONS_ARGS =
             Arrays.asList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.LESS, PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.GREATER, EQUAL);
 
-
-    /*public static ST generate(PredicateOperatorNode node, List<String> expressionList, STGroup template) {
-        PredicateOperatorNode.PredicateOperator operator = node.getOperator();
-        if(PREDICATE_OPERATIONS.contains(operator)) {
-            return generatePredicate(operator, template);
-        } else if(PREDICATE_OPERATIONS_ARGS.contains(operator)) {
-            return generatePredicateArgs()
-        }
-        return "";
-    }*/
-
     public static String generatePredicateExpression(PredicateOperatorNode.PredicateOperator operator, List<String> predicates, STGroup template) {
         Optional<String> result = predicates.stream()
                 //TODO
