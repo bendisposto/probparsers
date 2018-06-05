@@ -140,7 +140,7 @@ else {
 >>
 
 equal(arg1, arg2) ::= <<
-<arg1>.equals(<arg2>)
+<arg1>.equal(<arg2>)
 >>
 
 greater(arg1, arg2) ::= <<

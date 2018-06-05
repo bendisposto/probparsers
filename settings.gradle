@@ -1,1 +1,1 @@
-include 'bparser', 'prologlib', 'parserbase', 'ltlparser', 'answerparser', 'unicode', 'cliparser', 'theorymapping', 'eventbstruct', 'eventbalg','translator', 'typechecker', 'antlrparser'
+include 'bparser', 'prologlib', 'parserbase', 'ltlparser', 'answerparser', 'unicode', 'cliparser', 'theorymapping', 'eventbstruct', 'eventbalg','translator', 'typechecker', 'antlrparser', 'codegenerator', 'btypes'

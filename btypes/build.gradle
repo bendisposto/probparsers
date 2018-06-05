@@ -1,0 +1,45 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        name "snapshots"
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        name "release"
+        url "https://oss.sonatype.org/content/repositories/releases/"
+    }
+
+}
+
+dependencies {
+    compile 'com.google.guava:guava:25.1-jre'
+    testCompile 'junit:junit:4.8.2'
+}
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+mainClassName = "de.hhu.stups.btypes.Main"
+
+sourceSets.main.java.srcDirs = ['src/main/java']
+
+sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+
+tasks.withType(JavaExec) {
+    def env_vars = ['LD_LIBRARY_PATH'  : ("$System.env.LD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
+                    'DYLD_LIBRARY_PATH': ("$System.env.DYLD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
+                    'PATH'             : ("$System.env.PATH" + System.getProperty("path.separator") + "$projectDir/")]
+    environment env_vars
+
+    systemProperty "java.library.path", "./"
+}
+
+
