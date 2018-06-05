@@ -96,8 +96,6 @@ public class ClausesCheck implements SemanticCheck {
 	 * If the machine is a IMPLEMENTATION the following clauses are not allowed:
 	 * CONSTRAINTS, INCLUDES, USES, ABSTRACT_CONSTANTS, ABSTRACT_VARIABLES,
 	 * VARIABLES
-	 * 
-	 * @throws CheckException
 	 */
 	private void checkImplementationClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof AImplementationMachineParseUnit)) {
@@ -110,8 +108,6 @@ public class ClausesCheck implements SemanticCheck {
 	/**
 	 * If the machine is a REFINEMENT the following clauses are not allowed:
 	 * USES, CONSTRAINTS, LOCAL_VARIABLES, VALUES, IMPORTS
-	 * 
-	 * @throws CheckException
 	 */
 	private void checkRefinementClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof ARefinementMachineParseUnit)) {
@@ -124,8 +120,6 @@ public class ClausesCheck implements SemanticCheck {
 	/**
 	 * If the machine is a MACHINE the following clauses are not allowed:
 	 * LOCAL_VARIABLES, VALUES, IMPORTS
-	 * 
-	 * @throws CheckException
 	 */
 	private void checkMachineClauses(final Start rootNode) {
 		if (!(rootNode.getPParseUnit() instanceof AAbstractMachineParseUnit)) {
@@ -210,8 +204,6 @@ public class ClausesCheck implements SemanticCheck {
 
 	/**
 	 * Checks if one clause is used more than once in the machine.
-	 * 
-	 * @throws CheckException
 	 */
 	private void checkDoubleClauses() {
 		for (final Iterator<Set<Node>> iterator = clauses.values().iterator(); iterator.hasNext();) {

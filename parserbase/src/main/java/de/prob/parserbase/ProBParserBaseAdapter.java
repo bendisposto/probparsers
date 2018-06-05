@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.prob.parserbase;
 
 import java.util.Collection;

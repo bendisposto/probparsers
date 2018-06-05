@@ -128,8 +128,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The counterpart to {@link #open(Node)}, prints the closing parenthesis of
 	 * the term.
-	 * 
-	 * @param node
 	 */
 	private void close(final Node node) {
 		pout.closeTerm();
@@ -196,9 +194,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	/**
-	 * 
-	 * @param AST
-	 *            node
 	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
@@ -215,12 +210,10 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
 	 * grammar for non-Java front-ends. Two magic cases here:
-	 * "prover_comprehension_set" -> "comprehension_set", "op" ->
+	 * "prover_comprehension_set" -&gt; "comprehension_set", "op" -&gt;
 	 * "operation_call" Todo: do remove magic special cases DO NOT add extra
 	 * special cases here !!
 	 * 
-	 * @param Java
-	 *            class name
 	 * @return Prolog functor name
 	 */
 	private String toFunctorName(final String className) {

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.grammars.DefaultGrammar;

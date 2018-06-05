@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import de.be4.classicalb.core.parser.node.Node;

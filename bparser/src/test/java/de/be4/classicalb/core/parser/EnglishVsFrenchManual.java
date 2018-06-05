@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.classicalb.core.parser;
 
 import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.prob.prolog.output;
 
 import java.math.BigInteger;

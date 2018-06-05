@@ -7,11 +7,10 @@ import de.be4.classicalb.core.parser.node.AImplicationPredicate;
 import de.be4.classicalb.core.parser.node.AMultilineStringExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
-import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 
-import static de.be4.classicalb.core.parser.util.NodeCloner.*;
+import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
 public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 
@@ -20,11 +19,11 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		// IF P THE P2 ELSE P3 END
 		// will be translated into
 		// (p => p2) & (not(p) => p3)
-		AImplicationPredicate imp1 = new AImplicationPredicate((PPredicate) cloneNode(node.getCondition()),
-				(PPredicate) cloneNode(node.getThen()));
+		AImplicationPredicate imp1 = new AImplicationPredicate(cloneNode(node.getCondition()),
+				cloneNode(node.getThen()));
 		AImplicationPredicate imp2 = new AImplicationPredicate(
-				new ANegationPredicate((PPredicate) cloneNode(node.getCondition())),
-				(PPredicate) cloneNode(node.getElse()));
+				new ANegationPredicate(cloneNode(node.getCondition())),
+				cloneNode(node.getElse()));
 		AConjunctPredicate con = new AConjunctPredicate(imp1, imp2);
 		con.setStartPos(node.getStartPos());
 		con.setEndPos(node.getEndPos());

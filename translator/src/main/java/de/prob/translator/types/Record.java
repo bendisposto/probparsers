@@ -82,8 +82,7 @@ public class Record implements BObject, Map<java.lang.String, BObject> {
 		StringBuffer sb = new StringBuffer();
 		sb.append("rec(");
 		while (it.hasNext()) {
-			Map.Entry<java.lang.String, BObject> entry = (java.util.Map.Entry<java.lang.String, BObject>) it
-					.next();
+			Map.Entry<java.lang.String, BObject> entry = it.next();
 			sb.append(entry.getKey());
 			sb.append(": ");
 			sb.append(entry.getValue());

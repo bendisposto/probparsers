@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.prob.cliparser;
 
 import java.io.BufferedReader;
