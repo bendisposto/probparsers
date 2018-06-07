@@ -73,6 +73,8 @@ Tokens
 	div = '/' | '\div'| 0x00f7;
 	mult = '*' | 0x2217;
 	minus = '-' | 0x2212;
+	lbrace = '{' | '\{';
+	rbrace = '}' | '\}';
 
 	take = '/|\';
 	drop = '\|/';
