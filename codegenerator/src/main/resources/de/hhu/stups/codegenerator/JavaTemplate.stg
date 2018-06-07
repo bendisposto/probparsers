@@ -52,6 +52,10 @@ set_enumeration(enums) ::= <<
 new BSet(new HashSet\<BObject>(Arrays.asList(<enums; separator=", ">)))
 >>
 
+set_element(set,element) ::= <<
+<set>.<element>
+>>
+
 enum_call(class, identifier) ::= <<
 <class>.<identifier>
 >>

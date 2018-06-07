@@ -114,7 +114,6 @@ public class ExpressionOperatorGenerator {
     }
 
     private static String generateSetEnumeration(List<String> expressions, STGroup template) {
-        //TODO
         return template.getInstanceOf("set_enumeration").add("enums", expressions).render();
     }
 

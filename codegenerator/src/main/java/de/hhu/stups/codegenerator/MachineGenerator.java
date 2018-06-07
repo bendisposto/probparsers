@@ -185,10 +185,12 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     }
 
     public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node, Void expected) {
-        //TODO
         String typeName = node.getType().toString();
         typeName = typeName.substring(0,1).toUpperCase() + typeName.substring(1);
-        return typeName + "." + node.getName().toUpperCase();
+        ST element = currentGroup.getInstanceOf("set_element");
+        element.add("set", typeName);
+        element.add("element", node.getName().toUpperCase());
+        return element.render();
     }
 
 
