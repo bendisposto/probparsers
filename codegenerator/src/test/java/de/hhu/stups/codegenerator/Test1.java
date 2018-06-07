@@ -5,7 +5,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -26,18 +25,45 @@ public class Test1 {
     }
 
     @Test
-    public void testAbstractMachine() throws URISyntaxException, CodeGenerationException, IOException, InterruptedException {
+    public void testAbstractMachine() throws Exception {
         Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/AbstractMachine.mch").toURI());
         CodeGenerator.generate(path, GeneratorMode.JAVA);
 
-        //Runtime.getRuntime().exec("mkdir fabianvu");
-        Process process = Runtime.getRuntime().exec("javac /build/resources/test/de/hhu/stups/codegenerator/AbstractMachine.java");
-        writeInputToSystem(process.getErrorStream());
+        Process process1 = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/AbstractMachine.java -cp btypes.jar");
 
+        writeInputToSystem(process1.getErrorStream());
+        writeInputToOutput(process1.getErrorStream(), process1.getOutputStream());
+        process1.waitFor();
 
-        //String outPath = path.toFile().getName().replace(".scala", ".out");
-        //writeInputToOutput(process.getInputStream(), new FileOutputStream(outPath));*/
-        //process.waitFor();
+        /*Process process2 = Runtime.getRuntime().exec("java -classpath .:btypes.jar AbstractMachine");
+        writeInputToSystem(process2.getErrorStream());
+        writeInputToOutput(process2.getErrorStream(), process2.getOutputStream());
+
+        process2.waitFor();*/
+    }
+
+    @Test
+    public void testAbstractMachine3() throws Exception {
+        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/AbstractMachine3.mch").toURI());
+        CodeGenerator.generate(path, GeneratorMode.JAVA);
+
+        Process process1 = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/AbstractMachine3.java -cp btypes.jar");
+
+        writeInputToSystem(process1.getErrorStream());
+        writeInputToOutput(process1.getErrorStream(), process1.getOutputStream());
+        process1.waitFor();
+    }
+
+    @Test
+    public void testAbstractMachine4() throws Exception {
+        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/AbstractMachine4.mch").toURI());
+        CodeGenerator.generate(path, GeneratorMode.JAVA);
+
+        Process process1 = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/AbstractMachine4.java -cp btypes.jar");
+
+        writeInputToSystem(process1.getErrorStream());
+        writeInputToOutput(process1.getErrorStream(), process1.getOutputStream());
+        process1.waitFor();
     }
 
 }

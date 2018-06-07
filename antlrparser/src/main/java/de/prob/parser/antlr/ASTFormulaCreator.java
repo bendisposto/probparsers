@@ -1,5 +1,8 @@
 package de.prob.parser.antlr;
 
+import de.prob.parser.ast.SourceCodePosition;
+import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.DeferredSetNode;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -104,6 +107,22 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitParenthesis(BParser.ParenthesisContext ctx) {
+		return ctx.expression_in_par().accept(this);
+	}
+
+	@Override
+	public Node visitEmptySet(BParser.EmptySetContext ctx) {
+		SourceCodePosition sourceCodePosition = new SourceCodePosition();
+		sourceCodePosition.setStartLine(ctx.LEFT_BRACE().getSymbol().getLine());
+		sourceCodePosition.setStartColumn(ctx.LEFT_BRACE().getSymbol().getCharPositionInLine());
+		sourceCodePosition.setText(ctx.LEFT_BRACE().getSymbol().getText());
+
+		DeclarationNode declarationNode = new DeclarationNode(sourceCodePosition, ctx.LEFT_BRACE().getSymbol().getText());
+		return new DeferredSetNode(sourceCodePosition, declarationNode, "");
+	}
+
+	@Override
 	public Node visitPredicateBinExpression(BParser.PredicateBinExpressionContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
@@ -191,11 +210,19 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		case BParser.POW:
 			op = ExpressionOperator.POW;
 			break;
+		case BParser.CARD:
+			op = ExpressionOperator.CARD;
+			break;
 		default:
 			throw new RuntimeException(ctx.expression_prefix_operator().operator.getText());
 		}
 		ExprNode argument = (ExprNode) ctx.expression_in_par().accept(this);
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(argument), op);
+	}
+
+	@Override
+	public Node visitPredicateParenthesis(BParser.PredicateParenthesisContext ctx) {
+		return ctx.predicate().accept(this);
 	}
 
 	@Override

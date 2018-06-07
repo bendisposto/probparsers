@@ -163,6 +163,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
         //TODO
         imports.add(currentGroup.getInstanceOf("hashset_import").render());
+        imports.add(currentGroup.getInstanceOf("set_import").render());
+        imports.add(currentGroup.getInstanceOf("object_import").render());
         imports.add(currentGroup.getInstanceOf("arrays_import").render());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
         setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclaration().getName(), currentGroup));

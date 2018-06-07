@@ -26,7 +26,7 @@ public class BInteger extends BNumber {
 		return result;
 	}
 
-    BInteger(java.math.BigInteger value) {
+    public BInteger(java.math.BigInteger value) {
 		this.value = value;
 	}
 

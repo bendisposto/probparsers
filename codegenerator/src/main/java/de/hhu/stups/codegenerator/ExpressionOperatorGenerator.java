@@ -1,7 +1,6 @@
 package de.hhu.stups.codegenerator;
 
 
-import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -9,7 +8,6 @@ import org.stringtemplate.v4.STGroup;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
@@ -45,7 +43,7 @@ public class ExpressionOperatorGenerator {
         } else if(BOOLEANS.contains(operator)) {
             return generateBoolean(operator, template);
         } else if(node.getOperator() == SET_ENUMERATION){
-            return generateSetEnumeration(node, template);
+            return generateSetEnumeration(expressionList, template);
         }
         return "";
     }
@@ -115,11 +113,9 @@ public class ExpressionOperatorGenerator {
         return template;
     }
 
-    private static String generateSetEnumeration(ExpressionOperatorNode node, STGroup template) {
+    private static String generateSetEnumeration(List<String> expressions, STGroup template) {
         //TODO
-        return template.getInstanceOf("set_enumeration").add("enums", String.join(", ", node.getExpressionNodes().stream()
-                .map(ExprNode::toString)
-                .collect(Collectors.toList()))).render();
+        return template.getInstanceOf("set_enumeration").add("enums", expressions).render();
     }
 
     private static String generateBoolean(ExpressionOperatorNode.ExpressionOperator operator, STGroup template) {

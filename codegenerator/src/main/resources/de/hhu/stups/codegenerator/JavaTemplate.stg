@@ -49,7 +49,7 @@ private BSet <identifier> = <set_enumeration(enums)>;
 >>
 
 set_enumeration(enums) ::= <<
-new BSet(new HashSet\<>(Arrays.asList(<enums; separator=", ">)))
+new BSet(new HashSet\<BObject>(Arrays.asList(<enums; separator=", ">)))
 >>
 
 enum_call(class, identifier) ::= <<
@@ -84,6 +84,7 @@ boolean(cast) ::= <<
 >>
 
 boolean_import() ::= <<
+import de.hhu.stups.btypes.BBoolean;
 >>
 
 integer(cast) ::= <<
@@ -91,6 +92,7 @@ integer(cast) ::= <<
 >>
 
 integer_import() ::= <<
+import de.hhu.stups.btypes.BInteger;
 >>
 
 set(cast) ::= <<
@@ -98,6 +100,12 @@ set(cast) ::= <<
 >>
 
 set_import() ::= <<
+import de.hhu.stups.btypes.BSet;
+>>
+
+
+object_import() ::= <<
+import de.hhu.stups.btypes.BObject;
 >>
 
 hashset_import() ::= <<
