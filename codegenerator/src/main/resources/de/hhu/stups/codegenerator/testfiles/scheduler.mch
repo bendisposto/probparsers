@@ -1,7 +1,7 @@
 MACHINE scheduler
 
 SETS
-	PID /* = {process1,process2,process3} */
+	PID  = {process1,process2,process3}
 
 VARIABLES active, ready, waiting
 
@@ -17,11 +17,10 @@ INVARIANT  active : POW(PID) & ready : POW(PID) & waiting: POW(PID) & /* the typ
            waiting <: PID &
            (ready /\ waiting) = {} &
            active /\ (ready \/ waiting) = {} &
-           card(active) <= 1 &
-           ((active = {})  => (ready = {}))
+           card(active) <= 1
               
 INITIALISATION  
-	active := {} || ready := {} || waiting := {}
+	active := {}; ready := {}; waiting := {}
 	
 OPERATIONS
 
@@ -45,7 +44,7 @@ ready(rr) =
         SELECT
                 rr : waiting
         THEN
-                waiting := (waiting - {rr}) ||
+                waiting := (waiting - {rr});
                 IF (active = {}) THEN
                    active := {rr}
                 ELSE
@@ -57,14 +56,14 @@ swap =
         SELECT
                 active /= {}
         THEN
-                waiting := (waiting \/ active) ||
+                waiting := (waiting \/ active);
                 IF (ready = {}) THEN
                    active := {}
                 ELSE
-                   ANY pp WHERE pp : ready
+                   SELECT pp : ready
                    THEN
-                       active := {pp} ||
-                       ready := ready - {pp} 
+                       active := {pp};
+                       ready := ready - {pp}
                    END
                 END
         END       

@@ -16,7 +16,7 @@ public class <machine> {
 
     <initialization>
 
-    <operations; separator="\n">
+    <operations; separator="\n\n">
 
 }
 
@@ -28,11 +28,11 @@ public void initialize() {
 }
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, returnIdentifier) ::= <<
+operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
     <locals; separator="\n">
     <body>
-    <return(returnIdentifier)>
+    <return>
 }
 >>
 
@@ -81,6 +81,10 @@ declaration(type, identifier) ::= <<
 
 assignment(identifier, val) ::= <<
 <identifier> = <val>;
+>>
+
+void() ::= <<
+void
 >>
 
 boolean(cast) ::= <<

@@ -1,8 +1,5 @@
 package de.prob.parser.antlr;
 
-import de.prob.parser.ast.SourceCodePosition;
-import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.DeferredSetNode;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -113,13 +110,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitEmptySet(BParser.EmptySetContext ctx) {
-		SourceCodePosition sourceCodePosition = new SourceCodePosition();
-		sourceCodePosition.setStartLine(ctx.LEFT_BRACE().getSymbol().getLine());
-		sourceCodePosition.setStartColumn(ctx.LEFT_BRACE().getSymbol().getCharPositionInLine());
-		sourceCodePosition.setText(ctx.LEFT_BRACE().getSymbol().getText());
-
-		DeclarationNode declarationNode = new DeclarationNode(sourceCodePosition, ctx.LEFT_BRACE().getSymbol().getText());
-		return new DeferredSetNode(sourceCodePosition, declarationNode, "");
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), new ArrayList<>(), ExpressionOperator.SET_ENUMERATION);
 	}
 
 	@Override
@@ -358,6 +349,16 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		List<ExprNode> exprList = visitExpressionList(ctx.expression_list());
 
 		return new AssignSubstitutionNode(Util.createSourceCodePosition(ctx), leftList, exprList);
+	}
+
+	@Override
+	public Node visitSubstitutionBlock(BParser.SubstitutionBlockContext ctx) {
+		return ctx.substitution().accept(this);
+	}
+
+	@Override
+	public Node visitSubstitutionSkip(BParser.SubstitutionSkipContext ctx) {
+		return new ListSubstitutionNode(Util.createSourceCodePosition(ctx), ListOperator.Sequential, new ArrayList<>());
 	}
 
 	@Override

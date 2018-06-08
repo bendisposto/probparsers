@@ -1,5 +1,5 @@
 MACHINE
-    AbstractMachine4
+    AbstractMachine6
 
 SETS cars = {red,yellow,redyellow,green}; peds = {green, red}
 

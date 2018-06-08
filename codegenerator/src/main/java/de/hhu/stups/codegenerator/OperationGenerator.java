@@ -4,6 +4,7 @@ package de.hhu.stups.codegenerator;
 import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.types.BType;
+import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -22,7 +23,10 @@ public class OperationGenerator {
             String identifier = node.getOutputParams().get(0).getName();
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, template, false) + "* " + identifier);
             operation.add("returnType", TypeGenerator.generate(type, template, false));
-            operation.add("returnIdentifier", identifier);
+            operation.add("return", template.getInstanceOf("return").add("identifier", identifier).render());
+        } else if(node.getOutputParams().size() == 0) {
+            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
+            operation.add("returnType", TypeGenerator.generate(new UntypedType(), template, false));
         }
         operation.add("operationName", NameHandler.handle(node.getName().toLowerCase(), template));
         operation.add("parameters", generateParameters(node.getParams(), template));

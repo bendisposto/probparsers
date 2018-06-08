@@ -6,6 +6,7 @@ import de.prob.parser.ast.types.BoolType;
 import de.prob.parser.ast.types.EnumeratedSetElementType;
 import de.prob.parser.ast.types.IntegerType;
 import de.prob.parser.ast.types.SetType;
+import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.STGroup;
 
 import java.util.Set;
@@ -21,6 +22,8 @@ public class TypeGenerator {
             return generateSet(template, cast);
         } else if(type instanceof EnumeratedSetElementType) {
           return generateObject(template, cast);
+        } else if(type instanceof UntypedType) {
+            return generateUntyped(template);
         }
         return "";
     }
@@ -39,6 +42,10 @@ public class TypeGenerator {
 
     private static String generateObject(STGroup template, boolean cast) {
         return template.getInstanceOf("object").add("cast", cast).render();
+    }
+
+    private static String generateUntyped(STGroup template) {
+        return template.getInstanceOf("void").render();
     }
 
     public static void addImport(BType type, Set<String> imports, STGroup template) {

@@ -264,7 +264,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
     @Override
     public String visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
         if(node.getOperator() == IfOrSelectSubstitutionsNode.Operator.SELECT) {
-            return "";
+            return visitSubstitutionNode(node.getSubstitutions().get(0), expected);
         }
         ST ifST = currentGroup.getInstanceOf("if");
         ifST.add("predicate", visitPredicateNode(node.getConditions().get(0), expected));
