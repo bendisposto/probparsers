@@ -12,6 +12,7 @@ import java.util.Optional;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERSECTION;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERVAL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MINUS;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MOD;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MULT;
@@ -44,6 +45,8 @@ public class ExpressionOperatorGenerator {
             return generateBoolean(operator, template);
         } else if(node.getOperator() == SET_ENUMERATION){
             return generateSetEnumeration(expressionList, template);
+        } else if(node.getOperator() == INTERVAL) {
+            return generateInterval(expressionList, template);
         }
         return "";
     }
@@ -111,6 +114,13 @@ public class ExpressionOperatorGenerator {
                 break;
         }
         return template;
+    }
+
+    private static String generateInterval(List<String> arguments, STGroup template) {
+        ST interval = template.getInstanceOf("interval");
+        interval.add("arg1", arguments.get(0));
+        interval.add("arg2", arguments.get(1));
+        return interval.render();
     }
 
     private static String generateSetEnumeration(List<String> expressions, STGroup template) {

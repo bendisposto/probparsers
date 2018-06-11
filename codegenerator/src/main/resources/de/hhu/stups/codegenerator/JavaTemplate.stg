@@ -111,6 +111,10 @@ set(cast) ::= <<
 <if(cast)>(BSet)<else>BSet<endif>
 >>
 
+interval(arg1, arg2) ::= <<
+BSet.range(<arg1>,<arg2>)
+>>
+
 set_import() ::= <<
 import de.hhu.stups.btypes.BSet;
 >>
