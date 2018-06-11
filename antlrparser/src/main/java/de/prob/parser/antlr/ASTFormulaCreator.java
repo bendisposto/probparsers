@@ -36,6 +36,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
 import static files.BParser.AND;
 
 public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
@@ -243,6 +245,9 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		case BParser.MOD:
 			op = ExpressionOperator.MOD;
 			break;
+		case BParser.INTERVAL:
+			op= ExpressionOperator.INTERVAL;
+			break;
 		default:
 			break;
 		}
@@ -307,6 +312,9 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		map.put(BMoThParser.ISEQ, ExpressionOperator.ISEQ);
 		map.put(BMoThParser.ISEQ1, ExpressionOperator.ISEQ1);
 		 */
+		if(op == null) {
+			throw new RuntimeException("Not implemented operator: " + ctx.operator.getText());
+		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
 	}
 
