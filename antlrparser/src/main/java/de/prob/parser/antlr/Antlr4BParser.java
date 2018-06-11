@@ -15,7 +15,6 @@ import org.antlr.v4.runtime.DiagnosticErrorListener;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Antlr4BParser {
 
 	public static MachineNode createSemanticAST(String input) throws TypeErrorException {
@@ -27,7 +26,7 @@ public class Antlr4BParser {
 		return machineNode;
 	}
 
-	public static void createProject(String input, String... machines) {
+	public static BProject createProject(String input, String... machines) {
 		StartContext tree = parse(input);
 		AstCreator astCreator = new AstCreator(tree);
 		MachineNode main = astCreator.getMachineNode();
@@ -38,15 +37,17 @@ public class Antlr4BParser {
 			MachineNode mNode = astCreator2.getMachineNode();
 			machineNodeList.add(mNode);
 		}
-
-		// TODO determine order
+		
+		//TODO determine machine order
 
 		List<MachineContex> scopeList = new ArrayList<>();
 		for (MachineNode machineNode : machineNodeList) {
 			MachineContex machineContex = new MachineContex(machineNode, scopeList);
 			scopeList.add(machineContex);
 		}
-		MachineContex machineContex = new MachineContex(main, scopeList);
+		MachineContex machineContext = new MachineContex(main, scopeList);
+
+		return new BProject(machineContext.getMachineNode(), machineNodeList);
 	}
 
 	public static StartContext parse(String bString) {
