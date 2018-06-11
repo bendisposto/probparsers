@@ -17,10 +17,11 @@ public class OperationGenerator {
     public static ST generate(OperationNode node, List<DeclarationNode> locals, STGroup template) {
         ST operation = template.getInstanceOf("operation");
         operation.add("locals", declareLocals(locals,  template));
-        //TODO
+
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
+            //TODO
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, template, false) + "* " + identifier);
             operation.add("returnType", TypeGenerator.generate(type, template, false));
             operation.add("return", template.getInstanceOf("return").add("identifier", identifier).render());

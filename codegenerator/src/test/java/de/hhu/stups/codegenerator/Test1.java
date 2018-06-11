@@ -67,6 +67,18 @@ public class Test1 {
     }
 
     @Test
+    public void testAbstractMachine5() throws Exception {
+        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/AbstractMachine5.mch").toURI());
+        CodeGenerator.generate(path, GeneratorMode.JAVA);
+
+        Process process1 = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/AbstractMachine5.java -cp btypes.jar");
+
+        writeInputToSystem(process1.getErrorStream());
+        writeInputToOutput(process1.getErrorStream(), process1.getOutputStream());
+        process1.waitFor();
+    }
+
+    @Test
     public void testAbstractMachine6() throws Exception {
         Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/AbstractMachine6.mch").toURI());
         CodeGenerator.generate(path, GeneratorMode.JAVA);
