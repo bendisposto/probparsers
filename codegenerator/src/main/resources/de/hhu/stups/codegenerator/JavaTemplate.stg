@@ -83,6 +83,10 @@ assignment(identifier, val) ::= <<
 <identifier> = <val>;
 >>
 
+assignments(assignments) ::= <<
+<assignments; separator="\n">
+>>
+
 void() ::= <<
 void
 >>
