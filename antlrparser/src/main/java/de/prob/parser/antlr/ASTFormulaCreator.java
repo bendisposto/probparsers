@@ -15,6 +15,7 @@ import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
+import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
@@ -358,7 +359,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitSubstitutionSkip(BParser.SubstitutionSkipContext ctx) {
-		return new ListSubstitutionNode(Util.createSourceCodePosition(ctx), ListOperator.Sequential, new ArrayList<>());
+		return new SkipSubstitutionNode(Util.createSourceCodePosition(ctx));
 	}
 
 	@Override
