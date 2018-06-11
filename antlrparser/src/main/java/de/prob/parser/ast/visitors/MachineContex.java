@@ -19,13 +19,16 @@ import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.visitors.generic.ASTVisitor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MachineContex {
 	private final LinkedList<LinkedHashMap<String, DeclarationNode>> scopeTable = new LinkedList<>();
 	private final LinkedHashMap<Node, DeclarationNode> declarationReferences = new LinkedHashMap<>();
+	private final Map<String, OperationNode> operationsInScope = new HashMap<>();
 	private MachineNode machineNode;
 
 	public MachineContex(MachineNode machineNode) {
@@ -35,6 +38,10 @@ public class MachineContex {
 	public MachineContex(MachineNode machineNode, List<MachineContex> scopeList) {
 		this.machineNode = machineNode;
 		check(scopeList);
+	}
+
+	public MachineNode getMachineNode() {
+		return this.machineNode;
 	}
 
 	private void check(List<MachineContex> scopeList) {
@@ -64,6 +71,7 @@ public class MachineContex {
 			formulaScopeChecker.visitSubstitutionNode(machineNode.getInitialisation());
 		}
 
+		addOperationsToScope(scopeList);
 		for (OperationNode op : machineNode.getOperations()) {
 			createNewScope(op.getParams());
 			createNewScope(machineNode.getConstants());
@@ -73,6 +81,14 @@ public class MachineContex {
 			formulaScopeChecker.visitSubstitutionNode(op.getSubstitution());
 		}
 
+	}
+
+	private void addOperationsToScope(List<MachineContex> scopeList) {
+		for (MachineContex ct : scopeList) {
+			for (OperationNode opNode : ct.machineNode.getOperations()) {
+				operationsInScope.put(opNode.getName(), opNode);
+			}
+		}
 	}
 
 	private List<List<DeclarationNode>> getConstants(List<MachineContex> scopeList) {
@@ -116,6 +132,13 @@ public class MachineContex {
 
 		@Override
 		public void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node) {
+			List<String> names = node.getNames();
+			String opName = names.get(names.size() - 1);
+			if (operationsInScope.containsKey(opName)) {
+				node.setOperationsNode(operationsInScope.get(opName));
+			} else {
+				throw new RuntimeException("Unkown operation name: " + opName);
+			}
 			for (ExprNode arg : node.getArguments()) {
 				visitExprNode(arg);
 			}
