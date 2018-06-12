@@ -1,8 +1,8 @@
 package de.hhu.stups.codegenerator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,19 +26,29 @@ public class TestJava {
     }
 
     public void testJava(String machine) throws Exception {
-        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
-        CodeGenerator.generate(path, GeneratorMode.JAVA);
+        Path mchPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
+        CodeGenerator.generate(mchPath, GeneratorMode.JAVA);
 
         Process process = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/" + machine + ".java " + "-cp btypes.jar");
 
         writeInputToSystem(process.getErrorStream());
         writeInputToOutput(process.getErrorStream(), process.getOutputStream());
         process.waitFor();
+
+        Path javaPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".java").toURI());
+        Path classPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".class").toURI());
+        cleanUp(javaPath.toString());
+        cleanUp(classPath.toString());
     }
 
     @Test
     public void testAbstractMachine() throws Exception {
         testJava("AbstractMachine");
+    }
+
+    @Test
+    public void testAbstractMachine2() throws Exception {
+        testJava("AbstractMachine2");
     }
 
     @Test
@@ -51,10 +61,8 @@ public class TestJava {
         testJava("AbstractMachine4");
     }
 
-    @Ignore
     @Test
     public void testAbstractMachine5() throws Exception {
-    	//TODO machine does not exist
         testJava("AbstractMachine5");
     }
 
@@ -79,10 +87,8 @@ public class TestJava {
         testJava("Bakery0");
     }
 
-    @Ignore
     @Test
     public void testGCD() throws Exception {
-        //TODO parallel substitution is currently not supported
     	testJava("GCD");
     }
 
@@ -95,5 +101,23 @@ public class TestJava {
     public void testLift() throws Exception {
         testJava("Lift");
     }
+
+    @Test
+    public void testPhonebook() throws Exception {
+        testJava("phonebook");
+    }
+
+    @Test
+    public void testPhonebook6() throws Exception {
+        testJava("phonebook6");
+    }
+
+    private void cleanUp(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
 
 }
