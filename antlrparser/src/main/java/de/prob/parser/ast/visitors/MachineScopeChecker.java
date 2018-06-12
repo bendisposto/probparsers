@@ -40,7 +40,7 @@ public class MachineScopeChecker {
 	private List<DeclarationNode> constantsInScope;
 	private List<DeclarationNode> variablesInScope;
 
-	public MachineScopeChecker(MachineNode machineNode) {
+	public MachineScopeChecker(MachineNode machineNode) throws ScopeException {
 		this.machineNode = machineNode;
 		try {
 			check();
@@ -82,11 +82,11 @@ public class MachineScopeChecker {
 
 		addOperationsToScope(machineNode, true);
 		for (OperationNode op : machineNode.getOperations()) {
+			createNewScope(getSetsInScope());
+			createNewScope(getConstantsInScope());
+			createNewScope(getVariablesInScope());
 			createNewScope(op.getParams());
-			createNewScope(machineNode.getConstants());
-			createNewScope(machineNode.getVariables());
 			createNewScope(op.getOutputParams());
-			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitSubstitutionNode(op.getSubstitution());
 		}
 	}

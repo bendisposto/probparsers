@@ -3,7 +3,6 @@ package de.prob.parser;
 import org.junit.Test;
 
 import de.prob.parser.antlr.Antlr4BParser;
-import de.prob.parser.ast.visitors.TypeErrorException;
 
 public class MachineTest {
 
@@ -20,12 +19,12 @@ public class MachineTest {
 	}
 
 	@Test
-	public void testSingleMachine() throws TypeErrorException {
+	public void testSingleMachine() throws Exception {
 		Antlr4BParser.createSemanticAST(getTestMachine());
 	}
 
 	@Test
-	public void testMachines() throws TypeErrorException {
+	public void testMachines() throws Exception {
 		String machine = "MACHINE test2\n";
 		machine += "INCLUDES test\n";
 		machine += "CONSTANTS k2\n";
@@ -41,7 +40,7 @@ public class MachineTest {
 	}
 
 	@Test
-	public void testMachines2() throws TypeErrorException {
+	public void testMachines2() throws Exception {
 		String machine = "MACHINE test2\n";
 		machine += "INCLUDES test\n";
 		machine += "CONSTANTS k2\n";
@@ -55,7 +54,5 @@ public class MachineTest {
 
 		Antlr4BParser.createProject(machine, getTestMachine());
 	}
-	
-
 
 }

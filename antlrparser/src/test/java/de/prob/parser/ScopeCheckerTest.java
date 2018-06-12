@@ -4,12 +4,11 @@ import org.junit.Test;
 
 import de.prob.parser.antlr.Antlr4BParser;
 import de.prob.parser.antlr.ScopeException;
-import de.prob.parser.ast.visitors.TypeErrorException;
 
 public class ScopeCheckerTest {
 
 	@Test
-	public void testKnownOperation() throws TypeErrorException {
+	public void testKnownOperation() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "INCLUDES B\n";
 		machineA += "OPERATIONS\n";
@@ -24,7 +23,7 @@ public class ScopeCheckerTest {
 	}
 
 	@Test(expected = ScopeException.class)
-	public void testUnknownOperation() {
+	public void testUnknownOperation() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "INCLUDES B\n";
 		machineA += "OPERATIONS\n";
@@ -37,7 +36,7 @@ public class ScopeCheckerTest {
 	}
 
 	@Test
-	public void testKnownConstant() throws TypeErrorException {
+	public void testKnownConstant() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "INCLUDES B\n";
 		machineA += "PROPERTIES k = 2-1\n";
@@ -50,7 +49,7 @@ public class ScopeCheckerTest {
 	}
 
 	@Test(expected = ScopeException.class)
-	public void testUnknownConstant() throws TypeErrorException {
+	public void testUnknownConstant() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "PROPERTIES k = 2-1\n";
 		machineA += "END";
@@ -60,9 +59,9 @@ public class ScopeCheckerTest {
 		machineB += "END";
 		checkmachines(machineA, machineB);
 	}
-	
+
 	@Test
-	public void testKnownVariable() throws TypeErrorException {
+	public void testKnownVariable() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "INCLUDES B\n";
 		machineA += "INVARIANT x = 1\n";
@@ -75,7 +74,7 @@ public class ScopeCheckerTest {
 	}
 
 	@Test(expected = ScopeException.class)
-	public void testUnknownVariable() throws TypeErrorException {
+	public void testUnknownVariable() throws Exception {
 		String machineA = "MACHINE A\n";
 		machineA += "INVARIANT x = 1\n";
 		machineA += "END";
@@ -85,8 +84,8 @@ public class ScopeCheckerTest {
 		machineB += "END";
 		checkmachines(machineA, machineB);
 	}
-	
-	private void checkmachines(String machineA, String machineB) {
+
+	private void checkmachines(String machineA, String machineB) throws Exception {
 		Antlr4BParser.createProject(machineA, machineB);
 	}
 

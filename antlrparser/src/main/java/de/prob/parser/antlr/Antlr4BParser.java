@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class Antlr4BParser {
 
-	public static MachineNode createSemanticAST(String input) throws TypeErrorException {
+	public static MachineNode createSemanticAST(String input) throws TypeErrorException, ScopeException {
 		StartContext tree = parse(input);
 		AstCreator astCreator = new AstCreator(tree);
 		MachineNode machineNode = astCreator.getMachineNode();
@@ -32,7 +32,7 @@ public class Antlr4BParser {
 		return machineNode;
 	}
 
-	public static BProject createProject(String input, String... machines) {
+	public static BProject createProject(String input, String... machines) throws TypeErrorException, ScopeException {
 		StartContext tree = parse(input);
 		AstCreator astCreator = new AstCreator(tree);
 		MachineNode main = astCreator.getMachineNode();
@@ -51,6 +51,11 @@ public class Antlr4BParser {
 
 		for (int i = machineNodeList.size() - 1; i >= 0; i--) {
 			new MachineScopeChecker(machineNodeList.get(i));
+		}
+
+		for (int i = machineNodeList.size() - 1; i >= 0; i--) {
+			MachineNode machineNode = machineNodeList.get(i);
+			TypeChecker.typecheckMachineNode(machineNode);
 		}
 		return new BProject(machineNodeList);
 	}
