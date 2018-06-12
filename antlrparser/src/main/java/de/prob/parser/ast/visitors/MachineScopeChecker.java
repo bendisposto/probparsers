@@ -193,14 +193,6 @@ public class MachineScopeChecker {
 		this.scopeTable.add(scope);
 	}
 
-	private void createNewScope3(List<EnumeratedSetDeclarationNode> list) {
-		LinkedHashMap<String, DeclarationNode> scope = new LinkedHashMap<>();
-		for (EnumeratedSetDeclarationNode declarationNode : list) {
-			scope.put(declarationNode.getSetDeclarationNode().getName(), declarationNode.getSetDeclarationNode());
-		}
-		this.scopeTable.add(scope);
-	}
-
 	class FormulaScopeChecker extends ASTVisitor {
 
 		@Override
@@ -288,7 +280,7 @@ public class MachineScopeChecker {
 				return declarationNode;
 			}
 		}
-		throw new VisitorException(new ScopeException("Identifier not found: " + name));
+		throw new VisitorException(new ScopeException("Unknown identifier: " + name));
 	}
 
 	public void addDeclarationReference(Node identifierToken, DeclarationNode declarationToken) {

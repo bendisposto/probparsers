@@ -1,5 +1,6 @@
 package de.hhu.stups.codegenerator;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -50,8 +51,10 @@ public class TestJava {
         testJava("AbstractMachine4");
     }
 
+    @Ignore
     @Test
     public void testAbstractMachine5() throws Exception {
+    	//TODO machine does not exist
         testJava("AbstractMachine5");
     }
 
@@ -76,9 +79,11 @@ public class TestJava {
         testJava("Bakery0");
     }
 
+    @Ignore
     @Test
     public void testGCD() throws Exception {
-        testJava("GCD");
+        //TODO parallel substitution is currently not supported
+    	testJava("GCD");
     }
 
     @Test

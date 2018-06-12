@@ -85,9 +85,11 @@ public class AstCreator {
 			}
 			switch (ctx.name.getText()) {
 			case "CONSTANTS":
+			case "ABSTRACT_CONSTANTS":
 				machineNode.setConstants(createDeclarationList(ctx.identifier_list().IDENTIFIER()));
 				break;
 			case "VARIABLES":
+			case "ABSTRACT_VARIABLES":
 				machineNode.setVariables(createDeclarationList(ctx.identifier_list().IDENTIFIER()));
 				break;
 			default:

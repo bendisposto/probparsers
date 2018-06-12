@@ -109,13 +109,21 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitUnaryMinus(BParser.UnaryMinusContext ctx) {
+		ExprNode expr = (ExprNode) ctx.expression().accept(this);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(expr),
+				ExpressionOperator.UNARY_MINUS);
+	}
+
+	@Override
 	public Node visitParenthesis(BParser.ParenthesisContext ctx) {
 		return ctx.expression_in_par().accept(this);
 	}
 
 	@Override
 	public Node visitEmptySet(BParser.EmptySetContext ctx) {
-		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), new ArrayList<>(), ExpressionOperator.SET_ENUMERATION);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), new ArrayList<>(),
+				ExpressionOperator.SET_ENUMERATION);
 	}
 
 	@Override
@@ -192,6 +200,9 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		case BParser.INT:
 			op = ExpressionOperator.INT;
 			break;
+		case BParser.NAT:
+			op = ExpressionOperator.NAT;
+			break;
 		default:
 			throw new RuntimeException(ctx.expression_keyword().operator.getText());
 		}
@@ -249,7 +260,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 			op = ExpressionOperator.MOD;
 			break;
 		case BParser.INTERVAL:
-			op= ExpressionOperator.INTERVAL;
+			op = ExpressionOperator.INTERVAL;
 			break;
 		case DOM:
 			op = ExpressionOperator.DOMAIN;
@@ -318,7 +329,7 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		map.put(BMoThParser.ISEQ, ExpressionOperator.ISEQ);
 		map.put(BMoThParser.ISEQ1, ExpressionOperator.ISEQ1);
 		 */
-		if(op == null) {
+		if (op == null) {
 			throw new RuntimeException("Not implemented operator: " + ctx.operator.getText());
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
