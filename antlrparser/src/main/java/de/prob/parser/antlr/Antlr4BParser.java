@@ -1,6 +1,5 @@
 package de.prob.parser.antlr;
 
-import de.be4.classicalb.core.preparser.node.Token;
 import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.visitors.MachineScopeChecker;
@@ -50,7 +49,7 @@ public class Antlr4BParser {
 		// determine machine order
 		sortMachineNodes(machineNodeList);
 
-		for (int i = machineNodeList.size() - 1 ; i >= 0; i--) {
+		for (int i = machineNodeList.size() - 1; i >= 0; i--) {
 			new MachineScopeChecker(machineNodeList.get(i));
 		}
 		return new BProject(machineNodeList);

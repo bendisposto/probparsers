@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 public class AstCreator {
 	private final MachineNode machineNode;
 
@@ -31,7 +29,7 @@ public class AstCreator {
 	public AstCreator(StartContext startContext) {
 		this.machineNode = new MachineNode(Util.createSourceCodePosition(startContext));
 
-		MachineConstructor machineConstructor = new MachineConstructor(startContext);
+		new MachineConstructor(startContext);
 
 	}
 
