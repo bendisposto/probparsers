@@ -22,6 +22,7 @@ import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.types.*;
 
@@ -561,8 +562,8 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 
 	@Override
 	public BType visitIdentifierExprNode(IdentifierExprNode node, BType expected) {
-		if(node.getDeclarationNode() == null) {
-			//TODO: Check whether semantic is correct or not
+		if (node.getDeclarationNode() == null) {
+			// TODO: Check whether semantic is correct or not
 			return unify(expected, new UntypedType(), node);
 		}
 		return unify(expected, node.getDeclarationNode().getType(), node);
@@ -750,6 +751,16 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 	public BType visitListSubstitutionNode(ListSubstitutionNode node, BType expected) {
 		for (SubstitutionNode sub : node.getSubstitutions()) {
 			visitSubstitutionNode(sub, expected);
+		}
+		return null;
+	}
+
+	@Override
+	public BType visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, BType expected) {
+		for (int i = 0; i < node.getArguments().size(); i++) {
+			ExprNode arg = node.getArguments().get(i);
+			BType type = node.getOperationsNode().getParams().get(i).getType();
+			visitExprNode(arg, type);
 		}
 		return null;
 	}
