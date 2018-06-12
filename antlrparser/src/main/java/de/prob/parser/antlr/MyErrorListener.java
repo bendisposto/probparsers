@@ -8,13 +8,11 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import files.BParser;
 
 import static files.BParser.*;
 
 public class MyErrorListener extends BaseErrorListener {
-	BException exception;
 
 	@Override
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,

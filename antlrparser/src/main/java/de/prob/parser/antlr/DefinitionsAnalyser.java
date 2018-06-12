@@ -10,8 +10,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 import files.BParserBaseVisitor;
 import files.BParser.*;
 
@@ -170,11 +168,10 @@ public class DefinitionsAnalyser implements IDefinitions {
 				final ParserRuleContext context, int numberOfArguments) {
 
 			if (definitionTypes.get(defName) != DefinitionType.UNKNOWN_TYPE && definitionTypes.get(defName) != type) {
-				SourcecodeRange sourcecodeRange = new SourcecodeRange(context.getStart().getCharPositionInLine() + 1,
-						context.getStop().getCharPositionInLine() + context.getStop().getText().length() + 1);
+//				SourcecodeRange sourcecodeRange = new SourcecodeRange(context.getStart().getCharPositionInLine() + 1,
+//						context.getStop().getCharPositionInLine() + context.getStop().getText().length() + 1);
 				String msg = "Invalid definition type. Expected: " + definitionTypes.get(defName);
-				BParseException exception = new BParseException(null, msg);
-				throw new RuntimeException(exception);
+				throw new RuntimeException(msg);
 			}
 			final int numberOfParameter = definitionParameterNumber.get(defName);
 			if (numberOfParameter != numberOfArguments) {
