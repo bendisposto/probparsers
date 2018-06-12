@@ -6,27 +6,21 @@ import java.util.List;
 import de.prob.parser.ast.nodes.MachineNode;
 
 public class BProject {
-	private final MachineNode mainMachineNode;
-	private final String mainMachineName;
-	private final LinkedHashMap<String, MachineNode> referencedMachines = new LinkedHashMap<>();
+	private final LinkedHashMap<String, MachineNode> machinesMap = new LinkedHashMap<>();
 
-	public BProject(MachineNode mainMachineNode, List<MachineNode> machineNodeList) {
-		this.mainMachineNode = mainMachineNode;
-		this.mainMachineName = mainMachineNode.getName();
+	public BProject(List<MachineNode> machineNodeList) {
 		for (MachineNode node : machineNodeList) {
-			referencedMachines.put(node.getName(), node);
+			machinesMap.put(node.getName(), node);
 		}
 	}
 
 	public MachineNode getMainMachine() {
-		return this.mainMachineNode;
+		return this.machinesMap.entrySet().iterator().next().getValue();
 	}
 
 	public MachineNode getMachineNode(String machineName) {
-		if (machineName.equals(mainMachineName)) {
-			return mainMachineNode;
-		} else if (referencedMachines.containsKey(machineName)) {
-			return referencedMachines.get(machineName);
+		if (machinesMap.containsKey(machineName)) {
+			return machinesMap.get(machineName);
 		} else {
 			throw new RuntimeException("Unknown operation name: " + machineName);
 		}

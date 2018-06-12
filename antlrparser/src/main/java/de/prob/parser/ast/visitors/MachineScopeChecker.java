@@ -1,8 +1,11 @@
 package de.prob.parser.ast.visitors;
 
+import de.prob.parser.antlr.ScopeException;
+import de.prob.parser.antlr.VisitorException;
 import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
@@ -25,53 +28,59 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MachineContex {
+public class MachineScopeChecker {
 	private final LinkedList<LinkedHashMap<String, DeclarationNode>> scopeTable = new LinkedList<>();
 	private final LinkedHashMap<Node, DeclarationNode> declarationReferences = new LinkedHashMap<>();
 	private final Map<String, OperationNode> operationsInScope = new HashMap<>();
+
 	private MachineNode machineNode;
 
-	public MachineContex(MachineNode machineNode) {
-		this(machineNode, new ArrayList<>());
-	}
+	private List<MachineNode> machinesInScope;
+	private List<DeclarationNode> setsInScope;
+	private List<DeclarationNode> constantsInScope;
+	private List<DeclarationNode> variablesInScope;
 
-	public MachineContex(MachineNode machineNode, List<MachineContex> scopeList) {
+	public MachineScopeChecker(MachineNode machineNode) {
 		this.machineNode = machineNode;
-		check(scopeList);
+		try {
+			check();
+		} catch (VisitorException e) {
+			throw (ScopeException) e.getCause();
+		}
+
 	}
 
 	public MachineNode getMachineNode() {
 		return this.machineNode;
 	}
 
-	private void check(List<MachineContex> scopeList) {
+	private void check() {
 		FormulaScopeChecker formulaScopeChecker = new FormulaScopeChecker();
 
 		if (machineNode.getProperties() != null) {
 			scopeTable.clear();
-			createNewScope(machineNode.getConstants());
-			createNewScope2(getConstants(scopeList));
-			createNewScope3(machineNode.getEnumaratedSets());
+			createNewScope(getSetsInScope());
+			createNewScope(getConstantsInScope());
 			formulaScopeChecker.visitPredicateNode(machineNode.getProperties());
 		}
 
 		if (machineNode.getInvariant() != null) {
 			scopeTable.clear();
-			createNewScope(machineNode.getConstants());
-			createNewScope(machineNode.getVariables());
-			createNewScope3(machineNode.getEnumaratedSets());
+			createNewScope(getSetsInScope());
+			createNewScope(getConstantsInScope());
+			createNewScope(getVariablesInScope());
 			formulaScopeChecker.visitPredicateNode(machineNode.getInvariant());
 		}
 
 		if (machineNode.getInitialisation() != null) {
 			scopeTable.clear();
-			createNewScope(machineNode.getConstants());
-			createNewScope(machineNode.getVariables());
-			createNewScope3(machineNode.getEnumaratedSets());
+			createNewScope(getSetsInScope());
+			createNewScope(getConstantsInScope());
+			createNewScope(getVariablesInScope());
 			formulaScopeChecker.visitSubstitutionNode(machineNode.getInitialisation());
 		}
 
-		addOperationsToScope(scopeList);
+		addOperationsToScope(machineNode, true);
 		for (OperationNode op : machineNode.getOperations()) {
 			createNewScope(op.getParams());
 			createNewScope(machineNode.getConstants());
@@ -80,29 +89,100 @@ public class MachineContex {
 			createNewScope3(machineNode.getEnumaratedSets());
 			formulaScopeChecker.visitSubstitutionNode(op.getSubstitution());
 		}
-
 	}
 
-	private void addOperationsToScope(List<MachineContex> scopeList) {
-		for (MachineContex ct : scopeList) {
-			for (OperationNode opNode : ct.machineNode.getOperations()) {
-				operationsInScope.put(opNode.getName(), opNode);
+	private void addOperationsToScope(MachineNode mNode, boolean first) {
+		if (!first) {
+			for (OperationNode op : mNode.getOperations()) {
+				this.operationsInScope.put(op.getName(), op);
+			}
+		}
+		for (MachineReferenceNode ref : mNode.getMachineReferences()) {
+			MachineNode refMachine = ref.getMachineNode();
+			if (ref.getType() == MachineReferenceNode.Kind.EXTENDED
+					|| ref.getType() == MachineReferenceNode.Kind.INCLUDED) {
+				addOperationsToScope(refMachine, false);
 			}
 		}
 	}
 
-	private List<List<DeclarationNode>> getConstants(List<MachineContex> scopeList) {
-		List<List<DeclarationNode>> result = new ArrayList<>();
-		for (MachineContex ct : scopeList) {
-			result.add(ct.machineNode.getConstants());
+	public List<DeclarationNode> getConstantsInScope() {
+		if (constantsInScope == null) {
+			constantsInScope = getConstantsInScope(getMachinesInScope());
+		}
+		return constantsInScope;
+	}
+
+	public List<DeclarationNode> getConstantsInScope(List<MachineNode> list) {
+		List<DeclarationNode> result = new ArrayList<>();
+		for (MachineNode machine : list) {
+			result.addAll(machine.getConstants());
 		}
 		return result;
 	}
 
-	private void createNewScope2(List<List<DeclarationNode>> list) {
-		for (List<DeclarationNode> l : list) {
-			createNewScope(l);
+	public List<DeclarationNode> getVariablesInScope() {
+		if (variablesInScope == null) {
+			variablesInScope = getVariablesInScope(getMachinesInScope());
 		}
+		return variablesInScope;
+	}
+
+	public List<DeclarationNode> getVariablesInScope(List<MachineNode> list) {
+		List<DeclarationNode> result = new ArrayList<>();
+		for (MachineNode machine : list) {
+			result.addAll(machine.getVariables());
+		}
+		return result;
+	}
+
+	private List<DeclarationNode> getSetsInScope() {
+		if (this.setsInScope == null) {
+			setsInScope = getSetsInScope(getMachinesInScope());
+		}
+		return setsInScope;
+	}
+
+	private List<DeclarationNode> getSetsInScope(List<MachineNode> list) {
+		List<DeclarationNode> result = new ArrayList<>();
+		for (MachineNode machine : list) {
+			for (EnumeratedSetDeclarationNode enumSet : machine.getEnumaratedSets()) {
+				result.add(enumSet.getSetDeclarationNode());
+				result.addAll(enumSet.getElements());
+			}
+			result.addAll(machine.getDeferredSets());
+		}
+		return result;
+	}
+
+	private List<MachineNode> getMachinesInScope() {
+		if (this.machinesInScope == null) {
+			machinesInScope = new ArrayList<>();
+			machinesInScope.add(this.machineNode);
+			for (MachineReferenceNode ref : this.machineNode.getMachineReferences()) {
+				MachineNode refMachine = ref.getMachineNode();
+				machinesInScope.add(refMachine);
+				if (ref.getType() == MachineReferenceNode.Kind.EXTENDED
+						|| ref.getType() == MachineReferenceNode.Kind.INCLUDED) {
+					machinesInScope.addAll(getMachinesInScope(refMachine));
+				}
+			}
+		}
+		return machinesInScope;
+
+	}
+
+	private List<MachineNode> getMachinesInScope(MachineNode mNode) {
+		List<MachineNode> result = new ArrayList<>();
+		result.add(mNode);
+		for (MachineReferenceNode ref : mNode.getMachineReferences()) {
+			MachineNode refMachine = ref.getMachineNode();
+			if (ref.getType() == MachineReferenceNode.Kind.EXTENDED
+					|| ref.getType() == MachineReferenceNode.Kind.INCLUDED) {
+				result.addAll(getMachinesInScope(refMachine));
+			}
+		}
+		return result;
 	}
 
 	private void createNewScope(List<DeclarationNode> list) {
@@ -116,7 +196,7 @@ public class MachineContex {
 	private void createNewScope3(List<EnumeratedSetDeclarationNode> list) {
 		LinkedHashMap<String, DeclarationNode> scope = new LinkedHashMap<>();
 		for (EnumeratedSetDeclarationNode declarationNode : list) {
-			scope.put(declarationNode.getSetDeclaration().getName(), declarationNode.getSetDeclaration());
+			scope.put(declarationNode.getSetDeclarationNode().getName(), declarationNode.getSetDeclarationNode());
 		}
 		this.scopeTable.add(scope);
 	}
@@ -137,7 +217,7 @@ public class MachineContex {
 			if (operationsInScope.containsKey(opName)) {
 				node.setOperationsNode(operationsInScope.get(opName));
 			} else {
-				throw new RuntimeException("Unkown operation name: " + opName);
+				throw new VisitorException(new ScopeException("Unkown operation name: " + opName));
 			}
 			for (ExprNode arg : node.getArguments()) {
 				visitExprNode(arg);
@@ -208,7 +288,7 @@ public class MachineContex {
 				return declarationNode;
 			}
 		}
-		throw new RuntimeException("Identifier not found: " + name);
+		throw new VisitorException(new ScopeException("Identifier not found: " + name));
 	}
 
 	public void addDeclarationReference(Node identifierToken, DeclarationNode declarationToken) {

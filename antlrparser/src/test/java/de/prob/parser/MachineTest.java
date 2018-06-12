@@ -56,19 +56,6 @@ public class MachineTest {
 		Antlr4BParser.createProject(machine, getTestMachine());
 	}
 	
-	@Test
-	public void testOperationCall() throws TypeErrorException {
-		String machineA = "MACHINE A\n";
-		machineA += "INCLUDES B\n";
-		machineA += "OPERATIONS\n";
-		machineA += "foo = SELECT 1=1 THEN bar END \n";
-		machineA += "END";
 
-		String machineB = "MACHINE B\n";
-		machineB += "OPERATIONS\n";
-		machineB += "bar = PRE 1=1 THEN skip END \n";
-		machineB += "END";
-		Antlr4BParser.createProject(machineA, machineB);
-	}
 
 }

@@ -12,7 +12,7 @@ public class MachineNode extends Node {
 
 	private List<DeclarationNode> constants = new ArrayList<>();
 	private List<DeclarationNode> variables = new ArrayList<>();
-	private List<InstanceNode> instances = new ArrayList<>();
+	private List<MachineReferenceNode> machineReferences = new ArrayList<>();
 	private PredicateNode properties;
 	private PredicateNode invariant;
 	private SubstitutionNode initialisation;
@@ -21,15 +21,15 @@ public class MachineNode extends Node {
 	private List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
 	private List<DeclarationNode> deferredSets = new ArrayList<>();
 	private List<LTLFormula> ltlFormulas = new ArrayList<>();
-	private String name;
+	private String machineName;
 
 	public MachineNode(SourceCodePosition sourceCodePosition, String name) {
 		super(sourceCodePosition);
-		this.name = name;
+		this.machineName = name;
 	}
 
 	public String getName() {
-		return this.name;
+		return this.machineName;
 	}
 
 	public List<DeclarationNode> getVariables() {
@@ -120,20 +120,25 @@ public class MachineNode extends Node {
 		this.operations.add(operationNode);
 	}
 
-	public void addInstance(InstanceNode instanceNode) {
-		instances.add(instanceNode);
+	public void addMachineReferenceNode(MachineReferenceNode machineReferenceNode) {
+		machineReferences.add(machineReferenceNode);
 	}
 
-	public List<InstanceNode> getInstances() {
-		return instances;
+	public List<MachineReferenceNode> getMachineReferences() {
+		return machineReferences;
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.machineName = name;
 	}
 
 	@Override
 	public void removeChild(Node child) {
-		
+
+	}
+	
+	@Override
+	public String toString() {
+		return this.machineName;
 	}
 }
