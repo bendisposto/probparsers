@@ -143,7 +143,7 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 
 	private void checkMachineNode(MachineNode machineNode) {
 		for (EnumeratedSetDeclarationNode eSet : machineNode.getEnumaratedSets()) {
-			DeclarationNode setDeclaration = eSet.getSetDeclaration();
+			DeclarationNode setDeclaration = eSet.getSetDeclarationNode();
 			if (setDeclaration.getType() == null) {
 				EnumeratedSetElementType userDefinedElementType = new EnumeratedSetElementType(setDeclaration.getName(),
 						eSet.getElementsAsStrings());

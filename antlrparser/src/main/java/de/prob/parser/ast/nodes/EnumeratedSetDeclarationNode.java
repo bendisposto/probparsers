@@ -16,7 +16,7 @@ public class EnumeratedSetDeclarationNode extends Node {
 		this.elements = elements;
 	}
 
-	public DeclarationNode getSetDeclaration() {
+	public DeclarationNode getSetDeclarationNode() {
 		return this.setDeclaration;
 	}
 

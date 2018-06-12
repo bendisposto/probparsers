@@ -148,7 +148,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     private String declareEnums(EnumeratedSetDeclarationNode node) {
         ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-        String name = NameHandler.handle(node.getSetDeclaration().getName(), currentGroup);
+        String name = NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup);
         enumDeclaration.add("name", name.substring(0, 1).toUpperCase() + name.substring(1));
         List<String> enums = node.getElements().stream()
             .map(declaration -> declaration.getName().toUpperCase())
@@ -164,7 +164,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
         imports.add(currentGroup.getInstanceOf("object_import").render());
         imports.add(currentGroup.getInstanceOf("arrays_import").render());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-        setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclaration().getName(), currentGroup));
+        setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup));
         List<String> enums = node.getElements().stream()
                 .map(declaration -> callEnum(node, declaration))
                 .collect(Collectors.toList());
@@ -175,7 +175,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
     public String callEnum(EnumeratedSetDeclarationNode setDeclarationNode, DeclarationNode enumNode) {
         ST enumST = currentGroup.getInstanceOf("enum_call");
-        String name = setDeclarationNode.getSetDeclaration().getName();
+        String name = setDeclarationNode.getSetDeclarationNode().getName();
         enumST.add("class", name.substring(0, 1).toUpperCase() + name.substring(1));
         enumST.add("identifier", enumNode.getName().toUpperCase());
         return enumST.render();

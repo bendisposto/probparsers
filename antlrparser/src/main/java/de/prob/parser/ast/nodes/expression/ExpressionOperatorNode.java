@@ -68,9 +68,9 @@ public class ExpressionOperatorNode extends ExprNode
 	}
 	
 	
-	public void setExpressionNodes(List<ExprNode> expressionNodes2) {
-		this.expressionNodes = expressionNodes2;
-		for (ExprNode exprNode : expressionNodes2) {
+	public void setExpressionNodes(List<ExprNode> expressionNodes) {
+		this.expressionNodes = expressionNodes;
+		for (ExprNode exprNode : expressionNodes) {
 			exprNode.setParent(this);
 		}
 	}

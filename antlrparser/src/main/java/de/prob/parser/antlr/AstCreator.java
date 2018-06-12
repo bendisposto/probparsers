@@ -3,7 +3,7 @@ package de.prob.parser.antlr;
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
-import de.prob.parser.ast.nodes.InstanceNode;
+import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
@@ -29,7 +29,7 @@ public class AstCreator {
 	public AstCreator(StartContext startContext) {
 		this.machineNode = new MachineNode(Util.createSourceCodePosition(startContext));
 
-		MachineConstructor machineConstructor = new MachineConstructor(startContext);
+		new MachineConstructor(startContext);
 
 	}
 
@@ -48,10 +48,22 @@ public class AstCreator {
 
 		@Override
 		public Void visitInstanceClause(BParser.InstanceClauseContext ctx) {
+			MachineReferenceNode.Kind kind = null;
+			switch (ctx.name.getType()) {
+			case BParser.INCLUDES:
+				kind = MachineReferenceNode.Kind.INCLUDED;
+				break;
+			case BParser.EXTENDS:
+				kind = MachineReferenceNode.Kind.EXTENDED;
+				break;
+			default:
+				throw new RuntimeException("Unknown instance type: " + ctx.name.getText());
+			}
 			for (Machine_instantiationContext instance : ctx.machine_instantiation()) {
 				String prefix = instance.prefix == null ? null : instance.prefix.getText();
-				String name = instance.name.getText();
-				machineNode.addInstance(new InstanceNode(Util.createSourceCodePosition(ctx), name, prefix));
+				String machineName = instance.name.getText();
+				machineNode.addMachineReferenceNode(
+						new MachineReferenceNode(Util.createSourceCodePosition(ctx), machineName, kind, prefix, true));
 			}
 			return null;
 		}
@@ -60,8 +72,8 @@ public class AstCreator {
 		public Void visitEnumeratedSet(BParser.EnumeratedSetContext ctx) {
 			SourceCodePosition position = getSourcePositionFromTerminalNode(ctx.IDENTIFIER());
 			DeclarationNode declarationNode = new DeclarationNode(position, ctx.IDENTIFIER().getSymbol().getText());
-			machineNode.addSetEnumeration(new EnumeratedSetDeclarationNode(
-					position, declarationNode, createEnumeratedSetDeclarationList(ctx.identifier_list().IDENTIFIER())));
+			machineNode.addSetEnumeration(new EnumeratedSetDeclarationNode(position, declarationNode,
+					createEnumeratedSetDeclarationList(ctx.identifier_list().IDENTIFIER())));
 			return null;
 		}
 
