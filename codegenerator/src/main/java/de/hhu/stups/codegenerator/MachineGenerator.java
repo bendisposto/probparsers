@@ -29,6 +29,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 import org.stringtemplate.v4.ST;
@@ -380,5 +381,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
             .filter(outputParams::contains)
             .collect(Collectors.toList());
     }
+
+	@Override
+	public String visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

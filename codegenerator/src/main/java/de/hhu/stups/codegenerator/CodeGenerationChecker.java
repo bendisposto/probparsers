@@ -23,6 +23,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 
 import java.util.ArrayList;
@@ -171,4 +172,10 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
     public List<String> getErrors() {
         return errors;
     }
+
+	@Override
+	public Void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
