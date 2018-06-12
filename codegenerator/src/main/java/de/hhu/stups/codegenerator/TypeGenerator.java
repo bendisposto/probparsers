@@ -3,6 +3,7 @@ package de.hhu.stups.codegenerator;
 
 import de.prob.parser.ast.types.BType;
 import de.prob.parser.ast.types.BoolType;
+import de.prob.parser.ast.types.CoupleType;
 import de.prob.parser.ast.types.EnumeratedSetElementType;
 import de.prob.parser.ast.types.IntegerType;
 import de.prob.parser.ast.types.SetType;
@@ -21,7 +22,9 @@ public class TypeGenerator {
         } else if(type instanceof SetType) {
             return generateSet(template, cast);
         } else if(type instanceof EnumeratedSetElementType) {
-          return generateObject(template, cast);
+            return generateObject(template, cast);
+        } else if(type instanceof CoupleType) {
+            return generateCouple(template, cast);
         } else if(type instanceof UntypedType) {
             return generateUntyped(template);
         }
@@ -44,6 +47,10 @@ public class TypeGenerator {
         return template.getInstanceOf("object").add("cast", cast).render();
     }
 
+    private static String generateCouple(STGroup template, boolean cast){
+        return template.getInstanceOf("couple").add("cast", cast).render();
+    }
+
     private static String generateUntyped(STGroup template) {
         return template.getInstanceOf("void").render();
     }
@@ -55,6 +62,8 @@ public class TypeGenerator {
             imports.add(template.getInstanceOf("boolean_import").render());
         } else if(type instanceof EnumeratedSetElementType) {
             imports.add(template.getInstanceOf("set_import").render());
+        } else if(type instanceof CoupleType) {
+            imports.add(template.getInstanceOf("couple_import").render());
         }
     }
 

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.COUPLE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERSECTION;
@@ -47,6 +48,8 @@ public class ExpressionOperatorGenerator {
             return generateSetEnumeration(expressionList, template);
         } else if(node.getOperator() == INTERVAL) {
             return generateInterval(expressionList, template);
+        } else if(node.getOperator() == COUPLE) {
+            return generateCouple(expressionList, template);
         }
         return "";
     }
@@ -121,6 +124,13 @@ public class ExpressionOperatorGenerator {
         interval.add("arg1", arguments.get(0));
         interval.add("arg2", arguments.get(1));
         return interval.render();
+    }
+
+    private static String generateCouple(List<String> arguments, STGroup template) {
+        ST couple = template.getInstanceOf("couple_create");
+        couple.add("arg1", arguments.get(0));
+        couple.add("arg2", arguments.get(1));
+        return couple.render();
     }
 
     private static String generateSetEnumeration(List<String> expressions, STGroup template) {

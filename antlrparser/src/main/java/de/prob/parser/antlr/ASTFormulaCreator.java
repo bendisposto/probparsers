@@ -37,9 +37,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import static files.BParser.AND;
+import static files.BParser.DOM;
 
 public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 
@@ -100,8 +99,11 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 		case BParser.SET_SUBTRACTION:
 			op = ExpressionOperator.SET_SUBTRACTION;
 			break;
-		default:
+		case BParser.MAPLET:
+			op = ExpressionOperator.COUPLE;
 			break;
+		default:
+			throw new RuntimeException("Not implemented: " + ctx.expressionOperatorP160().operator.getText());
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
 	}
@@ -248,6 +250,9 @@ public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
 			break;
 		case BParser.INTERVAL:
 			op= ExpressionOperator.INTERVAL;
+			break;
+		case DOM:
+			op = ExpressionOperator.DOMAIN;
 			break;
 		default:
 			break;
