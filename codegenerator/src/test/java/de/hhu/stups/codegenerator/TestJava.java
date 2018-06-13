@@ -84,6 +84,18 @@ public class TestJava {
         testJava("AbstractMachine6");
     }
 
+    @Ignore
+    @Test
+    public void testAbstractMachine11() throws Exception {
+        testJava("AbstractMachine11");
+    }
+
+    @Ignore
+    @Test
+    public void testAbstractMachine14() throws Exception {
+        testJava("AbstractMachine14");
+    }
+
     @Test
     public void testCounter() throws Exception {
         testJava("Counter");
