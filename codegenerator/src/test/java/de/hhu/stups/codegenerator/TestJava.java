@@ -71,18 +71,16 @@ public class TestJava {
         testJava("AbstractMachine5");
     }
 
-    @Ignore
-    @Test
-    public void testAbstractMachine10() throws Exception {
-        //TODO
-        testJava("AbstractMachine10");
-    }
-
-
     @Test
     public void testAbstractMachine6() throws Exception {
         testJava("AbstractMachine6");
     }
+
+    @Test
+    public void testAbstractMachine10() throws Exception {
+        testJava("AbstractMachine10");
+    }
+
 
     @Ignore
     @Test

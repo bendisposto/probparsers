@@ -72,7 +72,7 @@ private <declaration(type, identifier)>;
 >>
 
 local_declaration(type, identifier) ::= <<
-<declaration(type, identifier)>;
+<declaration(type, identifier)> = null;
 >>
 
 declaration(type, identifier) ::= <<
@@ -159,13 +159,13 @@ unary_arithmetic(operator, arg1) ::= <<
 >>
 
 if(predicate, then, else1) ::= <<
-if(<predicate>) {
+if((<predicate>).booleanValue()) {
     <then>
 } <else1; separator=" ">
 >>
 
 elseif(predicate, then) ::= <<
-else if(<predicate>) {
+else if((<predicate>).booleanValue()) {
     <then>
 }
 >>
