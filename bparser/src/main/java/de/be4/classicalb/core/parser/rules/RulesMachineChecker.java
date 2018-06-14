@@ -49,6 +49,7 @@ import de.be4.classicalb.core.parser.node.AFunctionOperation;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AImplicationPredicate;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
@@ -804,9 +805,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation.", node));
 			return;
 		}
+
 		checkErrorType(node.getErrorType());
 		if (!node.getIdentifiers().isEmpty() && node.getWhen() == null) {
 			this.errorList.add(new CheckException(
@@ -815,6 +817,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
+			if (!node.getIdentifiers().isEmpty()) {
+				// implication is not allowed as the top level predicate if there are one or more parameters
+				checkTopLevelPredicate(node.getWhen(), "(WHEN predicate in RULE_FAIL)");
+			}
 			node.getWhen().apply(this);
 		}
 		node.getMessage().apply(this);
@@ -822,12 +828,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	}
 
+	public void checkTopLevelPredicate(PPredicate node, String text) {
+		if (node instanceof AImplicationPredicate) {
+			errorList.add(new CheckException("Implication is not allowed as the top level predicate " + text + ".", node));
+		}
+	}
+
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation.", node));
 			return;
 		}
+		checkTopLevelPredicate(node.getWhere(), "(WHERE predicate in RULE_FORALL)");
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);

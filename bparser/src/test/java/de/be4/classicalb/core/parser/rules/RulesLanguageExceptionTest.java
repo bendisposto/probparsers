@@ -111,7 +111,7 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FORALL x WHERE x : 1..3 EXPECT 1=1 COUNTEREXAMPLE \"Fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("'RULE_FORALL used outside of a RULE operation'"));
+		assertTrue(result.contains("'RULE_FORALL used outside of a RULE operation.'"));
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"Fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("'RULE_FAIL used outside of a RULE operation'"));
+		assertTrue(result.contains("'RULE_FAIL used outside of a RULE operation.'"));
 	}
 
 	@Test
