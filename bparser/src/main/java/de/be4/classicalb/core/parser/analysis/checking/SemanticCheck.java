@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.List;

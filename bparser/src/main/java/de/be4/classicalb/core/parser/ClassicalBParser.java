@@ -21,7 +21,7 @@ public class ClassicalBParser implements ProBParserBase {
 			Start ast = new BParser().parseExpression(expression);
 			printAst(pto, ast, wrap, WRAPPER_EXPR);
 		} catch (BCompoundException e) {
-			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
 		}
 	}
 
@@ -32,7 +32,7 @@ public class ClassicalBParser implements ProBParserBase {
 			Start ast = new BParser().parsePredicate(predicate);
 			printAst(pto, ast, wrap, WRAPPER_PRED);
 		} catch (BCompoundException e) {
-			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
 		}
 	}
 
@@ -43,7 +43,7 @@ public class ClassicalBParser implements ProBParserBase {
 			Start ast = new BParser().parseTranstion(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);
 		} catch (BCompoundException e) {
-			throw new ProBParseException(e.getFirstException().getLocalizedMessage());
+			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
 		}
 	}
 

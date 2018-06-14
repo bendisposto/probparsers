@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.prob.prolog.match;
 
 import java.math.BigInteger;

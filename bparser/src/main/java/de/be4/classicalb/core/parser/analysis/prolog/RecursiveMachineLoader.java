@@ -137,12 +137,6 @@ public class RecursiveMachineLoader {
 	/**
 	 * Tries to find a file containing the machine with the given file name.
 	 * 
-	 * @param ancestors
-	 * 
-	 * @param machineName
-	 *            Name of the machine to include, never <code>null</code>
-	 * @param paths
-	 * 
 	 * @return reference to a file containing the machine, may be non-existent
 	 *         but never <code>null</code>.
 	 * @throws CheckException

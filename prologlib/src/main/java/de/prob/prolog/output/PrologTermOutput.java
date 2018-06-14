@@ -60,7 +60,6 @@ public class PrologTermOutput implements IPrologTermOutput {
 	 *            if single quotes may be used
 	 * @param double_quotes
 	 *            if double quotes may be used
-	 * @return the escaped input string
 	 */
 	private void escape(final String input, final boolean single_quotes,
 			final boolean double_quotes) {

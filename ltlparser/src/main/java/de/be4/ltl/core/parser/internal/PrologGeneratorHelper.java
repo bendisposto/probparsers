@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.be4.ltl.core.parser.internal;
 
 import java.util.LinkedList;

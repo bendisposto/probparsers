@@ -68,14 +68,14 @@ public final class ASTBuilder {
 
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add((PExpression) cloneNode(pExpression));
+		list.add(cloneNode(pExpression));
 		return createPositinedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
 		final ArrayList<PExpression> list = new ArrayList<>();
 		for (PExpression pExpression : pExpressions) {
-			list.add((PExpression) cloneNode(pExpression));
+			list.add(cloneNode(pExpression));
 		}
 		return new ASetExtensionExpression(list);
 	}
@@ -86,7 +86,7 @@ public final class ASTBuilder {
 		}
 		final ArrayList<PExpression> list = new ArrayList<>();
 		for (PExpression pExpression : pExpressions) {
-			list.add((PExpression) cloneNode(pExpression));
+			list.add(cloneNode(pExpression));
 		}
 		return new ACoupleExpression(list);
 	}
@@ -114,7 +114,7 @@ public final class ASTBuilder {
 
 	public static AIdentifierExpression createRuleIdentifier(TIdentifierLiteral ruleLiteral) {
 		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add((TIdentifierLiteral) cloneNode((ruleLiteral)));
+		list.add(cloneNode((ruleLiteral)));
 		return new AIdentifierExpression(list);
 	}
 

@@ -85,10 +85,10 @@ public class PreParser {
 						+ "Clause 'DEFINITIONS' is used more than once";
 				throw new PreParseException(e.getToken(), message);
 			} else {
-				throw new PreParseException(e.getToken(), e.getLocalizedMessage());
+				throw new PreParseException(e.getToken(), e.getLocalizedMessage(), e);
 			}
 		} catch (final LexerException e) {
-			throw new PreParseException(e.getLocalizedMessage());
+			throw new PreParseException(e.getLocalizedMessage(), e);
 		}
 
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
@@ -151,9 +151,7 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
-				// + " used in " + modelFileName
-				);
+				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
 			} finally {
 			}
 		}
@@ -285,11 +283,11 @@ public class PreParser {
 				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(nameToken, rhsToken,
 						errorToken, e.getMessage());
-				throw new PreParseException(newMessage);
+				throw new PreParseException(newMessage, e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 						nameToken, rhsToken, e.getMessage());
-				throw new PreParseException(newMessage);
+				throw new PreParseException(newMessage, e);
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
@@ -408,20 +406,20 @@ public class PreParser {
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
 				throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-						definition, rhsToken, e3.getMessage()));
+						definition, rhsToken, e3.getMessage()), e);
 			} catch (IOException e1) {
-				throw new PreParseException(e.getMessage());
+				throw new PreParseException(e.toString(), e);
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
 			final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition, rhsToken,
 					errorToken, e.getMessage());
-			throw new PreParseException(newMessage);
+			throw new PreParseException(newMessage, e);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 			throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-					definition, rhsToken, e.getMessage()));
+					definition, rhsToken, e.getMessage()), e);
 		} catch (IOException e) {
-			throw new PreParseException(e.getMessage());
+			throw new PreParseException(e.toString(), e);
 		}
 
 	}

@@ -247,10 +247,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 				// renaming the operation
 				final TIdentifierLiteral first = compOperation.getReplacesIdentifier().getIdentifier().getFirst();
-				operationNameList.add((TIdentifierLiteral) cloneNode(first));
+				operationNameList.add(cloneNode(first));
 				nameIdentifier = cloneNode(compOperation.getReplacesIdentifier());
 			} else {
-				operationNameList.add((TIdentifierLiteral) cloneNode(node.getName()));
+				operationNameList.add(cloneNode(node.getName()));
 				// TODO refactor
 				nameIdentifier = cloneNode(new AIdentifierExpression(operationNameList));
 			}
@@ -299,7 +299,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression((PPredicate) NodeCloner.cloneNode(compOperation.getActivationPredicate()),
+			value = new AIfThenElseExpression(NodeCloner.cloneNode(compOperation.getActivationPredicate()),
 					createStringExpression(COMPUTATION_NOT_EXECUTED), createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
@@ -336,7 +336,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		AOperation operation = new AOperation();
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
-		nameList.add((TIdentifierLiteral) cloneNode(node.getRuleName()));
+		nameList.add(cloneNode(node.getRuleName()));
 		operation.setOpName(nameList);
 
 		// SELECT ruleName /= "NOT_CHECKED" & $COUNTEREXAMPLE : POW(STRING) THEN
@@ -414,7 +414,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		 */
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression((PPredicate) NodeCloner.cloneNode(currentRule.getActivationPredicate()),
+			value = new AIfThenElseExpression(NodeCloner.cloneNode(currentRule.getActivationPredicate()),
 					createStringExpression(RULE_NOT_CHECKED), createStringExpression(RULE_DISABLED));
 
 		} else {
@@ -590,7 +590,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createPositinedNode(new AMultOrCartExpression(
 						new ASetExtensionExpression(createExpressionList(
 								new AIntegerExpression(new TIntegerLiteral(Integer.toString(errorIndex))))),
-						(PExpression) cloneNode(setOfCounterexamples)), setOfCounterexamples));
+						cloneNode(setOfCounterexamples)), setOfCounterexamples));
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 				createExpressionList(union));
 		if (conditionalFail) {
@@ -751,7 +751,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
-				createExpressionList((PExpression) cloneNode(node.getSet())));
+				createExpressionList(cloneNode(node.getSet())));
 		final PSubstitution assignCVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localLoopCounter)),
 				createExpressionList(new ACardExpression(createIdentifier(localSetVariableName, node.getSet()))));
@@ -800,7 +800,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		} else {
 			// <code> x := CHOOSE(set); </code>
 			assignSub = new AAssignSubstitution(
-					createExpressionList((PExpression) cloneNode(node.getIdentifiers().get(0))),
+					createExpressionList(cloneNode(node.getIdentifiers().get(0))),
 					createExpressionList(chooseCall));
 		}
 

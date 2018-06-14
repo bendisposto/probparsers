@@ -25,7 +25,7 @@ public class Set implements BObject, java.util.Set<BObject> {
 		StringBuffer sb = new StringBuffer();
 		sb.append("{");
 		while (it.hasNext()) {
-			BObject b = (BObject) it.next();
+			BObject b = it.next();
 			sb.append(b.toString());
 			if (it.hasNext()) {
 				sb.append(", ");

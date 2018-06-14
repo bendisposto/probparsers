@@ -99,7 +99,7 @@ public class OpSubstitutions extends DepthFirstAdapter {
 		try {
 			start.apply(new OpSubstitutions(definitions));
 		} catch (VisitorException e) {
-			throw (CheckException) e.getException();
+			throw e.getException();
 		}
 
 	}

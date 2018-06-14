@@ -26,7 +26,7 @@ task genParser(type:JavaExec) {
 	// classpath =  sourceSets.main.compileClasspath
 	 classpath = configurations.sablecc
 	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/unicode.scc']
+	 args = ['-d','build/temp','src/main/resources/grammars/unicode.scc']
 }
 
 jar {
