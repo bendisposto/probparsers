@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
@@ -24,7 +25,7 @@ public class CodeGenerator {
 				GeneratorMode.JAVA);
 	}
 
-	public static void generate(Path path, GeneratorMode mode) throws CodeGenerationException {
+	public static Path generate(Path path, GeneratorMode mode) throws CodeGenerationException {
 		MachineNode node = null;
 		try {
 			BProject bProject = Antlr4BParser.createBProjectFromMainMachineFile(path.toFile());
@@ -45,9 +46,10 @@ public class CodeGenerator {
 		int lastIndexDot = path.toString().lastIndexOf(".");
 		Path newPath = Paths.get(path.toString().substring(0, lastIndexDot + 1) + mode.name().toLowerCase());
 		try {
-			Files.write(newPath, code.getBytes(), Files.exists(newPath) ? TRUNCATE_EXISTING : CREATE_NEW);
+			return Files.write(newPath, code.getBytes(), Files.exists(newPath) ? TRUNCATE_EXISTING : CREATE_NEW);
 		} catch (IOException e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
