@@ -135,6 +135,7 @@ public class TestJava {
         testJava("phonebook6");
     }
 
+    @Ignore
     @Test
     public void testProject() throws Exception {
         testJava("project1/A");
