@@ -2,6 +2,7 @@ package de.prob.parser.antlr;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.DeclarationNode.Kind;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.MachineNode;
@@ -143,9 +144,9 @@ public class MachineASTCreator {
 						DeclarationNode.Kind.OP_INPUT_PARAMETER);
 			}
 			SubstitutionNode sub = (SubstitutionNode) ctx.substitution().accept(formulaAstCreator);
-
-			OperationNode operationNode = new OperationNode(Util.createSourceCodePosition(ctx),
-					ctx.IDENTIFIER().getText(), outputParamNodes, sub, paramNodes);
+			String opName = ctx.IDENTIFIER().getText();
+			OperationNode operationNode = new OperationNode(Util.createSourceCodePosition(ctx), opName,
+					outputParamNodes, sub, paramNodes);
 			machineNode.addOperation(operationNode);
 			return null;
 		}
