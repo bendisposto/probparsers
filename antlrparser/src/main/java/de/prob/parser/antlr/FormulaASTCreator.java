@@ -35,12 +35,107 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static files.BParser.AND;
-import static files.BParser.DOM;
+import java.util.Map;
 
 public class FormulaASTCreator extends BParserBaseVisitor<Node> {
+
+	private static final Map<Integer, ExpressionOperator> exprOperatorMap = new HashMap<>();
+
+	private static void addExprOperator(Integer key, ExpressionOperator operator) {
+		if (exprOperatorMap.containsKey(key)) {
+			throw new RuntimeException("Duplicate key: " + operator);
+		}
+		exprOperatorMap.put(key, operator);
+	}
+
+	static {
+		addExprOperator(BParser.PLUS, ExpressionOperator.PLUS);
+		addExprOperator(BParser.MINUS, ExpressionOperator.MINUS);
+		addExprOperator(BParser.POWER_OF, ExpressionOperator.POWER_OF);
+		addExprOperator(BParser.MULT, ExpressionOperator.MULT);
+		addExprOperator(BParser.DIVIDE, ExpressionOperator.DIVIDE);
+		addExprOperator(BParser.MOD, ExpressionOperator.MOD);
+		addExprOperator(BParser.NATURAL, ExpressionOperator.NATURAL);
+		addExprOperator(BParser.NATURAL1, ExpressionOperator.NATURAL1);
+		addExprOperator(BParser.INTEGER, ExpressionOperator.INTEGER);
+		addExprOperator(BParser.NAT, ExpressionOperator.NAT);
+		addExprOperator(BParser.NAT1, ExpressionOperator.NAT1);
+		addExprOperator(BParser.INT, ExpressionOperator.INT);
+		addExprOperator(BParser.MININT, ExpressionOperator.MININT);
+		addExprOperator(BParser.MAXINT, ExpressionOperator.MAXINT);
+		addExprOperator(BParser.INTERVAL, ExpressionOperator.INTERVAL);
+
+		addExprOperator(BParser.TRUE, ExpressionOperator.TRUE);
+		addExprOperator(BParser.FALSE, ExpressionOperator.FALSE);
+		addExprOperator(BParser.BOOL, ExpressionOperator.BOOL);
+
+		// sets
+		addExprOperator(BParser.CARD, ExpressionOperator.CARD);
+		addExprOperator(BParser.INTERSECTION, ExpressionOperator.INTERSECTION);
+		addExprOperator(BParser.UNION, ExpressionOperator.UNION);
+		addExprOperator(BParser.SET_SUBTRACTION, ExpressionOperator.SET_SUBTRACTION);
+
+		addExprOperator(BParser.MIN, ExpressionOperator.MIN);
+		addExprOperator(BParser.MAX, ExpressionOperator.MAX);
+
+		// couples
+		addExprOperator(BParser.MAPLET, ExpressionOperator.COUPLE);
+
+		// relations
+		addExprOperator(BParser.DOM, ExpressionOperator.DOMAIN);
+		addExprOperator(BParser.RAN, ExpressionOperator.RANGE);
+		addExprOperator(BParser.OVERWRITE_RELATION, ExpressionOperator.OVERWRITE_RELATION);
+		addExprOperator(BParser.DIRECT_PRODUCT, ExpressionOperator.DIRECT_PRODUCT);
+		addExprOperator(BParser.CONCAT, ExpressionOperator.CONCAT);
+		addExprOperator(BParser.DOMAIN_RESTRICTION, ExpressionOperator.DOMAIN_RESTRICTION);
+		addExprOperator(BParser.DOMAIN_SUBSTRACTION, ExpressionOperator.DOMAIN_SUBTRACTION);
+		addExprOperator(BParser.RANGE_RESTRICTION, ExpressionOperator.RANGE_RESTRICTION);
+		addExprOperator(BParser.RANGE_SUBSTRATION, ExpressionOperator.RANGE_SUBTRATION);
+		addExprOperator(BParser.TILDE, ExpressionOperator.INVERSE_RELATION);
+		addExprOperator(BParser.SET_RELATION, ExpressionOperator.SET_RELATION);
+
+		// sequence operators
+		addExprOperator(BParser.FIRST, ExpressionOperator.FIRST);
+		addExprOperator(BParser.LAST, ExpressionOperator.LAST);
+		addExprOperator(BParser.FRONT, ExpressionOperator.FRONT);
+		addExprOperator(BParser.TAIL, ExpressionOperator.TAIL);
+		addExprOperator(BParser.CONC, ExpressionOperator.CONC);
+		addExprOperator(BParser.INSERT_FRONT, ExpressionOperator.INSERT_FRONT);
+		addExprOperator(BParser.INSERT_TAIL, ExpressionOperator.INSERT_TAIL);
+		addExprOperator(BParser.RESTRICT_FRONT, ExpressionOperator.RESTRICT_FRONT);
+		addExprOperator(BParser.RESTRICT_TAIL, ExpressionOperator.RESTRICT_TAIL);
+		addExprOperator(BParser.SEQ, ExpressionOperator.SEQ);
+		addExprOperator(BParser.SEQ1, ExpressionOperator.SEQ1);
+		addExprOperator(BParser.ISEQ, ExpressionOperator.ISEQ);
+		addExprOperator(BParser.ISEQ1, ExpressionOperator.ISEQ1);
+	}
+
+	private static final Map<Integer, PredOperatorExprArgs> predicateBinOperatorMap = new HashMap<>();
+
+	private static void addPredicateOperator(Integer key, PredOperatorExprArgs operator) {
+		if (predicateBinOperatorMap.containsKey(key)) {
+			throw new RuntimeException("Duplicate entry. key: " + key + ", operator: " + operator);
+		}
+		predicateBinOperatorMap.put(key, operator);
+	}
+
+	static {
+		addPredicateOperator(BParser.EQUAL, PredOperatorExprArgs.EQUAL);
+		addPredicateOperator(BParser.NOT_EQUAL, PredOperatorExprArgs.NOT_EQUAL);
+		addPredicateOperator(BParser.ELEMENT_OF, PredOperatorExprArgs.ELEMENT_OF);
+		addPredicateOperator(BParser.COLON, PredOperatorExprArgs.ELEMENT_OF);
+		addPredicateOperator(BParser.LESS_EQUAL, PredOperatorExprArgs.LESS_EQUAL);
+		addPredicateOperator(BParser.LESS, PredOperatorExprArgs.LESS);
+		addPredicateOperator(BParser.GREATER_EQUAL, PredOperatorExprArgs.GREATER_EQUAL);
+		addPredicateOperator(BParser.GREATER, PredOperatorExprArgs.GREATER);
+		addPredicateOperator(BParser.NOT_BELONGING, PredOperatorExprArgs.NOT_BELONGING);
+		addPredicateOperator(BParser.INCLUSION, PredOperatorExprArgs.INCLUSION);
+		addPredicateOperator(BParser.STRICT_INCLUSION, PredOperatorExprArgs.STRICT_INCLUSION);
+		addPredicateOperator(BParser.NON_INCLUSION, PredOperatorExprArgs.NON_INCLUSION);
+		addPredicateOperator(BParser.STRICT_NON_INCLUSION, PredOperatorExprArgs.STRICT_NON_INCLUSION);
+	}
 
 	@Override
 	public Node visitChildren(RuleNode node) {
@@ -65,7 +160,8 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		for (int i = 0; i < operators.size(); i++) {
 			Predicate_atomicContext rightContext = terms.get(i + 1);
 			PredicateNode right = (PredicateNode) rightContext.accept(this);
-			PredicateOperator op = ctx.operators.get(i).getType() == AND ? PredicateOperator.AND : PredicateOperator.OR;
+			PredicateOperator op = ctx.operators.get(i).getType() == BParser.AND ? PredicateOperator.AND
+					: PredicateOperator.OR;
 			temp = new PredicateOperatorNode(Util.createSourceCodePosition(ctx), op,
 					createPredicateNodeList(temp, right));
 		}
@@ -84,25 +180,11 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitBinOperatorP160(BParser.BinOperatorP160Context ctx) {
-		ExprNode left = (ExprNode) ctx.left.accept(this);
-		ExprNode right = (ExprNode) ctx.right.accept(this);
-		ExpressionOperator op = null;
-
-		int type = ctx.expressionOperatorP160().operator.getType();
-		switch (type) {
-		case BParser.INTERSECTION:
-			op = ExpressionOperator.INTERSECTION;
-			break;
-		case BParser.UNION:
-			op = ExpressionOperator.UNION;
-			break;
-		case BParser.SET_SUBTRACTION:
-			op = ExpressionOperator.SET_SUBTRACTION;
-			break;
-		case BParser.MAPLET:
-			op = ExpressionOperator.COUPLE;
-			break;
-		default:
+		final ExprNode left = (ExprNode) ctx.left.accept(this);
+		final ExprNode right = (ExprNode) ctx.right.accept(this);
+		final int type = ctx.expressionOperatorP160().operator.getType();
+		ExpressionOperator op = exprOperatorMap.get(type);
+		if (op == null) {
 			throw new RuntimeException("Not implemented: " + ctx.expressionOperatorP160().operator.getText());
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
@@ -130,53 +212,12 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	public Node visitPredicateBinExpression(BParser.PredicateBinExpressionContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
-		PredOperatorExprArgs op = null;
-		int type = ctx.predicate_expression_operator().operator.getType();
 
-		switch (type) {
-		case BParser.EQUAL:
-			op = PredOperatorExprArgs.EQUAL;
-			break;
-		case BParser.NOT_EQUAL:
-			op = PredOperatorExprArgs.NOT_EQUAL;
-			break;
-		case BParser.ELEMENT_OF:
-			op = PredOperatorExprArgs.ELEMENT_OF;
-			break;
-		case BParser.COLON:
-			op = PredOperatorExprArgs.ELEMENT_OF;
-			break;
-		case BParser.LESS_EQUAL:
-			op = PredOperatorExprArgs.LESS_EQUAL;
-			break;
-		case BParser.LESS:
-			op = PredOperatorExprArgs.LESS;
-			break;
-		case BParser.GREATER_EQUAL:
-			op = PredOperatorExprArgs.GREATER_EQUAL;
-			break;
-		case BParser.GREATER:
-			op = PredOperatorExprArgs.GREATER;
-			break;
-		case BParser.NOT_BELONGING:
-			op = PredOperatorExprArgs.NOT_BELONGING;
-			break;
-		case BParser.INCLUSION:
-			op = PredOperatorExprArgs.INCLUSION;
-			break;
-		case BParser.STRICT_INCLUSION:
-			op = PredOperatorExprArgs.STRICT_INCLUSION;
-			break;
-		case BParser.NON_INCLUSION:
-			op = PredOperatorExprArgs.NON_INCLUSION;
-			break;
-		case BParser.STRICT_NON_INCLUSION:
-			op = PredOperatorExprArgs.STRICT_NON_INCLUSION;
-			break;
-		default:
+		int type = ctx.predicate_expression_operator().operator.getType();
+		PredOperatorExprArgs op = predicateBinOperatorMap.get(type);
+		if (op == null) {
 			throw new RuntimeException();
 		}
-
 		return new PredicateOperatorWithExprArgsNode(Util.createSourceCodePosition(ctx), op,
 				createExprNodeList(left, right));
 	}
@@ -186,24 +227,8 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	@Override
 	public Node visitExpressionKeyword(BParser.ExpressionKeywordContext ctx) {
 		int type = ctx.expression_keyword().operator.getType();
-		ExpressionOperator op = null;
-		switch (type) {
-		case BParser.NATURAL:
-			op = ExpressionOperator.NATURAL;
-			break;
-		case BParser.INTEGER:
-			op = ExpressionOperator.INTEGER;
-			break;
-		case BParser.BOOL:
-			op = ExpressionOperator.BOOL;
-			break;
-		case BParser.INT:
-			op = ExpressionOperator.INT;
-			break;
-		case BParser.NAT:
-			op = ExpressionOperator.NAT;
-			break;
-		default:
+		ExpressionOperator op = exprOperatorMap.get(type);
+		if (op == null) {
 			throw new RuntimeException(ctx.expression_keyword().operator.getText());
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), op);
@@ -212,15 +237,8 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	@Override
 	public Node visitExpressionPrefixOperator(BParser.ExpressionPrefixOperatorContext ctx) {
 		int type = ctx.expression_prefix_operator().operator.getType();
-		ExpressionOperator op = null;
-		switch (type) {
-		case BParser.POW:
-			op = ExpressionOperator.POW;
-			break;
-		case BParser.CARD:
-			op = ExpressionOperator.CARD;
-			break;
-		default:
+		ExpressionOperator op = exprOperatorMap.get(type);
+		if (op == null) {
 			throw new RuntimeException(ctx.expression_prefix_operator().operator.getText());
 		}
 		ExprNode argument = (ExprNode) ctx.expression_in_par().accept(this);
@@ -241,94 +259,8 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	public ExprNode visitBinOperator(BParser.BinOperatorContext ctx) {
 		ExprNode left = (ExprNode) ctx.left.accept(this);
 		ExprNode right = (ExprNode) ctx.right.accept(this);
-		ExpressionOperator op = null;
-		int type = ctx.operator.getType();
-		switch (type) {
-		case BParser.PLUS:
-			op = ExpressionOperator.PLUS;
-			break;
-		case BParser.MINUS:
-			op = ExpressionOperator.MINUS;
-			break;
-		case BParser.MULT:
-			op = ExpressionOperator.MULT;
-			break;
-		case BParser.DIVIDE:
-			op = ExpressionOperator.DIVIDE;
-			break;
-		case BParser.MOD:
-			op = ExpressionOperator.MOD;
-			break;
-		case BParser.INTERVAL:
-			op = ExpressionOperator.INTERVAL;
-			break;
-		case DOM:
-			op = ExpressionOperator.DOMAIN;
-			break;
-		default:
-			break;
-		}
-		/*-
-		 * 
-		map.put(BMoThParser.PLUS, ExpressionOperator.PLUS);
-		map.put(BMoThParser.NATURAL, ExpressionOperator.NATURAL);
-		map.put(BMoThParser.NATURAL1, ExpressionOperator.NATURAL1);
-		map.put(BMoThParser.INTEGER, ExpressionOperator.INTEGER);
-		map.put(BMoThParser.NAT, ExpressionOperator.NAT);
-		map.put(BMoThParser.NAT1, ExpressionOperator.NAT1);
-		map.put(BMoThParser.INT, ExpressionOperator.INT);
-		map.put(BMoThParser.MININT, ExpressionOperator.MININT);
-		map.put(BMoThParser.MAXINT, ExpressionOperator.MAXINT);
-		
-		map.put(BMoThParser.BOOL, ExpressionOperator.BOOL);
-		map.put(BMoThParser.TRUE, ExpressionOperator.TRUE);
-		map.put(BMoThParser.FALSE, ExpressionOperator.FALSE);
-		map.put(BMoThParser.POWER_OF, ExpressionOperator.POWER_OF);
-		map.put(BMoThParser.MULT, ExpressionOperator.MULT);
-		map.put(BMoThParser.DIVIDE, ExpressionOperator.DIVIDE);
-		map.put(BMoThParser.MOD, ExpressionOperator.MOD);
-		map.put(BMoThParser.SET_SUBTRACTION, ExpressionOperator.SET_SUBTRACTION);
-		map.put(BMoThParser.INTERVAL, ExpressionOperator.INTERVAL);
-		map.put(BMoThParser.UNION, ExpressionOperator.UNION);
-		map.put(BMoThParser.INTERSECTION, ExpressionOperator.INTERSECTION);
-		map.put(BMoThParser.MAPLET, ExpressionOperator.COUPLE);
-		map.put(BMoThParser.DOM, ExpressionOperator.DOMAIN);
-		map.put(BMoThParser.RAN, ExpressionOperator.RANGE);
-		
-		map.put(BMoThParser.MIN, ExpressionOperator.MIN);
-		map.put(BMoThParser.MAX, ExpressionOperator.MAX);
-		
-		// relations
-		map.put(BMoThParser.OVERWRITE_RELATION, ExpressionOperator.OVERWRITE_RELATION);
-		map.put(BMoThParser.DIRECT_PRODUCT, ExpressionOperator.DIRECT_PRODUCT);
-		map.put(BMoThParser.CONCAT, ExpressionOperator.CONCAT);
-		map.put(BMoThParser.DOMAIN_RESTRICTION, ExpressionOperator.DOMAIN_RESTRICTION);
-		map.put(BMoThParser.DOMAIN_SUBTRACTION, ExpressionOperator.DOMAIN_SUBTRACTION);
-		map.put(BMoThParser.RANGE_RESTRICTION, ExpressionOperator.RANGE_RESTRICTION);
-		map.put(BMoThParser.RANGE_SUBTRACTION, ExpressionOperator.RANGE_SUBTRATION);
-		map.put(BMoThParser.TILDE, ExpressionOperator.INVERSE_RELATION);
-		map.put(BMoThParser.SET_RELATION, ExpressionOperator.SET_RELATION);
-		
-		// sets
-		map.put(BMoThParser.GENERALIZED_UNION, ExpressionOperator.GENERALIZED_UNION);
-		map.put(BMoThParser.GENERALIZED_INTER, ExpressionOperator.GENERALIZED_INTER);
-		map.put(BMoThParser.CARD, ExpressionOperator.CARD);
-		
-		// sequence operators
-		map.put(BMoThParser.FIRST, ExpressionOperator.FIRST);
-		map.put(BMoThParser.LAST, ExpressionOperator.LAST);
-		map.put(BMoThParser.FRONT, ExpressionOperator.FRONT);
-		map.put(BMoThParser.TAIL, ExpressionOperator.TAIL);
-		map.put(BMoThParser.CONC, ExpressionOperator.CONC);
-		map.put(BMoThParser.INSERT_FRONT, ExpressionOperator.INSERT_FRONT);
-		map.put(BMoThParser.INSERT_TAIL, ExpressionOperator.INSERT_TAIL);
-		map.put(BMoThParser.RESTRICT_FRONT, ExpressionOperator.RESTRICT_FRONT);
-		map.put(BMoThParser.RESTRICT_TAIL, ExpressionOperator.RESTRICT_TAIL);
-		map.put(BMoThParser.SEQ, ExpressionOperator.SEQ);
-		map.put(BMoThParser.SEQ1, ExpressionOperator.SEQ1);
-		map.put(BMoThParser.ISEQ, ExpressionOperator.ISEQ);
-		map.put(BMoThParser.ISEQ1, ExpressionOperator.ISEQ1);
-		 */
+		final int type = ctx.operator.getType();
+		final ExpressionOperator op = exprOperatorMap.get(type);
 		if (op == null) {
 			throw new RuntimeException("Not implemented operator: " + ctx.operator.getText());
 		}

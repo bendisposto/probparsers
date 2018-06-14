@@ -14,10 +14,12 @@ public class ExpressionOperatorNode extends ExprNode
 
 		// arithmetic
 		NATURAL, NATURAL1, INTEGER, INT, NAT, NAT1, MININT, MAXINT//
-		, BOOL, TRUE, FALSE, POWER_OF //
+		, TRUE, FALSE, POWER_OF //
 		, PLUS, MINUS, MULT, DIVIDE, MOD, INTERVAL//
 		, UNARY_MINUS//
 		, MAX, MIN//
+		// 
+		, BOOL
 		// set operators
 		, SET_ENUMERATION, EMPTY_SET, SET_SUBTRACTION, UNION, INTERSECTION//
 		, GENERALIZED_UNION, GENERALIZED_INTER//
