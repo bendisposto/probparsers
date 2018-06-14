@@ -3,6 +3,7 @@ package de.hhu.stups.codegenerator;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,20 +26,32 @@ public class TestJava {
         while ((size = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, size);
     }
 
-    public void testJava(String machineFileName) throws Exception {
-        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machineFileName + ".mch").toURI());
-        CodeGenerator.generate(path, GeneratorMode.JAVA);
+    public void testJava(String machine) throws Exception {
+        Path mchPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
+        CodeGenerator.generate(mchPath, GeneratorMode.JAVA);
 
-        Process process = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/" + machineFileName + ".java " + "-cp btypes.jar");
+        Process process = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/" + machine + ".java " + "-cp btypes.jar");
 
         writeInputToSystem(process.getErrorStream());
         writeInputToOutput(process.getErrorStream(), process.getOutputStream());
         process.waitFor();
+
+        Path javaPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".java").toURI());
+        Path classPath = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".class").toURI());
+        cleanUp(javaPath.toString());
+        cleanUp(classPath.toString());
     }
 
     @Test
     public void testAbstractMachine() throws Exception {
         testJava("AbstractMachine");
+    }
+
+    @Ignore
+    @Test
+    public void testAbstractMachine2() throws Exception {
+        //TODO
+        testJava("AbstractMachine2");
     }
 
     @Test
@@ -54,8 +67,13 @@ public class TestJava {
     @Ignore
     @Test
     public void testAbstractMachine5() throws Exception {
-    	//TODO machine does not exist
+        //TODO
         testJava("AbstractMachine5");
+    }
+
+    @Test
+    public void testAbstractMachine6() throws Exception {
+        testJava("AbstractMachine6");
     }
 
     @Test
@@ -64,9 +82,16 @@ public class TestJava {
     }
 
 
+    @Ignore
     @Test
-    public void testAbstractMachine6() throws Exception {
-        testJava("AbstractMachine6");
+    public void testAbstractMachine11() throws Exception {
+        testJava("AbstractMachine11");
+    }
+
+    @Ignore
+    @Test
+    public void testAbstractMachine14() throws Exception {
+        testJava("AbstractMachine14");
     }
 
     @Test
@@ -82,7 +107,7 @@ public class TestJava {
     @Ignore
     @Test
     public void testGCD() throws Exception {
-        //TODO parallel substitution is currently not supported
+        //TODO
     	testJava("GCD");
     }
 
@@ -96,9 +121,32 @@ public class TestJava {
         testJava("Lift");
     }
 
+    @Ignore
+    @Test
+    public void testPhonebook() throws Exception {
+        //TODO
+        testJava("phonebook");
+    }
+
+    @Ignore
+    @Test
+    public void testPhonebook6() throws Exception {
+        //TODO
+        testJava("phonebook6");
+    }
+
     @Test
     public void testProject() throws Exception {
         testJava("project1/A");
     }
+
     
+    private void cleanUp(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+
 }
