@@ -18,9 +18,15 @@ install: /bin/true
 sudo: false
 
 script:
-  - TERM=dumb ./gradlew clean deploy uploadArchives
+  - TERM=dumb ./gradlew clean deploy
 after_success:
-  - curl -L $JENKINS_URL
+  # Upload archives only on master and develop branches
+  - |
+    if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master" || "${TRAVIS_BRANCH}" == "develop") ]]
+    then
+      TERM=dumb ./gradlew uploadArchives
+      curl -L $JENKINS_URL
+    fi
   - TERM=dumb ./gradlew sonarqube --info --stacktrace
 env:
   global:
