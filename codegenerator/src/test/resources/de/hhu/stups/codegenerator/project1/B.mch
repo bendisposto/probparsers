@@ -1,6 +1,7 @@
 MACHINE
     B
 
+INCLUDES C
 VARIABLES bb
    
 INVARIANT bb : INT

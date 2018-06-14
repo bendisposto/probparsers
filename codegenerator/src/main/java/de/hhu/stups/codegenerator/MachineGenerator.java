@@ -278,7 +278,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
                 .map(condition -> visitPredicateNode(condition, null))
                 .collect(Collectors.toList());
         List<String> then = node.getSubstitutions().subList(1, node.getSubstitutions().size()).stream()
-                .map(substituionNode -> visitSubstitutionNode(substituionNode, null))
+                .map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
                 .collect(Collectors.toList());
 
         List<String> elseIfs = new ArrayList<>();
@@ -384,8 +384,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
-		// TODO Auto-generated method stub
-		return null;
+        ST functionCall = currentGroup.getInstanceOf("function_call");
+        functionCall.add("function", node.getOperationsNode().getName().toLowerCase());
+        functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
+        return functionCall.render();
 	}
 
 }

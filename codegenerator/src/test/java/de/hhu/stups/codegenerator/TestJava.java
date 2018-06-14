@@ -39,8 +39,8 @@ public class TestJava {
 		process.waitFor();
 
 		File classFile = new File(javaFilePath.getParent().toFile(), machine + ".class");
-		cleanUp(javaFilePath.toString());
-		cleanUp(classFile.getAbsolutePath().toString());
+		//cleanUp(javaFilePath.toString());
+		//cleanUp(classFile.getAbsolutePath().toString());
 	}
 
 	@Test
@@ -135,7 +135,6 @@ public class TestJava {
 		testJava("phonebook6");
 	}
 
-	@Ignore
 	@Test
 	public void testProject() throws Exception {
 		testJava("project1/A");

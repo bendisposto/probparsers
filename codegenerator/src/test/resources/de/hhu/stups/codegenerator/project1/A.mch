@@ -1,5 +1,6 @@
 MACHINE
     A
+
 INCLUDES B
 VARIABLES aa
    

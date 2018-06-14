@@ -383,6 +383,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		SubstitutionNode elseSubstitution = null;
 		if (ctx.elseSub != null) {
 			elseSubstitution = (SubstitutionNode) ctx.elseSub.accept(this);
+			subList.add(elseSubstitution);
 		}
 		return new IfOrSelectSubstitutionsNode(Util.createSourceCodePosition(ctx),
 				IfOrSelectSubstitutionsNode.Operator.IF, predList, subList, elseSubstitution);

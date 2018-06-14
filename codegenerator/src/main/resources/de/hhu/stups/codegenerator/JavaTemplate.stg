@@ -212,3 +212,7 @@ number(number) ::= <<
 new BInteger(new java.math.BigInteger("<number>"))
 >>
 
+function_call(function, args) ::= <<
+<function>(<args; separator=",">);
+>>
+
