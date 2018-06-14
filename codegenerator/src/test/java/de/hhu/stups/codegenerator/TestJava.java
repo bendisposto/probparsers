@@ -25,11 +25,11 @@ public class TestJava {
         while ((size = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, size);
     }
 
-    public void testJava(String machine) throws Exception {
-        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
+    public void testJava(String machineFileName) throws Exception {
+        Path path = Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/" + machineFileName + ".mch").toURI());
         CodeGenerator.generate(path, GeneratorMode.JAVA);
 
-        Process process = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/" + machine + ".java " + "-cp btypes.jar");
+        Process process = Runtime.getRuntime().exec("javac build/resources/test/de/hhu/stups/codegenerator/" + machineFileName + ".java " + "-cp btypes.jar");
 
         writeInputToSystem(process.getErrorStream());
         writeInputToOutput(process.getErrorStream(), process.getOutputStream());
@@ -96,4 +96,9 @@ public class TestJava {
         testJava("Lift");
     }
 
+    @Test
+    public void testProject() throws Exception {
+        testJava("project1/A");
+    }
+    
 }

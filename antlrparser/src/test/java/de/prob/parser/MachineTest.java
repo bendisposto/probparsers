@@ -6,7 +6,7 @@ import de.prob.parser.antlr.Antlr4BParser;
 
 public class MachineTest {
 
-	public String getTestMachine() {
+	public String getMainMachine() {
 		String machine = "MACHINE test\n";
 		machine += "CONSTANTS k\n";
 		machine += "PROPERTIES k = INTEGER \n";
@@ -20,7 +20,7 @@ public class MachineTest {
 
 	@Test
 	public void testSingleMachine() throws Exception {
-		Antlr4BParser.createSemanticAST(getTestMachine());
+		check(getMainMachine());
 	}
 
 	@Test
@@ -36,7 +36,7 @@ public class MachineTest {
 		machine += "IncX2 = IF a < 10 THEN IncX END \n";
 		machine += "END";
 
-		Antlr4BParser.createProject(machine, getTestMachine());
+		check(machine, getMainMachine());
 	}
 
 	@Test
@@ -52,7 +52,11 @@ public class MachineTest {
 		machine += "IncX2 = IF a < 10 THEN IncX ELSE IncX END \n";
 		machine += "END";
 
-		Antlr4BParser.createProject(machine, getTestMachine());
+		check(machine, getMainMachine());
+	}
+
+	private void check(String main, String... others) throws Exception {
+		Antlr4BParser.createBProjectFromMachineStrings(main, others);
 	}
 
 }

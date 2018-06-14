@@ -10,6 +10,9 @@ import java.util.List;
 
 public class MachineNode extends Node {
 
+	private String machineName;
+	private List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
+	private List<DeclarationNode> deferredSets = new ArrayList<>();
 	private List<DeclarationNode> constants = new ArrayList<>();
 	private List<DeclarationNode> variables = new ArrayList<>();
 	private List<MachineReferenceNode> machineReferences = new ArrayList<>();
@@ -17,16 +20,8 @@ public class MachineNode extends Node {
 	private PredicateNode invariant;
 	private SubstitutionNode initialisation;
 	private List<OperationNode> operations = new ArrayList<>();
-	private List<String> warnings = new ArrayList<>();
-	private List<EnumeratedSetDeclarationNode> setEnumerations = new ArrayList<>();
-	private List<DeclarationNode> deferredSets = new ArrayList<>();
-	private List<LTLFormula> ltlFormulas = new ArrayList<>();
-	private String machineName;
 
-	public MachineNode(SourceCodePosition sourceCodePosition, String name) {
-		super(sourceCodePosition);
-		this.machineName = name;
-	}
+	private List<LTLFormula> ltlFormulas = new ArrayList<>();
 
 	public String getName() {
 		return this.machineName;
@@ -88,14 +83,6 @@ public class MachineNode extends Node {
 		this.properties = properties;
 	}
 
-	public void setWarnings(List<String> warnings) {
-		this.warnings.addAll(warnings);
-	}
-
-	public List<String> getWarnings() {
-		return this.warnings;
-	}
-
 	public void addSetEnumeration(EnumeratedSetDeclarationNode setEnumeration) {
 		this.setEnumerations.add(setEnumeration);
 	}
@@ -136,7 +123,7 @@ public class MachineNode extends Node {
 	public void removeChild(Node child) {
 
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.machineName;

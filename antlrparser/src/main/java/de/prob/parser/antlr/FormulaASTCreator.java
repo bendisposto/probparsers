@@ -40,7 +40,7 @@ import java.util.List;
 import static files.BParser.AND;
 import static files.BParser.DOM;
 
-public class ASTFormulaCreator extends BParserBaseVisitor<Node> {
+public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitChildren(RuleNode node) {

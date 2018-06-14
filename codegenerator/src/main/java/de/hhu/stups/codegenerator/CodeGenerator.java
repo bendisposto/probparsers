@@ -1,6 +1,7 @@
 package de.hhu.stups.codegenerator;
 
 import de.prob.parser.antlr.Antlr4BParser;
+import de.prob.parser.antlr.BProject;
 import de.prob.parser.antlr.ScopeException;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.visitors.TypeErrorException;
@@ -24,13 +25,13 @@ public class CodeGenerator {
 	}
 
 	public static void generate(Path path, GeneratorMode mode) throws CodeGenerationException {
-		String file = "";
 		MachineNode node = null;
 		try {
-			file = new String(Files.readAllBytes(path));
-			node = Antlr4BParser.createSemanticAST(file);
+			BProject bProject = Antlr4BParser.createBProjectFromMainMachineFile(path.toFile());
+			node = bProject.getMainMachine();
 		} catch (TypeErrorException | ScopeException | IOException e) {
 			e.printStackTrace();
+			throw new CodeGenerationException(e.getMessage());
 		}
 		CodeGenerationChecker codeGenerationChecker = new CodeGenerationChecker(node);
 		codeGenerationChecker.check();

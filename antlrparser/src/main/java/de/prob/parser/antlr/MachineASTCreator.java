@@ -19,22 +19,25 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class AstCreator {
+public class MachineASTCreator {
 	private final MachineNode machineNode;
 
-	public MachineNode getMachineNode() {
+	public static MachineNode createMachineAST(StartContext startContext) {
+		MachineASTCreator machineASTCreator = new MachineASTCreator(startContext);
+		return machineASTCreator.getMachineNode();
+	}
+
+	private MachineNode getMachineNode() {
 		return this.machineNode;
 	}
 
-	public AstCreator(StartContext startContext) {
+	private MachineASTCreator(StartContext startContext) {
 		this.machineNode = new MachineNode(Util.createSourceCodePosition(startContext));
-
 		new MachineConstructor(startContext);
-
 	}
 
 	class MachineConstructor extends BParserBaseVisitor<Void> {
-		ASTFormulaCreator formulaAstCreator = new ASTFormulaCreator();
+		FormulaASTCreator formulaAstCreator = new FormulaASTCreator();
 
 		MachineConstructor(StartContext start) {
 			start.accept(this);
@@ -71,9 +74,11 @@ public class AstCreator {
 		@Override
 		public Void visitEnumeratedSet(BParser.EnumeratedSetContext ctx) {
 			SourceCodePosition position = getSourcePositionFromTerminalNode(ctx.IDENTIFIER());
-			DeclarationNode declarationNode = new DeclarationNode(position, ctx.IDENTIFIER().getSymbol().getText());
-			machineNode.addSetEnumeration(new EnumeratedSetDeclarationNode(position, declarationNode,
-					createEnumeratedSetDeclarationList(ctx.identifier_list().IDENTIFIER())));
+			DeclarationNode declarationNode = new DeclarationNode(position, ctx.IDENTIFIER().getSymbol().getText(),
+					DeclarationNode.Kind.ENUMERATED_SET, machineNode);
+			machineNode.addSetEnumeration(
+					new EnumeratedSetDeclarationNode(position, declarationNode, createDeclarationList(
+							ctx.identifier_list().IDENTIFIER(), DeclarationNode.Kind.ENUMERATED_SET_ELEMENT)));
 			return null;
 		}
 
@@ -86,11 +91,15 @@ public class AstCreator {
 			switch (ctx.name.getText()) {
 			case "CONSTANTS":
 			case "ABSTRACT_CONSTANTS":
-				machineNode.setConstants(createDeclarationList(ctx.identifier_list().IDENTIFIER()));
+			case "CONCRETE_CONSTANTS":
+				machineNode.setConstants(
+						createDeclarationList(ctx.identifier_list().IDENTIFIER(), DeclarationNode.Kind.CONSTANT));
 				break;
 			case "VARIABLES":
 			case "ABSTRACT_VARIABLES":
-				machineNode.setVariables(createDeclarationList(ctx.identifier_list().IDENTIFIER()));
+			case "CONCRETE_VARIABLES":
+				machineNode.setVariables(
+						createDeclarationList(ctx.identifier_list().IDENTIFIER(), DeclarationNode.Kind.VARIABLE));
 				break;
 			default:
 				unreachable();
@@ -125,11 +134,13 @@ public class AstCreator {
 		public Void visitBOperation(BParser.BOperationContext ctx) {
 			List<DeclarationNode> outputParamNodes = new ArrayList<>();
 			if (ctx.output != null) {
-				outputParamNodes = createDeclarationList(ctx.output.IDENTIFIER());
+				outputParamNodes = createDeclarationList(ctx.output.IDENTIFIER(),
+						DeclarationNode.Kind.OP_OUTPUT_PARAMETER);
 			}
 			List<DeclarationNode> paramNodes = new ArrayList<>();
 			if (ctx.parameters != null) {
-				paramNodes = createDeclarationList(ctx.parameters.IDENTIFIER());
+				paramNodes = createDeclarationList(ctx.parameters.IDENTIFIER(),
+						DeclarationNode.Kind.OP_INPUT_PARAMETER);
 			}
 			SubstitutionNode sub = (SubstitutionNode) ctx.substitution().accept(formulaAstCreator);
 
@@ -140,25 +151,14 @@ public class AstCreator {
 		}
 
 		private void unreachable() {
-			// TODO Auto-generated method stub
-
+			throw new RuntimeException();
 		}
 
-		private List<DeclarationNode> createDeclarationList(List<TerminalNode> list) {
+		private List<DeclarationNode> createDeclarationList(List<TerminalNode> list, DeclarationNode.Kind kind) {
 			List<DeclarationNode> declarationList = new ArrayList<>();
 			for (TerminalNode terminalNode : list) {
 				DeclarationNode declNode = new DeclarationNode(getSourcePositionFromTerminalNode(terminalNode),
-						terminalNode.getSymbol().getText());
-				declarationList.add(declNode);
-			}
-			return declarationList;
-		}
-
-		private List<DeclarationNode> createEnumeratedSetDeclarationList(List<TerminalNode> list) {
-			List<DeclarationNode> declarationList = new ArrayList<>();
-			for (TerminalNode terminalNode : list) {
-				DeclarationNode declNode = new DeclarationNode(getSourcePositionFromTerminalNode(terminalNode),
-						terminalNode.getSymbol().getText());
+						terminalNode.getSymbol().getText(), kind, machineNode);
 				declarationList.add(declNode);
 			}
 			return declarationList;

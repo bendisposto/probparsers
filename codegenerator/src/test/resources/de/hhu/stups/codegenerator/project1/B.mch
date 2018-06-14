@@ -1,0 +1,12 @@
+MACHINE
+    B
+
+VARIABLES bb
+   
+INVARIANT bb : INT
+INITIALISATION bb := 0
+
+OPERATIONS
+  IncB(pp) =  PRE pp : 1..10 THEN bb := bb + pp END
+
+END

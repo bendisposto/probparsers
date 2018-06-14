@@ -85,8 +85,8 @@ public class ScopeCheckerTest {
 		checkmachines(machineA, machineB);
 	}
 
-	private void checkmachines(String machineA, String machineB) throws Exception {
-		Antlr4BParser.createProject(machineA, machineB);
+	private void checkmachines(String main, String... others) throws Exception {
+		Antlr4BParser.createBProjectFromMachineStrings(main, others);
 	}
 
 }
