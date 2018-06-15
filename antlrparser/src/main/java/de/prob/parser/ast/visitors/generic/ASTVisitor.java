@@ -85,6 +85,9 @@ public class ASTVisitor implements ExpressionVisitor, SubstitutionVisitor, Predi
 		for (SubstitutionNode arg : node.getSubstitutions()) {
 			visitSubstitutionNode(arg);
 		}
+		if (node.getElseSubstitution() != null) {
+			visitSubstitutionNode(node.getElseSubstitution());
+		}
 	}
 
 	@Override
