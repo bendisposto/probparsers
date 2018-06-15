@@ -385,6 +385,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
         ST functionCall = currentGroup.getInstanceOf("function_call");
+        System.out.println(node.getOperationsNode());
         functionCall.add("function", node.getOperationsNode().getName().toLowerCase());
         functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
         return functionCall.render();
