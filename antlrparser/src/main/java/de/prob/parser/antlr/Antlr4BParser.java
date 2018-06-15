@@ -39,7 +39,6 @@ public class Antlr4BParser {
 	public static BProject createBProject(List<MachineNode> machineNodeList) throws TypeErrorException, ScopeException {
 		// determine machine order
 		sortMachineNodes(machineNodeList);
-
 		for (int i = machineNodeList.size() - 1; i >= 0; i--) {
 			new MachineScopeChecker(machineNodeList.get(i));
 		}
@@ -115,7 +114,6 @@ public class Antlr4BParser {
 		Map<String, Set<String>> dependencies = new HashMap<>();
 		determineMachineDependencies(machineNodeList.get(0), machineNodeMap, dependencies, new ArrayList<>());
 		List<String> machineNameList = Utils.sortByTopologicalOrder(dependencies);
-
 		machineNodeList.clear();
 		for (String machineName : machineNameList) {
 			machineNodeList.add(machineNodeMap.get(machineName));
@@ -134,6 +132,7 @@ public class Antlr4BParser {
 			if (ancestors.contains(refName)) {
 				throw new RuntimeException("Cycle detected");
 			}
+			set.add(refName);
 			final MachineNode refMachineNode = machineNodes.get(refName);
 			machineReferenceNode.setMachineNode(refMachineNode);
 			determineMachineDependencies(refMachineNode, machineNodes, dependencies, new ArrayList<>(ancestors));

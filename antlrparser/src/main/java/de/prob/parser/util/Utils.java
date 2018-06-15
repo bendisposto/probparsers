@@ -20,7 +20,7 @@ public class Utils {
 				Set<T> deps = new HashSet<>(dependencies.get(element));
 				deps.removeAll(sortedList);
 				if (deps.isEmpty()) {
-					sortedList.add(element);
+					sortedList.add(0,element);
 					newRun = true;
 				}
 			}
