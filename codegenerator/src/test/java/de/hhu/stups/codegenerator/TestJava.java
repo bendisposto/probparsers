@@ -94,7 +94,6 @@ public class TestJava {
 		testJava("AbstractMachine14");
 	}
 
-	@Ignore
 	@Test
 	public void testAbstractMachine15() throws Exception {
 		testJava("AbstractMachine15");

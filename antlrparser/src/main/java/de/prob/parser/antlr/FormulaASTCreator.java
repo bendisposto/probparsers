@@ -22,6 +22,7 @@ import files.BParser;
 import files.BParser.AndOrListContext;
 import files.BParser.BooleanValueContext;
 import files.BParser.ExpressionContext;
+import files.BParser.Expression_in_parContext;
 import files.BParser.Expression_listContext;
 import files.BParser.Identifier_or_function_or_recordContext;
 import files.BParser.PredicateContext;
@@ -51,7 +52,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	}
 
 	static {
-		//arithmetic
+		// arithmetic
 		addExprOperator(BParser.PLUS, ExpressionOperator.PLUS);
 		addExprOperator(BParser.MINUS, ExpressionOperator.MINUS);
 		addExprOperator(BParser.POWER_OF, ExpressionOperator.POWER_OF);
@@ -190,6 +191,18 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 			throw new RuntimeException("Not implemented: " + ctx.expressionOperatorP160().operator.getText());
 		}
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(left, right), op);
+	}
+
+	@Override
+	public Node visitExpressionFunctionCall(BParser.ExpressionFunctionCallContext ctx) {
+		List<ExprNode> list = new ArrayList<>();
+		final ExprNode func = (ExprNode) ctx.expression().accept(this);
+		list.add(func);
+		for (Expression_in_parContext arg : ctx.expression_in_par()) {
+			final ExprNode argNode = (ExprNode) arg.accept(this);
+			list.add(argNode);
+		}
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), list, ExpressionOperator.FUNCTION_CALL);
 	}
 
 	@Override
