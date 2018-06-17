@@ -445,7 +445,6 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	}
 
 	private Node notReachable(BooleanValueContext ctx) {
-
 		return null;
 	}
 
@@ -453,4 +452,5 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	public Node visitConditionSubstitution(BParser.ConditionSubstitutionContext ctx) {
 		return ctx.substitution().accept(this);
 	}
+
 }
