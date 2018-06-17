@@ -12,6 +12,7 @@ import java.util.Optional;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.COUPLE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FUNCTION_CALL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERSECTION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERVAL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MINUS;
@@ -50,6 +51,8 @@ public class ExpressionOperatorGenerator {
             return generateInterval(expressionList, template);
         } else if(node.getOperator() == COUPLE) {
             return generateCouple(expressionList, template);
+        } else if(node.getOperator() == FUNCTION_CALL) {
+            return generateFunctionCall(node, expressionList, template);
         }
         return "";
     }
@@ -139,6 +142,13 @@ public class ExpressionOperatorGenerator {
 
     private static String generateBoolean(ExpressionOperatorNode.ExpressionOperator operator, STGroup template) {
         return template.getInstanceOf("boolean_val").add("val", operator == TRUE).render();
+    }
+
+    private static String generateFunctionCall(ExpressionOperatorNode node, List<String> arguments, STGroup template) {
+        ST functionCall = template.getInstanceOf("expression_function_call");
+        functionCall.add("function", node.getExpressionNodes().get(0));
+        functionCall.add("args", arguments.subList(1, arguments.size()));
+        return functionCall.render();
     }
 
 }

@@ -67,27 +67,27 @@ public class BBoolean implements BObject {
 		return this;
 	}
 
-	public boolean or(BBoolean other) {
-		return this.booleanValue() || other.booleanValue();
+	public BBoolean or(BBoolean other) {
+		return new BBoolean(this.booleanValue() || other.booleanValue());
 	}
 
-	public boolean or(Boolean other) {
-		return this.booleanValue() || other;
+	public BBoolean or(Boolean other) {
+		return new BBoolean(this.booleanValue() || other);
 	}
 
-	public boolean xor(BBoolean other) {
-		return this.booleanValue() ^ other.booleanValue();
+	public BBoolean xor(BBoolean other) {
+		return new BBoolean(this.booleanValue() ^ other.booleanValue());
 	}
 
-	public boolean xor(Boolean other) {
-		return this.booleanValue() ^ other;
+	public BBoolean xor(Boolean other) {
+		return new BBoolean(this.booleanValue() ^ other);
 	}
 
-	public boolean and(BBoolean other) {
-		return this.booleanValue() && other.booleanValue();
+	public BBoolean and(BBoolean other) {
+		return new BBoolean(this.booleanValue() && other.booleanValue());
 	}
 
-	public boolean and(Boolean other) {
-		return this.booleanValue() && other;
+	public BBoolean and(Boolean other) {
+		return new BBoolean(this.booleanValue() && other);
 	}
 }

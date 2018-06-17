@@ -133,4 +133,14 @@ public class BSet implements BObject, Set<BObject> {
 		return new BSet(set);
 	}
 
+	public BObject call(BObject arg) {
+		for(BObject object : set) {
+			BTuple tuple = (BTuple) object;
+			if(tuple.getFirst().equals(arg)) {
+				return tuple.getSecond();
+			}
+		}
+		return null;
+	}
+
 }

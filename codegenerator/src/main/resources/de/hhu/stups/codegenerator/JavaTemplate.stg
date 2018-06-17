@@ -189,11 +189,11 @@ less(arg1, arg2) ::= <<
 >>
 
 and(arg1, arg2) ::= <<
-<arg1> && <arg2>
+<arg1>.and(<arg2>)
 >>
 
 or(arg1, arg2) ::= <<
-<arg1> || <arg2>
+<arg1>.or(<arg2>)
 >>
 
 implies(arg1, arg2) ::= <<
@@ -212,7 +212,11 @@ number(number) ::= <<
 new BInteger(new java.math.BigInteger("<number>"))
 >>
 
-function_call(function, args) ::= <<
+identifier_function_call(function, args) ::= <<
 <function>(<args; separator=",">);
+>>
+
+expression_function_call(function, args) ::= <<
+<function>.call(<args; separator=",">)
 >>
 
