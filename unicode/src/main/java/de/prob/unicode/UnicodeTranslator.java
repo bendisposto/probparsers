@@ -191,7 +191,7 @@ public class UnicodeTranslator {
 					sb.append(t.getText());
 				} else if (t instanceof TAnyChar) {
 					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
-					if (before && target == Encoding.ASCII) {
+					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
 					sb.append(t.getText());
