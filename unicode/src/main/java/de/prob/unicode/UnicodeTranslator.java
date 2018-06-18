@@ -194,7 +194,11 @@ public class UnicodeTranslator {
 					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
-					sb.append(t.getText());
+					if (target == Encoding.LATEX) {
+						sb.append(t.getText().replace("_", "\\_"));
+					} else {
+						sb.append(t.getText());
+					}
 				} else {
 					String translated;
 					Translation translation = m.get(key);
