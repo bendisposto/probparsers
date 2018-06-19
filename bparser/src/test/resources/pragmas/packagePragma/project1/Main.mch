@@ -1,0 +1,5 @@
+/*@package project1 */
+MACHINE Main
+INCLUDES AA
+INCLUDES BB
+END

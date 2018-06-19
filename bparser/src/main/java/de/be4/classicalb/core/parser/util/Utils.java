@@ -16,6 +16,7 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
+import de.be4.classicalb.core.parser.node.APackageParseUnit;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.Start;
@@ -55,9 +56,8 @@ public final class Utils {
 
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
-
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
-				|| parseUnit instanceof AImplementationMachineParseUnit);
+				|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
 	public static String getRevisionFromManifest() {
