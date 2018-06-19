@@ -240,7 +240,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
                 .stream()
                 .map(expr -> visitPredicateNode(expr, expected))
                 .collect(Collectors.toList());
-        return OperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
+        return OperatorGenerator.generateBinary(node::getOperator, expressionList, currentGroup);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
                 .stream()
                 .map(expr -> visitExprNode(expr, expected))
                 .collect(Collectors.toList());
-        return OperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
+        return OperatorGenerator.generateBinary(node::getOperator, expressionList, currentGroup);
     }
 
     @Override

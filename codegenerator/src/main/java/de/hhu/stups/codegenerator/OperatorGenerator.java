@@ -30,6 +30,11 @@ import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.Express
 
 public class OperatorGenerator {
 
+    @FunctionalInterface
+    public interface IOperator {
+        Object getOperator();
+    }
+
     private static final List<ExpressionOperatorNode.ExpressionOperator> BINARY_EXPRESSION_OPERATORS =
         Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
 
@@ -42,9 +47,9 @@ public class OperatorGenerator {
     public static String generateExpression(ExpressionOperatorNode node, List<String> expressionList, STGroup template) {
         ExpressionOperatorNode.ExpressionOperator operator = node.getOperator();
         if(BINARY_EXPRESSION_OPERATORS.contains(operator)) {
-            return generateBinaryExpression(node, expressionList, template);
+            return generateBinary(() -> operator, expressionList, template);
         } else if(UNARY_EXPRESSION_OPERATORS.contains(operator)) {
-            return generateUnaryExpression(node, expressionList, template);
+            return generateUnaryExpression(operator, expressionList, template);
         } else if(BOOLEANS.contains(operator)) {
             return generateBoolean(operator, template);
         } else if(node.getOperator() == SET_ENUMERATION){
@@ -60,16 +65,24 @@ public class OperatorGenerator {
     }
 
 
-    private static String generateUnaryExpression(ExpressionOperatorNode node, List<String> expressionList, STGroup template) {
-        ST expression = generateUnary(node.getOperator(), template);
+    private static String generateUnaryExpression(ExpressionOperatorNode.ExpressionOperator operator, List<String> expressionList, STGroup template) {
+        ST expression = generateUnary(operator, template);
         expression.add("arg", expressionList.get(0));
         return expression.render();
     }
 
-    private static String generateBinaryExpression(ExpressionOperatorNode node, List<String> expressionList, STGroup template) {
+    public static String generateBinary(IOperator operator, List<String> expressionList, STGroup template) {
         Optional<String> result = expressionList.stream()
             .reduce((a, e) -> {
-                ST expression = generateBinary(node.getOperator(), template);
+                Object op = operator.getOperator();
+                ST expression = null;
+                if(op instanceof ExpressionOperatorNode.ExpressionOperator) {
+                    expression = generateBinary((ExpressionOperatorNode.ExpressionOperator) op, template);
+                } else if(op instanceof PredicateOperatorNode.PredicateOperator) {
+                    expression = generateBinary((PredicateOperatorNode.PredicateOperator) op, template);
+                } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
+                    expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op, template);
+                }
                 expression.add("arg1", a);
                 expression.add("arg2", e);
                 return expression.render();
@@ -122,32 +135,7 @@ public class OperatorGenerator {
         return template;
     }
 
-    public static String generatePredicateExpression(PredicateOperatorNode.PredicateOperator operator, List<String> predicates, STGroup template) {
-        Optional<String> result = predicates.stream()
-                //TODO
-                .reduce((a, e) -> {
-                    ST predicate = generateBinaryArithmetic(operator, template);
-                    predicate.add("arg1", a);
-                    predicate.add("arg2", e);
-                    return predicate.render();
-                });
-        return result.isPresent() ? result.get() : "";
-    }
-
-    public static String generatePredicateExpression(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, List<String> predicates, STGroup template) {
-        Optional<String> result = predicates.stream()
-                //TODO
-                .reduce((a, e) -> {
-                    ST predicate = generateBinaryArithmetic(operator, template);
-                    predicate.add("arg1", a);
-                    predicate.add("arg2", e);
-                    return predicate.render();
-                });
-        return result.isPresent() ? result.get() : "";
-    }
-
-
-    private static ST generateBinaryArithmetic(PredicateOperatorNode.PredicateOperator operator, STGroup templateGroup) {
+    private static ST generateBinary(PredicateOperatorNode.PredicateOperator operator, STGroup templateGroup) {
         ST template = templateGroup.getInstanceOf("binary");
         switch(operator) {
             case AND:
@@ -166,7 +154,7 @@ public class OperatorGenerator {
     }
 
 
-    private static ST generateBinaryArithmetic(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, STGroup templateGroup) {
+    private static ST generateBinary(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, STGroup templateGroup) {
         ST template = templateGroup.getInstanceOf("binary");
         switch(operator) {
             case EQUAL:
