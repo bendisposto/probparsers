@@ -10,6 +10,7 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
+import de.prob.unicode.node.TIdentifierLiteral;
 import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.TString;
 import de.prob.unicode.node.Token;
@@ -179,6 +180,18 @@ public class UnicodeTranslator {
 					if (target == Encoding.LATEX) {
 						sb.append("\\text{");
 						sb.append(t.getText());
+						sb.append('}');
+					} else {
+						sb.append(t.getText());
+					}
+				} else if (t instanceof TIdentifierLiteral) {
+					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
+					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
+						sb.append(' ');
+					}
+					if (target == Encoding.LATEX) {
+						sb.append("\\mathit{");
+						sb.append(t.getText().replace("_", "\\_"));
 						sb.append('}');
 					} else {
 						sb.append(t.getText());
