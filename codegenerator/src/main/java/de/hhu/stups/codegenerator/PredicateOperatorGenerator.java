@@ -29,7 +29,7 @@ public class PredicateOperatorGenerator {
         Optional<String> result = predicates.stream()
                 //TODO
                 .reduce((a, e) -> {
-                    ST predicate = generatePredicate(operator, template);
+                    ST predicate = generateBinaryArithmetic(operator, template);
                     predicate.add("arg1", a);
                     predicate.add("arg2", e);
                     return predicate.render();
@@ -41,7 +41,7 @@ public class PredicateOperatorGenerator {
         Optional<String> result = predicates.stream()
                 //TODO
                 .reduce((a, e) -> {
-                    ST predicate = generatePredicateArgs(operator, template);
+                    ST predicate = generateBinaryArithmetic(operator, template);
                     predicate.add("arg1", a);
                     predicate.add("arg2", e);
                     return predicate.render();
@@ -49,33 +49,41 @@ public class PredicateOperatorGenerator {
         return result.isPresent() ? result.get() : "";
     }
 
-    public static ST generatePredicate(PredicateOperatorNode.PredicateOperator operator, STGroup template) {
+    private static ST generateBinaryArithmetic(PredicateOperatorNode.PredicateOperator operator, STGroup templateGroup) {
+        ST template = templateGroup.getInstanceOf("binary_arithmetic");
         switch(operator) {
             case AND:
-                return template.getInstanceOf("and");
+                template.add("operator", "and");
+                break;
             case OR:
-                return template.getInstanceOf("or");
+                template.add("operator", "or");
+                break;
             case IMPLIES:
-                return template.getInstanceOf("implies");
+                template.add("operator", "implies");
+                break;
             default:
                 break;
         }
-        return new ST("");
+        return template;
     }
 
 
-    public static ST generatePredicateArgs(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, STGroup template) {
+    private static ST generateBinaryArithmetic(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, STGroup templateGroup) {
+        ST template = templateGroup.getInstanceOf("binary_arithmetic");
         switch(operator) {
             case EQUAL:
-                return template.getInstanceOf("equal");
+                template.add("operator", "equal");
+                break;
             case LESS:
-                return template.getInstanceOf("less");
+                template.add("operator", "less");
+                break;
             case GREATER:
-                return template.getInstanceOf("greater");
+                template.add("operator", "greater");
+                break;
             default:
                 break;
         }
-        return new ST("");
+        return template;
     }
 
 }

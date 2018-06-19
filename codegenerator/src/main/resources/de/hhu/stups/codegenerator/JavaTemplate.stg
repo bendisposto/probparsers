@@ -176,30 +176,6 @@ else {
 }
 >>
 
-equal(arg1, arg2) ::= <<
-<arg1>.equal(<arg2>)
->>
-
-greater(arg1, arg2) ::= <<
-<arg1>.greater(<arg2>)
->>
-
-less(arg1, arg2) ::= <<
-<arg1>.less(<arg2>)
->>
-
-and(arg1, arg2) ::= <<
-<arg1>.and(<arg2>)
->>
-
-or(arg1, arg2) ::= <<
-<arg1>.or(<arg2>)
->>
-
-implies(arg1, arg2) ::= <<
-!(<arg1>) || <arg2>
->>
-
 boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
