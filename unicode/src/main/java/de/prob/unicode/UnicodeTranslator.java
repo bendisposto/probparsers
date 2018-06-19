@@ -10,8 +10,8 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
-import de.prob.unicode.node.TDoubleQuote;
 import de.prob.unicode.node.TSeparator;
+import de.prob.unicode.node.TString;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
@@ -168,27 +168,21 @@ public class UnicodeTranslator {
 
 		Token t;
 		Token last;
-		boolean insideDoubleQuouteComment = false;
 		try {
 			last = null;
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
-				if (insideDoubleQuouteComment && !(t instanceof TDoubleQuote)) {
-					sb.append(t.getText());
-					continue;
-				} else if (insideDoubleQuouteComment && t instanceof TDoubleQuote) {
-					sb.append(t.getText());
-					insideDoubleQuouteComment = false;
-					continue;
-				} else if (!insideDoubleQuouteComment && t instanceof TDoubleQuote) {
-					sb.append(t.getText());
-					insideDoubleQuouteComment = true;
-					continue;
-				}
-
 				final String key = t.getClass().getSimpleName();
 
 				if (t instanceof TSeparator) {
 					sb.append(t.getText());
+				} else if (t instanceof TString) {
+					if (target == Encoding.LATEX) {
+						sb.append("\\text{");
+						sb.append(t.getText());
+						sb.append('}');
+					} else {
+						sb.append(t.getText());
+					}
 				} else if (t instanceof TAnyChar) {
 					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
 					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
