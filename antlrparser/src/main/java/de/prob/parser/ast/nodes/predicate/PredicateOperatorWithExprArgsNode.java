@@ -1,11 +1,11 @@
 package de.prob.parser.ast.nodes.predicate;
 
-import java.util.Iterator;
-import java.util.List;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.OperatorNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class PredicateOperatorWithExprArgsNode extends PredicateNode
 		implements OperatorNode<PredicateOperatorWithExprArgsNode.PredOperatorExprArgs> {

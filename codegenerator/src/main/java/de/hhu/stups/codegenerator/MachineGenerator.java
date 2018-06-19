@@ -198,7 +198,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
             .stream()
             .map(expr -> visitExprNode(expr, expected))
             .collect(Collectors.toList());
-        return ExpressionOperatorGenerator.generate(node, expressionList, currentGroup);
+        return OperatorGenerator.generateExpression(node, expressionList, currentGroup);
     }
 
 
@@ -240,7 +240,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
                 .stream()
                 .map(expr -> visitPredicateNode(expr, expected))
                 .collect(Collectors.toList());
-        return PredicateOperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
+        return OperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
                 .stream()
                 .map(expr -> visitExprNode(expr, expected))
                 .collect(Collectors.toList());
-        return PredicateOperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
+        return OperatorGenerator.generatePredicateExpression(node.getOperator(), expressionList, currentGroup);
     }
 
     @Override

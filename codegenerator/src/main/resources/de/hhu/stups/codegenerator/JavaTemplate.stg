@@ -150,11 +150,11 @@ import de.hhu.stups.btypes.BTuple;
 
 
 
-binary_arithmetic(arg1,operator,arg2) ::= <<
+binary(arg1,operator,arg2) ::= <<
 <arg1>.<operator>(<arg2>)
 >>
 
-unary_arithmetic(operator, arg1) ::= <<
+unary(operator, arg1) ::= <<
 <arg1>.<operator>()
 >>
 
