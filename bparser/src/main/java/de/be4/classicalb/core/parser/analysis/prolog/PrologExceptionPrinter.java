@@ -110,7 +110,7 @@ public final class PrologExceptionPrinter {
 		}
 	}
 
-	private static void printLexerException(IPrologTermOutput pto, LexerException cause, String filename,
+	private static void printLexerException(IPrologTermOutput pto, Exception cause, String filename,
 			boolean useIndentation, boolean lineOneOff) {
 		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
 		// there is no source information / position attached to lexer
@@ -158,8 +158,13 @@ public final class PrologExceptionPrinter {
 	private static void printPreParseException(final IPrologTermOutput pto, final PreParseException e,
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
 		de.be4.classicalb.core.preparser.node.Token[] tokens = e.getTokens();
+		if (tokens.length == 0 && e.getCause() instanceof de.be4.classicalb.core.preparser.lexer.LexerException) {
+			printLexerException(pto, (Exception) e.getCause(), filename, useIndentation, lineOneOff);
+			return;
+		}
 		pto.openTerm("preparse_exception");
 		pto.openList();
+
 		for (int i = 0; i < tokens.length; i++) {
 			de.be4.classicalb.core.preparser.node.Token token = tokens[i];
 			if (token == null) {

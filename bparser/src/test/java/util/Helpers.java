@@ -114,6 +114,7 @@ public class Helpers {
 		try {
 			start = parser.parse(input, true);
 		} catch (BCompoundException e) {
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		OutputStream output = new OutputStream() {
