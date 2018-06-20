@@ -157,6 +157,11 @@ public final class PrologExceptionPrinter {
 
 	private static void printPreParseException(final IPrologTermOutput pto, final PreParseException e,
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
+		if (e.getCause() instanceof BLexerException) {
+			printBLexerException(pto, (BLexerException) e.getCause(), filename, useIndentation, lineOneOff);
+			return;
+		}
+
 		de.be4.classicalb.core.preparser.node.Token[] tokens = e.getTokens();
 		if (tokens.length == 0 && e.getCause() instanceof de.be4.classicalb.core.preparser.lexer.LexerException) {
 			printLexerException(pto, (Exception) e.getCause(), filename, useIndentation, lineOneOff);
