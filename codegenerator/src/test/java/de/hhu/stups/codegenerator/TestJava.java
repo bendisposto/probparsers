@@ -48,9 +48,10 @@ public class TestJava {
 		testJava("AbstractMachine");
 	}
 
+	@Ignore
 	@Test
 	public void testWhileSubstitution() throws Exception {
-		// TODO
+		// TODO VAR-Node
 		testJava("AbstractMachine2");
 	}
 
@@ -66,7 +67,6 @@ public class TestJava {
 
 	@Test
 	public void testWhileSubstitution2() throws Exception {
-		// TODO Fabian
 		testJava("AbstractMachine5");
 	}
 

@@ -370,7 +370,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
-		throw new RuntimeException("Implement WhileSubstitutionNode");
+		ST whileST = currentGroup.getInstanceOf("while");
+		whileST.add("predicate", visitPredicateNode(node.getCondition(), expected));
+		whileST.add("then", visitSubstitutionNode(node.getBody(), expected));
+		return whileST.render();
 	}
 
 }

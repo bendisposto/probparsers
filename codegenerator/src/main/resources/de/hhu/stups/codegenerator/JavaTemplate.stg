@@ -176,6 +176,12 @@ else {
 }
 >>
 
+while(predicate, then) ::= <<
+while((<predicate>).booleanValue()) {
+    <then>
+}
+>>
+
 boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
