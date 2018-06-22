@@ -114,6 +114,8 @@ public class PreParser {
 		for (final Token fileNameToken : list) {
 			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
 			try {
+				// Note, that the fileName could be a relative path, e.g.
+				// ./foo/bar/defs.def
 				final String fileName = fileNameToken.getText();
 				if (doneDefFiles.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
@@ -129,21 +131,17 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					final String content = contentProvider.getFileContent(directory, fileName);
 					newDoneList.add(fileName);
+					final String content = contentProvider.getFileContent(directory, fileName);
+					final BParser parser = new BParser(fileName, parseOptions);
 					final File file = contentProvider.getFile(directory, fileName);
-					String filePath = fileName;
 					if (file != null) {
-						filePath = file.getCanonicalPath();
+						parser.setDirectory(file.getParentFile());
 					}
-					final BParser parser = new BParser(filePath, parseOptions);
-					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
 					parser.parse(content, debugOutput, contentProvider);
-
 					definitions = parser.getDefinitions();
-
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);
 					}
