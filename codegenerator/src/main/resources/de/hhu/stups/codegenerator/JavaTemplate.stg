@@ -137,15 +137,15 @@ BSet.range(<arg1>,<arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-new BTuple(<arg1>, <arg2>)
+new BCouple(<arg1>, <arg2>)
 >>
 
 couple(cast) ::= <<
-<if(cast)>(BTuple)<else>BTuple<endif>
+<if(cast)>(BCouple)<else>BCouple<endif>
 >>
 
 couple_import() ::= <<
-import de.hhu.stups.btypes.BTuple;
+import de.hhu.stups.btypes.BCouple;
 >>
 
 

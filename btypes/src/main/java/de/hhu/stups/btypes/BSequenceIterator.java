@@ -46,7 +46,7 @@ class BSequenceIterator implements ListIterator<BObject> {
 		if(!this.hasNext()) {
 			throw new NoSuchElementException();
 		}
-		return new BTuple(BNumber.build(++this.i),
+		return new BCouple(BNumber.build(++this.i),
 				this.seq.get(this.i));
 	}
 
@@ -78,7 +78,7 @@ class BSequenceIterator implements ListIterator<BObject> {
 		if(!this.hasPrevious()) {
 			throw new NoSuchElementException();
 		}
-		return new BTuple(BNumber.build(this.i),
+		return new BCouple(BNumber.build(this.i),
 				this.seq.get(this.i--));
 	}
 

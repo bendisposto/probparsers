@@ -18,7 +18,7 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public static LinkedHashSet<BObject> newStorage() {
-		return new LinkedHashSet<BObject>();
+		return new LinkedHashSet<>();
 	}
 
 	public java.lang.String toString() {
@@ -135,7 +135,7 @@ public class BSet implements BObject, Set<BObject> {
 
 	public BObject call(BObject arg) {
 		for(BObject object : set) {
-			BTuple tuple = (BTuple) object;
+			BCouple tuple = (BCouple) object;
 			if(tuple.getFirst().equals(arg)) {
 				return tuple.getSecond();
 			}
