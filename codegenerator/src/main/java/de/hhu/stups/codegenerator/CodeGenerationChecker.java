@@ -24,6 +24,7 @@ import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 
 import java.util.ArrayList;
@@ -175,7 +176,11 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
 
 	@Override
 	public Void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("Implement " + node.getClass());
+	}
+
+	@Override
+	public Void visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
+		throw new RuntimeException("Implement " + node.getClass());
 	}
 }

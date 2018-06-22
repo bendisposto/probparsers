@@ -18,6 +18,7 @@ import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import files.BParser;
 import files.BParser.AndOrListContext;
 import files.BParser.BooleanValueContext;
@@ -399,6 +400,20 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		}
 		return new IfOrSelectSubstitutionsNode(Util.createSourceCodePosition(ctx),
 				IfOrSelectSubstitutionsNode.Operator.IF, predList, subList, elseSubstitution);
+	}
+
+	@Override
+	public Node visitWhileSubstitution(BParser.WhileSubstitutionContext ctx) {
+		PredicateNode condition = (PredicateNode) ctx.condition.accept(this);
+		SubstitutionNode body = (SubstitutionNode) ctx.substitution().accept(this);
+		PredicateNode invariant = (PredicateNode) ctx.invariant.accept(this);
+		ExprNode variant = (ExprNode) ctx.variant.accept(this);
+		return new WhileSubstitutionNode(Util.createSourceCodePosition(ctx), condition, body, invariant, variant);
+	}
+
+	@Override
+	public Node visitVarSubstitution(BParser.VarSubstitutionContext ctx) {
+		throw new RuntimeException("implement me");
 	}
 
 	@Override
