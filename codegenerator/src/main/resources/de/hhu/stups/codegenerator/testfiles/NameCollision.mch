@@ -1,7 +1,5 @@
 MACHINE
-    AbstractMachine10
-
-SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
+    NameCollision
 
 VARIABLES xx, yy, switch
 
@@ -10,7 +8,7 @@ INITIALISATION xx := 1; yy := {1,2,3} \/ {2}; switch := TRUE
 
 OPERATIONS
 out <-- Inc(pp) =
-    IF xx < 10 THEN
+    IF xx = 1 & xx < 10 THEN
         xx := xx + pp; out := xx
     ELSIF xx < 2 THEN
         xx := xx - pp; out := xx + 1

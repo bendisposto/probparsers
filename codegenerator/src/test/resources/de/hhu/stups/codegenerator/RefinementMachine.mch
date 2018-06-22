@@ -1,10 +1,10 @@
-/* AbstractMachine_i
+/* RefinementMachine
  * Author: 
  * Creation date: 13.04.18
  */
 
-IMPLEMENTATION AbstractMachine_i
-REFINES AbstractMachine
+IMPLEMENTATION RefinementMachine
+REFINES Operation
 
 CONCRETE_VARIABLES xx
    

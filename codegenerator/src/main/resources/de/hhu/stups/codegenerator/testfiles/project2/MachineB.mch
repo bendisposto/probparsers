@@ -1,4 +1,4 @@
-MACHINE AbstractMachine12
+MACHINE MachineB
 
 CONSTANTS k
 

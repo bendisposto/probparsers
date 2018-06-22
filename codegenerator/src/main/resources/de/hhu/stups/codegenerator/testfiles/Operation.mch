@@ -1,9 +1,8 @@
-/* AbstractMachine
+/* Operation
  * Author: 
  * Creation date: 13.04.18
  */
-MACHINE
-    AbstractMachine
+MACHINE Operation
 
 VARIABLES xx
    

@@ -1,7 +1,5 @@
 MACHINE
-    AbstractMachine13
-
-SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
+    Records
 
 VARIABLES xx, yy, switch
 

@@ -1,12 +1,9 @@
-MACHINE
-    AbstractMachine9
-
-SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
+MACHINE Interval
 
 VARIABLES xx, yy, switch
 
-INVARIANT xx : INT & yy: POW(INT * INT) & switch : BOOL
-INITIALISATION xx := 1; yy := {1 |-> 2, 2 |-> 3, 3|-> 4}; switch := TRUE
+INVARIANT xx : INT & yy : POW(INTEGER) & switch : BOOL
+INITIALISATION xx := 1; yy := 1..4; switch := TRUE
 
 OPERATIONS
 out <-- Inc(pp) =

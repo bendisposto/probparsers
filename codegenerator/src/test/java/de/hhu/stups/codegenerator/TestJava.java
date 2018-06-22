@@ -44,58 +44,81 @@ public class TestJava {
 	}
 
 	@Test
-	public void testAbstractMachine() throws Exception {
-		testJava("AbstractMachine");
+	public void testOperation() throws Exception {
+		testJava("Operation");
 	}
 
 	@Ignore
 	@Test
-	public void testWhileSubstitution() throws Exception {
+	public void testRefinement() throws Exception {
 		// TODO VAR-Node
-		testJava("AbstractMachine2");
+		testJava("RefinementMachine");
 	}
 
 	@Test
-	public void testAbstractMachine3() throws Exception {
-		testJava("AbstractMachine3");
+	public void testEnumSets() throws Exception {
+		testJava("EnumSets");
 	}
 
 	@Test
-	public void testAbstractMachine4() throws Exception {
-		testJava("AbstractMachine4");
+	public void testNameCollision() throws Exception {
+		testJava("NameCollision");
 	}
 
 	@Test
-	public void testWhileSubstitution2() throws Exception {
-		testJava("AbstractMachine5");
+	public void testWhile() throws Exception {
+		testJava("While");
 	}
 
 	@Test
-	public void testAbstractMachine6() throws Exception {
-		testJava("AbstractMachine6");
+	public void testInterval() throws Exception {
+		testJava("Interval");
+	}
+
+
+	@Test
+	public void testPair() throws Exception {
+		testJava("Pair");
 	}
 
 	@Test
-	public void testAbstractMachine10() throws Exception {
-		testJava("AbstractMachine10");
+	public void testIfAndPredicates() throws Exception {
+		testJava("IfAndPredicates");
 	}
 
 	@Ignore
 	@Test
-	public void testAbstractMachine11() throws Exception {
-		testJava("AbstractMachine11");
+	public void testBooleanPredicate() throws Exception {
+		testJava("BooleanPredicate");
 	}
 
 	@Ignore
 	@Test
-	public void testAbstractMachine14() throws Exception {
-		testJava("AbstractMachine14");
+	public void testRecords() throws Exception {
+		testJava("Records");
+	}
+
+	@Ignore
+	@Test
+	public void testNondeterminism() throws Exception {
+		testJava("Nondeterminism");
 	}
 
 	@Test
-	public void testAbstractMachine15() throws Exception {
-		testJava("AbstractMachine15");
+	public void testMapFunction() throws Exception {
+		testJava("MapFunction");
 	}
+
+	@Test
+	public void testEmptySet() throws Exception {
+		testJava("EmptySet");
+	}
+
+	@Test
+	public void testSetUnion() throws Exception {
+		testJava("SetUnion");
+	}
+
 
 	@Test
 	public void testCounter() throws Exception {
@@ -122,6 +145,12 @@ public class TestJava {
 	@Test
 	public void testLift() throws Exception {
 		testJava("Lift");
+	}
+
+	@Ignore
+	@Test
+	public void testTravelAgency() throws Exception {
+		testJava("TravelAgency");
 	}
 
 	@Ignore

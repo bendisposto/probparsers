@@ -1,6 +1,6 @@
-MACHINE AbstractMachine11
+MACHINE MachineA
 
-INCLUDES AbstractMachine12
+INCLUDES MachineB
 
 CONSTANTS k2
 PROPERTIES k2 :k

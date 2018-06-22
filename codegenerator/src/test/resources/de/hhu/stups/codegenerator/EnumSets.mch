@@ -1,12 +1,11 @@
-MACHINE
-    AbstractMachine3
+MACHINE EnumSets
 
 SETS cars = {red,yellow,redyellow,green}; peds = {green, red}
 
 VARIABLES xx, yy
 
 INVARIANT xx : INT & yy : POW(INTEGER)
-INITIALISATION xx := 1; yy := {1,2,3} \/ {2}
+INITIALISATION xx := 1
 
 OPERATIONS
 out <-- Inc(pp) =

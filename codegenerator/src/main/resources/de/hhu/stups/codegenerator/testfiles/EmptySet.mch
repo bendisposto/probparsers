@@ -1,16 +1,14 @@
 MACHINE
-    AbstractMachine14
-
-SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
+    EmptySet
 
 VARIABLES xx, yy, switch
 
-INVARIANT xx : INT & yy : INT & switch : BOOL
-INITIALISATION xx := 1; yy :: {1,2,3}; switch := TRUE
+INVARIANT xx : INT & yy : POW(INTEGER) & switch : BOOL
+INITIALISATION xx := 1; yy := {1,2,3} \/ {}; switch := TRUE
 
 OPERATIONS
 out <-- Inc(pp) =
-    IF xx < 10 THEN
+    IF xx = 1 & xx < 10 THEN
         xx := xx + pp; out := xx
     ELSIF xx < 2 THEN
         xx := xx - pp; out := xx + 1

@@ -1,17 +1,16 @@
 MACHINE
-    AbstractMachine15
+    Nondeterminism
 
 SETS cars = {red,yellow,redyellow,green,switch}; peds = {green, red}
 
-VARIABLES xx, yy, aa, switch, bb
+VARIABLES xx, yy, switch
 
-INVARIANT xx : INT & yy: POW(INT * INT) & aa : INT & bb : INT & switch : BOOL
-INITIALISATION xx := 1; yy := {1 |-> 2, 2 |-> 3, 3|-> 4}; switch := TRUE; aa := yy(1); bb := 1
+INVARIANT xx : INT & yy : INT & switch : BOOL
+INITIALISATION xx := 1; yy :: {1,2,3}; switch := TRUE
 
 OPERATIONS
-
 out <-- Inc(pp) =
-    IF xx = 1 & xx < 10 THEN
+    IF xx < 10 THEN
         xx := xx + pp; out := xx
     ELSIF xx < 2 THEN
         xx := xx - pp; out := xx + 1
@@ -20,8 +19,5 @@ out <-- Inc(pp) =
     ELSE
         xx := 2
     END
-
-
-
 
 END
