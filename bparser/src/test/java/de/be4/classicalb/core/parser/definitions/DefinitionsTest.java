@@ -2,13 +2,16 @@ package de.be4.classicalb.core.parser.definitions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static util.Helpers.getTreeAsString;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import util.Helpers;
 
 public class DefinitionsTest {
 
@@ -342,6 +345,16 @@ public class DefinitionsTest {
 	public void testDetectCycleInDefinitions2() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS bar == foo; foo == 1=1 & bar END\n";
 		getTreeAsString(testMachine);
+	}
+
+	
+	@Ignore
+	@Test
+	public void testMisleadingParseError() {
+		final String testMachine = "MACHINE foo \nDEFINITIONS \nCONSTANTS a \nPROPERTIES a = 1  END";
+		String output = Helpers.parseMachineAndGetPrologOutput(testMachine);
+		System.out.println(output);
+		//TODO
 	}
 
 }
