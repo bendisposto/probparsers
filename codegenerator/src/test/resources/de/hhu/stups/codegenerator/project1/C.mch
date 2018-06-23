@@ -7,6 +7,6 @@ INVARIANT cc : INT
 INITIALISATION cc := 0
 
 OPERATIONS
-  IncC(pp) =  PRE pp : 1..10 THEN cc := cc + pp END
+  cc <-- IncC(pp) =  PRE pp : 1..10 THEN cc := cc + pp END
 
 END

@@ -113,7 +113,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private String visitOperation(OperationNode node) {
 		// TODO
-		this.locals = getLocals(node.getOutputParams().stream().collect(Collectors.toSet()), node.getOutputParams());
+		this.locals = node.getOutputParams();
 		ST operation = OperationGenerator.generate(node, locals, currentGroup);
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
 		return operation.render();
@@ -353,11 +353,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitLTLBPredicateNode(LTLBPredicateNode node, Void expected) {
 		return null;
-	}
-
-	private List<DeclarationNode> getLocals(Set<DeclarationNode> assignedDeclarations,
-			List<DeclarationNode> outputParams) {
-		return assignedDeclarations.stream().filter(outputParams::contains).collect(Collectors.toList());
 	}
 
 	@Override

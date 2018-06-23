@@ -39,13 +39,18 @@ public class TestJava {
 		process.waitFor();
 
 		File classFile = new File(javaFilePath.getParent().toFile(), machine + ".class");
-		cleanUp(javaFilePath.toString());
-		cleanUp(classFile.getAbsolutePath().toString());
+		//cleanUp(javaFilePath.toString());
+		//cleanUp(classFile.getAbsolutePath().toString());
 	}
 
 	@Test
 	public void testOperation() throws Exception {
 		testJava("Operation");
+	}
+
+	@Test
+	public void testLocalDeclaration() throws Exception {
+		testJava("LocalDeclaration");
 	}
 
 	@Ignore
