@@ -108,6 +108,33 @@ public class Helpers {
 		return output.toString();
 	}
 
+	public static String parseMachineAndGetPrologOutput(String input) {
+		final BParser parser = new BParser("Test");
+
+		OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		try {
+			Start start = parser.parse(input, false);
+			final IPrologTermOutput pout = new PrologTermOutput(output, false);
+			printAsProlog(start, pout);
+			return output.toString();
+		} catch (BCompoundException e) {
+			PrologExceptionPrinter.printException(output, e, false, false);
+			return output.toString();
+		}
+		
+	}
+
 	public static String getMachineAsPrologTerm(String input) {
 		final BParser parser = new BParser("Test");
 		Start start;

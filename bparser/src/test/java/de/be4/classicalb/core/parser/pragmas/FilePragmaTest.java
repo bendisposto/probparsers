@@ -8,13 +8,11 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
-import util.Ast2String;
 import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 
 public class FilePragmaTest {
@@ -35,11 +33,10 @@ public class FilePragmaTest {
 	@Test
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
-		try {
-			getTreeAsString(testMachine);
-		} catch (BCompoundException e) {
-			assertTrue(e.getMessage().startsWith("A file pragma"));
-		}
+		String output = Helpers.parseMachineAndGetPrologOutput(testMachine);
+		System.out.println(output);
+		assertTrue(output.contains("parse_exception"));
+		assertTrue(output.contains("A file pragma"));
 	}
 
 	@Test(expected = BCompoundException.class)
@@ -106,17 +103,4 @@ public class FilePragmaTest {
 			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
 	}
 
-	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
-		final BParser parser = new BParser("testcase");
-		parser.getOptions().setGrammar(RulesGrammar.getInstance());
-		final Start startNode = parser.parse(testMachine, false);
-
-		// startNode.apply(new ASTPrinter());
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
-	}
 }
