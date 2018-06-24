@@ -55,6 +55,119 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
     }
 
     @Override
+    public Void visitExprOperatorNode(ExpressionOperatorNode node, Void expected) {
+        node.getExpressionNodes().forEach(expr -> visitExprNode(expr, expected));
+        return null;
+    }
+
+    @Override
+    public Void visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
+        return null;
+    }
+
+    @Override
+    public Void visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
+        visitPredicateNode(node.getPredicate(), expected);
+        return null;
+    }
+
+    @Override
+    public Void visitNumberNode(NumberNode node, Void expected) {
+        return null;
+    }
+
+    @Override
+    public Void visitQuantifiedExpressionNode(QuantifiedExpressionNode node, Void expected) {
+        errors.add("Quantified expressions cannot be generated");
+        return null;
+    }
+    @Override
+    public Void visitSetComprehensionNode(SetComprehensionNode node, Void expected) {
+        visitPredicateNode(node.getPredicateNode(), expected);
+        return null;
+    }
+
+
+    @Override
+    public Void visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
+        if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
+            errors.add("Parallel substitution cannot be generated");
+        }
+        node.getSubstitutions().forEach(substitution -> visitSubstitutionNode(substitution, expected));
+        return null;
+    }
+
+    @Override
+    public Void visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
+        node.getConditions().forEach(cond -> visitPredicateNode(cond, expected));
+        node.getSubstitutions().forEach(subs -> visitSubstitutionNode(subs, expected));
+        if(node.getElseSubstitution() != null) {
+            visitSubstitutionNode(node.getElseSubstitution(), expected);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
+        node.getLeftSide().forEach(expr -> visitExprNode(expr, expected));
+        node.getRightSide().forEach(expr -> visitExprNode(expr, expected));
+        return null;
+    }
+
+    @Override
+    public Void visitSkipSubstitutionNode(SkipSubstitutionNode node, Void expected) {
+        return null;
+    }
+
+    @Override
+    public Void visitConditionSubstitutionNode(ConditionSubstitutionNode node, Void expected) {
+        visitPredicateNode(node.getCondition(), expected);
+        visitSubstitutionNode(node.getSubstitution(), expected);
+        return null;
+    }
+
+    @Override
+    public Void visitAnySubstitution(AnySubstitutionNode node, Void expected) {
+        visitSubstitutionNode(node.getThenSubstitution(), expected);
+        visitPredicateNode(node.getWherePredicate(), expected);
+        return null;
+    }
+
+
+    @Override
+    public Void visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
+        errors.add("Becomes element of cannot be generated");
+        return null;
+    }
+
+    @Override
+    public Void visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, Void expected) {
+        node.getIdentifiers().forEach(identifier -> visitExprNode(identifier, expected));
+        visitPredicateNode(node.getPredicate(), expected);
+        return null;
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+	@Override
+	public Void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
+        //TODO: Calling operation with return value is not implemented
+        node.getArguments().forEach(arg -> visitExprNode(arg, expected));
+        visitSubstitutionNode(node.getOperationsNode().getSubstitution(), expected);
+        throw new RuntimeException("Implement " + node.getClass());
+	}
+
+	@Override
+	public Void visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
+        //TODO: Invariant Node is not implemented
+        visitPredicateNode(node.getCondition(), expected);
+        visitSubstitutionNode(node.getBody(), expected);
+		throw new RuntimeException("Implement " + node.getClass());
+	}
+
+    @Override
     public Void visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, Void expected) {
         return null;
     }
@@ -81,106 +194,19 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
 
     @Override
     public Void visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
+        node.getPredicateArguments().forEach(pred -> visitPredicateNode(pred, expected));
         return null;
     }
 
     @Override
     public Void visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
+        node.getExpressionNodes().forEach(expr -> visitExprNode(expr, expected));
         return null;
     }
 
     @Override
     public Void visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
+        visitPredicateNode(node.getPredicateNode(), expected);
         return null;
     }
-
-    @Override
-    public Void visitExprOperatorNode(ExpressionOperatorNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitNumberNode(NumberNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitQuantifiedExpressionNode(QuantifiedExpressionNode node, Void expected) {
-        errors.add("Quantified expressions cannot be generated");
-        return null;
-    }
-    @Override
-    public Void visitSetComprehensionNode(SetComprehensionNode node, Void expected) {
-        return null;
-    }
-
-
-    @Override
-    public Void visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
-        if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
-            errors.add("Parallel substitution cannot be generated");
-        }
-        return null;
-    }
-
-
-    @Override
-    public Void visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitSkipSubstitutionNode(SkipSubstitutionNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitConditionSubstitutionNode(ConditionSubstitutionNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitAnySubstitution(AnySubstitutionNode node, Void expected) {
-        return null;
-    }
-
-    @Override
-    public Void visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
-        errors.add("Becomes element of cannot be generated");
-        return null;
-    }
-
-    @Override
-    public Void visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, Void expected) {
-        return null;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-	@Override
-	public Void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
-		throw new RuntimeException("Implement " + node.getClass());
-	}
-
-	@Override
-	public Void visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
-		throw new RuntimeException("Implement " + node.getClass());
-	}
 }
