@@ -8,7 +8,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 
@@ -31,8 +31,8 @@ public interface ParametrisedSubstitutionVisitor<R, P> {
 			return visitAssignSubstitutionNode((AssignSubstitutionNode) node, expected);
 		} else if (node instanceof ListSubstitutionNode) {
 			return visitListSubstitutionNode((ListSubstitutionNode) node, expected);
-		} else if (node instanceof SubstitutionIdentifierCallNode) {
-			return visitSubstitutionIdentifierCallNode((SubstitutionIdentifierCallNode) node, expected);
+		} else if (node instanceof OperationCallSubstitutionNode) {
+			return visitSubstitutionIdentifierCallNode((OperationCallSubstitutionNode) node, expected);
 		}else if (node instanceof WhileSubstitutionNode) {
 			return visitWhileSubstitutionNode((WhileSubstitutionNode) node, expected);
 		}
@@ -57,6 +57,6 @@ public interface ParametrisedSubstitutionVisitor<R, P> {
 
 	R visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, P expected);
 
-	R visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, P expected);
+	R visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, P expected);
 
 }

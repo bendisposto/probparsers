@@ -23,7 +23,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 
@@ -152,10 +152,10 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
     }
 
 	@Override
-	public Void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
+	public Void visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, Void expected) {
         //TODO: Calling operation with return value is not implemented
         node.getArguments().forEach(arg -> visitExprNode(arg, expected));
-        visitSubstitutionNode(node.getOperationsNode().getSubstitution(), expected);
+        visitSubstitutionNode(node.getOperationNode().getSubstitution(), expected);
         throw new RuntimeException("Implement " + node.getClass());
 	}
 

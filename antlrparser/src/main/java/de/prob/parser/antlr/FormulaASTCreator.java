@@ -16,7 +16,7 @@ import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import files.BParser;
@@ -325,6 +325,38 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitSubstitutionIdentifierCall(BParser.SubstitutionIdentifierCallContext ctx) {
+		List<String> names = new ArrayList<>();
+		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
+			names.add(tNode.getText());
+		}
+
+		List<ExprNode> arguments = ctx.expression_list() == null ? new ArrayList<>()
+				: visitExpressionList(ctx.expression_list());
+		return new OperationCallSubstitutionNode(Util.createSourceCodePosition(ctx), names, arguments);
+	}
+
+	@Override
+	public Node visitSubstitutionOperationCall(BParser.SubstitutionOperationCallContext ctx) {
+		List<String> names = new ArrayList<>();
+		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
+			names.add(tNode.getText());
+		}
+		List<ExprNode> arguments = ctx.expression_list() == null ? new ArrayList<>()
+				: visitExpressionList(ctx.expression_list());
+
+		List<ExprNode> output = new ArrayList<>();
+		for (Token exprNode : ctx.identifier_list().idents) {
+			String name = exprNode.getText();
+			IdentifierExprNode identifierExprNode = new IdentifierExprNode(Util.createSourceCodePosition(exprNode),
+					name);
+			output.add(identifierExprNode);
+		}
+
+		return new OperationCallSubstitutionNode(Util.createSourceCodePosition(ctx), names, arguments, output);
+	}
+
+	@Override
 	public Node visitSubstitutionBlock(BParser.SubstitutionBlockContext ctx) {
 		return ctx.substitution().accept(this);
 	}
@@ -360,18 +392,6 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		}
 
 		return new ListSubstitutionNode(Util.createSourceCodePosition(ctx), operator, result);
-	}
-
-	@Override
-	public Node visitSubstitutionIdentifierCall(BParser.SubstitutionIdentifierCallContext ctx) {
-		List<String> names = new ArrayList<>();
-		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
-			names.add(tNode.getText());
-		}
-
-		List<ExprNode> arguments = ctx.expression_list() == null ? new ArrayList<>()
-				: visitExpressionList(ctx.expression_list());
-		return new SubstitutionIdentifierCallNode(Util.createSourceCodePosition(ctx), names, arguments);
 	}
 
 	@Override

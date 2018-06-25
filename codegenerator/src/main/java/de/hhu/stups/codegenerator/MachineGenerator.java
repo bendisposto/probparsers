@@ -28,7 +28,7 @@ import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
@@ -353,9 +353,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	@Override
-	public String visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node, Void expected) {
+	public String visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, Void expected) {
 		ST functionCall = currentGroup.getInstanceOf("identifier_function_call");
-		functionCall.add("function", node.getOperationsNode().getName().toLowerCase());
+		functionCall.add("function", node.getOperationNode().getName().toLowerCase());
 		functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
 		return functionCall.render();
 	}

@@ -18,7 +18,7 @@ import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionIdentifierCallNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.visitors.generic.ASTVisitor;
 
 import java.util.ArrayList;
@@ -203,7 +203,7 @@ public class MachineScopeChecker {
 		}
 
 		@Override
-		public void visitSubstitutionIdentifierCallNode(SubstitutionIdentifierCallNode node) {
+		public void visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node) {
 			List<String> names = node.getNames();
 			String opName = names.get(names.size() - 1);
 			if (operationsInScope.containsKey(opName)) {

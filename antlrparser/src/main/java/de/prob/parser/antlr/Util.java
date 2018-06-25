@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 import de.prob.parser.ast.SourceCodePosition;
 
@@ -48,6 +49,13 @@ public class Util {
 		sourceCodePosition.setStartColumn(ctx.getStart().getCharPositionInLine());
 		return sourceCodePosition;
 	}
-	
+
+	public static SourceCodePosition createSourceCodePosition(Token ctx) {
+		SourceCodePosition sourceCodePosition = new SourceCodePosition();
+		sourceCodePosition.setText(ctx.getText());
+		sourceCodePosition.setStartLine(ctx.getLine());
+		sourceCodePosition.setStartColumn(ctx.getCharPositionInLine());
+		return sourceCodePosition;
+	}
 
 }
