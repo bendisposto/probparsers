@@ -125,7 +125,7 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public static BSet range(BInteger a, BInteger b) {
-		HashSet<BObject> set = new HashSet();
+		HashSet<BObject> set = new HashSet<>();
 		//TODO test critical values
 		for(int i = a.intValue(); i < b.intValue() + 1; i++) {
 			set.add(new BInteger(new java.math.BigInteger(String.valueOf(i))));
@@ -140,7 +140,7 @@ public class BSet implements BObject, Set<BObject> {
 				return tuple.getSecond();
 			}
 		}
-		return null;
+		throw new RuntimeException("Argument is not in the key set of this map");
 	}
 
 }

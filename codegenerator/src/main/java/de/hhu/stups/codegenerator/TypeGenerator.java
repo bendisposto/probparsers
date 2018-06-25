@@ -60,8 +60,11 @@ public class TypeGenerator {
             imports.add(template.getInstanceOf("integer_import").render());
         } else if (type instanceof BoolType) {
             imports.add(template.getInstanceOf("boolean_import").render());
-        } else if(type instanceof EnumeratedSetElementType) {
+        } else if(type instanceof SetType) {
             imports.add(template.getInstanceOf("set_import").render());
+            imports.add(template.getInstanceOf("hashset_import").render());
+            imports.add(template.getInstanceOf("object_import").render());
+            imports.add(template.getInstanceOf("arrays_import").render());
         } else if(type instanceof CoupleType) {
             imports.add(template.getInstanceOf("couple_import").render());
         }

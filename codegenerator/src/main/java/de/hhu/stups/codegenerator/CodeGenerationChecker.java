@@ -206,7 +206,7 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
 
     @Override
     public Void visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
-        visitPredicateNode(node.getPredicateNode(), expected);
+        errors.add("Quantified expressions cannot be generated");
         return null;
     }
 }

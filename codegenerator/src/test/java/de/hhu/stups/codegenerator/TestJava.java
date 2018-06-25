@@ -30,7 +30,8 @@ public class TestJava {
 	public void testJava(String machine) throws Exception {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
-		Path javaFilePath = CodeGenerator.generate(mchPath, GeneratorMode.JAVA);
+		CodeGenerator codeGenerator = new CodeGenerator();
+		Path javaFilePath = codeGenerator.generate(mchPath, GeneratorMode.JAVA, true);
 		Process process = Runtime.getRuntime()
 				.exec("javac " + javaFilePath.toFile().getAbsolutePath() + " -cp btypes.jar");
 

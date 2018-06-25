@@ -12,29 +12,40 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 public class CodeGenerator {
 
+	private Set<Path> paths = new HashSet<>();
+
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
-		generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA);
+		CodeGenerator codeGenerator = new CodeGenerator();
+		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA, true);
 	}
 
-	public static Path generate(Path path, GeneratorMode mode) throws CodeGenerationException {
+	public Path generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {
+		if(isMain) {
+			paths.clear();
+		}
 		BProject project = parseProject(path);
 		checkProject(project);
 		for(MachineReferenceNode referenceNode : project.getMainMachine().getMachineReferences()) {
 			String[] pathAsList = path.toString().split("/");
 			pathAsList[pathAsList.length - 1] = pathAsList[pathAsList.length - 1].replaceAll(project.getMainMachine().getName(), referenceNode.getMachineName());
 			Path currentPath = Paths.get(String.join("/", pathAsList));
-			generate(currentPath, mode);
+			if(!paths.contains(currentPath)) {
+				paths.add(currentPath);
+				generate(currentPath, mode, false);
+			}
 		}
 		return writeToFile(path, mode, project.getMainMachine());
 	}
 
-	private static Path writeToFile(Path path, GeneratorMode mode, MachineNode node) {
+	private Path writeToFile(Path path, GeneratorMode mode, MachineNode node) {
 		MachineGenerator generator = new MachineGenerator(mode);
 		String code = generator.generateMachine(node);
 
@@ -48,7 +59,7 @@ public class CodeGenerator {
 		}
 	}
 
-	private static BProject parseProject(Path path) throws CodeGenerationException {
+	private BProject parseProject(Path path) throws CodeGenerationException {
 		BProject project = null;
 		try {
 			project = Antlr4BParser.createBProjectFromMainMachineFile(path.toFile());
@@ -59,14 +70,14 @@ public class CodeGenerator {
 		return project;
 	}
 
-	private static void checkProject(BProject project) throws CodeGenerationException {
+	private void checkProject(BProject project) throws CodeGenerationException {
 		checkMachine(project.getMainMachine());
 		for(MachineReferenceNode referenceNode : project.getMainMachine().getMachineReferences()) {
 			checkMachine(referenceNode.getMachineNode());
 		}
 	}
 
-	private static void checkMachine(MachineNode machine) throws CodeGenerationException {
+	private void checkMachine(MachineNode machine) throws CodeGenerationException {
 		CodeGenerationChecker codeGenerationChecker = new CodeGenerationChecker(machine);
 		codeGenerationChecker.check();
 		if (codeGenerationChecker.getErrors().size() > 0) {

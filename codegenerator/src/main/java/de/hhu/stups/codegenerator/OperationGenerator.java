@@ -16,7 +16,7 @@ public class OperationGenerator {
 
     public static ST generate(OperationNode node, List<DeclarationNode> locals, STGroup template) {
         ST operation = template.getInstanceOf("operation");
-        operation.add("locals", declareLocals(locals,  template));
+        operation.add("locals", declareLocals(locals, template));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();

@@ -149,7 +149,6 @@ import de.hhu.stups.btypes.BCouple;
 >>
 
 
-
 binary(arg1,operator,arg2) ::= <<
 <arg1>.<operator>(<arg2>)
 >>
