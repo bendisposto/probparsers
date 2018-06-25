@@ -153,10 +153,9 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
 
 	@Override
 	public Void visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, Void expected) {
-        //TODO: Calling operation with return value is not implemented
         node.getArguments().forEach(arg -> visitExprNode(arg, expected));
         visitSubstitutionNode(node.getOperationNode().getSubstitution(), expected);
-        throw new RuntimeException("Implement " + node.getClass());
+        return null;
 	}
 
 	@Override

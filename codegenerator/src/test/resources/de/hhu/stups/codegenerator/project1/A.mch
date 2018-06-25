@@ -2,11 +2,11 @@ MACHINE
     A
 
 INCLUDES C
-VARIABLES aa
+VARIABLES aa, bb
    
-INVARIANT aa : INT
-INITIALISATION aa := 0
+INVARIANT aa : INT & bb : INT
+INITIALISATION aa := 0; bb := 2
 
 OPERATIONS
-  IncAB(pp) =  PRE pp : 1..10 THEN aa := aa + pp ; aa <-- IncC(pp) END
+  IncAB(pp) =  PRE pp : 1..10 THEN aa := aa + pp ; aa <-- IncC(pp); bb <-- IncC(pp) END
 END

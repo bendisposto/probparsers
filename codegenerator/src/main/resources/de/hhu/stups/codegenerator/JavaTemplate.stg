@@ -193,6 +193,10 @@ number(number) ::= <<
 new BInteger(new java.math.BigInteger("<number>"))
 >>
 
+identifier_function_calls(variables, function, args) ::= <<
+<variables:{var | <var> = <identifier_function_call(function, args)>}>
+>>
+
 identifier_function_call(function, args) ::= <<
 <function>(<args; separator=",">);
 >>
