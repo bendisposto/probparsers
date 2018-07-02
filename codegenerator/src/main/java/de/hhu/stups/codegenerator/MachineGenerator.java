@@ -68,13 +68,22 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private STGroup currentGroup;
 
+	private Map<String, String> machineFromOperation;
+
+	private String machineName;
+
 	public MachineGenerator(GeneratorMode mode) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
 		this.locals = new ArrayList<>();
 		this.imports = new HashSet<>();
+		this.machineFromOperation = new HashMap<>();
 	}
 
 	public String generateMachine(MachineNode node) {
+		this.machineName = node.getName();
+		node.getMachineReferences()
+				.forEach(reference -> reference.getMachineNode().getOperations()
+						.forEach(operation -> machineFromOperation.put(operation.getName(), reference.getMachineName())));
 		ST machine = currentGroup.getInstanceOf("machine");
 		machine.add("imports", imports);
 		machine.add("machine", NameHandler.handleMachineName(node.getName()));
@@ -86,6 +95,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("enums", generateEnumDeclarations(node));
 		machine.add("sets", generateSetDeclarations(node));
 		machine.add("declarations", visitDeclarations(node.getVariables()));
+		machine.add("includes", generateIncludes(node));
 		machine.add("initialization", visitInitialization(node.getInitialisation()));
 		machine.add("operations", visitOperations(node.getOperations()));
 	}
@@ -99,6 +109,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		declaration.add("type", TypeGenerator.generate(node.getType(), currentGroup, false));
 		declaration.add("identifier", NameHandler.handle(node.getName(), currentGroup));
 		return declaration.render();
+	}
+
+	private List<String> generateIncludes(MachineNode node) {
+		return node.getMachineReferences().stream()
+				.map(reference -> {
+					ST declaration = currentGroup.getInstanceOf("include_declaration");
+					String machine = reference.getMachineName().toString();
+					declaration.add("type", NameHandler.handleMachineName(machine));
+					declaration.add("identifier", machine.toLowerCase());
+					return declaration.render();
+				})
+				.collect(Collectors.toList());
 	}
 
 	private String visitInitialization(SubstitutionNode node) {
@@ -357,10 +379,23 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		List<String> variables = node.getAssignedVariables().stream()
 				.map(var -> visitExprNode(var, expected))
 				.collect(Collectors.toList());
-		ST functionCall = currentGroup.getInstanceOf("identifier_function_calls");
-		functionCall.add("variables", variables);
-		functionCall.add("function", node.getOperationNode().getName().toLowerCase());
-		functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
+		String operationName = node.getOperationNode().getName();
+		String machineName = machineFromOperation.get(operationName).toString();
+		ST functionCall;
+		if(variables.size() > 0) {
+			functionCall = currentGroup.getInstanceOf("identifier_function_calls");
+			functionCall.add("variables", variables);
+			functionCall.add("machine", machineName.toLowerCase());
+			functionCall.add("function", operationName.toLowerCase());
+			functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
+			functionCall.add("this", machineName.equals(this.machineName));
+		} else {
+			functionCall = currentGroup.getInstanceOf("identifier_function_call");
+			functionCall.add("machine", machineName.toLowerCase());
+			functionCall.add("function", operationName.toLowerCase());
+			functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
+			functionCall.add("this", machineName.equals(this.machineName));
+		}
 		return functionCall.render();
 	}
 

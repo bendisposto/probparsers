@@ -3,10 +3,12 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 >>
 
 
-machine(imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
 <imports; separator="\n">
 
 public class <machine> {
+
+    <includes; separator="\n">
 
     <enums; separator="\n">
 
@@ -66,6 +68,9 @@ public enum <name> implements BObject {
 }
 >>
 
+include_declaration(type, identifier) ::= <<
+private <declaration(type, identifier)> = new <type>();
+>>
 
 global_declaration(type, identifier) ::= <<
 private <declaration(type, identifier)>;
@@ -193,12 +198,12 @@ number(number) ::= <<
 new BInteger(new java.math.BigInteger("<number>"))
 >>
 
-identifier_function_calls(variables, function, args) ::= <<
-<variables:{var | <var> = <identifier_function_call(function, args)>}>
+identifier_function_calls(variables, machine, function, args, this) ::= <<
+<variables:{var | <var> = <identifier_function_call(machine, function, args, this)>}>
 >>
 
-identifier_function_call(function, args) ::= <<
-<function>(<args; separator=",">);
+identifier_function_call(machine, function, args, this) ::= <<
+<if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
 >>
 
 expression_function_call(function, args) ::= <<

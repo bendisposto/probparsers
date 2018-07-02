@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by fabian on 31.05.18.
@@ -31,17 +33,22 @@ public class TestJava {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Path javaFilePath = codeGenerator.generate(mchPath, GeneratorMode.JAVA, true);
+		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, true);
 		Process process = Runtime.getRuntime()
-				.exec("javac " + javaFilePath.toFile().getAbsolutePath() + " -cp btypes.jar");
+				.exec("javac -classpath btypes.jar " + String.join(" ", javaFilePaths.stream()
+						.map(path -> path.toFile().getAbsoluteFile().toString())
+						.collect(Collectors.toSet())));
 
 		writeInputToSystem(process.getErrorStream());
 		writeInputToOutput(process.getErrorStream(), process.getOutputStream());
 		process.waitFor();
 
-		File classFile = new File(javaFilePath.getParent().toFile(), machine + ".class");
-		//cleanUp(javaFilePath.toString());
-		//cleanUp(classFile.getAbsolutePath().toString());
+		Set<File> classFiles = javaFilePaths.stream()
+				.map(path -> new File(path.getParent().toFile(), machine + ".class"))
+				.collect(Collectors.toSet());
+
+		//javaFilePaths.forEach(path -> cleanUp(path.toString()));
+		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));
 	}
 
 	@Test
@@ -171,6 +178,18 @@ public class TestJava {
 	public void testPhonebook6() throws Exception {
 		// TODO
 		testJava("phonebook6");
+	}
+
+	@Test
+	public void testSum() throws Exception {
+		testJava("Sum");
+	}
+
+	@Ignore
+	@Test
+	public void testRecursion() throws Exception {
+		//Correct exception
+		testJava("recursion/Sum1");
 	}
 
 	@Test

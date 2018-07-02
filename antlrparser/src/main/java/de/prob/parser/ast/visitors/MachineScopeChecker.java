@@ -209,7 +209,7 @@ public class MachineScopeChecker {
 			if (operationsInScope.containsKey(opName)) {
 				node.setOperationsNode(operationsInScope.get(opName));
 			} else {
-				throw new VisitorException(new ScopeException("Unkown operation name: " + opName));
+				throw new VisitorException(new ScopeException("Unknown operation name: " + opName));
 			}
 			for (ExprNode arg : node.getArguments()) {
 				visitExprNode(arg);

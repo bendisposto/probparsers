@@ -24,10 +24,10 @@ public class CodeGenerator {
 
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
 		CodeGenerator codeGenerator = new CodeGenerator();
-		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA, true);
+		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project2/MachineA.mch").toURI()), GeneratorMode.JAVA, true);
 	}
 
-	public Path generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {
+	public Set<Path> generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {
 		if(isMain) {
 			paths.clear();
 		}
@@ -38,11 +38,11 @@ public class CodeGenerator {
 			pathAsList[pathAsList.length - 1] = pathAsList[pathAsList.length - 1].replaceAll(project.getMainMachine().getName(), referenceNode.getMachineName());
 			Path currentPath = Paths.get(String.join("/", pathAsList));
 			if(!paths.contains(currentPath)) {
-				paths.add(currentPath);
 				generate(currentPath, mode, false);
 			}
 		}
-		return writeToFile(path, mode, project.getMainMachine());
+		paths.add(writeToFile(path, mode, project.getMainMachine()));
+		return paths;
 	}
 
 	private Path writeToFile(Path path, GeneratorMode mode, MachineNode node) {
