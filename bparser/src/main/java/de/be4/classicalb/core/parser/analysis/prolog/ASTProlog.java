@@ -34,7 +34,7 @@ public class ASTProlog extends DepthFirstAdapter {
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
-			"machine_header", "machine_reference", "operation", "rec_entry", "values_entry", "witness", "unit"));
+			"machine_header", "machine_reference", "operation", "refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -500,6 +500,22 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getOperationBody().apply(this);
 		close(node);
 	}
+	
+	@Override
+	public void caseARefinedOperation(final ARefinedOperation node) {
+		open(node);
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getOpName());
+		pout.closeTerm();
+		printAsList(node.getReturnValues());
+		printAsList(node.getParameters());
+		node.getAbOpName().apply(this);
+		node.getOperationBody().apply(this);
+		close(node);
+	}
+	
+	
 
 	// predicate
 

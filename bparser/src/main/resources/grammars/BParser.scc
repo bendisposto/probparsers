@@ -597,6 +597,8 @@ operation_list {-> operation*} =
 operation {-> operation} =
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
+  {refined_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? [ref]:identifier_literal [ab_op_name]:identifier_literal equal [operation_body]:substitution_l2
+    {-> New operation.refined([return_values.expression], [op_name.identifier_literal], [parameters.expression], ref, ab_op_name , operation_body.substitution)} |    
   {rule_operation} kw_rule [rule_name]:identifier_literal [attributes]:operation_attribute_list? kw_body [operation_body]:substitution_l0 end
     {-> New operation.rule(rule_name, [attributes.operation_attribute], operation_body.substitution)} |
   {computation} kw_computation [name]:identifier_literal [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
@@ -1190,6 +1192,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression ;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
+  {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |  
   {rule} [rule_name]:identifier_literal [attributes]:operation_attribute* [rule_body]:substitution |
   {computation} [name]:identifier_literal [attributes]:operation_attribute* [body]:substitution |
   {function} [return_values]:expression* [name]:identifier_literal [parameters]:expression* [attributes]:operation_attribute* [body]:substitution
