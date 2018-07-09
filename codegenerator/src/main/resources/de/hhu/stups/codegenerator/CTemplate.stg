@@ -1,12 +1,21 @@
 keywords() ::= <<
-auto, break, case, char, const, continue, default, do, double, else, enum, extern, float, for, goto, if, int, long, register, return, short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void volatile, while
+auto, break, case, char, const, continue, default, do, double, else, enum, extern, float, for, goto, if, int,
+long, register, return, short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void, volatile,
+while, fclose, clearerr, feof, ferror, fflush, fgetpos, fopen, fread, freopen, fseek, fsetpos, ftell, fwrite, remove,
+rename, rewind, setbuf, setvbuf, tmpfile, tmpnam, fprintf, printf, sprintf, vfprintf, vprintf, vsprintf, fscanf, scanf,
+sscanf, fgetc, fgets, fputc, fputs, getc, getchar, gets, putc, putchar, puts, ungetc, perror, NULL, BUFSIZ, EOF, FOPEN_MAX, FILENAME_MAX
+L_tmpnam, SEEK_CUR, SEEK_END, SEEK_SET, TMP_MAX, stderr, stdin, stdout, size_t, fpos_t, FILE,, wchar_t, div_t, ldiv_t, EXIT_FAILURE, EXIT_SUCCESS,
+RAND_MAX, MB_CUR_MAX, atof, atoi, atol, strtod, strtol, strtoul, calloc, free, malloc, realloc, abort, exit, getenv, system, bsearch, qsort, abs,
+div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb, create_atom, main, create_boolean, boolean_value, or, and, xor, create_integer,
+int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BAtom, BBoolean
 >>
 
 
-machine(imports, machine, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
 <imports; separator="\n">
+<includes; separator="\n">
 
 <enums>
 
@@ -42,6 +51,9 @@ set_declaration(type, identifier) ::= <<
 set_enum_declaration(name,enums) ::= <<
 >>
 
+include_declaration(type, identifier) ::= <<
+#include "<type>.c"
+>>
 
 global_declaration(type, identifier) ::= <<
 static <declaration(type, identifier)>;
@@ -91,12 +103,12 @@ object(cast) ::= <<
 <if(!cast)>BObject<endif>
 >>
 
-binary_arithmetic(arg1,operator,arg2) ::= <<
+binary(arg1,operator,arg2) ::= <<
 <operator>(<arg1>,<arg2>)
 >>
 
-unary_arithmetic(operator, arg) ::= <<
-<operator>(<arg>)
+unary(operator, arg1) ::= <<
+<operator>(<arg1>)
 >>
 
 boolean_val(val) ::= <<

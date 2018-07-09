@@ -6,6 +6,7 @@ import de.prob.parser.ast.types.BoolType;
 import de.prob.parser.ast.types.CoupleType;
 import de.prob.parser.ast.types.EnumeratedSetElementType;
 import de.prob.parser.ast.types.IntegerType;
+import de.prob.parser.ast.types.SetElementType;
 import de.prob.parser.ast.types.SetType;
 import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.STGroup;
@@ -62,9 +63,8 @@ public class TypeGenerator {
             imports.add(template.getInstanceOf("boolean_import").render());
         } else if(type instanceof SetType) {
             imports.add(template.getInstanceOf("set_import").render());
-            imports.add(template.getInstanceOf("hashset_import").render());
+        } else if(type instanceof SetElementType) {
             imports.add(template.getInstanceOf("object_import").render());
-            imports.add(template.getInstanceOf("arrays_import").render());
         } else if(type instanceof CoupleType) {
             imports.add(template.getInstanceOf("couple_import").render());
         }

@@ -27,8 +27,8 @@ import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
@@ -115,7 +115,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return node.getMachineReferences().stream()
 				.map(reference -> {
 					ST declaration = currentGroup.getInstanceOf("include_declaration");
-					String machine = reference.getMachineName().toString();
+					String machine = reference.getMachineName();
 					declaration.add("type", NameHandler.handleMachineName(machine));
 					declaration.add("identifier", machine.toLowerCase());
 					return declaration.render();
@@ -164,6 +164,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private String declareEnums(EnumeratedSetDeclarationNode node) {
+		TypeGenerator.addImport(node.getElements().get(0).getType(), imports, currentGroup);
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
 		String name = NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup);
 		enumDeclaration.add("name", name.substring(0, 1).toUpperCase() + name.substring(1));

@@ -160,10 +160,9 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
 
 	@Override
 	public Void visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
-        //TODO: Invariant Node is not implemented
         visitPredicateNode(node.getCondition(), expected);
         visitSubstitutionNode(node.getBody(), expected);
-		throw new RuntimeException("Implement " + node.getClass());
+        return null;
 	}
 
     @Override

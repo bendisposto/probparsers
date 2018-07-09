@@ -17,6 +17,10 @@ public class BSet implements BObject, Set<BObject> {
 		this.set = ImmutableSet.copyOf(elements);
 	}
 
+	public BSet(BObject... elements) {
+		this.set = ImmutableSet.copyOf(elements);
+	}
+
 	public static LinkedHashSet<BObject> newStorage() {
 		return new LinkedHashSet<>();
 	}

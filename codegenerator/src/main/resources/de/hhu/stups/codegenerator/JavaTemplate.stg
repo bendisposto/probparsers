@@ -51,7 +51,7 @@ private BSet <identifier> = <set_enumeration(enums)>;
 >>
 
 set_enumeration(enums) ::= <<
-new BSet(new HashSet\<BObject>(Arrays.asList(<enums; separator=", ">)))
+new BSet(<enums; separator=", ">)
 >>
 
 set_element(set,element) ::= <<
@@ -125,14 +125,6 @@ object_import() ::= <<
 import de.hhu.stups.btypes.BObject;
 >>
 
-hashset_import() ::= <<
-import java.util.HashSet;
->>
-
-arrays_import() ::= <<
-import java.util.Arrays;
->>
-
 object(cast) ::= <<
 <if(cast)>(BObject)<else>BObject<endif>
 >>
@@ -195,7 +187,7 @@ identifier(identifier, isReturn) ::= <<
 >>
 
 number(number) ::= <<
-new BInteger(new java.math.BigInteger("<number>"))
+new BInteger("<number>")
 >>
 
 identifier_function_calls(variables, machine, function, args, this) ::= <<

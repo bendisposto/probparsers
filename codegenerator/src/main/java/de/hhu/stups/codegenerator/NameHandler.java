@@ -17,7 +17,7 @@ public class NameHandler {
 
     public static String handle(String string, STGroup template) {
         ST keywords = template.getInstanceOf("keywords");
-        List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").split(","));
+        List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
         if(words.contains(string)) {
             return "_" + string;
         }

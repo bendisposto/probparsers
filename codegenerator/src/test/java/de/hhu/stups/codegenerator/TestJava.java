@@ -99,13 +99,11 @@ public class TestJava {
 		testJava("IfAndPredicates");
 	}
 
-	@Ignore
 	@Test
 	public void testBooleanPredicate() throws Exception {
 		testJava("BooleanPredicate");
 	}
 
-	@Ignore
 	@Test
 	public void testRecords() throws Exception {
 		testJava("Records");
