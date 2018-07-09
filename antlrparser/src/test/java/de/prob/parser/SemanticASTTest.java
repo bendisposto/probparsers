@@ -16,6 +16,16 @@ public class SemanticASTTest {
 		// TODO add class for records and structs
 	}
 
+	
+	@Test
+	public void testWhileLoop() throws Exception {
+		String machine = "MACHINE test2\n";
+		machine += "OPERATIONS \n";
+		machine += "foo = SELECT 1=1 THEN WHILE 1=1 DO skip INVARIANT 1=1 VARIANT 3 END END\n";
+		machine += "END";
+		check(machine);
+	}
+	
 	private void check(String main, String... others) throws Exception {
 		Antlr4BParser.createBProjectFromMachineStrings(main, others);
 	}
