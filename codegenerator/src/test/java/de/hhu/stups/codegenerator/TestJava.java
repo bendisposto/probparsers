@@ -121,6 +121,11 @@ public class TestJava {
 	}
 
 	@Test
+	public void testRelationImage() throws Exception {
+		testJava("RelationImage");
+	}
+
+	@Test
 	public void testEmptySet() throws Exception {
 		testJava("EmptySet");
 	}
