@@ -100,6 +100,16 @@ public class TestJava {
 	}
 
 	@Test
+	public void testImplies() throws Exception {
+		testJava("Implies");
+	}
+
+	@Test
+	public void testEquivalence() throws Exception {
+		testJava("Equivalence");
+	}
+
+	@Test
 	public void testBooleanPredicate() throws Exception {
 		testJava("BooleanPredicate");
 	}
