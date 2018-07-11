@@ -24,10 +24,15 @@ public class <machine> {
 
 >>
 
-initialization(body) ::= <<
+initialization(body, include_initializations) ::= <<
 public void initialize() {
+    <include_initializations; separator="\n">
     <body>
 }
+>>
+
+include_initialization(machine) ::= <<
+<machine>.initialize();
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<

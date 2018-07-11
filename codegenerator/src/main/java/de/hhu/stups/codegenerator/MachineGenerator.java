@@ -4,6 +4,7 @@ import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -29,7 +30,6 @@ import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
-import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 import org.stringtemplate.v4.ST;
@@ -96,7 +96,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("sets", generateSetDeclarations(node));
 		machine.add("declarations", visitDeclarations(node.getVariables()));
 		machine.add("includes", generateIncludes(node));
-		machine.add("initialization", visitInitialization(node.getInitialisation()));
+		machine.add("initialization", visitInitialization(node));
 		machine.add("operations", visitOperations(node.getOperations()));
 	}
 
@@ -123,9 +123,16 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				.collect(Collectors.toList());
 	}
 
-	private String visitInitialization(SubstitutionNode node) {
+	private String visitInitialization(MachineNode node) {
 		ST initialization = currentGroup.getInstanceOf("initialization");
-		initialization.add("body", visitSubstitutionNode(node, null));
+		initialization.add("include_initializations", node.getMachineReferences().stream().map(this::visitMachineInitialization).collect(Collectors.toList()));
+		initialization.add("body", visitSubstitutionNode(node.getInitialisation(), null));
+		return initialization.render();
+	}
+
+	private String visitMachineInitialization(MachineReferenceNode node) {
+		ST initialization = currentGroup.getInstanceOf("include_initialization");
+		initialization.add("machine", node.getMachineName().toLowerCase());
 		return initialization.render();
 	}
 
