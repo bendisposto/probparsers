@@ -450,11 +450,12 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 			visitExprNode(expressionNodes.get(0), node.getType());
 			visitExprNode(expressionNodes.get(1), node.getType());
 			return node.getType();
-		case INVERSE_RELATION:
+		case INVERSE_RELATION: {
 			SetType argType = (SetType) visitExprNode(expressionNodes.get(0),
 					new SetType(new CoupleType(new UntypedType(), new UntypedType())));
 			CoupleType c = (CoupleType) argType.getSubType();
 			return unify(expected, new SetType(new CoupleType(c.getRight(), c.getLeft())), node);
+		}
 		case RESTRICT_FRONT:
 		case RESTRICT_TAIL:
 			// s /|\ n s \|/ n
@@ -517,6 +518,16 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 			SetType baseType = (SetType) visitExprNode(expressionNodes.get(0),
 					new SetType(new CoupleType(domType, new UntypedType())));
 			return unify(expected, ((CoupleType) baseType.getSubType()).getRight(), node);
+		}
+		case RELATIONAL_IMAGE: {
+			SetType relType = (SetType) visitExprNode(expressionNodes.get(0),
+					new SetType(new CoupleType(new UntypedType(), new UntypedType())));
+			CoupleType coupleType = (CoupleType) relType.getSubType();
+			visitExprNode(expressionNodes.get(1), new SetType(coupleType.getLeft()));
+			// relType could have been changed
+			relType = (SetType) expressionNodes.get(0).getType();
+			coupleType = (CoupleType) relType.getSubType();
+			return unify(expected, new SetType(coupleType.getRight()), node);
 		}
 		case CARD:
 			visitExprNode(expressionNodes.get(0), new SetType(new UntypedType()));

@@ -18,7 +18,7 @@ public class ExpressionOperatorNode extends ExprNode
 		, PLUS, MINUS, MULT, DIVIDE, MOD, INTERVAL//
 		, UNARY_MINUS//
 		, MAX, MIN//
-		// 
+		//
 		, BOOL
 		// set operators
 		, SET_ENUMERATION, EMPTY_SET, SET_SUBTRACTION, UNION, INTERSECTION//
@@ -27,7 +27,7 @@ public class ExpressionOperatorNode extends ExprNode
 		, DOMAIN, RANGE, CARTESIAN_PRODUCT//
 		, CARD, DOMAIN_RESTRICTION, OVERWRITE_RELATION, DIRECT_PRODUCT//
 		, DOMAIN_SUBTRACTION, RANGE_RESTRICTION, RANGE_SUBTRATION//
-		, INVERSE_RELATION, SET_RELATION
+		, INVERSE_RELATION, SET_RELATION, RELATIONAL_IMAGE
 		// function
 		, FUNCTION_CALL
 		// sequence operators
@@ -36,7 +36,7 @@ public class ExpressionOperatorNode extends ExprNode
 		, SEQ, SEQ1, ISEQ, ISEQ1
 		// special
 		, COUPLE
-		//prefix operators
+		// prefix operators
 		, POW
 	}
 
@@ -68,8 +68,7 @@ public class ExpressionOperatorNode extends ExprNode
 	public void setOperator(ExpressionOperator operator) {
 		this.operator = operator;
 	}
-	
-	
+
 	public void setExpressionNodes(List<ExprNode> expressionNodes) {
 		this.expressionNodes = expressionNodes;
 		for (ExprNode exprNode : expressionNodes) {

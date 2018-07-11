@@ -207,6 +207,17 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitImageExpression(BParser.ImageExpressionContext ctx) {
+		List<ExprNode> list = new ArrayList<>();
+		final ExprNode func = (ExprNode) ctx.expression().accept(this);
+		list.add(func);
+		ExprNode arg = (ExprNode) ctx.expression_in_par().accept(this);
+		list.add(arg);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), list,
+				ExpressionOperator.RELATIONAL_IMAGE);
+	}
+
+	@Override
 	public Node visitUnaryMinus(BParser.UnaryMinusContext ctx) {
 		ExprNode expr = (ExprNode) ctx.expression().accept(this);
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), createExprNodeList(expr),
