@@ -90,4 +90,24 @@ public class BBoolean implements BObject {
 	public BBoolean and(Boolean other) {
 		return new BBoolean(this.booleanValue() && other);
 	}
+
+	public BBoolean not() {
+		return new BBoolean(!this.booleanValue());
+	}
+
+	public BBoolean implies(BBoolean other) {
+		return this.not().or(other);
+	}
+
+	public BBoolean implies(Boolean other) {
+		return new BBoolean(this.not().booleanValue() || other);
+	}
+
+	public BBoolean equivalent(BBoolean other) {
+		return this.implies(other).and(other.implies(this));
+	}
+
+	public BBoolean equivalent(Boolean other) {
+		return new BBoolean(this.booleanValue() == other);
+	}
 }

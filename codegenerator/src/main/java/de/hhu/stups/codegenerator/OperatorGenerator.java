@@ -37,10 +37,17 @@ public class OperatorGenerator {
     }
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> BINARY_EXPRESSION_OPERATORS =
-        Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
+            Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> UNARY_EXPRESSION_OPERATORS =
             Arrays.asList(UNARY_MINUS);
+
+    private static final List<PredicateOperatorNode.PredicateOperator> BINARY_PREDICATE_OPERATORS =
+            Arrays.asList(PredicateOperatorNode.PredicateOperator.AND, PredicateOperatorNode.PredicateOperator.OR,
+                        PredicateOperatorNode.PredicateOperator.IMPLIES, PredicateOperatorNode.PredicateOperator.EQUIVALENCE);
+
+    private static final List<PredicateOperatorNode.PredicateOperator> UNARY_PREDICATE_OPERATORS =
+            Arrays.asList(PredicateOperatorNode.PredicateOperator.NOT);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> BOOLEANS =
             Arrays.asList(TRUE,FALSE);
@@ -70,8 +77,24 @@ public class OperatorGenerator {
         return "";
     }
 
+    public static String generatePredicate(PredicateOperatorNode node, List<String> expressionList, STGroup template) {
+        PredicateOperatorNode.PredicateOperator operator = node.getOperator();
+        if(BINARY_PREDICATE_OPERATORS.contains(operator)) {
+            return generateBinary(() -> operator, expressionList, template);
+        } else if(UNARY_PREDICATE_OPERATORS.contains(operator)) {
+            return generateUnaryPredicate(operator, expressionList, template);
+        }
+        return "";
+    }
+
 
     private static String generateUnaryExpression(ExpressionOperatorNode.ExpressionOperator operator, List<String> expressionList, STGroup template) {
+        ST expression = generateUnary(operator, template);
+        expression.add("arg", expressionList.get(0));
+        return expression.render();
+    }
+
+    private static String generateUnaryPredicate(PredicateOperatorNode.PredicateOperator operator, List<String> expressionList, STGroup template) {
         ST expression = generateUnary(operator, template);
         expression.add("arg", expressionList.get(0));
         return expression.render();
@@ -147,6 +170,18 @@ public class OperatorGenerator {
         return template;
     }
 
+    private static ST generateUnary(PredicateOperatorNode.PredicateOperator operator, STGroup templateGroup) {
+        ST template = templateGroup.getInstanceOf("unary");
+        switch(operator) {
+            case NOT:
+                template.add("operator", "not");
+                break;
+            default:
+                break;
+        }
+        return template;
+    }
+
     private static ST generateBinary(PredicateOperatorNode.PredicateOperator operator, STGroup templateGroup) {
         ST template = templateGroup.getInstanceOf("binary");
         switch(operator) {
@@ -158,6 +193,9 @@ public class OperatorGenerator {
                 break;
             case IMPLIES:
                 template.add("operator", "implies");
+                break;
+            case EQUIVALENCE:
+                template.add("operator", "equivalent");
                 break;
             default:
                 break;

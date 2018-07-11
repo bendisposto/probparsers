@@ -1,5 +1,5 @@
 MACHINE
-    IfAndPredicates
+    Implies
 
 VARIABLES xx, yy, switch
 

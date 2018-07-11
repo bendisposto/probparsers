@@ -1,5 +1,5 @@
 MACHINE
-    IfAndPredicates
+    Equivalence
 
 VARIABLES xx, yy, switch
 

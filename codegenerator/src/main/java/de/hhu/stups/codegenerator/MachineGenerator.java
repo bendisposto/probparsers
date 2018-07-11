@@ -245,7 +245,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
 		List<String> expressionList = node.getPredicateArguments().stream()
 				.map(expr -> visitPredicateNode(expr, expected)).collect(Collectors.toList());
-		return OperatorGenerator.generateBinary(node::getOperator, expressionList, currentGroup);
+		return OperatorGenerator.generatePredicate(node, expressionList, currentGroup);
 	}
 
 	@Override
