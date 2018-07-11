@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static de.hhu.stups.codegenerator.GeneratorMode.C;
 import static de.hhu.stups.codegenerator.GeneratorMode.JAVA;
+import static de.hhu.stups.codegenerator.GeneratorMode.PY;
 
 public class MachineGenerator implements AbstractVisitor<String, Void> {
 
@@ -55,11 +56,15 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private static final STGroup C_GROUP = new STGroupFile(
 			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/CTemplate.stg").getFile());
 
+	private static final STGroup PYTHON_GROUP = new STGroupFile(
+			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/PythonTemplate.stg").getFile());
+
 	private static final Map<GeneratorMode, STGroup> TEMPLATE_MAP = new HashMap<>();
 
 	static {
 		TEMPLATE_MAP.put(JAVA, JAVA_GROUP);
 		TEMPLATE_MAP.put(C, C_GROUP);
+		TEMPLATE_MAP.put(PY, PYTHON_GROUP);
 	}
 
 	private List<DeclarationNode> locals;

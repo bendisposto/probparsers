@@ -6,7 +6,7 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
 <imports; separator="\n">
 
-public class <machine> {
+class <machine>:
 
     <includes; separator="\n">
 
@@ -20,27 +20,23 @@ public class <machine> {
 
     <operations; separator="\n\n">
 
-}
-
 >>
 
 initialization(body, include_initializations) ::= <<
-public void initialize() {
+def __init__():
     <include_initializations; separator="\n">
     <body>
-}
 >>
 
 include_initialization(machine) ::= <<
-<machine>.initialize();
+<machine>.__init__()
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
-public <returnType> <operationName>(<parameters; separator=", ">) {
+def <operationName>(<parameters; separator=", ">):
     <locals; separator="\n">
     <body>
     <return>
-}
 >>
 
 parameter(type, identifier) ::= <<
@@ -48,15 +44,15 @@ parameter(type, identifier) ::= <<
 >>
 
 return(identifier) ::= <<
-return <identifier>;
+return <identifier>
 >>
 
 set_declaration(identifier, enums) ::= <<
-private BSet <identifier> = <set_enumeration(enums)>;
+__<identifier> = <set_enumeration(enums)>
 >>
 
 set_enumeration(enums) ::= <<
-new BSet(<enums; separator=", ">)
+BSet(<enums; separator=", ">)
 >>
 
 set_element(set,element) ::= <<
@@ -68,29 +64,27 @@ enum_call(class, identifier) ::= <<
 >>
 
 set_enum_declaration(name,enums) ::= <<
-public enum <name> implements BObject {
-    <enums; separator=", \n">
-}
+<name> = Enum(<enums; separator=", ">)
 >>
 
 include_declaration(type, identifier) ::= <<
-private <declaration(type, identifier)> = new <type>();
+__<declaration(type, identifier)> = <type>()
 >>
 
 global_declaration(type, identifier) ::= <<
-private <declaration(type, identifier)>;
+__<declaration(type, identifier)>
 >>
 
 local_declaration(type, identifier) ::= <<
-<declaration(type, identifier)> = null;
+<declaration(type, identifier)> = None
 >>
 
 declaration(type, identifier) ::= <<
-<type> <identifier>
+<identifier>
 >>
 
 assignment(identifier, val) ::= <<
-<identifier> = <val>;
+<identifier> = <val>
 >>
 
 assignments(assignments) ::= <<
@@ -98,15 +92,13 @@ assignments(assignments) ::= <<
 >>
 
 void() ::= <<
-void
 >>
 
 type(type, cast) ::= <<
-<if(cast)>(<type>)<else><type><endif>
 >>
 
 import_type(type) ::= <<
-import de.hhu.stups.btypes.<type>;
+import <type>
 >>
 
 
@@ -115,7 +107,7 @@ BSet.range(<arg1>,<arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-new BCouple(<arg1>, <arg2>)
+BCouple(<arg1>, <arg2>)
 >>
 
 
@@ -128,39 +120,35 @@ unary(operator, arg1) ::= <<
 >>
 
 select(predicate, then) ::= <<
-if((<predicate>).booleanValue()) {
+if <predicate>.booleanValue():
     <then>
-} else {
-    throw new RuntimeException("Invocation of the operation is not possible");
-}
+else:
+    raise Error("Invocation of the operation is not possible")
 >>
 
 if(predicate, then, else1) ::= <<
-if((<predicate>).booleanValue()) {
+if <predicate>.booleanValue():
     <then>
-} <else1; separator=" ">
+<else1; separator=" ">
 >>
 
 elseif(predicate, then) ::= <<
-else if((<predicate>).booleanValue()) {
+else if <predicate>.booleanValue():
     <then>
-}
 >>
 
 else(then) ::= <<
-else {
+else:
     <then>
-}
 >>
 
 while(predicate, then) ::= <<
-while((<predicate>).booleanValue()) {
+while <predicate>.booleanValue():
     <then>
-}
 >>
 
 boolean_val(val) ::= <<
-<if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
+<if(val)>BBoolean(true)<else>BBoolean(false)<endif>
 >>
 
 identifier(identifier, isReturn) ::= <<
@@ -168,7 +156,7 @@ identifier(identifier, isReturn) ::= <<
 >>
 
 number(number) ::= <<
-new BInteger("<number>")
+BInteger("<number>")
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
@@ -176,7 +164,7 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 >>
 
 operation_call(machine, function, args, this) ::= <<
-<if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
+<if(this)>self.<else><machine>.<endif><function>(<args; separator=",">)
 >>
 
 expression_function_call(function, args) ::= <<
