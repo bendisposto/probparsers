@@ -137,14 +137,27 @@ public class BSet implements BObject, Set<BObject> {
 		return new BSet(set);
 	}
 
-	public BObject call(BObject arg) {
+	public BSet relationImage(BSet domain) {
+		return new BSet(set.stream()
+			.filter(object -> domain.contains(((BCouple) object).getFirst()))
+			.map(object -> ((BCouple) object).getSecond())
+			.collect(Collectors.toSet()));
+	}
+
+
+	//functionCall
+	public BObject functionCall(BObject arg) {
 		for(BObject object : set) {
-			BCouple tuple = (BCouple) object;
-			if(tuple.getFirst().equals(arg)) {
-				return tuple.getSecond();
+			BCouple couple = (BCouple) object;
+			if(couple.getFirst().equals(arg)) {
+				return couple.getSecond();
 			}
 		}
 		throw new RuntimeException("Argument is not in the key set of this map");
+	}
+
+	public BBoolean elementOf(BObject object) {
+		return new BBoolean(this.contains(object));
 	}
 
 }

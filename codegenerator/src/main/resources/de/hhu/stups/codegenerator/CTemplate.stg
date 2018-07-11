@@ -74,34 +74,15 @@ assignment(identifier, val) ::= <<
 void() ::= <<
 >>
 
-boolean(cast) ::= <<
-<if(!cast)>BBoolean<endif>
->>
-
-boolean_import() ::= <<
-#include "BBoolean.c"
->>
-
-integer(cast) ::= <<
-<if(!cast)>BInteger<endif>
->>
-
-integer_import() ::= <<
-#include "BInteger.c"
->>
-
-set(cast) ::= <<
-<if(!cast)>BSet<endif>
->>
-
-set_import() ::= <<
-#include "BSet.c"
+type(type, cast) ::= <<
+<if(!cast)><type><endif>
 >>
 
 
-object(cast) ::= <<
-<if(!cast)>BObject<endif>
+import_type(type) ::= <<
+#include "<type>.c"
 >>
+
 
 binary(arg1,operator,arg2) ::= <<
 <operator>(<arg1>,<arg2>)

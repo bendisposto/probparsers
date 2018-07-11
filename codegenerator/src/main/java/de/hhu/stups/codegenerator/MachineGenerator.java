@@ -263,11 +263,22 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
 		if (node.getOperator() == IfOrSelectSubstitutionsNode.Operator.SELECT) {
-			return visitSubstitutionNode(node.getSubstitutions().get(0), expected);
+			return visitSelectSubstitution(node);
 		}
+		return visitIfSubstitution(node);
+	}
+
+	private String visitSelectSubstitution(IfOrSelectSubstitutionsNode node) {
+		ST select = currentGroup.getInstanceOf("select");
+		select.add("predicate", visitPredicateNode(node.getConditions().get(0), null));
+		select.add("then", visitSubstitutionNode(node.getSubstitutions().get(0), null));
+		return select.render();
+	}
+
+	private String visitIfSubstitution(IfOrSelectSubstitutionsNode node) {
 		ST ifST = currentGroup.getInstanceOf("if");
-		ifST.add("predicate", visitPredicateNode(node.getConditions().get(0), expected));
-		ifST.add("then", visitSubstitutionNode(node.getSubstitutions().get(0), expected));
+		ifST.add("predicate", visitPredicateNode(node.getConditions().get(0), null));
+		ifST.add("then", visitSubstitutionNode(node.getSubstitutions().get(0), null));
 		ifST.add("else1", generateElseIfs(node));
 
 		if (node.getElseSubstitution() != null) {
@@ -381,22 +392,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				.map(var -> visitExprNode(var, expected))
 				.collect(Collectors.toList());
 		String operationName = node.getOperationNode().getName();
-		String machineName = machineFromOperation.get(operationName).toString();
+		String machineName = machineFromOperation.get(operationName);
 		ST functionCall;
 		if(variables.size() > 0) {
-			functionCall = currentGroup.getInstanceOf("identifier_function_calls");
-			functionCall.add("variables", variables);
-			functionCall.add("machine", machineName.toLowerCase());
-			functionCall.add("function", operationName.toLowerCase());
-			functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
-			functionCall.add("this", machineName.equals(this.machineName));
+			functionCall = currentGroup.getInstanceOf("operation_call_with_assignment");
+			functionCall.add("var", variables.get(0));
 		} else {
-			functionCall = currentGroup.getInstanceOf("identifier_function_call");
-			functionCall.add("machine", machineName.toLowerCase());
-			functionCall.add("function", operationName.toLowerCase());
-			functionCall.add("args", node.getArguments().stream().map(ExprNode::toString).collect(Collectors.toList()));
-			functionCall.add("this", machineName.equals(this.machineName));
+			functionCall = currentGroup.getInstanceOf("operation_call");
 		}
+		functionCall.add("machine", machineName.toLowerCase());
+		functionCall.add("function", operationName.toLowerCase());
+		functionCall.add("args", node.getArguments().stream().map(expr -> visitExprNode(expr, expected)).collect(Collectors.toList()));
+		functionCall.add("this", machineName.equals(this.machineName));
 		return functionCall.render();
 	}
 

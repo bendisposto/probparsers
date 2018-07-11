@@ -6,67 +6,49 @@ import de.prob.parser.ast.types.BoolType;
 import de.prob.parser.ast.types.CoupleType;
 import de.prob.parser.ast.types.EnumeratedSetElementType;
 import de.prob.parser.ast.types.IntegerType;
-import de.prob.parser.ast.types.SetElementType;
 import de.prob.parser.ast.types.SetType;
 import de.prob.parser.ast.types.UntypedType;
+import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 import java.util.Set;
 
 public class TypeGenerator {
 
-    public static String generate(BType type, STGroup template, boolean cast) {
+    public static String generate(BType type, STGroup group, boolean cast) {
+        ST template = group.getInstanceOf("type");
         if(type instanceof IntegerType) {
-            return generateInteger(template, cast);
+            return template.add("type", "BInteger").add("cast", cast).render();
         } else if(type instanceof BoolType) {
-            return generateBoolean(template, cast);
+            return template.add("type", "BBoolean").add("cast", cast).render();
         } else if(type instanceof SetType) {
-            return generateSet(template, cast);
+            return template.add("type", "BSet").add("cast", cast).render();
         } else if(type instanceof EnumeratedSetElementType) {
-            return generateObject(template, cast);
+            return template.add("type", "BObject").add("cast", cast).render();
         } else if(type instanceof CoupleType) {
-            return generateCouple(template, cast);
+            return template.add("type", "BCouple").add("cast", cast).render();
         } else if(type instanceof UntypedType) {
-            return generateUntyped(template);
+            return generateUntyped(group);
         }
         return "";
-    }
-
-    private static String generateInteger(STGroup template, boolean cast) {
-        return template.getInstanceOf("integer").add("cast", cast).render();
-    }
-
-    private static String generateBoolean(STGroup template, boolean cast) {
-        return template.getInstanceOf("boolean").add("cast", cast).render();
-    }
-
-    private static String generateSet(STGroup template, boolean cast) {
-        return template.getInstanceOf("set").add("cast", cast).render();
-    }
-
-    private static String generateObject(STGroup template, boolean cast) {
-        return template.getInstanceOf("object").add("cast", cast).render();
-    }
-
-    private static String generateCouple(STGroup template, boolean cast){
-        return template.getInstanceOf("couple").add("cast", cast).render();
     }
 
     private static String generateUntyped(STGroup template) {
         return template.getInstanceOf("void").render();
     }
 
-    public static void addImport(BType type, Set<String> imports, STGroup template) {
+    public static void addImport(BType type, Set<String> imports, STGroup group) {
+        ST template = group.getInstanceOf("import_type");
         if (type instanceof IntegerType) {
-            imports.add(template.getInstanceOf("integer_import").render());
+            imports.add(template.add("type", "BInteger").render());
         } else if (type instanceof BoolType) {
-            imports.add(template.getInstanceOf("boolean_import").render());
+            imports.add(template.add("type", "BBoolean").render());
         } else if(type instanceof SetType) {
-            imports.add(template.getInstanceOf("set_import").render());
-        } else if(type instanceof SetElementType) {
-            imports.add(template.getInstanceOf("object_import").render());
+            imports.add(template.add("type", "BSet").render());
+        } else if(type instanceof EnumeratedSetElementType) {
+            imports.add(template.add("type", "BObject").render());
         } else if(type instanceof CoupleType) {
-            imports.add(template.getInstanceOf("couple_import").render());
+            imports.add(template.add("type", "BCouple").render());
         }
     }
 

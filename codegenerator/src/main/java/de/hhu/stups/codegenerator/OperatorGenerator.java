@@ -21,6 +21,7 @@ import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.Express
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MOD;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MULT;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.PLUS;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.RELATIONAL_IMAGE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.SET_ENUMERATION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.SET_SUBTRACTION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.TRUE;
@@ -42,7 +43,10 @@ public class OperatorGenerator {
             Arrays.asList(UNARY_MINUS);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> BOOLEANS =
-        Arrays.asList(TRUE,FALSE);
+            Arrays.asList(TRUE,FALSE);
+
+    private static final List<Object> BINARY_SWAP =
+            Arrays.asList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.ELEMENT_OF);
 
     public static String generateExpression(ExpressionOperatorNode node, List<String> expressionList, STGroup template) {
         ExpressionOperatorNode.ExpressionOperator operator = node.getOperator();
@@ -60,6 +64,8 @@ public class OperatorGenerator {
             return generateCouple(expressionList, template);
         } else if(node.getOperator() == FUNCTION_CALL) {
             return generateFunctionCall(node, expressionList, template);
+        } else if(node.getOperator() == RELATIONAL_IMAGE) {
+            return generateRelationImage(node, expressionList, template);
         }
         return "";
     }
@@ -83,8 +89,14 @@ public class OperatorGenerator {
                 } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
                     expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op, template);
                 }
-                expression.add("arg1", a);
-                expression.add("arg2", e);
+
+                if(BINARY_SWAP.contains(op)) {
+                    expression.add("arg1", e);
+                    expression.add("arg2", a);
+                } else {
+                    expression.add("arg1", a);
+                    expression.add("arg2", e);
+                }
                 return expression.render();
             });
         return result.isPresent() ? result.get() : "";
@@ -157,6 +169,9 @@ public class OperatorGenerator {
     private static ST generateBinary(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator, STGroup templateGroup) {
         ST template = templateGroup.getInstanceOf("binary");
         switch(operator) {
+            case ELEMENT_OF:
+                template.add("operator", "elementOf");
+                break;
             case EQUAL:
                 template.add("operator", "equal");
                 break;
@@ -199,6 +214,13 @@ public class OperatorGenerator {
         functionCall.add("function", node.getExpressionNodes().get(0));
         functionCall.add("args", arguments.subList(1, arguments.size()));
         return functionCall.render();
+    }
+
+    private static String generateRelationImage(ExpressionOperatorNode node, List<String> arguments, STGroup template) {
+        ST relationImage = template.getInstanceOf("relation_image");
+        relationImage.add("function", node.getExpressionNodes().get(0));
+        relationImage.add("args", arguments.subList(1, arguments.size()));
+        return relationImage.render();
     }
 
 }

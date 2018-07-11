@@ -96,38 +96,14 @@ void() ::= <<
 void
 >>
 
-boolean(cast) ::= <<
-<if(cast)>(BBoolean)<else>BBoolean<endif>
+type(type, cast) ::= <<
+<if(cast)>(<type>)<else><type><endif>
 >>
 
-boolean_import() ::= <<
-import de.hhu.stups.btypes.BBoolean;
+import_type(type) ::= <<
+import de.hhu.stups.btypes.<type>;
 >>
 
-integer(cast) ::= <<
-<if(cast)>(BInteger)<else>BInteger<endif>
->>
-
-integer_import() ::= <<
-import de.hhu.stups.btypes.BInteger;
->>
-
-set(cast) ::= <<
-<if(cast)>(BSet)<else>BSet<endif>
->>
-
-set_import() ::= <<
-import de.hhu.stups.btypes.BSet;
->>
-
-
-object_import() ::= <<
-import de.hhu.stups.btypes.BObject;
->>
-
-object(cast) ::= <<
-<if(cast)>(BObject)<else>BObject<endif>
->>
 
 interval(arg1, arg2) ::= <<
 BSet.range(<arg1>,<arg2>)
@@ -137,14 +113,6 @@ couple_create(arg1, arg2) ::= <<
 new BCouple(<arg1>, <arg2>)
 >>
 
-couple(cast) ::= <<
-<if(cast)>(BCouple)<else>BCouple<endif>
->>
-
-couple_import() ::= <<
-import de.hhu.stups.btypes.BCouple;
->>
-
 
 binary(arg1,operator,arg2) ::= <<
 <arg1>.<operator>(<arg2>)
@@ -152,6 +120,14 @@ binary(arg1,operator,arg2) ::= <<
 
 unary(operator, arg1) ::= <<
 <arg1>.<operator>()
+>>
+
+select(predicate, then) ::= <<
+if((<predicate>).booleanValue()) {
+    <then>
+} else {
+    throw new RuntimeException("Invocation of the operation is not possible");
+}
 >>
 
 if(predicate, then, else1) ::= <<
@@ -190,15 +166,19 @@ number(number) ::= <<
 new BInteger("<number>")
 >>
 
-identifier_function_calls(variables, machine, function, args, this) ::= <<
-<variables:{var | <var> = <identifier_function_call(machine, function, args, this)>}>
+operation_call_with_assignment(var, machine, function, args, this) ::= <<
+<var> = <operation_call(machine, function, args, this)>
 >>
 
-identifier_function_call(machine, function, args, this) ::= <<
+operation_call(machine, function, args, this) ::= <<
 <if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
 >>
 
 expression_function_call(function, args) ::= <<
-<function>.call(<args; separator=",">)
+<function>.functionCall(<args; separator=",">)
+>>
+
+relation_image(function, args) ::= <<
+<function>.relationImage(<args; separator=",">)
 >>
 

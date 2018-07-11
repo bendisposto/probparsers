@@ -19,6 +19,12 @@ public abstract class BNumber extends java.lang.Number implements Comparable<BNu
 
 	public abstract java.math.BigInteger asBigInteger();
 
+	public abstract BBoolean less(BNumber o);
+
+	public abstract BBoolean greater(BNumber o);
+
+	public abstract BBoolean equal(BNumber o);
+
 	/* groovy operator overloading */
 	public abstract BNumber plus(BNumber o);
 
