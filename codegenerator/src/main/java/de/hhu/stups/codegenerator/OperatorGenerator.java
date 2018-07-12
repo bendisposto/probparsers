@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.CARD;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.COUPLE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
@@ -40,7 +41,7 @@ public class OperatorGenerator {
             Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> UNARY_EXPRESSION_OPERATORS =
-            Arrays.asList(UNARY_MINUS);
+            Arrays.asList(UNARY_MINUS, CARD);
 
     private static final List<PredicateOperatorNode.PredicateOperator> BINARY_PREDICATE_OPERATORS =
             Arrays.asList(PredicateOperatorNode.PredicateOperator.AND, PredicateOperatorNode.PredicateOperator.OR,
@@ -136,6 +137,9 @@ public class OperatorGenerator {
             case UNARY_MINUS:
                 template.add("operator", "negative");
                 break;
+            case CARD:
+                template.add("operator", "card");
+                break;
             default:
                 break;
         }
@@ -221,8 +225,14 @@ public class OperatorGenerator {
             case LESS:
                 template.add("operator", "less");
                 break;
+            case LESS_EQUAL:
+                template.add("operator", "lessEqual");
+                break;
             case GREATER:
                 template.add("operator", "greater");
+                break;
+            case GREATER_EQUAL:
+                template.add("operator", "greaterEqual");
                 break;
             default:
                 break;

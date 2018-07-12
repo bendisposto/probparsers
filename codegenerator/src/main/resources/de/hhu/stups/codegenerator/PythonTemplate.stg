@@ -115,8 +115,8 @@ binary(arg1,operator,arg2) ::= <<
 <arg1>.<operator>(<arg2>)
 >>
 
-unary(operator, arg1) ::= <<
-<arg1>.<operator>()
+unary(operator, arg) ::= <<
+<arg>.<operator>()
 >>
 
 select(predicate, then) ::= <<

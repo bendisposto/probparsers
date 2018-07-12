@@ -161,7 +161,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		} else if (node instanceof ExpressionOperatorNode) {
 			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
 		} else if (node instanceof EnumeratedSetElementNode) {
-			return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node, expected);
+			return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node);
 		}
 		return visitIdentifierExprNode((IdentifierExprNode) node, expected);
 	}
@@ -191,21 +191,20 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		TypeGenerator.addImport(node.getSetDeclarationNode().getType(), imports, currentGroup);
 		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
 		setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup));
-		List<String> enums = node.getElements().stream().map(declaration -> callEnum(node, declaration))
+		List<String> enums = node.getElements().stream().map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
 				.collect(Collectors.toList());
 		setDeclaration.add("enums", enums);
 		return setDeclaration.render();
 	}
 
-	public String callEnum(EnumeratedSetDeclarationNode setDeclarationNode, DeclarationNode enumNode) {
+	public String callEnum(String setName, DeclarationNode enumNode) {
 		ST enumST = currentGroup.getInstanceOf("enum_call");
-		String name = setDeclarationNode.getSetDeclarationNode().getName();
-		enumST.add("class", name.substring(0, 1).toUpperCase() + name.substring(1));
+		enumST.add("class", setName.substring(0, 1).toUpperCase() + setName.substring(1));
 		enumST.add("identifier", enumNode.getName().toUpperCase());
 		return enumST.render();
 	}
 
-	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node, Void expected) {
+	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node) {
 		String typeName = node.getType().toString();
 		typeName = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
 		ST element = currentGroup.getInstanceOf("set_element");

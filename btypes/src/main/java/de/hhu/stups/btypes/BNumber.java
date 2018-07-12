@@ -21,7 +21,11 @@ public abstract class BNumber extends java.lang.Number implements Comparable<BNu
 
 	public abstract BBoolean less(BNumber o);
 
+	public abstract BBoolean lessEqual(BNumber o);
+
 	public abstract BBoolean greater(BNumber o);
+
+	public abstract BBoolean greaterEqual(BNumber o);
 
 	public abstract BBoolean equal(BNumber o);
 

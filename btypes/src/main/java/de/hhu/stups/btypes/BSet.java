@@ -145,7 +145,6 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 
-	//functionCall
 	public BObject functionCall(BObject arg) {
 		for(BObject object : set) {
 			BCouple couple = (BCouple) object;
@@ -154,6 +153,11 @@ public class BSet implements BObject, Set<BObject> {
 			}
 		}
 		throw new RuntimeException("Argument is not in the key set of this map");
+	}
+
+
+	public BInteger card() {
+		return new BInteger(String.valueOf(this.size()));
 	}
 
 	public BBoolean elementOf(BObject object) {

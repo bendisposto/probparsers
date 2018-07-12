@@ -216,6 +216,11 @@ public class TestJava {
 		testJava("project2/MachineA");
 	}
 
+	@Test
+	public void testSieve() throws Exception {
+		testJava("Sieve");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {

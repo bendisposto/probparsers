@@ -38,10 +38,18 @@ public class BInteger extends BNumber {
 		return this.value.compareTo(o.asBigInteger());
 	}
 
-	public BBoolean less(BNumber o) {
+	public BBoolean lessEqual(BNumber o) {
 		return new BBoolean(compareTo(o) < 0);
 	}
 
+
+	public BBoolean greaterEqual(BNumber o) {
+		return new BBoolean(compareTo(o) >= 0);
+	}
+
+	public BBoolean less(BNumber o) {
+		return new BBoolean(compareTo(o) <= 0);
+	}
 	public BBoolean greater(BNumber o) {
 		return new BBoolean(compareTo(o) > 0);
 	}
