@@ -179,7 +179,7 @@ operation_call(machine, function, args, this) ::= <<
 <if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
 >>
 
-expression_function_call(function, args) ::= <<
+function_call(function, args) ::= <<
 <function>.functionCall(<args; separator=",">)
 >>
 

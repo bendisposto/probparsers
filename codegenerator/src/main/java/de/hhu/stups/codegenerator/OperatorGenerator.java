@@ -49,8 +49,11 @@ public class OperatorGenerator {
     private static final List<PredicateOperatorNode.PredicateOperator> UNARY_PREDICATE_OPERATORS =
             Arrays.asList(PredicateOperatorNode.PredicateOperator.NOT);
 
-    private static final List<ExpressionOperatorNode.ExpressionOperator> BOOLEANS =
+    private static final List<ExpressionOperatorNode.ExpressionOperator> EXPRESSION_BOOLEANS =
             Arrays.asList(TRUE,FALSE);
+
+    private static final List<PredicateOperatorNode.PredicateOperator> PREDICATE_BOOLEANS =
+            Arrays.asList(PredicateOperatorNode.PredicateOperator.TRUE, PredicateOperatorNode.PredicateOperator.FALSE);
 
     private static final List<Object> BINARY_SWAP =
             Arrays.asList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.ELEMENT_OF);
@@ -61,7 +64,7 @@ public class OperatorGenerator {
             return generateBinary(() -> operator, expressionList, template);
         } else if(UNARY_EXPRESSION_OPERATORS.contains(operator)) {
             return generateUnaryExpression(operator, expressionList, template);
-        } else if(BOOLEANS.contains(operator)) {
+        } else if(EXPRESSION_BOOLEANS.contains(operator)) {
             return generateBoolean(operator, template);
         } else if(node.getOperator() == SET_ENUMERATION){
             return generateSetEnumeration(expressionList, template);
@@ -83,6 +86,8 @@ public class OperatorGenerator {
             return generateBinary(() -> operator, expressionList, template);
         } else if(UNARY_PREDICATE_OPERATORS.contains(operator)) {
             return generateUnaryPredicate(operator, expressionList, template);
+        } else if (PREDICATE_BOOLEANS.contains(operator)) {
+            return generateBoolean(operator, template);
         }
         return "";
     }
@@ -247,8 +252,12 @@ public class OperatorGenerator {
         return template.getInstanceOf("boolean_val").add("val", operator == TRUE).render();
     }
 
+    private static String generateBoolean(PredicateOperatorNode.PredicateOperator operator, STGroup template) {
+        return template.getInstanceOf("boolean_val").add("val", operator == PredicateOperatorNode.PredicateOperator.TRUE).render();
+    }
+
     private static String generateFunctionCall(ExpressionOperatorNode node, List<String> arguments, STGroup template) {
-        ST functionCall = template.getInstanceOf("expression_function_call");
+        ST functionCall = template.getInstanceOf("function_call");
         functionCall.add("function", node.getExpressionNodes().get(0));
         functionCall.add("args", arguments.subList(1, arguments.size()));
         return functionCall.render();

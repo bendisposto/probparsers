@@ -114,6 +114,7 @@ public class TestJava {
 		testJava("BooleanPredicate");
 	}
 
+	@Ignore
 	@Test
 	public void testRecords() throws Exception {
 		testJava("Records");

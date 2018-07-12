@@ -172,6 +172,16 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		return temp;
 	}
 
+	@Override
+	public Node visitPredicateKeyword(BParser.PredicateKeywordContext ctx) {
+		if (ctx.keyword == null) {
+			throw new RuntimeException(ctx.keyword.getText());
+		}
+		int type = ctx.keyword.getType();
+		PredicateOperator op = type == BParser.BTRUE ? PredicateOperator.TRUE : PredicateOperator.FALSE;
+		List<PredicateNode> list = new ArrayList<>();
+		return new PredicateOperatorNode(Util.createSourceCodePosition(ctx), op, list);
+	}
 
 	@Override
 	public Node visitImplication(BParser.ImplicationContext ctx) {
