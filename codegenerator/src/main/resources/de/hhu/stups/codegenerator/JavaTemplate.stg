@@ -24,9 +24,9 @@ public class <machine> {
 
 >>
 
-initialization(body, include_initializations) ::= <<
+initialization(body, machines) ::= <<
 public void initialize() {
-    <include_initializations; separator="\n">
+    <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
 }
 >>
