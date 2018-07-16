@@ -13,6 +13,7 @@ import de.prob.unicode.node.TAnyChar;
 import de.prob.unicode.node.TIdentifierLiteral;
 import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.TString;
+import de.prob.unicode.node.TTruncatedSetSize;
 import de.prob.unicode.node.Token;
 
 public class UnicodeTranslator {
@@ -181,6 +182,19 @@ public class UnicodeTranslator {
 						sb.append("\\text{");
 						sb.append(t.getText());
 						sb.append('}');
+					} else {
+						sb.append(t.getText());
+					}
+				} else if (t instanceof TTruncatedSetSize) {
+					if (t.getText().startsWith("\\")) {
+						if (target == Encoding.LATEX) {
+							sb.append(t.getText());
+						} else {
+							sb.append(t.getText().substring(1));
+						}
+					} else if (target == Encoding.LATEX) {
+						sb.append('\\');
+						sb.append(t.getText());
 					} else {
 						sb.append(t.getText());
 					}

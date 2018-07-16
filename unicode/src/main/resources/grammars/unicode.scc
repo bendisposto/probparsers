@@ -10,6 +10,7 @@ Tokens
 	string = double_quote ([[0x0000 .. 0xffff] - [double_quote + '\']] | '\' [0x0000 .. 0xffff])* double_quote;
     typeof_open = '/*';
     typeof_close = '*/';
+    truncated_set_size = ('#' | '\#') digit+;
 	in = ':' | '\in' | 0x2208;
 	notsubseteq = '/<:' | '\notsubseteq' | 0x2288;
 	notsubset = '/<<:'| '\notsubset' | 0x2284;
