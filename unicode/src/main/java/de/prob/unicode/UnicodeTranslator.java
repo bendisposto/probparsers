@@ -57,8 +57,8 @@ public class UnicodeTranslator {
 		m.put("TNotsubset", new Translation("/<<:", "\\notsubset", "\u2284"));
 		m.put("TSubseteq", new Translation("<:", "\\subseteq", "\u2286"));
 		m.put("TSetminus", new Translation("\\", "\\setminus", "\u2216"));
-		m.put("TDotdot", new Translation("..", "\\ldots", "\u2025"));
-		m.put("TDotdotdot", new Translation("...", "\\0xpto", "\u2026")); // ellipsis, used in shortened set values #Nr.{a,b,...,c,d}
+		m.put("TDotdot", new Translation("..", "\\0xpto", "\u2025"));
+		m.put("TDotdotdot", new Translation("...", "\\ldots", "\u2026")); // ellipsis, used in shortened set values #Nr.{a,b,...,c,d}
 		m.put("TNat1", new Translation("NAT1", "\\nat1", "\u21151"));
 		m.put("TNat", new Translation("NAT", "\\nat", "\u2115"));
 		m.put("TEmptyset", new Translation("{}", "\\emptyset", "\u2205"));
