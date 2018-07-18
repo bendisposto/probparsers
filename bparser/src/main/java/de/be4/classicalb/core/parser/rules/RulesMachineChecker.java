@@ -49,6 +49,7 @@ import de.be4.classicalb.core.parser.node.AFunctionOperation;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AImplicationPredicate;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
@@ -245,7 +246,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		public void add(String attrName, POperationAttribute node) {
 			if (map.containsKey(attrName)) {
 				errorList.add(new CheckException(String.format("%s clause is used more than once in operation '%s'.",
-						attrName, currentOperation.getName()), node));
+						attrName, currentOperation.getOriginalName()), node));
 			}
 			map.put(attrName, node);
 		}
@@ -367,10 +368,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
 				rule.setRuleId((AIdentifierExpression) arguments.get(0));
 			} else {
-				errorList.add(new CheckException("Expected exactly one identifier behind RULEID", pOperationAttribute));
+				errorList
+						.add(new CheckException("Expected exactly one identifier behind RULEID.", pOperationAttribute));
 			}
 		} else {
-			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation",
+			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation.",
 					pOperationAttribute));
 		}
 		return;
@@ -426,8 +428,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				FunctionOperation func = (FunctionOperation) currentOperation;
 				func.setPreconditionPredicate(predicate);
 			} else {
-				errorList.add(new CheckException(
-						"PRECONDITION clause is not allowed for a RULE or COMPUTATION operation", pOperationAttribute));
+				errorList.add(
+						new CheckException("PRECONDITION clause is not allowed for a RULE or COMPUTATION operation.",
+								pOperationAttribute));
 			}
 			break;
 		case RulesGrammar.POSTCONDITION:
@@ -446,7 +449,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private boolean containsRule(String name) {
 		for (RuleOperation rule : this.rulesMap.values()) {
-			if (name.equals(rule.getName())) {
+			if (name.equals(rule.getOriginalName())) {
 				return true;
 			}
 		}
@@ -456,8 +459,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
 		currentOperation = new RuleOperation(node.getRuleName(), this.fileName, this.machineName, machineReferences);
-		if (containsRule(currentOperation.getName())) {
-			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getName() + "'.",
+		if (containsRule(currentOperation.getOriginalName())) {
+			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getOriginalName() + "'.",
 					node.getRuleName()));
 		}
 		RuleOperation ruleOp = (RuleOperation) currentOperation;
@@ -473,7 +476,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (int i = 1; i <= ruleOp.getNumberOfErrorTypes(); i++) {
 			if (implemented == null || !implemented.contains(i)) {
 				errorList.add(new CheckException(
-						String.format("Error type '%s' is not implemented in rule '%s'.", i, ruleOp.getName()),
+						String.format("Error type '%s' is not implemented in rule '%s'.", i, ruleOp.getOriginalName()),
 						ruleOp.getNameLiteral()));
 			}
 		}
@@ -802,9 +805,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation.", node));
 			return;
 		}
+
 		checkErrorType(node.getErrorType());
 		if (!node.getIdentifiers().isEmpty() && node.getWhen() == null) {
 			this.errorList.add(new CheckException(
@@ -813,6 +817,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
+			if (!node.getIdentifiers().isEmpty()) {
+				// implication is not allowed as the top level predicate if there are one or more parameters
+				checkTopLevelPredicate(node.getWhen(), "(WHEN predicate in RULE_FAIL)");
+			}
 			node.getWhen().apply(this);
 		}
 		node.getMessage().apply(this);
@@ -820,12 +828,19 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	}
 
+	public void checkTopLevelPredicate(PPredicate node, String text) {
+		if (node instanceof AImplicationPredicate) {
+			errorList.add(new CheckException("Implication is not allowed as the top level predicate " + text + ".", node));
+		}
+	}
+
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
 		if (!isInRule()) {
-			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation", node));
+			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation.", node));
 			return;
 		}
+		checkTopLevelPredicate(node.getWhere(), "(WHERE predicate in RULE_FORALL)");
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);

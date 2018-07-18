@@ -19,6 +19,7 @@ import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
 import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
 import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
+import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
@@ -471,7 +472,7 @@ public class BParser {
 	private List<CheckException> performSemanticChecks(final Start rootNode) {
 		final List<CheckException> list = new ArrayList<>();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
-				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck() };
+				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck(), new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {
@@ -562,7 +563,7 @@ public class BParser {
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput()) {
-				PrologExceptionPrinter.printException(err, e, bfile.getAbsolutePath());
+				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
@@ -581,7 +582,6 @@ public class BParser {
 		return 0;
 	}
 
-	
 	@SuppressWarnings("unused")
 	private boolean hashesStillValid(final File outputFile) {
 		// File dir = outputFile.getParentFile();

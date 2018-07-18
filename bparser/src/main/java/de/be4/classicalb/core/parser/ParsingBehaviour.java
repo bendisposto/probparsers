@@ -8,7 +8,7 @@ public class ParsingBehaviour {
 	private boolean useIndention = false;
 	private boolean addLineNumbers = false;
 	private boolean displayGraphically = false;
-	private boolean verbose = false;
+	private boolean verbose = false; //verbose mode includes debug prints
 	private boolean printTime = false;
 	private PrintStream out = System.out;
 	private boolean printAST = false;

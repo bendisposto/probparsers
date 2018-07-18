@@ -21,7 +21,7 @@ public class StringFormatOperatorTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains(
-				"parse_exception(pos(1,31,'UnknownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.')"));
+				"'The number of arguments (1) does not match the number of placeholders (2) in the string.'"));
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class StringFormatOperatorTest {
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
 		assertTrue(result.contains(
-				"parse_exception(pos(1,31,'UnknownFile'),'The number of arguments (1) does not match the number of placeholders (2) in the string.')"));
+				"'The number of arguments (1) does not match the number of placeholders (2) in the string.'"));
 	}
 
 	@Test

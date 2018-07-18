@@ -91,7 +91,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		try {
 			this.start.apply(this);
 		} catch (VisitorException e) {
-			throw new BException(fileName, (CheckException) e.getException());
+			throw new BException(fileName, e.getException());
 		}catch(VisitorIOException e) {
 			throw new BException(fileName, e.getException());
 		}

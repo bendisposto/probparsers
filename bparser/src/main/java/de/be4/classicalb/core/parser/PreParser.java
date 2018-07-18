@@ -85,10 +85,10 @@ public class PreParser {
 						+ "Clause 'DEFINITIONS' is used more than once";
 				throw new PreParseException(e.getToken(), message);
 			} else {
-				throw new PreParseException(e.getToken(), e.getLocalizedMessage());
+				throw new PreParseException(e.getToken(), e.getLocalizedMessage(), e);
 			}
 		} catch (final LexerException e) {
-			throw new PreParseException(e.getLocalizedMessage());
+			throw new PreParseException(e.getLocalizedMessage(), e);
 		}
 
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
@@ -114,6 +114,8 @@ public class PreParser {
 		for (final Token fileNameToken : list) {
 			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
 			try {
+				// Note, that the fileName could be a relative path, e.g.
+				// ./foo/bar/defs.def
 				final String fileName = fileNameToken.getText();
 				if (doneDefFiles.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
@@ -129,21 +131,17 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					final String content = contentProvider.getFileContent(directory, fileName);
 					newDoneList.add(fileName);
+					final String content = contentProvider.getFileContent(directory, fileName);
+					final BParser parser = new BParser(fileName, parseOptions);
 					final File file = contentProvider.getFile(directory, fileName);
-					String filePath = fileName;
 					if (file != null) {
-						filePath = file.getCanonicalPath();
+						parser.setDirectory(file.getParentFile());
 					}
-					final BParser parser = new BParser(filePath, parseOptions);
-					parser.setDirectory(directory);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
 					parser.parse(content, debugOutput, contentProvider);
-
 					definitions = parser.getDefinitions();
-
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);
 					}
@@ -151,9 +149,7 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e.getLocalizedMessage()
-				// + " used in " + modelFileName
-				);
+				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
 			} finally {
 			}
 		}
@@ -285,11 +281,11 @@ public class PreParser {
 				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(nameToken, rhsToken,
 						errorToken, e.getMessage());
-				throw new PreParseException(newMessage);
+				throw new PreParseException(newMessage, e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
 						nameToken, rhsToken, e.getMessage());
-				throw new PreParseException(newMessage);
+				throw new PreParseException(newMessage, e);
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
@@ -408,20 +404,20 @@ public class PreParser {
 				throw new PreParseException(newMessage);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
 				throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-						definition, rhsToken, e3.getMessage()));
+						definition, rhsToken, e3.getMessage()), e);
 			} catch (IOException e1) {
-				throw new PreParseException(e.getMessage());
+				throw new PreParseException(e.toString(), e);
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
 			final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition, rhsToken,
 					errorToken, e.getMessage());
-			throw new PreParseException(newMessage);
+			throw new PreParseException(newMessage, e);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
 			throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-					definition, rhsToken, e.getMessage()));
+					definition, rhsToken, e.getMessage()), e);
 		} catch (IOException e) {
-			throw new PreParseException(e.getMessage());
+			throw new PreParseException(e.toString(), e);
 		}
 
 	}

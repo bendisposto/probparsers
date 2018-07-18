@@ -72,6 +72,21 @@ public class PackagePragmaTest {
 		System.out.println(result);
 		assertTrue(result.contains("Imported package does not exist"));
 	}
+	
+	@Test
+	public void testDuplicateMachineClause() throws Exception {
+		final String result = Helpers.fullParsing("src/test/resources/pragmas/packagePragma/project1/Main.mch");
+		System.out.println(result);
+		//semantic checks (e.g. duplicate clauses) were previously disabled for APackageParseUnit nodes
+		assertTrue(result.contains("parse_exception"));
+	}
+	
+	@Test
+	public void testDefinitionFileReferencesInDefinitionFilesClause() throws Exception {
+		final String result = Helpers.fullParsing("src/test/resources/pragmas/packagePragma/definitionFiles/Main.mch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
 
 
 }

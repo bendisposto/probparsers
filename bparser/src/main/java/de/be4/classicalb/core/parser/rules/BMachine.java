@@ -99,10 +99,6 @@ public class BMachine implements IModel {
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		
 		pout.openTerm("machine");
-//		if (parsingBehaviour.isAddLineNumbers()) {
-//			pprinter.setSourcePositions(
-//					new SourcePositions(new ArrayList<IToken>(), new HashMap<PositionedNode, SourcecodeRange>()));
-//		}
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();

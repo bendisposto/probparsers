@@ -83,7 +83,7 @@ public class RulesMachineFilesTest {
 			if ("rule1".equals(next.getRuleName())) {
 				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToSucceed());
 				assertEquals(true, next.isCheckedForCounterexamples());
-				assertEquals("rule1", next.getRuleOperation().getName());
+				assertEquals("rule1", next.getRuleOperation().getOriginalName());
 			} else {
 				assertEquals("rule2", next.getRuleName());
 				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToFail());
@@ -343,12 +343,32 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testReplaces() {
-		String result = getRulesMachineAsPrologTerm(dir + "Replaces.rmch");
+		String result = getRulesMachineAsPrologTerm(dir + "replaces/Replaces.rmch");
 		System.out.println(result);
 		// System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir,
 		// "Replaces.rmch")));
 		assertFalse(result.contains("exception"));
 		assertFalse(result.contains("COMP_NewComp1"));
+	}
+
+	@Test
+	public void testInvalidDoubleReplacement() {
+		String result = getRulesMachineAsPrologTerm(dir + "replaces/DoubleReplacement.rmch");
+		System.out.println(result);
+		// System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir,
+		// "Replaces.rmch")));
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains("COMP_comp1"));
+	}
+
+	@Test
+	public void testVariableNotReplaced() {
+		String result = getRulesMachineAsPrologTerm(dir + "replaces/VariableNotReplaced.rmch");
+		System.out.println(result);
+		// System.out.println(RulesUtil.getRulesMachineAsBMachine(new File(dir,
+		// "Replaces.rmch")));
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains("COMP_comp1"));
 	}
 
 	private String getRulesMachineAsPrologTerm(String fileName) {

@@ -232,8 +232,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		System.out.println(result);
-		String expected = "parse_exception(pos(1,86,'UnknownFile'),'Variable \\'xx\\' read before defined.').\n";
-		assertEquals(expected, result);
+		assertTrue(result.contains("'Variable \\'xx\\' read before defined.'"));
 	}
 
 	@Test

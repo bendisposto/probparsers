@@ -1,10 +1,9 @@
 package de.prob.unicode;
-import static org.junit.Assert.assertEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import de.prob.unicode.UnicodeTranslator;
+import static org.junit.Assert.*;
 
 public class UnicodeTest {
 
@@ -36,7 +35,7 @@ public class UnicodeTest {
 
 	@Test
 	public void testQuotes() {
-		assertEquals("\"", UnicodeTranslator.toUnicode("\""));
+		assertEquals("\"test\"", UnicodeTranslator.toUnicode("\"test\""));
 	}
 
 	@Test

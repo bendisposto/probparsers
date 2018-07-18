@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.prob.parserbase;
 
 import de.prob.prolog.output.IPrologTermOutput;

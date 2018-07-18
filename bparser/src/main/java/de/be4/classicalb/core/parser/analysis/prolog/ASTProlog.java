@@ -34,7 +34,7 @@ public class ASTProlog extends DepthFirstAdapter {
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
-			"machine_header", "machine_reference", "operation", "rec_entry", "values_entry", "witness", "unit"));
+			"machine_header", "machine_reference", "operation", "refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from (simple) class names to prolog
 	// functor representing them
@@ -128,8 +128,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The counterpart to {@link #open(Node)}, prints the closing parenthesis of
 	 * the term.
-	 * 
-	 * @param node
 	 */
 	private void close(final Node node) {
 		pout.closeTerm();
@@ -196,9 +194,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	/**
-	 * 
-	 * @param AST
-	 *            node
 	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
@@ -215,12 +210,10 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
 	 * grammar for non-Java front-ends. Two magic cases here:
-	 * "prover_comprehension_set" -> "comprehension_set", "op" ->
+	 * "prover_comprehension_set" -&gt; "comprehension_set", "op" -&gt;
 	 * "operation_call" Todo: do remove magic special cases DO NOT add extra
 	 * special cases here !!
 	 * 
-	 * @param Java
-	 *            class name
 	 * @return Prolog functor name
 	 */
 	private String toFunctorName(final String className) {
@@ -507,6 +500,22 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getOperationBody().apply(this);
 		close(node);
 	}
+	
+	@Override
+	public void caseARefinedOperation(final ARefinedOperation node) {
+		open(node);
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getOpName());
+		pout.closeTerm();
+		printAsList(node.getReturnValues());
+		printAsList(node.getParameters());
+		node.getAbOpName().apply(this);
+		node.getOperationBody().apply(this);
+		close(node);
+	}
+	
+	
 
 	// predicate
 

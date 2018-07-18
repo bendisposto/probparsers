@@ -85,7 +85,7 @@ public class CliBParser {
 				out = new PrintStream(filename);
 			} catch (final FileNotFoundException e) {
 				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
-					PrologExceptionPrinter.printException(System.err, e, f.getAbsolutePath());
+					PrologExceptionPrinter.printException(System.err, e);
 				} else {
 					System.err.println("Unable to create file '" + filename + "'");
 				}
@@ -320,7 +320,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(socketOutputStream, e, theFormula, false, true);
+			PrologExceptionPrinter.printException(socketOutputStream, e);
 		}
 	}
 

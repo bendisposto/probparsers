@@ -71,7 +71,7 @@ public class CTagsGenerator {
 	private static List<CTagsEntry> createCTagsEntryFromOperations(Collection<AbstractOperation> values) {
 		List<CTagsEntry> list = new ArrayList<>();
 		for (AbstractOperation operation : values) {
-			list.add(new CTagsEntry(operation.getName(), operation.getFileName(),
+			list.add(new CTagsEntry(operation.getOriginalName(), operation.getFileName(),
 					operation.getNameLiteral().getStartPos(), TYPE_OPERATION));
 		}
 		return list;

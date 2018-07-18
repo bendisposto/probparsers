@@ -22,9 +22,9 @@ public class RulesProjectTest {
 		AbstractOperation abstractOperation = p.getOperationsMap().get("c2");
 		List<AbstractOperation> deps = abstractOperation.getSortedListOfTransitiveDependencies();
 		System.out.println(deps);
-		assertEquals("c3", deps.get(0).getName());
-		assertEquals("r1", deps.get(1).getName());
-		assertEquals("c1", deps.get(2).getName());
+		assertEquals("c3", deps.get(0).getOriginalName());
+		assertEquals("r1", deps.get(1).getOriginalName());
+		assertEquals("c1", deps.get(2).getOriginalName());
 	}
 
 }
