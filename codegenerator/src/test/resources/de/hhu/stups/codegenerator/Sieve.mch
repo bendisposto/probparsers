@@ -23,7 +23,7 @@ OPERATIONS
             INVARIANT 1=1
             VARIANT limit/cur - n
             END;
-            numbers := set
+            numbers := numbers - set
           END//VAR
         END;
         cur := cur+1
