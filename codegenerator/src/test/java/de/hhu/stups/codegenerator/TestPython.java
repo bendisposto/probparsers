@@ -176,6 +176,7 @@ public class TestPython {
 		testJava("phonebook6");
 	}
 
+	@Ignore
 	@Test
 	public void testSum() throws Exception {
 		testJava("Sum");

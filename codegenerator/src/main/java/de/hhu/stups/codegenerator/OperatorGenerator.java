@@ -79,7 +79,7 @@ public class OperatorGenerator {
         } else if(node.getOperator() == RELATIONAL_IMAGE) {
             return generateRelationImage(node, expressionList, template);
         }
-        throw new RuntimeException("Given node is not implemented: " + node.getClass());
+        throw new RuntimeException("Given operator is not implemented: " + node.getOperator());
     }
 
     public static String generatePredicate(PredicateOperatorNode node, List<String> expressionList, STGroup template) {
@@ -91,7 +91,7 @@ public class OperatorGenerator {
         } else if (PREDICATE_BOOLEANS.contains(operator)) {
             return generateBoolean(operator, template);
         }
-        throw new RuntimeException("Given node is not implemented: " + node.getClass());
+        throw new RuntimeException("Given operator is not implemented: " + node.getOperator());
     }
 
 
