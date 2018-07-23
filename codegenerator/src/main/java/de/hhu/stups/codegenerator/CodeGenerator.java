@@ -60,7 +60,7 @@ public class CodeGenerator {
 	}
 
 	private BProject parseProject(Path path) throws CodeGenerationException {
-		BProject project = null;
+		BProject project;
 		try {
 			project = Antlr4BParser.createBProjectFromMainMachineFile(path.toFile());
 		} catch (TypeErrorException | ScopeException | IOException e) {

@@ -8,6 +8,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class OperatorGenerator {
                         PredicateOperatorNode.PredicateOperator.IMPLIES, PredicateOperatorNode.PredicateOperator.EQUIVALENCE);
 
     private static final List<PredicateOperatorNode.PredicateOperator> UNARY_PREDICATE_OPERATORS =
-            Arrays.asList(PredicateOperatorNode.PredicateOperator.NOT);
+            Collections.singletonList(PredicateOperatorNode.PredicateOperator.NOT);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> EXPRESSION_BOOLEANS =
             Arrays.asList(TRUE,FALSE);
@@ -57,7 +58,7 @@ public class OperatorGenerator {
             Arrays.asList(PredicateOperatorNode.PredicateOperator.TRUE, PredicateOperatorNode.PredicateOperator.FALSE);
 
     private static final List<Object> BINARY_SWAP =
-            Arrays.asList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.ELEMENT_OF);
+            Collections.singletonList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.ELEMENT_OF);
 
     public static String generateExpression(ExpressionOperatorNode node, List<String> expressionList, STGroup template) {
         ExpressionOperatorNode.ExpressionOperator operator = node.getOperator();
@@ -78,7 +79,7 @@ public class OperatorGenerator {
         } else if(node.getOperator() == RELATIONAL_IMAGE) {
             return generateRelationImage(node, expressionList, template);
         }
-        return "";
+        throw new RuntimeException("Given node is not implemented: " + node.getClass());
     }
 
     public static String generatePredicate(PredicateOperatorNode node, List<String> expressionList, STGroup template) {
@@ -90,7 +91,7 @@ public class OperatorGenerator {
         } else if (PREDICATE_BOOLEANS.contains(operator)) {
             return generateBoolean(operator, template);
         }
-        return "";
+        throw new RuntimeException("Given node is not implemented: " + node.getClass());
     }
 
 
@@ -118,7 +119,7 @@ public class OperatorGenerator {
                 } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
                     expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op, template);
                 }
-
+                //TODO
                 if(BINARY_SWAP.contains(op)) {
                     expression.add("arg1", e);
                     expression.add("arg2", a);
@@ -128,6 +129,7 @@ public class OperatorGenerator {
                 }
                 return expression.render();
             });
+        //TODO
         return result.isPresent() ? result.get() : "";
     }
 
@@ -141,7 +143,7 @@ public class OperatorGenerator {
                 template.add("operator", "card");
                 break;
             default:
-                break;
+                throw new RuntimeException("Given operator is not implemented: " + operator);
         }
         return template;
     }
@@ -174,7 +176,7 @@ public class OperatorGenerator {
                 template.add("operator", "complement");
                 break;
             default:
-                break;
+                throw new RuntimeException("Given operator is not implemented: " + operator);
         }
         return template;
     }
@@ -186,7 +188,7 @@ public class OperatorGenerator {
                 template.add("operator", "not");
                 break;
             default:
-                break;
+                throw new RuntimeException("Given node is not implemented: " + operator);
         }
         return template;
     }
@@ -207,7 +209,7 @@ public class OperatorGenerator {
                 template.add("operator", "equivalent");
                 break;
             default:
-                break;
+                throw new RuntimeException("Given node is not implemented: " + operator);
         }
         return template;
     }
@@ -235,7 +237,7 @@ public class OperatorGenerator {
                 template.add("operator", "greaterEqual");
                 break;
             default:
-                break;
+                throw new RuntimeException("Given node is not implemented: " + operator);
         }
         return template;
     }

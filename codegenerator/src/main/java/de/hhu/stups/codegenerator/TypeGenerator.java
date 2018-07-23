@@ -30,7 +30,7 @@ public class TypeGenerator {
         } else if(type instanceof UntypedType) {
             return generateUntyped(group);
         }
-        return "";
+        throw new RuntimeException("Given type is not implemented: " + type);
     }
 
     private static String generateUntyped(STGroup template) {
@@ -50,6 +50,7 @@ public class TypeGenerator {
         } else if(type instanceof CoupleType) {
             imports.add(template.add("type", "BCouple").render());
         }
+        throw new RuntimeException("Given type is not implemented: " + type);
     }
 
 }

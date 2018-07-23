@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 
 public class OperationGenerator {
 
-    public static ST generate(OperationNode node, List<DeclarationNode> locals, STGroup template) {
+    public static ST generate(OperationNode node, STGroup template) {
         ST operation = template.getInstanceOf("operation");
-        operation.add("locals", declareLocals(locals, template));
+        operation.add("locals", declareLocals(node.getOutputParams(), template));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
@@ -34,9 +34,9 @@ public class OperationGenerator {
         return operation;
     }
 
-    public static List<String> declareLocals(List<DeclarationNode> locals, STGroup template) {
-         return locals.stream()
-            .map(local -> generateLocalDeclaration(local, template))
+    public static List<String> declareLocals(List<DeclarationNode> outputs, STGroup template) {
+         return outputs.stream()
+            .map(output -> generateLocalDeclaration(output, template))
             .collect(Collectors.toList());
     }
 

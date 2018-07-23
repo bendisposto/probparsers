@@ -4,6 +4,7 @@ import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -122,14 +123,16 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private List<String> generateIncludes(MachineNode node) {
 		return node.getMachineReferences().stream()
-				.map(reference -> {
-					ST declaration = currentGroup.getInstanceOf("include_declaration");
-					String machine = reference.getMachineName();
-					declaration.add("type", NameHandler.handleMachineName(machine));
-					declaration.add("identifier", machine.toLowerCase());
-					return declaration.render();
-				})
+				.map(this::generateIncludeClaration)
 				.collect(Collectors.toList());
+	}
+
+	private String generateIncludeClaration(MachineReferenceNode reference) {
+		ST declaration = currentGroup.getInstanceOf("include_declaration");
+		String machine = reference.getMachineName();
+		declaration.add("type", NameHandler.handleMachineName(machine));
+		declaration.add("identifier", machine.toLowerCase());
+		return declaration.render();
 	}
 
 	private String visitInitialization(MachineNode node) {
@@ -146,9 +149,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private String visitOperation(OperationNode node) {
-		// TODO
-		this.locals = node.getOutputParams();
-		ST operation = OperationGenerator.generate(node, locals, currentGroup);
+		ST operation = OperationGenerator.generate(node, currentGroup);
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
 		return operation.render();
 	}
@@ -162,20 +163,26 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
 		} else if (node instanceof EnumeratedSetElementNode) {
 			return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node);
+		} else if(node instanceof IdentifierExprNode) {
+			return visitIdentifierExprNode((IdentifierExprNode) node, expected);
 		}
-		return visitIdentifierExprNode((IdentifierExprNode) node, expected);
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	private List<String> generateEnumDeclarations(MachineNode node) {
-		return node.getEnumaratedSets().stream().map(this::declareEnums).collect(Collectors.toList());
+		return node.getEnumaratedSets().stream()
+				.map(this::declareEnums)
+				.collect(Collectors.toList());
 	}
 
 	private List<String> generateSetDeclarations(MachineNode node) {
-		return node.getEnumaratedSets().stream().map(this::visitEnumeratedSetDeclarationNode)
+		return node.getEnumaratedSets().stream()
+				.map(this::visitEnumeratedSetDeclarationNode)
 				.collect(Collectors.toList());
 	}
 
 	private String declareEnums(EnumeratedSetDeclarationNode node) {
+		//TODO
 		TypeGenerator.addImport(node.getElements().get(0).getType(), imports, currentGroup);
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
 		String name = NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup);
@@ -191,13 +198,15 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		TypeGenerator.addImport(node.getSetDeclarationNode().getType(), imports, currentGroup);
 		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
 		setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup));
-		List<String> enums = node.getElements().stream().map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
+		List<String> enums = node.getElements().stream()
+				.map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
 				.collect(Collectors.toList());
 		setDeclaration.add("enums", enums);
 		return setDeclaration.render();
 	}
 
 	public String callEnum(String setName, DeclarationNode enumNode) {
+		//TODO
 		ST enumST = currentGroup.getInstanceOf("enum_call");
 		enumST.add("class", setName.substring(0, 1).toUpperCase() + setName.substring(1));
 		enumST.add("identifier", enumNode.getName().toUpperCase());
@@ -215,7 +224,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitExprOperatorNode(ExpressionOperatorNode node, Void expected) {
-		List<String> expressionList = node.getExpressionNodes().stream().map(expr -> visitExprNode(expr, expected))
+		List<String> expressionList = node.getExpressionNodes().stream()
+				.map(expr -> visitExprNode(expr, expected))
 				.collect(Collectors.toList());
 		return OperatorGenerator.generateExpression(node, expressionList, currentGroup);
 	}
@@ -227,7 +237,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
@@ -239,36 +249,38 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitQuantifiedExpressionNode(QuantifiedExpressionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitSetComprehensionNode(SetComprehensionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitIdentifierPredicateNode(IdentifierPredicateNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
 		List<String> expressionList = node.getPredicateArguments().stream()
-				.map(expr -> visitPredicateNode(expr, expected)).collect(Collectors.toList());
+				.map(expr -> visitPredicateNode(expr, expected))
+				.collect(Collectors.toList());
 		return OperatorGenerator.generatePredicate(node, expressionList, currentGroup);
 	}
 
 	@Override
 	public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
-		List<String> expressionList = node.getExpressionNodes().stream().map(expr -> visitExprNode(expr, expected))
+		List<String> expressionList = node.getExpressionNodes().stream()
+				.map(expr -> visitExprNode(expr, expected))
 				.collect(Collectors.toList());
 		return OperatorGenerator.generateBinary(node::getOperator, expressionList, currentGroup);
 	}
 
 	@Override
 	public String visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
@@ -300,9 +312,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private List<String> generateElseIfs(IfOrSelectSubstitutionsNode node) {
 		List<String> conditions = node.getConditions().subList(1, node.getConditions().size()).stream()
-				.map(condition -> visitPredicateNode(condition, null)).collect(Collectors.toList());
+				.map(condition -> visitPredicateNode(condition, null))
+				.collect(Collectors.toList());
 		List<String> then = node.getSubstitutions().subList(1, node.getSubstitutions().size()).stream()
-				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null)).collect(Collectors.toList());
+				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
+				.collect(Collectors.toList());
 
 		List<String> elseIfs = new ArrayList<>();
 
@@ -324,7 +338,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitSkipSubstitutionNode(SkipSubstitutionNode node, Void expected) {
-		return null;
+		return "";
 	}
 
 	@Override
@@ -334,7 +348,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitAnySubstitution(AnySubstitutionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
@@ -349,6 +363,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	public String generateAssignment(ExprNode lhs, ExprNode rhs) {
+		//TODO
 		ST substitution = currentGroup.getInstanceOf("assignment");
 		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
 		String typeCast = TypeGenerator.generate(rhs.getType(), currentGroup, true);
@@ -362,43 +377,46 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	public String visitSequentialSubstitutionNode(ListSubstitutionNode node) {
+		//TODO
 		List<String> substitutionCodes = node.getSubstitutions().stream()
-				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null)).collect(Collectors.toList());
+				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
+				.collect(Collectors.toList());
 		return String.join("\n", substitutionCodes);
 	}
 
 	@Override
 	public String visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitLTLKeywordNode(LTLKeywordNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitLTLInfixOperatorNode(LTLInfixOperatorNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitLTLBPredicateNode(LTLBPredicateNode node, Void expected) {
-		return null;
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
 	public String visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, Void expected) {
+		//TODO
 		List<String> variables = node.getAssignedVariables().stream()
 				.map(var -> visitExprNode(var, expected))
 				.collect(Collectors.toList());
