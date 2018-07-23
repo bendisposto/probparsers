@@ -1,5 +1,6 @@
 package de.prob.parser.antlr;
 
+import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -18,6 +19,7 @@ import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import files.BParser;
 import files.BParser.AndOrListContext;
@@ -475,7 +477,15 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 
 	@Override
 	public Node visitVarSubstitution(BParser.VarSubstitutionContext ctx) {
-		throw new RuntimeException("implement me");
+		final List<DeclarationNode> identifierList = new ArrayList<>();
+		for (Token exprNode : ctx.identifier_list().idents) {
+			String name = exprNode.getText();
+			DeclarationNode decl = new DeclarationNode(Util.createSourceCodePosition(exprNode), name,
+					DeclarationNode.Kind.SUBSTITUION_IDENTIFIER, null);
+			identifierList.add(decl);
+		}
+		SubstitutionNode sub = (SubstitutionNode) ctx.substitution().accept(this);
+		return new VarSubstitutionNode(Util.createSourceCodePosition(ctx), identifierList, sub);
 	}
 
 	@Override

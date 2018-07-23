@@ -19,6 +19,7 @@ import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.visitors.generic.ASTVisitor;
 
 import java.util.ArrayList;
@@ -200,6 +201,12 @@ public class MachineScopeChecker {
 			DeclarationNode declarationNode = lookUpIdentifier(node.getName(), node);
 			node.setDeclarationNode(declarationNode);
 
+		}
+
+		@Override
+		public void visitVarSubstitutionNode(VarSubstitutionNode node) {
+			createNewScope(node.getLocalIdentifiers());
+			visitSubstitutionNode(node.getBody());
 		}
 
 		@Override

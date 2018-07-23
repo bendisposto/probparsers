@@ -22,6 +22,7 @@ import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 
 public class ASTVisitor implements ExpressionVisitor, SubstitutionVisitor, PredicateVisitor {
@@ -159,6 +160,11 @@ public class ASTVisitor implements ExpressionVisitor, SubstitutionVisitor, Predi
 		visitPredicateNode(node.getInvariant());
 		visitExprNode(node.getVariant());
 
+	}
+
+	@Override
+	public void visitVarSubstitutionNode(VarSubstitutionNode node) {
+		visitSubstitutionNode(node.getBody());
 	}
 
 }

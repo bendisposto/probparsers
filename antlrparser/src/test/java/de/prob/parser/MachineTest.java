@@ -55,6 +55,15 @@ public class MachineTest {
 		check(machine, getMainMachine());
 	}
 
+	@Test
+	public void testMachinesWithVARSubstitution() throws Exception {
+		String machine = "MACHINE test\n";
+		machine += "OPERATIONS\n";
+		machine += "Foo = VAR x IN x := 1; x := x + 1 END \n";
+		machine += "END";
+		check(machine);
+	}
+
 	private void check(String main, String... others) throws Exception {
 		Antlr4BParser.createBProjectFromMachineStrings(main, others);
 	}

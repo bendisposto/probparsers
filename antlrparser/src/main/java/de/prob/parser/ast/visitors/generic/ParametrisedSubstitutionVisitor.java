@@ -10,6 +10,7 @@ import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 
 public interface ParametrisedSubstitutionVisitor<R, P> {
@@ -35,9 +36,13 @@ public interface ParametrisedSubstitutionVisitor<R, P> {
 			return visitSubstitutionIdentifierCallNode((OperationCallSubstitutionNode) node, expected);
 		}else if (node instanceof WhileSubstitutionNode) {
 			return visitWhileSubstitutionNode((WhileSubstitutionNode) node, expected);
+		}else if (node instanceof VarSubstitutionNode) {
+			return visitVarSubstitutionNode((VarSubstitutionNode) node, expected);
 		}
 		throw new AssertionError(node.getClass());
 	}
+
+	R visitVarSubstitutionNode(VarSubstitutionNode node, P expected);
 
 	R visitWhileSubstitutionNode(WhileSubstitutionNode node, P expected);
 
