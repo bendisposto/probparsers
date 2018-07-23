@@ -24,6 +24,7 @@ import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 
@@ -205,6 +206,11 @@ public class CodeGenerationChecker implements AbstractVisitor<Void, Void> {
     @Override
     public Void visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
         errors.add("Quantified expressions cannot be generated");
+        return null;
+    }
+
+    @Override
+    public Void visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
         return null;
     }
 }

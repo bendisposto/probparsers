@@ -159,6 +159,11 @@ while((<predicate>).booleanValue()) {
 }
 >>
 
+var(locals, body) ::=<<
+<locals; separator="\n">
+<body>
+>>
+
 boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>

@@ -29,6 +29,7 @@ import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 import org.stringtemplate.v4.ST;
@@ -425,4 +426,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return whileST.render();
 	}
 
+	@Override
+	public String visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
+		ST varST = currentGroup.getInstanceOf("var");
+		varST.add("locals", OperationGenerator.declareLocals(node.getLocalIdentifiers(), currentGroup));
+		varST.add("body", visitSubstitutionNode(node.getBody(), expected));
+		return varST.render();
+	}
 }

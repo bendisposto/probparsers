@@ -34,7 +34,7 @@ public class OperationGenerator {
         return operation;
     }
 
-    private static List<String> declareLocals(List<DeclarationNode> locals, STGroup template) {
+    public static List<String> declareLocals(List<DeclarationNode> locals, STGroup template) {
          return locals.stream()
             .map(local -> generateLocalDeclaration(local, template))
             .collect(Collectors.toList());
