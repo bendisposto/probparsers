@@ -14,17 +14,15 @@ class <machine>:
 
     <sets; separator="\n">
 
-    <declarations; separator="\n">
-
     <initialization>
 
     <operations; separator="\n\n">
 
 >>
 
-initialization(body, include_initializations) ::= <<
-def __init__():
-    <include_initializations; separator="\n">
+initialization(body, machines) ::= <<
+def __init__(self):
+    <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
 >>
 
@@ -72,7 +70,6 @@ __<declaration(type, identifier)> = <type>()
 >>
 
 global_declaration(type, identifier) ::= <<
-__<declaration(type, identifier)>
 >>
 
 local_declaration(type, identifier) ::= <<
@@ -151,12 +148,12 @@ boolean_val(val) ::= <<
 <if(val)>BBoolean(true)<else>BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn) ::= <<
-<identifier>
+identifier(identifier, isReturn, isPrivate) ::= <<
+<if(!isPrivate)><identifier><else>self.__<identifier><endif>
 >>
 
 number(number) ::= <<
-BInteger("<number>")
+BInteger(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<

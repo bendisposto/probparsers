@@ -163,7 +163,7 @@ boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn) ::= <<
+identifier(identifier, isReturn, isPrivate) ::= <<
 <identifier>
 >>
 

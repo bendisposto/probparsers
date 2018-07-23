@@ -130,8 +130,7 @@ public class BSet implements BObject, Set<BObject> {
 
 	public static BSet range(BInteger a, BInteger b) {
 		HashSet<BObject> set = new HashSet<>();
-		//TODO test critical values
-		for(int i = a.intValue(); i < b.intValue() + 1; i++) {
+		for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
 			set.add(new BInteger(new java.math.BigInteger(String.valueOf(i))));
 		}
 		return new BSet(set);

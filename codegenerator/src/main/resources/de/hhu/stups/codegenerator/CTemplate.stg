@@ -88,8 +88,8 @@ binary(arg1,operator,arg2) ::= <<
 <operator>(<arg1>,<arg2>)
 >>
 
-unary(operator, arg1) ::= <<
-<operator>(<arg1>)
+unary(operator, arg) ::= <<
+<operator>(<arg>)
 >>
 
 boolean_val(val) ::= <<

@@ -12,21 +12,24 @@ import java.util.stream.Collectors;
 public class IdentifierGeneratorHandler {
 
 
-    public static String generate(IdentifierExprNode node, List<DeclarationNode> locals, STGroup template) {
-        if(locals.stream()
-            .map(declarationNode -> NameHandler.handle(declarationNode.getName(), template))
-            .collect(Collectors.toList())
-            .contains(node.toString())) {
-            return generate(node, template, true);
-        } else {
-            return generate(node, template, false);
-        }
+    public static String generate(IdentifierExprNode node, List<DeclarationNode> locals, List<DeclarationNode> globals, STGroup template) {
+        boolean isReturn = locals.stream()
+                .map(declarationNode -> NameHandler.handle(declarationNode.getName(), template))
+                .collect(Collectors.toList())
+                .contains(node.toString());
+
+        boolean isPrivate = globals.stream()
+                .map(DeclarationNode::getName)
+                .collect(Collectors.toList())
+                .contains(node.getName());
+        return generate(node, template, isReturn, isPrivate);
     }
 
-    private static String generate(IdentifierExprNode node, STGroup template, boolean isReturn) {
+    private static String generate(IdentifierExprNode node, STGroup template, boolean isReturn, boolean isPrivate) {
         ST identifier = template.getInstanceOf("identifier");
         identifier.add("identifier", NameHandler.handle(node.getName(), template));
         identifier.add("isReturn", isReturn);
+        identifier.add("isPrivate", isPrivate);
         return identifier.render();
     }
 

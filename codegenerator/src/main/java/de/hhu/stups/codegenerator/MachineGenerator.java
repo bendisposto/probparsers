@@ -68,6 +68,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private List<DeclarationNode> locals;
 
+	private List<DeclarationNode> globals;
+
 	private Set<String> imports;
 
 	private STGroup currentGroup;
@@ -79,12 +81,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public MachineGenerator(GeneratorMode mode) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
 		this.locals = new ArrayList<>();
+		this.globals = new ArrayList<>();
 		this.imports = new HashSet<>();
 		this.machineFromOperation = new HashMap<>();
 	}
 
 	public String generateMachine(MachineNode node) {
 		this.machineName = node.getName();
+		this.globals = node.getVariables();
 		node.getMachineReferences()
 				.forEach(reference -> reference.getMachineNode().getOperations()
 						.forEach(operation -> machineFromOperation.put(operation.getName(), reference.getMachineName())));
@@ -129,7 +133,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private String visitInitialization(MachineNode node) {
 		ST initialization = currentGroup.getInstanceOf("initialization");
-		initialization.add("machines", node.getMachineReferences().stream().map(reference -> reference.getMachineNode().getName().toLowerCase()).collect(Collectors.toList()));
+		initialization.add("machines", node.getMachineReferences().stream()
+				.map(reference -> reference.getMachineNode().getName().toLowerCase())
+				.collect(Collectors.toList()));
 		initialization.add("body", visitSubstitutionNode(node.getInitialisation(), null));
 		return initialization.render();
 	}
@@ -215,7 +221,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-		return IdentifierGeneratorHandler.generate(node, locals, currentGroup);
+		return IdentifierGeneratorHandler.generate(node, locals, globals, currentGroup);
 	}
 
 	@Override
