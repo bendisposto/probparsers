@@ -181,6 +181,6 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 >>
 
 operation_call(machine, function, args, this) ::= <<
-<if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
+<if(this)>this.<else>this.<machine>.<endif><function>(<args; separator=",">);
 >>
 

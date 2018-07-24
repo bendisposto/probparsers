@@ -12,16 +12,13 @@ import java.util.stream.Collectors;
 public class IdentifierGeneratorHandler {
 
 
-    public static String generate(IdentifierExprNode node, List<DeclarationNode> locals, List<DeclarationNode> globals, STGroup template) {
-        boolean isReturn = locals.stream()
+    public static String generate(IdentifierExprNode node, List<DeclarationNode> outputs, List<String> globals, STGroup template) {
+        boolean isReturn = outputs.stream()
                 .map(declarationNode -> NameHandler.handle(declarationNode.getName(), template))
                 .collect(Collectors.toList())
                 .contains(node.toString());
 
-        boolean isPrivate = globals.stream()
-                .map(DeclarationNode::getName)
-                .collect(Collectors.toList())
-                .contains(node.getName());
+        boolean isPrivate = globals.contains(node.getName());
         return generate(node, template, isReturn, isPrivate);
     }
 

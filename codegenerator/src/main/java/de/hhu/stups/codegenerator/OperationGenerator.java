@@ -29,7 +29,7 @@ public class OperationGenerator {
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
             operation.add("returnType", TypeGenerator.generate(new UntypedType(), template, false));
         }
-        operation.add("operationName", NameHandler.handle(node.getName().toLowerCase(), template));
+        operation.add("operationName", NameHandler.handle(node.getName(), template));
         operation.add("parameters", generateParameters(node.getParams(), template));
         return operation;
     }
