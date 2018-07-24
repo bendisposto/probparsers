@@ -89,8 +89,8 @@ declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
 
-assignment(identifier, val) ::= <<
-<identifier> = <val>;
+assignment(identifier, typeCast, val) ::= <<
+<identifier> = <typeCast> <val>;
 >>
 
 assignments(assignments) ::= <<
@@ -123,8 +123,8 @@ binary(arg1,operator,arg2) ::= <<
 <arg1>.<operator>(<arg2>)
 >>
 
-unary(operator, arg) ::= <<
-<arg>.<operator>()
+unary(operator, obj, args) ::= <<
+<obj>.<operator>(<args; separator=", ">)
 >>
 
 select(predicate, then) ::= <<
@@ -182,13 +182,5 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 
 operation_call(machine, function, args, this) ::= <<
 <if(this)>this.<else><machine>.<endif><function>(<args; separator=",">);
->>
-
-function_call(function, args) ::= <<
-<function>.functionCall(<args; separator=",">)
->>
-
-relation_image(function, args) ::= <<
-<function>.relationImage(<args; separator=",">)
 >>
 

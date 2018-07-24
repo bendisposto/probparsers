@@ -1,6 +1,6 @@
 MACHINE EnumSets
 
-SETS cars = {red,yellow,redyellow,green}; peds = {green, red}
+SETS cars = {red,yellow,redyellow,green}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
 
 VARIABLES xx, yy
 

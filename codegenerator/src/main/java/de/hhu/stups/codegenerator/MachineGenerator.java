@@ -363,11 +363,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	public String generateAssignment(ExprNode lhs, ExprNode rhs) {
-		//TODO
 		ST substitution = currentGroup.getInstanceOf("assignment");
 		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
 		String typeCast = TypeGenerator.generate(rhs.getType(), currentGroup, true);
-		substitution.add("val", typeCast + visitExprNode(rhs, null));
+		substitution.add("typeCast", typeCast);
+		substitution.add("val", visitExprNode(rhs, null));
 		return substitution.render();
 	}
 
@@ -377,7 +377,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	public String visitSequentialSubstitutionNode(ListSubstitutionNode node) {
-		//TODO
 		List<String> substitutionCodes = node.getSubstitutions().stream()
 				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
 				.collect(Collectors.toList());

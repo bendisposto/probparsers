@@ -42,7 +42,7 @@ public class OperatorGenerator {
             Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> UNARY_EXPRESSION_OPERATORS =
-            Arrays.asList(UNARY_MINUS, CARD);
+            Arrays.asList(UNARY_MINUS, CARD, RELATIONAL_IMAGE, FUNCTION_CALL);
 
     private static final List<PredicateOperatorNode.PredicateOperator> BINARY_PREDICATE_OPERATORS =
             Arrays.asList(PredicateOperatorNode.PredicateOperator.AND, PredicateOperatorNode.PredicateOperator.OR,
@@ -74,10 +74,6 @@ public class OperatorGenerator {
             return generateInterval(expressionList, template);
         } else if(node.getOperator() == COUPLE) {
             return generateCouple(expressionList, template);
-        } else if(node.getOperator() == FUNCTION_CALL) {
-            return generateFunctionCall(node, expressionList, template);
-        } else if(node.getOperator() == RELATIONAL_IMAGE) {
-            return generateRelationImage(node, expressionList, template);
         }
         throw new RuntimeException("Given operator is not implemented: " + node.getOperator());
     }
@@ -97,13 +93,15 @@ public class OperatorGenerator {
 
     private static String generateUnaryExpression(ExpressionOperatorNode.ExpressionOperator operator, List<String> expressionList, STGroup template) {
         ST expression = generateUnary(operator, template);
-        expression.add("arg", expressionList.get(0));
+        expression.add("obj", expressionList.get(0));
+        expression.add("args", expressionList.subList(1, expressionList.size()));
         return expression.render();
     }
 
     private static String generateUnaryPredicate(PredicateOperatorNode.PredicateOperator operator, List<String> expressionList, STGroup template) {
         ST expression = generateUnary(operator, template);
-        expression.add("arg", expressionList.get(0));
+        expression.add("obj", expressionList.get(0));
+        expression.add("args", expressionList.subList(1, expressionList.size()));
         return expression.render();
     }
 
@@ -119,7 +117,9 @@ public class OperatorGenerator {
                 } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
                     expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op, template);
                 }
-                //TODO
+                if(expression == null) {
+                    throw new RuntimeException("Given operator was not implemented: " + operator.getOperator());
+                }
                 if(BINARY_SWAP.contains(op)) {
                     expression.add("arg1", e);
                     expression.add("arg2", a);
@@ -129,7 +129,6 @@ public class OperatorGenerator {
                 }
                 return expression.render();
             });
-        //TODO
         return result.isPresent() ? result.get() : "";
     }
 
@@ -141,6 +140,12 @@ public class OperatorGenerator {
                 break;
             case CARD:
                 template.add("operator", "card");
+                break;
+            case FUNCTION_CALL:
+                template.add("operator", "functionCall");
+                break;
+            case RELATIONAL_IMAGE:
+                template.add("operator", "relationImage");
                 break;
             default:
                 throw new RuntimeException("Given operator is not implemented: " + operator);
@@ -266,20 +271,6 @@ public class OperatorGenerator {
 
     private static String generateBoolean(PredicateOperatorNode.PredicateOperator operator, STGroup template) {
         return template.getInstanceOf("boolean_val").add("val", operator == PredicateOperatorNode.PredicateOperator.TRUE).render();
-    }
-
-    private static String generateFunctionCall(ExpressionOperatorNode node, List<String> arguments, STGroup template) {
-        ST functionCall = template.getInstanceOf("function_call");
-        functionCall.add("function", node.getExpressionNodes().get(0));
-        functionCall.add("args", arguments.subList(1, arguments.size()));
-        return functionCall.render();
-    }
-
-    private static String generateRelationImage(ExpressionOperatorNode node, List<String> arguments, STGroup template) {
-        ST relationImage = template.getInstanceOf("relation_image");
-        relationImage.add("function", node.getExpressionNodes().get(0));
-        relationImage.add("args", arguments.subList(1, arguments.size()));
-        return relationImage.render();
     }
 
 }
