@@ -74,6 +74,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private List<String> reservedVariables;
 
+	private List<String> reservedVariablesAndMachines;
+
+	private List<String> reservedVariablesAndMachinesAndEnums;
+
 	private Set<String> imports;
 
 	private STGroup currentGroup;
@@ -88,20 +92,27 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.globals = new ArrayList<>();
 		this.imports = new HashSet<>();
 		this.reservedVariables = new ArrayList<>();
+		this.reservedVariablesAndMachines = new ArrayList<>();
+		this.reservedVariablesAndMachinesAndEnums = new ArrayList<>();
 		this.machineFromOperation = new HashMap<>();
 	}
 
 	public String generateMachine(MachineNode node) {
 		this.machineName = node.getName();
 		reservedVariables.addAll(node.getVariables().stream()
-				.map(DeclarationNode::getName)
+				.map(variable -> NameHandler.handle(variable.getName(), currentGroup))
 				.collect(Collectors.toList()));
-		reservedVariables.addAll(node.getEnumaratedSets().stream()
-				.map(set -> set.getSetDeclarationNode().getName())
+		reservedVariablesAndMachines.addAll(reservedVariables);
+		reservedVariablesAndMachines.addAll(node.getMachineReferences().stream()
+				.map(reference -> NameHandler.handleIdentifier(reference.getMachineName(), reservedVariables, currentGroup))
 				.collect(Collectors.toList()));
-		this.globals.addAll(reservedVariables);
-		this.globals.addAll(node.getMachineReferences().stream()
-				.map(reference -> NameHandler.handleIncludedMachine(reference.getMachineName(), reservedVariables))
+		reservedVariablesAndMachinesAndEnums.addAll(reservedVariablesAndMachines);
+		this.reservedVariablesAndMachinesAndEnums.addAll(node.getEnumaratedSets().stream()
+				.map(set -> NameHandler.handleIdentifier(set.getSetDeclarationNode().getName(), reservedVariablesAndMachines, currentGroup))
+				.collect(Collectors.toList()));
+		this.globals.addAll(reservedVariablesAndMachines);
+		this.globals.addAll(node.getEnumaratedSets().stream()
+				.map(set -> NameHandler.handleIdentifier(set.getSetDeclarationNode().getName(), reservedVariablesAndMachinesAndEnums, currentGroup))
 				.collect(Collectors.toList()));
 		node.getMachineReferences()
 				.forEach(reference -> reference.getMachineNode().getOperations()
@@ -143,14 +154,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		ST declaration = currentGroup.getInstanceOf("include_declaration");
 		String machine = reference.getMachineName();
 		declaration.add("type", machine);
-		declaration.add("identifier", NameHandler.handleIncludedMachine(machine, reservedVariables));
+		declaration.add("identifier", NameHandler.handleIdentifier(machine, reservedVariables, currentGroup));
 		return declaration.render();
 	}
 
 	private String visitInitialization(MachineNode node) {
 		ST initialization = currentGroup.getInstanceOf("initialization");
 		initialization.add("machines", node.getMachineReferences().stream()
-				.map(reference -> NameHandler.handleIncludedMachine(reference.getMachineNode().getName(), reservedVariables))
+				.map(reference -> NameHandler.handleIdentifier(reference.getMachineNode().getName(), reservedVariables, currentGroup))
 				.collect(Collectors.toList()));
 		initialization.add("body", visitSubstitutionNode(node.getInitialisation(), null));
 		return initialization.render();
@@ -201,9 +212,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		//TODO
 		TypeGenerator.addImport(node.getElements().get(0).getType(), imports, currentGroup);
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-		String name = NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup);
-		enumDeclaration.add("name", name.substring(0, 1).toUpperCase() + name.substring(1));
-		List<String> enums = node.getElements().stream().map(declaration -> declaration.getName().toUpperCase())
+		enumDeclaration.add("name", NameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), reservedVariablesAndMachines, currentGroup));
+		List<String> enums = node.getElements().stream()
+				.map(DeclarationNode::getName)
 				.collect(Collectors.toList());
 		enumDeclaration.add("enums", enums);
 		return enumDeclaration.render();
@@ -213,7 +224,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		// TODO
 		TypeGenerator.addImport(node.getSetDeclarationNode().getType(), imports, currentGroup);
 		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-		setDeclaration.add("identifier", NameHandler.handle(node.getSetDeclarationNode().getName(), currentGroup));
+		setDeclaration.add("identifier", NameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), reservedVariablesAndMachinesAndEnums, currentGroup));
 		List<String> enums = node.getElements().stream()
 				.map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
 				.collect(Collectors.toList());
@@ -224,17 +235,17 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String callEnum(String setName, DeclarationNode enumNode) {
 		//TODO
 		ST enumST = currentGroup.getInstanceOf("enum_call");
-		enumST.add("class", setName.substring(0, 1).toUpperCase() + setName.substring(1));
-		enumST.add("identifier", enumNode.getName().toUpperCase());
+		enumST.add("class", NameHandler.handleIdentifier(setName, reservedVariablesAndMachines, currentGroup));
+		enumST.add("identifier", enumNode.getName());
 		return enumST.render();
 	}
 
 	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node) {
+		//TODO
 		String typeName = node.getType().toString();
-		typeName = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
 		ST element = currentGroup.getInstanceOf("set_element");
-		element.add("set", typeName);
-		element.add("element", node.getName().toUpperCase());
+		element.add("set", NameHandler.handleIdentifier(typeName, reservedVariablesAndMachines, currentGroup));
+		element.add("element", node.getName());
 		return element.render();
 	}
 
@@ -443,7 +454,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		} else {
 			functionCall = currentGroup.getInstanceOf("operation_call");
 		}
-		functionCall.add("machine", NameHandler.handleIncludedMachine(machineName, reservedVariables));
+		functionCall.add("machine", NameHandler.handleIdentifier(machineName, reservedVariables, currentGroup));
 		functionCall.add("function", operationName);
 		functionCall.add("args", node.getArguments().stream()
 				.map(expr -> visitExprNode(expr, expected))

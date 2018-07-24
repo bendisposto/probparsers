@@ -21,12 +21,11 @@ public class NameHandler {
         return string;
     }
 
-    public static String handleIncludedMachine(String machine, List<String> variables) {
-        String result = machine;
+    public static String handleIdentifier(String identifier, List<String> variables, STGroup template) {
+        String result = handle(identifier, template);
         while(variables.contains(result)) {
             result = "_" + result;
         }
         return result;
     }
-
 }
