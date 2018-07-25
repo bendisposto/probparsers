@@ -39,7 +39,7 @@ public class BInteger extends BNumber {
 	}
 
 	public BBoolean lessEqual(BNumber o) {
-		return new BBoolean(compareTo(o) < 0);
+		return new BBoolean(compareTo(o) <= 0);
 	}
 
 
@@ -48,7 +48,7 @@ public class BInteger extends BNumber {
 	}
 
 	public BBoolean less(BNumber o) {
-		return new BBoolean(compareTo(o) <= 0);
+		return new BBoolean(compareTo(o) < 0);
 	}
 	public BBoolean greater(BNumber o) {
 		return new BBoolean(compareTo(o) > 0);
