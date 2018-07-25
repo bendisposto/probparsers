@@ -69,7 +69,15 @@ enum_call(class, identifier) ::= <<
 
 set_enum_declaration(name,enums) ::= <<
 public enum <name> implements BObject {
-    <enums; separator=", \n">
+    <enums; separator=", \n">;
+
+    public BBoolean equal(<name> o) {
+        return new BBoolean(this == o);
+    }
+
+    public BBoolean unequal(<name> o) {
+        return new BBoolean(this != o);
+    }
 }
 >>
 

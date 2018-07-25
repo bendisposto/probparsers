@@ -180,6 +180,11 @@ public class TestJava {
 		testJava("TravelAgency");
 	}
 
+	@Test
+	public void testTrafficLight() throws Exception {
+		testJava("TrafficLight");
+	}
+
 	@Ignore
 	@Test
 	public void testPhonebook() throws Exception {

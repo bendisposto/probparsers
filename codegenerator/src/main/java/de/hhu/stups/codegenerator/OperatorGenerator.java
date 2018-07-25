@@ -229,6 +229,9 @@ public class OperatorGenerator {
             case EQUAL:
                 template.add("operator", "equal");
                 break;
+            case NOT_EQUAL:
+                template.add("operator", "unequal");
+                break;
             case LESS:
                 template.add("operator", "less");
                 break;

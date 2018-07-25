@@ -50,12 +50,17 @@ public class BInteger extends BNumber {
 	public BBoolean less(BNumber o) {
 		return new BBoolean(compareTo(o) < 0);
 	}
+
 	public BBoolean greater(BNumber o) {
 		return new BBoolean(compareTo(o) > 0);
 	}
 
 	public BBoolean equal(BNumber o) {
 		return new BBoolean(compareTo(o) == 0);
+	}
+
+	public BBoolean unequal(BNumber o) {
+		return new BBoolean(compareTo(o) != 0);
 	}
 
 
