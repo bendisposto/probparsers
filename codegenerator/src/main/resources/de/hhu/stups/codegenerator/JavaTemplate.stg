@@ -1,5 +1,5 @@
 keywords() ::= <<
-abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto
+abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto, initialized
 >>
 
 
@@ -16,6 +16,8 @@ public class <machine> {
 
     <declarations; separator="\n">
 
+    private boolean initialized = false;
+
     <initialization>
 
     <operations; separator="\n\n">
@@ -26,8 +28,13 @@ public class <machine> {
 
 initialization(body, machines) ::= <<
 public void initialize() {
-    <machines : {m | <include_initialization(m)>}; separator="\n">
-    <body>
+    if(!initialized) {
+        <machines : {m | <include_initialization(m)>}; separator="\n">
+        <body>
+    } else {
+        throw new RuntimeException("Machine is already initialized");
+    }
+    initialized = true;
 }
 >>
 
