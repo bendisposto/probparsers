@@ -495,7 +495,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
 		ST varST = currentGroup.getInstanceOf("var");
-		varST.add("locals", operationGenerator.declareLocals(node.getLocalIdentifiers(), reservedVariablesAndMachines));
+		varST.add("locals", operationGenerator.generateDeclarations(node.getLocalIdentifiers(), OperationGenerator.DeclarationType.LOCAL_DECLARATION, reservedVariablesAndMachines));
 		varST.add("body", visitSubstitutionNode(node.getBody(), expected));
 		return varST.render();
 	}

@@ -14,6 +14,11 @@ import java.util.stream.Collectors;
 
 public class OperationGenerator {
 
+    public enum DeclarationType {
+        LOCAL_DECLARATION,
+        PARAMETER
+    }
+
     private final STGroup group;
 
     private final NameHandler nameHandler;
@@ -29,7 +34,7 @@ public class OperationGenerator {
 
     public ST generate(OperationNode node, List<String> variables) {
         ST operation = group.getInstanceOf("operation");
-        operation.add("locals", declareLocals(node.getOutputParams(), variables));
+        operation.add("locals", generateDeclarations(node.getOutputParams(), DeclarationType.LOCAL_DECLARATION, variables));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
@@ -43,34 +48,30 @@ public class OperationGenerator {
             operation.add("returnType", typeGenerator.generate(new UntypedType(), variables, false));
         }
         operation.add("operationName", nameHandler.handle(node.getName()));
-        operation.add("parameters", generateParameters(node.getParams(), variables));
+        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER, variables));
         return operation;
     }
 
-    public List<String> declareLocals(List<DeclarationNode> outputs, List<String> variables) {
-         return outputs.stream()
-            .map(output -> generateLocalDeclaration(output, variables))
-            .collect(Collectors.toList());
+    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type, List<String> variables) {
+        return declarations.stream()
+                .map(declaration -> type == DeclarationType.LOCAL_DECLARATION ?
+                        generateLocalDeclaration(declaration, variables) : generateParameter(declaration, variables))
+                .collect(Collectors.toList());
     }
 
-    private String generateLocalDeclaration(DeclarationNode node, List<String> variables) {
-        ST declaration = group.getInstanceOf("local_declaration");
+    private String generateDeclaration(DeclarationNode node, String templateName, List<String> variables) {
+        ST declaration = group.getInstanceOf(templateName);
         declaration.add("type", typeGenerator.generate(node.getType(), variables, false));
         declaration.add("identifier", nameHandler.handle(node.getName()));
         return declaration.render();
     }
 
-    private List<String> generateParameters(List<DeclarationNode> parameters, List<String> variables) {
-        return parameters.stream()
-            .map(parameterNode -> generateParameter(parameterNode, variables))
-            .collect(Collectors.toList());
+    private String generateLocalDeclaration(DeclarationNode node, List<String> variables) {
+        return generateDeclaration(node, "local_declaration", variables);
     }
 
-    public String generateParameter(DeclarationNode node, List<String> variables) {
-        ST parameter = group.getInstanceOf("parameter");
-        parameter.add("type", typeGenerator.generate(node.getType(), variables, false));
-        parameter.add("identifier", nameHandler.handle(node.getName()));
-        return parameter.render();
+    private String generateParameter(DeclarationNode node, List<String> variables) {
+        return generateDeclaration(node, "declaration", variables);
     }
 
 }
