@@ -14,49 +14,62 @@ import java.util.stream.Collectors;
 
 public class OperationGenerator {
 
-    public static ST generate(OperationNode node, List<String> variables, STGroup template) {
-        ST operation = template.getInstanceOf("operation");
-        operation.add("locals", declareLocals(node.getOutputParams(), variables, template));
+    private final STGroup group;
+
+    private final NameHandler nameHandler;
+
+    private final TypeGenerator typeGenerator;
+
+
+    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final TypeGenerator typeGenerator) {
+        this.group = group;
+        this.nameHandler = nameHandler;
+        this.typeGenerator = typeGenerator;
+    }
+
+    public ST generate(OperationNode node, List<String> variables) {
+        ST operation = group.getInstanceOf("operation");
+        operation.add("locals", declareLocals(node.getOutputParams(), variables));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
             //TODO
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + TypeGenerator.generate(type, variables, template, false) + "* " + identifier);
-            operation.add("returnType", TypeGenerator.generate(type, variables, template, false));
-            operation.add("return", template.getInstanceOf("return").add("identifier", identifier).render());
+            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, variables, false) + "* " + identifier);
+            operation.add("returnType", typeGenerator.generate(type, variables, false));
+            operation.add("return", group.getInstanceOf("return").add("identifier", identifier).render());
         } else if(node.getOutputParams().size() == 0) {
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
-            operation.add("returnType", TypeGenerator.generate(new UntypedType(), variables, template, false));
+            operation.add("returnType", typeGenerator.generate(new UntypedType(), variables, false));
         }
-        operation.add("operationName", NameHandler.handle(node.getName(), template));
-        operation.add("parameters", generateParameters(node.getParams(), variables, template));
+        operation.add("operationName", nameHandler.handle(node.getName()));
+        operation.add("parameters", generateParameters(node.getParams(), variables));
         return operation;
     }
 
-    public static List<String> declareLocals(List<DeclarationNode> outputs, List<String> variables, STGroup template) {
+    public List<String> declareLocals(List<DeclarationNode> outputs, List<String> variables) {
          return outputs.stream()
-            .map(output -> generateLocalDeclaration(output, variables, template))
+            .map(output -> generateLocalDeclaration(output, variables))
             .collect(Collectors.toList());
     }
 
-    private static String generateLocalDeclaration(DeclarationNode node, List<String> variables, STGroup template) {
-        ST declaration = template.getInstanceOf("local_declaration");
-        declaration.add("type", TypeGenerator.generate(node.getType(), variables, template, false));
-        declaration.add("identifier", NameHandler.handle(node.getName(), template));
+    private String generateLocalDeclaration(DeclarationNode node, List<String> variables) {
+        ST declaration = group.getInstanceOf("local_declaration");
+        declaration.add("type", typeGenerator.generate(node.getType(), variables, false));
+        declaration.add("identifier", nameHandler.handle(node.getName()));
         return declaration.render();
     }
 
-    private static List<String> generateParameters(List<DeclarationNode> parameters, List<String> variables, STGroup template) {
+    private List<String> generateParameters(List<DeclarationNode> parameters, List<String> variables) {
         return parameters.stream()
-            .map(parameterNode -> generateParameter(parameterNode, variables, template))
+            .map(parameterNode -> generateParameter(parameterNode, variables))
             .collect(Collectors.toList());
     }
 
-    public static String generateParameter(DeclarationNode node, List<String> variables, STGroup template) {
-        ST parameter = template.getInstanceOf("parameter");
-        parameter.add("type", TypeGenerator.generate(node.getType(), variables, template, false));
-        parameter.add("identifier", NameHandler.handle(node.getName(), template));
+    public String generateParameter(DeclarationNode node, List<String> variables) {
+        ST parameter = group.getInstanceOf("parameter");
+        parameter.add("type", typeGenerator.generate(node.getType(), variables, false));
+        parameter.add("identifier", nameHandler.handle(node.getName()));
         return parameter.render();
     }
 

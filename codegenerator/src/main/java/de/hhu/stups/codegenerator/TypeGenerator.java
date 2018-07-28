@@ -16,7 +16,19 @@ import java.util.Set;
 
 public class TypeGenerator {
 
-    public static String generate(BType type, List<String> variables, STGroup group, boolean cast) {
+    private final STGroup group;
+
+    private final NameHandler nameHandler;
+
+    private final Set<String> imports;
+
+    public TypeGenerator(STGroup group, NameHandler nameHandler, Set<String> imports) {
+        this.group = group;
+        this.nameHandler = nameHandler;
+        this.imports = imports;
+    }
+
+    public String generate(BType type, List<String> variables, boolean cast) {
         ST template = group.getInstanceOf("type");
         if(type instanceof IntegerType) {
             return template.add("type", "BInteger").add("cast", cast).render();
@@ -25,20 +37,20 @@ public class TypeGenerator {
         } else if(type instanceof SetType) {
             return template.add("type", "BSet").add("cast", cast).render();
         } else if(type instanceof EnumeratedSetElementType) {
-            return template.add("type", NameHandler.handleIdentifier(type.toString(), variables, group)).add("cast", cast).render();
+            return template.add("type", nameHandler.handleIdentifier(type.toString(), variables)).add("cast", cast).render();
         } else if(type instanceof CoupleType) {
             return template.add("type", "BCouple").add("cast", cast).render();
         } else if(type instanceof UntypedType) {
-            return generateUntyped(group);
+            return generateUntyped();
         }
         return "";
     }
 
-    private static String generateUntyped(STGroup template) {
-        return template.getInstanceOf("void").render();
+    private String generateUntyped() {
+        return group.getInstanceOf("void").render();
     }
 
-    public static void addImport(BType type, Set<String> imports, STGroup group) {
+    public void addImport(BType type) {
         ST template = group.getInstanceOf("import_type");
         if (type instanceof IntegerType) {
             imports.add(template.add("type", "BInteger").render());

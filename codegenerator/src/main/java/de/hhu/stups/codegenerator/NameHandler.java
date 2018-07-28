@@ -11,9 +11,15 @@ import java.util.List;
  */
 public class NameHandler {
 
+    private final STGroup group;
 
-    public static String handle(String string, STGroup template) {
-        ST keywords = template.getInstanceOf("keywords");
+    public NameHandler(final STGroup group) {
+        this.group = group;
+    }
+
+
+    public String handle(String string) {
+        ST keywords = group.getInstanceOf("keywords");
         List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
         if(words.contains(string)) {
             return "_" + string;
@@ -21,8 +27,8 @@ public class NameHandler {
         return string;
     }
 
-    public static String handleIdentifier(String identifier, List<String> variables, STGroup template) {
-        String result = handle(identifier, template);
+    public String handleIdentifier(String identifier, List<String> variables) {
+        String result = handle(identifier);
         while(variables.contains(result)) {
             result = "_" + result;
         }
