@@ -6,6 +6,7 @@ import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,19 +16,22 @@ public class IdentifierGenerator {
 
     private final NameHandler nameHandler;
 
+    private List<DeclarationNode> outputParams;
+
     public IdentifierGenerator(final STGroup group, final NameHandler nameHandler) {
         this.group = group;
         this.nameHandler = nameHandler;
+        this.outputParams = new ArrayList<>();
     }
 
 
-    public String generate(IdentifierExprNode node, List<DeclarationNode> outputs, List<String> globals) {
-        boolean isReturn = outputs.stream()
+    public String generate(IdentifierExprNode node) {
+        boolean isReturn = outputParams.stream()
                 .map(declarationNode -> nameHandler.handle(declarationNode.getName()))
                 .collect(Collectors.toList())
                 .contains(node.toString());
 
-        boolean isPrivate = globals.contains(node.getName());
+        boolean isPrivate = nameHandler.getGlobals().contains(node.getName());
         return generate(node, isReturn, isPrivate);
     }
 
@@ -39,4 +43,7 @@ public class IdentifierGenerator {
         return identifier.render();
     }
 
+    public void setOutputParams(List<DeclarationNode> outputParams){
+        this.outputParams = outputParams;
+    }
 }

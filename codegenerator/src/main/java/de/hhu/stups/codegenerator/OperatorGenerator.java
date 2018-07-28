@@ -115,16 +115,9 @@ public class OperatorGenerator {
         Optional<String> result = expressionList.stream()
             .reduce((a, e) -> {
                 Object op = operator.getOperator();
-                ST expression = null;
-                if(op instanceof ExpressionOperatorNode.ExpressionOperator) {
-                    expression = generateBinary((ExpressionOperatorNode.ExpressionOperator) op);
-                } else if(op instanceof PredicateOperatorNode.PredicateOperator) {
-                    expression = generateBinary((PredicateOperatorNode.PredicateOperator) op);
-                } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
-                    expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op);
-                }
+                ST expression = getTemplateFromBinaryOperator(op);
                 if(expression == null) {
-                    throw new RuntimeException("Given operator was not implemented: " + operator.getOperator());
+                    throw new RuntimeException("Given operator was not implemented: " + op);
                 }
                 if(BINARY_SWAP.contains(op)) {
                     expression.add("arg1", e);
@@ -136,6 +129,18 @@ public class OperatorGenerator {
                 return expression.render();
             });
         return result.isPresent() ? result.get() : "";
+    }
+
+    private ST getTemplateFromBinaryOperator(Object op) {
+        ST expression = null;
+        if(op instanceof ExpressionOperatorNode.ExpressionOperator) {
+            expression = generateBinary((ExpressionOperatorNode.ExpressionOperator) op);
+        } else if(op instanceof PredicateOperatorNode.PredicateOperator) {
+            expression = generateBinary((PredicateOperatorNode.PredicateOperator) op);
+        } else if(op instanceof PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) {
+            expression = generateBinary((PredicateOperatorWithExprArgsNode.PredOperatorExprArgs) op);
+        }
+        return expression;
     }
 
     private ST generateUnary(ExpressionOperatorNode.ExpressionOperator operator) {

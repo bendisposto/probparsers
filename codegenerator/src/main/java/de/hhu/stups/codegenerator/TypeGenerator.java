@@ -11,7 +11,7 @@ import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 public class TypeGenerator {
@@ -22,13 +22,13 @@ public class TypeGenerator {
 
     private final Set<String> imports;
 
-    public TypeGenerator(STGroup group, NameHandler nameHandler, Set<String> imports) {
+    public TypeGenerator(STGroup group, NameHandler nameHandler) {
         this.group = group;
         this.nameHandler = nameHandler;
-        this.imports = imports;
+        this.imports = new HashSet<>();
     }
 
-    public String generate(BType type, List<String> variables, boolean cast) {
+    public String generate(BType type, boolean cast) {
         ST template = group.getInstanceOf("type");
         if(type instanceof IntegerType) {
             return template.add("type", "BInteger").add("cast", cast).render();
@@ -37,7 +37,7 @@ public class TypeGenerator {
         } else if(type instanceof SetType) {
             return template.add("type", "BSet").add("cast", cast).render();
         } else if(type instanceof EnumeratedSetElementType) {
-            return template.add("type", nameHandler.handleIdentifier(type.toString(), variables)).add("cast", cast).render();
+            return template.add("type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.MACHINES)).add("cast", cast).render();
         } else if(type instanceof CoupleType) {
             return template.add("type", "BCouple").add("cast", cast).render();
         } else if(type instanceof UntypedType) {
@@ -64,6 +64,10 @@ public class TypeGenerator {
         } else if(type instanceof CoupleType) {
             imports.add(template.add("type", "BCouple").render());
         }
+    }
+
+    public Set<String> getImports() {
+        return imports;
     }
 
 }

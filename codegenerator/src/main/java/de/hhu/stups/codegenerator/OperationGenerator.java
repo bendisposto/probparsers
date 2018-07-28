@@ -32,46 +32,46 @@ public class OperationGenerator {
         this.typeGenerator = typeGenerator;
     }
 
-    public ST generate(OperationNode node, List<String> variables) {
+    public ST generate(OperationNode node) {
         ST operation = group.getInstanceOf("operation");
-        operation.add("locals", generateDeclarations(node.getOutputParams(), DeclarationType.LOCAL_DECLARATION, variables));
+        operation.add("locals", generateDeclarations(node.getOutputParams(), DeclarationType.LOCAL_DECLARATION));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
             //TODO
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, variables, false) + "* " + identifier);
-            operation.add("returnType", typeGenerator.generate(type, variables, false));
+            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, false) + "* " + identifier);
+            operation.add("returnType", typeGenerator.generate(type, false));
             operation.add("return", group.getInstanceOf("return").add("identifier", identifier).render());
         } else if(node.getOutputParams().size() == 0) {
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
-            operation.add("returnType", typeGenerator.generate(new UntypedType(), variables, false));
+            operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
         }
         operation.add("operationName", nameHandler.handle(node.getName()));
-        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER, variables));
+        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER));
         return operation;
     }
 
-    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type, List<String> variables) {
+    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type) {
         return declarations.stream()
                 .map(declaration -> type == DeclarationType.LOCAL_DECLARATION ?
-                        generateLocalDeclaration(declaration, variables) : generateParameter(declaration, variables))
+                        generateLocalDeclaration(declaration) : generateParameter(declaration))
                 .collect(Collectors.toList());
     }
 
-    private String generateDeclaration(DeclarationNode node, String templateName, List<String> variables) {
+    private String generateDeclaration(DeclarationNode node, String templateName) {
         ST declaration = group.getInstanceOf(templateName);
-        declaration.add("type", typeGenerator.generate(node.getType(), variables, false));
+        declaration.add("type", typeGenerator.generate(node.getType(), false));
         declaration.add("identifier", nameHandler.handle(node.getName()));
         return declaration.render();
     }
 
-    private String generateLocalDeclaration(DeclarationNode node, List<String> variables) {
-        return generateDeclaration(node, "local_declaration", variables);
+    private String generateLocalDeclaration(DeclarationNode node) {
+        return generateDeclaration(node, "local_declaration");
     }
 
-    private String generateParameter(DeclarationNode node, List<String> variables) {
-        return generateDeclaration(node, "declaration", variables);
+    private String generateParameter(DeclarationNode node) {
+        return generateDeclaration(node, "declaration");
     }
 
 }
