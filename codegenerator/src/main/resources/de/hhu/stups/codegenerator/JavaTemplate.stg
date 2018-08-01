@@ -28,12 +28,11 @@ public class <machine> {
 
 initialization(body, machines) ::= <<
 public void initialize() {
-    if(!initialized) {
-        <machines : {m | <include_initialization(m)>}; separator="\n">
-        <body>
-    } else {
+    if(initialized) {
         throw new RuntimeException("Machine is already initialized");
     }
+    <machines : {m | <include_initialization(m)>}; separator="\n">
+    <body>
     initialized = true;
 }
 >>
@@ -44,6 +43,9 @@ include_initialization(machine) ::= <<
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
+    if(!initialized) {
+        throw new RuntimeException("Machine was not initialized");
+    }
     <locals; separator="\n">
     <body>
     <return>

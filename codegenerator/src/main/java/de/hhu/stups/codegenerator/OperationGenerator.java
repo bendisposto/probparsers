@@ -32,17 +32,23 @@ public class OperationGenerator {
         this.typeGenerator = typeGenerator;
     }
 
-    public ST generate(OperationNode node) {
+    public ST generate(OperationNode node, List<DeclarationNode> globals) {
         ST operation = group.getInstanceOf("operation");
-        operation.add("locals", generateDeclarations(node.getOutputParams(), DeclarationType.LOCAL_DECLARATION));
+
+        operation.add("locals", generateDeclarations(node.getOutputParams()
+                .stream()
+                .filter(output -> !globals.stream()
+                        .map(DeclarationNode::getName)
+                        .collect(Collectors.toList()).contains(output.getName()))
+                .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
             //TODO
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, false) + "* " + identifier);
+            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, false) + "* " + nameHandler.handle(identifier));
             operation.add("returnType", typeGenerator.generate(type, false));
-            operation.add("return", group.getInstanceOf("return").add("identifier", identifier).render());
+            operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handle(identifier)).render());
         } else if(node.getOutputParams().size() == 0) {
             operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
             operation.add("returnType", typeGenerator.generate(new UntypedType(), false));

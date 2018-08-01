@@ -1,9 +1,9 @@
 MACHINE
     A
 
-INCLUDES C
+INCLUDES switch
 
-SETS C = {red,yellow,redyellow,green}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
+SETS switch = {red,yellow,redyellow,green}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
 
 VARIABLES aa, bb
 
@@ -12,5 +12,5 @@ INITIALISATION aa := 0; bb := 2
 
 OPERATIONS
   IncAB(pp) =  PRE pp : 1..10 THEN aa := aa + pp ; aa <-- IncC(pp) END;
-  incab(pp) =  PRE pp : 1..10 THEN aa := aa + pp ; aa <-- IncC(pp) END
+  switch(switch) =  PRE switch : 1..10 THEN aa := aa + switch ; aa <-- IncC(switch) END
 END

@@ -24,7 +24,7 @@ public class CodeGenerator {
 
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
 		CodeGenerator codeGenerator = new CodeGenerator();
-		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/TrafficLight.mch").toURI()), GeneratorMode.JAVA, true);
+		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA, true);
 	}
 
 	public Set<Path> generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {
@@ -50,7 +50,10 @@ public class CodeGenerator {
 		String code = generator.generateMachine(node);
 
 		int lastIndexDot = path.toString().lastIndexOf(".");
-		Path newPath = Paths.get(path.toString().substring(0, lastIndexDot + 1) + mode.name().toLowerCase());
+		int lastIndexSlash = path.toString().lastIndexOf("/");
+
+		String fileName = path.toString().substring(lastIndexSlash + 1, lastIndexDot);
+		Path newPath = Paths.get(path.toString().substring(0, lastIndexSlash + 1) + generator.getNameHandler().handle(fileName) + "." + mode.name().toLowerCase());
 		try {
 			return Files.write(newPath, code.getBytes(), Files.exists(newPath) ? TRUNCATE_EXISTING : CREATE_NEW);
 		} catch (IOException e) {

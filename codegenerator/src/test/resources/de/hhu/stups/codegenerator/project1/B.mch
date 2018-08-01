@@ -1,7 +1,7 @@
 MACHINE
     B
 
-INCLUDES C
+INCLUDES switch
 VARIABLES bb
    
 INVARIANT bb : INT
