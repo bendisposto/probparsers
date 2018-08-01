@@ -206,7 +206,9 @@ public class Definitions extends IDefinitions {
 	@Override
 	public void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded) {
 		if (file != null) {
-			machineFilesLoaded.add(file);
+			if(!machineFilesLoaded.contains(file)) {
+				machineFilesLoaded.add(file);
+			}
 			final int fileNumber = machineFilesLoaded.indexOf(file) + 1;
 			for (PDefinition def : definitionsMap.values()) {
 				nodeIdMapping.assignIdentifiers(fileNumber, def);

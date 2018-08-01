@@ -1,0 +1,14 @@
+RULES_MACHINE RulesMachineIncludesDefsFile
+DEFINITIONS
+  "Defs.def"
+OPERATIONS
+
+RULE rule1
+BODY
+  RULE_FAIL
+  WHEN 133 = FooValue
+  COUNTEREXAMPLE "never"
+  END
+END
+
+END

@@ -1,0 +1,4 @@
+RULES_MACHINE Main
+REFERENCES
+  RulesMachineIncludesDefsFile
+END

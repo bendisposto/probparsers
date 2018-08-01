@@ -45,6 +45,8 @@ public class RulesProject {
 	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final NodeIdAssignment nodeIdAssignment = new NodeIdAssignment();
+	private List<File> filesLoaded = new ArrayList<>(); // rules machine files
+														// and definitions files
 	private HashMap<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
 	private HashMap<String, String> operationReplacementMap = new HashMap<>();
@@ -146,19 +148,19 @@ public class RulesProject {
 				.extractConfigurationOfMainModel(this.bModels.get(0), this.allOperations);
 		final BMachine compositionMachine = new BMachine(COMPOSITION_MACHINE_NAME);
 		MachineInjector injector = new MachineInjector(compositionMachine.getStart());
-		int fileNumber = 1;
 		for (IModel model : bModels) {
 			RulesParseUnit rulesParseUnit = (RulesParseUnit) model;
 			rulesParseUnit.translate(allOperations);
 			if (!rulesParseUnit.hasError()) {
 				Start start = rulesParseUnit.getStart();
-				nodeIdAssignment.assignIdentifiers(fileNumber, start);
+				filesLoaded.add(new File(rulesParseUnit.getPath()));
+				nodeIdAssignment.assignIdentifiers(filesLoaded.size(), start);
+				rulesParseUnit.getBParser().getDefinitions().assignIdsToNodes(nodeIdAssignment, filesLoaded);
 			} else {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
 			Start otherStart = rulesParseUnit.getStart();
 			injector.injectMachine(otherStart);
-			fileNumber++;
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 		bModels.add(compositionMachine);
@@ -204,7 +206,6 @@ public class RulesProject {
 	}
 
 	private void checkProject() {
-
 		collectAllOperations();
 		checkDependencies();
 		findImplicitDependenciesToComputations();
@@ -664,14 +665,14 @@ public class RulesProject {
 		pout.printAtom(MAIN_MACHINE_NAME);
 		pout.openList();
 
-		for (IModel iModel : bModels) {
-			pout.printAtom(iModel.getPath());
+		for (File file : this.filesLoaded) {
+			pout.printAtom(file.getAbsolutePath());
 		}
 		pout.closeList();
 		pout.closeTerm();
 		pout.fullstop();
 
-		NodeIdAssignment tempNodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
+		final NodeIdAssignment tempNodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
 				: new NodeIdAssignment();
 
 		for (IModel iModel : bModels) {
