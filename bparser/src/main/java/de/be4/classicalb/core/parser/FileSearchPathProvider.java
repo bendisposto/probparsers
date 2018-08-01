@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,10 +71,10 @@ public class FileSearchPathProvider implements Iterable<File> {
 		return fileName;
 	}
 
-	public File resolve() throws FileNotFoundException {
+	public File resolve() throws IOException {
 		for (File f : this) {
 			if (f.exists() && f.isFile()) {
-				return f;
+				return f.getCanonicalFile();
 			}
 		}
 		throw new FileNotFoundException(fileName);
