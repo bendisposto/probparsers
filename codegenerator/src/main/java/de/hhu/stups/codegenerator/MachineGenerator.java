@@ -80,6 +80,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private Map<String, String> machineFromOperation;
 
+	private Map<String, List<String>> setToEnum;
+
 	private MachineNode machineNode;
 
 	public MachineGenerator(GeneratorMode mode) {
@@ -90,6 +92,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.operatorGenerator = new OperatorGenerator(currentGroup);
 		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
+		this.setToEnum = new HashMap<>();
 	}
 
 	public String generateMachine(MachineNode node) {
@@ -192,6 +195,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private List<String> generateEnumDeclarations(MachineNode node) {
+		node.getEnumaratedSets().forEach(set -> setToEnum.put(set.getSetDeclarationNode().getName(), set.getElements().stream()
+				.map(DeclarationNode::getName)
+				.collect(Collectors.toList())));
 		return node.getEnumaratedSets().stream()
 				.map(this::declareEnums)
 				.collect(Collectors.toList());
@@ -207,12 +213,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		typeGenerator.addImport(node.getElements().get(0).getType());
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
 		enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-		boolean anyEnumDisallowed = node.getElements().stream().anyMatch(element -> !element.getName().equals(nameHandler.handle(element.getName())));
-		if(anyEnumDisallowed) {
-			throw new RuntimeException("Code generation for an enum name is not possible");
-		}
 		List<String> enums = node.getElements().stream()
-				.map(element -> nameHandler.handle(element.getName()))
+				.map(element -> nameHandler.handleEnum(element.getName(), node.getElements().stream().map(DeclarationNode::getName).collect(Collectors.toList())))
 				.collect(Collectors.toList());
 		enumDeclaration.add("enums", enums);
 		return enumDeclaration.render();
@@ -232,7 +234,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String callEnum(String setName, DeclarationNode enumNode) {
 		ST enumST = currentGroup.getInstanceOf("enum_call");
 		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
-		enumST.add("identifier", enumNode.getName());
+		enumST.add("identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
 		return enumST.render();
 	}
 
@@ -240,7 +242,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		String typeName = node.getType().toString();
 		ST element = currentGroup.getInstanceOf("set_element");
 		element.add("set", nameHandler.handleIdentifier(typeName, NameHandler.IdentifierHandlingEnum.MACHINES));
-		element.add("element", node.getName());
+		element.add("element", nameHandler.handleEnum(node.getName(), setToEnum.get(typeName)));
 		return element.render();
 	}
 

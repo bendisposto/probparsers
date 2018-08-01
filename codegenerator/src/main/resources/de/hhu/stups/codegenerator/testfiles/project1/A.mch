@@ -3,7 +3,7 @@ MACHINE
 
 INCLUDES switch
 
-SETS switch = {red,yellow,redyellow,green}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
+SETS switch = {red,yellow,redyellow,green,switch}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
 
 VARIABLES aa, bb
 

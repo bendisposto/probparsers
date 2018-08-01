@@ -84,6 +84,18 @@ public class NameHandler {
         return result;
     }
 
+    public String handleEnum(String identifier, List<String> enums) {
+        ST keywords = group.getInstanceOf("keywords");
+        List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
+        String result = identifier;
+        if(words.contains(identifier)) {
+            while (enums.contains(result)) {
+                result = result + "_";
+            }
+        }
+        return result;
+    }
+
     private List<String> getVariables(IdentifierHandlingEnum identifierHandling) {
         List<String> variables = null;
         switch (identifierHandling) {
