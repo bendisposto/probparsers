@@ -23,7 +23,7 @@ class <machine>:
 initialization(body, machines) ::= <<
 def initialize(self):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ and self.__initialized):
-        raise Error("Machine is already initialized")
+        raise Exception("Machine is already initialized")
     <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
     self.__initialized = True
@@ -36,7 +36,7 @@ include_initialization(machine) ::= <<
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 def <operationName>(self<parameters : {par |, <par>}>):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ or not self.__initialized):
-        raise Error("Machine was not initialized")
+        raise Exception("Machine was not initialized")
     <locals; separator="\n">
     <body>
     <return>
