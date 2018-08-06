@@ -204,6 +204,11 @@ public class TestPython {
 		testJava("Sieve");
 	}
 
+	@Test
+	public void testReset() throws Exception {
+		testJava("Reset");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {

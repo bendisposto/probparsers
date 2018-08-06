@@ -27,20 +27,15 @@ BBoolean xor(BBoolean b1, BBoolean b2) {
     return create_boolean(b1.value != b2.value);
 }
 
-int main() {
-
-    BBoolean a = create_boolean(1);
-    BBoolean b = create_boolean(0);
-
-    BBoolean c = or(a,b);
-    BBoolean d = and(a,b);
-    BBoolean e = xor(a,b);
-
-    printf("%d\n", c.value);
-    printf("%d\n", d.value);
-    printf("%d\n", e.value);
-
-
+BBoolean not(BBoolean b1) {
+    return create_boolean(!b1.value);
 }
 
+BBoolean implies(BBoolean b1, BBoolean b2) {
+    return create_boolean(!b1.value || b2.value);
+}
+
+BBoolean equivalent(BBoolean b1, BBoolean b2) {
+    return and(implies(b1,b2),implies(b2,b1));
+}
 

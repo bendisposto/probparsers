@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "BBoolean.c"
 
 typedef struct BInteger {
 	int value;
@@ -44,12 +45,36 @@ BInteger multiply(BInteger i1, BInteger i2) {
 
 
 BInteger divide(BInteger i1, BInteger i2) {
-    return create_integer(i1.value/i2.value);
+    return create_integer(i1.value / i2.value);
 }
 
 
 BInteger modulo(BInteger i1, BInteger i2) {
-    return create_integer(i1.value/i2.value);
+    return create_integer(i1.value % i2.value);
+}
+
+BBoolean lessEqual(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value <= i2.value);
+}
+
+BBoolean less(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value < i2.value);
+}
+
+BBoolean greaterEqual(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value >= i2.value);
+}
+
+BBoolean greater(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value > i2.value);
+}
+
+BBoolean equal(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value == i2.value);
+}
+
+BBoolean unequal(BInteger i1, BInteger i2) {
+    return create_boolean(i1.value != i2.value);
 }
 
 

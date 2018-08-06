@@ -1,5 +1,5 @@
 keywords() ::= <<
-abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto, initialized
+abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto, initialized, initialize
 >>
 
 
@@ -52,10 +52,6 @@ public <returnType> <operationName>(<parameters; separator=", ">) {
 }
 >>
 
-parameter(type, identifier) ::= <<
-<declaration(type, identifier)>
->>
-
 return(identifier) ::= <<
 return <identifier>;
 >>
@@ -103,6 +99,10 @@ local_declaration(type, identifier) ::= <<
 >>
 
 declaration(type, identifier) ::= <<
+<type> <identifier>
+>>
+
+parameter(type, identifier, isReturn) ::= <<
 <type> <identifier>
 >>
 

@@ -40,44 +40,42 @@ public class OperationGenerator {
                 .filter(output -> !globals.stream()
                         .map(DeclarationNode::getName)
                         .collect(Collectors.toList()).contains(output.getName()))
-                .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION));
+                .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION, false));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
-            //TODO
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : "") + typeGenerator.generate(type, false) + "* " + nameHandler.handle(identifier));
             operation.add("returnType", typeGenerator.generate(type, false));
             operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handle(identifier)).render());
         } else if(node.getOutputParams().size() == 0) {
-            operation.add("returnParameters", (node.getParams().size() > 0 ? ", " : ""));
             operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
         }
         operation.add("operationName", nameHandler.handle(node.getName()));
-        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER));
+        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));
+        operation.add("returnParameters", generateDeclarations(node.getOutputParams(), DeclarationType.PARAMETER, true));
         return operation;
     }
 
-    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type) {
+    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type, boolean isReturn) {
         return declarations.stream()
                 .map(declaration -> type == DeclarationType.LOCAL_DECLARATION ?
-                        generateLocalDeclaration(declaration) : generateParameter(declaration))
+                        generateLocalDeclaration(declaration) : generateParameter(declaration, isReturn))
                 .collect(Collectors.toList());
     }
 
-    private String generateDeclaration(DeclarationNode node, String templateName) {
-        ST declaration = group.getInstanceOf(templateName);
+    private String generateLocalDeclaration(DeclarationNode node) {
+        ST declaration = group.getInstanceOf("local_declaration");
         declaration.add("type", typeGenerator.generate(node.getType(), false));
         declaration.add("identifier", nameHandler.handle(node.getName()));
         return declaration.render();
     }
 
-    private String generateLocalDeclaration(DeclarationNode node) {
-        return generateDeclaration(node, "local_declaration");
-    }
-
-    private String generateParameter(DeclarationNode node) {
-        return generateDeclaration(node, "declaration");
+    private String generateParameter(DeclarationNode node, boolean isReturn) {
+        ST declaration = group.getInstanceOf("parameter");
+        declaration.add("isReturn", isReturn);
+        declaration.add("type", typeGenerator.generate(node.getType(), false));
+        declaration.add("identifier", nameHandler.handle(node.getName()));
+        return declaration.render();
     }
 
 }

@@ -1,5 +1,5 @@
 keywords() ::= <<
-abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto
+abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto, initialized, initialize
 >>
 
 
@@ -21,9 +21,12 @@ class <machine>:
 >>
 
 initialization(body, machines) ::= <<
-def __init__(self):
+def initialize(self):
+    if('_' + type(self).__name__ + '__initialized' in self.__dict__ and self.__initialized):
+        raise Error("Machine is already initialized")
     <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
+    self.__initialized = True
 >>
 
 include_initialization(machine) ::= <<
@@ -31,14 +34,12 @@ include_initialization(machine) ::= <<
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
-def <operationName>(<parameters; separator=", ">):
+def <operationName>(self<parameters : {par |, <par>}>):
+    if('_' + type(self).__name__ + '__initialized' in self.__dict__ or not self.__initialized):
+        raise Error("Machine was not initialized")
     <locals; separator="\n">
     <body>
     <return>
->>
-
-parameter(type, identifier) ::= <<
-<declaration(type, identifier)>
 >>
 
 return(identifier) ::= <<
@@ -77,6 +78,11 @@ local_declaration(type, identifier) ::= <<
 >>
 
 declaration(type, identifier) ::= <<
+<identifier>
+>>
+
+
+parameter(type, identifier, isReturn) ::= <<
 <identifier>
 >>
 

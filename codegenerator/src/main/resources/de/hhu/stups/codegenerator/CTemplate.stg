@@ -7,7 +7,7 @@ sscanf, fgetc, fgets, fputc, fputs, getc, getchar, gets, putc, putchar, puts, un
 L_tmpnam, SEEK_CUR, SEEK_END, SEEK_SET, TMP_MAX, stderr, stdin, stdout, size_t, fpos_t, FILE,, wchar_t, div_t, ldiv_t, EXIT_FAILURE, EXIT_SUCCESS,
 RAND_MAX, MB_CUR_MAX, atof, atoi, atol, strtod, strtol, strtoul, calloc, free, malloc, realloc, abort, exit, getenv, system, bsearch, qsort, abs,
 div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb, create_atom, main, create_boolean, boolean_value, or, and, xor, create_integer,
-int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BAtom, BBoolean
+int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BAtom, BBoolean, initialized, initialize
 >>
 
 
@@ -23,33 +23,53 @@ machine(imports, machine, includes, enums, sets, declarations, initialization, o
 
 <declarations; separator="\n">
 
+static int initialized = 0;
+
 <initialization>
 
-<operations; separator="\n">
+<operations; separator="\n\n">
 
 >>
 
-initialization(body) ::= <<
+initialization(body, machines) ::= <<
 void initialize(void) {
+    if(initialized) {
+        fprintf(stderr, "Machine was not initialized\n");
+        exit(-1);
+    }
     <body>
+    initialized = 1;
 }
 >>
 
 operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
-void <operationName>(<parameters; separator=", "><returnParameters>) {
+void <operationName>(<parameters; separator=", "><returnParameters : {par |, <par>}>) {
+    if(!initialized) {
+        fprintf(stderr, "Machine was not initialized\n");
+        exit(-1);
+    }
     <body>
 }
 >>
 
-parameter(type, identifier) ::= <<
-<declaration(type, identifier)>
+return(identifier) ::= <<
 >>
 
-set_declaration(type, identifier) ::= <<
+set_declaration(identifier, enums) ::= <<
 >>
 
 set_enum_declaration(name,enums) ::= <<
 >>
+
+set_enumeration(enums) ::= <<
+>>
+
+set_element(set,element) ::= <<
+>>
+
+enum_call(class, identifier) ::= <<
+>>
+
 
 include_declaration(type, identifier) ::= <<
 #include "<type>.c"
@@ -67,8 +87,17 @@ declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
 
-assignment(identifier, val) ::= <<
+
+parameter(type, identifier, isReturn) ::= <<
+<if(isReturn)><type> *<identifier><else><type> <identifier><endif>
+>>
+
+assignment(identifier, typeCast, val) ::= <<
 <identifier> = <val>;
+>>
+
+assignments(assignments) ::= <<
+<assignments; separator="\n">
 >>
 
 void() ::= <<
@@ -83,24 +112,75 @@ import_type(type) ::= <<
 #include "<type>.c"
 >>
 
+interval(arg1, arg2) ::= <<
+>>
+
+couple_create(arg1, arg2) ::= <<
+
+>>
+
+
 
 binary(arg1,operator,arg2) ::= <<
 <operator>(<arg1>,<arg2>)
 >>
 
-unary(operator, arg) ::= <<
-<operator>(<arg>)
+unary(operator, obj, args) ::= <<
+<operator>(<obj>,<args; separator=", ">)
 >>
+
+select(predicate, then) ::= <<
+if((<predicate>).booleanValue()) {
+    <then>
+} else {
+    fprintf(stderr, "Invocation of the operation is not possible\n");
+    exit(-1);
+}
+>>
+
+if(predicate, then, else1) ::= <<
+if((<predicate>).booleanValue()) {
+    <then>
+} <else1; separator=" ">
+>>
+
+elseif(predicate, then) ::= <<
+else if((<predicate>).booleanValue()) {
+    <then>
+}
+>>
+
+else(then) ::= <<
+else {
+    <then>
+}
+>>
+
+while(predicate, then) ::= <<
+while((<predicate>).booleanValue()) {
+    <then>
+}
+>>
+
+var(locals, body) ::=<<
+>>
+
 
 boolean_val(val) ::= <<
 <if(val)>create_boolean(1)<else>create_boolean(0)<endif>
 >>
 
-identifier(identifier, isReturn) ::= <<
+identifier(identifier, isReturn, isPrivate) ::= <<
 <if(isReturn)>(*<identifier>)<else><identifier><endif>
 >>
 
 number(number) ::= <<
 create_integer(<number>)
+>>
+
+operation_call_with_assignment(var, machine, function, args, this) ::= <<
+>>
+
+operation_call(machine, function, args, this) ::= <<
 >>
 
