@@ -1,12 +1,12 @@
 MACHINE
     switch
 
-VARIABLES switch
+VARIABLES abc
 
-INVARIANT switch : INT
-INITIALISATION switch := 0
+INVARIANT abc : INT
+INITIALISATION abc := 0
 
 OPERATIONS
-  switch <-- IncC(pp) =  PRE pp : 1..10 THEN switch := switch + pp END
+  abc <-- IncC(pp) =  PRE pp : 1..10 THEN abc := abc + pp END
 
 END

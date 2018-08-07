@@ -46,7 +46,7 @@ public class OperationGenerator {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
             operation.add("returnType", typeGenerator.generate(type, false));
-            operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handle(identifier)).render());
+            operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handleIdentifier(identifier, NameHandler.IdentifierHandlingEnum.MACHINES)).render());
         } else if(node.getOutputParams().size() == 0) {
             operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
         }
@@ -66,7 +66,7 @@ public class OperationGenerator {
     private String generateLocalDeclaration(DeclarationNode node) {
         ST declaration = group.getInstanceOf("local_declaration");
         declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handle(node.getName()));
+        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 
@@ -74,7 +74,7 @@ public class OperationGenerator {
         ST declaration = group.getInstanceOf("parameter");
         declaration.add("isReturn", isReturn);
         declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handle(node.getName()));
+        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 

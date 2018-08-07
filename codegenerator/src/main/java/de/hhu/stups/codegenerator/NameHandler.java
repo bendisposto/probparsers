@@ -29,11 +29,11 @@ public class NameHandler {
 
     private List<String> globals;
 
-    private List<String> reservedVariables;
+    private List<String> reservedMachines;
 
-    private List<String> reservedVariablesAndMachines;
+    private List<String> reservedMachinesAndVariables;
 
-    private List<String> reservedVariablesAndMachinesAndEnums;
+    private List<String> reservedMachinesAndVariablesAndEnums;
 
     private Map<String, List<String>> enumTypes;
 
@@ -41,25 +41,26 @@ public class NameHandler {
         this.group = group;
         this.globals = new ArrayList<>();
         this.enumTypes = new HashMap<>();
-        this.reservedVariables = new ArrayList<>();
-        this.reservedVariablesAndMachines = new ArrayList<>();
-        this.reservedVariablesAndMachinesAndEnums = new ArrayList<>();
+        this.reservedMachines = new ArrayList<>();
+        this.reservedMachinesAndVariables = new ArrayList<>();
+        this.reservedMachinesAndVariablesAndEnums = new ArrayList<>();
     }
 
     public void initialize(MachineNode node) {
         node.getEnumaratedSets().forEach(set -> enumTypes.put(set.getSetDeclarationNode().getName(), set.getElementsAsStrings()));
-        reservedVariables.addAll(node.getVariables().stream()
-                .map(variable -> handle(variable.getName()))
+        reservedMachines.addAll(node.getMachineReferences().stream()
+                .map(reference -> handle(reference.getMachineName()))
                 .collect(Collectors.toList()));
-        reservedVariablesAndMachines.addAll(reservedVariables);
-        reservedVariablesAndMachines.addAll(node.getMachineReferences().stream()
-                .map(reference -> handleIdentifier(reference.getMachineName(), VARIABLES))
+        reservedMachinesAndVariables.addAll(reservedMachines);
+        reservedMachinesAndVariables.addAll(node.getVariables().stream()
+                .map(variable -> handleIdentifier(variable.getName(), MACHINES))
                 .collect(Collectors.toList()));
-        reservedVariablesAndMachinesAndEnums.addAll(reservedVariablesAndMachines);
-        this.reservedVariablesAndMachinesAndEnums.addAll(node.getEnumaratedSets().stream()
-                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), MACHINES))
+
+        reservedMachinesAndVariablesAndEnums.addAll(reservedMachinesAndVariables);
+        this.reservedMachinesAndVariablesAndEnums.addAll(node.getEnumaratedSets().stream()
+                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), VARIABLES))
                 .collect(Collectors.toList()));
-        this.globals.addAll(reservedVariablesAndMachines);
+        this.globals.addAll(reservedMachinesAndVariablesAndEnums);
         this.globals.addAll(node.getEnumaratedSets().stream()
                 .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.ENUMS))
                 .collect(Collectors.toList()));
@@ -99,14 +100,14 @@ public class NameHandler {
     private List<String> getVariables(IdentifierHandlingEnum identifierHandling) {
         List<String> variables = null;
         switch (identifierHandling) {
-            case VARIABLES:
-                variables = reservedVariables;
-                break;
             case MACHINES:
-                variables = reservedVariablesAndMachines;
+                variables = reservedMachines;
+                break;
+            case VARIABLES:
+                variables = reservedMachinesAndVariables;
                 break;
             case ENUMS:
-                variables = reservedVariablesAndMachinesAndEnums;
+                variables = reservedMachinesAndVariablesAndEnums;
                 break;
             default:
                 break;

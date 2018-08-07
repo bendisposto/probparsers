@@ -27,7 +27,7 @@ public class IdentifierGenerator {
 
     public String generate(IdentifierExprNode node) {
         boolean isReturn = outputParams.stream()
-                .map(declarationNode -> nameHandler.handle(declarationNode.getName()))
+                .map(declarationNode -> nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
                 .collect(Collectors.toList())
                 .contains(node.toString());
 
@@ -37,7 +37,7 @@ public class IdentifierGenerator {
 
     private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
-        identifier.add("identifier", nameHandler.handle(node.getName()));
+        identifier.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         identifier.add("isReturn", isReturn);
         identifier.add("isPrivate", isPrivate);
         return identifier.render();
@@ -46,4 +46,5 @@ public class IdentifierGenerator {
     public void setOutputParams(List<DeclarationNode> outputParams){
         this.outputParams = outputParams;
     }
+
 }

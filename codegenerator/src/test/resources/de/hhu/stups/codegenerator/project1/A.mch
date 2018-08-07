@@ -3,14 +3,13 @@ MACHINE
 
 INCLUDES switch
 
-SETS switch = {red,yellow,redyellow,green,switch}; peds = {green, red, GREEN}; Peds = {green, red, GREEN}
+SETS switch = {red,yellow,redyellow,green,switch,SWITCH}
 
-VARIABLES aa, bb
+VARIABLES aa, switch
 
-INVARIANT aa : INT & bb : INT
-INITIALISATION aa := 0; bb := 2
+INVARIANT aa:INT & switch : INT
+INITIALISATION aa := 1; switch := 0
 
 OPERATIONS
-  IncAB(pp) =  PRE pp : 1..10 THEN aa := aa + pp ; aa <-- IncC(pp) END;
-  switch(switch) =  PRE switch : 1..10 THEN aa := aa + switch ; aa <-- IncC(switch) END
+    switch(switch) =  PRE switch : 1..10 THEN aa := aa + switch; aa <-- IncC(switch) END
 END
