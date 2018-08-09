@@ -1,11 +1,13 @@
 package de.prob.parser;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.prob.parser.antlr.Antlr4BParser;
 
 public class SemanticASTTest {
 
+	@Ignore
 	@Test
 	public void testRecords() throws Exception {
 		String machine = "MACHINE test2\n";

@@ -212,7 +212,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private String declareEnums(EnumeratedSetDeclarationNode node) {
 		typeGenerator.addImport(node.getElements().get(0).getType());
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-		enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+		enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
 		List<String> enums = node.getElements().stream()
 				.map(element -> nameHandler.handleEnum(element.getName(), node.getElements().stream().map(DeclarationNode::getName).collect(Collectors.toList())))
 				.collect(Collectors.toList());
@@ -223,7 +223,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
 		typeGenerator.addImport(node.getSetDeclarationNode().getType());
 		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-		setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.ENUMS));
+		setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
 		List<String> enums = node.getElements().stream()
 				.map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
 				.collect(Collectors.toList());
@@ -233,7 +233,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	public String callEnum(String setName, DeclarationNode enumNode) {
 		ST enumST = currentGroup.getInstanceOf("enum_call");
-		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.VARIABLES));
+		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
 		enumST.add("identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
 		return enumST.render();
 	}
@@ -241,7 +241,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node) {
 		String typeName = node.getType().toString();
 		ST element = currentGroup.getInstanceOf("set_element");
-		element.add("set", nameHandler.handleIdentifier(typeName, NameHandler.IdentifierHandlingEnum.VARIABLES));
+		element.add("set", nameHandler.handleIdentifier(typeName, NameHandler.IdentifierHandlingEnum.MACHINES));
 		element.add("element", nameHandler.handleEnum(node.getName(), setToEnum.get(typeName)));
 		return element.render();
 	}

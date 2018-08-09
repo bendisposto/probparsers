@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static de.hhu.stups.codegenerator.NameHandler.IdentifierHandlingEnum.MACHINES;
-import static de.hhu.stups.codegenerator.NameHandler.IdentifierHandlingEnum.VARIABLES;
 
 /**
  * Created by fabian on 01.06.18.
@@ -20,9 +19,8 @@ import static de.hhu.stups.codegenerator.NameHandler.IdentifierHandlingEnum.VARI
 public class NameHandler {
 
     public enum IdentifierHandlingEnum {
-        VARIABLES,
         MACHINES,
-        ENUMS
+        VARIABLES
     }
 
     private final STGroup group;
@@ -33,8 +31,6 @@ public class NameHandler {
 
     private List<String> reservedMachinesAndVariables;
 
-    private List<String> reservedMachinesAndVariablesAndEnums;
-
     private Map<String, List<String>> enumTypes;
 
     public NameHandler(final STGroup group) {
@@ -43,7 +39,6 @@ public class NameHandler {
         this.enumTypes = new HashMap<>();
         this.reservedMachines = new ArrayList<>();
         this.reservedMachinesAndVariables = new ArrayList<>();
-        this.reservedMachinesAndVariablesAndEnums = new ArrayList<>();
     }
 
     public void initialize(MachineNode node) {
@@ -56,13 +51,12 @@ public class NameHandler {
                 .map(variable -> handleIdentifier(variable.getName(), MACHINES))
                 .collect(Collectors.toList()));
 
-        reservedMachinesAndVariablesAndEnums.addAll(reservedMachinesAndVariables);
-        this.reservedMachinesAndVariablesAndEnums.addAll(node.getEnumaratedSets().stream()
-                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), VARIABLES))
+        reservedMachinesAndVariables.addAll(node.getEnumaratedSets().stream()
+                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), MACHINES))
                 .collect(Collectors.toList()));
-        this.globals.addAll(reservedMachinesAndVariablesAndEnums);
-        this.globals.addAll(node.getEnumaratedSets().stream()
-                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.ENUMS))
+        globals.addAll(reservedMachinesAndVariables);
+        globals.addAll(node.getEnumaratedSets().stream()
+                .map(set -> handleIdentifier(set.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES))
                 .collect(Collectors.toList()));
     }
 
@@ -105,9 +99,6 @@ public class NameHandler {
                 break;
             case VARIABLES:
                 variables = reservedMachinesAndVariables;
-                break;
-            case ENUMS:
-                variables = reservedMachinesAndVariablesAndEnums;
                 break;
             default:
                 break;
