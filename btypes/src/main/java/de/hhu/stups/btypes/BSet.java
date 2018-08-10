@@ -103,7 +103,7 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public boolean retainAll(Collection<?> c) {
-		return set.retainAll(c);
+		throw new UnsupportedOperationException();
 	}
 
 	public Iterator<BObject> iterator() {
