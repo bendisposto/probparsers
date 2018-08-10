@@ -23,12 +23,15 @@ public class OperationGenerator {
 
     private final NameHandler nameHandler;
 
+    private final IdentifierGenerator identifierGenerator;
+
     private final TypeGenerator typeGenerator;
 
 
-    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final TypeGenerator typeGenerator) {
+    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final IdentifierGenerator identifierGenerator, final TypeGenerator typeGenerator) {
         this.group = group;
         this.nameHandler = nameHandler;
+        this.identifierGenerator = identifierGenerator;
         this.typeGenerator = typeGenerator;
     }
 
@@ -37,9 +40,6 @@ public class OperationGenerator {
 
         operation.add("locals", generateDeclarations(node.getOutputParams()
                 .stream()
-                .filter(output -> !globals.stream()
-                        .map(DeclarationNode::getName)
-                        .collect(Collectors.toList()).contains(output.getName()))
                 .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION, false));
 
         if(node.getOutputParams().size() == 1) {
@@ -63,7 +63,7 @@ public class OperationGenerator {
                 .collect(Collectors.toList());
     }
 
-    private String generateLocalDeclaration(DeclarationNode node) {
+    public String generateLocalDeclaration(DeclarationNode node) {
         ST declaration = group.getInstanceOf("local_declaration");
         declaration.add("type", typeGenerator.generate(node.getType(), false));
         declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));

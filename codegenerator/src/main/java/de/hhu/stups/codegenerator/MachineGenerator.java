@@ -84,15 +84,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private MachineNode machineNode;
 
+	private boolean isLocalScope;
+
 	public MachineGenerator(GeneratorMode mode) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup);
-		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
+		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, identifierGenerator, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
 		this.setToEnum = new HashMap<>();
+		this.isLocalScope = false;
 	}
 
 	public String generateMachine(MachineNode node) {
@@ -256,7 +259,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-		return identifierGenerator.generate(node);
+		return identifierGenerator.generate(node, isLocalScope);
 	}
 
 	@Override
@@ -471,9 +474,25 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
 		ST varST = currentGroup.getInstanceOf("var");
-		varST.add("locals", operationGenerator.generateDeclarations(node.getLocalIdentifiers(), OperationGenerator.DeclarationType.LOCAL_DECLARATION, false));
+		node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.addLocal(identifier.getName()));
+		this.isLocalScope = true;
+		varST.add("locals", generateVariablesInVar(node.getLocalIdentifiers()));
 		varST.add("body", visitSubstitutionNode(node.getBody(), expected));
+		this.isLocalScope = false;
 		return varST.render();
+	}
+
+	public List<String> generateVariablesInVar(List<DeclarationNode> identifiers) {
+		return identifiers.stream()
+				.map(this::generateVariableInVar)
+				.collect(Collectors.toList());
+	}
+
+	public String generateVariableInVar(DeclarationNode identifier) {
+		ST declaration = currentGroup.getInstanceOf("local_declaration");
+		declaration.add("type", typeGenerator.generate(identifier.getType(), false));
+		declaration.add("identifier", identifierGenerator.generateVarDeclaration(identifier.getName()));
+		return declaration.render();
 	}
 
 	public NameHandler getNameHandler() {

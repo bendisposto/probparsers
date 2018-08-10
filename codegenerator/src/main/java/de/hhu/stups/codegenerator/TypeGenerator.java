@@ -37,7 +37,7 @@ public class TypeGenerator {
         } else if(type instanceof SetType) {
             return template.add("type", "BSet").add("cast", cast).render();
         } else if(type instanceof EnumeratedSetElementType) {
-            return template.add("type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.VARIABLES)).add("cast", cast).render();
+            return template.add("type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.MACHINES)).add("cast", cast).render();
         } else if(type instanceof CoupleType) {
             return template.add("type", "BCouple").add("cast", cast).render();
         } else if(type instanceof UntypedType) {

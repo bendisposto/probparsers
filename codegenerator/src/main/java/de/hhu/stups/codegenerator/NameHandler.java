@@ -71,7 +71,10 @@ public class NameHandler {
     }
 
     public String handleIdentifier(String identifier, IdentifierHandlingEnum identifierHandling) {
-        List<String> variables = getVariables(identifierHandling);
+        return handleIdentifier(identifier, getVariables(identifierHandling));
+    }
+
+    public String handleIdentifier(String identifier, List<String> variables) {
         String result = handle(identifier);
         while(variables.contains(result)) {
             result = "_" + result;

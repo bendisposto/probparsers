@@ -232,6 +232,11 @@ public class TestJava {
 		testJava("Reset");
 	}
 
+	@Test
+	public void testTest() throws Exception {
+		testJava("Test");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {
