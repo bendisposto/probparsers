@@ -47,5 +47,12 @@ public class BCouple implements BObject {
 		return second;
 	}
 
+	public BBoolean equal(BCouple o) {
+		return new BBoolean(equals(o));
+	}
+
+	public BBoolean unequal(BCouple o) {
+		return new BBoolean(!equals(o));
+	}
 
 }

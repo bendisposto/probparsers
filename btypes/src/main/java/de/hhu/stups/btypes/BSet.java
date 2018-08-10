@@ -163,4 +163,12 @@ public class BSet implements BObject, Set<BObject> {
 		return new BBoolean(this.contains(object));
 	}
 
+	public BBoolean equal(BSet o) {
+		return new BBoolean(equals(o));
+	}
+
+	public BBoolean unequal(BSet o) {
+		return new BBoolean(!equals(o));
+	}
+
 }
