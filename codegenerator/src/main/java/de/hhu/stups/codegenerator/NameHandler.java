@@ -71,16 +71,13 @@ public class NameHandler {
     }
 
     public String handleIdentifier(String identifier, IdentifierHandlingEnum identifierHandling) {
-        return handleIdentifier(identifier, getVariables(identifierHandling));
-    }
-
-    public String handleIdentifier(String identifier, List<String> variables) {
         String result = handle(identifier);
-        while(variables.contains(result)) {
+        while(getVariables(identifierHandling).contains(result)) {
             result = "_" + result;
         }
         return result;
     }
+
 
     public String handleEnum(String identifier, List<String> enums) {
         ST keywords = group.getInstanceOf("keywords");

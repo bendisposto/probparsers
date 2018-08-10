@@ -259,7 +259,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-		return identifierGenerator.generate(node, isLocalScope);
+		if(isLocalScope) {
+			return identifierGenerator.generateVarDeclaration(node.getName());
+		}
+		return identifierGenerator.generate(node);
 	}
 
 	@Override

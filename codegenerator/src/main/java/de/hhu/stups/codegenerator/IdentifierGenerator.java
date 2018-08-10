@@ -30,25 +30,19 @@ public class IdentifierGenerator {
     }
 
 
-    public String generate(IdentifierExprNode node, boolean isLocalScope) {
+    public String generate(IdentifierExprNode node) {
         boolean isReturn = outputParams.stream()
                 .map(declarationNode -> nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
                 .collect(Collectors.toList())
                 .contains(node.toString());
 
         boolean isPrivate = nameHandler.getGlobals().contains(node.getName());
-        return generate(node, isReturn, isPrivate, isLocalScope);
+        return generate(node, isReturn, isPrivate);
     }
 
-    private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate, boolean isLocalScope) {
+    private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
-        String resultIdentifier = nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES);
-        if(locals.keySet().contains(node.getName())) {
-            for (int i = 0; i < locals.get(node.getName()); i++) {
-                resultIdentifier = "_" + resultIdentifier;
-            }
-        }
-        identifier.add("identifier", resultIdentifier);
+        identifier.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         identifier.add("isReturn", isReturn);
         identifier.add("isPrivate", isPrivate);
         return identifier.render();
