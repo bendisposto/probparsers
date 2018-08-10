@@ -39,3 +39,11 @@ BBoolean equivalent(BBoolean b1, BBoolean b2) {
     return and(implies(b1,b2),implies(b2,b1));
 }
 
+BBoolean equal(BBoolean i1, BBoolean i2) {
+    return create_boolean(i1.value == i2.value);
+}
+
+BBoolean unequal(BBoolean i1, BBoolean i2) {
+    return create_boolean(i1.value != i2.value);
+}
+
