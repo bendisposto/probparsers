@@ -62,14 +62,17 @@ public class IdentifierGenerator {
         return identifier.render();
     }
 
-    public void setOutputParams(List<DeclarationNode> outputParams){
+    public void setParams(List<DeclarationNode> inputParams, List<DeclarationNode> outputParams){
         this.outputParams = outputParams;
         this.locals.clear();
-        List<String> outputs = outputParams.stream()
-                .map(output -> nameHandler.handleIdentifier(output.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
+        List<String> parameters = outputParams.stream()
+                .map(DeclarationNode::getName)
                 .collect(Collectors.toList());
-        for(String output : outputs) {
-            locals.put(output, 0);
+        parameters.addAll(inputParams.stream()
+                .map(DeclarationNode::getName)
+                .collect(Collectors.toList()));
+        for(String parameter : parameters) {
+            locals.put(parameter, 0);
         }
     }
 

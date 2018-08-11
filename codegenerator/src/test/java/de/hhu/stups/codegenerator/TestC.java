@@ -25,7 +25,7 @@ public class TestC {
             outputStream.write(buffer, 0, size);
     }
 
-    public void testJava(String machine) throws Exception {
+    public void testC(String machine) throws Exception {
         Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
                 .getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -36,178 +36,183 @@ public class TestC {
 
     @Test
     public void testOperation() throws Exception {
-        testJava("Operation");
+        testC("Operation");
     }
 
     @Test
     public void testLocalDeclaration() throws Exception {
-        testJava("LocalDeclaration");
+        testC("LocalDeclaration");
     }
 
     @Ignore
     @Test
     public void testRefinement() throws Exception {
         // TODO VAR-Node
-        testJava("RefinementMachine");
+        testC("RefinementMachine");
     }
 
     @Test
     public void testEnumSets() throws Exception {
-        testJava("EnumSets");
+        testC("EnumSets");
     }
 
     @Test
     public void testNameCollision() throws Exception {
-        testJava("NameCollision");
+        testC("NameCollision");
     }
 
     @Test
     public void testWhile() throws Exception {
-        testJava("While");
+        testC("While");
     }
 
     @Test
     public void testInterval() throws Exception {
-        testJava("Interval");
+        testC("Interval");
     }
 
 
     @Test
     public void testPair() throws Exception {
-        testJava("Pair");
+        testC("Pair");
     }
 
     @Test
     public void testIfAndPredicates() throws Exception {
-        testJava("IfAndPredicates");
+        testC("IfAndPredicates");
     }
 
     @Test
     public void testImplies() throws Exception {
-        testJava("Implies");
+        testC("Implies");
     }
 
     @Test
     public void testEquivalence() throws Exception {
-        testJava("Equivalence");
+        testC("Equivalence");
     }
 
     @Test
     public void testBooleanPredicate() throws Exception {
-        testJava("BooleanPredicate");
+        testC("BooleanPredicate");
     }
 
     @Ignore
     @Test
     public void testRecords() throws Exception {
-        testJava("Records");
+        testC("Records");
     }
 
     @Ignore
     @Test
     public void testNondeterminism() throws Exception {
-        testJava("Nondeterminism");
+        testC("Nondeterminism");
     }
 
     @Test
     public void testMapFunction() throws Exception {
-        testJava("MapFunction");
+        testC("MapFunction");
     }
 
     @Test
     public void testRelationImage() throws Exception {
-        testJava("RelationImage");
+        testC("RelationImage");
     }
 
     @Test
     public void testEmptySet() throws Exception {
-        testJava("EmptySet");
+        testC("EmptySet");
     }
 
     @Test
     public void testSetUnion() throws Exception {
-        testJava("SetUnion");
+        testC("SetUnion");
     }
 
 
     @Test
     public void testCounter() throws Exception {
-        testJava("Counter");
+        testC("Counter");
     }
 
     @Test
     public void testBakery0() throws Exception {
-        testJava("Bakery0");
+        testC("Bakery0");
     }
 
     @Ignore
     @Test
     public void testGCD() throws Exception {
         // TODO
-        testJava("GCD");
+        testC("GCD");
     }
 
     @Test
     public void testACounter() throws Exception {
-        testJava("ACounter");
+        testC("ACounter");
     }
 
     @Test
     public void testLift() throws Exception {
-        testJava("Lift");
+        testC("Lift");
     }
 
     @Ignore
     @Test
     public void testTravelAgency() throws Exception {
-        testJava("TravelAgency");
+        testC("TravelAgency");
     }
 
     @Ignore
     @Test
     public void testPhonebook() throws Exception {
         // TODO
-        testJava("phonebook");
+        testC("phonebook");
     }
 
     @Ignore
     @Test
     public void testPhonebook6() throws Exception {
         // TODO
-        testJava("phonebook6");
+        testC("phonebook6");
     }
 
     @Ignore
     @Test
     public void testSum() throws Exception {
-        testJava("Sum");
+        testC("Sum");
     }
 
     @Ignore
     @Test
     public void testRecursion() throws Exception {
         //Correct exception
-        testJava("recursion/Sum1");
+        testC("recursion/Sum1");
     }
 
     @Test
     public void testProject() throws Exception {
-        testJava("project1/A");
+        testC("project1/A");
     }
 
     @Test
     public void testProject2() throws Exception {
-        testJava("project2/MachineA");
+        testC("project2/MachineA");
     }
 
     @Test
     public void testSieve() throws Exception {
-        testJava("Sieve");
+        testC("Sieve");
     }
 
     @Test
     public void testReset() throws Exception {
-        testJava("Reset");
+        testC("Reset");
+    }
+
+    @Test
+    public void testManyLocalDeclarations() throws Exception {
+        testC("ManyLocalDeclarations");
     }
 
     private void cleanUp(String path) {

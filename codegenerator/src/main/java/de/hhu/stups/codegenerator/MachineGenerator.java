@@ -171,7 +171,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private String visitOperation(OperationNode node) {
-		identifierGenerator.setOutputParams(node.getOutputParams());
+		identifierGenerator.setParams(node.getParams(), node.getOutputParams());
 		ST operation = operationGenerator.generate(node, machineNode.getVariables());
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
 		return operation.render();

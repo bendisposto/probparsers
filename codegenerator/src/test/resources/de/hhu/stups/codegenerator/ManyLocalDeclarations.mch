@@ -1,4 +1,4 @@
-MACHINE Test
+MACHINE ManyLocalDeclarations
 
 VARIABLES xx, yy
 

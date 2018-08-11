@@ -233,8 +233,8 @@ public class TestJava {
 	}
 
 	@Test
-	public void testTest() throws Exception {
-		testJava("Test");
+	public void testManyLocalDeclarations() throws Exception {
+		testJava("ManyLocalDeclarations");
 	}
 
 	private void cleanUp(String path) {

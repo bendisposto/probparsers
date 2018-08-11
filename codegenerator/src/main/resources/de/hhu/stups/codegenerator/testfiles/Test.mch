@@ -1,27 +1,15 @@
 MACHINE Test
 
-VARIABLES xx, yy
+SETS colors = {red, redyellow, yellow, green}; colors2 = {a,b,c}
 
-INVARIANT xx : INT & yy : POW(INTEGER)
-INITIALISATION xx := 1; yy := {1,2,3} \/ {2}
+VARIABLES tl_cars, tl_peds, colors3
 
-OPERATIONS
-out <-- Inc(aa) =
-    PRE aa : NAT THEN
-        out := {1,2};
-        VAR out IN
-            out := aa + 1
-        END;
-        VAR out IN
-            out := aa + 1
-        END;
-        VAR out IN
-            out := aa + 1
-        END;
-        VAR out IN
-            out := aa + 1
-        END
-    END
+INVARIANT tl_cars : colors &
+      colors3 : POW(colors) &
+	  tl_peds : {red, green} &
+	  (tl_peds = red or
+	  tl_cars = red)
 
+INITIALISATION  tl_cars := red; tl_peds := red; colors3 := colors /\ colors2
 
 END

@@ -24,7 +24,7 @@ public class CodeGenerator {
 
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
 		CodeGenerator codeGenerator = new CodeGenerator();
-		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/Test.mch").toURI()), GeneratorMode.JAVA, true);
+		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA, true);
 	}
 
 	public Set<Path> generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {

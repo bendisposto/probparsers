@@ -24,7 +24,7 @@ public class TestPython {
 			outputStream.write(buffer, 0, size);
 	}
 
-	public void testJava(String machine) throws Exception {
+	public void testPython(String machine) throws Exception {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
@@ -35,178 +35,183 @@ public class TestPython {
 
 	@Test
 	public void testOperation() throws Exception {
-		testJava("Operation");
+		testPython("Operation");
 	}
 
 	@Test
 	public void testLocalDeclaration() throws Exception {
-		testJava("LocalDeclaration");
+		testPython("LocalDeclaration");
 	}
 
 	@Ignore
 	@Test
 	public void testRefinement() throws Exception {
 		// TODO VAR-Node
-		testJava("RefinementMachine");
+		testPython("RefinementMachine");
 	}
 
 	@Test
 	public void testEnumSets() throws Exception {
-		testJava("EnumSets");
+		testPython("EnumSets");
 	}
 
 	@Test
 	public void testNameCollision() throws Exception {
-		testJava("NameCollision");
+		testPython("NameCollision");
 	}
 
 	@Test
 	public void testWhile() throws Exception {
-		testJava("While");
+		testPython("While");
 	}
 
 	@Test
 	public void testInterval() throws Exception {
-		testJava("Interval");
+		testPython("Interval");
 	}
 
 
 	@Test
 	public void testPair() throws Exception {
-		testJava("Pair");
+		testPython("Pair");
 	}
 
 	@Test
 	public void testIfAndPredicates() throws Exception {
-		testJava("IfAndPredicates");
+		testPython("IfAndPredicates");
 	}
 
 	@Test
 	public void testImplies() throws Exception {
-		testJava("Implies");
+		testPython("Implies");
 	}
 
 	@Test
 	public void testEquivalence() throws Exception {
-		testJava("Equivalence");
+		testPython("Equivalence");
 	}
 
 	@Test
 	public void testBooleanPredicate() throws Exception {
-		testJava("BooleanPredicate");
+		testPython("BooleanPredicate");
 	}
 
 	@Ignore
 	@Test
 	public void testRecords() throws Exception {
-		testJava("Records");
+		testPython("Records");
 	}
 
 	@Ignore
 	@Test
 	public void testNondeterminism() throws Exception {
-		testJava("Nondeterminism");
+		testPython("Nondeterminism");
 	}
 
 	@Test
 	public void testMapFunction() throws Exception {
-		testJava("MapFunction");
+		testPython("MapFunction");
 	}
 
 	@Test
 	public void testRelationImage() throws Exception {
-		testJava("RelationImage");
+		testPython("RelationImage");
 	}
 
 	@Test
 	public void testEmptySet() throws Exception {
-		testJava("EmptySet");
+		testPython("EmptySet");
 	}
 
 	@Test
 	public void testSetUnion() throws Exception {
-		testJava("SetUnion");
+		testPython("SetUnion");
 	}
 
 
 	@Test
 	public void testCounter() throws Exception {
-		testJava("Counter");
+		testPython("Counter");
 	}
 
 	@Test
 	public void testBakery0() throws Exception {
-		testJava("Bakery0");
+		testPython("Bakery0");
 	}
 
 	@Ignore
 	@Test
 	public void testGCD() throws Exception {
 		// TODO
-		testJava("GCD");
+		testPython("GCD");
 	}
 
 	@Test
 	public void testACounter() throws Exception {
-		testJava("ACounter");
+		testPython("ACounter");
 	}
 
 	@Test
 	public void testLift() throws Exception {
-		testJava("Lift");
+		testPython("Lift");
 	}
 
 	@Ignore
 	@Test
 	public void testTravelAgency() throws Exception {
-		testJava("TravelAgency");
+		testPython("TravelAgency");
 	}
 
 	@Ignore
 	@Test
 	public void testPhonebook() throws Exception {
 		// TODO
-		testJava("phonebook");
+		testPython("phonebook");
 	}
 
 	@Ignore
 	@Test
 	public void testPhonebook6() throws Exception {
 		// TODO
-		testJava("phonebook6");
+		testPython("phonebook6");
 	}
 
 	@Ignore
 	@Test
 	public void testSum() throws Exception {
-		testJava("Sum");
+		testPython("Sum");
 	}
 
 	@Ignore
 	@Test
 	public void testRecursion() throws Exception {
 		//Correct exception
-		testJava("recursion/Sum1");
+		testPython("recursion/Sum1");
 	}
 
 	@Test
 	public void testProject() throws Exception {
-		testJava("project1/A");
+		testPython("project1/A");
 	}
 
 	@Test
 	public void testProject2() throws Exception {
-		testJava("project2/MachineA");
+		testPython("project2/MachineA");
 	}
 
 	@Test
 	public void testSieve() throws Exception {
-		testJava("Sieve");
+		testPython("Sieve");
 	}
 
 	@Test
 	public void testReset() throws Exception {
-		testJava("Reset");
+		testPython("Reset");
+	}
+
+	@Test
+	public void testManyLocalDeclarations() throws Exception {
+		testPython("ManyLocalDeclarations");
 	}
 
 	private void cleanUp(String path) {
