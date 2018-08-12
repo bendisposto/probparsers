@@ -283,6 +283,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	@Override
+	public String visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
+		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+	}
+
+	@Override
 	public String visitSetComprehensionNode(SetComprehensionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
@@ -306,11 +311,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				.map(expr -> visitExprNode(expr, expected))
 				.collect(Collectors.toList());
 		return operatorGenerator.generateBinary(node::getOperator, expressionList);
-	}
-
-	@Override
-	public String visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
 	@Override
@@ -403,6 +403,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
+		if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
+			throw new RuntimeException("Given list substitution is not implemented: " + node.getOperator());
+		}
 		return visitSequentialSubstitutionNode(node);
 	}
 
@@ -425,22 +428,22 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	@Override
 	public String visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return "";
 	}
 
 	@Override
 	public String visitLTLKeywordNode(LTLKeywordNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return "";
 	}
 
 	@Override
 	public String visitLTLInfixOperatorNode(LTLInfixOperatorNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return "";
 	}
 
 	@Override
 	public String visitLTLBPredicateNode(LTLBPredicateNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return "";
 	}
 
 	@Override
@@ -501,4 +504,5 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public NameHandler getNameHandler() {
 		return nameHandler;
 	}
+
 }
