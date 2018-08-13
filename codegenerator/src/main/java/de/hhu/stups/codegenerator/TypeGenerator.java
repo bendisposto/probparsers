@@ -28,6 +28,9 @@ public class TypeGenerator {
         this.imports = new HashSet<>();
     }
 
+    /*
+    * This function generates code for a type with the given type and the information whether the type is generated for casting an object
+    */
     public String generate(BType type, boolean cast) {
         ST template = group.getInstanceOf("type");
         if(type instanceof IntegerType) {
@@ -46,10 +49,17 @@ public class TypeGenerator {
         return "";
     }
 
+    /*
+    * This function generates code for untyped nodes.
+    */
     private String generateUntyped() {
         return group.getInstanceOf("void").render();
     }
 
+
+    /*
+    * This function adds import for the types used in the generated code
+    */
     public void addImport(BType type) {
         ST template = group.getInstanceOf("import_type");
         if (type instanceof IntegerType) {

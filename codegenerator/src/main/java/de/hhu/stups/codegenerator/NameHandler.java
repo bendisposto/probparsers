@@ -18,6 +18,9 @@ import static de.hhu.stups.codegenerator.NameHandler.IdentifierHandlingEnum.MACH
  */
 public class NameHandler {
 
+    /*
+    * Enum for handling levels for the collision problem between identifiers and keywords
+    */
     public enum IdentifierHandlingEnum {
         MACHINES,
         VARIABLES
@@ -41,6 +44,9 @@ public class NameHandler {
         this.reservedMachinesAndVariables = new ArrayList<>();
     }
 
+    /*
+    * This functions initializes different levels for handling collisions between identifiers and keywords
+    */
     public void initialize(MachineNode node) {
         node.getEnumaratedSets().forEach(set -> enumTypes.put(set.getSetDeclarationNode().getName(), set.getElementsAsStrings()));
         reservedMachines.addAll(node.getMachineReferences().stream()
@@ -61,6 +67,9 @@ public class NameHandler {
     }
 
 
+    /*
+    * This function handles collision between identifiers and keywords from the belonging template.
+    */
     public String handle(String string) {
         ST keywords = group.getInstanceOf("keywords");
         List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
@@ -70,6 +79,9 @@ public class NameHandler {
         return string;
     }
 
+    /*
+    * This function handles collision between identifiers and keywords for all levels
+    */
     public String handleIdentifier(String identifier, IdentifierHandlingEnum identifierHandling) {
         String result = handle(identifier);
         while(getVariables(identifierHandling).contains(result)) {
@@ -79,6 +91,9 @@ public class NameHandler {
     }
 
 
+    /*
+    * This function handles collisions between keywords and identifiers for enums
+    */
     public String handleEnum(String identifier, List<String> enums) {
         ST keywords = group.getInstanceOf("keywords");
         List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
@@ -91,6 +106,9 @@ public class NameHandler {
         return result;
     }
 
+    /*
+    * This function gets the list of reserved variables from a given level that is represented by identifierHandling
+    */
     private List<String> getVariables(IdentifierHandlingEnum identifierHandling) {
         List<String> variables = null;
         switch (identifierHandling) {

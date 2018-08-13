@@ -38,6 +38,9 @@ public class OperatorGenerator {
         Object getOperator();
     }
 
+    /*
+    * Hard-coded lists for identifying the type of the operators for expresion and predicates
+    */
     private static final List<ExpressionOperatorNode.ExpressionOperator> BINARY_EXPRESSION_OPERATORS =
             Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
 
@@ -57,6 +60,12 @@ public class OperatorGenerator {
     private static final List<PredicateOperatorNode.PredicateOperator> PREDICATE_BOOLEANS =
             Arrays.asList(PredicateOperatorNode.PredicateOperator.TRUE, PredicateOperatorNode.PredicateOperator.FALSE);
 
+    /*
+    * Generating code for operators in this lists swaps the argument.
+    * Example: Consider the predicate for checking whether x is in element in the list Y in B
+    * B code: x <: Y (x is on the left-hand side and Y is on the right hand-side in the AST)
+    * Generated code: Y.elementOf(x) (x is an argument, while Y is the set where the operation is acted on)
+    */
     private static final List<Object> BINARY_SWAP =
             Collections.singletonList(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs.ELEMENT_OF);
 
@@ -66,6 +75,9 @@ public class OperatorGenerator {
         this.group = group;
     }
 
+    /*
+    * This function generates code for an expression with the given AST node and the list of expressions within the expression.
+    */
     public String generateExpression(ExpressionOperatorNode node, List<String> expressionList) {
         ExpressionOperatorNode.ExpressionOperator operator = node.getOperator();
         if(BINARY_EXPRESSION_OPERATORS.contains(operator)) {
@@ -84,6 +96,9 @@ public class OperatorGenerator {
         throw new RuntimeException("Given operator is not implemented: " + node.getOperator());
     }
 
+    /*
+    * This function generates code for a predicate with the given AST node and the list of expresions within the predicate.
+    */
     public String generatePredicate(PredicateOperatorNode node, List<String> expressionList) {
         PredicateOperatorNode.PredicateOperator operator = node.getOperator();
         if(BINARY_PREDICATE_OPERATORS.contains(operator)) {
@@ -97,6 +112,9 @@ public class OperatorGenerator {
     }
 
 
+    /*
+    * This function generates code for an unary expression with the given operator and arguments.
+    */
     private String generateUnaryExpression(ExpressionOperatorNode.ExpressionOperator operator, List<String> expressionList) {
         ST expression = generateUnary(operator);
         expression.add("obj", expressionList.get(0));
@@ -104,6 +122,9 @@ public class OperatorGenerator {
         return expression.render();
     }
 
+    /*
+    * This function generates code for an unary predicate with the given operator and arguments.
+    */
     private String generateUnaryPredicate(PredicateOperatorNode.PredicateOperator operator, List<String> expressionList) {
         ST expression = generateUnary(operator);
         expression.add("obj", expressionList.get(0));
@@ -111,6 +132,9 @@ public class OperatorGenerator {
         return expression.render();
     }
 
+    /*
+    * This function generates code for binary predicates and expressions
+    */
     public String generateBinary(IOperator operator, List<String> expressionList) {
         Optional<String> result = expressionList.stream()
             .reduce((a, e) -> {
@@ -131,6 +155,10 @@ public class OperatorGenerator {
         return result.isPresent() ? result.get() : "";
     }
 
+    /*
+    * This function gets the template fro the given binary operator.
+    * The given binary operator can be an operator for expressions as well as for predicates.
+    */
     private ST getTemplateFromBinaryOperator(Object op) {
         ST expression = null;
         if(op instanceof ExpressionOperatorNode.ExpressionOperator) {
@@ -143,6 +171,9 @@ public class OperatorGenerator {
         return expression;
     }
 
+    /*
+    * This function gets the template for unary expressions and replaces the placeholder with the given operator.
+    */
     private ST generateUnary(ExpressionOperatorNode.ExpressionOperator operator) {
         ST template = group.getInstanceOf("unary");
         switch (operator) {
@@ -164,6 +195,9 @@ public class OperatorGenerator {
         return template;
     }
 
+    /*
+    * This function gets the template for binary expressions and replaces the placeholder with the given operator.
+    */
     private ST generateBinary(ExpressionOperatorNode.ExpressionOperator operator) {
         ST template = group.getInstanceOf("binary");
         switch(operator) {
@@ -197,6 +231,9 @@ public class OperatorGenerator {
         return template;
     }
 
+    /*
+    * This functions gets the template for unary predicates and replaces the placeholder with the given operator.
+    */
     private ST generateUnary(PredicateOperatorNode.PredicateOperator operator) {
         ST template = group.getInstanceOf("unary");
         switch(operator) {
@@ -209,6 +246,9 @@ public class OperatorGenerator {
         return template;
     }
 
+    /*
+    * This functions gets the template for binary predicates and replaces the placeholder with the given operator.
+    */
     private ST generateBinary(PredicateOperatorNode.PredicateOperator operator) {
         ST template = group.getInstanceOf("binary");
         switch(operator) {
@@ -230,7 +270,9 @@ public class OperatorGenerator {
         return template;
     }
 
-
+    /*
+    * This functions gets the template for binary predicates with expression arguments and replaces the placeholder with the given operator.
+    */
     private ST generateBinary(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator) {
         ST template = group.getInstanceOf("binary");
         switch(operator) {
@@ -261,6 +303,9 @@ public class OperatorGenerator {
         return template;
     }
 
+    /*
+    * This function generates code for an interval with the given arguments.
+    */
     private String generateInterval(List<String> arguments) {
         ST interval = group.getInstanceOf("interval");
         interval.add("arg1", arguments.get(0));
@@ -268,6 +313,9 @@ public class OperatorGenerator {
         return interval.render();
     }
 
+    /*
+    * This function generates code for a couple with the given arguments.
+    */
     private String generateCouple(List<String> arguments) {
         ST couple = group.getInstanceOf("couple_create");
         couple.add("arg1", arguments.get(0));
@@ -275,14 +323,23 @@ public class OperatorGenerator {
         return couple.render();
     }
 
+    /*
+    * This function generates code for set enumerations with the given arguments.
+    */
     private String generateSetEnumeration(List<String> expressions) {
         return group.getInstanceOf("set_enumeration").add("enums", expressions).render();
     }
 
+    /*
+    * This function generates code for boolean constants as expressions.
+    */
     private String generateBoolean(ExpressionOperatorNode.ExpressionOperator operator) {
         return group.getInstanceOf("boolean_val").add("val", operator == TRUE).render();
     }
 
+    /*
+    * This function generates code for boolean constants as predicates.
+    */
     private String generateBoolean(PredicateOperatorNode.PredicateOperator operator) {
         return group.getInstanceOf("boolean_val").add("val", operator == PredicateOperatorNode.PredicateOperator.TRUE).render();
     }

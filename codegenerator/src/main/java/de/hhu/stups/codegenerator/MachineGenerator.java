@@ -47,8 +47,15 @@ import static de.hhu.stups.codegenerator.GeneratorMode.C;
 import static de.hhu.stups.codegenerator.GeneratorMode.JAVA;
 import static de.hhu.stups.codegenerator.GeneratorMode.PY;
 
+/*
+* The code generator is implemented by using the visitor pattern
+*/
+
 public class MachineGenerator implements AbstractVisitor<String, Void> {
 
+	/*
+	* Template groups for the supported programming languages
+	*/
 	private static final STGroup JAVA_GROUP = new STGroupFile(MachineGenerator.class.getClassLoader()
 			.getResource("de/hhu/stups/codegenerator/JavaTemplate.stg").getFile());
 
@@ -92,12 +99,15 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup);
-		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, identifierGenerator, typeGenerator);
+		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
 		this.setToEnum = new HashMap<>();
 		this.isLocalScope = false;
 	}
 
+	/*
+	* This function generates code for the whole machine with the given AST node.
+	*/
 	public String generateMachine(MachineNode node) {
 		initialize(node);
 		ST machine = currentGroup.getInstanceOf("machine");
@@ -107,18 +117,27 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return machine.render();
 	}
 
+	/*
+	* This function initializes needed semantic information during code generation.
+	*/
 	private void initialize(MachineNode node) {
 		this.machineNode = node;
 		nameHandler.initialize(node);
 		mapOperationsToMachine(node);
 	}
 
+	/*
+	* This function maps operations to machines for identifying the included machine where the operation is called from.
+	*/
 	private void mapOperationsToMachine(MachineNode node) {
 		node.getMachineReferences()
 				.forEach(reference -> reference.getMachineNode().getOperations()
 						.forEach(operation -> machineFromOperation.put(operation.getName(), reference.getMachineName())));
 	}
 
+	/*
+	* This function generates the whole body of a machine from the given AST node for the machine.
+	*/
 	private void generateBody(MachineNode node, ST machine) {
 		machine.add("enums", generateEnumDeclarations(node));
 		machine.add("sets", generateSetDeclarations(node));
@@ -128,12 +147,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("operations", visitOperations(node.getOperations()));
 	}
 
+	/*
+	* This function generates code from the VARIABLES clause
+	*/
 	private List<String> visitDeclarations(List<DeclarationNode> declarations) {
 		return declarations.stream()
 				.map(this::generateGlobalDeclaration)
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for each declaration from the VARIABLES clause
+	*/
 	private String generateGlobalDeclaration(DeclarationNode node) {
 		ST declaration = currentGroup.getInstanceOf("global_declaration");
 		declaration.add("type", typeGenerator.generate(node.getType(), false));
@@ -141,12 +166,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return declaration.render();
 	}
 
+	/*
+	* This function generates code for all including other machines with the given AST node of the main machine.
+	*/
 	private List<String> generateIncludes(MachineNode node) {
 		return node.getMachineReferences().stream()
 				.map(this::generateIncludeDeclaration)
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for one included machine with the given AST node and the template.
+	*/
 	private String generateIncludeDeclaration(MachineReferenceNode reference) {
 		ST declaration = currentGroup.getInstanceOf("include_declaration");
 		String machine = reference.getMachineName();
@@ -155,6 +186,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return declaration.render();
 	}
 
+	/*
+	* This function generates code for the initialization for the given AST node of the machine.
+	*/
 	private String visitInitialization(MachineNode node) {
 		ST initialization = currentGroup.getInstanceOf("initialization");
 		initialization.add("machines", node.getMachineReferences().stream()
@@ -164,19 +198,28 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return initialization.render();
 	}
 
+	/*
+	* This function generates code for all operations in a machine.
+	*/
 	private List<String> visitOperations(List<OperationNode> operations) {
 		return operations.stream()
 				.map(this::visitOperation)
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for one operation with the given AST node for an operation.
+	*/
 	private String visitOperation(OperationNode node) {
 		identifierGenerator.setParams(node.getParams(), node.getOutputParams());
-		ST operation = operationGenerator.generate(node, machineNode.getVariables());
+		ST operation = operationGenerator.generate(node);
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
 		return operation.render();
 	}
 
+	/*
+	* This function generates code from an expression in B.
+	*/
 	@Override
 	public String visitExprNode(ExprNode node, Void expected) {
 		typeGenerator.addImport(node.getType());
@@ -197,6 +240,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* This function generates code for enumerated sets within a machine.
+	*/
 	private List<String> generateEnumDeclarations(MachineNode node) {
 		node.getEnumaratedSets().forEach(set -> setToEnum.put(set.getSetDeclarationNode().getName(), set.getElements().stream()
 				.map(DeclarationNode::getName)
@@ -206,12 +252,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for all declarations of enums for enumerated sets from the node of the machine.
+	*/
 	private List<String> generateSetDeclarations(MachineNode node) {
 		return node.getEnumaratedSets().stream()
 				.map(this::visitEnumeratedSetDeclarationNode)
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for declarating a enum for an enumerated set from the belonging AST node and the belonging template.
+	*/
 	private String declareEnums(EnumeratedSetDeclarationNode node) {
 		typeGenerator.addImport(node.getElements().get(0).getType());
 		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
@@ -223,6 +275,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return enumDeclaration.render();
 	}
 
+	/*
+	* This function generates code with creating a BSet for an enumerated set from the belonging AST node and the belonging template.
+	*/
 	public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
 		typeGenerator.addImport(node.getSetDeclarationNode().getType());
 		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
@@ -234,6 +289,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return setDeclaration.render();
 	}
 
+	/*
+	* This function generates code for calling enums from an enumerated from the belonging AST node,
+	* template and the name of the enumerated set the enum belongs to.
+	*/
 	public String callEnum(String setName, DeclarationNode enumNode) {
 		ST enumST = currentGroup.getInstanceOf("enum_call");
 		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
@@ -241,6 +300,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return enumST.render();
 	}
 
+	/*
+	* This function generates code for creating enums within a declared BSet for an enumerated set from the belonging AST node and template.
+	*/
 	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node) {
 		String typeName = node.getType().toString();
 		ST element = currentGroup.getInstanceOf("set_element");
@@ -249,6 +311,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return element.render();
 	}
 
+	/*
+	* This function generates code for an expression.
+	*/
 	@Override
 	public String visitExprOperatorNode(ExpressionOperatorNode node, Void expected) {
 		List<String> expressionList = node.getExpressionNodes().stream()
@@ -257,6 +322,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return operatorGenerator.generateExpression(node, expressionList);
 	}
 
+	/*
+	* This function generates code for an identifier from the belonging AST node.
+	*/
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
 		if(isLocalScope) {
@@ -265,11 +333,17 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return identifierGenerator.generate(node);
 	}
 
+	/*
+	* Code is not generated from the cast predicate expressions in the given subset of B
+	*/
 	@Override
 	public String visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* This function generates code for numbers from the belonging AST node and the belonging template
+	*/
 	@Override
 	public String visitNumberNode(NumberNode node, Void expected) {
 		ST number = currentGroup.getInstanceOf("number");
@@ -277,26 +351,41 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return number.render();
 	}
 
+	/*
+	* Code is not generated from quantified expresions in the given subset of B
+	*/
 	@Override
 	public String visitQuantifiedExpressionNode(QuantifiedExpressionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* Code is not generated from quantified predicates in the given subset of B
+	*/
 	@Override
 	public String visitQuantifiedPredicateNode(QuantifiedPredicateNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* Code is not generated from set comprehensions in the given subset of B
+	*/
 	@Override
 	public String visitSetComprehensionNode(SetComprehensionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* Code is not generated from identifier predicates in the given subset of B
+	*/
 	@Override
 	public String visitIdentifierPredicateNode(IdentifierPredicateNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* This function generates code for a predicate with the belonging AST node
+	*/
 	@Override
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
 		List<String> expressionList = node.getPredicateArguments().stream()
@@ -305,6 +394,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return operatorGenerator.generatePredicate(node, expressionList);
 	}
 
+	/*
+	* This function generates code for a predicate with expression as arguments with the belonging AST node
+	*/
 	@Override
 	public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
 		List<String> expressionList = node.getExpressionNodes().stream()
@@ -313,6 +405,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return operatorGenerator.generateBinary(node::getOperator, expressionList);
 	}
 
+	/*
+	* This function generates code for if substitutions and select substitutions from the belonging AST node.
+	*/
 	@Override
 	public String visitIfOrSelectSubstitutionsNode(IfOrSelectSubstitutionsNode node, Void expected) {
 		if (node.getOperator() == IfOrSelectSubstitutionsNode.Operator.SELECT) {
@@ -321,6 +416,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return visitIfSubstitution(node);
 	}
 
+	/*
+	* This function generates code for select substitutions from the belonging AST node and the belonging template.
+	*/
 	private String visitSelectSubstitution(IfOrSelectSubstitutionsNode node) {
 		ST select = currentGroup.getInstanceOf("select");
 		select.add("predicate", visitPredicateNode(node.getConditions().get(0), null));
@@ -328,6 +426,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return select.render();
 	}
 
+	/*
+	* This function generates code for if substitutions with and without else-branches from the belonging AST node and the belonging template.
+	*/
 	private String visitIfSubstitution(IfOrSelectSubstitutionsNode node) {
 		ST ifST = currentGroup.getInstanceOf("if");
 		ifST.add("predicate", visitPredicateNode(node.getConditions().get(0), null));
@@ -340,6 +441,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return ifST.render();
 	}
 
+	/*
+	* This function generates code from the else if branches with the belonging AST node.
+	*/
 	private List<String> generateElseIfs(IfOrSelectSubstitutionsNode node) {
 		List<String> conditions = node.getConditions().subList(1, node.getConditions().size()).stream()
 				.map(condition -> visitPredicateNode(condition, null))
@@ -360,27 +464,42 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return elseIfs;
 	}
 
+	/*
+	* This function generates code from the else branch from the belonging AST node.
+	*/
 	private String generateElse(IfOrSelectSubstitutionsNode node) {
 		ST elseST = currentGroup.getInstanceOf("else");
 		elseST.add("then", visitSubstitutionNode(node.getElseSubstitution(), null));
 		return elseST.render();
 	}
 
+	/*
+	* Generating code from the skip substitution results in an empty string.
+	*/
 	@Override
 	public String visitSkipSubstitutionNode(SkipSubstitutionNode node, Void expected) {
 		return "";
 	}
 
+	/*
+	* Code is not generated from the Condition substitution in the given subset of B.
+	*/
 	@Override
 	public String visitConditionSubstitutionNode(ConditionSubstitutionNode node, Void expected) {
 		return visitSubstitutionNode(node.getSubstitution(), expected);
 	}
 
+	/*
+	* Code is not generated from the Any substitution in the given subset of B.
+	*/
 	@Override
 	public String visitAnySubstitution(AnySubstitutionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* This function generates code for a list of assignments from the belonging AST node.
+	*/
 	@Override
 	public String visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
 		ST substitutions = currentGroup.getInstanceOf("assignments");
@@ -392,6 +511,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return substitutions.render();
 	}
 
+	/*
+	* This function generates code for one assignment with the expressions and the belonging template
+	*/
 	public String generateAssignment(ExprNode lhs, ExprNode rhs) {
 		ST substitution = currentGroup.getInstanceOf("assignment");
 		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
@@ -401,6 +523,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return substitution.render();
 	}
 
+	/*
+	* This function generates code for sequential substitution and throws an exception for parallel substitutions as
+	* code generation for parallel subsitutition is not supported in the given subset of B.
+	* Therefore the belonging AST node is used.
+	*/
 	@Override
 	public String visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
 		if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
@@ -409,6 +536,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return visitSequentialSubstitutionNode(node);
 	}
 
+	/*
+	* This function generates code for a sequential substitution with the belonging AST node.
+	*/
 	public String visitSequentialSubstitutionNode(ListSubstitutionNode node) {
 		List<String> substitutionCodes = node.getSubstitutions().stream()
 				.map(substitutionNode -> visitSubstitutionNode(substitutionNode, null))
@@ -416,36 +546,59 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return String.join("\n", substitutionCodes);
 	}
 
+	/*
+	* Code is not generated from the becomes element of substitution in the given subset of B.
+	*/
 	@Override
 	public String visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+
+	/*
+	* Code is not generated from the becomes such that substitution in the given subset of B.
+	*/
 	@Override
 	public String visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, Void expected) {
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
+	/*
+	* Generating code for LTL formulae results in an empty string as it is proven.
+	*/
 	@Override
 	public String visitLTLPrefixOperatorNode(LTLPrefixOperatorNode node, Void expected) {
 		return "";
 	}
 
+	/*
+	* Generating code for LTL formulae results in an empty string as it is proven.
+	*/
 	@Override
 	public String visitLTLKeywordNode(LTLKeywordNode node, Void expected) {
 		return "";
 	}
 
+	/*
+	* Generating code for LTL formulae results in an empty string as it is proven.
+	*/
 	@Override
 	public String visitLTLInfixOperatorNode(LTLInfixOperatorNode node, Void expected) {
 		return "";
 	}
 
+	/*
+	* Generating code for LTL formulae results in an empty string as it is proven.
+	*/
 	@Override
 	public String visitLTLBPredicateNode(LTLBPredicateNode node, Void expected) {
 		return "";
 	}
 
+	/*
+	* This function generates code from operation calls from the belonging AST node and the belonging templates
+	* for operation calls with and without assignments.
+	*/
 	@Override
 	public String visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, Void expected) {
 		List<String> variables = node.getAssignedVariables().stream()
@@ -469,6 +622,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return functionCall.render();
 	}
 
+	/*
+	* This function generates code for a while loop with the belonging AST node and the belonging template.
+	*/
 	@Override
 	public String visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
 		ST whileST = currentGroup.getInstanceOf("while");
@@ -477,6 +633,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return whileST.render();
 	}
 
+	/*
+	* This function generates from a var substitution with the belonging AST node and template. During this step the
+	* flag for local scope is set to true and finally resetted to false. This is needed for handling collisions between
+	* local variables and output parameters.
+	*/
 	@Override
 	public String visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
 		ST varST = currentGroup.getInstanceOf("var");
@@ -488,12 +649,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return varST.render();
 	}
 
+	/*
+	* This function generates code for all declarations of local variables from a var substitution from the list of identifiers as AST nodes.
+	*/
 	public List<String> generateVariablesInVar(List<DeclarationNode> identifiers) {
 		return identifiers.stream()
 				.map(this::generateVariableInVar)
 				.collect(Collectors.toList());
 	}
 
+	/*
+	* This function generates code for one declaration of a local variable from a var substitution node from the belonging AST node and template.
+	*/
 	public String generateVariableInVar(DeclarationNode identifier) {
 		ST declaration = currentGroup.getInstanceOf("local_declaration");
 		declaration.add("type", typeGenerator.generate(identifier.getType(), false));

@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 
 public class OperationGenerator {
 
+    /*
+    * Enum for identifying whether the given declaration is a local declaration or a parameter
+    */
     public enum DeclarationType {
         LOCAL_DECLARATION,
         PARAMETER
@@ -23,19 +26,20 @@ public class OperationGenerator {
 
     private final NameHandler nameHandler;
 
-    private final IdentifierGenerator identifierGenerator;
-
     private final TypeGenerator typeGenerator;
 
 
-    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final IdentifierGenerator identifierGenerator, final TypeGenerator typeGenerator) {
+    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final TypeGenerator typeGenerator) {
         this.group = group;
         this.nameHandler = nameHandler;
-        this.identifierGenerator = identifierGenerator;
         this.typeGenerator = typeGenerator;
     }
 
-    public ST generate(OperationNode node, List<DeclarationNode> globals) {
+
+    /*
+    * This function generates code for an operation from the given AST node
+    */
+    public ST generate(OperationNode node) {
         ST operation = group.getInstanceOf("operation");
 
         operation.add("locals", generateDeclarations(node.getOutputParams()
@@ -56,6 +60,9 @@ public class OperationGenerator {
         return operation;
     }
 
+    /*
+    * This function generates code for a list of local declarations or parameters in the generated code
+    */
     public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type, boolean isReturn) {
         return declarations.stream()
                 .map(declaration -> type == DeclarationType.LOCAL_DECLARATION ?
@@ -63,6 +70,9 @@ public class OperationGenerator {
                 .collect(Collectors.toList());
     }
 
+    /*
+    * This function generates code for a local declaration with the given node from the AST
+    */
     public String generateLocalDeclaration(DeclarationNode node) {
         ST declaration = group.getInstanceOf("local_declaration");
         declaration.add("type", typeGenerator.generate(node.getType(), false));
@@ -70,6 +80,9 @@ public class OperationGenerator {
         return declaration.render();
     }
 
+    /*
+    * This function generates code for a parameter with the given node from the AST and the information whether it is an output parameter
+    */
     private String generateParameter(DeclarationNode node, boolean isReturn) {
         ST declaration = group.getInstanceOf("parameter");
         declaration.add("isReturn", isReturn);

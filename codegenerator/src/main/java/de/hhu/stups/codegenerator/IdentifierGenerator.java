@@ -30,6 +30,10 @@ public class IdentifierGenerator {
     }
 
 
+    /*
+    * This function generates code for an identifier.
+    * It also calculates whether the identifier is a output parameter and whether it is generated to a private variable within a machine.
+    */
     public String generate(IdentifierExprNode node) {
         boolean isReturn = outputParams.stream()
                 .map(declarationNode -> nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
@@ -40,6 +44,9 @@ public class IdentifierGenerator {
         return generate(node, isReturn, isPrivate);
     }
 
+    /*
+    * This function generates code for an identifier from the template directly with the given information.
+    */
     private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
         identifier.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
@@ -48,6 +55,9 @@ public class IdentifierGenerator {
         return identifier.render();
     }
 
+    /*
+    * This function generates code for a declaration of a local variable in B.
+    */
     public String generateVarDeclaration(String name) {
         ST identifier = group.getInstanceOf("identifier");
         String resultIdentifier = nameHandler.handleIdentifier(name, NameHandler.IdentifierHandlingEnum.MACHINES);
@@ -62,6 +72,9 @@ public class IdentifierGenerator {
         return identifier.render();
     }
 
+    /*
+    * This function sets the output paramters and calculates the generated local variables (collision problem between output parameters and local variables).
+    */
     public void setParams(List<DeclarationNode> inputParams, List<DeclarationNode> outputParams){
         this.outputParams = outputParams;
         this.locals.clear();
@@ -76,6 +89,9 @@ public class IdentifierGenerator {
         }
     }
 
+    /*
+    * This function is needed for solving the collision problem beteween output parameters and local variables.
+    */
     public void addLocal(String local) {
         if(locals.keySet().contains(local)) {
             int value = locals.get(local);
