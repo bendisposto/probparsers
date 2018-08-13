@@ -30,7 +30,6 @@ public class CodeGenerator {
 	* Example: gradle run -Planguage = "java" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
 	*/
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
-		System.err.println(args.length);
 		if(args.length != 2) {
 			System.err.println("Wrong number of arguments");
 			return;
