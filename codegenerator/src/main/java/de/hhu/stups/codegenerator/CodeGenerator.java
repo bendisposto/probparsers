@@ -9,6 +9,7 @@ import de.prob.parser.ast.visitors.TypeErrorException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,11 +24,36 @@ public class CodeGenerator {
 	private Set<Path> paths = new HashSet<>();
 
 	/*
-	* Just a main function for generating an exampe
+	* Main function
+	* First argument : Option for programming language
+	* Second argument : Path for the main machine code should be generated for
+	* Example: gradle run -Planguage = "java" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
 	*/
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
+		System.err.println(args.length);
+		if(args.length != 2) {
+			System.err.println("Wrong number of arguments");
+			return;
+		}
+		GeneratorMode mode = null;
+		String languageOption = args[0];
+		if("java".equals(languageOption)) {
+			mode = GeneratorMode.JAVA;
+		} else if("python".equals(languageOption)) {
+			mode = GeneratorMode.PY;
+		} else if("c".equals(languageOption)) {
+			mode = GeneratorMode.C;
+		} else {
+			System.err.println("Wrong argument for language");
+			return;
+		}
 		CodeGenerator codeGenerator = new CodeGenerator();
-		codeGenerator.generate(Paths.get(CodeGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/testfiles/project1/A.mch").toURI()), GeneratorMode.JAVA, true);
+		URL url = CodeGenerator.class.getClassLoader().getResource(args[1]);
+		if(url == null) {
+			System.err.println("File not found");
+			return;
+		}
+		codeGenerator.generate(Paths.get(url.toURI()), mode, true);
 	}
 
 	/*

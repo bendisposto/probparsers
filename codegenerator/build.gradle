@@ -39,8 +39,11 @@ sourceSets.main.java.srcDirs = ['src/main/java']
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 
-
 tasks.withType(JavaExec) {
+    if(project.hasProperty('language') && project.hasProperty('file')){
+        args([language, file])
+    }
+
     def env_vars = ['LD_LIBRARY_PATH'  : ("$System.env.LD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
                     'DYLD_LIBRARY_PATH': ("$System.env.DYLD_LIBRARY_PATH" + System.getProperty("path.separator") + "$projectDir/"),
                     'PATH'             : ("$System.env.PATH" + System.getProperty("path.separator") + "$projectDir/")]
