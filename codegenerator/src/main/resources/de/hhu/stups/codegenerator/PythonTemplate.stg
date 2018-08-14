@@ -20,7 +20,7 @@ class <machine>:
 
 >>
 
-initialization(body, machines) ::= <<
+initialization(machine, body, machines) ::= <<
 def initialize(self):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ and self.__initialized):
         raise Exception("Machine is already initialized")
@@ -33,7 +33,7 @@ include_initialization(machine) ::= <<
 <machine>.__init__()
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 def <operationName>(self<parameters : {par |, <par>}>):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ or not self.__initialized):
         raise Exception("Machine was not initialized")
@@ -168,9 +168,9 @@ BInteger(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
-<var> = <operation_call(machine, function, args, this)>
+<var> = <operation_call(machine, function, args, this, var)>
 >>
 
-operation_call(machine, function, args, this) ::= <<
+operation_call(machine, function, args, this, var) ::= <<
 <if(this)>self.<else><machine>.<endif><function>(<args; separator=",">)
 >>

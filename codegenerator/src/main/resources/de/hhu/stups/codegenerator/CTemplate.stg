@@ -7,13 +7,14 @@ sscanf, fgetc, fgets, fputc, fputs, getc, getchar, gets, putc, putchar, puts, un
 L_tmpnam, SEEK_CUR, SEEK_END, SEEK_SET, TMP_MAX, stderr, stdin, stdout, size_t, fpos_t, FILE,, wchar_t, div_t, ldiv_t, EXIT_FAILURE, EXIT_SUCCESS,
 RAND_MAX, MB_CUR_MAX, atof, atoi, atol, strtod, strtol, strtoul, calloc, free, malloc, realloc, abort, exit, getenv, system, bsearch, qsort, abs,
 div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb, create_atom, main, create_boolean, boolean_value, or, and, xor, create_integer,
-int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BAtom, BBoolean, initialized, initialize
+int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BBoolean
 >>
 
 
 machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
+#include \<stdlib.h>
 <imports; separator="\n">
 <includes; separator="\n">
 
@@ -23,7 +24,7 @@ machine(imports, machine, includes, enums, sets, declarations, initialization, o
 
 <declarations; separator="\n">
 
-static int initialized = 0;
+static int <machine>_initialized = 0;
 
 <initialization>
 
@@ -31,20 +32,25 @@ static int initialized = 0;
 
 >>
 
-initialization(body, machines) ::= <<
-void initialize(void) {
-    if(initialized) {
+initialization(machine, body, machines) ::= <<
+void <machine>_initialize(void) {
+    if(<machine>_initialized) {
         fprintf(stderr, "Machine was not initialized\n");
         exit(-1);
     }
+    <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
-    initialized = 1;
+    <machine>_initialized = 1;
 }
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+include_initialization(machine) ::= <<
+<machine>_initialize();
+>>
+
+operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 void <operationName>(<parameters; separator=", "><returnParameters : {par |, <par>}>) {
-    if(!initialized) {
+    if(!<machine>_initialized) {
         fprintf(stderr, "Machine was not initialized\n");
         exit(-1);
     }
@@ -163,6 +169,8 @@ while((<predicate>).booleanValue()) {
 >>
 
 var(locals, body) ::=<<
+<locals; separator="\n">
+<body>
 >>
 
 
@@ -179,8 +187,10 @@ create_integer(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
+<operation_call(machine, function, args, this, var)>
 >>
 
-operation_call(machine, function, args, this) ::= <<
+operation_call(machine, function, args, this, var) ::= <<
+<function>(<args; separator=",">, &<var>);
 >>
 

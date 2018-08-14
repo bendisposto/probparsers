@@ -26,7 +26,7 @@ public class <machine> {
 
 >>
 
-initialization(body, machines) ::= <<
+initialization(machine, body, machines) ::= <<
 public void initialize() {
     if(initialized) {
         throw new RuntimeException("Machine is already initialized");
@@ -41,7 +41,7 @@ include_initialization(machine) ::= <<
 <machine>.initialize();
 >>
 
-operation(returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw new RuntimeException("Machine was not initialized");
@@ -197,7 +197,7 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 <var> = <operation_call(machine, function, args, this)>
 >>
 
-operation_call(machine, function, args, this) ::= <<
-<if(this)>this.<else>this.<machine>.<endif><function>(<args; separator=",">);
+operation_call(machine, function, args, this, var) ::= <<
+<function>(<args; separator=",">);
 >>
 

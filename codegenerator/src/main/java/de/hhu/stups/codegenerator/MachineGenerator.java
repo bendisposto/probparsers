@@ -191,6 +191,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	private String visitInitialization(MachineNode node) {
 		ST initialization = currentGroup.getInstanceOf("initialization");
+		initialization.add("machine", nameHandler.handle(node.getName()));
 		initialization.add("machines", node.getMachineReferences().stream()
 				.map(reference -> nameHandler.handle(reference.getMachineNode().getName()))
 				.collect(Collectors.toList()));
@@ -213,6 +214,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private String visitOperation(OperationNode node) {
 		identifierGenerator.setParams(node.getParams(), node.getOutputParams());
 		ST operation = operationGenerator.generate(node);
+		operation.add("machine", nameHandler.handle(machineNode.getName()));
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
 		return operation.render();
 	}
@@ -607,11 +609,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		String operationName = node.getOperationNode().getName();
 		String machineName = machineFromOperation.get(operationName);
 		ST functionCall;
+		//Size of variables must be less equal than 1 for now.
+		//TODO: Implement Records
 		if(variables.size() > 0) {
 			functionCall = currentGroup.getInstanceOf("operation_call_with_assignment");
 			functionCall.add("var", variables.get(0));
 		} else {
 			functionCall = currentGroup.getInstanceOf("operation_call");
+			functionCall.add("var", "");
 		}
 		functionCall.add("machine", nameHandler.handle(machineName));
 		functionCall.add("function", operationName);
