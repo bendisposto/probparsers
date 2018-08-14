@@ -198,6 +198,6 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 >>
 
 operation_call(machine, function, args, this, var) ::= <<
-<function>(<args; separator=",">);
+<if(this)>this.<else>this.<machine>.<endif><function>(<args; separator=",">);
 >>
 

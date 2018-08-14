@@ -60,13 +60,13 @@ public class IdentifierGenerator {
     */
     public String generateVarDeclaration(String name) {
         ST identifier = group.getInstanceOf("identifier");
-        String resultIdentifier = nameHandler.handleIdentifier(name, NameHandler.IdentifierHandlingEnum.MACHINES);
+        StringBuilder resultIdentifier = new StringBuilder(nameHandler.handleIdentifier(name, NameHandler.IdentifierHandlingEnum.MACHINES));
         if(locals.keySet().contains(name)) {
             for (int i = 0; i < locals.get(name); i++) {
-                resultIdentifier = "_" + resultIdentifier;
+                resultIdentifier.insert(0, "_");
             }
         }
-        identifier.add("identifier", resultIdentifier);
+        identifier.add("identifier", resultIdentifier.toString());
         identifier.add("isReturn", false);
         identifier.add("isPrivate", false);
         return identifier.render();

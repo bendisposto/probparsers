@@ -83,11 +83,11 @@ public class NameHandler {
     * This function handles collision between identifiers and keywords for all levels
     */
     public String handleIdentifier(String identifier, IdentifierHandlingEnum identifierHandling) {
-        String result = handle(identifier);
-        while(getVariables(identifierHandling).contains(result)) {
-            result = "_" + result;
+        StringBuilder result = new StringBuilder(handle(identifier));
+        while(getVariables(identifierHandling).contains(result.toString())) {
+            result.insert(0, "_");
         }
-        return result;
+        return result.toString();
     }
 
 
@@ -97,13 +97,13 @@ public class NameHandler {
     public String handleEnum(String identifier, List<String> enums) {
         ST keywords = group.getInstanceOf("keywords");
         List<String> words = Arrays.asList(keywords.render().replaceAll(" ","").replaceAll("\n","").split(","));
-        String result = identifier;
+        StringBuilder result = new StringBuilder(identifier);
         if(words.contains(identifier)) {
-            while (enums.contains(result)) {
-                result = result + "_";
+            while (enums.contains(result.toString())) {
+                result.append("_");
             }
         }
-        return result;
+        return result.toString();
     }
 
     /*
