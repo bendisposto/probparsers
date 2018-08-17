@@ -496,6 +496,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String visitAssignSubstitutionNode(AssignSubstitutionNode node, Void expected) {
 		ST substitutions = currentGroup.getInstanceOf("assignments");
 		List<String> assignments = new ArrayList<>();
+		//TODO: For now, the variable on the left-hand side and on the right-hand side must be distinct
 		for (int i = 0; i < node.getLeftSide().size(); i++) {
 			assignments.add(generateAssignment(node.getLeftSide().get(i), node.getRightSide().get(i)));
 		}
