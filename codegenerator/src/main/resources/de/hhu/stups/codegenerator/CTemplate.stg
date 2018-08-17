@@ -70,9 +70,6 @@ set_enum_declaration(name,enums) ::= <<
 set_enumeration(enums) ::= <<
 >>
 
-set_element(set,element) ::= <<
->>
-
 enum_call(class, identifier) ::= <<
 >>
 

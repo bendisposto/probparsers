@@ -230,7 +230,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		} else if (node instanceof ExpressionOperatorNode) {
 			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
 		} else if (node instanceof EnumeratedSetElementNode) {
-			return visitEnumeratedSetElementNode((EnumeratedSetElementNode) node);
+			EnumeratedSetElementNode element = (EnumeratedSetElementNode) node;
+			return callEnum(element.getType().toString(), element.getDeclarationNode());
 		} else if(node instanceof IdentifierExprNode) {
 			Map<String, List<String>> enumTypes = nameHandler.getEnumTypes();
 			if(enumTypes.keySet().contains(node.getType().toString()) &&
@@ -300,17 +301,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
 		enumST.add("identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
 		return enumST.render();
-	}
-
-	/*
-	* This function generates code for creating enums within a declared BSet for an enumerated set from the belonging AST node and template.
-	*/
-	public String visitEnumeratedSetElementNode(EnumeratedSetElementNode node) {
-		String typeName = node.getType().toString();
-		ST element = currentGroup.getInstanceOf("set_element");
-		element.add("set", nameHandler.handleIdentifier(typeName, NameHandler.IdentifierHandlingEnum.MACHINES));
-		element.add("element", nameHandler.handleEnum(node.getName(), setToEnum.get(typeName)));
-		return element.render();
 	}
 
 	/*

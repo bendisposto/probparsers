@@ -64,10 +64,6 @@ set_enumeration(enums) ::= <<
 new BSet(<enums; separator=", ">)
 >>
 
-set_element(set,element) ::= <<
-<set>.<element>
->>
-
 enum_call(class, identifier) ::= <<
 <class>.<identifier>
 >>

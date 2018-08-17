@@ -218,6 +218,22 @@ public class TestJava {
 	}
 
 	@Test
+	public void testLiftBenchmarks() throws Exception {
+		testJava("liftbenchmarks/LiftExec");
+	}
+
+
+	@Test
+	public void testSieveBenchmarks() throws Exception {
+		testJava("sievebenchmarks/Sieve");
+	}
+
+	@Test
+	public void testTrafficLightBenchmarks() throws Exception {
+		testJava("trafficlightbenchmarks/TrafficLightExec");
+	}
+
+	@Test
 	public void testProject2() throws Exception {
 		testJava("project2/MachineA");
 	}
