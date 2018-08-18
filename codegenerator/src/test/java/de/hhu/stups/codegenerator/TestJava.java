@@ -234,6 +234,16 @@ public class TestJava {
 	}
 
 	@Test
+	public void testIncreasingSet() throws Exception {
+		testJava("setoperationbenchmarks/IncreasingSet");
+	}
+
+	@Test
+	public void testSetOperation() throws Exception {
+		testJava("setoperationbenchmarks/SetOperation");
+	}
+
+	@Test
 	public void testProject2() throws Exception {
 		testJava("project2/MachineA");
 	}

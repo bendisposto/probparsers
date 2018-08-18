@@ -2,7 +2,7 @@ MACHINE Lift
 
 VARIABLES  floor
 
-INVARIANT  floor : 0..100 /* NAT */
+INVARIANT  floor : 0..100
 
 INITIALISATION floor := 0
 
