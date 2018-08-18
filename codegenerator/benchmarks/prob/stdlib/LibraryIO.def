@@ -1,0 +1,114 @@
+DEFINITIONS
+/* This Library DEFINITION file provides a convenient access to the ProB
+   external functions for printing information to screen or to a file */
+/* Include it into your machine by writing
+  DEFINITIONS
+      "LibraryIO.def"
+*/
+ PRINT(x) == skip;
+ EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any type T */
+ PRINTF(s,x) == skip;
+ EXTERNAL_SUBSTITUTION_PRINTF(PRINTF_TYPE) == STRING*seq(PRINTF_TYPE);
+ FPRINTF(file,s,x) == skip;
+ EXTERNAL_SUBSTITUTION_FPRINTF(FPRINTF_TYPE) == STRING*STRING*seq(FPRINTF_TYPE);
+ 
+ printf(format_string,value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_printf(printf_TYPE) == STRING*seq(printf_TYPE);
+    /* example: printf("result: ~w~n",[1+2]) */
+    /* printf could also be used as external function STRING*seq(T) --> BOOL */
+  /* here the old-style printf with just a single argument: */
+ printf1(s,x) == printf(s,[x]);
+ printf_nonvar(format_string,value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_printf_nonvar(printf_TYPE) == STRING*seq(printf_TYPE);
+ tprintf(format_string,value) == TRUE=TRUE; // print and trace afterwards; tracing requires running ProB from source
+ EXTERNAL_PREDICATE_tprintf(printf_TYPE) == STRING*seq(printf_TYPE);
+ printf_opt_trace(format_string,value,trace) == TRUE=TRUE; // print value if trace argument is TRUE
+ EXTERNAL_PREDICATE_printf_opt_trace(printf_TYPE) == STRING*seq(printf_TYPE)*BOOL;
+ iprintf(format_string,value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_iprintf(printf_TYPE) == STRING*seq(printf_TYPE);
+ printf_two(format_string,value,str2,val2) == TRUE=TRUE; // print two values, triggers as soon as first value is known
+ EXTERNAL_PREDICATE_printf_two(T,T2) == STRING*T*STRING*T2;
+
+ fprintf(file,s,x) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_fprintf(T) == STRING*STRING*T;
+    /* fprintf could also be used as external function STRING*STRING*T --> BOOL */
+
+ vprintf(format_string,value) == value; 
+ EXTERNAL_FUNCTION_vprintf(T) == STRING*T --> T; /* value printf: print and return value as result */
+  /* example: vprintf("result: ~w~n",1+2) */
+
+ fvprintf(file,format_string,value) == value; 
+ EXTERNAL_FUNCTION_fvprintf(T) == STRING*STRING*T --> T; /* value printf: print and return value as result */
+ 
+ observe(value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_observe(T) == T;
+ tobserve(value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_tobserve(T) == T;
+ observe_fun(value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_observe_fun(A,B) == POW(A*B); /* should only be applied to functions/relations */
+ ENUMERATE(value) == TRUE=TRUE;
+ EXTERNAL_PREDICATE_ENUMERATE(T) == T;
+ 
+ EXTERNAL_FUNCTION_TIME == STRING --> INTEGER;
+ TIME(s) == 0;
+ EXTERNAL_FUNCTION_TIMESTAMP_INFO == STRING*INTEGER --> INTEGER;
+ TIMESTAMP_INFO(s,ticks) == 0;
+ EXTERNAL_FUNCTION_TIMESTAMP == INTEGER*INTEGER*INTEGER*INTEGER*INTEGER*INTEGER --> INTEGER;
+ TIMESTAMP(Year,Month,Day,Hour,Min,Sec) == 0;
+ EXTERNAL_FUNCTION_GET_INFO == STRING --> STRING;
+ GET_INFO(s) == "INFO";
+ 
+ EXTERNAL_SUBSTITUTION_SLEEP == INTEGER;
+ SLEEP(x) == skip;
+ 
+ EXTERNAL_PREDICATE_SET_PREF == STRING*STRING;
+ SET_PREF(a,b) == (1=1);
+ 
+ EXTERNAL_SUBSTITUTION_SEE == (STRING);
+ SEE(file) == skip;
+ 
+ EXTERNAL_FUNCTION_GET_CODE == (STRING --> INTEGER);
+ GET_CODE(file) == 0;
+ EXTERNAL_FUNCTION_GET_CODE_STDIN == (INTEGER);
+ GET_CODE_STDIN == 0;
+ 
+ EXTERNAL_SUBSTITUTION_SEEN == STRING;
+ SEEN(file) == skip;
+ 
+ EXTERNAL_FUNCTION_READ_FILE_AS_STRINGS == (STRING --> seq(STRING));
+ READ_FILE_AS_STRINGS(file) == <>;
+ 
+ EXTERNAL_FUNCTION_READ_LINE == (STRING --> STRING);
+ READ_LINE(file) == "";
+ 
+ EXTERNAL_FUNCTION_CURRENT_FILE_POSITION == (STRING * STRING --> INTEGER);
+ CURRENT_FILE_POSITION(file,pos) == 0;
+ 
+ EXTERNAL_PREDICATE_EOF == (STRING);
+ EOF(file) == (1=1);
+ EXTERNAL_PREDICATE_EOF_STDIN == (STRING);
+ EOF_STDIN(dummy) == (1=1);
+ 
+ EXTERNAL_FUNCTION_DELTA_WALLTIME == (INTEGER);
+ DELTA_WALLTIME == 0;
+ 
+ ARGV(x) == "";
+ EXTERNAL_FUNCTION_ARGV == INTEGER --> STRING;
+ ARGC == 0;
+ EXTERNAL_FUNCTION_ARGC == INTEGER;
+  
+ EXTERNAL_SUBSTITUTION_ADD_ERROR(T) == (STRING*T);
+ ADD_ERROR(x,e) == skip;
+ 
+  /* parametric functions from LibraryStrings; cannot be represented as constant function : */
+ STRING_TO_ENUM(S) ==({}(1)); /* Note: you have to include the DEFINITION into your B file */
+ EXTERNAL_FUNCTION_STRING_TO_ENUM(STRING_TO_ENUM_TYPE) == (STRING --> STRING_TO_ENUM_TYPE);
+ TYPED_STRING_TO_ENUM(t,sss) ==({}(1));
+ EXTERNAL_FUNCTION_TYPED_STRING_TO_ENUM(STRING_TO_ENUM_TYPE) == 
+                      (POW(STRING_TO_ENUM_TYPE)*STRING --> STRING_TO_ENUM_TYPE);
+ INT_TO_STRING(S) == "0";
+ EXTERNAL_FUNCTION_INT_TO_STRING == (INTEGER --> STRING);
+ TO_STRING(S) == "0";
+ EXTERNAL_FUNCTION_TO_STRING(X) == (X --> STRING);
+ FORMAT_TO_STRING(S,List) == "0";
+ EXTERNAL_FUNCTION_FORMAT_TO_STRING(X) == ((STRING*seq(X)) --> STRING)

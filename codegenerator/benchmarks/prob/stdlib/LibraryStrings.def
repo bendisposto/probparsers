@@ -1,0 +1,81 @@
+DEFINITIONS
+/*
+ Interface File for ProB's external string functions
+ 
+In pure B there are only two built-in operators on strings: equality $=$ and inequality $\neq$.
+This library provides several string manipulation functions, and assumes that STRINGS are
+ sequences of unicode characters (in UTF-8 encoding).
+*/
+  /* This external function takes a string and returns the length. */
+  STRING_LENGTH(xxx) == length(xxx);
+  EXTERNAL_FUNCTION_STRING_LENGTH == STRING --> INTEGER;
+  
+  /* This external function takes two strings and concatenates them. */
+  STRING_APPEND(xxx,yyy) == append(xxx,yyy);
+  EXTERNAL_FUNCTION_STRING_APPEND == (STRING*STRING) --> STRING;
+
+  /* This external function takes a sequence of strings and concatenates them. */
+  STRING_CONC(string_conc_list) == "";
+  EXTERNAL_FUNCTION_STRING_CONC == seq(STRING) --> STRING;
+  
+  /* This external function takes two strings and separates the first string
+     according to the separator specified by the second string. */
+  STRING_SPLIT(xxx,yyy) == split(xxx,yyy);
+  EXTERNAL_FUNCTION_STRING_SPLIT == ((STRING*STRING) --> (INTEGER<->STRING));
+  
+  /* This external function takes a sequence of strings and a separator string
+     and joins the strings together inserting the separators as often as needed.
+     It is the inverse of the STRING_SPLIT function. */
+  STRING_JOIN(xxx,yyy) == join(xxx,yyy);
+  EXTERNAL_FUNCTION_STRING_JOIN == (((INTEGER<->STRING)*STRING) --> STRING);
+  
+  STRING_CHARS(xxx) == chars(xxx);
+  EXTERNAL_FUNCTION_STRING_CHARS == (STRING --> (INTEGER<->STRING));
+  
+  STRING_CODES(xxx) == codes(xxx);
+  EXTERNAL_FUNCTION_STRING_CODES == (STRING --> (INTEGER<->INTEGER));
+  
+  /* This external function takes a string and converts it into an integer.
+     An error is raised if this cannot be done.
+     It is safer to first check with {\tt STRING\_IS\_INT} whether the conversion can be done. */
+  STRING_TO_INT(sss) == 0;
+  EXTERNAL_FUNCTION_STRING_TO_INT == (STRING --> INTEGER);
+  
+  /* This external predicate takes a string and is true if the string represents an integer. */
+  STRING_IS_INT(sss) == (1=1);
+  EXTERNAL_PREDICATE_STRING_IS_INT == (STRING);
+  
+  /* This external function takes a decimal string (with optional decimal places)
+      and converts it to an integer with the given precision. */
+  EXTERNAL_FUNCTION_DEC_STRING_TO_INT == STRING * INTEGER --> INTEGER;
+  DEC_STRING_TO_INT(decimal_string,precision) == 0;
+  
+   /* parametric function; cannot be represented as constant function : */
+  STRING_TO_ENUM(sss) ==({}(1)); /* Note: you have to include the DEFINITION into your B file */
+  EXTERNAL_FUNCTION_STRING_TO_ENUM(STRING_TO_ENUM_TYPE) == (STRING --> STRING_TO_ENUM_TYPE);
+  TYPED_STRING_TO_ENUM(t,sss) ==({}(1));
+  EXTERNAL_FUNCTION_TYPED_STRING_TO_ENUM(STRING_TO_ENUM_TYPE) == 
+                      (POW(STRING_TO_ENUM_TYPE)*STRING --> STRING_TO_ENUM_TYPE);
+  
+  /* This external function converts an integer to a string representation. */
+  INT_TO_STRING(sss) == "0";
+  EXTERNAL_FUNCTION_INT_TO_STRING == (INTEGER --> STRING);
+  
+  /* This external function converts an integer to a decimal string representation
+     with the precision provided by the second argument. */
+  INT_TO_DEC_STRING(integer,precision) == "0.0";
+  EXTERNAL_FUNCTION_INT_TO_DEC_STRING == (INTEGER*INTEGER --> STRING);
+  
+  /* This external function converts a B data value to a string representation. */
+  TO_STRING(sss) == "0";
+  EXTERNAL_FUNCTION_TO_STRING(TO_STRING_TYPE) == (TO_STRING_TYPE --> STRING);
+  
+  /* This external function takes a format string and a B sequence of values and generates an output
+     string, where the values have been inserted into the format string in place of the ~w placeholders.
+   */
+  FORMAT_TO_STRING(MyFormatString,ListOfValues) == "0";
+  EXTERNAL_FUNCTION_FORMAT_TO_STRING(FORMAT_TO_STRING_TYPE) == ((STRING*seq(FORMAT_TO_STRING_TYPE)) --> STRING);
+  
+  /* This external function checks whether the second string occurs contiguously within the first string. */
+  EXTERNAL_FUNCTION_STRING_CONTAINS_STRING == (STRING*STRING)--> BOOL;
+  STRING_CONTAINS_STRING(arg1,arg2)==FALSE; // TRUE when arg2 occurs as contiguous substring in arg1

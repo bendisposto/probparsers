@@ -1,0 +1,15 @@
+DEFINITIONS
+ // external functions and predicates that serve as annotations for ProB
+ 
+ EXTERNAL_FUNCTION_FORCE(T) == T --> T;
+ FORCE(value) == value;
+ // forces evaluation of symbolic set representations
+ // usage FORCE( { x | x:1..100 & x mod 2 = 0 } )
+ 
+ EXTERNAL_PREDICATE_ENUMERATE(T) == T;
+ ENUMERATE(identifier) == (1=1);
+ // usage ENUMERATE(y) & x:1..2 & y:200..300 & x = y mod 3  --> will generate y=200,x=2 first
+ 
+ EXTERNAL_PREDICATE_DO_NOT_ENUMERATE(T) == T;
+ DO_NOT_ENUMERATE(identifier) == (1=1)
+

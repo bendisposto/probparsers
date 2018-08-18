@@ -1,0 +1,50 @@
+DEFINITIONS
+ /* EXTERNAL PREDICATES AND FUNCTIONS for accessing META Information */
+ /* i.e., reification/reflection of ProB's status and interface */
+ 
+ /* general information */
+ EXTERNAL_FUNCTION_PROB_INFO_STR == STRING --> STRING;
+ PROB_INFO_STR(info_field_name) == "";
+ EXTERNAL_FUNCTION_PROB_STATISTICS == STRING --> INTEGER;
+ PROB_STATISTICS(info_field_name) == 0;
+ 
+ EXTERNAL_FUNCTION_PROJECT_INFO == STRING --> POW(STRING);
+ PROJECT_INFO(info_field_name) == {};
+ EXTERNAL_FUNCTION_PROJECT_STATISTICS == STRING --> INTEGER;
+ PROJECT_STATISTICS(info_field_name) == 0;
+ EXTERNAL_FUNCTION_MACHINE_INFO == STRING * STRING --> STRING;
+ MACHINE_INFO(info_field_name,machine) == "";
+ 
+ /* interface to preferences */
+ EXTERNAL_FUNCTION_GET_PREF == STRING --> STRING;
+ GET_PREF(preference_name) == "";
+ EXTERNAL_FUNCTION_GET_PREF_DEFAULT == STRING --> STRING;
+ GET_PREF_DEFAULT(preference_name) == "";
+ /* this is also in LibraryIO.def: */
+ EXTERNAL_PREDICATE_SET_PREF == STRING*STRING;
+ SET_PREF(preference_name,preference_new_value) == (1=1);
+ 
+  
+ /* interface to bvisual2 */
+ EXTERNAL_FUNCTION_FORMULA_INFOS == STRING --> POW(INTEGER*STRING);
+ FORMULA_INFOS(formula_string) == [];
+ EXTERNAL_FUNCTION_FORMULA_VALUES == STRING --> POW(INTEGER*STRING);
+ FORMULA_VALUES(formula_string) == [];
+ 
+ /* state space */
+ EXTERNAL_FUNCTION_HISTORY == POW(INTEGER*INTEGER);
+ HISTORY == [];
+ EXTERNAL_FUNCTION_STATE_AS_STRING == INTEGER --> STRING;
+ STATE_AS_STRING(prob_state_id) == "";
+ EXTERNAL_PREDICATE_STATE_SUCC == INTEGER * INTEGER;
+ STATE_SUCC(prob_state_id1,prob_state_id2) == 1=1;
+ EXTERNAL_PREDICATE_STATE_TRANS == INTEGER * STRING * INTEGER;
+ STATE_TRANS(prob_state_id1,operation_name,prob_state_id2) == 1=1;
+ EXTERNAL_PREDICATE_STATE_TRANS_ARGS(ArgsType) == INTEGER * STRING * ArgsType * INTEGER;
+ STATE_TRANS_ARGS(prob_state_id1,operation_name,operation_args,prob_state_id2) == 1=1;
+ EXTERNAL_PREDICATE_STATE_SAT == INTEGER * STRING;
+ STATE_SAT(prob_state_id,b_predicate) == 1=1;
+ EXTERNAL_FUNCTION_EVAL(X) == INTEGER * STRING --> X;
+ EVAL(prob_state_id,b_formula) == {};
+ CURRENT_STATE_ID == PROB_STATISTICS("current-state-id")
+ 

@@ -1,0 +1,28 @@
+DEFINITIONS
+/* This Library DEFINITION file provides a convenient access to the ProB
+   external functions for XML Manipulations */
+/* Include it into your machine by writing
+  DEFINITIONS
+      "LibraryXML.def"
+*/
+ XML_ELement_Type == 
+      struct(
+        recId: NATURAL1,
+        pId:NATURAL,
+        element:STRING,
+        attributes: STRING +-> STRING,
+        meta: STRING +-> STRING
+        );
+ EXTERNAL_FUNCTION_READ_XML == (STRING * STRING) --> seq(XML_ELement_Type);
+ READ_XML(file,encoding) == {}; 
+  // encoding can be "auto", "ISO-8859-1", "ISO-8859-2", "ISO-8859-15", "UTF-8", "UTF-16",
+  // "UTF-16LE","UTF-16BE","UTF-32","UTF-32LE","UTF-32BE", "ANSI_X3.4-1968", "windows 1252"
+ 
+ EXTERNAL_FUNCTION_READ_XML_FROM_STRING == STRING --> seq(XML_ELement_Type);
+ READ_XML_FROM_STRING(contents) == {};
+ 
+ EXTERNAL_FUNCTION_WRITE_XML_TO_STRING == seq(XML_ELement_Type) --> STRING;
+ WRITE_XML_TO_STRING(contents) == "<?xml ...?>";
+ 
+ EXTERNAL_PREDICATE_WRITE_XML == seq(XML_ELement_Type) * STRING;
+ WRITE_XML(contents,file) == (1=1)

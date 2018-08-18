@@ -1,0 +1,13 @@
+DEFINITIONS
+/* This Library DEFINITION file provides a convenient access to the ProB
+   external SORT function.
+   This external function takes a set and translates it into a B sequence.
+   It uses ProB's internal order for sorting the elements.
+   It will not work for infinite sets.
+*/
+/* Include it into your machine by writing
+  DEFINITIONS
+      "SORT.def"
+*/
+ SORT(X) == [];
+ EXTERNAL_FUNCTION_SORT(T) == (POW(T)-->seq(T));

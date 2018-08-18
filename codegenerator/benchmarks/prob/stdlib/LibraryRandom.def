@@ -1,0 +1,14 @@
+DEFINITIONS
+ /* LibraryRandom.def */
+ 
+ EXTERNAL_FUNCTION_RANDOM == INTEGER*INTEGER --> INTEGER;
+ RANDOM(x,y) == x;
+ 
+ random_element(x) == max(x);
+ EXTERNAL_FUNCTION_random_element(RANDOM_TYPE) == POW(RANDOM_TYPE) --> RANDOM_TYPE;
+ 
+ random_subset(x) == x;
+ EXTERNAL_FUNCTION_random_subset(RANDOM_TYPE) == POW(RANDOM_TYPE) --> POW(RANDOM_TYPE);
+
+ random_permutation(x) == [];
+ EXTERNAL_FUNCTION_random_permutation(RANDOM_TYPE) == POW(RANDOM_TYPE) --> seq(RANDOM_TYPE);

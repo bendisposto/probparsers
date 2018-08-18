@@ -1,0 +1,8 @@
+DEFINITIONS
+ /* EXTERNAL FUNCTIONS for accessing HASHING functions */
+ 
+ /* general information */
+ EXTERNAL_FUNCTION_SHA_HASH(T) == T --> seq(INTEGER);
+ SHA_HASH(sha_value) == [0];
+ EXTERNAL_FUNCTION_HASH(T) == T --> INTEGER;
+ HASH(sha_value) == 0;
