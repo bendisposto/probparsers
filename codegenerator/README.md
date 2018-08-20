@@ -1,4 +1,4 @@
-This is a code generator for generating code from B to other programming languages.
+This is the code generator **B2Program** for generating code from B to other programming languages.
 
 A subset of Java is supported for now.
 

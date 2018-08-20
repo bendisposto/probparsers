@@ -105,6 +105,11 @@ public class TestJava {
 	}
 
 	@Test
+	public void testDanglingElse() throws Exception {
+		testJava("DanglingElse");
+	}
+
+	@Test
 	public void testImplies() throws Exception {
 		testJava("Implies");
 	}
