@@ -22,11 +22,11 @@ An example where code generation for C works is the machine Lift
 
 **Starting the code generator:**
 
-Java : Example: gradle run -Planguage = "java" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
+Java : Example: gradle run -Planguage="java" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
-Python: Example: gradle run -Planguage = "python" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
+Python: Example: gradle run -Planguage="python" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
-C: Example: gradle run -Planguage = "c" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
+C: Example: gradle run -Planguage="c" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
 
 <br>
@@ -62,6 +62,9 @@ C: Example: gradle run -Planguage = "c" -Pfile = "de/hhu/stups/codegenerator/tes
 1. Write a main function in the generated main file
 2. ./*main file*
 3. Example: ./Lift
+
+
+Analysis of the Performance is described in the README in directory *benchmarks*
 
 
 
