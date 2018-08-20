@@ -35,17 +35,11 @@ public class TrafficLightExec {
     }
 
     public static void main(String[] args) {
-        long start = System.nanoTime();
         TrafficLightExec exec = new TrafficLightExec();
-        long end = System.nanoTime();
-        System.out.println("Loading: " + (end - start));
-        start = System.nanoTime();
         exec.initialize();
-        end = System.nanoTime();
-        System.out.println("Initialisation: " + (end - start));
-        start = System.nanoTime();
+        long start = System.nanoTime();
         exec.simulate();
-        end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println("Execution: " + (end - start));
     }
 

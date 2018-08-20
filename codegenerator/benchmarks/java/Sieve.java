@@ -46,17 +46,11 @@ public class Sieve {
     }
 
     public static void main(String[] args) {
-        long start = System.nanoTime();
         Sieve sieve = new Sieve();
-        long end = System.nanoTime();
-        System.out.println("Loading: " + (end - start));
-        start = System.nanoTime();
         sieve.initialize();
-        end = System.nanoTime();
-        System.out.println("Initialisation: " + (end - start));
-        start = System.nanoTime();
+        long start = System.nanoTime();
         sieve.ComputeNumberOfPrimes();
-        end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println("Execution: " + (end - start));
     }
 }

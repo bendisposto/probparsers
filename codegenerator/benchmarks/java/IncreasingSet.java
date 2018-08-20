@@ -1,12 +1,13 @@
+import de.hhu.stups.btypes.BSet;
 import de.hhu.stups.btypes.BInteger;
 
-public class LiftExec {
+public class IncreasingSet {
 
-    private Lift Lift = new Lift();
 
 
 
     private BInteger counter;
+    private BSet set;
 
     private boolean initialized = false;
 
@@ -14,8 +15,8 @@ public class LiftExec {
         if(initialized) {
             throw new RuntimeException("Machine is already initialized");
         }
-        Lift.initialize();
         counter = (BInteger) new BInteger("0");
+        set = (BSet) new BSet(new BInteger("1"), new BInteger("2"), new BInteger("3"));
         initialized = true;
     }
 
@@ -23,25 +24,14 @@ public class LiftExec {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger("3000"))).booleanValue()) {
-            BInteger i = null;
-            i = (BInteger) new BInteger("0");
-            while((i.less(new BInteger("100"))).booleanValue()) {
-                this.Lift.inc();
-                i = (BInteger) i.plus(new BInteger("1"));
-            }
-            BInteger _i = null;
-            _i = (BInteger) new BInteger("0");
-            while((_i.less(new BInteger("100"))).booleanValue()) {
-                this.Lift.dec();
-                _i = (BInteger) _i.plus(new BInteger("1"));
-            }
+        while((counter.less(new BInteger("25000"))).booleanValue()) {
+            set = (BSet) set.union(new BSet(counter));
             counter = (BInteger) counter.plus(new BInteger("1"));
         }
     }
 
     public static void main(String[] args) {
-        LiftExec exec = new LiftExec();
+        IncreasingSet exec = new IncreasingSet();
         exec.initialize();
         long start = System.nanoTime();
         exec.simulate();

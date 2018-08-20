@@ -273,6 +273,11 @@ public class TestJava {
 		testJava("ManyLocalDeclarations");
 	}
 
+	@Test
+	public void testManyLocalDeclarations2() throws Exception {
+		testJava("ManyLocalDeclarations2");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {
