@@ -29,7 +29,8 @@ def initialize(self):
 >>
 
 include_initialization(machine) ::= <<
-<machine>.__init__()
+__<machine> = <machine>()
+__<machine>.__init__()
 >>
 
 operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
@@ -163,9 +164,9 @@ BInteger(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
-<var> = <operation_call(machine, function, args, this, var)>
+<var> = <operation_call_without_assignment(machine, function, args, this)>
 >>
 
-operation_call(machine, function, args, this, var) ::= <<
-<if(this)>self.<else><machine>.<endif><function>(<args; separator=",">)
+operation_call_without_assignment(machine, function, args, this) ::= <<
+<if(this)>self.__<else><machine>.<endif><function>(<args; separator=",">)
 >>

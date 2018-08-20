@@ -184,10 +184,10 @@ create_integer(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
-<operation_call(machine, function, args, this, var)>
+<function>(<args; separator=",">, &<var>);
 >>
 
-operation_call(machine, function, args, this, var) ::= <<
-<function>(<args; separator=",">, &<var>);
+operation_call_without_assignment(machine, function, args, this) ::= <<
+<function>(<args; separator=",">);
 >>
 

@@ -52,6 +52,11 @@ public class TestJava {
 	}
 
 	@Test
+	public void testExample() throws Exception {
+		testJava("Example");
+	}
+
+	@Test
 	public void testOperation() throws Exception {
 		testJava("Operation");
 	}

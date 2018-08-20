@@ -35,6 +35,11 @@ public class TestC {
     }
 
     @Test
+    public void testExample() throws Exception {
+        testC("Example");
+    }
+
+    @Test
     public void testOperation() throws Exception {
         testC("Operation");
     }

@@ -606,8 +606,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 			functionCall = currentGroup.getInstanceOf("operation_call_with_assignment");
 			functionCall.add("var", variables.get(0));
 		} else {
-			functionCall = currentGroup.getInstanceOf("operation_call");
-			functionCall.add("var", "");
+			functionCall = currentGroup.getInstanceOf("operation_call_without_assignment");
 		}
 		functionCall.add("machine", nameHandler.handle(machineName));
 		functionCall.add("function", operationName);

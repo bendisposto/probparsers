@@ -190,10 +190,10 @@ new BInteger("<number>")
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
-<var> = <operation_call(machine, function, args, this)>
+<var> = <operation_call_without_assignment(machine, function, args, this)>
 >>
 
-operation_call(machine, function, args, this, var) ::= <<
+operation_call_without_assignment(machine, function, args, this) ::= <<
 <if(this)>this.<else>this.<machine>.<endif><function>(<args; separator=",">);
 >>
 
