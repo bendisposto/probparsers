@@ -1,7 +1,9 @@
 package de.hhu.stups.btypes;
 
-import com.google.common.collect.ImmutableSet;
+import org.pcollections.HashTreePSet;
+import org.pcollections.PSet;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,14 +13,18 @@ import java.util.stream.Collectors;
 
 public class BSet implements BObject, Set<BObject> {
 
-	private final ImmutableSet<BObject> set;
+	private final PSet<BObject> set;
 
 	public BSet(java.util.Set<BObject> elements) {
-		this.set = ImmutableSet.copyOf(elements);
+		this.set = HashTreePSet.from(elements);
+	}
+
+	public BSet(PSet<BObject> elements) {
+		this.set = elements;
 	}
 
 	public BSet(BObject... elements) {
-		this.set = ImmutableSet.copyOf(elements);
+		this.set = HashTreePSet.from(Arrays.asList(elements));
 	}
 
 	public static LinkedHashSet<BObject> newStorage() {
@@ -111,21 +117,17 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public BSet intersect(BSet set) {
-		return new BSet(this.stream()
-				.filter(set::contains)
-				.collect(Collectors.toSet()));
+		return new BSet(this.set.plusAll(set)
+				.minusAll(this.set.minusAll(set))
+				.minusAll(set.set.minusAll(this.set)));
 	}
 
 	public BSet complement(BSet set) {
-		return new BSet(this.stream()
-				.filter(element -> !set.contains(element))
-				.collect(Collectors.toSet()));
+		return new BSet(this.set.minusAll(set));
 	}
 
 	public BSet union(BSet set) {
-		HashSet<BObject> result = new HashSet<>(this);
-		result.addAll(set);
-		return new BSet(result);
+		return new BSet(this.set.plusAll(set));
 	}
 
 	public static BSet range(BInteger a, BInteger b) {
