@@ -17,7 +17,7 @@ DEFINITIONS
     /* example: printf("result: ~w~n",[1+2]) */
     /* printf could also be used as external function STRING*seq(T) --> BOOL */
   /* here the old-style printf with just a single argument: */
- printf1(s,x) == printf(s,[x]);
+ printf1(format_string,single_arg) == printf(format_string,[single_arg]);
  printf_nonvar(format_string,value) == TRUE=TRUE;
  EXTERNAL_PREDICATE_printf_nonvar(printf_TYPE) == STRING*seq(printf_TYPE);
  tprintf(format_string,value) == TRUE=TRUE; // print and trace afterwards; tracing requires running ProB from source

@@ -11,5 +11,8 @@ DEFINITIONS
  // usage ENUMERATE(y) & x:1..2 & y:200..300 & x = y mod 3  --> will generate y=200,x=2 first
  
  EXTERNAL_PREDICATE_DO_NOT_ENUMERATE(T) == T;
- DO_NOT_ENUMERATE(identifier) == (1=1)
+ DO_NOT_ENUMERATE(identifier) == (1=1);
 
+ EXTERNAL_PREDICATE_ASSERT_TRUE == BOOL*STRING;
+ ASSERT_TRUE(p,x) == (1=1);
+ // usage ASSERT_TRUE(bool(Pred),"Error Message")

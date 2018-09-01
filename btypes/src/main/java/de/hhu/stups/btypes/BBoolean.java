@@ -111,11 +111,11 @@ public class BBoolean implements BObject {
 		return new BBoolean(this.booleanValue() == other);
 	}
 
-	public BBoolean equal(BBoolean o) {
-		return new BBoolean(this.value.equals(o.value));
+	public BBoolean equal(BBoolean other) {
+		return new BBoolean(this.value.equals(other.value));
 	}
 
-	public BBoolean unequal(BBoolean o) {
-		return new BBoolean(this.value.equals(o.value));
+	public BBoolean unequal(BBoolean other) {
+		return new BBoolean(!this.value.equals(other.value));
 	}
 }

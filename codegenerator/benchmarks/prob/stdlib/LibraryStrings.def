@@ -32,8 +32,11 @@ This library provides several string manipulation functions, and assumes that ST
   STRING_CHARS(xxx) == chars(xxx);
   EXTERNAL_FUNCTION_STRING_CHARS == (STRING --> (INTEGER<->STRING));
   
-  STRING_CODES(xxx) == codes(xxx);
+  STRING_CODES(string_codes_str) == codes(string_codes_str);
   EXTERNAL_FUNCTION_STRING_CODES == (STRING --> (INTEGER<->INTEGER));
+  
+  CODES_TO_STRING(codes_to_string_seq) == "";
+  EXTERNAL_FUNCTION_CODES_TO_STRING == ((INTEGER<->INTEGER) --> STRING);
   
   /* This external function takes a string and converts it into an integer.
      An error is raised if this cannot be done.
@@ -47,8 +50,8 @@ This library provides several string manipulation functions, and assumes that ST
   
   /* This external function takes a decimal string (with optional decimal places)
       and converts it to an integer with the given precision. */
-  EXTERNAL_FUNCTION_DEC_STRING_TO_INT == STRING * INTEGER --> INTEGER;
   DEC_STRING_TO_INT(decimal_string,precision) == 0;
+  EXTERNAL_FUNCTION_DEC_STRING_TO_INT == STRING * INTEGER --> INTEGER;
   
    /* parametric function; cannot be represented as constant function : */
   STRING_TO_ENUM(sss) ==({}(1)); /* Note: you have to include the DEFINITION into your B file */
