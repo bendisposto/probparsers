@@ -1,4 +1,4 @@
-PROBCLI=probcli
+PROBCLI=./probcli.sh
 sieve:
 	$(PROBCLI) Sieve.mch -init -execute 1
 lift:
@@ -9,3 +9,6 @@ set:
 	$(PROBCLI) SetOperation.mch -init -execute 1
 iset:
 	$(PROBCLI) IncreasingSet.mch -init -execute 1
+
+clean:
+	rm *.prob
