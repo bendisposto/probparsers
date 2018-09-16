@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static de.hhu.stups.codegenerator.GeneratorMode.C;
+import static de.hhu.stups.codegenerator.GeneratorMode.CPP;
 import static de.hhu.stups.codegenerator.GeneratorMode.JAVA;
 import static de.hhu.stups.codegenerator.GeneratorMode.PY;
 
@@ -62,6 +63,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private static final STGroup C_GROUP = new STGroupFile(
 			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/CTemplate.stg").getFile());
 
+	private static final STGroup CPP_GROUP = new STGroupFile(
+			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/CppTemplate.stg").getFile());
+
 	private static final STGroup PYTHON_GROUP = new STGroupFile(
 			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/PythonTemplate.stg").getFile());
 
@@ -70,6 +74,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	static {
 		TEMPLATE_MAP.put(JAVA, JAVA_GROUP);
 		TEMPLATE_MAP.put(C, C_GROUP);
+		TEMPLATE_MAP.put(CPP, CPP_GROUP);
 		TEMPLATE_MAP.put(PY, PYTHON_GROUP);
 	}
 
@@ -91,7 +96,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private MachineNode machineNode;
 
-	private boolean isLocalScope;
+	private int currentLocalScope;
+
+	private int localScopes;
 
 	public MachineGenerator(GeneratorMode mode) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
@@ -102,7 +109,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
 		this.setToEnum = new HashMap<>();
-		this.isLocalScope = false;
+		this.currentLocalScope = 0;
+		this.localScopes = 0;
 	}
 
 	/*
@@ -319,7 +327,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-		if(isLocalScope) {
+		if(currentLocalScope > 0) {
 			return identifierGenerator.generateVarDeclaration(node.getName());
 		}
 		return identifierGenerator.generate(node);
@@ -636,11 +644,15 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitVarSubstitutionNode(VarSubstitutionNode node, Void expected) {
 		ST varST = currentGroup.getInstanceOf("var");
+		this.localScopes++;
+		this.currentLocalScope++;
+		identifierGenerator.push(localScopes);
 		node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.addLocal(identifier.getName()));
-		this.isLocalScope = true;
 		varST.add("locals", generateVariablesInVar(node.getLocalIdentifiers()));
 		varST.add("body", visitSubstitutionNode(node.getBody(), expected));
-		this.isLocalScope = false;
+		identifierGenerator.pop();
+		node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.resetLocal(identifier.getName()));
+		this.currentLocalScope--;
 		return varST.render();
 	}
 

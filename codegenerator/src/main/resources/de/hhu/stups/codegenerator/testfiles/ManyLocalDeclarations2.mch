@@ -23,7 +23,6 @@ out <-- Inc(aa) =
         VAR out IN
             out := aa + 1
         END;
-        out := 3
     END
 
 

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class IdentifierGenerator {
@@ -20,13 +21,20 @@ public class IdentifierGenerator {
 
     private List<DeclarationNode> outputParams;
 
-    private Map<String, Integer> locals;
+    private Map<String, Integer> currentLocals;
+
+    private Map<String, Integer> maxLocals;
+
+    private Stack<Integer> stackScope;
 
     public IdentifierGenerator(final STGroup group, final NameHandler nameHandler) {
         this.group = group;
         this.nameHandler = nameHandler;
         this.outputParams = new ArrayList<>();
-        this.locals = new HashMap<>();
+        this.currentLocals = new HashMap<>();
+        this.maxLocals = new HashMap<>();
+        this.stackScope = new Stack<>();
+        stackScope.push(0);
     }
 
 
@@ -61,8 +69,8 @@ public class IdentifierGenerator {
     public String generateVarDeclaration(String name) {
         ST identifier = group.getInstanceOf("identifier");
         StringBuilder resultIdentifier = new StringBuilder(nameHandler.handleIdentifier(name, NameHandler.IdentifierHandlingEnum.MACHINES));
-        if(locals.keySet().contains(name)) {
-            for (int i = 0; i < locals.get(name); i++) {
+        if(currentLocals.keySet().contains(name)) {
+            for (int i = 0; i < currentLocals.get(name); i++) {
                 resultIdentifier.insert(0, "_");
             }
         }
@@ -77,7 +85,8 @@ public class IdentifierGenerator {
     */
     public void setParams(List<DeclarationNode> inputParams, List<DeclarationNode> outputParams){
         this.outputParams = outputParams;
-        this.locals.clear();
+        this.currentLocals.clear();
+        this.maxLocals.clear();
         List<String> parameters = outputParams.stream()
                 .map(DeclarationNode::getName)
                 .collect(Collectors.toList());
@@ -85,7 +94,8 @@ public class IdentifierGenerator {
                 .map(DeclarationNode::getName)
                 .collect(Collectors.toList()));
         for(String parameter : parameters) {
-            locals.put(parameter, 0);
+            currentLocals.put(parameter, 0);
+            maxLocals.put(parameter, 0);
         }
     }
 
@@ -93,12 +103,35 @@ public class IdentifierGenerator {
     * This function is needed for solving the collision problem beteween output parameters and local variables.
     */
     public void addLocal(String local) {
-        if(locals.keySet().contains(local)) {
-            int value = locals.get(local);
-            locals.put(local, value + 1);
+        if(maxLocals.keySet().contains(local)) {
+            int value = maxLocals.get(local);
+            maxLocals.put(local, value + 1);
+            currentLocals.put(local, value + 1);
         } else {
-            locals.put(local, 0);
+            currentLocals.put(local, 0);
         }
+    }
+
+    /*
+    * This function is needed for solving the collision problem beteween output parameters and local variables.
+    */
+    public void resetLocal(String local) {
+        currentLocals.put(local, stackScope.peek());
+    }
+
+    /*
+    * Puts an element on the stack handling collision problem between local variables
+    */
+    public void push(int value) {
+        stackScope.push(value);
+    }
+
+
+    /*
+    * Pops from the stack handling collision problem between local variables
+    */
+    public void pop() {
+        stackScope.pop();
     }
 
 }
