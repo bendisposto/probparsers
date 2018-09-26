@@ -846,6 +846,7 @@ expression_keyword {-> expression} =
   {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}  |
   {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+  {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}  |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
@@ -1311,6 +1312,7 @@ expression =
   {general_union} [expression]:expression |
   {general_intersection} [expression]:expression |
   {quantified_union} [identifiers]:expression* [predicates]:predicate [expression]:expression |
+  {symbolic_quantified_union} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {quantified_intersection} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {relations} [left]:expression [right]:expression |
   {identity} [expression]:expression |
