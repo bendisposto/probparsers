@@ -508,6 +508,9 @@ definition_x {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
+ // attempt to allow identifier lists in DEFINITIONs, but leads to conflicts: 
+//  {couplewopar} [name]:identifier_literal double_equal [first]:expression_in_par comma [rest]:expression_list {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))} |
+//  {couplewopar} [name]:identifier_literal double_equal [rest]:identifier_list {-> New definition.expression_definition(name, [], New expression.couple([rest.expression]))} |
   {file} [filename]:string_literal {-> New definition.file_definition(filename)};
 
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
