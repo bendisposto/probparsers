@@ -7,7 +7,7 @@
 Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
 
 <pre>
-def parser_version = '2.9.12' // development version: 2.9.13-SNAPSHOT
+def parser_version = '2.9.13' // development version: 2.9.14-SNAPSHOT
 dependencies {
 	compile group: "de.hhu.stups", name: "bparser", version: parser_version
 	compile group: "de.hhu.stups", name: "ltlparser", version: parser_version// optional
