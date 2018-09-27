@@ -191,4 +191,8 @@ public class RulesParseUnit implements IModel {
 		return this.bCompoundException;
 	}
 
+	public BParser getBParser() {
+		return this.bParser;
+	}
+
 }

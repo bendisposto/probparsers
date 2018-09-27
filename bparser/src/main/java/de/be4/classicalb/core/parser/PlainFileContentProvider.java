@@ -11,8 +11,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 	}
 
 	@Override
-	public String getFileContent(File directory, String filename)
-			throws IOException {
+	public String getFileContent(File directory, String filename) throws IOException {
 		// TODO caching could help for speed up if files are used more than
 		// once
 		final File file;
@@ -20,8 +19,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		return Utils.readFile(file);
 	}
 
-	public File getFile(final File directory, final String filename)
-			throws IOException {
+	public File getFile(final File directory, final String filename) throws IOException {
 		FileSearchPathProvider provider;
 		if (directory == null) {
 			provider = new FileSearchPathProvider(filename);

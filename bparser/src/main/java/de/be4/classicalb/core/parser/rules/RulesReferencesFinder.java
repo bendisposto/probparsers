@@ -244,7 +244,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 			try {
 				return new FileSearchPathProvider(parentMachineDirectory.getPath(), name + suffix, this.pathList)
 						.resolve();
-			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
 			}

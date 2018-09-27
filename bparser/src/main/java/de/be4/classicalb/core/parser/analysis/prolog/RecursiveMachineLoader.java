@@ -150,7 +150,7 @@ public class RecursiveMachineLoader {
 						: parentMachineDirectory.getAbsolutePath();
 				return new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
 						.resolve();
-			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
 			}

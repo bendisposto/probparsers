@@ -641,6 +641,15 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicQuantifiedUnionExpression(final ASymbolicQuantifiedUnionExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		close(node);
+	}
+
+	@Override
 	public void caseAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());

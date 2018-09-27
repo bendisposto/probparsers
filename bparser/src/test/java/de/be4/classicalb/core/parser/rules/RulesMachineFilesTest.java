@@ -26,6 +26,15 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testMachineIncludingDefsFile() throws Exception {
+		String output = getRulesMachineAsPrologTerm(dir + "project/project_with_def_file/Main.rmch");
+		System.out.println(output);
+		assertTrue(output.contains("Defs.def"));
+		assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
+		
+	}
+
+	@Test
 	public void testProject2() throws Exception {
 		File file = new File(dir + "project/references/test1/Rule1.rmch");
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();

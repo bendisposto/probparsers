@@ -508,6 +508,9 @@ definition_x {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
+ // attempt to allow identifier lists in DEFINITIONs, but leads to conflicts: 
+//  {couplewopar} [name]:identifier_literal double_equal [first]:expression_in_par comma [rest]:expression_list {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))} |
+//  {couplewopar} [name]:identifier_literal double_equal [rest]:identifier_list {-> New definition.expression_definition(name, [], New expression.couple([rest.expression]))} |
   {file} [filename]:string_literal {-> New definition.file_definition(filename)};
 
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
@@ -843,6 +846,7 @@ expression_keyword {-> expression} =
   {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}  |
   {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+  {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}  |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
@@ -1308,6 +1312,7 @@ expression =
   {general_union} [expression]:expression |
   {general_intersection} [expression]:expression |
   {quantified_union} [identifiers]:expression* [predicates]:predicate [expression]:expression |
+  {symbolic_quantified_union} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {quantified_intersection} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {relations} [left]:expression [right]:expression |
   {identity} [expression]:expression |
