@@ -8,6 +8,22 @@ iset: IncreasingSet.class
 	java -cp :btypes.jar IncreasingSet
 set: SetOperation.class
 	java -cp :btypes.jar SetOperation
+plus: Plus.class
+	java -cp :btypes.jar Plus
+minus: Minus.class
+	java -cp :btypes.jar Minus
+multiply: Multiply.class
+	java -cp :btypes.jar Multiply
+divide: Divide.class
+	java -cp :btypes.jar Divide
+modulo: Modulo.class
+	java -cp :btypes.jar Modulo
+negative: Negative.class
+	java -cp :btypes.jar Negative
+bignumbers: BigNumbers.class
+	java -cp :btypes.jar BigNumbers
+smallnumbers: SmallNumbers.class
+	java -cp :btypes.jar SmallNumbers
 
 Lift.class: Lift.java
 	javac -cp btypes.jar Lift.java
@@ -23,6 +39,22 @@ IncreasingSet.class: IncreasingSet.java
 	javac -cp btypes.jar IncreasingSet.java
 SetOperation.class: SetOperation.java
 	javac -cp btypes.jar SetOperation.java
+Plus.class: Plus.java
+	javac -cp btypes.jar Plus.java
+Minus.class: Minus.java
+	javac -cp btypes.jar Minus.java
+Multiply.class: Multiply.java
+	javac -cp btypes.jar Multiply.java
+Divide.class: Divide.java
+	javac -cp btypes.jar Divide.java
+Modulo.class: Modulo.java
+	javac -cp btypes.jar Modulo.java
+Negative.class: Negative.java
+	javac -cp btypes.jar Negative.java
+BigNumbers.class: BigNumbers.java
+	javac -cp btypes.jar BigNumbers.java
+SmallNumbers.class: SmallNumbers.java
+	javac -cp btypes.jar SmallNumbers.java
 
 clean:
 	rm *.class

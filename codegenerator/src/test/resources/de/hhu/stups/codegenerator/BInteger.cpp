@@ -177,7 +177,8 @@ class BInteger : BObject {
         }
 
         BInteger operator=(BInteger other) {
-            return BInteger(other.value);
+            this->value = other.value;
+            return *this;
         }
 
         bool operator !=(BObject o) {

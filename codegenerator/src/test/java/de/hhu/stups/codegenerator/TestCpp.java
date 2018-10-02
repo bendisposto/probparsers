@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by fabian on 30.08.18.
@@ -25,12 +26,37 @@ public class TestCpp {
 			outputStream.write(buffer, 0, size);
 	}
 
+	public static void writeInputToSystem(InputStream inputStream) throws IOException {
+		writeInputToOutput(inputStream, System.err);
+	}
+
+
 	public void testCpp(String machine) throws Exception {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
 		Set<Path> cppFilePaths = codeGenerator.generate(mchPath, GeneratorMode.CPP, true);
+		cppFilePaths.forEach(path -> {
+			try {
+				Process process = Runtime.getRuntime()
+                        .exec("g++ -c " + path.toFile().getAbsoluteFile().toString());
+				writeInputToSystem(process.getErrorStream());
+				writeInputToOutput(process.getErrorStream(), process.getOutputStream());
+				process.waitFor();
+			} catch (IOException | InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
 
+
+
+
+		Set<File> oFiles = cppFilePaths.stream()
+				.map(path -> new File(path.getParent().toFile(), machine + ".o"))
+				.collect(Collectors.toSet());
+
+		//javaFilePaths.forEach(path -> cleanUp(path.toString()));
+		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));
 		//cFilePaths.forEach(path -> cleanUp(path.toString()));
 	}
 

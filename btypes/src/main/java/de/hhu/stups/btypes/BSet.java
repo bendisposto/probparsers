@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -147,11 +148,12 @@ public class BSet implements BObject, Set<BObject> {
 
 
 	public BObject functionCall(BObject arg) {
-		for(BObject object : set) {
-			BCouple couple = (BCouple) object;
-			if(couple.getFirst().equals(arg)) {
-				return couple.getSecond();
-			}
+		List<BCouple> matchedCouples = set.stream()
+			.map(object -> (BCouple) object)
+			.filter(couple -> couple.getFirst().equals(arg))
+			.collect(Collectors.toList());
+		if(matchedCouples.size() > 0) {
+			return matchedCouples.get(0).getSecond();
 		}
 		throw new RuntimeException("Argument is not in the key set of this map");
 	}

@@ -278,6 +278,53 @@ public class TestJava {
 		testJava("ManyLocalDeclarations2");
 	}
 
+	@Test
+	public void testPlus() throws Exception {
+		testJava("arithmetic/Plus");
+	}
+
+	@Test
+	public void testMinus() throws Exception {
+		testJava("arithmetic/Minus");
+	}
+
+	@Test
+	public void testMultiply() throws Exception {
+		testJava("arithmetic/Multiply");
+	}
+
+	@Test
+	public void testDivide() throws Exception {
+		testJava("arithmetic/Divide");
+	}
+
+
+	@Test
+	public void testModulo() throws Exception {
+		testJava("arithmetic/Modulo");
+	}
+
+	@Test
+	public void testNegative() throws Exception {
+		testJava("arithmetic/Negative");
+	}
+
+	@Ignore
+	@Test
+	public void testPositive() throws Exception {
+		testJava("arithmetic/Positive");
+	}
+
+	@Test
+	public void testSmallNumbers() throws Exception {
+		testJava("integers/SmallNumbers");
+	}
+
+	@Test
+	public void testBigNumbers() throws Exception {
+		testJava("integers/BigNumbers");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {
