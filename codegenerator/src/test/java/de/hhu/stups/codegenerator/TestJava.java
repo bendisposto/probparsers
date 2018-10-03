@@ -343,6 +343,7 @@ public class TestJava {
 	}
 
 
+	@Ignore
 	@Test
 	public void testNot() throws Exception {
 		testJava("logical/Not");
