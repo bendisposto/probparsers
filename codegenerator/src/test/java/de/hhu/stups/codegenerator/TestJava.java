@@ -325,6 +325,35 @@ public class TestJava {
 		testJava("integers/BigNumbers");
 	}
 
+	@Test
+	public void testAnd() throws Exception {
+		testJava("logical/And");
+	}
+
+
+	@Test
+	public void testOr() throws Exception {
+		testJava("logical/Or");
+	}
+
+
+	@Test
+	public void testImpliesPerformance() throws Exception {
+		testJava("logical/Implies");
+	}
+
+
+	@Test
+	public void testNot() throws Exception {
+		testJava("logical/Not");
+	}
+
+
+	@Test
+	public void testEquivalent() throws Exception {
+		testJava("logical/Equivalent");
+	}
+
 	private void cleanUp(String path) {
 		File file = new File(path);
 		if (file.exists()) {

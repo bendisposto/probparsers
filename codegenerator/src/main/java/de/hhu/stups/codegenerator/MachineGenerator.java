@@ -388,6 +388,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
+		typeGenerator.addImport(node.getType());
 		List<String> expressionList = node.getPredicateArguments().stream()
 				.map(expr -> visitPredicateNode(expr, expected))
 				.collect(Collectors.toList());
@@ -399,6 +400,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
+		typeGenerator.addImport(node.getType());
 		List<String> expressionList = node.getExpressionNodes().stream()
 				.map(expr -> visitExprNode(expr, expected))
 				.collect(Collectors.toList());

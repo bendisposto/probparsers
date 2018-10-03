@@ -188,7 +188,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	@Override
 	public Node visitImplication(BParser.ImplicationContext ctx) {
 		PredicateNode left = (PredicateNode) ctx.left.accept(this);
-		PredicateNode right = (PredicateNode) ctx.left.accept(this);
+		PredicateNode right = (PredicateNode) ctx.right.accept(this);
 		List<PredicateNode> list = new ArrayList<>();
 		list.add(left);
 		list.add(right);
@@ -198,7 +198,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	@Override
 	public Node visitPredicateBinPredicateOperator(BParser.PredicateBinPredicateOperatorContext ctx) {
 		PredicateNode left = (PredicateNode) ctx.left.accept(this);
-		PredicateNode right = (PredicateNode) ctx.left.accept(this);
+		PredicateNode right = (PredicateNode) ctx.right.accept(this);
 		List<PredicateNode> list = new ArrayList<>();
 		list.add(left);
 		list.add(right);

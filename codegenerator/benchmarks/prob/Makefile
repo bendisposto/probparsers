@@ -25,6 +25,14 @@ bignumbers:
 	$(PROBCLI) BigNumbers.mch -init -execute 1
 smallnumbers:
 	$(PROBCLI) SmallNumbers.mch -init -execute 1
+and:
+	$(PROBCLI) And.mch -init -execute 1
+or:
+	$(PROBCLI) Or.mch -init -execute 1
+equivalent:
+	$(PROBCLI) Equivalent.mch -init -execute 1
+implies:
+	$(PROBCLI) Implies.mch -init -execute 1
 
 clean:
 	rm *.prob

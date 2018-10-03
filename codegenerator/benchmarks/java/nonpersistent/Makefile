@@ -24,6 +24,14 @@ bignumbers: BigNumbers.class
 	java -cp :btypes.jar BigNumbers
 smallnumbers: SmallNumbers.class
 	java -cp :btypes.jar SmallNumbers
+and: And.class
+	java -cp :btypes.jar And
+or: Or.class
+	java -cp :btypes.jar Or
+implies: Implies.class
+	java -cp :btypes.jar Implies
+equivalent: Equivalent.class
+	java -cp :btypes.jar Equivalent
 
 Lift.class: Lift.java
 	javac -cp btypes.jar Lift.java
@@ -55,6 +63,14 @@ BigNumbers.class: BigNumbers.java
 	javac -cp btypes.jar BigNumbers.java
 SmallNumbers.class: SmallNumbers.java
 	javac -cp btypes.jar SmallNumbers.java
+And.class: And.java
+	javac -cp btypes.jar And.java
+Or.class: Or.java
+	javac -cp btypes.jar Or.java
+Implies.class: Implies.java
+	javac -cp btypes.jar Implies.java
+Equivalent.class: Equivalent.java
+	javac -cp btypes.jar Equivalent.java
 
 clean:
 	rm *.class
