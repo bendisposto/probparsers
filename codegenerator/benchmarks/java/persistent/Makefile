@@ -32,6 +32,18 @@ implies: Implies.class
 	java -cp :btypes_persistent.jar Implies
 equivalent: Equivalent.class
 	java -cp :btypes_persistent.jar Equivalent
+less: Less.class
+	java -cp :btypes_persistent.jar Less
+lessequal: LessEqual.class
+	java -cp :btypes_persistent.jar LessEqual
+greater: Greater.class
+	java -cp :btypes_persistent.jar Greater
+greaterequal: GreaterEqual.class
+	java -cp :btypes_persistent.jar GreaterEqual
+equal: Equal.class
+	java -cp :btypes_persistent.jar Equal
+unequal: Unequal.class
+	java -cp :btypes_persistent.jar Unequal
 
 
 
@@ -73,6 +85,18 @@ Implies.class: Implies.java
 	javac -cp btypes_persistent.jar Implies.java
 Equivalent.class: Equivalent.java
 	javac -cp btypes_persistent.jar Equivalent.java
+Less.class: Less.java
+	javac -cp btypes_persistent.jar Less.java
+LessEqual.class: LessEqual.java
+	javac -cp btypes_persistent.jar LessEqual.java
+Greater.class: Greater.java
+	javac -cp btypes_persistent.jar Greater.java
+GreaterEqual.class: GreaterEqual.java
+	javac -cp btypes_persistent.jar GreaterEqual.java
+Equal.class: Equal.java
+	javac -cp btypes_persistent.jar Equal.java
+Unequal.class: Unequal.java
+	javac -cp btypes_persistent.jar Unequal.java
 
 clean:
 	rm *.class

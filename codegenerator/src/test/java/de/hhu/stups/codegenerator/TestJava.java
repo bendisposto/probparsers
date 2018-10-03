@@ -348,11 +348,44 @@ public class TestJava {
 		testJava("logical/Not");
 	}
 
-
 	@Test
 	public void testEquivalent() throws Exception {
 		testJava("logical/Equivalent");
 	}
+
+	@Test
+	public void testLess() throws Exception {
+		testJava("comparison/Less");
+	}
+
+	@Test
+	public void testLessEqual() throws Exception {
+		testJava("comparison/LessEqual");
+	}
+
+	@Test
+	public void testGreater() throws Exception {
+		testJava("comparison/Greater");
+	}
+
+
+	@Test
+	public void testGreaterEqual() throws Exception {
+		testJava("comparison/GreaterEqual");
+	}
+
+
+	@Test
+	public void tessEqual() throws Exception {
+		testJava("comparison/Equal");
+	}
+
+
+	@Test
+	public void testUnequal() throws Exception {
+		testJava("comparison/Unequal");
+	}
+
 
 	private void cleanUp(String path) {
 		File file = new File(path);

@@ -32,6 +32,18 @@ implies: Implies.class
 	java -cp :btypes.jar Implies
 equivalent: Equivalent.class
 	java -cp :btypes.jar Equivalent
+less: Less.class
+	java -cp :btypes.jar Less
+lessequal: LessEqual.class
+	java -cp :btypes.jar LessEqual
+greater: Greater.class
+	java -cp :btypes.jar Greater
+greaterequal: GreaterEqual.class
+	java -cp :btypes.jar GreaterEqual
+equal: Equal.class
+	java -cp :btypes.jar Equal
+unequal: Unequal.class
+	java -cp :btypes.jar Unequal
 
 
 
@@ -73,6 +85,18 @@ Implies.class: Implies.java
 	javac -cp btypes.jar Implies.java
 Equivalent.class: Equivalent.java
 	javac -cp btypes.jar Equivalent.java
+Less.class: Less.java
+	javac -cp btypes.jar Less.java
+LessEqual.class: LessEqual.java
+	javac -cp btypes.jar LessEqual.java
+Greater.class: Greater.java
+	javac -cp btypes.jar Greater.java
+GreaterEqual.class: GreaterEqual.java
+	javac -cp btypes.jar GreaterEqual.java
+Equal.class: Equal.java
+	javac -cp btypes.jar Equal.java
+Unequal.class: Unequal.java
+	javac -cp btypes.jar Unequal.java
 
 clean:
 	rm *.class

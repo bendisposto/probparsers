@@ -33,6 +33,18 @@ equivalent:
 	$(PROBCLI) Equivalent.mch -init -execute 1
 implies:
 	$(PROBCLI) Implies.mch -init -execute 1
+less:
+	$(PROBCLI) Less.mch -init -execute 1
+lessequal:
+	$(PROBCLI) LessEqual.mch -init -execute 1
+greater:
+	$(PROBCLI) Greater.mch -init -execute 1
+greaterequal:
+	$(PROBCLI) GreaterEqual.mch -init -execute 1
+equal:
+	$(PROBCLI) Equal.mch -init -execute 1
+unequal:
+	$(PROBCLI) Unequal.mch -init -execute 1
 
 clean:
 	rm *.prob
