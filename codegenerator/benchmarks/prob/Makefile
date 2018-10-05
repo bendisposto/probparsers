@@ -45,6 +45,26 @@ equal:
 	$(PROBCLI) Equal.mch -init -execute 1
 unequal:
 	$(PROBCLI) Unequal.mch -init -execute 1
+setcardbig:
+	$(PROBCLI) SetCardBig.mch -init -execute 1
+setcardsmall:
+	$(PROBCLI) SetCardSmall.mch -init -execute 1
+setcomplementbig:
+	$(PROBCLI) SetComplementBig.mch -init -execute 1
+setcomplementsmall:
+	$(PROBCLI) SetComplementSmall.mch -init -execute 1
+setelementofbig:
+	$(PROBCLI) SetElementOfBig.mch -init -execute 1
+setelementofsmall:
+	$(PROBCLI) SetElementOfSmall.mch -init -execute 1
+setintersectionbig:
+	$(PROBCLI) SetIntersectionBig.mch -init -execute 1
+setintersectionsmall:
+	$(PROBCLI) SetIntersectionSmall.mch -init -execute 1
+setunionbig:
+	$(PROBCLI) SetUnionBig.mch -init -execute 1
+setunionsmall:
+	$(PROBCLI) SetUnionSmall.mch -init -execute 1
 
 clean:
 	rm *.prob

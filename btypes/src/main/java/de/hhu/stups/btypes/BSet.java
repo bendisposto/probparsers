@@ -118,9 +118,7 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public BSet intersect(BSet set) {
-		return new BSet(this.set.plusAll(set)
-				.minusAll(this.set.minusAll(set))
-				.minusAll(set.set.minusAll(this.set)));
+		return new BSet(this.set.minusAll(this.set.minusAll(set)));
 	}
 
 	public BSet complement(BSet set) {
@@ -134,7 +132,7 @@ public class BSet implements BObject, Set<BObject> {
 	public static BSet range(BInteger a, BInteger b) {
 		HashSet<BObject> set = new HashSet<>();
 		for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
-			set.add(new BInteger(new java.math.BigInteger(String.valueOf(i))));
+			set.add(new BInteger(String.valueOf(i)));
 		}
 		return new BSet(set);
 	}

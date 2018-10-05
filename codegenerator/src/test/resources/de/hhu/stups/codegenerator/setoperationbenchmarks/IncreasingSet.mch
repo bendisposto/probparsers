@@ -12,7 +12,7 @@ OPERATIONS
 	      set := set \/ {counter};
 	      counter := counter + 1
 		  INVARIANT 1 = 1
-		  VARIANT 100000 - counter
+		  VARIANT 25000 - counter
 	      END
 
 END

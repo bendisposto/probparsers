@@ -44,6 +44,26 @@ equal: Equal.class
 	java -cp :btypes_persistent.jar Equal
 unequal: Unequal.class
 	java -cp :btypes_persistent.jar Unequal
+setcardbig: SetCardBig.class
+	java -cp :btypes_persistent.jar SetCardBig
+setcardsmall: SetCardSmall.class
+	java -cp :btypes_persistent.jar SetCardSmall
+setcomplementbig: SetComplementBig.class
+	java -cp :btypes_persistent.jar SetComplementBig
+setcomplementsmall: SetComplementSmall.class
+	java -cp :btypes_persistent.jar SetComplementSmall
+setelementofbig: SetElementOfBig.class
+	java -cp :btypes_persistent.jar SetElementOfBig
+setelementofsmall: SetElementOfSmall.class
+	java -cp :btypes_persistent.jar SetElementOfSmall
+setintersectionbig: SetIntersectionBig.class
+	java -cp :btypes_persistent.jar SetIntersectionBig
+setintersectionsmall: SetIntersectionSmall.class
+	java -cp :btypes_persistent.jar SetIntersectionSmall
+setunionbig: SetUnionBig.class
+	java -cp :btypes_persistent.jar SetUnionBig
+setunionsmall: SetUnionSmall.class
+	java -cp :btypes_persistent.jar SetUnionSmall
 
 
 
@@ -97,6 +117,26 @@ Equal.class: Equal.java
 	javac -cp btypes_persistent.jar Equal.java
 Unequal.class: Unequal.java
 	javac -cp btypes_persistent.jar Unequal.java
+SetCardBig.class: SetCardBig.java
+	javac -cp btypes_persistent.jar SetCardBig.java
+SetCardSmall.class: SetCardSmall.java
+	javac -cp btypes_persistent.jar SetCardSmall.java
+SetComplementBig.class: SetComplementBig.java
+	javac -cp btypes_persistent.jar SetComplementBig.java
+SetComplementSmall.class: SetComplementSmall.java
+	javac -cp btypes_persistent.jar SetComplementSmall.java
+SetElementOfBig.class: SetElementOfBig.java
+	javac -cp btypes_persistent.jar SetElementOfBig.java
+SetElementOfSmall.class: SetElementOfSmall.java
+	javac -cp btypes_persistent.jar SetElementOfSmall.java
+SetIntersectionBig.class: SetIntersectionBig.java
+	javac -cp btypes_persistent.jar SetIntersectionBig.java
+SetIntersectionSmall.class: SetIntersectionSmall.java
+	javac -cp btypes_persistent.jar SetIntersectionSmall.java
+SetUnionBig.class: SetUnionBig.java
+	javac -cp btypes_persistent.jar SetUnionBig.java
+SetUnionSmall.class: SetUnionSmall.java
+	javac -cp btypes_persistent.jar SetUnionSmall.java
 
 clean:
 	rm *.class

@@ -30,7 +30,7 @@ public class BInteger extends BNumber {
 		this.value = new java.math.BigInteger(value);
 	}
 
-    public BInteger(java.math.BigInteger value) {
+	public BInteger(java.math.BigInteger value) {
 		this.value = value;
 	}
 
@@ -72,7 +72,7 @@ public class BInteger extends BNumber {
 		if (getClass() != o.getClass()) {
 			oi = new java.math.BigInteger(java.lang.String.valueOf(o.longValue()));
 		} else {
-            BInteger oo = (BInteger) o;
+			BInteger oo = (BInteger) o;
 			oi = oo.value;
 		}
 		return this.value.compareTo(oi);

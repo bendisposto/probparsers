@@ -387,6 +387,68 @@ public class TestJava {
 		testJava("comparison/Unequal");
 	}
 
+	@Test
+	public void testCardBig() throws Exception {
+		testJava("setoperation_big/SetCardBig");
+	}
+
+	@Test
+	public void testComplementBig() throws Exception {
+		testJava("setoperation_big/SetComplementBig");
+	}
+
+	@Test
+	public void testElementOfBig() throws Exception {
+		testJava("setoperation_big/SetElementOfBig");
+	}
+
+	@Test
+	public void testIntersectionBig() throws Exception {
+		testJava("setoperation_big/SetIntersectionBig");
+	}
+
+	@Ignore
+	@Test
+	public void testRangeBig() throws Exception {
+		testJava("setoperation_big/SetRangeBig");
+	}
+
+	@Test
+	public void testUnionBig() throws Exception {
+		testJava("setoperation_big/SetUnionBig");
+	}
+
+	@Test
+	public void testCardSmall() throws Exception {
+		testJava("setoperation_small/SetCardSmall");
+	}
+
+	@Test
+	public void testComplementSmall() throws Exception {
+		testJava("setoperation_small/SetComplementSmall");
+	}
+
+	@Test
+	public void testElementOfSmall() throws Exception {
+		testJava("setoperation_small/SetElementOfSmall");
+	}
+
+	@Test
+	public void testIntersectionSmall() throws Exception {
+		testJava("setoperation_small/SetIntersectionSmall");
+	}
+
+	@Ignore
+	@Test
+	public void testRangeSmall() throws Exception {
+		testJava("setoperation_small/SetRangeSmall");
+	}
+
+	@Test
+	public void testUnionSmall() throws Exception {
+		testJava("setoperation_small/SetUnionSmall");
+	}
+
 
 	private void cleanUp(String path) {
 		File file = new File(path);
