@@ -49,7 +49,7 @@ public class Sieve {
         Sieve sieve = new Sieve();
         sieve.initialize();
         long start = System.nanoTime();
-        sieve.ComputeNumberOfPrimes();
+        System.out.println(sieve.ComputeNumberOfPrimes());
         long end = System.nanoTime();
         System.out.println("Execution: " + (end - start));
     }

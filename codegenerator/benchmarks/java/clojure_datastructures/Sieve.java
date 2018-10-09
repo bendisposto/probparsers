@@ -27,8 +27,8 @@ public class Sieve {
             throw new RuntimeException("Machine was not initialized");
         }
         BInteger res = null;
-        while((cur.greater(new BInteger("1")).and(cur.multiply(cur).lessEqual(limit))).booleanValue()) {
-            if((numbers.elementOf(cur)).booleanValue()) {
+	while((cur.greater(new BInteger("1")).and(cur.multiply(cur).lessEqual(limit))).booleanValue()) {
+	    if((numbers.elementOf(cur)).booleanValue()) {
                 BInteger n = null;
                 BSet set = null;
                 n = (BInteger) cur;
@@ -49,7 +49,7 @@ public class Sieve {
         Sieve sieve = new Sieve();
         sieve.initialize();
         long start = System.nanoTime();
-        sieve.ComputeNumberOfPrimes();
+        System.out.println(sieve.ComputeNumberOfPrimes().intValue());
         long end = System.nanoTime();
         System.out.println("Execution: " + (end - start));
     }

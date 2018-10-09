@@ -23,7 +23,7 @@ public class Plus {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger("500000"))).booleanValue()) {
+        while((counter.less(new BInteger("5000000"))).booleanValue()) {
             counter = (BInteger) counter.plus(new BInteger("1"));
             value = (BInteger) value.plus(new BInteger("1"));
         }
