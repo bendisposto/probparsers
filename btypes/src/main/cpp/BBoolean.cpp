@@ -123,12 +123,15 @@ class BBoolean : public BObject {
             return new BBoolean(booleanValue() != other.booleanValue());
         }
 
-        bool operator !=(BObject o) {
-            return true;
+        bool operator !=(BBoolean other) {
+            return booleanValue() != other.booleanValue();
         }
 
-        bool operator ==(BObject o) {
-            return true;
+        bool operator ==(BBoolean other) {
+            return booleanValue() == other.booleanValue();
         }
 
+        bool operator <(BBoolean other) {
+            return booleanValue() != other.booleanValue();
+        }
 };

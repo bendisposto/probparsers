@@ -5,7 +5,7 @@
 using namespace std;
 
 
-class BInteger : BObject {
+class BInteger : public BObject {
 
     /*
 	@Override
@@ -177,15 +177,16 @@ class BInteger : BObject {
         }
 
         BInteger operator=(BInteger other) {
-            return BInteger(other.value);
+            this->value = other.value;
+            return *this;
         }
 
-        bool operator !=(BObject o) {
-            return true;
+        bool operator !=(BInteger o) {
+            return compareTo(o) != 0;
         }
 
-        bool operator ==(BObject o) {
-            return true;
+        bool operator ==(BInteger o) {
+            return compareTo(o) == 0;
         }
 
 };

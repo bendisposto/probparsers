@@ -27,6 +27,8 @@ class BNumber : public BObject {
 
         virtual BBoolean less(BNumber o);
 
+        virtual bool less(BNumber o);
+
         virtual BBoolean lessEqual(BNumber o);
 
         virtual BBoolean greater(BNumber o);
