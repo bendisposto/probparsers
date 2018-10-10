@@ -4,6 +4,9 @@
 
 using namespace std;
 
+#ifndef BNUMBER_H
+#define BNUMBER_H
+
 class BNumber : public BObject {
 
     public:
@@ -26,6 +29,8 @@ class BNumber : public BObject {
         }
 
         virtual BBoolean less(BNumber o);
+
+        virtual bool less(BNumber o);
 
         virtual BBoolean lessEqual(BNumber o);
 
@@ -64,3 +69,4 @@ class BNumber : public BObject {
         virtual BNumber positive();
 
 };
+#endif

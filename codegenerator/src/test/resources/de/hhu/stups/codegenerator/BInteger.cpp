@@ -46,6 +46,8 @@ class BInteger : public BObject {
 
         BInteger(){}
 
+        BInteger(const BObject& v) : BObject(v) {}
+
         int intValue() {
             return value;
         }

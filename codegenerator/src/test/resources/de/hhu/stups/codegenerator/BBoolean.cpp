@@ -69,6 +69,8 @@ class BBoolean : public BObject {
 
     	BBoolean(){}
 
+    	BBoolean(const BObject& v) : BObject(v) {}
+
     	static string toString(bool b) {
     		return b ? "true" : "false";
     	}

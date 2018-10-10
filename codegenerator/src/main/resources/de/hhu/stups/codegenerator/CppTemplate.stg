@@ -72,7 +72,7 @@ BSet <identifier> = <set_enumeration(enums)>;
 >>
 
 set_enumeration(enums) ::= <<
-BSet(<enums; separator=", ">)
+BSet((BObject[]){<enums; separator=", ">})
 >>
 
 enum_call(class, identifier) ::= <<

@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <vector>
 #include <cstdarg>
 #include "BInteger.cpp"
+#include "BCouple.cpp"
 
 #ifndef BSET_H
 #define BSET_H
@@ -20,14 +22,19 @@ class BSet : public BObject {
             this->set = elements;
         }
 
-        BSet(BObject elements...) {
+        BSet(BObject elements[]) {
             this->set = std::set<BObject>();
-            this->set.insert(elements);
+            int length = sizeof(elements)/sizeof(*elements);
+            for(int i = 0; i < length; i++) {
+                this->set.insert(elements[i]);
+            }
         }
 
         BSet() {
             this->set = std::set<BObject>();
         }
+
+        BSet(const BObject& v) : BObject(v) {}
 
 	/*public BSet(java.util.Set<BObject> elements) {
 		this.set = HashTreePSet.from(elements);
@@ -171,24 +178,29 @@ class BSet : public BObject {
             return BSet(result);
         }
 
-        /*BSet relationImage(BSet domain) {
-            return new BSet(set.stream()
-                .filter(object -> domain.contains(((BCouple) object).getFirst()))
-                .map(object -> ((BCouple) object).getSecond())
-                .collect(Collectors.toSet()));
+        BSet relationImage(BSet domain) {
+            std::set<BObject> result;
+            for(std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
+                BObject object = *it;
+                BCouple couple = (BCouple) object;
+                if(domain.set.find(couple.getFirst()) == domain.set.end()) {
+                    result.insert(couple.getSecond());
+                }
+            }
+            return BSet(result);
         }
 
 
         BObject functionCall(BObject arg) {
-            List<BCouple> matchedCouples = set.stream()
-                .map(object -> (BCouple) object)
-                .filter(couple -> couple.getFirst().equals(arg))
-                .collect(Collectors.toList());
-            if(matchedCouples.size() > 0) {
-                return matchedCouples.get(0).getSecond();
+            for(std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
+                BObject object = *it;
+                BCouple couple = (BCouple) object;
+                if(couple.getFirst() == arg) {
+                    return couple.getSecond();
+                }
             }
-            throw new RuntimeException("Argument is not in the key set of this map");
-        }*/
+            throw runtime_error("Argument is not in the key set of this map");
+        }
 
 
         BInteger card() {

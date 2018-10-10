@@ -4,6 +4,9 @@
 
 using namespace std;
 
+#ifndef BCOUPLE_H
+#define BCOUPLE_H
+
 class BCouple : public BObject {
 
 	private:
@@ -12,13 +15,14 @@ class BCouple : public BObject {
 
 	public:
 
-        BCouple(BObject* left, BObject* right) {
-            if (left == NULL || right == NULL) {
-                throw runtime_error("Illegal argument");
-            }
-            lhs = *left;
-            rhs = *right;
+        BCouple(BObject lhs, BObject rhs) {
+            this->lhs = lhs;
+            this->rhs = rhs;
         }
+
+        BCouple(){}
+
+        BCouple(const BObject& v) : BObject(v) {}
 
         BObject getFirst() {
             return lhs;
@@ -35,6 +39,10 @@ class BCouple : public BObject {
         BBoolean operator !=(BCouple o) {
             return new BBoolean(lhs != o.lhs || rhs != o.rhs);
         }
+
+        /*BCouple operator() {
+            return *this;
+        }*/
 
 	/*public boolean equals(Object o) {
 		if (this == o) {
@@ -59,3 +67,4 @@ class BCouple : public BObject {
 	}*/
 
 };
+#endif
