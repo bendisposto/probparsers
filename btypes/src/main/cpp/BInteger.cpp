@@ -5,6 +5,9 @@
 using namespace std;
 
 
+#ifndef BINTEGER_H
+#define BINTEGER_H
+
 class BInteger : public BObject {
 
     /*
@@ -41,6 +44,8 @@ class BInteger : public BObject {
             value = val;
         }
 
+        BInteger(){}
+
         int intValue() {
             return value;
         }
@@ -54,28 +59,28 @@ class BInteger : public BObject {
         }
 
         BBoolean lessEqual(BInteger o) {
-            return new BBoolean(compareTo(o) <= 0);
+            return BBoolean(compareTo(o) <= 0);
         }
 
 
         BBoolean greaterEqual(BInteger o) {
-            return new BBoolean(compareTo(o) >= 0);
+            return BBoolean(compareTo(o) >= 0);
         }
 
         BBoolean less(BInteger o) {
-            return new BBoolean(compareTo(o) < 0);
+            return BBoolean(compareTo(o) < 0);
         }
 
         BBoolean greater(BInteger o) {
-            return new BBoolean(compareTo(o) > 0);
+            return BBoolean(compareTo(o) > 0);
         }
 
         BBoolean equal(BInteger o) {
-            return new BBoolean(compareTo(o) == 0);
+            return BBoolean(compareTo(o) == 0);
         }
 
         BBoolean unequal(BInteger o) {
-            return new BBoolean(compareTo(o) != 0);
+            return BBoolean(compareTo(o) != 0);
         }
 
         /*int compareTo(java.lang.Number o) {
@@ -190,3 +195,4 @@ class BInteger : public BObject {
         }
 
 };
+#endif

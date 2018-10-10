@@ -1,7 +1,11 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <cstdarg>
 #include "BInteger.cpp"
+
+#ifndef BSET_H
+#define BSET_H
 
 using namespace std;
 
@@ -14,6 +18,15 @@ class BSet : public BObject {
 
         BSet(std::set<BObject> elements) {
             this->set = elements;
+        }
+
+        BSet(BObject elements...) {
+            this->set = std::set<BObject>();
+            this->set.insert(elements);
+        }
+
+        BSet() {
+            this->set = std::set<BObject>();
         }
 
 	/*public BSet(java.util.Set<BObject> elements) {
@@ -183,7 +196,7 @@ class BSet : public BObject {
         }
 
         BBoolean elementOf(BObject object) {
-            return new BBoolean(this->set.find(object) != this->set.end());
+            return BBoolean(this->set.find(object) != this->set.end());
         }
 
         /*BBoolean equal(BSet o) {
@@ -195,3 +208,4 @@ class BSet : public BObject {
         }*/
 
 };
+#endif

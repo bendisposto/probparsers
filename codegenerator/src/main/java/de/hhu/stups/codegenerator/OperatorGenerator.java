@@ -71,8 +71,11 @@ public class OperatorGenerator {
 
     private final STGroup group;
 
-    public OperatorGenerator(final STGroup group) {
+    private final NameHandler nameHandler;
+
+    public OperatorGenerator(final STGroup group, final NameHandler nameHandler) {
         this.group = group;
+        this.nameHandler = nameHandler;
     }
 
     /*
@@ -176,22 +179,24 @@ public class OperatorGenerator {
     */
     private ST generateUnary(ExpressionOperatorNode.ExpressionOperator operator) {
         ST template = group.getInstanceOf("unary");
+        String operatorName;
         switch (operator) {
             case UNARY_MINUS:
-                template.add("operator", "negative");
+                operatorName = "negative";
                 break;
             case CARD:
-                template.add("operator", "card");
+                operatorName = "card";
                 break;
             case FUNCTION_CALL:
-                template.add("operator", "functionCall");
+                operatorName = "functionCall";
                 break;
             case RELATIONAL_IMAGE:
-                template.add("operator", "relationImage");
+                operatorName = "relationImage";
                 break;
             default:
                 throw new RuntimeException("Given operator is not implemented: " + operator);
         }
+        template.add("operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -200,34 +205,36 @@ public class OperatorGenerator {
     */
     private ST generateBinary(ExpressionOperatorNode.ExpressionOperator operator) {
         ST template = group.getInstanceOf("binary");
+        String operatorName;
         switch(operator) {
             case PLUS:
-                template.add("operator", "plus");
+                operatorName = "plus";
                 break;
             case MINUS:
-                template.add("operator", "minus");
+                operatorName = "minus";
                 break;
             case MULT:
-                template.add("operator", "multiply");
+                operatorName = "multiply";
                 break;
             case DIVIDE:
-                template.add("operator", "divide");
+                operatorName = "divide";
                 break;
             case MOD:
-                template.add("operator", "modulo");
+                operatorName = "modulo";
                 break;
             case INTERSECTION:
-                template.add("operator", "intersect");
+                operatorName = "intersect";
                 break;
             case UNION:
-                template.add("operator", "union");
+                operatorName = "union";
                 break;
             case SET_SUBTRACTION:
-                template.add("operator", "complement");
+                operatorName = "complement";
                 break;
             default:
                 throw new RuntimeException("Given operator is not implemented: " + operator);
         }
+        template.add("operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -236,13 +243,15 @@ public class OperatorGenerator {
     */
     private ST generateUnary(PredicateOperatorNode.PredicateOperator operator) {
         ST template = group.getInstanceOf("unary");
+        String operatorName;
         switch(operator) {
             case NOT:
-                template.add("operator", "not");
+                operatorName = "not";
                 break;
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
+        template.add("operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -251,22 +260,24 @@ public class OperatorGenerator {
     */
     private ST generateBinary(PredicateOperatorNode.PredicateOperator operator) {
         ST template = group.getInstanceOf("binary");
+        String operatorName;
         switch(operator) {
             case AND:
-                template.add("operator", "and");
+                operatorName = "and";
                 break;
             case OR:
-                template.add("operator", "or");
+                operatorName = "or";
                 break;
             case IMPLIES:
-                template.add("operator", "implies");
+                operatorName = "implies";
                 break;
             case EQUIVALENCE:
-                template.add("operator", "equivalent");
+                operatorName = "equivalent";
                 break;
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
+        template.add("operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -275,31 +286,33 @@ public class OperatorGenerator {
     */
     private ST generateBinary(PredicateOperatorWithExprArgsNode.PredOperatorExprArgs operator) {
         ST template = group.getInstanceOf("binary");
+        String operatorName;
         switch(operator) {
             case ELEMENT_OF:
-                template.add("operator", "elementOf");
+                operatorName = "elementOf";
                 break;
             case EQUAL:
-                template.add("operator", "equal");
+                operatorName = "equal";
                 break;
             case NOT_EQUAL:
-                template.add("operator", "unequal");
+                operatorName = "unequal";
                 break;
             case LESS:
-                template.add("operator", "less");
+                operatorName = "less";
                 break;
             case LESS_EQUAL:
-                template.add("operator", "lessEqual");
+                operatorName = "lessEqual";
                 break;
             case GREATER:
-                template.add("operator", "greater");
+                operatorName = "greater";
                 break;
             case GREATER_EQUAL:
-                template.add("operator", "greaterEqual");
+                operatorName = "greaterEqual";
                 break;
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
+        template.add("operator", nameHandler.handle(operatorName));
         return template;
     }
 

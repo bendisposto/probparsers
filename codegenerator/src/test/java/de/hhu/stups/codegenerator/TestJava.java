@@ -449,6 +449,18 @@ public class TestJava {
 		testJava("setoperation_small/SetUnionSmall");
 	}
 
+	@Ignore
+	@Test
+	public void testCruiseController1() throws Exception {
+		testJava("Cruise_finite1");
+	}
+
+	@Ignore
+	@Test
+	public void testCruiseControllerk() throws Exception {
+		testJava("Cruise_finite_k");
+	}
+
 
 	private void cleanUp(String path) {
 		File file = new File(path);

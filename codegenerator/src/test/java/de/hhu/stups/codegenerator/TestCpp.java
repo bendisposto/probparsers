@@ -48,9 +48,6 @@ public class TestCpp {
 			}
 		});
 
-
-
-
 		Set<File> oFiles = cppFilePaths.stream()
 				.map(path -> new File(path.getParent().toFile(), machine + ".o"))
 				.collect(Collectors.toSet());
@@ -244,6 +241,177 @@ public class TestCpp {
 	@Test
 	public void testManyLocalDeclarations() throws Exception {
 		testCpp("ManyLocalDeclarations");
+	}
+
+	@Test
+	public void testPlus() throws Exception {
+		testCpp("arithmetic/Plus");
+	}
+
+	@Test
+	public void testMinus() throws Exception {
+		testCpp("arithmetic/Minus");
+	}
+
+	@Test
+	public void testMultiply() throws Exception {
+		testCpp("arithmetic/Multiply");
+	}
+
+	@Test
+	public void testDivide() throws Exception {
+		testCpp("arithmetic/Divide");
+	}
+
+
+	@Test
+	public void testModulo() throws Exception {
+		testCpp("arithmetic/Modulo");
+	}
+
+	@Test
+	public void testNegative() throws Exception {
+		testCpp("arithmetic/Negative");
+	}
+
+	@Ignore
+	@Test
+	public void testPositive() throws Exception {
+		testCpp("arithmetic/Positive");
+	}
+
+	@Test
+	public void testSmallNumbers() throws Exception {
+		testCpp("integers/SmallNumbers");
+	}
+
+	@Test
+	public void testBigNumbers() throws Exception {
+		testCpp("integers/BigNumbers");
+	}
+
+	@Test
+	public void testAnd() throws Exception {
+		testCpp("logical/And");
+	}
+
+
+	@Test
+	public void testOr() throws Exception {
+		testCpp("logical/Or");
+	}
+
+
+	@Test
+	public void testImpliesPerformance() throws Exception {
+		testCpp("logical/Implies");
+	}
+
+
+	@Ignore
+	@Test
+	public void testNot() throws Exception {
+		testCpp("logical/Not");
+	}
+
+	@Test
+	public void testEquivalent() throws Exception {
+		testCpp("logical/Equivalent");
+	}
+
+	@Test
+	public void testLess() throws Exception {
+		testCpp("comparison/Less");
+	}
+
+	@Test
+	public void testLessEqual() throws Exception {
+		testCpp("comparison/LessEqual");
+	}
+
+	@Test
+	public void testGreater() throws Exception {
+		testCpp("comparison/Greater");
+	}
+
+
+	@Test
+	public void testGreaterEqual() throws Exception {
+		testCpp("comparison/GreaterEqual");
+	}
+
+
+	@Test
+	public void tessEqual() throws Exception {
+		testCpp("comparison/Equal");
+	}
+
+
+	@Test
+	public void testUnequal() throws Exception {
+		testCpp("comparison/Unequal");
+	}
+
+	@Test
+	public void testCardBig() throws Exception {
+		testCpp("setoperation_big/SetCardBig");
+	}
+
+	@Test
+	public void testComplementBig() throws Exception {
+		testCpp("setoperation_big/SetComplementBig");
+	}
+
+	@Test
+	public void testElementOfBig() throws Exception {
+		testCpp("setoperation_big/SetElementOfBig");
+	}
+
+	@Test
+	public void testIntersectionBig() throws Exception {
+		testCpp("setoperation_big/SetIntersectionBig");
+	}
+
+	@Ignore
+	@Test
+	public void testRangeBig() throws Exception {
+		testCpp("setoperation_big/SetRangeBig");
+	}
+
+	@Test
+	public void testUnionBig() throws Exception {
+		testCpp("setoperation_big/SetUnionBig");
+	}
+
+	@Test
+	public void testCardSmall() throws Exception {
+		testCpp("setoperation_small/SetCardSmall");
+	}
+
+	@Test
+	public void testComplementSmall() throws Exception {
+		testCpp("setoperation_small/SetComplementSmall");
+	}
+
+	@Test
+	public void testElementOfSmall() throws Exception {
+		testCpp("setoperation_small/SetElementOfSmall");
+	}
+
+	@Test
+	public void testIntersectionSmall() throws Exception {
+		testCpp("setoperation_small/SetIntersectionSmall");
+	}
+
+	@Ignore
+	@Test
+	public void testRangeSmall() throws Exception {
+		testCpp("setoperation_small/SetRangeSmall");
+	}
+
+	@Test
+	public void testUnionSmall() throws Exception {
+		testCpp("setoperation_small/SetUnionSmall");
 	}
 
 	private void cleanUp(String path) {

@@ -4,6 +4,9 @@
 
 using namespace std;
 
+#ifndef BCOUPLE_H
+#define BCOUPLE_H
+
 class BCouple : public BObject {
 
 	private:
@@ -19,6 +22,8 @@ class BCouple : public BObject {
             lhs = *left;
             rhs = *right;
         }
+
+        BCouple(){}
 
         BObject getFirst() {
             return lhs;
@@ -59,3 +64,4 @@ class BCouple : public BObject {
 	}*/
 
 };
+#endif

@@ -1,11 +1,15 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include "BObject.cpp"
+#include <cstdarg>
+#include "BInteger.cpp"
+
+#ifndef BSET_H
+#define BSET_H
 
 using namespace std;
 
-class BSet : public BObject, public std::set<BObject> {
+class BSet : public BObject {
 
     private:
         std::set<BObject> set;
@@ -14,6 +18,15 @@ class BSet : public BObject, public std::set<BObject> {
 
         BSet(std::set<BObject> elements) {
             this->set = elements;
+        }
+
+        BSet(BObject elements...) {
+            this->set = std::set<BObject>();
+            this->set.insert(elements);
+        }
+
+        BSet() {
+            this->set = std::set<BObject>();
         }
 
 	/*public BSet(java.util.Set<BObject> elements) {
@@ -117,29 +130,48 @@ class BSet : public BObject, public std::set<BObject> {
             return set.iterator();
         }*/
 
-        /*BSet intersect(BSet set) {
-            return new BSet(this.set.plusAll(set)
-                    .minusAll(this.set.minusAll(set))
-                    .minusAll(set.set.minusAll(this.set)));
+        BSet intersect(BSet set) {
+            std::set<BObject> result;
+            for (std::set<BObject>::iterator it = set.set.begin(); it != set.set.end(); ++it) {
+                BObject obj = *it;
+                if(this->set.find(obj) != this->set.end()) {
+                    result.insert(obj);
+                }
+            }
+            return BSet(result);
         }
 
         BSet complement(BSet set) {
-            return new BSet(this.set.minusAll(set));
+            std::set<BObject> result;
+            for (std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
+                BObject obj = *it;
+                if(set.set.find(obj) != set.set.end()) {
+                    result.insert(*it);
+                }
+            }
+            return BSet(result);
         }
 
-        BSet union(BSet set) {
-            return new BSet(this.set.plusAll(set));
+        BSet _union(BSet set) {
+            std::set<BObject> result;
+            for (std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
+                result.insert(*it);
+            }
+            for (std::set<BObject>::iterator it = set.set.begin(); it != set.set.end(); ++it) {
+                result.insert(*it);
+            }
+            return BSet(result);
         }
 
         static BSet range(BInteger a, BInteger b) {
-            HashSet<BObject> set = new HashSet<>();
+            std::set<BObject> result;
             for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
-                set.add(new BInteger(new java.math.BigInteger(String.valueOf(i))));
+                result.insert(BInteger(i));
             }
-            return new BSet(set);
+            return BSet(result);
         }
 
-        BSet relationImage(BSet domain) {
+        /*BSet relationImage(BSet domain) {
             return new BSet(set.stream()
                 .filter(object -> domain.contains(((BCouple) object).getFirst()))
                 .map(object -> ((BCouple) object).getSecond())
@@ -156,18 +188,18 @@ class BSet : public BObject, public std::set<BObject> {
                 return matchedCouples.get(0).getSecond();
             }
             throw new RuntimeException("Argument is not in the key set of this map");
-        }
+        }*/
 
 
         BInteger card() {
-            return new BInteger(String.valueOf(this.size()));
+            return BInteger(this->set.size());
         }
 
         BBoolean elementOf(BObject object) {
-            return new BBoolean(this.contains(object));
+            return BBoolean(this->set.find(object) != this->set.end());
         }
 
-        BBoolean equal(BSet o) {
+        /*BBoolean equal(BSet o) {
             return new BBoolean(equals(o));
         }
 
@@ -176,3 +208,4 @@ class BSet : public BObject, public std::set<BObject> {
         }*/
 
 };
+#endif

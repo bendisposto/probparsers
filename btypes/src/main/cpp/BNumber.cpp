@@ -4,6 +4,9 @@
 
 using namespace std;
 
+#ifndef BNUMBER_H
+#define BNUMBER_H
+
 class BNumber : public BObject {
 
     public:
@@ -66,3 +69,4 @@ class BNumber : public BObject {
         virtual BNumber positive();
 
 };
+#endif

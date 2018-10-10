@@ -105,7 +105,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
-		this.operatorGenerator = new OperatorGenerator(currentGroup);
+		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
 		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
 		this.setToEnum = new HashMap<>();
