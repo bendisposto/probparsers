@@ -65,6 +65,30 @@ setunionbig:
 	$(PROBCLI) SetUnionBig.mch -init -execute 1
 setunionsmall:
 	$(PROBCLI) SetUnionSmall.mch -init -execute 1
+rangebig:
+	$(PROBCLI) RangeBig.mch -init -execute 1
+rangesmall:
+	$(PROBCLI) RangeSmall.mch -init -execute 1
+rangecardbig:
+	$(PROBCLI) RangeCardBig.mch -init -execute 1
+rangecardsmall:
+	$(PROBCLI) RangeCardSmall.mch -init -execute 1
+rangecomplementbig:
+	$(PROBCLI) RangeComplementBig.mch -init -execute 1
+rangecomplementsmall:
+	$(PROBCLI) RangeComplementSmall.mch -init -execute 1
+rangeelementofbig:
+	$(PROBCLI) RangeElementOfBig.mch -init -execute 1
+rangeelementofsmall:
+	$(PROBCLI) RangeElementOfSmall.mch -init -execute 1
+rangeintersectionbig:
+	$(PROBCLI) RangeIntersectionBig.mch -init -execute 1
+rangeintersectionsmall:
+	$(PROBCLI) RangeIntersectionSmall.mch -init -execute 1
+rangeunionbig:
+	$(PROBCLI) RangeUnionBig.mch -init -execute 1
+rangeunionsmall:
+	$(PROBCLI) RangeUnionSmall.mch -init -execute 1
 
 clean:
 	rm *.prob

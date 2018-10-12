@@ -26,7 +26,7 @@ public class RangeSmall {
             throw new RuntimeException("Machine was not initialized");
         }
         while((counter.less(new BInteger("5000000"))).booleanValue()) {
-            set = (BSet) BSet.range(new BInteger("0"),new BInteger("1"));
+            set = (BSet) BSet.range(new BInteger("0"),new BInteger("5"));
             counter = (BInteger) counter.plus(new BInteger("1"));
         }
     }

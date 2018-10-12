@@ -8,7 +8,7 @@ INITIALISATION counter := 0; set := {}
 
 OPERATIONS
 
-	simulate = WHILE counter < 10000 DO
+	simulate = WHILE counter < 1000 DO
 	      set := 1..25000;
 	      counter := counter + 1
 		  INVARIANT 1 = 1

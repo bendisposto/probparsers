@@ -64,6 +64,30 @@ setunionbig: SetUnionBig.class
 	java -cp :btypes.jar SetUnionBig
 setunionsmall: SetUnionSmall.class
 	java -cp :btypes.jar SetUnionSmall
+rangebig: RangeBig.class
+	java -cp :btypes.jar RangeBig
+rangesmall: RangeSmall.class
+	java -cp :btypes.jar RangeSmall
+rangecardbig: RangeCardBig.class
+	java -cp :btypes.jar RangeCardBig
+rangecardsmall: RangeCardSmall.class
+	java -cp :btypes.jar RangeCardSmall
+rangecomplementbig: RangeComplementBig.class
+	java -cp :btypes.jar RangeComplementBig
+rangecomplementsmall: RangeComplementSmall.class
+	java -cp :btypes.jar RangeComplementSmall
+rangeelementofbig: RangeElementOfBig.class
+	java -cp :btypes.jar RangeElementOfBig
+rangeelementofsmall: RangeElementOfSmall.class
+	java -cp :btypes.jar RangeElementOfSmall
+rangeintersectionbig: RangeIntersectionBig.class
+	java -cp :btypes.jar RangeIntersectionBig
+rangeintersectionsmall: RangeIntersectionSmall.class
+	java -cp :btypes.jar RangeIntersectionSmall
+rangeunionbig: RangeUnionBig.class
+	java -cp :btypes.jar RangeUnionBig
+rangeunionsmall: RangeUnionSmall.class
+	java -cp :btypes.jar RangeUnionSmall
 
 
 
@@ -137,6 +161,30 @@ SetUnionBig.class: SetUnionBig.java
 	javac -cp btypes.jar SetUnionBig.java
 SetUnionSmall.class: SetUnionSmall.java
 	javac -cp btypes.jar SetUnionSmall.java
+RangeBig.class: RangeBig.java
+	javac -cp btypes.jar RangeBig.java
+RangeSmall.class: RangeSmall.java
+	javac -cp btypes.jar RangeSmall.java
+RangeCardBig.class: RangeCardBig.java
+	javac -cp btypes.jar RangeCardBig.java
+RangeCardSmall.class: RangeCardSmall.java
+	javac -cp btypes.jar RangeCardSmall.java
+RangeComplementBig.class: RangeComplementBig.java
+	javac -cp btypes.jar RangeComplementBig.java
+RangeComplementSmall.class: RangeComplementSmall.java
+	javac -cp btypes.jar RangeComplementSmall.java
+RangeElementOfBig.class: RangeElementOfBig.java
+	javac -cp btypes.jar RangeElementOfBig.java
+RangeElementOfSmall.class: RangeElementOfSmall.java
+	javac -cp btypes.jar RangeElementOfSmall.java
+RangeIntersectionBig.class: RangeIntersectionBig.java
+	javac -cp btypes.jar RangeIntersectionBig.java
+RangeIntersectionSmall.class: RangeIntersectionSmall.java
+	javac -cp btypes.jar RangeIntersectionSmall.java
+RangeUnionBig.class: RangeUnionBig.java
+	javac -cp btypes.jar RangeUnionBig.java
+RangeUnionSmall.class: RangeUnionSmall.java
+	javac -cp btypes.jar RangeUnionSmall.java
 
 clean:
 	rm *.class

@@ -64,6 +64,30 @@ setunionbig: SetUnionBig.class
 	java -cp :btypes_persistent.jar SetUnionBig
 setunionsmall: SetUnionSmall.class
 	java -cp :btypes_persistent.jar SetUnionSmall
+rangebig: RangeBig.class
+	java -cp :btypes_persistent.jar RangeBig
+rangesmall: RangeSmall.class
+	java -cp :btypes_persistent.jar RangeSmall
+rangecardbig: RangeCardBig.class
+	java -cp :btypes_persistent.jar RangeCardBig
+rangecardsmall: RangeCardSmall.class
+	java -cp :btypes_persistent.jar RangeCardSmall
+rangecomplementbig: RangeComplementBig.class
+	java -cp :btypes_persistent.jar RangeComplementBig
+rangecomplementsmall: RangeComplementSmall.class
+	java -cp :btypes_persistent.jar RangeComplementSmall
+rangeelementofbig: RangeElementOfBig.class
+	java -cp :btypes_persistent.jar RangeElementOfBig
+rangeelementofsmall: RangeElementOfSmall.class
+	java -cp :btypes_persistent.jar RangeElementOfSmall
+rangeintersectionbig: RangeIntersectionBig.class
+	java -cp :btypes_persistent.jar RangeIntersectionBig
+rangeintersectionsmall: RangeIntersectionSmall.class
+	java -cp :btypes_persistent.jar RangeIntersectionSmall
+rangeunionbig: RangeUnionBig.class
+	java -cp :btypes_persistent.jar RangeUnionBig
+rangeunionsmall: RangeUnionSmall.class
+	java -cp :btypes_persistent.jar RangeUnionSmall
 
 
 
@@ -137,6 +161,30 @@ SetUnionBig.class: SetUnionBig.java
 	javac -cp btypes_persistent.jar SetUnionBig.java
 SetUnionSmall.class: SetUnionSmall.java
 	javac -cp btypes_persistent.jar SetUnionSmall.java
+RangeBig.class: RangeBig.java
+	javac -cp btypes_persistent.jar RangeBig.java
+RangeSmall.class: RangeSmall.java
+	javac -cp btypes_persistent.jar RangeSmall.java
+RangeCardBig.class: RangeCardBig.java
+	javac -cp btypes_persistent.jar RangeCardBig.java
+RangeCardSmall.class: RangeCardSmall.java
+	javac -cp btypes_persistent.jar RangeCardSmall.java
+RangeComplementBig.class: RangeComplementBig.java
+	javac -cp btypes_persistent.jar RangeComplementBig.java
+RangeComplementSmall.class: RangeComplementSmall.java
+	javac -cp btypes_persistent.jar RangeComplementSmall.java
+RangeElementOfBig.class: RangeElementOfBig.java
+	javac -cp btypes_persistent.jar RangeElementOfBig.java
+RangeElementOfSmall.class: RangeElementOfSmall.java
+	javac -cp btypes_persistent.jar RangeElementOfSmall.java
+RangeIntersectionBig.class: RangeIntersectionBig.java
+	javac -cp btypes_persistent.jar RangeIntersectionBig.java
+RangeIntersectionSmall.class: RangeIntersectionSmall.java
+	javac -cp btypes_persistent.jar RangeIntersectionSmall.java
+RangeUnionBig.class: RangeUnionBig.java
+	javac -cp btypes_persistent.jar RangeUnionBig.java
+RangeUnionSmall.class: RangeUnionSmall.java
+	javac -cp btypes_persistent.jar RangeUnionSmall.java
 
 clean:
 	rm *.class

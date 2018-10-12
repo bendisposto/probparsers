@@ -407,12 +407,6 @@ public class TestJava {
 		testJava("setoperation_big/SetIntersectionBig");
 	}
 
-	@Ignore
-	@Test
-	public void testRangeBig() throws Exception {
-		testJava("setoperation_big/SetRangeBig");
-	}
-
 	@Test
 	public void testUnionBig() throws Exception {
 		testJava("setoperation_big/SetUnionBig");
@@ -438,16 +432,73 @@ public class TestJava {
 		testJava("setoperation_small/SetIntersectionSmall");
 	}
 
-	@Ignore
-	@Test
-	public void testRangeSmall() throws Exception {
-		testJava("setoperation_small/SetRangeSmall");
-	}
-
 	@Test
 	public void testUnionSmall() throws Exception {
 		testJava("setoperation_small/SetUnionSmall");
 	}
+
+	@Test
+	public void testRangeBig() throws Exception {
+		testJava("range_big/RangeBig");
+	}
+
+
+	@Test
+	public void testRangeCardBig() throws Exception {
+		testJava("range_big/RangeCardBig");
+	}
+
+	@Test
+	public void testRangeComplementBig() throws Exception {
+		testJava("range_big/RangeComplementBig");
+	}
+
+	@Test
+	public void testRangeElementOfBig() throws Exception {
+		testJava("range_big/RangeElementOfBig");
+	}
+
+	@Test
+	public void testRangeIntersectionBig() throws Exception {
+		testJava("range_big/RangeIntersectionBig");
+	}
+
+	@Test
+	public void testRangeUnionBig() throws Exception {
+		testJava("range_big/RangeUnionBig");
+	}
+
+	@Test
+	public void testRangeSmall() throws Exception {
+		testJava("range_small/RangeSmall");
+	}
+
+
+	@Test
+	public void testRangeCardSmall() throws Exception {
+		testJava("range_small/RangeCardSmall");
+	}
+
+	@Test
+	public void testRangeComplementSmall() throws Exception {
+		testJava("range_small/RangeComplementSmall");
+	}
+
+	@Test
+	public void testRangeElementOfSmall() throws Exception {
+		testJava("range_small/RangeElementOfSmall");
+	}
+
+	@Test
+	public void testRangeIntersectionSmall() throws Exception {
+		testJava("range_small/RangeIntersectionSmall");
+	}
+
+	@Test
+	public void testRangeUnionSmall() throws Exception {
+		testJava("range_small/RangeUnionSmall");
+	}
+
 
 	@Ignore
 	@Test
