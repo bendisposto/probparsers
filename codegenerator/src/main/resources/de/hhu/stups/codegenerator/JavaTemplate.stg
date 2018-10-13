@@ -170,6 +170,27 @@ else {
 }
 >>
 
+choice(len, then, choice1) ::= <<
+int index = (int) Math.floor(Math.random() * <len>);
+if(index == 0) {
+    <then>
+} <choice1; separator=" ">
+>>
+
+
+choice1(counter, then) ::= <<
+else if(index == <counter>) {
+    <then>
+}
+>>
+
+choice2(then) ::= <<
+else {
+    <then>
+}
+>>
+
+
 while(predicate, then) ::= <<
 while((<predicate>).booleanValue()) {
     <then>

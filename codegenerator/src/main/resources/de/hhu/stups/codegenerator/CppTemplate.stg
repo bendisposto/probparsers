@@ -29,6 +29,8 @@ class <machine> {
 
     public:
 
+        <machine>(){}
+
         <initialization>
 
         <operations; separator="\n\n">
@@ -81,16 +83,19 @@ enum_call(class, identifier) ::= <<
 
 set_enum_declaration(name,enums) ::= <<
 class <name> : public BObject {
-
     public:
 
         enum <name>_type {
             <enums;separator=", \n">
         };
 
+        <name>_type value;
+
         <name>(<name>_type type) {
             this->value = type;
         }
+
+        <name>(){}
 
         BBoolean equal(<name> o) {
             return BBoolean(this->value == o.value);
@@ -99,9 +104,6 @@ class <name> : public BObject {
         BBoolean unequal(<name> o) {
             return BBoolean(this->value != o.value);
         }
-
-    private:
-        <name>_type value;
 };
 >>
 

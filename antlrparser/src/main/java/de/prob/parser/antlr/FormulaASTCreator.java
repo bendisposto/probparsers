@@ -16,6 +16,7 @@ import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode.Pred
 import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ChoiceSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
@@ -602,4 +603,12 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		return ctx.substitution().accept(this);
 	}
 
+	@Override
+	public Node visitChoiceSubstitution(BParser.ChoiceSubstitutionContext ctx) {
+		List<SubstitutionNode> substitutions = new ArrayList<>();
+		for(SubstitutionContext sCtx : ctx.substitution()) {
+			substitutions.add((SubstitutionNode) sCtx.accept(this));
+		}
+		return new ChoiceSubstitutionNode(Util.createSourceCodePosition(ctx), substitutions);
+	}
 }

@@ -4,6 +4,7 @@ import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ChoiceSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
@@ -38,6 +39,8 @@ public interface ParametrisedSubstitutionVisitor<R, P> {
 			return visitWhileSubstitutionNode((WhileSubstitutionNode) node, expected);
 		}else if (node instanceof VarSubstitutionNode) {
 			return visitVarSubstitutionNode((VarSubstitutionNode) node, expected);
+		}else if(node instanceof ChoiceSubstitutionNode) {
+			return visitChoiceSubstitutionNode((ChoiceSubstitutionNode) node, expected);
 		}
 		throw new AssertionError(node.getClass());
 	}
@@ -63,5 +66,7 @@ public interface ParametrisedSubstitutionVisitor<R, P> {
 	R visitBecomesSuchThatSubstitutionNode(BecomesSuchThatSubstitutionNode node, P expected);
 
 	R visitSubstitutionIdentifierCallNode(OperationCallSubstitutionNode node, P expected);
+
+	R visitChoiceSubstitutionNode(ChoiceSubstitutionNode node, P expected);
 
 }

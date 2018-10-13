@@ -16,6 +16,7 @@ import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ChoiceSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
@@ -167,4 +168,10 @@ public class ASTVisitor implements ExpressionVisitor, SubstitutionVisitor, Predi
 		visitSubstitutionNode(node.getBody());
 	}
 
+	@Override
+	public void visitChoiceSubstitutionNode(ChoiceSubstitutionNode node) {
+		for(SubstitutionNode substitution : node.getSubstitutions()) {
+			visitSubstitutionNode(substitution);
+		}
+	}
 }

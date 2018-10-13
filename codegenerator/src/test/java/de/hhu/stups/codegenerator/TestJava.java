@@ -498,6 +498,16 @@ public class TestJava {
 		testJava("range_small/RangeUnionSmall");
 	}
 
+	@Test
+	public void testChoice() throws Exception {
+		testJava("Choice");
+	}
+
+	@Test
+	public void testAssert() throws Exception {
+		testJava("Assert");
+	}
+
 
 	@Ignore
 	@Test

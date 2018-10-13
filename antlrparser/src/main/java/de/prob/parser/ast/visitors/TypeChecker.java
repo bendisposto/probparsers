@@ -14,6 +14,7 @@ import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
 import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
+import de.prob.parser.ast.nodes.substitution.ChoiceSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
@@ -789,6 +790,14 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 		visitSubstitutionNode(node.getBody(), expected);
 		visitPredicateNode(node.getInvariant(), BoolType.getInstance());
 		visitExprNode(node.getVariant(), IntegerType.getInstance());
+		return null;
+	}
+
+	@Override
+	public BType visitChoiceSubstitutionNode(ChoiceSubstitutionNode node, BType expected) {
+		for(SubstitutionNode substitution : node.getSubstitutions()) {
+			visitSubstitutionNode(substitution, expected);
+		}
 		return null;
 	}
 

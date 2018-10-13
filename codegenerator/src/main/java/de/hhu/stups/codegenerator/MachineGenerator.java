@@ -25,11 +25,13 @@ import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesSuchThatSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ChoiceSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ConditionSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
@@ -475,9 +477,35 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return elseST.render();
 	}
 
+	@Override
+	public String visitChoiceSubstitutionNode(ChoiceSubstitutionNode node, Void expected) {
+		ST choice = currentGroup.getInstanceOf("choice");
+		int length = node.getSubstitutions().size();
+		List<SubstitutionNode> substitutions = node.getSubstitutions();
+		choice.add("len", length);
+		choice.add("then", visitSubstitutionNode(substitutions.get(0), null));
+		choice.add("choice1", generateOtherChoices(node));
+		if(substitutions.size() > 1) {
+			ST choice2 = currentGroup.getInstanceOf("choice2");
+			choice.add("choice1", choice2.add("then", visitSubstitutionNode(substitutions.get(length - 1), expected)));
+		}
+		return choice.render();
+	}
+
+	private List<String> generateOtherChoices(ChoiceSubstitutionNode node) {
+		List<String> otherChoices = new ArrayList<>();
+		for (int i = 1; i < node.getSubstitutions().size() - 1; i++) {
+			ST choice = currentGroup.getInstanceOf("choice1");
+			choice.add("counter", i);
+			choice.add("then", visitSubstitutionNode(node.getSubstitutions().get(i), null));
+			otherChoices.add(choice.render());
+		}
+		return otherChoices;
+	}
+
 	/*
-	* Generating code from the skip substitution results in an empty string.
-	*/
+    * Generating code from the skip substitution results in an empty string.
+    */
 	@Override
 	public String visitSkipSubstitutionNode(SkipSubstitutionNode node, Void expected) {
 		return "";
