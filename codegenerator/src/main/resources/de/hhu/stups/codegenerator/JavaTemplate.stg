@@ -106,6 +106,10 @@ assignment(identifier, typeCast, val) ::= <<
 <identifier> = <typeCast> <val>;
 >>
 
+nondeterminism(identifier, typeCast, set) ::= <<
+<identifier> = <typeCast> <set>.nondeterminism();
+>>
+
 assignments(assignments) ::= <<
 <assignments; separator="\n">
 >>

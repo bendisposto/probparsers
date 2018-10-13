@@ -35,7 +35,7 @@ public class TestJava {
 		CodeGenerator codeGenerator = new CodeGenerator();
 		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, true);
 		Process process = Runtime.getRuntime()
-				.exec("javac -classpath btypes.jar " + String.join(" ", javaFilePaths.stream()
+				.exec("javac -classpath btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
 						.map(path -> path.toFile().getAbsoluteFile().toString())
 						.collect(Collectors.toSet())));
 
@@ -130,7 +130,6 @@ public class TestJava {
 		testJava("Records");
 	}
 
-	@Ignore
 	@Test
 	public void testNondeterminism() throws Exception {
 		testJava("Nondeterminism");

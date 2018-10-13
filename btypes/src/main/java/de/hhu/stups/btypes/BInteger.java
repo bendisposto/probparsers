@@ -1,6 +1,31 @@
 package de.hhu.stups.btypes;
 
+
+import clojure.lang.BigInt;
+import clojure.lang.RT;
+import clojure.lang.Var;
+
+import java.math.BigInteger;
+
 public class BInteger extends BNumber {
+
+	private static final Var PLUS = RT.var("clojure.core", "+");
+
+	private static final Var MINUS = RT.var("clojure.core", "-");
+
+	private static final Var MULTIPLY = RT.var("clojure.core", "*");
+
+	private static final Var DIVIDE = RT.var("clojure.core", "quot");
+
+	private static final Var MODULO = RT.var("clojure.core", "mod");
+
+	private static final Var COMPARE = RT.var("clojure.core", "compare");
+
+	public static final Var INC = RT.var("clojure.core", "inc");
+
+	private static final Var DEC = RT.var("clojure.core", "dec");
+
+	private static final Var POWER = RT.var("clojure.core", "^");
 
 	@Override
 	public boolean equals(Object obj) {
@@ -8,15 +33,16 @@ public class BInteger extends BNumber {
 			return true;
 		if (obj == null)
 			return false;
-		if (obj instanceof java.lang.Number) {
-			return this.compareTo((java.lang.Number) obj) == 0;
+		if (obj instanceof BNumber) {
+			//TODO: other numbers
+			return this.compareTo((BNumber) obj) == 0;
 		}
 		// assert getClass() != obj.getClass()
 		return false;
 	}
 
 	private static final long serialVersionUID = -6484548796859331267L;
-	private java.math.BigInteger value;
+	private java.lang.Number value;
 
 	@Override
 	public int hashCode() {
@@ -27,15 +53,20 @@ public class BInteger extends BNumber {
 	}
 
 	public BInteger(String value) {
-		this.value = new java.math.BigInteger(value);
+		try {
+			this.value = Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			this.value = BigInt.fromBigInteger(new java.math.BigInteger(value));
+		}
 	}
 
-	public BInteger(java.math.BigInteger value) {
+	public BInteger(java.lang.Number value) {
 		this.value = value;
 	}
 
 	public int compareTo(BNumber o) {
-		return this.value.compareTo(o.asBigInteger());
+		BInteger other = (BInteger) o;
+		return (int) COMPARE.invoke(this.value, other.value);
 	}
 
 	public BBoolean lessEqual(BNumber o) {
@@ -45,6 +76,11 @@ public class BInteger extends BNumber {
 
 	public BBoolean greaterEqual(BNumber o) {
 		return new BBoolean(compareTo(o) >= 0);
+	}
+
+	@Override
+	public BigInteger asBigInteger() {
+		return new java.math.BigInteger(value.toString());
 	}
 
 	public BBoolean less(BNumber o) {
@@ -61,21 +97,6 @@ public class BInteger extends BNumber {
 
 	public BBoolean unequal(BNumber o) {
 		return new BBoolean(compareTo(o) != 0);
-	}
-
-
-	public int compareTo(java.lang.Number o) {
-		java.math.BigInteger oi;
-		if (o == null) {
-			throw new NullPointerException();
-		}
-		if (getClass() != o.getClass()) {
-			oi = new java.math.BigInteger(java.lang.String.valueOf(o.longValue()));
-		} else {
-			BInteger oo = (BInteger) o;
-			oi = oo.value;
-		}
-		return this.value.compareTo(oi);
 	}
 
 	@Override
@@ -100,12 +121,8 @@ public class BInteger extends BNumber {
 
 	@Override
 	public BNumber plus(BNumber o) {
-		return new BInteger(this.value.add(o.asBigInteger()));
-	}
-
-	@Override
-	public java.math.BigInteger asBigInteger() {
-		return this.value;
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) PLUS.invoke(this.value, other.value));
 	}
 
 	public java.lang.String toString() {
@@ -114,62 +131,67 @@ public class BInteger extends BNumber {
 
 	@Override
 	public BNumber minus(BNumber o) {
-		return new BInteger(this.value.subtract(o.asBigInteger()));
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) MINUS.invoke(this.value, other.value));
 	}
 
 	@Override
 	public BNumber multiply(BNumber o) {
-		return new BInteger(this.value.multiply(o.asBigInteger()));
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) MULTIPLY.invoke(this.value, other.value));
 	}
 
 	@Override
 	public BNumber power(BNumber o) {
-		return new BInteger(this.value.pow(o.intValue()));
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) POWER.invoke(this.value, other.value));
 	}
 
 	@Override
 	public BNumber divide(BNumber o) {
-		return new BInteger(this.value.divide(o.asBigInteger()));
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) DIVIDE.invoke(this.value, other.value));
 	}
 
 	@Override
 	public BNumber modulo(BNumber o) {
-		return new BInteger(this.value.mod(o.asBigInteger()));
+		BInteger other = (BInteger) o;
+		return new BInteger((java.lang.Number) MODULO.invoke(this.value, other.value));
 	}
 
 	@Override
 	public BNumber or(BNumber o) {
-		return new BInteger(this.value.or(o.asBigInteger()));
+		return null;
 	}
 
 	@Override
 	public BNumber and(BNumber o) {
-		return new BInteger(this.value.and(o.asBigInteger()));
+		return null;
 	}
 
 	@Override
 	public BNumber xor(BNumber o) {
-		return new BInteger(this.value.xor(o.asBigInteger()));
+		return null;
 	}
 
 	@Override
 	public BNumber next() {
-		return new BInteger(this.value.add(new java.math.BigInteger("1")));
+		return new BInteger((java.lang.Number) INC.invoke(this.value));
 	}
 
 	@Override
 	public BNumber previous() {
-		return new BInteger(this.value.subtract(new java.math.BigInteger("1")));
+		return new BInteger((java.lang.Number) DEC.invoke(this.value));
 	}
 
 	@Override
 	public BNumber leftShift(BNumber o) {
-		return new BInteger(this.value.shiftLeft(o.intValue()));
+		return null;
 	}
 
 	@Override
 	public BNumber rightShift(BNumber o) {
-		return new BInteger(this.value.shiftRight(o.intValue()));
+		return null;
 	}
 
 	@Override
@@ -179,7 +201,7 @@ public class BInteger extends BNumber {
 
 	@Override
 	public BNumber negative() {
-		return new BInteger(this.value.negate());
+		return new BInteger((java.lang.Number) MINUS.invoke(this.value));
 	}
 
 	@Override
@@ -187,4 +209,7 @@ public class BInteger extends BNumber {
 		return this;
 	}
 
+	public java.lang.Number getValue() {
+		return value;
+	}
 }

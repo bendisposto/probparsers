@@ -549,12 +549,24 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return String.join("\n", substitutionCodes);
 	}
 
-	/*
-	* Code is not generated from the becomes element of substitution in the given subset of B.
-	*/
 	@Override
 	public String visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		ST substitutions = currentGroup.getInstanceOf("assignments");
+		List<String> assignments = new ArrayList<>();
+		for (int i = 0; i < node.getIdentifiers().size(); i++) {
+			assignments.add(generateNondeterminism(node.getIdentifiers().get(i), node.getExpression()));
+		}
+		substitutions.add("assignments", assignments);
+		return substitutions.render();
+	}
+
+	public String generateNondeterminism(IdentifierExprNode lhs, ExprNode rhs) {
+		ST substitution = currentGroup.getInstanceOf("nondeterminism");
+		substitution.add("identifier", visitIdentifierExprNode(lhs, null));
+		String typeCast = typeGenerator.generate(lhs.getType(), true);
+		substitution.add("typeCast", typeCast);
+		substitution.add("set", visitExprNode(rhs, null));
+		return substitution.render();
 	}
 
 

@@ -132,24 +132,24 @@ public class BSet implements BObject, Set<BObject> {
 	public static BSet range(BInteger a, BInteger b) {
 		HashSet<BObject> set = new HashSet<>();
 		for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
-			set.add(new BInteger(String.valueOf(i)));
+			set.add(new BInteger(i.intValue()));
 		}
 		return new BSet(set);
 	}
 
 	public BSet relationImage(BSet domain) {
 		return new BSet(set.stream()
-			.filter(object -> domain.contains(((BCouple) object).getFirst()))
-			.map(object -> ((BCouple) object).getSecond())
-			.collect(Collectors.toSet()));
+				.filter(object -> domain.contains(((BCouple) object).getFirst()))
+				.map(object -> ((BCouple) object).getSecond())
+				.collect(Collectors.toSet()));
 	}
 
 
 	public BObject functionCall(BObject arg) {
 		List<BCouple> matchedCouples = set.stream()
-			.map(object -> (BCouple) object)
-			.filter(couple -> couple.getFirst().equals(arg))
-			.collect(Collectors.toList());
+				.map(object -> (BCouple) object)
+				.filter(couple -> couple.getFirst().equals(arg))
+				.collect(Collectors.toList());
 		if(matchedCouples.size() > 0) {
 			return matchedCouples.get(0).getSecond();
 		}
@@ -158,7 +158,7 @@ public class BSet implements BObject, Set<BObject> {
 
 
 	public BInteger card() {
-		return new BInteger(String.valueOf(this.size()));
+		return new BInteger(this.size());
 	}
 
 	public BBoolean elementOf(BObject object) {
@@ -173,4 +173,8 @@ public class BSet implements BObject, Set<BObject> {
 		return new BBoolean(!equals(o));
 	}
 
+	public BObject nondeterminism() {
+		int index = (int) Math.floor(Math.random() * set.size());
+		return (BObject) toArray()[index];
+	}
 }
