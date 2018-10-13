@@ -7,17 +7,20 @@ import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.expression.NumberNode;
+import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode.PredicateOperator;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode.PredOperatorExprArgs;
+import de.prob.parser.ast.nodes.substitution.AnySubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.IfOrSelectSubstitutionsNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode.ListOperator;
-import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
@@ -175,6 +178,12 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitPredicateNot(BParser.PredicateNotContext ctx) {
+		PredicateNode node = (PredicateNode) ctx.predicate().accept(this);
+		return new PredicateOperatorNode(Util.createSourceCodePosition(ctx), PredicateOperator.NOT, createPredicateNodeList(node));
+	}
+
+	@Override
 	public Node visitPredicateKeyword(BParser.PredicateKeywordContext ctx) {
 		if (ctx.keyword == null) {
 			throw new RuntimeException(ctx.keyword.getText());
@@ -184,6 +193,19 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		List<PredicateNode> list = new ArrayList<>();
 		return new PredicateOperatorNode(Util.createSourceCodePosition(ctx), op, list);
 	}
+
+	@Override
+	public Node visitPredicateIdentifierCall(BParser.PredicateIdentifierCallContext ctx) {
+		/*List<String> names = new ArrayList<>();
+		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
+			names.add(tNode.getText());
+		}
+
+		ExprNode exprNode = (ExprNode) ctx.expression.accept(this);*/
+		//TODO
+		return new IdentifierPredicateNode(Util.createSourceCodePosition(ctx), ctx.composed_identifier().getText());
+	}
+
 
 	@Override
 	public Node visitImplication(BParser.ImplicationContext ctx) {
@@ -374,7 +396,6 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		for (TerminalNode tNode : ctx.composed_identifier().IDENTIFIER()) {
 			names.add(tNode.getText());
 		}
-
 		List<ExprNode> arguments = ctx.expression_list() == null ? new ArrayList<>()
 				: visitExpressionList(ctx.expression_list());
 		return new OperationCallSubstitutionNode(Util.createSourceCodePosition(ctx), names, arguments);
@@ -392,8 +413,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		List<ExprNode> output = new ArrayList<>();
 		for (Token exprNode : ctx.identifier_list().idents) {
 			String name = exprNode.getText();
-			IdentifierExprNode identifierExprNode = new IdentifierExprNode(Util.createSourceCodePosition(exprNode),
-					name);
+			IdentifierExprNode identifierExprNode = new IdentifierExprNode(Util.createSourceCodePosition(exprNode), name);
 			output.add(identifierExprNode);
 		}
 
@@ -514,6 +534,35 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		}
 		return new IfOrSelectSubstitutionsNode(Util.createSourceCodePosition(ctx),
 				IfOrSelectSubstitutionsNode.Operator.SELECT, predList, subList, elseSubstitution);
+	}
+
+	@Override
+	public Node visitAnySubstitution(BParser.AnySubstitutionContext ctx) {
+		PredicateNode predicate = (PredicateNode) ctx.predicate().accept(this);
+		SubstitutionNode substitution = (SubstitutionNode) ctx.substitution().accept(this);
+		List<DeclarationNode> identifierList = new ArrayList<>();
+
+		for (Token node : ctx.identifier_list().idents) {
+			String name = node.getText();
+			DeclarationNode decl = new DeclarationNode(Util.createSourceCodePosition(node), name,
+					DeclarationNode.Kind.SUBSTITUION_IDENTIFIER, null);
+			identifierList.add(decl);
+		}
+		return new AnySubstitutionNode(Util.createSourceCodePosition(ctx), identifierList, predicate, substitution);
+	}
+
+	@Override
+	public Node visitBecomesElementOfSubstitution(BParser.BecomesElementOfSubstitutionContext ctx) {
+		List<IdentifierExprNode> leftList = new ArrayList<>();
+		for (Token left : ctx.identifier_list().idents) {
+			String name = left.getText();
+			IdentifierExprNode identifierExprNode = new IdentifierExprNode(Util.createSourceCodePosition(left),
+					name);
+			leftList.add(identifierExprNode);
+		}
+
+		ExprNode expression = (ExprNode) ctx.expression().accept(this);
+		return new BecomesElementOfSubstitutionNode(Util.createSourceCodePosition(ctx), leftList, expression);
 	}
 
 	@Override

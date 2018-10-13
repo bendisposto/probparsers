@@ -200,7 +200,6 @@ public class MachineScopeChecker {
 		public void visitIdentifierExprNode(IdentifierExprNode node) {
 			DeclarationNode declarationNode = lookUpIdentifier(node.getName(), node);
 			node.setDeclarationNode(declarationNode);
-
 		}
 
 		@Override
@@ -238,7 +237,8 @@ public class MachineScopeChecker {
 		@Override
 		public void visitIdentifierPredicateNode(IdentifierPredicateNode node) {
 			// TODO Auto-generated method stub
-
+			DeclarationNode declarationNode = lookUpIdentifier(node.getName(), node);
+			node.setDeclarationNode(declarationNode);
 		}
 
 		@Override
@@ -250,13 +250,18 @@ public class MachineScopeChecker {
 		@Override
 		public void visitAnySubstitution(AnySubstitutionNode node) {
 			// TODO Auto-generated method stub
-
+			createNewScope(node.getParameters());
+			visitPredicateNode(node.getWherePredicate());
+			visitSubstitutionNode(node.getThenSubstitution());
 		}
 
 		@Override
 		public void visitBecomesElementOfSubstitutionNode(BecomesElementOfSubstitutionNode node) {
 			// TODO Auto-generated method stub
-
+			for (ExprNode expr : node.getIdentifiers()) {
+				visitExprNode(expr);
+			}
+			visitExprNode(node.getExpression());
 		}
 
 		@Override
@@ -273,7 +278,6 @@ public class MachineScopeChecker {
 			for (ExprNode expr : node.getRightSide()) {
 				visitExprNode(expr);
 			}
-
 		}
 
 	}

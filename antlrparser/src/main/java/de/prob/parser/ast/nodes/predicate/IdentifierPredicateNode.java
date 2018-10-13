@@ -13,6 +13,10 @@ public class IdentifierPredicateNode extends PredicateNode {
 		this.name = name;
 	}
 
+	public void setDeclarationNode(DeclarationNode declarationNode) {
+		this.declarationNode = declarationNode;
+	}
+
 	public DeclarationNode getDeclarationNode() {
 		return declarationNode;
 	}
