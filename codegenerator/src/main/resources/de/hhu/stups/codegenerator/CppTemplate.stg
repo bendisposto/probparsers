@@ -68,7 +68,7 @@ return <identifier>;
 >>
 
 set_declaration(identifier, enums) ::= <<
-BSet <identifier> = <set_enumeration(enums)>;
+#define <identifier> <set_enumeration(enums)>
 >>
 
 set_enumeration(enums) ::= <<
@@ -76,21 +76,33 @@ BSet((BObject[]){<enums; separator=", ">})
 >>
 
 enum_call(class, identifier) ::= <<
-<class>.<identifier>
+<class>(<class>::<identifier>)
 >>
 
 set_enum_declaration(name,enums) ::= <<
-enum <name> : public BObject {
-    <enums; separator=", \n">;
+class <name> : public BObject {
 
-    BBoolean equal(<name> o) {
-        return BBoolean(this == o);
-    }
+    public:
 
-    BBoolean unequal(<name> o) {
-        return BBoolean(this != o);
-    }
-}
+        enum <name>_type {
+            <enums;separator=", \n">
+        };
+
+        <name>(<name>_type type) {
+            this->value = type;
+        }
+
+        BBoolean equal(<name> o) {
+            return BBoolean(this->value == o.value);
+        }
+
+        BBoolean unequal(<name> o) {
+            return BBoolean(this->value != o.value);
+        }
+
+    private:
+        <name>_type value;
+};
 >>
 
 include_declaration(type, identifier) ::= <<
