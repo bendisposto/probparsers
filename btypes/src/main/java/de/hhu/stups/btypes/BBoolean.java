@@ -1,7 +1,9 @@
 package de.hhu.stups.btypes;
 
+import java.util.Objects;
+
 public class BBoolean implements BObject {
-	private final Boolean value;
+	private final boolean value;
 
 	public static boolean parseBoolean(String s) {
 		return Boolean.parseBoolean(s);
@@ -16,7 +18,7 @@ public class BBoolean implements BObject {
 	}
 
 	public int compareTo(Boolean b) {
-		return value.compareTo(b);
+		return b.compareTo(value);
 	}
 
 	public static Boolean valueOf(String s) {
@@ -32,36 +34,42 @@ public class BBoolean implements BObject {
 	}
 
 	public boolean booleanValue() {
-		return value.booleanValue();
+		return value;
 	}
 
 	@Override
 	public String toString() {
-		return value.toString();
+		return String.valueOf(value);
 	}
 
 	@Override
 	public int hashCode() {
-		return value.hashCode();
+		return Objects.hash(value);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return value.equals(obj);
+		if(!(obj instanceof BBoolean)) {
+			return false;
+		}
+		if(((BBoolean) obj).booleanValue() != value) {
+			return false;
+		}
+		return true;
 	}
 
 	public BBoolean(boolean value) {
-		this.value = new Boolean(value);
+		this.value = value;
 	}
 
 	public BBoolean(String s) {
-		this.value = new Boolean(s);
+		this.value = Boolean.parseBoolean(s);
 	}
 
 	/* groovy operator overloading support */
 	@SuppressWarnings("rawtypes")
 	Object asType(Class clazz) {
-		if (clazz == new Boolean(true).getClass()) {
+		if (clazz == new BBoolean(true).getClass()) {
 			return this.booleanValue();
 		}
 		return this;
@@ -112,10 +120,10 @@ public class BBoolean implements BObject {
 	}
 
 	public BBoolean equal(BBoolean other) {
-		return new BBoolean(this.value.equals(other.value));
+		return new BBoolean(this.value == other.value);
 	}
 
 	public BBoolean unequal(BBoolean other) {
-		return new BBoolean(!this.value.equals(other.value));
+		return new BBoolean(this.value != other.value);
 	}
 }

@@ -22,11 +22,11 @@ An example where code generation for C works is the machine Lift
 
 **Starting the code generator:**
 
-Java : Example: gradle run -Planguage="java" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
+Java : Example: gradle run -Planguage="java" -Pbig_integer="true/false" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
-Python: Example: gradle run -Planguage="python" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
+Python: Example: gradle run -Planguage="python" -Pbig_integer="true/false" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
-C: Example: gradle run -Planguage="c" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
+C: Example: gradle run -Planguage="c" -Pbig_integer="true/false" -Pfile="de/hhu/stups/codegenerator/testfiles/Lift.mch"
 
 
 <br>

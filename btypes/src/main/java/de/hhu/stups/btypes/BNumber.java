@@ -5,8 +5,8 @@ public abstract class BNumber extends java.lang.Number implements Comparable<BNu
 	private static final long serialVersionUID = 7702079048348822936L;
 
 	// TODO Maybe add a Integer subtype that promotes to BigInter on operations
-	public static BInteger build(String s) {
-		return new BInteger(s);
+	public static BBigInteger build(String s) {
+		return new BBigInteger(s);
 	}
 
 	public static BNumber build(long i) {

@@ -33,7 +33,7 @@ public class TestJava {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, true);
+		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true);
 		Process process = Runtime.getRuntime()
 				.exec("javac -classpath btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
 						.map(path -> path.toFile().getAbsoluteFile().toString())
@@ -515,7 +515,6 @@ public class TestJava {
 		testJava("Cruise_finite1");
 	}
 
-	@Ignore
 	@Test
 	public void testCruiseControllerk() throws Exception {
 		testJava("Cruise_finite_k");

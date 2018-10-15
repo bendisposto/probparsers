@@ -30,7 +30,7 @@ public class CodeGenerator {
 	* Example: gradle run -Planguage = "java" -Pfile = "de/hhu/stups/codegenerator/testfiles/Lift.mch"
 	*/
 	public static void main(String[] args) throws URISyntaxException, CodeGenerationException {
-		if(args.length != 2) {
+		if(args.length != 3) {
 			System.err.println("Wrong number of arguments");
 			return;
 		}
@@ -46,19 +46,29 @@ public class CodeGenerator {
 			System.err.println("Wrong argument for language");
 			return;
 		}
+		String integerOption = args[1];
+		boolean useBigInteger;
+		if("true".equals(integerOption)) {
+			useBigInteger = true;
+		} else if("false".equals(integerOption)) {
+			useBigInteger = false;
+		} else {
+			System.err.println("Wrong argument for choice of integers");
+			return;
+		}
 		CodeGenerator codeGenerator = new CodeGenerator();
-		URL url = CodeGenerator.class.getClassLoader().getResource(args[1]);
+		URL url = CodeGenerator.class.getClassLoader().getResource(args[2]);
 		if(url == null) {
 			System.err.println("File not found");
 			return;
 		}
-		codeGenerator.generate(Paths.get(url.toURI()), mode, true);
+		codeGenerator.generate(Paths.get(url.toURI()), mode, useBigInteger, true);
 	}
 
 	/*
 	* This function generates code from a given path for a machine, the target language and the information whether it is a main machine of a project
 	*/
-	public Set<Path> generate(Path path, GeneratorMode mode, boolean isMain) throws CodeGenerationException {
+	public Set<Path> generate(Path path, GeneratorMode mode, boolean useBigInteger, boolean isMain) throws CodeGenerationException {
 		if(isMain) {
 			paths.clear();
 		}
@@ -68,18 +78,18 @@ public class CodeGenerator {
 			pathAsList[pathAsList.length - 1] = pathAsList[pathAsList.length - 1].replaceAll(project.getMainMachine().getName(), referenceNode.getMachineName());
 			Path currentPath = Paths.get(String.join("/", pathAsList));
 			if(!paths.contains(currentPath)) {
-				generate(currentPath, mode, false);
+				generate(currentPath, mode, useBigInteger, false);
 			}
 		}
-		paths.add(writeToFile(path, mode, project.getMainMachine()));
+		paths.add(writeToFile(path, mode, useBigInteger, project.getMainMachine()));
 		return paths;
 	}
 
 	/*
 	* This function generates code for a targeted programming language with creating the belonging file
 	*/
-	private Path writeToFile(Path path, GeneratorMode mode, MachineNode node) {
-		MachineGenerator generator = new MachineGenerator(mode);
+	private Path writeToFile(Path path, GeneratorMode mode, boolean useBigInteger, MachineNode node) {
+		MachineGenerator generator = new MachineGenerator(mode, useBigInteger);
 		String code = generator.generateMachine(node);
 
 		int lastIndexDot = path.toString().lastIndexOf(".");

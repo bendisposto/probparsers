@@ -210,8 +210,8 @@ identifier(identifier, isReturn, isPrivate) ::= <<
 <identifier>
 >>
 
-number(number) ::= <<
-new BInteger("<number>")
+number(number, useBigInteger) ::= <<
+<if(useBigInteger)>new BBigInteger("<number>")<else>new BInteger(<number>)<endif>
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<

@@ -129,6 +129,14 @@ public class BSet implements BObject, Set<BObject> {
 		return new BSet(this.set.plusAll(set));
 	}
 
+	public static BSet range(BBigInteger a, BBigInteger b) {
+		HashSet<BObject> set = new HashSet<>();
+		for(BBigInteger i = a; i.lessEqual(b).booleanValue(); i = (BBigInteger) i.next()) {
+			set.add(new BBigInteger(i.intValue()));
+		}
+		return new BSet(set);
+	}
+
 	public static BSet range(BInteger a, BInteger b) {
 		HashSet<BObject> set = new HashSet<>();
 		for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {

@@ -102,8 +102,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private int localScopes;
 
-	public MachineGenerator(GeneratorMode mode) {
+	private boolean useBigInteger;
+
+	public MachineGenerator(GeneratorMode mode, boolean useBigInteger) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
+		this.useBigInteger = useBigInteger;
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
@@ -350,6 +353,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String visitNumberNode(NumberNode node, Void expected) {
 		ST number = currentGroup.getInstanceOf("number");
 		number.add("number", node.getValue().toString());
+		number.add("useBigInteger", useBigInteger);
 		return number.render();
 	}
 
@@ -524,6 +528,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitAnySubstitution(AnySubstitutionNode node, Void expected) {
+		//return visitSubstitutionNode(node.getThenSubstitution(), expected);
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
 
