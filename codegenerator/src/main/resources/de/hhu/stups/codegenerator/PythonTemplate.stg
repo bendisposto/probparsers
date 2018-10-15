@@ -155,7 +155,7 @@ boolean_val(val) ::= <<
 <if(val)>BBoolean(true)<else>BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate) ::= <<
+identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 <if(!isPrivate)><identifier><else>self.__<identifier><endif>
 >>
 

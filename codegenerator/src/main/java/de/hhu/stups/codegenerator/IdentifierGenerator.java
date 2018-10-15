@@ -27,13 +27,19 @@ public class IdentifierGenerator {
 
     private Stack<Integer> stackScope;
 
-    public IdentifierGenerator(final STGroup group, final NameHandler nameHandler) {
+    private final List<String> identifierOnLhsInParallel;
+
+    private boolean lhsInParallel;
+
+    public IdentifierGenerator(final STGroup group, final NameHandler nameHandler,
+                               final List<String> identifierOnLhsInParallel) {
         this.group = group;
         this.nameHandler = nameHandler;
         this.outputParams = new ArrayList<>();
         this.currentLocals = new HashMap<>();
         this.maxLocals = new HashMap<>();
         this.stackScope = new Stack<>();
+        this.identifierOnLhsInParallel = identifierOnLhsInParallel;
         stackScope.push(0);
     }
 
@@ -60,6 +66,7 @@ public class IdentifierGenerator {
         identifier.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         identifier.add("isReturn", isReturn);
         identifier.add("isPrivate", isPrivate);
+        identifier.add("rhsOnLhs", identifierOnLhsInParallel.contains(node.getName()) && !lhsInParallel);
         return identifier.render();
     }
 
@@ -77,6 +84,7 @@ public class IdentifierGenerator {
         identifier.add("identifier", resultIdentifier.toString());
         identifier.add("isReturn", false);
         identifier.add("isPrivate", false);
+        identifier.add("rhsOnLhs", identifierOnLhsInParallel.contains(name) && !lhsInParallel);
         return identifier.render();
     }
 
@@ -134,4 +142,7 @@ public class IdentifierGenerator {
         stackScope.pop();
     }
 
+    public void setLhsInParallel(boolean lhsInParallel) {
+        this.lhsInParallel = lhsInParallel;
+    }
 }

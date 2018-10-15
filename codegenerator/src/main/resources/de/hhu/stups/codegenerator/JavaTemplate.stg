@@ -102,16 +102,30 @@ parameter(type, identifier, isReturn) ::= <<
 <type> <identifier>
 >>
 
+parallel(loads, others, stores) ::=<<
+<loads; separator="\n">
+<others; separator="\n">
+<stores; separator="\n">
+>>
+
+parallel_load(type, identifier, typeCast) ::= <<
+<type> ld_<identifier> = <typeCast> <identifier>;
+>>
+
+parallel_store(identifier, typeCast, val) ::= <<
+<identifier> = <typeCast> <val>;
+>>
+
 assignment(identifier, typeCast, val) ::= <<
 <identifier> = <typeCast> <val>;
 >>
 
-nondeterminism(identifier, typeCast, set) ::= <<
-<identifier> = <typeCast> <set>.nondeterminism();
->>
-
 assignments(assignments) ::= <<
 <assignments; separator="\n">
+>>
+
+nondeterminism(identifier, typeCast, set) ::= <<
+<identifier> = <typeCast> <set>.nondeterminism();
 >>
 
 void() ::= <<
@@ -206,8 +220,8 @@ boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate) ::= <<
-<identifier>
+identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
+<if(rhsOnLhs)>ld_<identifier><else><identifier><endif>
 >>
 
 number(number, useBigInteger) ::= <<

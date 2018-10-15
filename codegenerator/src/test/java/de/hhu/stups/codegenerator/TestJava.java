@@ -263,8 +263,18 @@ public class TestJava {
 	}
 
 	@Test
+	public void testSieveParallel() throws Exception {
+		testJava("SieveParallel");
+	}
+
+	@Test
 	public void testReset() throws Exception {
 		testJava("Reset");
+	}
+
+	@Test
+	public void testSwap() throws Exception {
+		testJava("Swap");
 	}
 
 	@Test

@@ -175,7 +175,7 @@ boolean_val(val) ::= <<
 <if(val)>create_boolean(1)<else>create_boolean(0)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate) ::= <<
+identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 <if(isReturn)>(*<identifier>)<else><identifier><endif>
 >>
 

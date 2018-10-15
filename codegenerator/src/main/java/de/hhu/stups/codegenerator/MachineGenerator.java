@@ -104,11 +104,17 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private boolean useBigInteger;
 
+	private List<String> identifierOnLhsInParallel;
+
+	private List<String> definedLoadsInParallel;
+
 	public MachineGenerator(GeneratorMode mode, boolean useBigInteger) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
 		this.useBigInteger = useBigInteger;
 		this.nameHandler = new NameHandler(currentGroup);
-		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
+		this.identifierOnLhsInParallel = new ArrayList<>();
+		this.definedLoadsInParallel = new ArrayList<>();
+		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler, identifierOnLhsInParallel);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
 		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
@@ -226,6 +232,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	private String visitOperation(OperationNode node) {
 		identifierGenerator.setParams(node.getParams(), node.getOutputParams());
+		definedLoadsInParallel.clear();
+		identifierOnLhsInParallel.clear();
 		ST operation = operationGenerator.generate(node);
 		operation.add("machine", nameHandler.handle(machineNode.getName()));
 		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
@@ -567,9 +575,82 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	@Override
 	public String visitListSubstitutionNode(ListSubstitutionNode node, Void expected) {
 		if(node.getOperator() == ListSubstitutionNode.ListOperator.Parallel) {
-			throw new RuntimeException("Given list substitution is not implemented: " + node.getOperator());
+			return visitParallelSubstitutionNode(node);
 		}
 		return visitSequentialSubstitutionNode(node);
+	}
+
+	public String visitParallelSubstitutionNode(ListSubstitutionNode node) {
+		//TODO implement parallel execution of operation call from included machine
+		identifierOnLhsInParallel.clear();
+		ST substitutions = currentGroup.getInstanceOf("parallel");
+		List<SubstitutionNode> assignments = node.getSubstitutions().stream()
+				.filter(substituion -> substituion instanceof AssignSubstitutionNode)
+				.collect(Collectors.toList());
+		List<String> loads = assignments.stream()
+				.map(assignment -> visitParallelLoads((AssignSubstitutionNode) assignment))
+				.collect(Collectors.toList());
+		List<String> others = node.getSubstitutions().stream()
+				.filter(substituion -> !(substituion instanceof AssignSubstitutionNode))
+				.map(substitution -> visitSubstitutionNode(substitution, null))
+				.collect(Collectors.toList());
+		List<String> stores = assignments.stream()
+				.map(assignment -> visitParallelStores((AssignSubstitutionNode) assignment))
+				.collect(Collectors.toList());
+		substitutions.add("loads", loads);
+		substitutions.add("others", others);
+		substitutions.add("stores", stores);
+		identifierOnLhsInParallel.clear();
+		return substitutions.render();
+	}
+
+	public String visitParallelLoads(AssignSubstitutionNode node) {
+		ST substitutions = currentGroup.getInstanceOf("assignments");
+		List<String> assignments = new ArrayList<>();
+		//TODO: For now, the variable on the left-hand side and on the right-hand side must be distinct
+		for (int i = 0; i < node.getLeftSide().size(); i++) {
+			IdentifierExprNode identifier = (IdentifierExprNode) node.getLeftSide().get(i);
+			if(definedLoadsInParallel.contains(identifier.getName())) {
+				continue;
+			}
+			assignments.add(visitParallelLoad(identifier));
+			identifierOnLhsInParallel.add(identifier.getName());
+			definedLoadsInParallel.add(identifier.getName());
+		}
+		substitutions.add("assignments", assignments);
+		return substitutions.render();
+	}
+
+	public String visitParallelLoad(ExprNode expr) {
+		ST substitution = currentGroup.getInstanceOf("parallel_load");
+		substitution.add("type", typeGenerator.generate(expr.getType(), false));
+		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) expr, null));
+		String typeCast = typeGenerator.generate(expr.getType(), true);
+		substitution.add("typeCast", typeCast);
+		return substitution.render();
+	}
+
+
+	public String visitParallelStores(AssignSubstitutionNode node) {
+		ST substitutions = currentGroup.getInstanceOf("assignments");
+		List<String> assignments = new ArrayList<>();
+		//TODO: For now, the variable on the left-hand side and on the right-hand side must be distinct
+		for (int i = 0; i < node.getLeftSide().size(); i++) {
+			assignments.add(visitParallelStore(node.getLeftSide().get(i), node.getRightSide().get(i)));
+		}
+		substitutions.add("assignments", assignments);
+		return substitutions.render();
+	}
+
+	public String visitParallelStore(ExprNode lhs, ExprNode rhs) {
+		ST substitution = currentGroup.getInstanceOf("parallel_store");
+		identifierGenerator.setLhsInParallel(true);
+		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
+		identifierGenerator.setLhsInParallel(false);
+		String typeCast = typeGenerator.generate(rhs.getType(), true);
+		substitution.add("typeCast", typeCast);
+		substitution.add("val", visitExprNode(rhs, null));
+		return substitution.render();
 	}
 
 	/*
