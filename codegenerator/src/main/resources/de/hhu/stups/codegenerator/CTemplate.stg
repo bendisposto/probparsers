@@ -179,7 +179,7 @@ identifier(identifier, isReturn, isPrivate) ::= <<
 <if(isReturn)>(*<identifier>)<else><identifier><endif>
 >>
 
-number(number) ::= <<
+number(number, useBigInteger) ::= <<
 create_integer(<number>)
 >>
 

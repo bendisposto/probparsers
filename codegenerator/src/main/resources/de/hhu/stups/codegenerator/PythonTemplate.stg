@@ -159,7 +159,7 @@ identifier(identifier, isReturn, isPrivate) ::= <<
 <if(!isPrivate)><identifier><else>self.__<identifier><endif>
 >>
 
-number(number) ::= <<
+number(number, useBigInteger) ::= <<
 BInteger(<number>)
 >>
 

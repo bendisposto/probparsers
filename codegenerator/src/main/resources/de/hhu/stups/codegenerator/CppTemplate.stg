@@ -210,7 +210,7 @@ identifier(identifier, isReturn, isPrivate) ::= <<
 <identifier>
 >>
 
-number(number) ::= <<
+number(number, useBigInteger) ::= <<
 BInteger(<number>)
 >>
 
