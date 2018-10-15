@@ -28,7 +28,7 @@ public class TestPython {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Set<Path> pythonFilePaths = codeGenerator.generate(mchPath, GeneratorMode.PY, true);
+		Set<Path> pythonFilePaths = codeGenerator.generate(mchPath, GeneratorMode.PY, false,true);
 
 		//pythonFilePaths.forEach(path -> cleanUp(path.toString()));
 	}

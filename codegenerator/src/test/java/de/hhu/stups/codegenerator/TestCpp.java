@@ -35,7 +35,7 @@ public class TestCpp {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Set<Path> cppFilePaths = codeGenerator.generate(mchPath, GeneratorMode.CPP, true);
+		Set<Path> cppFilePaths = codeGenerator.generate(mchPath, GeneratorMode.CPP, false, true);
 		cppFilePaths.forEach(path -> {
 			try {
 				Process process = Runtime.getRuntime()

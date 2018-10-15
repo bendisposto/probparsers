@@ -11,13 +11,13 @@ SETS
     ODset = {ODnone, ODclose, ODveryclose}
 
 DEFINITIONS
-  LIMIT == 10; /* with LIMIT=4 we have 2705 states; 9.9 secs model checking ; 2 secs with TLC*/
-    /* with LIMIT=5 : 3377 states, 12.8 secs model checking; 2 secs with TLC*/
-   /* with LIMIT=10 : 6737 states; 25 secs model checking; 2 secs with TLC */
-	CruiseReallyActive == (ObstacleStatusJustChanged = FALSE &
+  /* 10 == 10;  with 10=4 we have 2705 states; 9.9 secs model checking ; 2 secs with TLC*/
+    /* with 10=5 : 3377 states, 12.8 secs model checking; 2 secs with TLC*/
+   /* with 10=10 : 6737 states; 25 secs model checking; 2 secs with TLC */
+	/*(ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE) == (ObstacleStatusJustChanged = FALSE &
 			       CCInitialisationInProgress = FALSE &
 			       CruiseSpeedChangeInProgress = FALSE);
-  ASSERT_LTL == "G (e(SetCruiseSpeed) => e(CruiseBecomesNotAllowed))";
+  ASSERT_LTL == "G (e(SetCruiseSpeed) => e(CruiseBecomesNotAllowed))";*/
   ASSERT_LTL1 == "G (e(CruiseBecomesNotAllowed) => e(SetCruiseSpeed))";
   ASSERT_LTL2 == "G (e(CruiseBecomesNotAllowed) => e(ObstacleDisappears))"
 /* LTL Formulas
@@ -63,7 +63,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     VehicleTryKeepTimeGap:BOOL &
     CruiseSpeedAtMax:BOOL &
     NumberOfSetCruise:NATURAL &
-      NumberOfSetCruise:0..LIMIT & /* added by mal */
+      NumberOfSetCruise:0..10 & /* added by mal */
     ObstaclePresent:BOOL &
     ObstacleDistance:ODset &
     ObstacleRelativeSpeed:RSset &
@@ -98,14 +98,14 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     (CruiseActive = TRUE
         => (VehicleTryKeepSpeed = TRUE
 			   or VehicleTryKeepTimeGap = TRUE
-			   or not(CruiseReallyActive))) &
-    (ObstacleDistance = ODnone & CruiseActive = TRUE & CruiseReallyActive
+			   or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))) &
+    (ObstacleDistance = ODnone & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepSpeed = TRUE) &
-    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & CruiseReallyActive
+    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepTimeGap = TRUE) &
-    (ObstacleDistance = ODveryclose & CruiseReallyActive
+    (ObstacleDistance = ODveryclose & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepTimeGap = TRUE) &
-    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & CruiseReallyActive
+    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
         => VehicleTryKeepSpeed = TRUE)
 
 
@@ -179,7 +179,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 		ELSE
 			CCInitialisationInProgress := TRUE
 		END ||
-        IF NumberOfSetCruise<LIMIT THEN  /* added my mal */
+        IF NumberOfSetCruise<10 THEN  /* added my mal */
             NumberOfSetCruise := NumberOfSetCruise + 1
         END
     END;
@@ -373,7 +373,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         SpeedAboveMax = FALSE &
         (CruiseActive = FALSE
 			or VehicleCanKeepSpeed = FALSE
-			or not(CruiseReallyActive))
+			or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))
     THEN
         SpeedAboveMax := TRUE ||
         VehicleAtCruiseSpeed := FALSE
