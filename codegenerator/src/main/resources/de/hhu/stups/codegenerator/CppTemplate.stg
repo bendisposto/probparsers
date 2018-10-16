@@ -5,7 +5,7 @@ return, short, signed, sizeof, static, static_cast, volatile, struct, switch, te
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<iostream>
 #include \<string>
 <imports; separator="\n">
@@ -37,6 +37,7 @@ class <machine> {
 
 };
 
+<addition>
 >>
 
 initialization(machine, body, machines) ::= <<

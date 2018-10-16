@@ -29,7 +29,7 @@ public class TestC {
         Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
                 .getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
         CodeGenerator codeGenerator = new CodeGenerator();
-        Set<Path> cFilePaths = codeGenerator.generate(mchPath, GeneratorMode.C, false, true);
+        Set<Path> cFilePaths = codeGenerator.generate(mchPath, GeneratorMode.C, false, true, null);
 
         //cFilePaths.forEach(path -> cleanUp(path.toString()));
     }

@@ -3,7 +3,7 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 public class <machine> {
@@ -21,6 +21,9 @@ public class <machine> {
     <initialization>
 
     <operations; separator="\n\n">
+
+
+    <addition>
 
 }
 

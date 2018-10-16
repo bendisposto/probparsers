@@ -11,7 +11,7 @@ int_value, long_value, float_value, double_value, plus, minus, multiply, divide,
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
 #include \<stdlib.h>
@@ -30,6 +30,7 @@ static int <machine>_initialized = 0;
 
 <operations; separator="\n\n">
 
+<addition>
 >>
 
 initialization(machine, body, machines) ::= <<

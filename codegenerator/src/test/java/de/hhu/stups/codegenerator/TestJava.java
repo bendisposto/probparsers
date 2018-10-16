@@ -33,7 +33,29 @@ public class TestJava {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true);
+		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, null);
+		Process process = Runtime.getRuntime()
+				.exec("javac -classpath btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
+						.map(path -> path.toFile().getAbsoluteFile().toString())
+						.collect(Collectors.toSet())));
+
+		writeInputToSystem(process.getErrorStream());
+		writeInputToOutput(process.getErrorStream(), process.getOutputStream());
+		process.waitFor();
+
+		Set<File> classFiles = javaFilePaths.stream()
+				.map(path -> new File(path.getParent().toFile(), machine + ".class"))
+				.collect(Collectors.toSet());
+
+		//javaFilePaths.forEach(path -> cleanUp(path.toString()));
+		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));
+	}
+
+	public void testJava(String machine, String addition) throws Exception {
+		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
+				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
+		CodeGenerator codeGenerator = new CodeGenerator();
+		Set<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, addition);
 		Process process = Runtime.getRuntime()
 				.exec("javac -classpath btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
 						.map(path -> path.toFile().getAbsoluteFile().toString())
@@ -180,7 +202,7 @@ public class TestJava {
 
 	@Test
 	public void testLift() throws Exception {
-		testJava("Lift");
+		testJava("Lift", "LiftAddition.st");
 	}
 
 	@Ignore

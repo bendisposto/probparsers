@@ -2,7 +2,7 @@ keywords() ::= <<
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations) ::= <<
+machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 class <machine>:
@@ -17,6 +17,7 @@ class <machine>:
 
     <operations; separator="\n\n">
 
+    <addition>
 >>
 
 initialization(machine, body, machines) ::= <<

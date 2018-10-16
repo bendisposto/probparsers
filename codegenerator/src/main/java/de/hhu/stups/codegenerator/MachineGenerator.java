@@ -39,6 +39,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,8 +111,17 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private List<String> definedLoadsInParallel;
 
-	public MachineGenerator(GeneratorMode mode, boolean useBigInteger) {
+	private String addition;
+
+	public MachineGenerator(GeneratorMode mode, boolean useBigInteger, Path addition) {
 		this.currentGroup = TEMPLATE_MAP.get(mode);
+		if(addition != null) {
+			try {
+				this.addition = new String(Files.readAllBytes(addition));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		this.useBigInteger = useBigInteger;
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierOnLhsInParallel = new ArrayList<>();
@@ -130,6 +142,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String generateMachine(MachineNode node) {
 		initialize(node);
 		ST machine = currentGroup.getInstanceOf("machine");
+		machine.add("addition", addition);
 		machine.add("imports", typeGenerator.getImports());
 		machine.add("machine", nameHandler.handle(node.getName()));
 		generateBody(node, machine);
