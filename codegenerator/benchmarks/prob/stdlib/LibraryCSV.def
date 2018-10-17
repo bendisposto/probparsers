@@ -1,0 +1,11 @@
+DEFINITIONS
+  
+/* CSV */
+
+// read in CSV file as set of tuples
+EXTERNAL_FUNCTION_READ_CSV(T) == STRING*BOOL*BOOL --> T;
+READ_CSV(file,SkipLine1,AllowExtraColumns) == {};
+
+// read in CSV file as sequence of tuples
+EXTERNAL_FUNCTION_READ_CSV_SEQUENCE(T) == STRING*BOOL*BOOL --> seq(T);
+READ_CSV_SEQUENCE(file,SkipLine1,AllowExtraColumns) == {};

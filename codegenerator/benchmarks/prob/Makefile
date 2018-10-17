@@ -59,6 +59,8 @@ setelementofsmall:
 	$(PROBCLI) SetElementOfSmall.mch -init -execute 1
 setintersectionbig:
 	$(PROBCLI) SetIntersectionBig.mch -init -execute 1
+setintersectionbig2:
+	$(PROBCLI) SetIntersectionBig2.mch -init -execute 1
 setintersectionsmall:
 	$(PROBCLI) SetIntersectionSmall.mch -init -execute 1
 setunionbig:

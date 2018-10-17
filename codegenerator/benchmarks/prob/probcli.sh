@@ -14,4 +14,4 @@ ulimit -d unlimited
 
 chmod a+x "$dirname/$PROBCOMMAND"
 chmod a+x "$dirname/$INTERRUPT_COMMAND"
-LD_LIBRARY_PATH="lib" exec  "$dirname/$PROBCOMMAND" "$@"
+LD_LIBRARY_PATH="lib" SP_TIMEOUT_IMPLEMENTATON="legacy" exec  "$dirname/$PROBCOMMAND" "$@"

@@ -13,16 +13,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 public class CodeGenerator {
 
-	private Set<Path> paths = new HashSet<>();
+	private List<Path> paths = new ArrayList<>();
 
 	/*
 	* Main function
@@ -73,7 +73,7 @@ public class CodeGenerator {
 	/*
 	* This function generates code from a given path for a machine, the target language and the information whether it is a main machine of a project
 	*/
-	public Set<Path> generate(Path path, GeneratorMode mode, boolean useBigInteger, boolean isMain, String addition) throws CodeGenerationException {
+	public List<Path> generate(Path path, GeneratorMode mode, boolean useBigInteger, boolean isMain, String addition) throws CodeGenerationException {
 		if(isMain) {
 			paths.clear();
 		}

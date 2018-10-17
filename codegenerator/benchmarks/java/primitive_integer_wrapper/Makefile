@@ -58,6 +58,8 @@ setelementofsmall: SetElementOfSmall.class
 	java -cp :btypes.jar SetElementOfSmall
 setintersectionbig: SetIntersectionBig.class
 	java -cp :btypes.jar SetIntersectionBig
+setintersectionbig2: SetIntersectionBig2.class
+	java -cp :btypes.jar SetIntersectionBig2
 setintersectionsmall: SetIntersectionSmall.class
 	java -cp :btypes.jar SetIntersectionSmall
 setunionbig: SetUnionBig.class
@@ -155,6 +157,8 @@ SetElementOfSmall.class: SetElementOfSmall.java
 	javac -cp btypes.jar SetElementOfSmall.java
 SetIntersectionBig.class: SetIntersectionBig.java
 	javac -cp btypes.jar SetIntersectionBig.java
+SetIntersectionBig2.class: SetIntersectionBig2.java
+	javac -cp btypes.jar SetIntersectionBig2.java
 SetIntersectionSmall.class: SetIntersectionSmall.java
 	javac -cp btypes.jar SetIntersectionSmall.java
 SetUnionBig.class: SetUnionBig.java

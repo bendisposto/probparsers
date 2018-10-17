@@ -1,31 +1,69 @@
 package de.hhu.stups.btypes;
 
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
+import clojure.java.api.Clojure;
+import clojure.lang.AFn;
+import clojure.lang.IFn;
+import clojure.lang.PersistentHashSet;
+import clojure.lang.RT;
+import clojure.lang.Var;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class BSet implements BObject, Set<BObject> {
 
-	private final PSet<BObject> set;
-
-	public BSet(java.util.Set<BObject> elements) {
-		this.set = HashTreePSet.from(elements);
+	private static final class createBInteger extends AFn {
+		@Override
+		public Object invoke(Object obj) {
+			return new BInteger(Integer.parseInt(obj.toString()));
+		}
 	}
 
-	public BSet(PSet<BObject> elements) {
+	private static final Var SET;
+
+	private static final Var EMPTY;
+
+	private static final Var COUNT;
+
+	private static final IFn INTERSECTION;
+
+	private static final IFn UNION;
+
+	private static final IFn DIFFERENCE;
+
+	private static final IFn RANGE;
+
+	private static final IFn MAP;
+
+	private static final IFn INC;
+
+	private static final IFn CREATE_INTEGER;
+
+
+	static {
+		RT.var("clojure.core", "require").invoke(Clojure.read("clojure.set"));
+		SET = RT.var("clojure.core", "set");
+		EMPTY = RT.var("clojure.core", "empty?");
+		COUNT = RT.var("clojure.core", "count");
+		INTERSECTION = RT.var("clojure.set", "intersection");
+		UNION = RT.var("clojure.set", "union");
+		DIFFERENCE = RT.var("clojure.set", "difference");
+		RANGE = RT.var("clojure.core", "range");
+		MAP = RT.var("clojure.core", "map");
+		INC = RT.var("clojure.core", "inc");
+		CREATE_INTEGER = new createBInteger();
+	}
+
+	private final PersistentHashSet set;
+
+	public BSet(PersistentHashSet elements) {
 		this.set = elements;
 	}
 
 	public BSet(BObject... elements) {
-		this.set = HashTreePSet.from(Arrays.asList(elements));
+		this.set = (PersistentHashSet) SET.invoke(elements);
 	}
 
 	public static LinkedHashSet<BObject> newStorage() {
@@ -48,11 +86,11 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public int size() {
-		return this.set.size();
+		return (int) COUNT.invoke(this.set);
 	}
 
 	public boolean isEmpty() {
-		return this.set.isEmpty();
+		return (boolean) EMPTY.invoke(this.set);
 	}
 
 	public boolean contains(Object o) {
@@ -98,7 +136,7 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public <T> T[] toArray(T[] a) {
-		return set.toArray(a);
+		return (T[]) set.toArray(a);
 	}
 
 	public boolean containsAll(Collection<?> c) {
@@ -118,59 +156,48 @@ public class BSet implements BObject, Set<BObject> {
 	}
 
 	public BSet intersect(BSet set) {
-		return new BSet(this.set.minusAll(this.set.minusAll(set)));
+		return new BSet((PersistentHashSet) INTERSECTION.invoke(this.set, set.set));
 	}
 
 	public BSet complement(BSet set) {
-		return new BSet(this.set.minusAll(set));
+		return new BSet((PersistentHashSet) DIFFERENCE.invoke(this.set, set.set));
 	}
 
 	public BSet union(BSet set) {
-		return new BSet(this.set.plusAll(set));
-	}
-
-	public static BSet range(BBigInteger a, BBigInteger b) {
-		HashSet<BObject> set = new HashSet<>();
-		for(BBigInteger i = a; i.lessEqual(b).booleanValue(); i = (BBigInteger) i.next()) {
-			set.add(new BBigInteger(i.intValue()));
-		}
-		return new BSet(set);
+		return new BSet((PersistentHashSet) UNION.invoke(this.set, set.set));
 	}
 
 	public static BSet range(BInteger a, BInteger b) {
-		HashSet<BObject> set = new HashSet<>();
-		for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
-			set.add(new BInteger(i.intValue()));
-		}
-		return new BSet(set);
+		return new BSet((PersistentHashSet) SET.invoke(
+				MAP.invoke(CREATE_INTEGER, RANGE.invoke(a.getValue(), INC.invoke(b.getValue())))));
 	}
 
-	public BSet relationImage(BSet domain) {
+	/*public BSet relationImage(BSet domain) {
 		return new BSet(set.stream()
-				.filter(object -> domain.contains(((BCouple) object).getFirst()))
-				.map(object -> ((BCouple) object).getSecond())
-				.collect(Collectors.toSet()));
+			.filter(object -> domain.contains(((BCouple) object).getFirst()))
+			.map(object -> ((BCouple) object).getSecond())
+			.collect(Collectors.toSet()));
 	}
 
 
 	public BObject functionCall(BObject arg) {
 		List<BCouple> matchedCouples = set.stream()
-				.map(object -> (BCouple) object)
-				.filter(couple -> couple.getFirst().equals(arg))
-				.collect(Collectors.toList());
+			.map(object -> (BCouple) object)
+			.filter(couple -> couple.getFirst().equals(arg))
+			.collect(Collectors.toList());
 		if(matchedCouples.size() > 0) {
 			return matchedCouples.get(0).getSecond();
 		}
 		throw new RuntimeException("Argument is not in the key set of this map");
-	}
+	}*/
 
 
 	public BInteger card() {
-		return new BInteger(this.size());
+		return new BInteger((int) COUNT.invoke(this.set));
 	}
 
 	public BBoolean elementOf(BObject object) {
-		return new BBoolean(this.contains(object));
+		return new BBoolean(this.set.contains(object));
 	}
 
 	public BBoolean equal(BSet o) {
@@ -181,8 +208,4 @@ public class BSet implements BObject, Set<BObject> {
 		return new BBoolean(!equals(o));
 	}
 
-	public BObject nondeterminism() {
-		int index = (int) Math.floor(Math.random() * set.size());
-		return (BObject) toArray()[index];
-	}
 }

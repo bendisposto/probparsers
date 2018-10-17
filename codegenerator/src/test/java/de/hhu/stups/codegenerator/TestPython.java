@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by fabian on 31.05.18.
@@ -28,7 +28,7 @@ public class TestPython {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		Set<Path> pythonFilePaths = codeGenerator.generate(mchPath, GeneratorMode.PY, false,true, null);
+		List<Path> pythonFilePaths = codeGenerator.generate(mchPath, GeneratorMode.PY, false,true, null);
 
 		//pythonFilePaths.forEach(path -> cleanUp(path.toString()));
 	}

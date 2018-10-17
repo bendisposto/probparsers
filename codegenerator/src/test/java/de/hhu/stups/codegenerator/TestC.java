@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by fabian on 05.08.18.
@@ -29,7 +29,7 @@ public class TestC {
         Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
                 .getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
         CodeGenerator codeGenerator = new CodeGenerator();
-        Set<Path> cFilePaths = codeGenerator.generate(mchPath, GeneratorMode.C, false, true, null);
+        List<Path> cFilePaths = codeGenerator.generate(mchPath, GeneratorMode.C, false, true, null);
 
         //cFilePaths.forEach(path -> cleanUp(path.toString()));
     }
