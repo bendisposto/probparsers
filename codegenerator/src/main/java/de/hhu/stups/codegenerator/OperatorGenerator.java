@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.BOOL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.CARD;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.COUPLE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
@@ -95,6 +96,8 @@ public class OperatorGenerator {
             return generateInterval(expressionList);
         } else if(node.getOperator() == COUPLE) {
             return generateCouple(expressionList);
+        } else if(node.getOperator() == BOOL) {
+            return generateBooleans();
         }
         throw new RuntimeException("Given operator is not implemented: " + node.getOperator());
     }
@@ -355,6 +358,10 @@ public class OperatorGenerator {
     */
     private String generateBoolean(PredicateOperatorNode.PredicateOperator operator) {
         return group.getInstanceOf("boolean_val").add("val", operator == PredicateOperatorNode.PredicateOperator.TRUE).render();
+    }
+
+    public String generateBooleans() {
+        return group.getInstanceOf("bool").render();
     }
 
 }

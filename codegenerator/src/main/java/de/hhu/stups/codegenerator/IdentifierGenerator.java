@@ -50,7 +50,9 @@ public class IdentifierGenerator {
     */
     public String generate(IdentifierExprNode node) {
         boolean isReturn = outputParams.stream()
-                .map(declarationNode -> nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
+                .map(declarationNode -> declarationNode.getType().toString().startsWith("POW") ?
+                        nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
+                        nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
                 .collect(Collectors.toList())
                 .contains(node.toString());
 
@@ -63,7 +65,9 @@ public class IdentifierGenerator {
     */
     private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
-        identifier.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        identifier.add("identifier", node.getType() != null && node.getType().toString().startsWith("POW") ?
+                nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
+                nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         identifier.add("isReturn", isReturn);
         identifier.add("isPrivate", isPrivate);
         identifier.add("rhsOnLhs", identifierOnLhsInParallel.contains(node.getName()) && !lhsInParallel);

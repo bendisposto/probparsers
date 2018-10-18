@@ -123,7 +123,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     ObstacleStatusJustChanged := FALSE ||
     CCInitialisationInProgress := FALSE ||
     CruiseSpeedChangeInProgress := FALSE ||
-   ANY op, ors WHERE
+    ANY op, ors WHERE
         (op: BOOL) &
         (ors : RSset) &
         (op = FALSE <=> (ors = RSnone))
@@ -207,7 +207,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 				CruiseSpeedChangeInProgress = FALSE)
 			   => vtktg = TRUE) &
            ((ObstacleRelativeSpeed = RSpos &
-				ObstacleDistance /= ODveryclose&
+				ObstacleDistance /= ODveryclose &
 				ObstacleStatusJustChanged = FALSE &
 				CruiseSpeedChangeInProgress = FALSE)
                => vtks = TRUE) &

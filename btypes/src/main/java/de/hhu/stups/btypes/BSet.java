@@ -208,4 +208,9 @@ public class BSet implements BObject, Set<BObject> {
 		return new BBoolean(!equals(o));
 	}
 
+	public BObject nondeterminism() {
+		int index = (int) Math.floor(Math.random() * set.size());
+		return (BObject) toArray()[index];
+	}
+
 }

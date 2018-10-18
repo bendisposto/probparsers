@@ -18,6 +18,7 @@ import de.prob.parser.ast.nodes.ltl.LTLKeywordNode;
 import de.prob.parser.ast.nodes.ltl.LTLPrefixOperatorNode;
 import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
 import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
+import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorWithExprArgsNode;
 import de.prob.parser.ast.nodes.predicate.QuantifiedPredicateNode;
@@ -34,6 +35,7 @@ import de.prob.parser.ast.nodes.substitution.SkipSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.VarSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
+import de.prob.parser.ast.types.BoolType;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -577,8 +579,42 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitAnySubstitution(AnySubstitutionNode node, Void expected) {
-		//return visitSubstitutionNode(node.getThenSubstitution(), expected);
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return generateAnyParameters(node.getParameters(), node.getParameters().get(0), node.getWherePredicate(), node.getThenSubstitution(), 0, node.getParameters().size());
+		//throw new RuntimeException("Given node is not implemented: " + node.getClass());
+	}
+
+	public String generateAnyParameters(List<DeclarationNode> parameters, DeclarationNode parameter,
+								  PredicateNode predicateNode, SubstitutionNode substitutionNode, int index, int length) {
+		ST substitution = currentGroup.getInstanceOf("any");
+		if(index == length - 1) {
+			substitution.add("type", typeGenerator.generate(parameter.getType(), false));
+			substitution.add("identifier", nameHandler.handle(parameter.getName()));
+			if(!(parameter.getType() instanceof BoolType)) {
+				substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+			} else {
+				substitution.add("set", operatorGenerator.generateBooleans());
+			}
+			substitution.add("index", index);
+			substitution.add("body", generateAnyBody(predicateNode, substitutionNode));
+		} else {
+			substitution.add("type", typeGenerator.generate(parameter.getType(), false));
+			substitution.add("identifier", nameHandler.handle(parameter.getName()));
+			if(!(parameter.getType() instanceof BoolType)) {
+				substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+			} else {
+				substitution.add("set", operatorGenerator.generateBooleans());
+			}
+			substitution.add("index", index);
+			substitution.add("body", generateAnyParameters(parameters, parameters.get(index + 1), predicateNode, substitutionNode, index + 1, length));
+		}
+		return substitution.render();
+	}
+
+	public String generateAnyBody(PredicateNode predicateNode, SubstitutionNode substitutionNode) {
+		ST body = currentGroup.getInstanceOf("any_body");
+		body.add("predicate", visitPredicateNode(predicateNode, null));
+		body.add("body", visitSubstitutionNode(substitutionNode, null));
+		return body.render();
 	}
 
 	/*

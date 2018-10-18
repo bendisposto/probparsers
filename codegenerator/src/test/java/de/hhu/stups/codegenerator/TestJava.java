@@ -567,7 +567,6 @@ public class TestJava {
 		testJava("Cruise_finite1");
 	}
 
-	@Ignore
 	@Test
 	public void testCruiseControllerk() throws Exception {
 		testJava("Cruise_finite_k");

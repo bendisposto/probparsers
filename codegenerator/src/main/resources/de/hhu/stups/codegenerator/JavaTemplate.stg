@@ -89,6 +89,10 @@ public enum <name> implements BObject {
 }
 >>
 
+bool() ::= <<
+BBoolean.BOOL
+>>
+
 include_declaration(type, identifier) ::= <<
 private <declaration(type, identifier)> = new <type>();
 >>
@@ -221,6 +225,18 @@ else {
 }
 >>
 
+any(type, identifier, set, body, index) ::= <<
+for(int _<index>_i = 0; _<index>_i \< <set>.size(); _<index>_i++) {
+    <type> <identifier> = (<type>) <set>.toArray()[_<index>_i];
+    <body>
+}
+>>
+
+any_body(predicate, body) ::= <<
+if(<predicate>.booleanValue()) {
+    <body>
+}
+>>
 
 while(predicate, then) ::= <<
 while((<predicate>).booleanValue()) {
