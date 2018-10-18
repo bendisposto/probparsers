@@ -11,7 +11,7 @@ int_value, long_value, float_value, double_value, plus, minus, multiply, divide,
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
 #include \<stdlib.h>
@@ -89,6 +89,12 @@ local_declaration(type, identifier) ::= <<
 
 declaration(type, identifier) ::= <<
 <type> <identifier>
+>>
+
+constant(type, identifier, val) ::= <<
+>>
+
+values(assignments) ::= <<
 >>
 
 

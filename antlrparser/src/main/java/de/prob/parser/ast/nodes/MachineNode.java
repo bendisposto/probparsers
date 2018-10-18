@@ -20,6 +20,7 @@ public class MachineNode extends Node {
 	private PredicateNode invariant;
 	private SubstitutionNode initialisation;
 	private List<OperationNode> operations = new ArrayList<>();
+	private List<SubstitutionNode> values = new ArrayList<>();
 
 	private List<LTLFormula> ltlFormulas = new ArrayList<>();
 
@@ -113,6 +114,14 @@ public class MachineNode extends Node {
 
 	public List<MachineReferenceNode> getMachineReferences() {
 		return machineReferences;
+	}
+
+	public void addValues(SubstitutionNode substitution) {
+		values.add(substitution);
+	}
+
+	public List<SubstitutionNode> getValues() {
+		return values;
 	}
 
 	public void setName(String name) {

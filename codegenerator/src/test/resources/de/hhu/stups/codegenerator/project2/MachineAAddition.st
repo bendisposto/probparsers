@@ -3,5 +3,5 @@ public static void main(String[] args) {
     machine.initialize();
     machine.IncX1();
     machine.IncX2();
-    System.out.println(machine.MachineB.x);
+    System.out.println(machine.MachineB);
 }

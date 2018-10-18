@@ -71,12 +71,12 @@ public class TestJava {
 		Path mainPath = javaFilePaths.get(0);
 
 		Process executeProcess = Runtime.getRuntime()
-				.exec("java -cp :btypes_persistent.jar " + mainPath.toFile().getAbsoluteFile().toString().split("\\.")[0] + " > " + mainPath.toFile().getAbsoluteFile().toString().replace(".java", ".out"));
+				.exec("java -cp :btypes_persistent.jar " + mainPath.toFile().getAbsoluteFile().toString().replace(".java", ""));
 		executeProcess.waitFor();
 
 		String outPath = mainPath.toFile().getAbsoluteFile().toString().replace(".java", ".out");
 
-		writeInputToSystem(executeProcess.getErrorStream());
+		writeInputToSystem(executeProcess.getInputStream());
 		writeInputToOutput(executeProcess.getInputStream(), new FileOutputStream(outPath));
 
 

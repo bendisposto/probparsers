@@ -2,12 +2,14 @@ package de.prob.parser.antlr;
 
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.DeclarationNode.Kind;
 import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
-import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.MachineNode;
+import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.OperationNode;
+import de.prob.parser.ast.nodes.expression.ExprNode;
+import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
+import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.SubstitutionNode;
 import files.BParser;
 import files.BParser.DeclarationClauseContext;
@@ -17,6 +19,7 @@ import files.BParserBaseVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -112,6 +115,19 @@ public class MachineASTCreator {
 		public Void visitInitialisationClause(BParser.InitialisationClauseContext ctx) {
 			SubstitutionNode subNode = (SubstitutionNode) ctx.substitution().accept(formulaAstCreator);
 			machineNode.setInitialisation(subNode);
+			return null;
+		}
+
+		@Override
+		public Void visitValuesClause(BParser.ValuesClauseContext ctx) {
+			for(int i = 0; i < ctx.idents.size(); i++) {
+				String name = ctx.idents.get(i).getText();
+				IdentifierExprNode identifier = new IdentifierExprNode(Util.createSourceCodePosition(ctx.idents.get(i)), name);
+				ExprNode expr = (ExprNode) ctx.exprs.get(i).accept(formulaAstCreator);
+				machineNode.addValues(new AssignSubstitutionNode(Util.createSourceCodePosition(ctx),
+						Collections.singletonList(identifier),
+						Collections.singletonList(expr)));
+			}
 			return null;
 		}
 

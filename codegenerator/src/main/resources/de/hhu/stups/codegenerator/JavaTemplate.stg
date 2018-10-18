@@ -3,10 +3,14 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 public class <machine> {
+
+    <constants; separator="\n">
+
+    <values>
 
     <includes; separator="\n">
 
@@ -97,6 +101,16 @@ local_declaration(type, identifier) ::= <<
 <declaration(type, identifier)> = null;
 >>
 
+constant(type, identifier, val) ::= <<
+private static final <type> <identifier>;
+>>
+
+values(assignments) ::= <<
+static {
+    <assignments; separator="\n">
+}
+>>
+
 declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
@@ -112,7 +126,7 @@ parallel(loads, others, stores) ::=<<
 >>
 
 parallel_load(type, identifier, typeCast) ::= <<
-<type> ld_<identifier> = <typeCast> <identifier>;
+<type> _ld_<identifier> = <typeCast> <identifier>;
 >>
 
 parallel_store(identifier, typeCast, val) ::= <<
@@ -224,7 +238,7 @@ boolean_val(val) ::= <<
 >>
 
 identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
-<if(rhsOnLhs)>ld_<identifier><else><identifier><endif>
+<if(rhsOnLhs)>_ld_<identifier><else><identifier><endif>
 >>
 
 number(number, useBigInteger) ::= <<

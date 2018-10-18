@@ -1,5 +1,5 @@
 public static void main(String[] args) {
-    SieveParallelAddition sieve = new SieveParallelAddition();
+    SieveParallel sieve = new SieveParallel();
     sieve.initialize();
     System.out.println(sieve.ComputeNumberOfPrimes());
 }

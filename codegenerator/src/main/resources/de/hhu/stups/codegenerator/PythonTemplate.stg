@@ -2,7 +2,7 @@ keywords() ::= <<
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 class <machine>:
@@ -76,6 +76,13 @@ local_declaration(type, identifier) ::= <<
 
 declaration(type, identifier) ::= <<
 <identifier>
+>>
+
+
+constant(type, identifier, val) ::= <<
+>>
+
+values(assignments) ::= <<
 >>
 
 

@@ -5,7 +5,7 @@ return, short, signed, sizeof, static, static_cast, volatile, struct, switch, te
 >>
 
 
-machine(imports, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<iostream>
 #include \<string>
 <imports; separator="\n">
@@ -122,6 +122,12 @@ local_declaration(type, identifier) ::= <<
 
 declaration(type, identifier) ::= <<
 <type> <identifier>
+>>
+
+constant(type, identifier, val) ::= <<
+>>
+
+values(assignments) ::= <<
 >>
 
 parameter(type, identifier, isReturn) ::= <<

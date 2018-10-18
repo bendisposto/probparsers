@@ -171,12 +171,40 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	* This function generates the whole body of a machine from the given AST node for the machine.
 	*/
 	private void generateBody(MachineNode node, ST machine) {
+		machine.add("constants", generateConstants(node));
+		machine.add("values", generateValues(node));
 		machine.add("enums", generateEnumDeclarations(node));
 		machine.add("sets", generateSetDeclarations(node));
 		machine.add("declarations", visitDeclarations(node.getVariables()));
 		machine.add("includes", generateIncludes(node));
 		machine.add("initialization", visitInitialization(node));
 		machine.add("operations", visitOperations(node.getOperations()));
+	}
+
+	private String generateValues(MachineNode node) {
+		if(node.getValues().size() == 0) {
+			return "";
+		}
+		ST values = currentGroup.getInstanceOf("values");
+		List<String> assignments = node.getValues().stream()
+				.map(substitution -> visitSubstitutionNode(substitution, null))
+				.collect(Collectors.toList());
+		values.add("assignments", assignments);
+		return values.render();
+	}
+
+	private List<String> generateConstants(MachineNode node) {
+		//TODO Generate code for PROPERTIES (?)
+		return node.getConstants().stream()
+				.map(this::generateConstant)
+				.collect(Collectors.toList());
+	}
+
+	private String generateConstant(DeclarationNode constant) {
+		ST declaration = currentGroup.getInstanceOf("constant");
+		declaration.add("type", typeGenerator.generate(constant.getType(), false));
+		declaration.add("identifier", nameHandler.handleIdentifier(constant.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+		return declaration.render();
 	}
 
 	/*
