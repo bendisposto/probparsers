@@ -303,6 +303,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				return callEnum(node.getType().toString(), ((IdentifierExprNode) node).getDeclarationNode());
 			}
 			return visitIdentifierExprNode((IdentifierExprNode) node, expected);
+		} else if(node instanceof CastPredicateExpressionNode) {
+			return visitCastPredicateExpressionNode((CastPredicateExpressionNode) node, expected);
 		}
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
 	}
@@ -390,11 +392,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	/*
-	* Code is not generated from the cast predicate expressions in the given subset of B
+	* This function generates code for cast predicates
 	*/
 	@Override
 	public String visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return visitPredicateNode(node.getPredicate(), expected);
 	}
 
 	/*

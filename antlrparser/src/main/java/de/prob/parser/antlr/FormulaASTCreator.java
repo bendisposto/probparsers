@@ -7,6 +7,7 @@ import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.expression.NumberNode;
+import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
 import de.prob.parser.ast.nodes.predicate.IdentifierPredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateNode;
 import de.prob.parser.ast.nodes.predicate.PredicateOperatorNode;
@@ -370,6 +371,11 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 			return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), ExpressionOperator.FALSE);
 		}
 		return notReachable(ctx);
+	}
+
+	@Override
+	public Node visitBoolCastExpression(BParser.BoolCastExpressionContext ctx) {
+		return new CastPredicateExpressionNode(Util.createSourceCodePosition(ctx), (PredicateNode) ctx.predicate().accept(this));
 	}
 
 	@Override

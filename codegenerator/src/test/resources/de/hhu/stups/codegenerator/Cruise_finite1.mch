@@ -11,9 +11,9 @@ SETS
     ODset = {ODnone, ODclose, ODveryclose}
 
 DEFINITIONS
-	CruiseReallyActive == (ObstacleStatusJustChanged = FALSE &
+	/*(ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE) == (ObstacleStatusJustChanged = FALSE &
 			       CCInitialisationInProgress = FALSE &
-			       CruiseSpeedChangeInProgress = FALSE);
+			       CruiseSpeedChangeInProgress = FALSE);*/
   ASSERT_LTL == "G (e(SetCruiseSpeed) => e(CruiseBecomesNotAllowed))";
   ASSERT_LTL1 == "G (e(CruiseBecomesNotAllowed) => e(SetCruiseSpeed))";
   ASSERT_LTL2 == "G (e(CruiseBecomesNotAllowed) => e(ObstacleDisappears))"
@@ -28,13 +28,13 @@ DEFINITIONS
 
 G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 */
- VARIABLES 
- /* User level variables */ 
-    CruiseAllowed, 
-    CruiseActive, 
-    VehicleAtCruiseSpeed, 
-    VehicleCanKeepSpeed, 
-    VehicleTryKeepSpeed, 
+ VARIABLES
+ /* User level variables */
+    CruiseAllowed,
+    CruiseActive,
+    VehicleAtCruiseSpeed,
+    VehicleCanKeepSpeed,
+    VehicleTryKeepSpeed,
     SpeedAboveMax,
     VehicleTryKeepTimeGap,
     CruiseSpeedAtMax,
@@ -45,21 +45,21 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 	CCInitialisationInProgress,
 	CruiseSpeedChangeInProgress,
 
- /* Verification support variables */ 
-    NumberOfSetCruise 
+ /* Verification support variables */
+    NumberOfSetCruise
 
 
- INVARIANT 
- /* Typing */ 
-    CruiseAllowed:BOOL & 
-    CruiseActive:BOOL & 
-    VehicleAtCruiseSpeed:BOOL & 
-    VehicleCanKeepSpeed:BOOL & 
-    VehicleTryKeepSpeed:BOOL & 
-    SpeedAboveMax:BOOL & 
+ INVARIANT
+ /* Typing */
+    CruiseAllowed:BOOL &
+    CruiseActive:BOOL &
+    VehicleAtCruiseSpeed:BOOL &
+    VehicleCanKeepSpeed:BOOL &
+    VehicleTryKeepSpeed:BOOL &
+    SpeedAboveMax:BOOL &
     VehicleTryKeepTimeGap:BOOL &
     CruiseSpeedAtMax:BOOL &
-    NumberOfSetCruise:NATURAL & 
+    NumberOfSetCruise:NATURAL &
       NumberOfSetCruise:0..1 & /* added by mal */
     ObstaclePresent:BOOL &
     ObstacleDistance:ODset &
@@ -67,8 +67,8 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 	ObstacleStatusJustChanged:BOOL &
 	CCInitialisationInProgress:BOOL &
 	CruiseSpeedChangeInProgress:BOOL &
- 
-    /* Consistency */ 
+
+    /* Consistency */
     (CruiseActive = FALSE => VehicleAtCruiseSpeed = FALSE) &
     (CruiseActive = FALSE => VehicleCanKeepSpeed = FALSE) &
     (CruiseActive = FALSE => VehicleTryKeepSpeed = FALSE) &
@@ -95,93 +95,93 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     (CruiseActive = TRUE
         => (VehicleTryKeepSpeed = TRUE
 			   or VehicleTryKeepTimeGap = TRUE
-			   or not(CruiseReallyActive))) &
-    (ObstacleDistance = ODnone & CruiseActive = TRUE & CruiseReallyActive
+			   or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))) &
+    (ObstacleDistance = ODnone & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepSpeed = TRUE) &
-    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & CruiseReallyActive
-		=> VehicleTryKeepTimeGap = TRUE) & 
-    (ObstacleDistance = ODveryclose & CruiseReallyActive
-		=> VehicleTryKeepTimeGap = TRUE) & 
-    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & CruiseReallyActive
+    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
+		=> VehicleTryKeepTimeGap = TRUE) &
+    (ObstacleDistance = ODveryclose & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
+		=> VehicleTryKeepTimeGap = TRUE) &
+    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
         => VehicleTryKeepSpeed = TRUE)
 
 
- INITIALISATION 
-    CruiseAllowed := FALSE ; 
-    CruiseActive := FALSE ; 
-    VehicleAtCruiseSpeed := FALSE ; 
-    VehicleCanKeepSpeed := FALSE ; 
-    VehicleTryKeepSpeed := FALSE ; 
-    SpeedAboveMax := FALSE ; 
-    VehicleTryKeepTimeGap := FALSE ;
-    NumberOfSetCruise := 0 ;
-    CruiseSpeedAtMax:= FALSE ;
-    ObstacleDistance := ODnone ;
-    ObstacleStatusJustChanged := FALSE ;
-    CCInitialisationInProgress := FALSE ;
-    CruiseSpeedChangeInProgress := FALSE ;
+ INITIALISATION
+    CruiseAllowed := FALSE ||
+    CruiseActive := FALSE ||
+    VehicleAtCruiseSpeed := FALSE ||
+    VehicleCanKeepSpeed := FALSE ||
+    VehicleTryKeepSpeed := FALSE ||
+    SpeedAboveMax := FALSE ||
+    VehicleTryKeepTimeGap := FALSE ||
+    NumberOfSetCruise := 0 ||
+    CruiseSpeedAtMax:= FALSE ||
+    ObstacleDistance := ODnone ||
+    ObstacleStatusJustChanged := FALSE ||
+    CCInitialisationInProgress := FALSE ||
+    CruiseSpeedChangeInProgress := FALSE ||
    ANY op, ors WHERE
         (op: BOOL) &
         (ors : RSset) &
         (op = FALSE <=> (ors = RSnone))
-    THEN    
-        ObstaclePresent := op ;
+    THEN
+        ObstaclePresent := op ||
         ObstacleRelativeSpeed := ors
     END
 
 
- OPERATIONS 
- 
+ OPERATIONS
+
     CruiseBecomesNotAllowed =
-    SELECT 
-        CruiseAllowed = TRUE 
-    THEN 
-        CruiseAllowed := FALSE ; 
-        CruiseActive := FALSE ; 
-        VehicleCanKeepSpeed := FALSE ; 
-        VehicleTryKeepSpeed := FALSE ; 
-        VehicleAtCruiseSpeed := FALSE ;
-        VehicleTryKeepTimeGap := FALSE ; 
-        CruiseSpeedAtMax := FALSE ;
-        ObstacleDistance := ODnone ;
-        NumberOfSetCruise := 0 ;
-        ObstacleStatusJustChanged := FALSE ;
-        CCInitialisationInProgress := FALSE ;
+    SELECT
+        CruiseAllowed = TRUE
+    THEN
+        CruiseAllowed := FALSE ||
+        CruiseActive := FALSE ||
+        VehicleCanKeepSpeed := FALSE ||
+        VehicleTryKeepSpeed := FALSE ||
+        VehicleAtCruiseSpeed := FALSE ||
+        VehicleTryKeepTimeGap := FALSE ||
+        CruiseSpeedAtMax := FALSE ||
+        ObstacleDistance := ODnone ||
+        NumberOfSetCruise := 0 ||
+        ObstacleStatusJustChanged := FALSE ||
+        CCInitialisationInProgress := FALSE ||
         CruiseSpeedChangeInProgress := FALSE
-    END; 
- 
- 
-    CruiseBecomesAllowed = SELECT 
+    END;
+
+
+    CruiseBecomesAllowed = SELECT
         CruiseAllowed = FALSE  /* & CruiseAllowed = TRUE */
-    THEN 
-        CruiseAllowed := TRUE 
-    END; 
- 
- 
+    THEN
+        CruiseAllowed := TRUE
+    END;
+
+
     SetCruiseSpeed = SELECT
         CruiseAllowed = TRUE
-    THEN 
-        CruiseActive := TRUE ; 
-        VehicleCanKeepSpeed :: BOOL ; 
+    THEN
+        CruiseActive := TRUE ||
+        VehicleCanKeepSpeed :: BOOL ||
 
-        IF SpeedAboveMax = FALSE THEN 
-            VehicleAtCruiseSpeed := TRUE ;
+        IF SpeedAboveMax = FALSE THEN
+            VehicleAtCruiseSpeed := TRUE ||
             CruiseSpeedAtMax:: BOOL
         ELSE
             CruiseSpeedAtMax:=TRUE
-        END ;
-	    ObstacleStatusJustChanged := TRUE ;
+        END ||
+	    ObstacleStatusJustChanged := TRUE ||
 	    IF CruiseActive = TRUE THEN
 			CruiseSpeedChangeInProgress := TRUE
 		ELSE
 			CCInitialisationInProgress := TRUE
-		END ;
+		END ||
         IF NumberOfSetCruise<1 THEN  /* added my mal */
             NumberOfSetCruise := NumberOfSetCruise + 1
         END
     END;
 
-	
+
     CCInitialisationFinished = SELECT
 	   CCInitialisationInProgress  = TRUE
     THEN
@@ -197,30 +197,30 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
            ((ObstacleDistance = ODclose &
 				ObstacleRelativeSpeed /= RSpos &
 				ObstacleStatusJustChanged = FALSE &
-				CruiseSpeedChangeInProgress = FALSE) 
-               => vtktg = TRUE) & 
+				CruiseSpeedChangeInProgress = FALSE)
+               => vtktg = TRUE) &
            ((ObstacleDistance = ODveryclose &
 				ObstacleStatusJustChanged = FALSE &
 				CruiseSpeedChangeInProgress = FALSE)
-			   => vtktg = TRUE) & 
+			   => vtktg = TRUE) &
            ((ObstacleRelativeSpeed = RSpos &
 				ObstacleDistance /= ODveryclose&
 				ObstacleStatusJustChanged = FALSE &
-				CruiseSpeedChangeInProgress = FALSE) 
+				CruiseSpeedChangeInProgress = FALSE)
                => vtks = TRUE) &
-           ((ObstacleRelativeSpeed = RSequal & ObstacleDistance = ODnone) 
+           ((ObstacleRelativeSpeed = RSequal & ObstacleDistance = ODnone)
                 => vtktg = FALSE) &
            ((ObstacleRelativeSpeed = RSneg & ObstacleDistance = ODnone)
                 => vtktg = FALSE) &
-           ((ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose) 
+           ((ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose)
                 => vtktg = FALSE)
         THEN
-            VehicleTryKeepTimeGap := vtktg ;
+            VehicleTryKeepTimeGap := vtktg ||
             VehicleTryKeepSpeed := vtks
         END
 	END;
 
-	
+
     CCInitialisationDelayFinished =
 	SELECT
 		CCInitialisationInProgress = TRUE &
@@ -233,21 +233,21 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 			 ObstacleRelativeSpeed /= RSpos &
 			 ObstacleStatusJustChanged = FALSE &
 			 CruiseSpeedChangeInProgress = FALSE )
-			=> (VehicleTryKeepTimeGap = TRUE)) & 
+			=> (VehicleTryKeepTimeGap = TRUE)) &
         ((ObstacleDistance = ODveryclose &
 			 ObstacleStatusJustChanged = FALSE &
 			 CruiseSpeedChangeInProgress = FALSE)
-			=> VehicleTryKeepTimeGap = TRUE) & 
+			=> VehicleTryKeepTimeGap = TRUE) &
         ((ObstacleRelativeSpeed = RSpos &
 			 ObstacleDistance /= ODveryclose &
 			 ObstacleStatusJustChanged = FALSE &
-			 CruiseSpeedChangeInProgress = FALSE) 
+			 CruiseSpeedChangeInProgress = FALSE)
             => VehicleTryKeepSpeed = TRUE)
     THEN
         CCInitialisationInProgress := TRUE
     END;
 
-	
+
 	CruiseSpeedChangeFinished = SELECT
 	   CruiseSpeedChangeInProgress  = TRUE
     THEN
@@ -263,30 +263,30 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
            ((ObstacleDistance = ODclose &
 				ObstacleRelativeSpeed /= RSpos &
 				ObstacleStatusJustChanged = FALSE &
-				CCInitialisationInProgress = FALSE) 
-               => vtktg = TRUE) & 
+				CCInitialisationInProgress = FALSE)
+               => vtktg = TRUE) &
            ((ObstacleDistance = ODveryclose &
 				ObstacleStatusJustChanged = FALSE &
 				CCInitialisationInProgress = FALSE)
-			   => vtktg = TRUE) & 
+			   => vtktg = TRUE) &
            ((ObstacleRelativeSpeed = RSpos &
 				ObstacleDistance /= ODveryclose&
 				ObstacleStatusJustChanged = FALSE &
-				CCInitialisationInProgress = FALSE) 
+				CCInitialisationInProgress = FALSE)
                => vtks = TRUE) &
-           ((ObstacleRelativeSpeed = RSequal & ObstacleDistance = ODnone) 
+           ((ObstacleRelativeSpeed = RSequal & ObstacleDistance = ODnone)
                 => vtktg = FALSE) &
            ((ObstacleRelativeSpeed = RSneg & ObstacleDistance = ODnone)
                 => vtktg = FALSE) &
-           ((ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose) 
+           ((ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose)
                 => vtktg = FALSE)
         THEN
-            VehicleTryKeepTimeGap := vtktg ;
+            VehicleTryKeepTimeGap := vtktg ||
             VehicleTryKeepSpeed := vtks
         END
 	END;
 
-	
+
     CruiseSpeedChangeDelayFinished =
 	SELECT
 		CruiseSpeedChangeInProgress = TRUE &
@@ -299,80 +299,80 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
 			 ObstacleRelativeSpeed /= RSpos &
 			 ObstacleStatusJustChanged = FALSE &
 			 CCInitialisationInProgress = FALSE )
-			=> (VehicleTryKeepTimeGap = TRUE)) & 
+			=> (VehicleTryKeepTimeGap = TRUE)) &
         ((ObstacleDistance = ODveryclose &
 			 ObstacleStatusJustChanged = FALSE &
 			 CCInitialisationInProgress = FALSE)
-			=> VehicleTryKeepTimeGap = TRUE) & 
+			=> VehicleTryKeepTimeGap = TRUE) &
         ((ObstacleRelativeSpeed = RSpos &
 			 ObstacleDistance /= ODveryclose &
 			 ObstacleStatusJustChanged = FALSE &
-			 CCInitialisationInProgress = FALSE) 
+			 CCInitialisationInProgress = FALSE)
             => VehicleTryKeepSpeed = TRUE)
     THEN
        CruiseSpeedChangeInProgress := TRUE
     END;
 
-	
-   CruiseOff =
-    SELECT 
-        CruiseActive = TRUE  
-    THEN 
-        CruiseActive := FALSE ; 
-        VehicleCanKeepSpeed := FALSE ; 
-        VehicleTryKeepSpeed := FALSE ; 
-        VehicleAtCruiseSpeed := FALSE ; 
-        VehicleTryKeepTimeGap := FALSE ;
-        CruiseSpeedAtMax := FALSE ;
-        ObstacleDistance := ODnone ;
-        NumberOfSetCruise := 0 ;
-        ObstacleStatusJustChanged := FALSE ;
-		CCInitialisationInProgress := FALSE ;
-		CruiseSpeedChangeInProgress := FALSE
-    END; 
- 
 
-    ExternalForcesBecomesExtreme = SELECT 
-        VehicleCanKeepSpeed = TRUE 
-    THEN 
-        VehicleCanKeepSpeed := FALSE 
-    END; 
- 
- 
-    ExternalForcesBecomesNormal = SELECT 
-        CruiseActive = TRUE & 
-        VehicleCanKeepSpeed = FALSE 
-    THEN 
-        VehicleCanKeepSpeed := TRUE 
-    END; 
- 
- 
+   CruiseOff =
+    SELECT
+        CruiseActive = TRUE
+    THEN
+        CruiseActive := FALSE ||
+        VehicleCanKeepSpeed := FALSE ||
+        VehicleTryKeepSpeed := FALSE ||
+        VehicleAtCruiseSpeed := FALSE ||
+        VehicleTryKeepTimeGap := FALSE ||
+        CruiseSpeedAtMax := FALSE ||
+        ObstacleDistance := ODnone ||
+        NumberOfSetCruise := 0 ||
+        ObstacleStatusJustChanged := FALSE ||
+		CCInitialisationInProgress := FALSE ||
+		CruiseSpeedChangeInProgress := FALSE
+    END;
+
+
+    ExternalForcesBecomesExtreme = SELECT
+        VehicleCanKeepSpeed = TRUE
+    THEN
+        VehicleCanKeepSpeed := FALSE
+    END;
+
+
+    ExternalForcesBecomesNormal = SELECT
+        CruiseActive = TRUE &
+        VehicleCanKeepSpeed = FALSE
+    THEN
+        VehicleCanKeepSpeed := TRUE
+    END;
+
+
     VehicleLeavesCruiseSpeed =
-    SELECT   
-        VehicleAtCruiseSpeed = TRUE & 
+    SELECT
+        VehicleAtCruiseSpeed = TRUE &
         (VehicleCanKeepSpeed = FALSE & VehicleTryKeepSpeed = TRUE) or
         (VehicleTryKeepSpeed = FALSE)
-    THEN 
-        VehicleAtCruiseSpeed := FALSE 
-    END; 
- 
- 
-    VehicleReachesCruiseSpeed = SELECT 
-        CruiseActive = TRUE & 
-        VehicleAtCruiseSpeed = FALSE & 
-        SpeedAboveMax = FALSE 
-    THEN  
-        VehicleAtCruiseSpeed := TRUE 
-    END; 
- 
- 
-    VehicleExceedsMaxCruiseSpeed = SELECT 
-        SpeedAboveMax = FALSE & 
+    THEN
+        VehicleAtCruiseSpeed := FALSE
+    END;
+
+
+    VehicleReachesCruiseSpeed = SELECT
+        CruiseActive = TRUE &
+        VehicleAtCruiseSpeed = FALSE &
+        SpeedAboveMax = FALSE
+    THEN
+        VehicleAtCruiseSpeed := TRUE
+    END;
+
+
+    VehicleExceedsMaxCruiseSpeed = SELECT
+        SpeedAboveMax = FALSE &
         (CruiseActive = FALSE
 			or VehicleCanKeepSpeed = FALSE
-			or not(CruiseReallyActive))
+			or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))
     THEN 
-        SpeedAboveMax := TRUE ;  
+        SpeedAboveMax := TRUE ||  
         VehicleAtCruiseSpeed := FALSE
     END; 
  
@@ -380,7 +380,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     VehicleFallsBelowMaxCruiseSpeed = SELECT 
         SpeedAboveMax = TRUE 
     THEN 
-        SpeedAboveMax := FALSE ;
+        SpeedAboveMax := FALSE ||
         IF (CruiseActive=TRUE) & (CruiseSpeedAtMax = TRUE) THEN
 			VehicleAtCruiseSpeed := TRUE
         END
@@ -390,7 +390,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ObstacleDistance = ODclose &
 	    ObstacleRelativeSpeed = RSneg
     THEN
-		ObstacleDistance := ODveryclose ;
+		ObstacleDistance := ODveryclose ||
         ObstacleStatusJustChanged := TRUE
     END;
 
@@ -400,8 +400,8 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ((ObstacleDistance = ODveryclose & ObstacleRelativeSpeed = RSpos)
 			or (ObstacleDistance = ODnone & ObstacleRelativeSpeed = RSneg))
     THEN
-        ObstacleDistance := ODclose ;
-        ObstacleStatusJustChanged := TRUE ;
+        ObstacleDistance := ODclose ||
+        ObstacleStatusJustChanged := TRUE ||
         IF (ObstacleRelativeSpeed = RSpos) THEN
             VehicleTryKeepTimeGap := FALSE
         END
@@ -411,8 +411,8 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ObstacleDistance = ODclose &
         ObstacleRelativeSpeed = RSpos
     THEN
-        ObstacleStatusJustChanged := TRUE ;
-        ObstacleDistance := ODnone ;
+        ObstacleStatusJustChanged := TRUE ||
+        ObstacleDistance := ODnone ||
         VehicleTryKeepTimeGap:= FALSE
     END;
 
@@ -421,10 +421,10 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ObstaclePresent = TRUE &
         ObstacleRelativeSpeed = RSequal
     THEN 
-        ObstacleRelativeSpeed := RSpos ;
+        ObstacleRelativeSpeed := RSpos ||
 	    IF CruiseActive = TRUE THEN
 			ObstacleStatusJustChanged := TRUE
-		END ;
+		END ||
         IF (ObstacleDistance/=ODveryclose) THEN
             VehicleTryKeepTimeGap:=FALSE
         END
@@ -433,7 +433,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     ObstacleStopsTravelFaster = SELECT
         ObstacleRelativeSpeed = RSpos
     THEN
-        ObstacleRelativeSpeed := RSequal ;
+        ObstacleRelativeSpeed := RSequal ||
 	    IF CruiseActive = TRUE THEN
 			ObstacleStatusJustChanged := TRUE
 		END
@@ -443,7 +443,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     ObstacleStartsTravelSlower = SELECT
         ObstacleRelativeSpeed = RSequal
     THEN
-        ObstacleRelativeSpeed := RSneg ;
+        ObstacleRelativeSpeed := RSneg ||
  	    IF CruiseActive = TRUE THEN
 			ObstacleStatusJustChanged := TRUE
 		END
@@ -453,7 +453,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     ObstacleStopsTravelSlower = SELECT
         ObstacleRelativeSpeed = RSneg
     THEN
-        ObstacleRelativeSpeed := RSequal ;
+        ObstacleRelativeSpeed := RSequal ||
  	    IF CruiseActive = TRUE THEN
 			ObstacleStatusJustChanged := TRUE
  		END
@@ -464,9 +464,9 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ObstaclePresent = FALSE &
         CruiseActive = TRUE
     THEN
-        ObstaclePresent := TRUE ;
-	    ObstacleStatusJustChanged := TRUE ;
-        ObstacleRelativeSpeed :: RSset - {RSnone} ;
+        ObstaclePresent := TRUE ||
+	    ObstacleStatusJustChanged := TRUE ||
+        ObstacleRelativeSpeed :: RSset - {RSnone} ||
         ObstacleDistance :: ODset-{ODnone}
     END;
 
@@ -475,20 +475,20 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         ObstaclePresent = FALSE &
         CruiseActive = FALSE
     THEN
-        ObstaclePresent := TRUE ;
-        ObstacleRelativeSpeed :: RSset - {RSnone} ;
+        ObstaclePresent := TRUE ||
+        ObstacleRelativeSpeed :: RSset - {RSnone} ||
         ObstacleDistance := ODnone
     END;
 
     ObstacleDisappears = SELECT 
         ObstaclePresent = TRUE 
     THEN 
-        ObstaclePresent := FALSE ;
-        ObstacleRelativeSpeed := RSnone ;
+        ObstaclePresent := FALSE ||
+        ObstacleRelativeSpeed := RSnone ||
   	    IF CruiseActive = TRUE THEN
 			ObstacleStatusJustChanged := TRUE
-		END ;
-        ObstacleDistance := ODnone ;
+		END ||
+        ObstacleDistance := ODnone ||
 		VehicleTryKeepTimeGap := FALSE
     END;
 
@@ -526,7 +526,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
            ((ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose) 
                 => vtktg = FALSE)
         THEN
-            VehicleTryKeepTimeGap := vtktg ;
+            VehicleTryKeepTimeGap := vtktg ||
             VehicleTryKeepSpeed := vtks
         END
 	END;

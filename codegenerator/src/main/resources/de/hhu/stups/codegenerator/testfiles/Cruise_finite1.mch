@@ -11,9 +11,9 @@ SETS
     ODset = {ODnone, ODclose, ODveryclose}
 
 DEFINITIONS
-	CruiseReallyActive == (ObstacleStatusJustChanged = FALSE &
+	/*(ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE) == (ObstacleStatusJustChanged = FALSE &
 			       CCInitialisationInProgress = FALSE &
-			       CruiseSpeedChangeInProgress = FALSE);
+			       CruiseSpeedChangeInProgress = FALSE);*/
   ASSERT_LTL == "G (e(SetCruiseSpeed) => e(CruiseBecomesNotAllowed))";
   ASSERT_LTL1 == "G (e(CruiseBecomesNotAllowed) => e(SetCruiseSpeed))";
   ASSERT_LTL2 == "G (e(CruiseBecomesNotAllowed) => e(ObstacleDisappears))"
@@ -95,14 +95,14 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
     (CruiseActive = TRUE
         => (VehicleTryKeepSpeed = TRUE
 			   or VehicleTryKeepTimeGap = TRUE
-			   or not(CruiseReallyActive))) &
-    (ObstacleDistance = ODnone & CruiseActive = TRUE & CruiseReallyActive
+			   or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))) &
+    (ObstacleDistance = ODnone & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepSpeed = TRUE) &
-    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & CruiseReallyActive
+    (ObstacleDistance = ODclose & ObstacleRelativeSpeed /= RSpos & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepTimeGap = TRUE) & 
-    (ObstacleDistance = ODveryclose & CruiseReallyActive
+    (ObstacleDistance = ODveryclose & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
 		=> VehicleTryKeepTimeGap = TRUE) & 
-    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & CruiseReallyActive
+    (ObstacleRelativeSpeed = RSpos & ObstacleDistance /= ODveryclose & CruiseActive = TRUE & (ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)
         => VehicleTryKeepSpeed = TRUE)
 
 
@@ -370,7 +370,7 @@ G( e(CruiseOff) => O [CruiseBecomesNotAllowed])  -> FALSE
         SpeedAboveMax = FALSE & 
         (CruiseActive = FALSE
 			or VehicleCanKeepSpeed = FALSE
-			or not(CruiseReallyActive))
+			or not((ObstacleStatusJustChanged = FALSE & 			       CCInitialisationInProgress = FALSE & 			       CruiseSpeedChangeInProgress = FALSE)))
     THEN 
         SpeedAboveMax := TRUE ||  
         VehicleAtCruiseSpeed := FALSE

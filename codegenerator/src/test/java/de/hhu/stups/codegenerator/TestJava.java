@@ -388,8 +388,6 @@ public class TestJava {
 		testJava("logical/Implies", "ImpliesAddition.st");
 	}
 
-
-	@Ignore
 	@Test
 	public void testNot() throws Exception {
 		testJava("logical/Not");
@@ -398,6 +396,16 @@ public class TestJava {
 	@Test
 	public void testEquivalent() throws Exception {
 		testJava("logical/Equivalent", "EquivalentAddition.st");
+	}
+
+	@Test
+	public void testBooleanExpression() throws Exception {
+		testJava("logical/BooleanExpression");
+	}
+
+	@Test
+	public void testBooleanConstant() throws Exception {
+		testJava("logical/BooleanConstant");
 	}
 
 	@Test
@@ -560,8 +568,6 @@ public class TestJava {
 		testJava("Assert");
 	}
 
-
-	@Ignore
 	@Test
 	public void testCruiseController1() throws Exception {
 		testJava("Cruise_finite1");
