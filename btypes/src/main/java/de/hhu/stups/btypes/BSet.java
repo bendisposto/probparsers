@@ -21,6 +21,43 @@ public class BSet implements BObject, Set<BObject> {
 		}
 	}
 
+	private static final class Contains extends AFn {
+
+		private BSet domain;
+
+		public Contains(BSet domain) {
+			this.domain = domain;
+		}
+
+		@Override
+		public Object invoke(Object obj) {
+			return domain.contains(((BCouple) obj).getFirst());
+		}
+	}
+
+	private static final class EqualsFirst extends AFn {
+
+		private BObject arg;
+
+		public EqualsFirst(BObject arg) {
+			this.arg = arg;
+		}
+
+		@Override
+		public Object invoke(Object obj) {
+			return ((BCouple) obj).getFirst().equals(arg);
+		}
+	}
+
+	private static final class Second extends AFn {
+		@Override
+		public Object invoke(Object obj) {
+			return ((BCouple) obj).getSecond();
+		}
+	}
+
+
+
 	private static final Var SET;
 
 	private static final Var EMPTY;
@@ -37,6 +74,10 @@ public class BSet implements BObject, Set<BObject> {
 
 	private static final IFn MAP;
 
+	private static final IFn FILTER;
+
+	private static final IFn FIRST;
+
 	private static final IFn INC;
 
 	private static final IFn CREATE_INTEGER;
@@ -52,6 +93,8 @@ public class BSet implements BObject, Set<BObject> {
 		DIFFERENCE = RT.var("clojure.set", "difference");
 		RANGE = RT.var("clojure.core", "range");
 		MAP = RT.var("clojure.core", "map");
+		FILTER = RT.var("clojure.core", "filter");
+		FIRST = RT.var("clojure.core", "first");
 		INC = RT.var("clojure.core", "inc");
 		CREATE_INTEGER = new createBInteger();
 	}
@@ -172,24 +215,20 @@ public class BSet implements BObject, Set<BObject> {
 				MAP.invoke(CREATE_INTEGER, RANGE.invoke(a.getValue(), INC.invoke(b.getValue())))));
 	}
 
-	/*public BSet relationImage(BSet domain) {
-		return new BSet(set.stream()
-			.filter(object -> domain.contains(((BCouple) object).getFirst()))
-			.map(object -> ((BCouple) object).getSecond())
-			.collect(Collectors.toSet()));
+	public BSet relationImage(BSet domain) {
+		return new BSet((PersistentHashSet)
+				SET.invoke(MAP.invoke(new Second(),
+						FILTER.invoke(new Contains(domain), set))));
 	}
 
 
 	public BObject functionCall(BObject arg) {
-		List<BCouple> matchedCouples = set.stream()
-			.map(object -> (BCouple) object)
-			.filter(couple -> couple.getFirst().equals(arg))
-			.collect(Collectors.toList());
-		if(matchedCouples.size() > 0) {
-			return matchedCouples.get(0).getSecond();
+		PersistentHashSet matchedCouples = (PersistentHashSet) SET.invoke(FILTER.invoke(new EqualsFirst(arg), set));
+		if((int) COUNT.invoke(matchedCouples) > 0) {
+			return ((BCouple) FIRST.invoke(matchedCouples)).getSecond();
 		}
 		throw new RuntimeException("Argument is not in the key set of this map");
-	}*/
+	}
 
 
 	public BInteger card() {
