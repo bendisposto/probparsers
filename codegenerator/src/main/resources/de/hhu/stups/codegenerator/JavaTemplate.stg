@@ -235,6 +235,7 @@ for(int _<index>_i = 0; _<index>_i \< <set>.size(); _<index>_i++) {
 any_body(predicate, body) ::= <<
 if(<predicate>.booleanValue()) {
     <body>
+    break;
 }
 >>
 
