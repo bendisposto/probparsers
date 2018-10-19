@@ -2,11 +2,10 @@
 #include <string>
 #include "BBoolean.cpp"
 
-using namespace std;
-
-
 #ifndef BINTEGER_H
 #define BINTEGER_H
+
+using namespace std;
 
 class BInteger : public BObject {
 
@@ -44,11 +43,11 @@ class BInteger : public BObject {
             value = val;
         }
 
-        BInteger(){}
+        BInteger(BInteger* val) {
+            this->value = val->value;
+        }
 
-        BInteger(const BObject& v) : BObject(v) {}
-
-        int intValue() {
+        int intValue() const {
             return value;
         }
 
@@ -56,33 +55,33 @@ class BInteger : public BObject {
             return value.compareTo(o.asBigInteger());
         }*/
 
-        int compareTo(BInteger o) {
-            return intValue() - o.intValue();
+        int compareTo(BInteger* o) const {
+            return intValue() - o->intValue();
         }
 
-        BBoolean lessEqual(BInteger o) {
-            return BBoolean(compareTo(o) <= 0);
+        BBoolean* lessEqual(BInteger* o) {
+            return new BBoolean(compareTo(o) <= 0);
         }
 
 
-        BBoolean greaterEqual(BInteger o) {
-            return BBoolean(compareTo(o) >= 0);
+        BBoolean* greaterEqual(BInteger* o) {
+            return new BBoolean(compareTo(o) >= 0);
         }
 
-        BBoolean less(BInteger o) {
-            return BBoolean(compareTo(o) < 0);
+        BBoolean* less(BInteger* o) {
+            return new BBoolean(compareTo(o) < 0);
         }
 
-        BBoolean greater(BInteger o) {
-            return BBoolean(compareTo(o) > 0);
+        BBoolean* greater(BInteger* o) {
+            return new BBoolean(compareTo(o) > 0);
         }
 
-        BBoolean equal(BInteger o) {
-            return BBoolean(compareTo(o) == 0);
+        BBoolean* equal(BInteger* o) {
+            return new BBoolean(compareTo(o) == 0);
         }
 
-        BBoolean unequal(BInteger o) {
-            return BBoolean(compareTo(o) != 0);
+        BBoolean* unequal(BInteger* o) {
+            return new BBoolean(compareTo(o) != 0);
         }
 
         /*int compareTo(java.lang.Number o) {
@@ -111,8 +110,8 @@ class BInteger : public BObject {
             return value.doubleValue();
         }*/
 
-        BInteger plus(BInteger o) {
-            return BInteger(value + o.intValue());
+        BInteger* plus(BInteger* o) {
+            return new BInteger(value + o->intValue());
         }
 
         /*java.math.BigInteger asBigInteger() {
@@ -123,24 +122,24 @@ class BInteger : public BObject {
             return value.toString();
         }*/
 
-        BInteger minus(BInteger o) {
-            return BInteger(value - o.intValue());
+        BInteger* minus(BInteger* o) {
+            return new BInteger(value - o->intValue());
         }
 
-        BInteger multiply(BInteger o) {
-            return BInteger(value * o.intValue());
+        BInteger* multiply(BInteger* o) {
+            return new BInteger(value * o->intValue());
         }
 
-        BInteger power(BInteger o) {
-            return BInteger(value^o.intValue());
+        BInteger* power(BInteger* o) {
+            return new BInteger(value ^ o->intValue());
         }
 
-        BInteger divide(BInteger o) {
-            return BInteger(value/o.intValue());
+        BInteger* divide(BInteger* o) {
+            return new BInteger(value / o->intValue());
         }
 
-        BInteger modulo(BInteger o) {
-            return BInteger(value % o.intValue());
+        BInteger* modulo(BInteger* o) {
+            return new BInteger(value % o->intValue());
         }
 
         /*BInteger or(BInteger o) {
@@ -155,12 +154,12 @@ class BInteger : public BObject {
             return new BInteger(value.xor(o.value));
         }*/
 
-        BInteger next() {
-            return BInteger(value + 1);
+        BInteger* next() {
+            return new BInteger(value + 1);
         }
 
-        BInteger previous() {
-            return BInteger(value - 1);
+        BInteger* previous() {
+            return new BInteger(value - 1);
         }
 
         /*BInteger leftShift(BInteger o) {
@@ -175,12 +174,12 @@ class BInteger : public BObject {
             return equals(o);
         }*/
 
-        BInteger negative() {
-            return BInteger(-value);
+        BInteger* negative() {
+            return new BInteger(-value);
         }
 
-        BInteger positive() {
-            return BInteger(value);
+        BInteger* positive() {
+            return this;
         }
 
         BInteger operator=(BInteger other) {
@@ -188,12 +187,24 @@ class BInteger : public BObject {
             return *this;
         }
 
-        bool operator !=(BInteger o) {
-            return compareTo(o) != 0;
+        friend bool operator !=(const BInteger& o1, const BInteger& o2) {
+            return o1.intValue() - o2.intValue() != 0;
         }
 
-        bool operator ==(BInteger o) {
-            return compareTo(o) == 0;
+        friend bool operator ==(const BInteger& o1, const BInteger& o2) {
+            std::cout << typeid(o1).name() << std::endl;
+            return o1.intValue() - o2.intValue() == 0;
+        }
+
+        friend bool operator <(const BInteger& p1, const BInteger& p2) {
+            return p1.intValue() < p2.intValue();
+        }
+
+        int hashCode() const override {
+            int prime = 31;
+            int result = 1;
+            result = prime * result + value;
+            return result;
         }
 
 };

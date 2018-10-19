@@ -56,7 +56,7 @@ include_initialization(machine) ::= <<
 >>
 
 operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
-<returnType> <operationName>(<parameters; separator=", ">) {
+<returnType>* <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw runtime_error("Machine was not initialized");
     }
@@ -75,11 +75,11 @@ set_declaration(identifier, enums) ::= <<
 >>
 
 set_enumeration(enums) ::= <<
-BSet((BObject[]){<enums; separator=", ">})
+new BSet((BObject* []){<enums; separator=", ">})
 >>
 
 enum_call(class, identifier) ::= <<
-<class>(<class>::<identifier>)
+new <class>(<class>::<identifier>)
 >>
 
 set_enum_declaration(name,enums) ::= <<
@@ -98,12 +98,16 @@ class <name> : public BObject {
 
         <name>(){}
 
-        BBoolean equal(<name> o) {
-            return BBoolean(this->value == o.value);
+        BBoolean* equal(<name>* o) {
+            return BBoolean(this->value == o->value);
         }
 
-        BBoolean unequal(<name> o) {
-            return BBoolean(this->value != o.value);
+        BBoolean* unequal(<name>* o) {
+            return BBoolean(this->value != o->value);
+        }
+
+        int hashCode() const {
+            return 0;
         }
 };
 >>
@@ -121,7 +125,7 @@ local_declaration(type, identifier) ::= <<
 >>
 
 declaration(type, identifier) ::= <<
-<type> <identifier>
+<type>* <identifier>
 >>
 
 constant(type, identifier, val) ::= <<
@@ -131,7 +135,7 @@ values(assignments) ::= <<
 >>
 
 parameter(type, identifier, isReturn) ::= <<
-<type> <identifier>
+<type>* <identifier>
 >>
 
 assignment(identifier, typeCast, val) ::= <<
@@ -160,20 +164,20 @@ BSet::range(<arg1>,<arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-BCouple(<arg1>, <arg2>)
+new BCouple(<arg1>, <arg2>)
 >>
 
 
 binary(arg1,operator,arg2) ::= <<
-<arg1>.<operator>(<arg2>)
+<arg1>-><operator>(<arg2>)
 >>
 
 unary(operator, obj, args) ::= <<
-<obj>.<operator>(<args; separator=", ">)
+<obj>-><operator>(<args; separator=", ">)
 >>
 
 select(predicate, then) ::= <<
-if((<predicate>).booleanValue()) {
+if((<predicate>)->booleanValue()) {
     <then>
 } else {
     throw runtime_error("Invocation of the operation is not possible");
@@ -181,13 +185,13 @@ if((<predicate>).booleanValue()) {
 >>
 
 if(predicate, then, else1) ::= <<
-if((<predicate>).booleanValue()) {
+if((<predicate>)->booleanValue()) {
     <then>
 } <else1; separator=" ">
 >>
 
 elseif(predicate, then) ::= <<
-else if((<predicate>).booleanValue()) {
+else if((<predicate>)->booleanValue()) {
     <then>
 }
 >>
@@ -199,7 +203,7 @@ else {
 >>
 
 while(predicate, then) ::= <<
-while((<predicate>).booleanValue()) {
+while((<predicate>)->booleanValue()) {
     <then>
 }
 >>
@@ -210,7 +214,7 @@ var(locals, body) ::=<<
 >>
 
 boolean_val(val) ::= <<
-<if(val)>BBoolean(true)<else>BBoolean(false)<endif>
+<if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
 
 identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
@@ -218,11 +222,11 @@ identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 >>
 
 number(number, useBigInteger) ::= <<
-BInteger(<number>)
+new BInteger(<number>)
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
-<function>(<args; separator=",">, &<var>);
+<function>(<args; separator=",">, <var>);
 >>
 
 operation_call_without_assignment(machine, function, args, this) ::= <<

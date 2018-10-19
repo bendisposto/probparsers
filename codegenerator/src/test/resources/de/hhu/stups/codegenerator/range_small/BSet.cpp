@@ -13,28 +13,32 @@ using namespace std;
 
 class BSet : public BObject {
 
+    struct BObjectComparator{
+        bool operator()(const BObject* lhs, const BObject* rhs) const {
+            return lhs->hashCode() < rhs->hashCode();
+        }
+    };
+
     private:
-        std::set<BObject> set;
+        std::set<BObject*, BObjectComparator>* set;
 
     public:
 
-        BSet(const std::set<BObject> elements) {
+        BSet(std::set<BObject*, BObjectComparator>* elements) {
             this->set = elements;
         }
 
-        BSet(const BObject elements[]) {
-            this->set = std::set<BObject>();
+        BSet(BObject* elements[]) {
+            this->set = new std::set<BObject*, BObjectComparator>(BObjectComparator());
             int length = sizeof(elements)/sizeof(*elements);
             for(int i = 0; i < length; i++) {
-                this->set.insert(elements[i]);
+                this->set->insert(elements[i]);
             }
         }
 
         BSet() {
-            this->set = std::set<BObject>();
+            this->set = new std::set<BObject*, BObjectComparator>(BObjectComparator());
         }
-
-        BSet(const BObject& v) : BObject(v) {}
 
 	/*public BSet(java.util.Set<BObject> elements) {
 		this.set = HashTreePSet.from(elements);
@@ -68,15 +72,15 @@ class BSet : public BObject {
 	}*/
 
         int size() {
-            return set.size();
+            return this->set->size();
         }
 
         bool isEmpty() {
-            return set.empty();
+            return this->set->empty();
         }
 
-        bool contains(BObject o) {
-            return set.count(o) != 0;
+        bool contains(BObject* o) {
+            return this->set->count(o) != 0;
         }
 
         /*boolean add(BObject bObject) {
@@ -137,78 +141,78 @@ class BSet : public BObject {
             return set.iterator();
         }*/
 
-        BSet intersect(BSet set) {
-            std::set<BObject> result;
-            for (std::set<BObject>::iterator it = set.set.begin(); it != set.set.end(); ++it) {
-                BObject obj = *it;
-                if(this->set.find(obj) != this->set.end()) {
-                    result.insert(obj);
+        BSet* intersect(BSet* set) {
+            std::set<BObject*, BObjectComparator>* result = new std::set<BObject*, BObjectComparator>(BObjectComparator());
+            for (std::set<BObject*, BObjectComparator>::iterator it = set->set->begin(); it != set->set->end(); ++it) {
+                BObject* obj = *it;
+                if(this->set->find(obj) != this->set->end()) {
+                    result->insert(obj);
                 }
             }
-            return BSet(result);
+            return new BSet(result);
         }
 
-        BSet complement(BSet set) {
-            std::set<BObject> result;
-            for (std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
-                BObject obj = *it;
-                if(set.set.find(obj) != set.set.end()) {
-                    result.insert(*it);
+        BSet* complement(BSet* set) {
+            std::set<BObject*, BObjectComparator>* result = new std::set<BObject*, BObjectComparator>(BObjectComparator());
+            for (std::set<BObject*, BObjectComparator>::iterator it = this->set->begin(); it != this->set->end(); ++it) {
+                BObject* obj = *it;
+                if(set->set->find(obj) == set->set->end()) {
+                    result->insert(obj);
                 }
             }
-            return BSet(result);
+            return new BSet(result);
         }
 
-        BSet _union(BSet set) {
-            std::set<BObject> result;
-            for (std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
-                result.insert(*it);
+        BSet* _union(BSet* set) {
+            std::set<BObject*, BObjectComparator>* result = new std::set<BObject*, BObjectComparator>(BObjectComparator());
+            for (std::set<BObject*, BObjectComparator>::iterator it = this->set->begin(); it != this->set->end(); ++it) {
+                result->insert(*it);
             }
-            for (std::set<BObject>::iterator it = set.set.begin(); it != set.set.end(); ++it) {
-                result.insert(*it);
+            for (std::set<BObject*, BObjectComparator>::iterator it = set->set->begin(); it != set->set->end(); ++it) {
+                result->insert(*it);
             }
-            return BSet(result);
+            return new BSet(result);
         }
 
-        static BSet range(BInteger a, BInteger b) {
-            std::set<BObject> result;
-            for(BInteger i = a; i.lessEqual(b).booleanValue(); i = (BInteger) i.next()) {
-                result.insert(BInteger(i));
+        static BSet* range(BInteger* a, BInteger* b) {
+            std::set<BObject*, BObjectComparator>* result = new std::set<BObject*, BObjectComparator>(BObjectComparator());
+            for(BInteger* i = a; i->lessEqual(b)->booleanValue(); i = i->next()) {
+                result->insert(new BInteger(i));
             }
-            return BSet(result);
+            return new BSet(result);
         }
 
-        BSet relationImage(BSet domain) {
-            std::set<BObject> result;
-            for(std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
-                BObject object = *it;
-                BCouple couple = (BCouple) object;
-                if(domain.set.find(couple.getFirst()) == domain.set.end()) {
-                    result.insert(couple.getSecond());
+        BSet* relationImage(BSet* domain) {
+            std::set<BObject*, BObjectComparator>* result = new std::set<BObject*, BObjectComparator>(BObjectComparator());
+            for(std::set<BObject*, BObjectComparator>::iterator it = this->set->begin(); it != this->set->end(); ++it) {
+                BObject* object = *it;
+                BCouple* couple = (BCouple*) object;
+                if(domain->set->find(couple->getFirst()) == domain->set->end()) {
+                    result->insert(couple->getSecond());
                 }
             }
-            return BSet(result);
+            return new BSet(result);
         }
 
 
-        BObject functionCall(BObject arg) {
-            for(std::set<BObject>::iterator it = this->set.begin(); it != this->set.end(); ++it) {
-                BObject object = *it;
-                BCouple couple = (BCouple) object;
-                if(couple.getFirst() == arg) {
-                    return couple.getSecond();
+        BObject* functionCall(BObject* arg) {
+            for(std::set<BObject*, BObjectComparator>::iterator it = this->set->begin(); it != this->set->end(); ++it) {
+                BObject* object = *it;
+                BCouple* couple = (BCouple*) object;
+                if(*(couple->getFirst()) == *arg) {
+                    return couple->getSecond();
                 }
             }
             throw runtime_error("Argument is not in the key set of this map");
         }
 
 
-        BInteger card() {
-            return BInteger(this->set.size());
+        BInteger* card() {
+            return new BInteger(this->set->size());
         }
 
-        BBoolean elementOf(BObject object) {
-            return BBoolean(this->set.find(object) != this->set.end());
+        BBoolean* elementOf(BObject* object) {
+            return new BBoolean(this->set->find(object) != this->set->end());
         }
 
         /*BBoolean equal(BSet o) {
@@ -218,6 +222,10 @@ class BSet : public BObject {
         BBoolean unequal(BSet o) {
             return new BBoolean(!equals(o));
         }*/
+
+        int hashCode() const override {
+            return 0;
+        }
 
 };
 #endif

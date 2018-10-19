@@ -67,10 +67,6 @@ class BBoolean : public BObject {
     		value = val;
     	}
 
-    	BBoolean(){}
-
-    	BBoolean(const BObject& v) : BObject(v) {}
-
     	static string toString(bool b) {
     		return b ? "true" : "false";
     	}
@@ -79,56 +75,56 @@ class BBoolean : public BObject {
 		    return value;
 	    }
 
-        BBoolean _or(BBoolean other) {
-            return BBoolean(booleanValue() || other.booleanValue());
+        BBoolean* _or(BBoolean* other) {
+            return new BBoolean(booleanValue() || other->booleanValue());
         }
 
-        BBoolean _or(bool other) {
-            return BBoolean(booleanValue() || other);
+        BBoolean* _or(bool other) {
+            return new BBoolean(booleanValue() || other);
         }
 
-        BBoolean _xor(BBoolean other) {
-            return BBoolean(booleanValue() ^ other.booleanValue());
+        BBoolean* _xor(BBoolean* other) {
+            return new BBoolean(booleanValue() ^ other->booleanValue());
         }
 
-        BBoolean _xor(bool other) {
-            return BBoolean(booleanValue() ^ other);
+        BBoolean* _xor(bool other) {
+            return new BBoolean(booleanValue() ^ other);
         }
 
-        BBoolean _and(BBoolean other) {
-            return BBoolean(booleanValue() && other.booleanValue());
+        BBoolean* _and(BBoolean* other) {
+            return new BBoolean(booleanValue() && other->booleanValue());
         }
 
-        BBoolean _and(bool other) {
-            return BBoolean(booleanValue() && other);
+        BBoolean* _and(bool other) {
+            return new BBoolean(booleanValue() && other);
         }
 
-        BBoolean _not() {
-            return BBoolean(!booleanValue());
+        BBoolean* _not() {
+            return new BBoolean(!booleanValue());
         }
 
-        BBoolean implies(BBoolean other) {
-            return BBoolean(!booleanValue() || other.booleanValue());
+        BBoolean* implies(BBoolean* other) {
+            return new BBoolean(!booleanValue() || other->booleanValue());
         }
 
-        BBoolean implies(bool other) {
-            return BBoolean(!booleanValue() || other);
+        BBoolean* implies(bool other) {
+            return new BBoolean(!booleanValue() || other);
         }
 
-        BBoolean equivalent(bool other) {
-            return BBoolean(booleanValue() == other);
+        BBoolean* equivalent(bool other) {
+            return new BBoolean(booleanValue() == other);
         }
 
-        BBoolean equivalent(BBoolean other) {
-            return BBoolean(booleanValue() == other.booleanValue());
+        BBoolean* equivalent(BBoolean* other) {
+            return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean equal(BBoolean other) {
-            return BBoolean(booleanValue() == other.booleanValue());
+        BBoolean equal(BBoolean* other) {
+            return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean unequal(BBoolean other) {
-            return BBoolean(booleanValue() != other.booleanValue());
+        BBoolean unequal(BBoolean* other) {
+            return new BBoolean(booleanValue() != other->booleanValue());
         }
 
         bool operator !=(BBoolean other) {
@@ -141,6 +137,10 @@ class BBoolean : public BObject {
 
         bool operator <(BBoolean other) {
             return booleanValue() != other.booleanValue();
+        }
+
+        int hashCode() const override {
+            return value == true ? 1 : 0;
         }
 };
 #endif
