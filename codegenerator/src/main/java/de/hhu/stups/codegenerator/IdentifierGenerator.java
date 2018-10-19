@@ -50,7 +50,7 @@ public class IdentifierGenerator {
     */
     public String generate(IdentifierExprNode node) {
         boolean isReturn = outputParams.stream()
-                .map(declarationNode -> declarationNode.getType().toString().startsWith("POW") ?
+                .map(declarationNode -> nameHandler.getEnumTypes().keySet().contains(declarationNode.getName()) ?
                         nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
                         nameHandler.handleIdentifier(declarationNode.getName(), NameHandler.IdentifierHandlingEnum.MACHINES))
                 .collect(Collectors.toList())
@@ -65,7 +65,7 @@ public class IdentifierGenerator {
     */
     private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
-        identifier.add("identifier", node.getType() != null && node.getType().toString().startsWith("POW") ?
+        identifier.add("identifier", node.getType() != null && nameHandler.getEnumTypes().keySet().contains(node.getName()) ?
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         identifier.add("isReturn", isReturn);
@@ -120,6 +120,7 @@ public class IdentifierGenerator {
             maxLocals.put(local, value + 1);
             currentLocals.put(local, value + 1);
         } else {
+            maxLocals.put(local, 0);
             currentLocals.put(local, 0);
         }
     }

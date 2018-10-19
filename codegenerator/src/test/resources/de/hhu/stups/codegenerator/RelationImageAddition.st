@@ -1,5 +1,5 @@
 public static void main(String[] args) {
-    RelationImageAddition relationImage = new RelationImageAddition();
+    RelationImage relationImage = new RelationImage();
     relationImage.initialize();
     System.out.println(relationImage.aa);
 }

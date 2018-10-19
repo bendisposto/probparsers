@@ -57,7 +57,7 @@ public class TestJava {
 		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
 				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		List<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, addition);
+		List<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, null);
 		Process compileProcess = Runtime.getRuntime()
 				.exec("javac -cp btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
 						.map(path -> path.toFile().getAbsoluteFile().toString())
