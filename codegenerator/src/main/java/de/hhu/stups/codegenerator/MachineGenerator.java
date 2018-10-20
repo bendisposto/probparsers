@@ -236,11 +236,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private String generateMachineImport(MachineReferenceNode reference) {
-		ST declaration = currentGroup.getInstanceOf("include_declaration");
+		ST imp = currentGroup.getInstanceOf("import_type");
 		String machine = reference.getMachineName();
-		declaration.add("type", nameHandler.handle(machine));
-		declaration.add("identifier", nameHandler.handle(machine));
-		return declaration.render();
+		imp.add("type", nameHandler.handle(machine));
+		return imp.render();
 	}
 
 	/*
