@@ -11,12 +11,12 @@ int_value, long_value, float_value, double_value, plus, minus, multiply, divide,
 >>
 
 
-machine(imports, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
 #include \<stdlib.h>
 <imports; separator="\n">
-<includes; separator="\n">
+<includedMachines; separator="\n">
 
 <enums>
 
@@ -49,7 +49,7 @@ include_initialization(machine) ::= <<
 <machine>_initialize();
 >>
 
-operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
 void <operationName>(<parameters; separator=", "><returnParameters : {par |, <par>}>) {
     if(!<machine>_initialized) {
         fprintf(stderr, "Machine was not initialized\n");
@@ -76,7 +76,6 @@ enum_call(class, identifier) ::= <<
 
 
 include_declaration(type, identifier) ::= <<
-#include "<type>.c"
 >>
 
 global_declaration(type, identifier) ::= <<

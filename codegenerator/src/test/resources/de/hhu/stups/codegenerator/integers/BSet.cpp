@@ -24,6 +24,8 @@ class BSet : public BObject {
 
     public:
 
+        #define BOOL new BSet((BObject* []){new BBoolean(true), new BBoolean(false)});
+
         BSet(std::set<BObject*, BObjectComparator>* elements) {
             this->set = elements;
         }
@@ -223,8 +225,26 @@ class BSet : public BObject {
             return new BBoolean(!equals(o));
         }*/
 
+        BObject* nondeterminism() {
+		    int index = rand() % set->size();
+		    std::set<BObject*, BObjectComparator>::iterator it = std::next(this->set->begin(), index);
+		    return *it;
+	    }
+
         int hashCode() const override {
             return 0;
+        }
+
+        std::set<BObject*, BObjectComparator>::iterator begin() {
+            return set->begin();
+        }
+
+        std::set<BObject*, BObjectComparator>::iterator end() {
+            return set->end();
+        }
+
+        static BSet* BOOLEANS() {
+            return BOOL;
         }
 
 };

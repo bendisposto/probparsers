@@ -4,6 +4,10 @@
 
 using namespace std;
 
+
+#ifndef BBOOLEAN_H
+#define BBOOLEAN_H
+
 class BBoolean : public BObject {
 	private:
 	    bool value;
@@ -71,64 +75,72 @@ class BBoolean : public BObject {
 		    return value;
 	    }
 
-        BBoolean operator or(BBoolean other) {
-            return new BBoolean(booleanValue() || other.booleanValue());
+        BBoolean* _or(BBoolean* other) {
+            return new BBoolean(booleanValue() || other->booleanValue());
         }
 
-        BBoolean operator or(bool other) {
+        BBoolean* _or(bool other) {
             return new BBoolean(booleanValue() || other);
         }
 
-        BBoolean operator xor(BBoolean other) {
-            return new BBoolean(booleanValue() ^ other.booleanValue());
+        BBoolean* _xor(BBoolean* other) {
+            return new BBoolean(booleanValue() ^ other->booleanValue());
         }
 
-        BBoolean operator xor(bool other) {
+        BBoolean* _xor(bool other) {
             return new BBoolean(booleanValue() ^ other);
         }
 
-        BBoolean operator and(BBoolean other) {
-            return new BBoolean(booleanValue() && other.booleanValue());
+        BBoolean* _and(BBoolean* other) {
+            return new BBoolean(booleanValue() && other->booleanValue());
         }
 
-        BBoolean operator and(bool other) {
+        BBoolean* _and(bool other) {
             return new BBoolean(booleanValue() && other);
         }
 
-        BBoolean operator not() {
+        BBoolean* _not() {
             return new BBoolean(!booleanValue());
         }
 
-        BBoolean implies(BBoolean other) {
-            return new BBoolean(!booleanValue() || other.booleanValue());
+        BBoolean* implies(BBoolean* other) {
+            return new BBoolean(!booleanValue() || other->booleanValue());
         }
 
-        BBoolean implies(bool other) {
+        BBoolean* implies(bool other) {
             return new BBoolean(!booleanValue() || other);
         }
 
-        BBoolean equivalent(bool other) {
+        BBoolean* equivalent(bool other) {
             return new BBoolean(booleanValue() == other);
         }
 
-        BBoolean equivalent(BBoolean other) {
-            return new BBoolean(booleanValue() == other.booleanValue());
+        BBoolean* equivalent(BBoolean* other) {
+            return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean equal(BBoolean other) {
-            return new BBoolean(booleanValue() == other.booleanValue());
+        BBoolean* equal(BBoolean* other) {
+            return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean unequal(BBoolean other) {
-            return new BBoolean(booleanValue() != other.booleanValue());
+        BBoolean* unequal(BBoolean* other) {
+            return new BBoolean(booleanValue() != other->booleanValue());
         }
 
-        bool operator !=(BObject o) {
-            return true;
+        bool operator !=(BBoolean other) {
+            return booleanValue() != other.booleanValue();
         }
 
-        bool operator ==(BObject o) {
-            return true;
+        bool operator ==(BBoolean other) {
+            return booleanValue() == other.booleanValue();
         }
 
+        bool operator <(BBoolean other) {
+            return booleanValue() != other.booleanValue();
+        }
+
+        int hashCode() const override {
+            return value == true ? 1 : 0;
+        }
 };
+#endif

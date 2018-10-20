@@ -5,10 +5,11 @@ return, short, signed, sizeof, static, static_cast, volatile, struct, switch, te
 >>
 
 
-machine(imports, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, includedMachines, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<iostream>
 #include \<string>
 <imports; separator="\n">
+<includedMachines; separator="\n">
 
 using namespace std;
 
@@ -52,11 +53,11 @@ void initialize() {
 >>
 
 include_initialization(machine) ::= <<
-<machine>.initialize();
+<machine>->initialize();
 >>
 
-operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
-<returnType>* <operationName>(<parameters; separator=", ">) {
+operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
+<if(isTyped)><returnType>*<else><returnType><endif> <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw runtime_error("Machine was not initialized");
     }
@@ -75,11 +76,11 @@ set_declaration(identifier, enums) ::= <<
 >>
 
 set_enumeration(enums) ::= <<
-new BSet((BObject* []){<enums; separator=", ">})
+(new BSet((BObject* []){<enums; separator=", ">}))
 >>
 
 enum_call(class, identifier) ::= <<
-new <class>(<class>::<identifier>)
+(new <class>(<class>::<identifier>))
 >>
 
 set_enum_declaration(name,enums) ::= <<
@@ -96,24 +97,26 @@ class <name> : public BObject {
             this->value = type;
         }
 
-        <name>(){}
-
         BBoolean* equal(<name>* o) {
-            return BBoolean(this->value == o->value);
+            return new BBoolean(this->value == o->value);
         }
 
         BBoolean* unequal(<name>* o) {
-            return BBoolean(this->value != o->value);
+            return new BBoolean(this->value != o->value);
         }
 
         int hashCode() const {
-            return 0;
+            return static_cast\<int>(value);
         }
 };
 >>
 
+bool() ::= <<
+(BSet::BOOLEANS())
+>>
+
 include_declaration(type, identifier) ::= <<
-<declaration(type, identifier)> = new <type>();
+<declaration(type, identifier)> = new class <type>();
 >>
 
 global_declaration(type, identifier) ::= <<
@@ -138,12 +141,30 @@ parameter(type, identifier, isReturn) ::= <<
 <type>* <identifier>
 >>
 
+parallel(loads, others, stores) ::=<<
+<loads; separator="\n">
+<others; separator="\n">
+<stores; separator="\n">
+>>
+
+parallel_load(type, identifier, typeCast) ::= <<
+<type>* _ld_<identifier> = (<typeCast>*) <identifier>;
+>>
+
+parallel_store(identifier, typeCast, val) ::= <<
+<identifier> = (<typeCast>*) <val>;
+>>
+
 assignment(identifier, typeCast, val) ::= <<
-<identifier> = <val>;
+<identifier> = (<typeCast>*) <val>;
 >>
 
 assignments(assignments) ::= <<
 <assignments; separator="\n">
+>>
+
+nondeterminism(identifier, typeCast, set) ::= <<
+<identifier> = (<typeCast>*) <set>->nondeterminism();
 >>
 
 void() ::= <<
@@ -164,7 +185,7 @@ BSet::range(<arg1>,<arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-new BCouple(<arg1>, <arg2>)
+(new BCouple(<arg1>, <arg2>))
 >>
 
 
@@ -202,6 +223,40 @@ else {
 }
 >>
 
+choice(len, then, choice1) ::= <<
+int index = rand() % <len>
+if(index == 0) {
+    <then>
+} <choice1; separator=" ">
+>>
+
+
+choice1(counter, then) ::= <<
+else if(index == <counter>) {
+    <then>
+}
+>>
+
+choice2(then) ::= <<
+else {
+    <then>
+}
+>>
+
+any(type, identifier, set, body, index) ::= <<
+for(int _<index>_i = 0; _<index>_i \< <set>->size(); _<index>_i++) {
+    <type>* <identifier> = (<type>*) *(std::next(<set>->begin(), _<index>_i));
+    <body>
+}
+>>
+
+any_body(predicate, body) ::= <<
+if(<predicate>->booleanValue()) {
+    <body>
+    break;
+}
+>>
+
 while(predicate, then) ::= <<
 while((<predicate>)->booleanValue()) {
     <then>
@@ -214,7 +269,7 @@ var(locals, body) ::=<<
 >>
 
 boolean_val(val) ::= <<
-<if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
+<if(val)>(new BBoolean(true))<else>(new BBoolean(false))<endif>
 >>
 
 identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
@@ -222,7 +277,7 @@ identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 >>
 
 number(number, useBigInteger) ::= <<
-new BInteger(<number>)
+(new BInteger(<number>))
 >>
 
 operation_call_with_assignment(var, machine, function, args, this) ::= <<
@@ -230,7 +285,5 @@ operation_call_with_assignment(var, machine, function, args, this) ::= <<
 >>
 
 operation_call_without_assignment(machine, function, args, this) ::= <<
-<function>(<args; separator=",">);
+<if(this)>this-><else>this-><machine>-><endif><function>(<args; separator=",">);
 >>
-
-

@@ -225,6 +225,33 @@ public class TestCpp {
 	}
 
 	@Test
+	public void testLiftBenchmarks() throws Exception {
+		testCpp("liftbenchmarks/LiftExec");
+	}
+
+
+	@Test
+	public void testSieveBenchmarks() throws Exception {
+		testCpp("sievebenchmarks/Sieve");
+	}
+
+	@Test
+	public void testTrafficLightBenchmarks() throws Exception {
+		testCpp("trafficlightbenchmarks/TrafficLightExec");
+	}
+
+	@Test
+	public void testIncreasingSet() throws Exception {
+		testCpp("setoperationbenchmarks/IncreasingSet");
+	}
+
+	@Test
+	public void testSetOperation() throws Exception {
+		testCpp("setoperationbenchmarks/SetOperation");
+	}
+
+
+	@Test
 	public void testProject2() throws Exception {
 		testCpp("project2/MachineA");
 	}
@@ -235,6 +262,16 @@ public class TestCpp {
 	}
 
 	@Test
+	public void testSieveParallel() throws Exception {
+		testCpp("SieveParallel");
+	}
+
+	@Test
+	public void testSwap() throws Exception {
+		testCpp("Swap");
+	}
+
+	@Test
 	public void testReset() throws Exception {
 		testCpp("Reset");
 	}
@@ -242,6 +279,11 @@ public class TestCpp {
 	@Test
 	public void testManyLocalDeclarations() throws Exception {
 		testCpp("ManyLocalDeclarations");
+	}
+
+	@Test
+	public void testManyLocalDeclarations2() throws Exception {
+		testCpp("ManyLocalDeclarations2");
 	}
 
 	@Test
@@ -468,6 +510,26 @@ public class TestCpp {
 	@Test
 	public void testTrafficLight() throws Exception {
 		testCpp("TrafficLight");
+	}
+
+	@Test
+	public void testChoice() throws Exception {
+		testCpp("Choice");
+	}
+
+	@Test
+	public void testAssert() throws Exception {
+		testCpp("Assert");
+	}
+
+	@Test
+	public void testCruiseController1() throws Exception {
+		testCpp("Cruise_finite1");
+	}
+
+	@Test
+	public void testCruiseControllerk() throws Exception {
+		testCpp("Cruise_finite_k");
 	}
 
 	private void cleanUp(String path) {

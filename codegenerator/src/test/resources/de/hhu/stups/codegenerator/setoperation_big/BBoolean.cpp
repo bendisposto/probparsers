@@ -119,11 +119,11 @@ class BBoolean : public BObject {
             return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean equal(BBoolean* other) {
+        BBoolean* equal(BBoolean* other) {
             return new BBoolean(booleanValue() == other->booleanValue());
         }
 
-        BBoolean unequal(BBoolean* other) {
+        BBoolean* unequal(BBoolean* other) {
             return new BBoolean(booleanValue() != other->booleanValue());
         }
 

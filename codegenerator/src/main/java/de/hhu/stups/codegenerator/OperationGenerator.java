@@ -50,8 +50,10 @@ public class OperationGenerator {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
             operation.add("returnType", typeGenerator.generate(type, false));
+            operation.add("isTyped", true);
             operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handleIdentifier(identifier, NameHandler.IdentifierHandlingEnum.MACHINES)).render());
         } else if(node.getOutputParams().size() == 0) {
+            operation.add("isTyped", false);
             operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
         }
         operation.add("operationName", nameHandler.handle(node.getName()));

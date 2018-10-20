@@ -14,6 +14,8 @@ import java.util.Set;
 
 public class BSet implements BObject, Set<BObject> {
 
+	public static final BSet BOOL = new BSet(new BBoolean(true), new BBoolean(false));
+
 	private static final class createBInteger extends AFn {
 		@Override
 		public Object invoke(Object obj) {

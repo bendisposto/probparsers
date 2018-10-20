@@ -4,8 +4,6 @@ import java.util.Objects;
 
 public class BBoolean implements BObject {
 
-	public static final BSet BOOL = new BSet(new BBoolean(true), new BBoolean(false));
-
 	private final boolean value;
 
 	public static boolean parseBoolean(String s) {

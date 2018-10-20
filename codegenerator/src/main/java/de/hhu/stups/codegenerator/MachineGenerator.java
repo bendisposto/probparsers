@@ -146,6 +146,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		ST machine = currentGroup.getInstanceOf("machine");
 		machine.add("addition", addition);
 		machine.add("imports", typeGenerator.getImports());
+		machine.add("includedMachines", generateMachineImports(node));
 		machine.add("machine", nameHandler.handle(node.getName()));
 		generateBody(node, machine);
 		return machine.render();
@@ -226,6 +227,19 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		declaration.add("type", typeGenerator.generate(node.getType(), false));
 		declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
 		return declaration.render();
+	}
+
+	private List<String> generateMachineImports(MachineNode node) {
+		return node.getMachineReferences().stream()
+				.map(this::generateMachineImport)
+				.collect(Collectors.toList());
+	}
+
+	private String generateMachineImport(MachineReferenceNode reference) {
+		ST imp = currentGroup.getInstanceOf("import_type");
+		String machine = reference.getMachineName();
+		imp.add("type", nameHandler.handle(machine));
+		return imp.render();
 	}
 
 	/*

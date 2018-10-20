@@ -2,7 +2,7 @@ keywords() ::= <<
 >>
 
 
-machine(imports, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, includedMachines, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 class <machine>:
@@ -34,7 +34,7 @@ __<machine> = <machine>()
 __<machine>.__init__()
 >>
 
-operation(machine, returnType, operationName, parameters, returnParameters, locals, body, return) ::= <<
+operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
 def <operationName>(self<parameters : {par |, <par>}>):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ or not self.__initialized):
         raise Exception("Machine was not initialized")
