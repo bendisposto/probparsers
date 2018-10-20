@@ -11,6 +11,9 @@ machine(imports, includedMachines, machine, includes, constants, values, enums, 
 <imports; separator="\n">
 <includedMachines; separator="\n">
 
+#ifndef <machine>_H
+#define <machine>_H
+
 using namespace std;
 
 class <machine> {
@@ -37,6 +40,7 @@ class <machine> {
         <operations; separator="\n\n">
 
 };
+#endif
 
 <addition>
 >>

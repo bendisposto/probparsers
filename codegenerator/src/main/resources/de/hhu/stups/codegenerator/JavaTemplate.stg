@@ -5,6 +5,7 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 
 machine(imports, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
+import de.hhu.stups.btypes.BUtils;
 
 public class <machine> {
 
@@ -90,7 +91,7 @@ public enum <name> implements BObject {
 >>
 
 bool() ::= <<
-BSet.BOOL
+BUtils.BOOL
 >>
 
 include_declaration(type, identifier) ::= <<

@@ -236,10 +236,11 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	}
 
 	private String generateMachineImport(MachineReferenceNode reference) {
-		ST imp = currentGroup.getInstanceOf("import_type");
+		ST declaration = currentGroup.getInstanceOf("include_declaration");
 		String machine = reference.getMachineName();
-		imp.add("type", nameHandler.handle(machine));
-		return imp.render();
+		declaration.add("type", nameHandler.handle(machine));
+		declaration.add("identifier", nameHandler.handle(machine));
+		return declaration.render();
 	}
 
 	/*
@@ -608,6 +609,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 			if(!(parameter.getType() instanceof BoolType)) {
 				substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
 			} else {
+
 				substitution.add("set", operatorGenerator.generateBooleans());
 			}
 			substitution.add("index", index);
