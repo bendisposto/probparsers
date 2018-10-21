@@ -53,6 +53,37 @@ public class DeclarationGenerator {
         return declaration.render();
     }
 
+    /*
+* This function generates code for a list of local declarations or parameters in the generated code
+*/
+    public List<String> generateDeclarations(List<DeclarationNode> declarations, OperationGenerator.DeclarationType type, boolean isReturn) {
+        return declarations.stream()
+                .map(declaration -> type == OperationGenerator.DeclarationType.LOCAL_DECLARATION ?
+                        generateLocalDeclaration(declaration) : generateParameter(declaration, isReturn))
+                .collect(Collectors.toList());
+    }
+
+    /*
+    * This function generates code for a local declaration with the given node from the AST
+    */
+    public String generateLocalDeclaration(DeclarationNode node) {
+        ST declaration = currentGroup.getInstanceOf("local_declaration");
+        declaration.add("type", typeGenerator.generate(node.getType(), false));
+        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        return declaration.render();
+    }
+
+    /*
+    * This function generates code for a parameter with the given node from the AST and the information whether it is an output parameter
+    */
+    private String generateParameter(DeclarationNode node, boolean isReturn) {
+        ST declaration = currentGroup.getInstanceOf("parameter");
+        declaration.add("isReturn", isReturn);
+        declaration.add("type", typeGenerator.generate(node.getType(), false));
+        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        return declaration.render();
+    }
+
     public String generateValues(MachineNode node) {
         if(node.getValues().size() == 0) {
             return "";

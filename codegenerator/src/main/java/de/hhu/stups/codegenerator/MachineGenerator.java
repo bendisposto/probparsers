@@ -3,7 +3,6 @@ package de.hhu.stups.codegenerator;
 import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.MachineReferenceNode;
-import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
@@ -88,10 +87,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
 		this.declarationGenerator = new DeclarationGenerator(currentGroup, this, typeGenerator, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
-		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
 
 		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
 																operatorGenerator, identifierGenerator);
+		this.operationGenerator = new OperationGenerator(currentGroup, this, substitutionGenerator, declarationGenerator, identifierGenerator, nameHandler, typeGenerator);
 		this.machineFromOperation = new HashMap<>();
 	}
 
@@ -138,7 +137,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("declarations", declarationGenerator.visitDeclarations(node.getVariables()));
 		machine.add("includes", declarationGenerator.generateIncludes(node));
 		machine.add("initialization", substitutionGenerator.visitInitialization(node));
-		machine.add("operations", visitOperations(node.getOperations()));
+		machine.add("operations", operationGenerator.visitOperations(node.getOperations()));
 	}
 
 	private List<String> generateMachineImports(MachineNode node) {
@@ -152,27 +151,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		String machine = reference.getMachineName();
 		imp.add("type", nameHandler.handle(machine));
 		return imp.render();
-	}
-
-	/*
-	* This function generates code for all operations in a machine.
-	*/
-	private List<String> visitOperations(List<OperationNode> operations) {
-		return operations.stream()
-				.map(this::visitOperation)
-				.collect(Collectors.toList());
-	}
-
-	/*
-	* This function generates code for one operation with the given AST node for an operation.
-	*/
-	private String visitOperation(OperationNode node) {
-		identifierGenerator.setParams(node.getParams(), node.getOutputParams());
-		substitutionGenerator.resetParallel();
-		ST operation = operationGenerator.generate(node);
-		operation.add("machine", nameHandler.handle(machineNode.getName()));
-		operation.add("body", visitSubstitutionNode(node.getSubstitution(), null));
-		return operation.render();
 	}
 
 	/*

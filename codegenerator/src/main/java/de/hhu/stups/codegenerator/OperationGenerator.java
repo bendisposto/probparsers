@@ -1,7 +1,6 @@
 package de.hhu.stups.codegenerator;
 
 
-import de.prob.parser.ast.nodes.DeclarationNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.types.BType;
 import de.prob.parser.ast.types.UntypedType;
@@ -24,25 +23,60 @@ public class OperationGenerator {
 
     private final STGroup group;
 
+    private final MachineGenerator machineGenerator;
+
+    private final DeclarationGenerator declarationGenerator;
+
+    private final IdentifierGenerator identifierGenerator;
+
     private final NameHandler nameHandler;
+
+    private final SubstitutionGenerator substitutionGenerator;
 
     private final TypeGenerator typeGenerator;
 
 
-    public OperationGenerator(final STGroup group, final NameHandler nameHandler, final TypeGenerator typeGenerator) {
+    public OperationGenerator(final STGroup group, final MachineGenerator machineGenerator, final SubstitutionGenerator substitutionGenerator,
+                              final DeclarationGenerator declarationGenerator, final IdentifierGenerator identifierGenerator,
+                              final NameHandler nameHandler, final TypeGenerator typeGenerator) {
         this.group = group;
+        this.machineGenerator = machineGenerator;
+        this.declarationGenerator = declarationGenerator;
+        this.substitutionGenerator = substitutionGenerator;
+        this.identifierGenerator = identifierGenerator;
         this.nameHandler = nameHandler;
         this.typeGenerator = typeGenerator;
+    }
+
+    /*
+    * This function generates code for all operations in a machine.
+    */
+    public List<String> visitOperations(List<OperationNode> operations) {
+        return operations.stream()
+                .map(this::visitOperation)
+                .collect(Collectors.toList());
+    }
+
+    /*
+    * This function generates code for one operation with the given AST node for an operation.
+    */
+    private String visitOperation(OperationNode node) {
+        identifierGenerator.setParams(node.getParams(), node.getOutputParams());
+        substitutionGenerator.resetParallel();
+        ST operation = generate(node);
+        operation.add("machine", nameHandler.handle(machineGenerator.getMachineName()));
+        operation.add("body", machineGenerator.visitSubstitutionNode(node.getSubstitution(), null));
+        return operation.render();
     }
 
 
     /*
     * This function generates code for an operation from the given AST node
     */
-    public ST generate(OperationNode node) {
+    private ST generate(OperationNode node) {
         ST operation = group.getInstanceOf("operation");
 
-        operation.add("locals", generateDeclarations(node.getOutputParams()
+        operation.add("locals", declarationGenerator.generateDeclarations(node.getOutputParams()
                 .stream()
                 .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION, false));
 
@@ -58,40 +92,9 @@ public class OperationGenerator {
             operation.add("return", group.getInstanceOf("no_return").render());
         }
         operation.add("operationName", nameHandler.handle(node.getName()));
-        operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));
-        operation.add("returnParameters", generateDeclarations(node.getOutputParams(), DeclarationType.PARAMETER, true));
+        operation.add("parameters", declarationGenerator.generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));
+        operation.add("returnParameters", declarationGenerator.generateDeclarations(node.getOutputParams(), DeclarationType.PARAMETER, true));
         return operation;
-    }
-
-    /*
-    * This function generates code for a list of local declarations or parameters in the generated code
-    */
-    public List<String> generateDeclarations(List<DeclarationNode> declarations, DeclarationType type, boolean isReturn) {
-        return declarations.stream()
-                .map(declaration -> type == DeclarationType.LOCAL_DECLARATION ?
-                        generateLocalDeclaration(declaration) : generateParameter(declaration, isReturn))
-                .collect(Collectors.toList());
-    }
-
-    /*
-    * This function generates code for a local declaration with the given node from the AST
-    */
-    public String generateLocalDeclaration(DeclarationNode node) {
-        ST declaration = group.getInstanceOf("local_declaration");
-        declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-        return declaration.render();
-    }
-
-    /*
-    * This function generates code for a parameter with the given node from the AST and the information whether it is an output parameter
-    */
-    private String generateParameter(DeclarationNode node, boolean isReturn) {
-        ST declaration = group.getInstanceOf("parameter");
-        declaration.add("isReturn", isReturn);
-        declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-        return declaration.render();
     }
 
 }
