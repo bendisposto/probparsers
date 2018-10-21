@@ -1,7 +1,5 @@
 package de.hhu.stups.codegenerator;
 
-import de.prob.parser.ast.nodes.DeclarationNode;
-import de.prob.parser.ast.nodes.EnumeratedSetDeclarationNode;
 import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.MachineReferenceNode;
@@ -36,7 +34,6 @@ import de.prob.parser.ast.nodes.substitution.WhileSubstitutionNode;
 import de.prob.parser.ast.visitors.AbstractVisitor;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,51 +43,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static de.hhu.stups.codegenerator.GeneratorMode.C;
-import static de.hhu.stups.codegenerator.GeneratorMode.CLJ;
-import static de.hhu.stups.codegenerator.GeneratorMode.CPP;
-import static de.hhu.stups.codegenerator.GeneratorMode.JAVA;
-import static de.hhu.stups.codegenerator.GeneratorMode.PY;
-
 /*
 * The code generator is implemented by using the visitor pattern
 */
 
 public class MachineGenerator implements AbstractVisitor<String, Void> {
 
-	/*
-	* Template groups for the supported programming languages
-	*/
-	private static final STGroup JAVA_GROUP = new STGroupFile(MachineGenerator.class.getClassLoader()
-			.getResource("de/hhu/stups/codegenerator/JavaTemplate.stg").getFile());
-
-	private static final STGroup C_GROUP = new STGroupFile(
-			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/CTemplate.stg").getFile());
-
-	private static final STGroup CPP_GROUP = new STGroupFile(
-			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/CppTemplate.stg").getFile());
-
-	private static final STGroup PYTHON_GROUP = new STGroupFile(
-			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/PythonTemplate.stg").getFile());
-
-	private static final STGroup CLJ_GROUP = new STGroupFile(
-			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/ClojureTemplate.stg").getFile());
-
-	private static final Map<GeneratorMode, STGroup> TEMPLATE_MAP = new HashMap<>();
-
-	static {
-		TEMPLATE_MAP.put(JAVA, JAVA_GROUP);
-		TEMPLATE_MAP.put(C, C_GROUP);
-		TEMPLATE_MAP.put(CPP, CPP_GROUP);
-		TEMPLATE_MAP.put(PY, PYTHON_GROUP);
-		TEMPLATE_MAP.put(CLJ, CLJ_GROUP);
-	}
-
 	private final TypeGenerator typeGenerator;
 
 	private final OperatorGenerator operatorGenerator;
 
 	private final OperationGenerator operationGenerator;
+
+	private final DeclarationGenerator declarationGenerator;
 
 	private final SubstitutionGenerator substitutionGenerator;
 
@@ -102,8 +67,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private Map<String, String> machineFromOperation;
 
-	private Map<String, List<String>> setToEnum;
-
 	private MachineNode machineNode;
 
 	private boolean useBigInteger;
@@ -111,7 +74,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private String addition;
 
 	public MachineGenerator(GeneratorMode mode, boolean useBigInteger, Path addition) {
-		this.currentGroup = TEMPLATE_MAP.get(mode);
+		this.currentGroup = CodeGeneratorUtils.getGroup(mode);
 		if(addition != null) {
 			try {
 				this.addition = new String(Files.readAllBytes(addition));
@@ -123,11 +86,13 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
+		this.declarationGenerator = new DeclarationGenerator(currentGroup, this, typeGenerator, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
 		this.operationGenerator = new OperationGenerator(currentGroup, nameHandler, typeGenerator);
-		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator, operatorGenerator, identifierGenerator);
+
+		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
+																operatorGenerator, identifierGenerator);
 		this.machineFromOperation = new HashMap<>();
-		this.setToEnum = new HashMap<>();
 	}
 
 	/*
@@ -166,59 +131,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	* This function generates the whole body of a machine from the given AST node for the machine.
 	*/
 	private void generateBody(MachineNode node, ST machine) {
-		machine.add("constants", generateConstants(node));
-		machine.add("values", generateValues(node));
-		machine.add("enums", generateEnumDeclarations(node));
-		machine.add("sets", generateSetDeclarations(node));
-		machine.add("declarations", visitDeclarations(node.getVariables()));
-		machine.add("includes", generateIncludes(node));
+		machine.add("constants", declarationGenerator.generateConstants(node));
+		machine.add("values", declarationGenerator.generateValues(node));
+		machine.add("enums", declarationGenerator.generateEnumDeclarations(node));
+		machine.add("sets", declarationGenerator.generateSetDeclarations(node));
+		machine.add("declarations", declarationGenerator.visitDeclarations(node.getVariables()));
+		machine.add("includes", declarationGenerator.generateIncludes(node));
 		machine.add("initialization", substitutionGenerator.visitInitialization(node));
 		machine.add("operations", visitOperations(node.getOperations()));
-	}
-
-	private String generateValues(MachineNode node) {
-		if(node.getValues().size() == 0) {
-			return "";
-		}
-		ST values = currentGroup.getInstanceOf("values");
-		List<String> assignments = node.getValues().stream()
-				.map(substitution -> visitSubstitutionNode(substitution, null))
-				.collect(Collectors.toList());
-		values.add("assignments", assignments);
-		return values.render();
-	}
-
-	private List<String> generateConstants(MachineNode node) {
-		//TODO Generate code for PROPERTIES (?)
-		return node.getConstants().stream()
-				.map(this::generateConstant)
-				.collect(Collectors.toList());
-	}
-
-	private String generateConstant(DeclarationNode constant) {
-		ST declaration = currentGroup.getInstanceOf("constant");
-		declaration.add("type", typeGenerator.generate(constant.getType(), false));
-		declaration.add("identifier", nameHandler.handleIdentifier(constant.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-		return declaration.render();
-	}
-
-	/*
-	* This function generates code from the VARIABLES clause
-	*/
-	private List<String> visitDeclarations(List<DeclarationNode> declarations) {
-		return declarations.stream()
-				.map(this::generateGlobalDeclaration)
-				.collect(Collectors.toList());
-	}
-
-	/*
-	* This function generates code for each declaration from the VARIABLES clause
-	*/
-	private String generateGlobalDeclaration(DeclarationNode node) {
-		ST declaration = currentGroup.getInstanceOf("global_declaration");
-		declaration.add("type", typeGenerator.generate(node.getType(), false));
-		declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-		return declaration.render();
 	}
 
 	private List<String> generateMachineImports(MachineNode node) {
@@ -232,26 +152,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		String machine = reference.getMachineName();
 		imp.add("type", nameHandler.handle(machine));
 		return imp.render();
-	}
-
-	/*
-	* This function generates code for all including other machines with the given AST node of the main machine.
-	*/
-	private List<String> generateIncludes(MachineNode node) {
-		return node.getMachineReferences().stream()
-				.map(this::generateIncludeDeclaration)
-				.collect(Collectors.toList());
-	}
-
-	/*
-	* This function generates code for one included machine with the given AST node and the template.
-	*/
-	private String generateIncludeDeclaration(MachineReferenceNode reference) {
-		ST declaration = currentGroup.getInstanceOf("include_declaration");
-		String machine = reference.getMachineName();
-		declaration.add("type", nameHandler.handle(machine));
-		declaration.add("identifier", nameHandler.handle(machine));
-		return declaration.render();
 	}
 
 	/*
@@ -287,78 +187,18 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
 		} else if (node instanceof EnumeratedSetElementNode) {
 			EnumeratedSetElementNode element = (EnumeratedSetElementNode) node;
-			return callEnum(element.getType().toString(), element.getDeclarationNode());
+			return declarationGenerator.callEnum(element.getType().toString(), element.getDeclarationNode());
 		} else if(node instanceof IdentifierExprNode) {
 			Map<String, List<String>> enumTypes = nameHandler.getEnumTypes();
 			if(enumTypes.keySet().contains(node.getType().toString()) &&
 					enumTypes.get(node.getType().toString()).contains(((IdentifierExprNode) node).getName())) {
-				return callEnum(node.getType().toString(), ((IdentifierExprNode) node).getDeclarationNode());
+				return declarationGenerator.callEnum(node.getType().toString(), ((IdentifierExprNode) node).getDeclarationNode());
 			}
 			return visitIdentifierExprNode((IdentifierExprNode) node, expected);
 		} else if(node instanceof CastPredicateExpressionNode) {
 			return visitCastPredicateExpressionNode((CastPredicateExpressionNode) node, expected);
 		}
 		throw new RuntimeException("Given node is not implemented: " + node.getClass());
-	}
-
-	/*
-	* This function generates code for enumerated sets within a machine.
-	*/
-	private List<String> generateEnumDeclarations(MachineNode node) {
-		node.getEnumaratedSets().forEach(set -> setToEnum.put(set.getSetDeclarationNode().getName(), set.getElements().stream()
-				.map(DeclarationNode::getName)
-				.collect(Collectors.toList())));
-		return node.getEnumaratedSets().stream()
-				.map(this::declareEnums)
-				.collect(Collectors.toList());
-	}
-
-	/*
-	* This function generates code for all declarations of enums for enumerated sets from the node of the machine.
-	*/
-	private List<String> generateSetDeclarations(MachineNode node) {
-		return node.getEnumaratedSets().stream()
-				.map(this::visitEnumeratedSetDeclarationNode)
-				.collect(Collectors.toList());
-	}
-
-	/*
-	* This function generates code for declarating a enum for an enumerated set from the belonging AST node and the belonging template.
-	*/
-	private String declareEnums(EnumeratedSetDeclarationNode node) {
-		typeGenerator.addImport(node.getElements().get(0).getType());
-		ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-		enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-		List<String> enums = node.getElements().stream()
-				.map(element -> nameHandler.handleEnum(element.getName(), node.getElements().stream().map(DeclarationNode::getName).collect(Collectors.toList())))
-				.collect(Collectors.toList());
-		enumDeclaration.add("enums", enums);
-		return enumDeclaration.render();
-	}
-
-	/*
-	* This function generates code with creating a BSet for an enumerated set from the belonging AST node and the belonging template.
-	*/
-	public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
-		typeGenerator.addImport(node.getSetDeclarationNode().getType());
-		ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-		setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
-		List<String> enums = node.getElements().stream()
-				.map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
-				.collect(Collectors.toList());
-		setDeclaration.add("enums", enums);
-		return setDeclaration.render();
-	}
-
-	/*
-	* This function generates code for calling enums from an enumerated from the belonging AST node,
-	* template and the name of the enumerated set the enum belongs to.
-	*/
-	public String callEnum(String setName, DeclarationNode enumNode) {
-		ST enumST = currentGroup.getInstanceOf("enum_call");
-		enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
-		enumST.add("identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
-		return enumST.render();
 	}
 
 	/*
