@@ -27,19 +27,17 @@ public class IdentifierGenerator {
 
     private Stack<Integer> stackScope;
 
-    private final List<String> identifierOnLhsInParallel;
+    private List<String> identifierOnLhsInParallel;
 
     private boolean lhsInParallel;
 
-    public IdentifierGenerator(final STGroup group, final NameHandler nameHandler,
-                               final List<String> identifierOnLhsInParallel) {
+    public IdentifierGenerator(final STGroup group, final NameHandler nameHandler) {
         this.group = group;
         this.nameHandler = nameHandler;
         this.outputParams = new ArrayList<>();
         this.currentLocals = new HashMap<>();
         this.maxLocals = new HashMap<>();
         this.stackScope = new Stack<>();
-        this.identifierOnLhsInParallel = identifierOnLhsInParallel;
         stackScope.push(0);
     }
 
@@ -149,5 +147,9 @@ public class IdentifierGenerator {
 
     public void setLhsInParallel(boolean lhsInParallel) {
         this.lhsInParallel = lhsInParallel;
+    }
+
+    public void setIdentifierOnLhsInParallel(List<String> identifierOnLhsInParallel) {
+        this.identifierOnLhsInParallel = identifierOnLhsInParallel;
     }
 }
