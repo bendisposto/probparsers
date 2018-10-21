@@ -1,6 +1,5 @@
 package de.hhu.stups.codegenerator;
 
-import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
@@ -36,9 +35,6 @@ import org.stringtemplate.v4.STGroup;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /*
 * The code generator is implemented by using the visitor pattern
@@ -56,6 +52,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private final DeclarationGenerator declarationGenerator;
 
+	private final ExpressionGenerator expressionGenerator;
+
+	private final PredicateGenerator predicateGenerator;
+
 	private final SubstitutionGenerator substitutionGenerator;
 
 	private final IdentifierGenerator identifierGenerator;
@@ -65,8 +65,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private STGroup currentGroup;
 
 	private MachineNode machineNode;
-
-	private boolean useBigInteger;
 
 	private String addition;
 
@@ -79,7 +77,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 				e.printStackTrace();
 			}
 		}
-		this.useBigInteger = useBigInteger;
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
@@ -88,6 +85,10 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
 		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
 																operatorGenerator, identifierGenerator);
+		this.predicateGenerator = new PredicateGenerator(this, importGenerator, operatorGenerator);
+		this.expressionGenerator = new ExpressionGenerator(currentGroup, this, useBigInteger, nameHandler, importGenerator,
+															declarationGenerator, identifierGenerator, substitutionGenerator,
+															operatorGenerator);
 		this.operationGenerator = new OperationGenerator(currentGroup, this, substitutionGenerator, declarationGenerator, identifierGenerator, nameHandler, typeGenerator);
 	}
 
@@ -128,71 +129,29 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("operations", operationGenerator.visitOperations(node.getOperations()));
 	}
 
-	/*
-	* This function generates code from an expression in B.
-	*/
 	@Override
 	public String visitExprNode(ExprNode node, Void expected) {
-		importGenerator.addImport(node.getType());
-		if (node instanceof NumberNode) {
-			return visitNumberNode((NumberNode) node, expected);
-		} else if (node instanceof ExpressionOperatorNode) {
-			return visitExprOperatorNode((ExpressionOperatorNode) node, expected);
-		} else if (node instanceof EnumeratedSetElementNode) {
-			EnumeratedSetElementNode element = (EnumeratedSetElementNode) node;
-			return declarationGenerator.callEnum(element.getType().toString(), element.getDeclarationNode());
-		} else if(node instanceof IdentifierExprNode) {
-			Map<String, List<String>> enumTypes = nameHandler.getEnumTypes();
-			if(enumTypes.keySet().contains(node.getType().toString()) &&
-					enumTypes.get(node.getType().toString()).contains(((IdentifierExprNode) node).getName())) {
-				return declarationGenerator.callEnum(node.getType().toString(), ((IdentifierExprNode) node).getDeclarationNode());
-			}
-			return visitIdentifierExprNode((IdentifierExprNode) node, expected);
-		} else if(node instanceof CastPredicateExpressionNode) {
-			return visitCastPredicateExpressionNode((CastPredicateExpressionNode) node, expected);
-		}
-		throw new RuntimeException("Given node is not implemented: " + node.getClass());
+		return expressionGenerator.visitExprNode(node);
 	}
 
-	/*
-	* This function generates code for an expression.
-	*/
 	@Override
 	public String visitExprOperatorNode(ExpressionOperatorNode node, Void expected) {
-		List<String> expressionList = node.getExpressionNodes().stream()
-				.map(expr -> visitExprNode(expr, expected))
-				.collect(Collectors.toList());
-		return operatorGenerator.generateExpression(node, expressionList);
+		return expressionGenerator.visitExprOperatorNode(node);
 	}
 
-	/*
-	* This function generates code for an identifier from the belonging AST node.
-	*/
 	@Override
 	public String visitIdentifierExprNode(IdentifierExprNode node, Void expected) {
-		if(substitutionGenerator.getCurrentLocalScope() > 0) {
-			return identifierGenerator.generateVarDeclaration(node.getName());
-		}
-		return identifierGenerator.generate(node);
+		return expressionGenerator.visitIdentifierExprNode(node);
 	}
 
-	/*
-	* This function generates code for cast predicates
-	*/
 	@Override
 	public String visitCastPredicateExpressionNode(CastPredicateExpressionNode node, Void expected) {
-		return visitPredicateNode(node.getPredicate(), expected);
+		return expressionGenerator.visitCastPredicateExpressionNode(node);
 	}
 
-	/*
-	* This function generates code for numbers from the belonging AST node and the belonging template
-	*/
 	@Override
 	public String visitNumberNode(NumberNode node, Void expected) {
-		ST number = currentGroup.getInstanceOf("number");
-		number.add("number", node.getValue().toString());
-		number.add("useBigInteger", useBigInteger);
-		return number.render();
+		return expressionGenerator.visitNumberNode(node);
 	}
 
 	/*
@@ -232,11 +191,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
-		importGenerator.addImport(node.getType());
-		List<String> expressionList = node.getPredicateArguments().stream()
-				.map(expr -> visitPredicateNode(expr, expected))
-				.collect(Collectors.toList());
-		return operatorGenerator.generatePredicate(node, expressionList);
+		return predicateGenerator.visitPredicateOperatorNode(node);
 	}
 
 	/*
@@ -244,11 +199,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
-		importGenerator.addImport(node.getType());
-		List<String> expressionList = node.getExpressionNodes().stream()
-				.map(expr -> visitExprNode(expr, expected))
-				.collect(Collectors.toList());
-		return operatorGenerator.generateBinary(node::getOperator, expressionList);
+		return predicateGenerator.visitPredicateOperatorWithExprArgs(node);
 	}
 
 
