@@ -35,7 +35,7 @@ public class SubstitutionGenerator {
 
     private final TypeGenerator typeGenerator;
 
-    private final OperatorGenerator operatorGenerator;
+    private final ExpressionGenerator expressionGenerator;
 
     private final IdentifierGenerator identifierGenerator;
 
@@ -48,13 +48,14 @@ public class SubstitutionGenerator {
     private final List<String> definedLoadsInParallel;
 
     public SubstitutionGenerator(final STGroup currentGroup, final MachineGenerator machineGenerator, final NameHandler nameHandler,
-                                 final TypeGenerator typeGenerator, final OperatorGenerator operatorGenerator,
+                                 final TypeGenerator typeGenerator, final ExpressionGenerator expressionGenerator,
                                  final IdentifierGenerator identifierGenerator) {
         this.currentGroup = currentGroup;
         this.machineGenerator = machineGenerator;
         this.nameHandler = nameHandler;
         this.typeGenerator = typeGenerator;
-        this.operatorGenerator = operatorGenerator;
+        this.expressionGenerator = expressionGenerator;
+        this.expressionGenerator.setSubstitutionGenerator(this);
         this.identifierGenerator = identifierGenerator;
         this.identifierOnLhsInParallel = new ArrayList<>();
         this.definedLoadsInParallel = new ArrayList<>();
@@ -179,7 +180,7 @@ public class SubstitutionGenerator {
                 substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
             } else {
 
-                substitution.add("set", operatorGenerator.generateBooleans());
+                substitution.add("set", expressionGenerator.generateBooleans());
             }
             substitution.add("index", index);
             substitution.add("body", generateAnyBody(predicateNode, substitutionNode));
@@ -189,7 +190,7 @@ public class SubstitutionGenerator {
             if(!(parameter.getType() instanceof BoolType)) {
                 substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
             } else {
-                substitution.add("set", operatorGenerator.generateBooleans());
+                substitution.add("set", expressionGenerator.generateBooleans());
             }
             substitution.add("index", index);
             substitution.add("body", generateAnyParameters(parameters, parameters.get(index + 1), predicateNode, substitutionNode, index + 1, length));

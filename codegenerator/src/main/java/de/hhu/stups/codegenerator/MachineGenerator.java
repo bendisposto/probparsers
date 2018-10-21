@@ -82,14 +82,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
 		this.importGenerator = new ImportGenerator(currentGroup, nameHandler);
 		this.declarationGenerator = new DeclarationGenerator(currentGroup, this, typeGenerator, importGenerator, nameHandler);
-		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
-		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
-																operatorGenerator, identifierGenerator);
-		this.predicateGenerator = new PredicateGenerator(this, importGenerator, operatorGenerator);
+		this.predicateGenerator = new PredicateGenerator(currentGroup, this, nameHandler, importGenerator);
 		this.expressionGenerator = new ExpressionGenerator(currentGroup, this, useBigInteger, nameHandler, importGenerator,
-															declarationGenerator, identifierGenerator, substitutionGenerator,
-															operatorGenerator);
-		this.operationGenerator = new OperationGenerator(currentGroup, this, substitutionGenerator, declarationGenerator, identifierGenerator, nameHandler, typeGenerator);
+															declarationGenerator, identifierGenerator);
+		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
+																expressionGenerator, identifierGenerator);
+		this.operatorGenerator = new OperatorGenerator(predicateGenerator, expressionGenerator);
+		this.operationGenerator = new OperationGenerator(currentGroup, this, substitutionGenerator,
+															declarationGenerator, identifierGenerator, nameHandler, typeGenerator);
 	}
 
 	/*
