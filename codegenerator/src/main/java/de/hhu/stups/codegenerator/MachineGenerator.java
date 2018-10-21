@@ -2,7 +2,6 @@ package de.hhu.stups.codegenerator;
 
 import de.prob.parser.ast.nodes.EnumeratedSetElementNode;
 import de.prob.parser.ast.nodes.MachineNode;
-import de.prob.parser.ast.nodes.MachineReferenceNode;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
@@ -37,7 +36,6 @@ import org.stringtemplate.v4.STGroup;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +47,8 @@ import java.util.stream.Collectors;
 public class MachineGenerator implements AbstractVisitor<String, Void> {
 
 	private final TypeGenerator typeGenerator;
+
+	private final ImportGenerator importGenerator;
 
 	private final OperatorGenerator operatorGenerator;
 
@@ -63,8 +63,6 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private final NameHandler nameHandler;
 
 	private STGroup currentGroup;
-
-	private Map<String, String> machineFromOperation;
 
 	private MachineNode machineNode;
 
@@ -85,13 +83,12 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		this.nameHandler = new NameHandler(currentGroup);
 		this.identifierGenerator = new IdentifierGenerator(currentGroup, nameHandler);
 		this.typeGenerator = new TypeGenerator(currentGroup, nameHandler);
-		this.declarationGenerator = new DeclarationGenerator(currentGroup, this, typeGenerator, nameHandler);
+		this.importGenerator = new ImportGenerator(currentGroup, nameHandler);
+		this.declarationGenerator = new DeclarationGenerator(currentGroup, this, typeGenerator, importGenerator, nameHandler);
 		this.operatorGenerator = new OperatorGenerator(currentGroup, nameHandler);
-
 		this.substitutionGenerator = new SubstitutionGenerator(currentGroup, this, nameHandler, typeGenerator,
 																operatorGenerator, identifierGenerator);
 		this.operationGenerator = new OperationGenerator(currentGroup, this, substitutionGenerator, declarationGenerator, identifierGenerator, nameHandler, typeGenerator);
-		this.machineFromOperation = new HashMap<>();
 	}
 
 	/*
@@ -101,8 +98,8 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		initialize(node);
 		ST machine = currentGroup.getInstanceOf("machine");
 		machine.add("addition", addition);
-		machine.add("imports", typeGenerator.getImports());
-		machine.add("includedMachines", generateMachineImports(node));
+		machine.add("imports", importGenerator.getImports());
+		machine.add("includedMachines", importGenerator.generateMachineImports(node));
 		machine.add("machine", nameHandler.handle(node.getName()));
 		generateBody(node, machine);
 		return machine.render();
@@ -114,16 +111,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private void initialize(MachineNode node) {
 		this.machineNode = node;
 		nameHandler.initialize(node);
-		mapOperationsToMachine(node);
-	}
-
-	/*
-	* This function maps operations to machines for identifying the included machine where the operation is called from.
-	*/
-	private void mapOperationsToMachine(MachineNode node) {
-		node.getMachineReferences()
-				.forEach(reference -> reference.getMachineNode().getOperations()
-						.forEach(operation -> machineFromOperation.put(operation.getName(), reference.getMachineName())));
+		operationGenerator.mapOperationsToMachine(node);
 	}
 
 	/*
@@ -140,25 +128,12 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		machine.add("operations", operationGenerator.visitOperations(node.getOperations()));
 	}
 
-	private List<String> generateMachineImports(MachineNode node) {
-		return node.getMachineReferences().stream()
-				.map(this::generateMachineImport)
-				.collect(Collectors.toList());
-	}
-
-	private String generateMachineImport(MachineReferenceNode reference) {
-		ST imp = currentGroup.getInstanceOf("import_type");
-		String machine = reference.getMachineName();
-		imp.add("type", nameHandler.handle(machine));
-		return imp.render();
-	}
-
 	/*
 	* This function generates code from an expression in B.
 	*/
 	@Override
 	public String visitExprNode(ExprNode node, Void expected) {
-		typeGenerator.addImport(node.getType());
+		importGenerator.addImport(node.getType());
 		if (node instanceof NumberNode) {
 			return visitNumberNode((NumberNode) node, expected);
 		} else if (node instanceof ExpressionOperatorNode) {
@@ -257,7 +232,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorNode(PredicateOperatorNode node, Void expected) {
-		typeGenerator.addImport(node.getType());
+		importGenerator.addImport(node.getType());
 		List<String> expressionList = node.getPredicateArguments().stream()
 				.map(expr -> visitPredicateNode(expr, expected))
 				.collect(Collectors.toList());
@@ -269,7 +244,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	*/
 	@Override
 	public String visitPredicateOperatorWithExprArgs(PredicateOperatorWithExprArgsNode node, Void expected) {
-		typeGenerator.addImport(node.getType());
+		importGenerator.addImport(node.getType());
 		List<String> expressionList = node.getExpressionNodes().stream()
 				.map(expr -> visitExprNode(expr, expected))
 				.collect(Collectors.toList());
@@ -383,7 +358,4 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		return machineNode.getName();
 	}
 
-	public Map<String, String> getMachineFromOperation() {
-		return machineFromOperation;
-	}
 }

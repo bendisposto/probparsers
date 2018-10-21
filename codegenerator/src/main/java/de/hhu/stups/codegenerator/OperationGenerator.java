@@ -1,13 +1,16 @@
 package de.hhu.stups.codegenerator;
 
 
+import de.prob.parser.ast.nodes.MachineNode;
 import de.prob.parser.ast.nodes.OperationNode;
 import de.prob.parser.ast.types.BType;
 import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -35,6 +38,8 @@ public class OperationGenerator {
 
     private final TypeGenerator typeGenerator;
 
+    private final Map<String, String> machineFromOperation;
+
 
     public OperationGenerator(final STGroup group, final MachineGenerator machineGenerator, final SubstitutionGenerator substitutionGenerator,
                               final DeclarationGenerator declarationGenerator, final IdentifierGenerator identifierGenerator,
@@ -43,9 +48,20 @@ public class OperationGenerator {
         this.machineGenerator = machineGenerator;
         this.declarationGenerator = declarationGenerator;
         this.substitutionGenerator = substitutionGenerator;
+        this.substitutionGenerator.setOperationGenerator(this);
         this.identifierGenerator = identifierGenerator;
         this.nameHandler = nameHandler;
         this.typeGenerator = typeGenerator;
+        this.machineFromOperation = new HashMap<>();
+    }
+
+    /*
+    * This function maps operations to machines for identifying the included machine where the operation is called from.
+    */
+    public void mapOperationsToMachine(MachineNode node) {
+        node.getMachineReferences()
+                .forEach(reference -> reference.getMachineNode().getOperations()
+                        .forEach(operation -> machineFromOperation.put(operation.getName(), reference.getMachineName())));
     }
 
     /*
@@ -97,4 +113,7 @@ public class OperationGenerator {
         return operation;
     }
 
+    public Map<String, String> getMachineFromOperation() {
+        return machineFromOperation;
+    }
 }

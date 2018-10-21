@@ -29,6 +29,8 @@ public class SubstitutionGenerator {
 
     private final MachineGenerator machineGenerator;
 
+    private OperationGenerator operationGenerator;
+
     private final NameHandler nameHandler;
 
     private final TypeGenerator typeGenerator;
@@ -46,7 +48,8 @@ public class SubstitutionGenerator {
     private final List<String> definedLoadsInParallel;
 
     public SubstitutionGenerator(final STGroup currentGroup, final MachineGenerator machineGenerator, final NameHandler nameHandler,
-                                final TypeGenerator typeGenerator, final OperatorGenerator operatorGenerator, final IdentifierGenerator identifierGenerator) {
+                                 final TypeGenerator typeGenerator, final OperatorGenerator operatorGenerator,
+                                 final IdentifierGenerator identifierGenerator) {
         this.currentGroup = currentGroup;
         this.machineGenerator = machineGenerator;
         this.nameHandler = nameHandler;
@@ -349,7 +352,7 @@ public class SubstitutionGenerator {
                 .map(var -> machineGenerator.visitExprNode(var, expected))
                 .collect(Collectors.toList());
         String operationName = node.getOperationNode().getName();
-        String machineName = machineGenerator.getMachineFromOperation().get(operationName);
+        String machineName = operationGenerator.getMachineFromOperation().get(operationName);
         ST functionCall;
         //Size of variables must be less equal than 1 for now.
         //TODO: Implement Records
@@ -424,5 +427,9 @@ public class SubstitutionGenerator {
     public void resetParallel() {
         definedLoadsInParallel.clear();
         identifierOnLhsInParallel.clear();
+    }
+
+    public void setOperationGenerator(OperationGenerator operationGenerator) {
+        this.operationGenerator = operationGenerator;
     }
 }

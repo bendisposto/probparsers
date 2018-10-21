@@ -11,21 +11,15 @@ import de.prob.parser.ast.types.UntypedType;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class TypeGenerator {
 
     private final STGroup group;
 
     private final NameHandler nameHandler;
 
-    private final Set<String> imports;
-
     public TypeGenerator(STGroup group, NameHandler nameHandler) {
         this.group = group;
         this.nameHandler = nameHandler;
-        this.imports = new HashSet<>();
     }
 
     /*
@@ -54,30 +48,6 @@ public class TypeGenerator {
     */
     private String generateUntyped() {
         return group.getInstanceOf("void").render();
-    }
-
-
-    /*
-    * This function adds import for the types used in the generated code
-    */
-    public void addImport(BType type) {
-        ST template = group.getInstanceOf("import_type");
-        if (type instanceof IntegerType) {
-            imports.add(template.add("type", "BInteger").render());
-        } else if (type instanceof BoolType) {
-            imports.add(template.add("type", "BBoolean").render());
-        } else if(type instanceof SetType) {
-            imports.add(template.add("type", "BSet").render());
-        } else if(type instanceof EnumeratedSetElementType) {
-            imports.add(group.getInstanceOf("import_type").add("type", "BObject").render());
-            imports.add(group.getInstanceOf("import_type").add("type", "BBoolean").render());
-        } else if(type instanceof CoupleType) {
-            imports.add(template.add("type", "BCouple").render());
-        }
-    }
-
-    public Set<String> getImports() {
-        return imports;
     }
 
 }

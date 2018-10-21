@@ -21,15 +21,19 @@ public class DeclarationGenerator {
 
     private final TypeGenerator typeGenerator;
 
+    private final ImportGenerator importGenerator;
+
     private final NameHandler nameHandler;
 
     private final Map<String, List<String>> setToEnum;
 
 
-    public DeclarationGenerator(final STGroup currentGroup, final MachineGenerator machineGenerator, final TypeGenerator typeGenerator, final NameHandler nameHandler) {
+    public DeclarationGenerator(final STGroup currentGroup, final MachineGenerator machineGenerator,
+                                final TypeGenerator typeGenerator, final ImportGenerator importGenerator, final NameHandler nameHandler) {
         this.currentGroup = currentGroup;
         this.machineGenerator = machineGenerator;
         this.typeGenerator = typeGenerator;
+        this.importGenerator = importGenerator;
         this.nameHandler = nameHandler;
         this.setToEnum = new HashMap<>();
     }
@@ -155,7 +159,7 @@ public class DeclarationGenerator {
     * This function generates code for declarating a enum for an enumerated set from the belonging AST node and the belonging template.
     */
     private String declareEnums(EnumeratedSetDeclarationNode node) {
-        typeGenerator.addImport(node.getElements().get(0).getType());
+        importGenerator.addImport(node.getElements().get(0).getType());
         ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
         enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         List<String> enums = node.getElements().stream()
@@ -169,7 +173,7 @@ public class DeclarationGenerator {
     * This function generates code with creating a BSet for an enumerated set from the belonging AST node and the belonging template.
     */
     public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
-        typeGenerator.addImport(node.getSetDeclarationNode().getType());
+        importGenerator.addImport(node.getSetDeclarationNode().getType());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
         setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
         List<String> enums = node.getElements().stream()
