@@ -47,6 +47,9 @@ return(identifier) ::= <<
 return <identifier>
 >>
 
+no_return() ::=<<
+>>
+
 set_declaration(identifier, enums) ::= <<
 __<identifier> = <set_enumeration(enums)>
 >>
@@ -90,7 +93,7 @@ parameter(type, identifier, isReturn) ::= <<
 <identifier>
 >>
 
-assignment(identifier, typeCast, val) ::= <<
+assignment(identifier, isPrivate, typeCast, val) ::= <<
 <identifier> = <val>
 >>
 
@@ -171,7 +174,7 @@ number(number, useBigInteger) ::= <<
 BInteger(<number>)
 >>
 
-operation_call_with_assignment(var, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
 <var> = <operation_call_without_assignment(machine, function, args, this)>
 >>
 

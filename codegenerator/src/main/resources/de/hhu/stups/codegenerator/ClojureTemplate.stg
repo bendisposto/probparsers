@@ -4,75 +4,63 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 
 
 machine(imports, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
-<imports; separator="\n">
-import de.hhu.stups.btypes.BUtils;
+(ns <machine>
+    <imports; separator="\n">
+    (:import de.hhu.stups.btypes.BUtils))
 
-public class <machine> {
+<enums; separator="\n\n">
 
-    <constants; separator="\n">
+(defn -create_<machine> []
+    [[] #{:initialized false
+        <values; separator=" ">
+        <includes; separator=" ">
+        <declarations; separator=" ">
+        <sets; separator=" ">
+            }])
 
-    <values>
+<initialization>
 
-    <includes; separator="\n">
-
-    <enums; separator="\n\n">
-
-    <sets; separator="\n">
-
-    <declarations; separator="\n">
-
-    private boolean initialized = false;
-
-    <initialization>
-
-    <operations; separator="\n\n">
+<operations; separator="\n\n">
 
 
-    <addition>
-
-}
-
+<addition>
 >>
 
 initialization(machine, body, machines) ::= <<
-public void initialize() {
-    if(initialized) {
-        throw new RuntimeException("Machine is already initialized");
-    }
+(defn -initialize []
+    (if initialized
+        (throw (RuntimeException. "Machine is already initialized")))
     <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
-    initialized = true;
-}
+    (assoc-in state [:initialized] true) nil)
 >>
 
 include_initialization(machine) ::= <<
-<machine>.initialize();
+(initialize <machine>)
 >>
 
 operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
-public <returnType> <operationName>(<parameters; separator=", ">) {
-    if(!initialized) {
-        throw new RuntimeException("Machine was not initialized");
-    }
-    <locals; separator="\n">
-    <body>
-    <return>
-}
+(defn -<operationName> [<parameters; separator=" ">]
+    (if (not initialized)
+        (throw (RuntimeException. "Machine is already initialized")))
+    (let [locals #{<locals; separator=" ">}]
+        <body> <return>))
 >>
 
 return(identifier) ::= <<
-return <identifier>;
+(get-in locals :<identifier>)
 >>
 
 no_return() ::=<<
+nil
 >>
 
 set_declaration(identifier, enums) ::= <<
-private BSet <identifier> = <set_enumeration(enums)>;
+:<identifier> <set_enumeration(enums)>
 >>
 
 set_enumeration(enums) ::= <<
-new BSet(<enums; separator=", ">)
+(de.hhu.stups.btypes.BSet. <enums; separator=" ">)
 >>
 
 enum_call(class, identifier) ::= <<
@@ -94,55 +82,52 @@ public enum <name> implements BObject {
 >>
 
 bool() ::= <<
-BUtils.BOOL
+(de.hhu.stups.BUtils/BOOL)
 >>
 
 include_declaration(type, identifier) ::= <<
-private <declaration(type, identifier)> = new <type>();
+:<declaration(type, identifier)> (<type>.)
 >>
 
 global_declaration(type, identifier) ::= <<
-private <declaration(type, identifier)>;
+:<declaration(type, identifier)> nil
 >>
 
 local_declaration(type, identifier) ::= <<
-<declaration(type, identifier)> = null;
+:<declaration(type, identifier)> nil
 >>
 
 constant(type, identifier, val) ::= <<
-private static final <type> <identifier>;
 >>
 
 values(assignments) ::= <<
-static {
-    <assignments; separator="\n">
-}
+<assignments; separator="\n">
 >>
 
 declaration(type, identifier) ::= <<
-<type> <identifier>
+<identifier>
 >>
 
 parameter(type, identifier, isReturn) ::= <<
-<type> <identifier>
+<identifier>
 >>
 
 parallel(loads, others, stores) ::=<<
-<loads; separator="\n">
-<others; separator="\n">
-<stores; separator="\n">
+(let [locals #{<locals; separator=" ">}]
+    <others; separator="\n">
+    <stores; separator="\n">)
 >>
 
 parallel_load(type, identifier, typeCast) ::= <<
-<type> _ld_<identifier> = <typeCast> <identifier>;
+_ld_<identifier> <identifier>
 >>
 
 parallel_store(identifier, isPrivate, typeCast, val) ::= <<
-<identifier> = <typeCast> <val>;
+(assoc-in <if(isPrivate)>state<else>locals<endif> [:<identifier>] <val>)
 >>
 
 assignment(identifier, isPrivate, typeCast, val) ::= <<
-<identifier> = <typeCast> <val>;
+(assoc-in <if(isPrivate)>state<else>locals<endif> [:<identifier>] <val>)
 >>
 
 assignments(assignments) ::= <<
@@ -150,112 +135,97 @@ assignments(assignments) ::= <<
 >>
 
 nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
-<identifier> = <typeCast> <set>.nondeterminism();
+(assoc-in <if(isPrivate)>state<else>locals<endif> [:<identifier>] (nondeterminism set))
 >>
 
 void() ::= <<
-void
 >>
 
 type(type, cast) ::= <<
-<if(cast)>(<type>)<else><type><endif>
 >>
 
 import_type(type) ::= <<
-import de.hhu.stups.btypes.<type>;
+(:import de.hhu.stups.btypes.<type>)
 >>
 
 
 interval(arg1, arg2) ::= <<
-BSet.range(<arg1>,<arg2>)
+(de.hhu.stups.btypes.BSet.range. <arg1> <arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-new BCouple(<arg1>, <arg2>)
+(de.hhu.stups.btypes.BCouple. <arg1> <arg2>)
 >>
 
 
 binary(arg1,operator,arg2) ::= <<
-<arg1>.<operator>(<arg2>)
+(<operator> <arg1> <arg2>)
 >>
 
 unary(operator, obj, args) ::= <<
-<obj>.<operator>(<args; separator=", ">)
+(<operator> <obj> <args; separator=" ">)
 >>
 
 select(predicate, then) ::= <<
-if((<predicate>).booleanValue()) {
-    <then>
-} else {
-    throw new RuntimeException("Invocation of the operation is not possible");
-}
+(if (booleanValue <predicate>)
+    (do <then>)
+    (throw (RuntimeException. "Invocation of the operation is not possible")))
 >>
 
 if(predicate, then, else1) ::= <<
-if((<predicate>).booleanValue()) {
-    <then>
-} <else1; separator=" ">
+(if (booleanValue <predicate>)
+    (do <then>)
+    <else1; separator=" ">)
 >>
 
 elseif(predicate, then) ::= <<
-else if((<predicate>).booleanValue()) {
-    <then>
-}
+(if (booleanValue <predicate>)
+    (do <then>))
 >>
 
 else(then) ::= <<
-else {
-    <then>
-}
+(do <then>)
 >>
 
 choice(len, then, choice1) ::= <<
-int index = (int) Math.floor(Math.random() * <len>);
-if(index == 0) {
-    <then>
-} <choice1; separator=" ">
+(let [index Math.floor(Math.random() * <len>)]
+    (if (= index 0)
+        (do <then>)
+        <choice1; separator=" ">))
 >>
 
-
 choice1(counter, then) ::= <<
-else if(index == <counter>) {
-    <then>
-}
+(if (= index <counter>)
+    (do <then>))
 >>
 
 choice2(then) ::= <<
-else {
-    <then>
-}
+(do <then>)
 >>
 
 any(type, identifier, set, body, index) ::= <<
-for(int _<index>_i = 0; _<index>_i \< <set>.size(); _<index>_i++) {
-    <type> <identifier> = (<type>) <set>.toArray()[_<index>_i];
-    <body>
-}
+(for [_<index>_i (range (inc (size <set>)))]
+    (assoc-in locals [:<identifier>] (nth <set> _<index>_i))
+    (do <body>))
 >>
 
 any_body(predicate, body) ::= <<
-if(<predicate>.booleanValue()) {
-    <body>
-    break;
-}
+(if (booleanValue <predicate>)
+    (do <body>))
 >>
 
 while(predicate, then) ::= <<
-while((<predicate>).booleanValue()) {
-    <then>
-}
+(while (booleanValue <predicate>)
+    (do <then>))
 >>
 
 var(locals, body) ::=<<
-<locals; separator="\n">
-<body>
+(let [locals #{<locals; separator=" ">}]
+    <body>)
 >>
 
 boolean_val(val) ::= <<
-<if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
+<if(val)>(de.hhu.stups.btypes.BBoolean. true)<else>(de.hhu.stups.btypes.BBoolean. false)<endif>
 >>
 
 identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
@@ -263,14 +233,14 @@ identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 >>
 
 number(number, useBigInteger) ::= <<
-<if(useBigInteger)>new BBigInteger("<number>")<else>new BInteger(<number>)<endif>
+<if(useBigInteger)>(de.hhu.stups.btypes.BBigInteger. "<number>")<else>(de.hhu.stups.btypes.BInteger. <number>)<endif>
 >>
 
 operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
-<var> = <operation_call_without_assignment(machine, function, args, this)>
+(assoc-in <if(isPrivate)>state<else>locals<endif>  [:<var>] <operation_call_without_assignment(machine, function, args, this)>)
 >>
 
 operation_call_without_assignment(machine, function, args, this) ::= <<
-<if(this)>this.<else>this.<machine>.<endif><function>(<args; separator=",">);
+(<if(this)><else><machine>/<endif><function> <args; separator=" ">)
 >>
 

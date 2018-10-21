@@ -62,6 +62,9 @@ void <operationName>(<parameters; separator=", "><returnParameters : {par |, <pa
 return(identifier) ::= <<
 >>
 
+no_return() ::=<<
+>>
+
 set_declaration(identifier, enums) ::= <<
 >>
 
@@ -101,7 +104,7 @@ parameter(type, identifier, isReturn) ::= <<
 <if(isReturn)><type> *<identifier><else><type> <identifier><endif>
 >>
 
-assignment(identifier, typeCast, val) ::= <<
+assignment(identifier, isPrivate, typeCast, val) ::= <<
 <identifier> = <val>;
 >>
 
@@ -189,7 +192,7 @@ number(number, useBigInteger) ::= <<
 create_integer(<number>)
 >>
 
-operation_call_with_assignment(var, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
 <function>(<args; separator=",">, &<var>);
 >>
 

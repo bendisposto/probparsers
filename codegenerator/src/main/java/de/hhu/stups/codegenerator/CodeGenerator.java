@@ -43,6 +43,8 @@ public class CodeGenerator {
 			mode = GeneratorMode.PY;
 		} else if("c".equals(languageOption)) {
 			mode = GeneratorMode.C;
+		} else if("clojure".equals(languageOption)) {
+			mode = GeneratorMode.CLJ;
 		} else {
 			System.err.println("Wrong argument for language");
 			return;

@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static de.hhu.stups.codegenerator.GeneratorMode.C;
+import static de.hhu.stups.codegenerator.GeneratorMode.CLJ;
 import static de.hhu.stups.codegenerator.GeneratorMode.CPP;
 import static de.hhu.stups.codegenerator.GeneratorMode.JAVA;
 import static de.hhu.stups.codegenerator.GeneratorMode.PY;
@@ -76,6 +77,9 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	private static final STGroup PYTHON_GROUP = new STGroupFile(
 			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/PythonTemplate.stg").getFile());
 
+	private static final STGroup CLJ_GROUP = new STGroupFile(
+			MachineGenerator.class.getClassLoader().getResource("de/hhu/stups/codegenerator/ClojureTemplate.stg").getFile());
+
 	private static final Map<GeneratorMode, STGroup> TEMPLATE_MAP = new HashMap<>();
 
 	static {
@@ -83,6 +87,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		TEMPLATE_MAP.put(C, C_GROUP);
 		TEMPLATE_MAP.put(CPP, CPP_GROUP);
 		TEMPLATE_MAP.put(PY, PYTHON_GROUP);
+		TEMPLATE_MAP.put(CLJ, CLJ_GROUP);
 	}
 
 	private final TypeGenerator typeGenerator;
@@ -655,6 +660,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String generateAssignment(ExprNode lhs, ExprNode rhs) {
 		ST substitution = currentGroup.getInstanceOf("assignment");
 		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
+		substitution.add("isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
 		String typeCast = typeGenerator.generate(rhs.getType(), true);
 		substitution.add("typeCast", typeCast);
 		substitution.add("val", visitExprNode(rhs, null));
@@ -740,6 +746,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		ST substitution = currentGroup.getInstanceOf("parallel_store");
 		identifierGenerator.setLhsInParallel(true);
 		substitution.add("identifier", visitIdentifierExprNode((IdentifierExprNode) lhs, null));
+		substitution.add("isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
 		identifierGenerator.setLhsInParallel(false);
 		String typeCast = typeGenerator.generate(rhs.getType(), true);
 		substitution.add("typeCast", typeCast);
@@ -771,6 +778,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String generateNondeterminism(IdentifierExprNode lhs, ExprNode rhs) {
 		ST substitution = currentGroup.getInstanceOf("nondeterminism");
 		substitution.add("identifier", visitIdentifierExprNode(lhs, null));
+		substitution.add("isPrivate", nameHandler.getGlobals().contains(lhs.getName()));
 		String typeCast = typeGenerator.generate(lhs.getType(), true);
 		substitution.add("typeCast", typeCast);
 		substitution.add("set", visitExprNode(rhs, null));
@@ -835,6 +843,7 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 		if(variables.size() > 0) {
 			functionCall = currentGroup.getInstanceOf("operation_call_with_assignment");
 			functionCall.add("var", variables.get(0));
+			functionCall.add("isPrivate", nameHandler.getGlobals().contains(variables.get(0)));
 		} else {
 			functionCall = currentGroup.getInstanceOf("operation_call_without_assignment");
 		}

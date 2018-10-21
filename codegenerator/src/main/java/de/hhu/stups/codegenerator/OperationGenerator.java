@@ -55,6 +55,7 @@ public class OperationGenerator {
         } else if(node.getOutputParams().size() == 0) {
             operation.add("isTyped", false);
             operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
+            operation.add("return", group.getInstanceOf("no_return").render());
         }
         operation.add("operationName", nameHandler.handle(node.getName()));
         operation.add("parameters", generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));

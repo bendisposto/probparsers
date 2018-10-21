@@ -75,6 +75,9 @@ return(identifier) ::= <<
 return <identifier>;
 >>
 
+no_return() ::=<<
+>>
+
 set_declaration(identifier, enums) ::= <<
 #define <identifier> <set_enumeration(enums)>
 >>
@@ -155,11 +158,11 @@ parallel_load(type, identifier, typeCast) ::= <<
 <type>* _ld_<identifier> = (<typeCast>*) <identifier>;
 >>
 
-parallel_store(identifier, typeCast, val) ::= <<
+parallel_store(identifier, isPrivate, typeCast, val) ::= <<
 <identifier> = (<typeCast>*) <val>;
 >>
 
-assignment(identifier, typeCast, val) ::= <<
+assignment(identifier, isPrivate, typeCast, val) ::= <<
 <identifier> = (<typeCast>*) <val>;
 >>
 
@@ -167,7 +170,7 @@ assignments(assignments) ::= <<
 <assignments; separator="\n">
 >>
 
-nondeterminism(identifier, typeCast, set) ::= <<
+nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
 <identifier> = (<typeCast>*) <set>->nondeterminism();
 >>
 
@@ -284,7 +287,7 @@ number(number, useBigInteger) ::= <<
 (new BInteger(<number>))
 >>
 
-operation_call_with_assignment(var, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
 <function>(<args; separator=",">, <var>);
 >>
 
