@@ -161,9 +161,9 @@ class BSet : public BObject {
 
         BSet<T> intersect(const BSet& set) {
             immer::set<T,Hash, HashEqual> result = this->set;
-            for (typename immer::set<T,Hash, HashEqual>::const_iterator it = set.set.begin(); it != set.set.end(); ++it) {
+            for (typename immer::set<T,Hash, HashEqual>::const_iterator it = this->set.begin(); it != this->set.end(); ++it) {
                 T obj = *it;
-                if(this->set.count(obj) == 0) {
+                if(set.set.count(obj) == 0) {
                     result = result.erase(obj);
                 }
             }
