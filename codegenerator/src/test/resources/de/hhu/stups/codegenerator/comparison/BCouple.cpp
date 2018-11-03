@@ -10,30 +10,32 @@ using namespace std;
 class BCouple : public BObject {
 
 	private:
-	    BObject* lhs;
-	    BObject* rhs;
+	    BObject lhs;
+	    BObject rhs;
 
 	public:
 
-        BCouple(BObject* lhs, BObject* rhs) {
-            this->lhs = lhs;
-            this->rhs = rhs;
+        BCouple(BObject l, BObject r) {
+            lhs = l;
+            rhs = r;
         }
 
-        BObject* getFirst() {
+        BCouple(){}
+
+        BObject getFirst() {
             return lhs;
         }
 
-        BObject* getSecond() {
+        BObject getSecond() {
             return rhs;
         }
 
-        BBoolean* operator ==(BCouple* o) {
-            return new BBoolean(*lhs == *(o->lhs) && *rhs == *(o->rhs));
+        BBoolean operator ==(BCouple o) {
+            return lhs == o.lhs && rhs == o.rhs;
         }
 
-        BBoolean* operator !=(BCouple* o) {
-            return new BBoolean(*lhs != *(o->lhs) || *rhs != *(o->rhs));
+        BBoolean operator !=(BCouple o) {
+            return lhs != o.lhs || rhs != o.rhs;
         }
 
         int hashCode() const {

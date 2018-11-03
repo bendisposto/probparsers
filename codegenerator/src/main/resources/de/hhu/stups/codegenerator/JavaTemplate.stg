@@ -67,11 +67,11 @@ return <identifier>;
 no_return() ::=<<
 >>
 
-set_declaration(identifier, enums) ::= <<
+set_declaration(identifier, type, enums) ::= <<
 private BSet <identifier> = <set_enumeration(enums)>;
 >>
 
-set_enumeration(enums) ::= <<
+set_enumeration(type, enums) ::= <<
 new BSet(<enums; separator=", ">)
 >>
 
@@ -159,6 +159,10 @@ void
 
 type(type, cast) ::= <<
 <if(cast)>(<type>)<else><type><endif>
+>>
+
+set_type(type, cast) ::=<<
+<if(cast)>(BSet\<<type> >)<else>BSet\<<type> ><endif>
 >>
 
 import_type(type) ::= <<

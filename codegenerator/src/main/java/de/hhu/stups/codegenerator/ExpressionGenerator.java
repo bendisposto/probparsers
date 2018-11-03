@@ -7,6 +7,8 @@ import de.prob.parser.ast.nodes.expression.ExpressionOperatorNode;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.expression.NumberNode;
 import de.prob.parser.ast.nodes.predicate.CastPredicateExpressionNode;
+import de.prob.parser.ast.types.BType;
+import de.prob.parser.ast.types.SetType;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -62,13 +64,15 @@ public class ExpressionGenerator {
 
     private final IdentifierGenerator identifierGenerator;
 
+    private final TypeGenerator typeGenerator;
+
     private SubstitutionGenerator substitutionGenerator;
 
     private OperatorGenerator operatorGenerator;
 
     public ExpressionGenerator(final STGroup currentGroup, final MachineGenerator machineGenerator, boolean useBigInteger, final NameHandler nameHandler,
                                final ImportGenerator importGenerator, final DeclarationGenerator declarationGenerator,
-                               final IdentifierGenerator identifierGenerator) {
+                               final IdentifierGenerator identifierGenerator, final TypeGenerator typeGenerator) {
         this.currentGroup = currentGroup;
         this.machineGenerator = machineGenerator;
         this.useBigInteger = useBigInteger;
@@ -76,6 +80,7 @@ public class ExpressionGenerator {
         this.importGenerator = importGenerator;
         this.declarationGenerator = declarationGenerator;
         this.identifierGenerator = identifierGenerator;
+        this.typeGenerator = typeGenerator;
     }
 
     /*
@@ -152,7 +157,7 @@ public class ExpressionGenerator {
         } else if(EXPRESSION_BOOLEANS.contains(operator)) {
             return generateBoolean(operator);
         } else if(node.getOperator() == SET_ENUMERATION){
-            return generateSetEnumeration(expressionList);
+            return generateSetEnumeration(node.getType(), expressionList);
         } else if(node.getOperator() == INTERVAL) {
             return generateInterval(expressionList);
         } else if(node.getOperator() == COUPLE) {
@@ -260,8 +265,10 @@ public class ExpressionGenerator {
     /*
     * This function generates code for set enumerations with the given arguments.
     */
-    private String generateSetEnumeration(List<String> expressions) {
-        return currentGroup.getInstanceOf("set_enumeration").add("enums", expressions).render();
+    private String generateSetEnumeration(BType type, List<String> expressions) {
+        return currentGroup.getInstanceOf("set_enumeration")
+                .add("type", typeGenerator.generate(((SetType) type).getSubType(), false))
+                .add("enums", expressions).render();
     }
 
     /*

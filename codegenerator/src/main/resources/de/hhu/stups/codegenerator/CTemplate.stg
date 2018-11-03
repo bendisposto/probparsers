@@ -65,13 +65,13 @@ return(identifier) ::= <<
 no_return() ::=<<
 >>
 
-set_declaration(identifier, enums) ::= <<
+set_declaration(identifier, type, enums) ::= <<
 >>
 
 set_enum_declaration(name,enums) ::= <<
 >>
 
-set_enumeration(enums) ::= <<
+set_enumeration(type, enums) ::= <<
 >>
 
 enum_call(class, identifier) ::= <<
@@ -117,6 +117,10 @@ void() ::= <<
 
 type(type, cast) ::= <<
 <if(!cast)><type><endif>
+>>
+
+set_type(type, cast) ::=<<
+<if(!cast)>BSet<endif>
 >>
 
 

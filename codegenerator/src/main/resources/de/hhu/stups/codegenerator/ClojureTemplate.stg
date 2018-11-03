@@ -55,11 +55,11 @@ no_return() ::=<<
 nil
 >>
 
-set_declaration(identifier, enums) ::= <<
+set_declaration(identifier, type, enums) ::= <<
 :<identifier> <set_enumeration(enums)>
 >>
 
-set_enumeration(enums) ::= <<
+set_enumeration(type, enums) ::= <<
 (de.hhu.stups.btypes.BSet. <enums; separator=" ">)
 >>
 
@@ -142,6 +142,9 @@ void() ::= <<
 >>
 
 type(type, cast) ::= <<
+>>
+
+set_type(type, cast) ::=<<
 >>
 
 import_type(type) ::= <<

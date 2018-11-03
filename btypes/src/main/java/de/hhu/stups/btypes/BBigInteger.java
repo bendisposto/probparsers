@@ -159,7 +159,7 @@ public class BBigInteger extends BNumber {
 		return new BBigInteger((java.lang.Number) MODULO.invoke(this.value, other.value));
 	}
 
-	@Override
+	/*@Override
 	public BNumber or(BNumber o) {
 		return null;
 	}
@@ -172,7 +172,7 @@ public class BBigInteger extends BNumber {
 	@Override
 	public BNumber xor(BNumber o) {
 		return null;
-	}
+	}*/
 
 	@Override
 	public BNumber next() {

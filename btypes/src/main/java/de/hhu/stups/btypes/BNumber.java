@@ -38,11 +38,11 @@ public abstract class BNumber extends java.lang.Number implements Comparable<BNu
 
 	public abstract BNumber modulo(BNumber o);
 
-	public abstract BNumber or(BNumber o);
+	/*public abstract BNumber or(BNumber o);
 
 	public abstract BNumber and(BNumber o);
 
-	public abstract BNumber xor(BNumber o);
+	public abstract BNumber xor(BNumber o);*/
 
 	public abstract BNumber next();
 

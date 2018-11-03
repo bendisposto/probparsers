@@ -32,7 +32,9 @@ public class TypeGenerator {
         } else if(type instanceof BoolType) {
             return template.add("type", "BBoolean").add("cast", cast).render();
         } else if(type instanceof SetType) {
-            return template.add("type", "BSet").add("cast", cast).render();
+            return group.getInstanceOf("set_type")
+                    .add("type", generate(((SetType) type).getSubType(), false))
+                    .add("cast", cast).render();
         } else if(type instanceof EnumeratedSetElementType) {
             return template.add("type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.MACHINES)).add("cast", cast).render();
         } else if(type instanceof CoupleType) {

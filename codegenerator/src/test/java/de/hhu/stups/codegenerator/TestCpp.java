@@ -40,7 +40,7 @@ public class TestCpp {
 		cppFilePaths.forEach(path -> {
 			try {
 				Process process = Runtime.getRuntime()
-                        .exec("g++ -c " + path.toFile().getAbsoluteFile().toString());
+                        .exec("g++ -std=c++14 -c " + path.toFile().getAbsoluteFile().toString());
 				writeInputToSystem(process.getErrorStream());
 				writeInputToOutput(process.getErrorStream(), process.getOutputStream());
 				process.waitFor();

@@ -8,6 +8,7 @@ return, short, signed, sizeof, static, static_cast, volatile, struct, switch, te
 machine(imports, includedMachines, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<iostream>
 #include \<string>
+#include "BUtils.cpp"
 <imports; separator="\n">
 <includedMachines; separator="\n">
 
@@ -57,11 +58,11 @@ void initialize() {
 >>
 
 include_initialization(machine) ::= <<
-<machine>->initialize();
+<machine>.initialize();
 >>
 
 operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
-<if(isTyped)><returnType>*<else><returnType><endif> <operationName>(<parameters; separator=", ">) {
+<returnType> <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw runtime_error("Machine was not initialized");
     }
@@ -78,16 +79,16 @@ return <identifier>;
 no_return() ::=<<
 >>
 
-set_declaration(identifier, enums) ::= <<
-#define <identifier> <set_enumeration(enums)>
+set_declaration(identifier, type, enums) ::= <<
+#define <identifier> <set_enumeration(type, enums)>
 >>
 
-set_enumeration(enums) ::= <<
-(new BSet((BObject* []){<enums; separator=", ">}))
+set_enumeration(type, enums) ::= <<
+(BSet\<<type> >((<type>[]){<enums; separator=", ">}))
 >>
 
 enum_call(class, identifier) ::= <<
-(new <class>(<class>::<identifier>))
+(<class>(<class>::<identifier>))
 >>
 
 set_enum_declaration(name,enums) ::= <<
@@ -100,16 +101,26 @@ class <name> : public BObject {
 
         <name>_type value;
 
+        <name>(){}
+
         <name>(<name>_type type) {
             this->value = type;
         }
 
-        BBoolean* equal(<name>* o) {
-            return new BBoolean(this->value == o->value);
+        BBoolean equal(const <name>& o) {
+            return value == o.value;
         }
 
-        BBoolean* unequal(<name>* o) {
-            return new BBoolean(this->value != o->value);
+        BBoolean unequal(const <name>& o) {
+            return value != o.value;
+        }
+
+        friend bool operator ==(const <name>& p1, const <name>& p2) {
+            return p1.value == p2.value;
+        }
+
+        friend bool operator !=(const <name>& p1, const <name>& p2) {
+            return p1.value != p2.value;
         }
 
         int hashCode() const {
@@ -119,11 +130,11 @@ class <name> : public BObject {
 >>
 
 bool() ::= <<
-(BSet::BOOLEANS())
+(BOOL)
 >>
 
 include_declaration(type, identifier) ::= <<
-<declaration(type, identifier)> = new class <type>();
+<declaration(type, identifier)>;
 >>
 
 global_declaration(type, identifier) ::= <<
@@ -135,7 +146,7 @@ local_declaration(type, identifier) ::= <<
 >>
 
 declaration(type, identifier) ::= <<
-<type>* <identifier>
+<type> <identifier>
 >>
 
 constant(type, identifier, val) ::= <<
@@ -145,7 +156,7 @@ values(assignments) ::= <<
 >>
 
 parameter(type, identifier, isReturn) ::= <<
-<type>* <identifier>
+<type> <identifier>
 >>
 
 parallel(loads, others, stores) ::=<<
@@ -155,15 +166,15 @@ parallel(loads, others, stores) ::=<<
 >>
 
 parallel_load(type, identifier, typeCast) ::= <<
-<type>* _ld_<identifier> = (<typeCast>*) <identifier>;
+<type> _ld_<identifier> = static_cast\<<typeCast> >(<identifier>);
 >>
 
 parallel_store(identifier, isPrivate, typeCast, val) ::= <<
-<identifier> = (<typeCast>*) <val>;
+<identifier> = static_cast\<<typeCast> >(<val>);
 >>
 
 assignment(identifier, isPrivate, typeCast, val) ::= <<
-<identifier> = (<typeCast>*) <val>;
+<identifier> = static_cast\<<typeCast> >(<val>);
 >>
 
 assignments(assignments) ::= <<
@@ -171,7 +182,7 @@ assignments(assignments) ::= <<
 >>
 
 nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
-<identifier> = (<typeCast>*) <set>->nondeterminism();
+<identifier> = static_cast\<<typeCast> >(<set>.nondeterminism());
 >>
 
 void() ::= <<
@@ -182,30 +193,34 @@ type(type, cast) ::= <<
 <type>
 >>
 
+set_type(type, cast) ::=<<
+BSet\<<type> >
+>>
+
 import_type(type) ::= <<
 #include "<type>.cpp"
 >>
 
 
 interval(arg1, arg2) ::= <<
-BSet::range(<arg1>,<arg2>)
+(BSet\<BInteger>::range(<arg1>,<arg2>))
 >>
 
 couple_create(arg1, arg2) ::= <<
-(new BCouple(<arg1>, <arg2>))
+(BCouple(<arg1>, <arg2>))
 >>
 
 
 binary(arg1,operator,arg2) ::= <<
-<arg1>-><operator>(<arg2>)
+<arg1>.<operator>(<arg2>)
 >>
 
 unary(operator, obj, args) ::= <<
-<obj>-><operator>(<args; separator=", ">)
+<obj>.<operator>(<args; separator=", ">)
 >>
 
 select(predicate, then) ::= <<
-if((<predicate>)->booleanValue()) {
+if((<predicate>).booleanValue()) {
     <then>
 } else {
     throw runtime_error("Invocation of the operation is not possible");
@@ -213,13 +228,13 @@ if((<predicate>)->booleanValue()) {
 >>
 
 if(predicate, then, else1) ::= <<
-if((<predicate>)->booleanValue()) {
+if((<predicate>).booleanValue()) {
     <then>
 } <else1; separator=" ">
 >>
 
 elseif(predicate, then) ::= <<
-else if((<predicate>)->booleanValue()) {
+else if((<predicate>).booleanValue()) {
     <then>
 }
 >>
@@ -251,21 +266,21 @@ else {
 >>
 
 any(type, identifier, set, body, index) ::= <<
-for(int _<index>_i = 0; _<index>_i \< <set>->size(); _<index>_i++) {
-    <type>* <identifier> = (<type>*) *(std::next(<set>->begin(), _<index>_i));
+for(int _<index>_i = 0; _<index>_i \< (<set>.size()); _<index>_i++) {
+    <type> <identifier> = static_cast\<<type> >(*(std::next(<set>.begin(), _<index>_i)));
     <body>
 }
 >>
 
 any_body(predicate, body) ::= <<
-if(<predicate>->booleanValue()) {
+if(<predicate>.booleanValue()) {
     <body>
     break;
 }
 >>
 
 while(predicate, then) ::= <<
-while((<predicate>)->booleanValue()) {
+while((<predicate>).booleanValue()) {
     <then>
 }
 >>
@@ -276,7 +291,7 @@ var(locals, body) ::=<<
 >>
 
 boolean_val(val) ::= <<
-<if(val)>(new BBoolean(true))<else>(new BBoolean(false))<endif>
+<if(val)>(BBoolean(true))<else>(BBoolean(false))<endif>
 >>
 
 identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
@@ -284,7 +299,7 @@ identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
 >>
 
 number(number, useBigInteger) ::= <<
-(new BInteger(<number>))
+(BInteger(<number>))
 >>
 
 operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
@@ -292,5 +307,5 @@ operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::
 >>
 
 operation_call_without_assignment(machine, function, args, this) ::= <<
-<if(this)>this-><else>this-><machine>-><endif><function>(<args; separator=",">);
+<if(this)>this-><else>this-><machine>.<endif><function>(<args; separator=",">);
 >>

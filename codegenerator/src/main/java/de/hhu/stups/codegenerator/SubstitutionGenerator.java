@@ -173,26 +173,17 @@ public class SubstitutionGenerator {
     public String generateAnyParameters(List<DeclarationNode> parameters, DeclarationNode parameter,
                                         PredicateNode predicateNode, SubstitutionNode substitutionNode, int index, int length) {
         ST substitution = currentGroup.getInstanceOf("any");
+        substitution.add("type", typeGenerator.generate(parameter.getType(), false));
+        substitution.add("identifier", nameHandler.handle(parameter.getName()));
+        if(!(parameter.getType() instanceof BoolType)) {
+            substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+        } else {
+            substitution.add("set", expressionGenerator.generateBooleans());
+        }
+        substitution.add("index", index);
         if(index == length - 1) {
-            substitution.add("type", typeGenerator.generate(parameter.getType(), false));
-            substitution.add("identifier", nameHandler.handle(parameter.getName()));
-            if(!(parameter.getType() instanceof BoolType)) {
-                substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
-            } else {
-
-                substitution.add("set", expressionGenerator.generateBooleans());
-            }
-            substitution.add("index", index);
             substitution.add("body", generateAnyBody(predicateNode, substitutionNode));
         } else {
-            substitution.add("type", typeGenerator.generate(parameter.getType(), false));
-            substitution.add("identifier", nameHandler.handle(parameter.getName()));
-            if(!(parameter.getType() instanceof BoolType)) {
-                substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
-            } else {
-                substitution.add("set", expressionGenerator.generateBooleans());
-            }
-            substitution.add("index", index);
             substitution.add("body", generateAnyParameters(parameters, parameters.get(index + 1), predicateNode, substitutionNode, index + 1, length));
         }
         return substitution.render();

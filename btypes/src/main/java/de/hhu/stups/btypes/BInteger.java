@@ -130,7 +130,7 @@ public class BInteger extends BNumber {
         return new BInteger(this.value % other.value);
     }
 
-    @Override
+    /*@Override
     public BNumber or(BNumber o) {
         return null;
     }
@@ -143,7 +143,7 @@ public class BInteger extends BNumber {
     @Override
     public BNumber xor(BNumber o) {
         return null;
-    }
+    }*/
 
     @Override
     public BNumber next() {

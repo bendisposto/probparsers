@@ -176,6 +176,7 @@ public class DeclarationGenerator {
         importGenerator.addImport(node.getSetDeclarationNode().getType());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
         setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+        setDeclaration.add("type", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         List<String> enums = node.getElements().stream()
                 .map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
                 .collect(Collectors.toList());
