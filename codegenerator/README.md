@@ -1,6 +1,11 @@
 This is the code generator **B2Program** for generating code from B to other programming languages.
 
-A subset of Java is supported for now.
+A subset of B is supported for Java and C++ now.
+
+The implementation of the types in B uses persistent set from:
+https://github.com/arximboldi/immer
+
+The library must first be installed before the generated C++ code can be used.
 
 The generated code in Python is not supported as the implementations of needed B Types are missed.
 
