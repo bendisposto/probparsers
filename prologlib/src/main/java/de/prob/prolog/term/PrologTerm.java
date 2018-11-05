@@ -98,7 +98,7 @@ public abstract class PrologTerm implements Serializable {
 		if (term.isAtom())
 			return term.getFunctor();
 		else
-			throw new IllegalArgumentException("Expected an atomic prolog term, but was " + term.toString());
+			throw new IllegalArgumentException("Expected an atomic Prolog term, but was " + term.toString());
 	}
 
 	public static List<String> atomicStrings(final Iterable<PrologTerm> terms) {

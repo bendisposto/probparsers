@@ -148,8 +148,14 @@ public class BLexer extends Lexer {
 			throw new LexerException("#! only allowed in first line of the file");
 		}
 
-		if (token instanceof TStringLiteral || token instanceof TMultilineStringContent) {
-			handleStringToken(token);
+		if (token instanceof TStringLiteral) {
+			// for normal string literals we also get the surrounding quotes " as part of the token
+			// these need to be removed and the escaping codes dealt with
+			handleStringToken(token,true);
+		}
+		if (token instanceof TMultilineStringContent) {
+			// multiline strings do not have surrounding "
+				handleStringToken(token,false);
 		}
 
 		if (token instanceof THexLiteral) {
@@ -167,19 +173,23 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void handleStringToken(Token token) {
+	private void handleStringToken(Token token, Boolean surrounding_quotes) {
 		// google for howto-unescape-a-java-string-literal-in-java
-		// quickfix: we do nothing just strip off the "
-		String literal = token.getText();
-
+		// quickfix: we do nothing just strip off the " if surrounding_quotes is true,
+		// we now also convert escape codes using stringReplacements
 		/*
 		 * Note, the text of a TMultilineString token does not start with '''
 		 * because the ''' are contained in the TMultilineStringStartEnd token
 		 */
-		if (literal.startsWith("\"")) {
-			/// "foo"
+		String literal = token.getText();
+		// System.out.println("string token literal = " + literal + " length = " + literal.length());
+		
+		if (surrounding_quotes && literal.startsWith("\"")) {
+			/// we assume literal also ends with \", if string contains less than two characters we get an exception !
+			/// "foo" gets translated to foo
 			literal = literal.substring(1, literal.length() - 1);
 		}
+		// System.out.println("string token literal after = " + literal + " length = " + literal.length());
 
 		boolean backslashFound = false;
 		StringBuilder sb = new StringBuilder();
