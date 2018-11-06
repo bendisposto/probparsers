@@ -6,8 +6,7 @@ rename, rewind, setbuf, setvbuf, tmpfile, tmpnam, fprintf, printf, sprintf, vfpr
 sscanf, fgetc, fgets, fputc, fputs, getc, getchar, gets, putc, putchar, puts, ungetc, perror, NULL, BUFSIZ, EOF, FOPEN_MAX, FILENAME_MAX
 L_tmpnam, SEEK_CUR, SEEK_END, SEEK_SET, TMP_MAX, stderr, stdin, stdout, size_t, fpos_t, FILE,, wchar_t, div_t, ldiv_t, EXIT_FAILURE, EXIT_SUCCESS,
 RAND_MAX, MB_CUR_MAX, atof, atoi, atol, strtod, strtol, strtoul, calloc, free, malloc, realloc, abort, exit, getenv, system, bsearch, qsort, abs,
-div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb, create_atom, main, create_boolean, boolean_value, or, and, xor, create_integer,
-int_value, long_value, float_value, double_value, plus, minus, multiply, divide, modulo, next, previous, negative, positive, BInteger, BBoolean
+div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb
 >>
 
 
@@ -65,18 +64,45 @@ return(identifier) ::= <<
 no_return() ::=<<
 >>
 
-set_declaration(identifier, type, enums) ::= <<
+set_declaration(identifier, type, enums, isEmpty) ::= <<
+static BSet <identifier> = <set_enumeration(type, enums, isEmpty)>;
 >>
 
 set_enum_declaration(name,enums) ::= <<
+enum <name>_type {
+    <enums; separator=", \n">;
+};
+
+typedef struct <name> {
+    struct BObject;
+    <name>_type value;
+} <name>;
+
+<name> create_<name>(<name>_type value) {
+    <name> result = {value};
+    return result;
+}
+
+BBoolean equal(<name> o1, <name> o2) {
+    return create_boolean(o1.value == o2.value);
+}
+
+BBoolean unequal(<name> o1, <name> o2) {
+    return create_boolean(o1.value != o2.value);
+}
 >>
 
-set_enumeration(type, enums) ::= <<
+set_enumeration(type, enums, isEmpty) ::= <<
+create_bset((<type>[]){<enums; separator=", ">})
 >>
 
 enum_call(class, identifier) ::= <<
+create_<class>(identifier);
 >>
 
+bool() ::= <<
+BOOL
+>>
 
 include_declaration(type, identifier) ::= <<
 >>
@@ -104,12 +130,30 @@ parameter(type, identifier, isReturn) ::= <<
 <if(isReturn)><type> *<identifier><else><type> <identifier><endif>
 >>
 
+parallel(loads, others, stores) ::=<<
+<loads; separator="\n">
+<others; separator="\n">
+<stores; separator="\n">
+>>
+
+parallel_load(type, identifier, typeCast) ::= <<
+<type> _ld_<identifier> = <typeCast> <identifier>;
+>>
+
+parallel_store(identifier, isPrivate, typeCast, val) ::= <<
+<identifier> = <typeCast> <val>;
+>>
+
 assignment(identifier, isPrivate, typeCast, val) ::= <<
 <identifier> = <val>;
 >>
 
 assignments(assignments) ::= <<
 <assignments; separator="\n">
+>>
+
+nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
+<identifier> = <typeCast> nondeterminism(<set>);
 >>
 
 void() ::= <<
@@ -129,12 +173,11 @@ import_type(type) ::= <<
 >>
 
 interval(arg1, arg2) ::= <<
+range(<arg1>, <arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
-
 >>
-
 
 
 binary(arg1,operator,arg2) ::= <<
@@ -146,7 +189,7 @@ unary(operator, obj, args) ::= <<
 >>
 
 select(predicate, then) ::= <<
-if((<predicate>).booleanValue()) {
+if(booleanValue(<predicate>)) {
     <then>
 } else {
     fprintf(stderr, "Invocation of the operation is not possible\n");
@@ -155,13 +198,13 @@ if((<predicate>).booleanValue()) {
 >>
 
 if(predicate, then, else1) ::= <<
-if((<predicate>).booleanValue()) {
+if(booleanValue(<predicate>)) {
     <then>
 } <else1; separator=" ">
 >>
 
 elseif(predicate, then) ::= <<
-else if((<predicate>).booleanValue()) {
+else if(booleanValue(<predicate>)) {
     <then>
 }
 >>
@@ -172,8 +215,42 @@ else {
 }
 >>
 
+choice(len, then, choice1) ::= <<
+int index = (int) rand() % <len>;
+if(index == 0) {
+    <then>
+} <choice1; separator=" ">
+>>
+
+
+choice1(counter, then) ::= <<
+else if(index == <counter>) {
+    <then>
+}
+>>
+
+choice2(then) ::= <<
+else {
+    <then>
+}
+>>
+
+any(type, identifier, set, body, index) ::= <<
+for(int _<index>_i = 0; _<index>_i \< (size(<set>)); _<index>_i++) {
+    <type> <identifier> = *(((<type>**) pblSetToArray(<set>.set))[_<index>_i]);
+    <body>
+}
+>>
+
+any_body(predicate, body) ::= <<
+if(booleanValue(<predicate>)) {
+    <body>
+    break;
+}
+>>
+
 while(predicate, then) ::= <<
-while((<predicate>).booleanValue()) {
+while(booleanValue(<predicate>)) {
     <then>
 }
 >>

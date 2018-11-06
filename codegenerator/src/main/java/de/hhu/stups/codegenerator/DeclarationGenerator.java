@@ -181,6 +181,7 @@ public class DeclarationGenerator {
                 .map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
                 .collect(Collectors.toList());
         setDeclaration.add("enums", enums);
+        setDeclaration.add("isEmpty", enums.isEmpty());
         return setDeclaration.render();
     }
 

@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include "BBoolean.c"
 
+#ifndef BINTEGER_H
+#define BINTEGER_H
+
 typedef struct BInteger {
+    struct BObject;
 	int value;
 } BInteger;
 
@@ -94,4 +98,4 @@ BInteger positive(BInteger i) {
     return create_integer(i.value);
 }
 
-
+#endif

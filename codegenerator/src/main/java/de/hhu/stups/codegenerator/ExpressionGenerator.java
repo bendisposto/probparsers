@@ -268,7 +268,8 @@ public class ExpressionGenerator {
     private String generateSetEnumeration(BType type, List<String> expressions) {
         return currentGroup.getInstanceOf("set_enumeration")
                 .add("type", typeGenerator.generate(((SetType) type).getSubType(), false))
-                .add("enums", expressions).render();
+                .add("enums", expressions)
+                .add("isEmpty", expressions.isEmpty()).render();
     }
 
     /*

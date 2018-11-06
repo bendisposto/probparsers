@@ -55,11 +55,11 @@ no_return() ::=<<
 nil
 >>
 
-set_declaration(identifier, type, enums) ::= <<
+set_declaration(identifier, type, enums, isEmpty) ::= <<
 :<identifier> <set_enumeration(enums)>
 >>
 
-set_enumeration(type, enums) ::= <<
+set_enumeration(type, enums, isEmpty) ::= <<
 (de.hhu.stups.btypes.BSet. <enums; separator=" ">)
 >>
 

@@ -42,7 +42,7 @@ class BSet : public BObject {
             this->set = elements;
         }
 
-        BSet<T>(T elements[]) {
+        BSet<T>(vector<T> elements) {
             int length = sizeof(T)/sizeof(T*);
             this->set = immer::set<T,Hash, HashEqual>();
             for(int i = 0; i < length; i++) {

@@ -67,11 +67,11 @@ return <identifier>;
 no_return() ::=<<
 >>
 
-set_declaration(identifier, type, enums) ::= <<
-private BSet <identifier> = <set_enumeration(enums)>;
+set_declaration(identifier, type, enums, isEmpty) ::= <<
+private BSet <identifier> = <set_enumeration(type, enums, isEmpty)>;
 >>
 
-set_enumeration(type, enums) ::= <<
+set_enumeration(type, enums, isEmpty) ::= <<
 new BSet(<enums; separator=", ">)
 >>
 
