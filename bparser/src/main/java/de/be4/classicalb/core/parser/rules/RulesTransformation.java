@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
@@ -301,7 +302,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(NodeCloner.cloneNode(compOperation.getActivationPredicate()),
-					createStringExpression(COMPUTATION_NOT_EXECUTED), Collections.emptyList(),
+					createStringExpression(COMPUTATION_NOT_EXECUTED), new LinkedList<PExpression>(),
 					createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
@@ -417,7 +418,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(NodeCloner.cloneNode(currentRule.getActivationPredicate()),
-					createStringExpression(RULE_NOT_CHECKED), Collections.emptyList(),
+					createStringExpression(RULE_NOT_CHECKED), new LinkedList<PExpression>(),
 					createStringExpression(RULE_DISABLED));
 
 		} else {
