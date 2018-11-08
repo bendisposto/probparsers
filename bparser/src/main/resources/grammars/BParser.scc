@@ -912,11 +912,14 @@ expression_atomic {-> expression} =
   {nat1_set} nat1 {-> New expression.nat1_set()} |
   {int_set} int {-> New expression.int_set()} |
   {bool_set} bool {-> New expression.bool_set()} |
-  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top else [else_expr]:expression_top end
-    {-> New expression.if_then_else(condition.predicate, then_expr.expression, else_expr.expression)} |
+  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top [elsifs]:if_elseif_expression* else [else_expr]:expression_top end
+    {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
   {let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
   {string_set} string {-> New expression.string_set()} ;
+
+if_elseif_expression  {-> expression} =
+	elsif [condition]:predicate_top then [expr]:expression_top {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
 
 expression_list {-> expression*} =
   {single} [expression]:expression_top {-> [expression.expression]} |
@@ -1284,7 +1287,8 @@ expression =
   {mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
   {div} [left]:expression [right]:expression |
   {floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
-  {if_then_else} [condition]:predicate [then]:expression [else]:expression |
+  {if_elsif_expr}  [condition]:predicate [then]:expression |
+  {if_then_else} [condition]:predicate [then]:expression [elsifs]:expression* [else]:expression |
   {let_expression} [identifiers]:expression* [assignment]:predicate [expr]:expression |
   {modulo} [left]:expression [right]:expression |
   {power_of} [left]:expression [right]:expression |
