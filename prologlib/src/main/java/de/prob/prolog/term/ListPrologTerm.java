@@ -31,7 +31,13 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	private final int end;
 
 	public ListPrologTerm(final PrologTerm... elements) {
-		super(".", elements);
+		// Note: this super call is not entirely correct, it does not match the structure of Prolog lists properly.
+		// A Prolog list is either the atom [] or a term of the form .(Head, Tail), where Tail is another list.
+		// However, we incorrectly use the list's elements as the arguments of the list term, which creates a "flat" list rather than a linked list.
+		// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
+		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
+		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
+		super(elements.length == 0 ? "[]" : ".", elements);
 		if (elements == null)
 			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = elements;
@@ -44,12 +50,18 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public ListPrologTerm(int start, int end, ListPrologTerm org) {
-		super(".");
+		super(org.getFunctor());
 		this.start = start;
 		this.end = end;
 		if (org == null)
 			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = org.elements;
+	}
+
+	@Override
+	public boolean isAtom() {
+		// The empty list is an atom in Prolog.
+		return this.isEmpty();
 	}
 
 	@Override
