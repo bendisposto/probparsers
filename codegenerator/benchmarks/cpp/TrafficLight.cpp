@@ -55,7 +55,7 @@ class TrafficLight {
     private:
 
 
-        #define _colors (BSet<colors >((vector<colors>){(colors(colors::red)), (colors(colors::redyellow)), (colors(colors::yellow)), (colors(colors::green))}))
+        #define _colors (BSet<colors >((colors(colors::red)), (colors(colors::redyellow)), (colors(colors::yellow)), (colors(colors::green))))
 
         colors tl_cars;
         colors tl_peds;

@@ -79,12 +79,12 @@ return <identifier>;
 no_return() ::=<<
 >>
 
-set_declaration(identifier, type, enums, isEmpty) ::= <<
-#define <identifier> <set_enumeration(type, enums, isEmpty)>
+set_declaration(identifier, type, enums) ::= <<
+#define <identifier> <set_enumeration(type, enums)>
 >>
 
-set_enumeration(type, enums, isEmpty) ::= <<
-(BSet\<<type> >(<if(isEmpty)><else>(vector\<<type>\>){<enums; separator=", ">}<endif>))
+set_enumeration(type, enums) ::= <<
+(BSet\<<type> >(<enums; separator=", ">))
 >>
 
 enum_call(class, identifier) ::= <<

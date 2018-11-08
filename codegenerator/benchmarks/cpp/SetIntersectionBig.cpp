@@ -33,7 +33,7 @@ class SetIntersectionBig {
                 throw runtime_error("Machine is already initialized");
             }
             counter = static_cast<BInteger >((BInteger(0)));
-            set1 = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))).complement((BSet<BInteger >((vector<BInteger>){(BInteger(24999))}))));
+            set1 = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))).complement((BSet<BInteger >((BInteger(24999))))));
             set2 = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(3000)))));
             initialized = true;
         }

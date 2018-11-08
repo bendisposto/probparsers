@@ -33,7 +33,7 @@ class SetCardSmall {
                 throw runtime_error("Machine is already initialized");
             }
             counter = static_cast<BInteger >((BInteger(0)));
-            set = static_cast<BSet<BInteger > >((BSet<BInteger >((vector<BInteger>){(BInteger(1))})));
+            set = static_cast<BSet<BInteger > >((BSet<BInteger >((BInteger(1)))));
             result = static_cast<BInteger >((BInteger(0)));
             initialized = true;
         }

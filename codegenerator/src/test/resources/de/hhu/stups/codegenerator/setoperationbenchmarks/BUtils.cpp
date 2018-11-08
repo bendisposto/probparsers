@@ -6,6 +6,6 @@ using namespace std;
 #ifndef BUTILS_H
 #define BUTILS_H
 
-#define BOOL (BSet<BBoolean>((vector<BBoolean>) {BBoolean(true), BBoolean(false)}))
+#define BOOL (BSet<BBoolean>(BBoolean(true), BBoolean(false)))
 
 #endif

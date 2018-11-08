@@ -50,7 +50,7 @@ class Sieve {
                     n = static_cast<BInteger >(cur);
                     set = static_cast<BSet<BInteger > >((BSet<BInteger >()));
                     while((n.lessEqual(limit.divide(cur))).booleanValue()) {
-                        set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >((vector<BInteger>){cur.multiply(n)}))));
+                        set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >({cur.multiply(n)}))));
                         n = static_cast<BInteger >(n.plus((BInteger(1))));
                     }
                     numbers = static_cast<BSet<BInteger > >(numbers.complement(set));

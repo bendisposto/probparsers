@@ -50,11 +50,11 @@ return <identifier>
 no_return() ::=<<
 >>
 
-set_declaration(identifier, type, enums, isEmpty) ::= <<
-__<identifier> = <set_enumeration(type, enums, isEmpty)>
+set_declaration(identifier, type, enums) ::= <<
+__<identifier> = <set_enumeration(type, enums)>
 >>
 
-set_enumeration(type, enums, isEmpty) ::= <<
+set_enumeration(type, enums) ::= <<
 BSet(<enums; separator=", ">)
 >>
 

@@ -42,12 +42,21 @@ class BSet : public BObject {
             this->set = elements;
         }
 
-        BSet<T>(vector<T> elements) {
-            int length = sizeof(T)/sizeof(T*);
-            this->set = immer::set<T,Hash, HashEqual>();
-            for(int i = 0; i < length; i++) {
-                this->set = this->set.insert(elements[i]);
-            }
+        template<typename... Args>
+        BSet<T>(Args... args) {
+          this->set = var(args...);
+        }
+
+        immer::set<T,Hash, HashEqual> var() {
+          immer::set<T,Hash, HashEqual> result;
+          return result;
+        }
+
+        template<typename R, typename... Args>
+        immer::set<R,Hash, HashEqual> var(R first, Args... args) {
+          immer::set<R, Hash, HashEqual> result = var(args...);
+          result = result.insert(first);
+          return result;
         }
 
         BSet<T>() {
@@ -89,7 +98,7 @@ class BSet : public BObject {
 		return sb.toString();
 	}*/
 
-        int size() {
+        int size() const {
             return set.size();
         }
 
@@ -174,27 +183,36 @@ class BSet : public BObject {
             immer::set<T,Hash, HashEqual> result = this->set;
             for (typename immer::set<T,Hash, HashEqual>::const_iterator it = set.set.begin(); it != set.set.end(); ++it) {
                 T obj = *it;
-                if(this->set.count(obj) > 0) {
-                    result = result.erase(obj);
-                }
+                result = result.erase(obj);
             }
             return BSet(result);
         }
 
         BSet<T> _union(const BSet& set) {
-            immer::set<T,Hash, HashEqual> result = this->set;
-            for (typename immer::set<T,Hash, HashEqual>::const_iterator it = set.set.begin(); it != set.set.end(); ++it) {
-                result = result.insert(*it);
+            if(this->size() > set.size()) {
+                immer::set<T,Hash, HashEqual> result = this->set;
+                for (typename immer::set<T,Hash, HashEqual>::const_iterator it = set.set.begin(); it != set.set.end(); ++it) {
+                    T obj = *it;
+                    result = result.insert(obj);
+                }
+                 return BSet(result);
+            } else {
+                immer::set<T,Hash, HashEqual> result = set.set;
+                for (typename immer::set<T,Hash, HashEqual>::const_iterator it = this->set.begin(); it != this->set.end(); ++it) {
+                    T obj = *it;
+                    result = result.insert(obj);
+                }
+                 return BSet(result);
             }
-            return BSet(result);
         }
 
         static BSet<BInteger> range(const BInteger& a, const BInteger& b) {
             immer::set<BInteger, Hash, HashEqual> result;
-            for(BInteger i = a; i.lessEqual(b).booleanValue(); i = i.next()) {
-                result = result.insert(BInteger(i));
+            int end = b.intValue();
+            for(int i = a.intValue(); i < end; ++i) {
+                result = result.insert(i);
             }
-            return BSet<BInteger>(result);
+            return BSet(result);
         }
 
         BSet<BObject> relationImage(const BSet<BObject>& domain) {

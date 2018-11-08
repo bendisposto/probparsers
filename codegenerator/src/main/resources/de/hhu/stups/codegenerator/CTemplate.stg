@@ -64,8 +64,8 @@ return(identifier) ::= <<
 no_return() ::=<<
 >>
 
-set_declaration(identifier, type, enums, isEmpty) ::= <<
-static BSet <identifier> = <set_enumeration(type, enums, isEmpty)>;
+set_declaration(identifier, type, enums) ::= <<
+static BSet <identifier> = <set_enumeration(type, enums)>;
 >>
 
 set_enum_declaration(name,enums) ::= <<
@@ -92,7 +92,7 @@ BBoolean unequal(<name> o1, <name> o2) {
 }
 >>
 
-set_enumeration(type, enums, isEmpty) ::= <<
+set_enumeration(type, enums) ::= <<
 create_bset((<type>[]){<enums; separator=", ">})
 >>
 

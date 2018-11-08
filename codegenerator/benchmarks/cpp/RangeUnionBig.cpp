@@ -41,7 +41,7 @@ class RangeUnionBig {
                 throw runtime_error("Machine was not initialized");
             }
             while((counter.less((BInteger(35000)))).booleanValue()) {
-                set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >((vector<BInteger>){counter}))));
+                set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >(counter))));
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
         }

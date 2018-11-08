@@ -32,7 +32,7 @@ class SetOperation {
                 throw runtime_error("Machine is already initialized");
             }
             counter = static_cast<BInteger >((BInteger(0)));
-            set = static_cast<BSet<BInteger > >((BSet<BInteger >((vector<BInteger>){(BInteger(1)), (BInteger(2)), (BInteger(3))})));
+            set = static_cast<BSet<BInteger > >((BSet<BInteger >((BInteger(1)), (BInteger(2)), (BInteger(3)))));
             initialized = true;
         }
 
@@ -41,7 +41,7 @@ class SetOperation {
                 throw runtime_error("Machine was not initialized");
             }
             while((counter.less((BInteger(500000)))).booleanValue()) {
-                set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >((vector<BInteger>){(BInteger(1))}))));
+                set = static_cast<BSet<BInteger > >(set._union((BSet<BInteger >((BInteger(1))))));
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
         }
