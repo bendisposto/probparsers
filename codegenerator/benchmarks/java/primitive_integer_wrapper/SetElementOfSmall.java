@@ -36,7 +36,7 @@ public class SetElementOfSmall {
         long start = System.nanoTime();
         exec.simulate();
         long end = System.nanoTime();
-        System.out.println("Execution: " + (end - start));
+        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
     }
 
 }

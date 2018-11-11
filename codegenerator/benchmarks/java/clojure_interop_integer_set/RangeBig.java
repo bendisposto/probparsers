@@ -29,7 +29,6 @@ public class RangeBig {
             set = (BSet) BSet.range(new BInteger("1"),new BInteger("25000"));
             counter = (BInteger) counter.plus(new BInteger("1"));
         }
-	//System.out.println(set.card());
     }
 
     public static void main(String[] args) {
@@ -38,7 +37,7 @@ public class RangeBig {
         long start = System.nanoTime();
         exec.simulate();
         long end = System.nanoTime();
-        System.out.println("Execution: " + (end - start));
+        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
     }
 
 }

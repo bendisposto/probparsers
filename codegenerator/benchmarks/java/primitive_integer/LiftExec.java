@@ -15,7 +15,7 @@ public class LiftExec {
             throw new RuntimeException("Machine is already initialized");
         }
         Lift.initialize();
-        counter = (BInteger) new BInteger(0);
+        counter = (BInteger) new BInteger("0");
         initialized = true;
     }
 
@@ -23,20 +23,20 @@ public class LiftExec {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger(3000))).booleanValue()) {
+        while((counter.less(new BInteger("3000"))).booleanValue()) {
             BInteger i = null;
-            i = (BInteger) new BInteger(0);
-            while((i.less(new BInteger(100))).booleanValue()) {
+            i = (BInteger) new BInteger("0");
+            while((i.less(new BInteger("100"))).booleanValue()) {
                 this.Lift.inc();
-                i = (BInteger) i.plus(new BInteger(1));
+                i = (BInteger) i.plus(new BInteger("1"));
             }
             BInteger _i = null;
-            _i = (BInteger) new BInteger(0);
-            while((_i.less(new BInteger(100))).booleanValue()) {
+            _i = (BInteger) new BInteger("0");
+            while((_i.less(new BInteger("100"))).booleanValue()) {
                 this.Lift.dec();
-                _i = (BInteger) _i.plus(new BInteger(1));
+                _i = (BInteger) _i.plus(new BInteger("1"));
             }
-            counter = (BInteger) counter.plus(new BInteger(1));
+            counter = (BInteger) counter.plus(new BInteger("1"));
         }
     }
 
@@ -46,7 +46,7 @@ public class LiftExec {
         long start = System.nanoTime();
         exec.simulate();
         long end = System.nanoTime();
-        System.out.println("Execution: " + (end - start));
+        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
     }
 
 }

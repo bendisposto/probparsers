@@ -1,3 +1,5 @@
+make: plus minus multiply divide modulo negative and or implies equivalent less lessequal greater greaterequal equal unequal setunionsmall setintersectionsmall setcomplementsmall setcardsmall setelementofsmall setunionbig setintersectionbig setcomplementbig setcardbig setelementofbig rangesmall rangeunionsmall rangeintersectionsmall rangecomplementsmall rangecardsmall rangeelementofsmall rangebig rangeunionbig rangeintersectionbig rangecomplementbig rangecardbig rangeelementofbig
+
 lift: LiftExec.class
 	java -cp :btypes.jar LiftExec
 traffic: TrafficLightExec.class

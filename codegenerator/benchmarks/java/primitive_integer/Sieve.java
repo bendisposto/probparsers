@@ -1,6 +1,5 @@
 import de.hhu.stups.btypes.BSet;
 import de.hhu.stups.btypes.BInteger;
-import de.hhu.stups.btypes.BBoolean;
 
 public class Sieve {
 
@@ -17,11 +16,10 @@ public class Sieve {
         if(initialized) {
             throw new RuntimeException("Machine is already initialized");
         }
-        numbers = (BSet) BSet.range(new BInteger(2),new BInteger(10000));
-        cur = (BInteger) new BInteger(2);
-        limit = (BInteger) new BInteger(10000);
+        numbers = (BSet) BSet.range(new BInteger("2"),new BInteger("10000"));
+        cur = (BInteger) new BInteger("2");
+        limit = (BInteger) new BInteger("10000");
         initialized = true;
-    	//System.out.println(numbers.card());
     }
 
     public BInteger ComputeNumberOfPrimes() {
@@ -29,19 +27,19 @@ public class Sieve {
             throw new RuntimeException("Machine was not initialized");
         }
         BInteger res = null;
-        while((cur.greater(new BInteger(1)).and(cur.multiply(cur).lessEqual(limit))).booleanValue()) {
-            if((numbers.elementOf(cur)).booleanValue()) {
+	while((cur.greater(new BInteger("1")).and(cur.multiply(cur).lessEqual(limit))).booleanValue()) {
+	    if((numbers.elementOf(cur)).booleanValue()) {
                 BInteger n = null;
                 BSet set = null;
                 n = (BInteger) cur;
                 set = (BSet) new BSet();
                 while((n.lessEqual(limit.divide(cur))).booleanValue()) {
                     set = (BSet) set.union(new BSet(cur.multiply(n)));
-                    n = (BInteger) n.plus(new BInteger(1));
+                    n = (BInteger) n.plus(new BInteger("1"));
                 }
                 numbers = (BSet) numbers.complement(set);
             } 
-            cur = (BInteger) cur.plus(new BInteger(1));
+            cur = (BInteger) cur.plus(new BInteger("1"));
         }
         res = (BInteger) numbers.card();
         return res;
@@ -51,21 +49,8 @@ public class Sieve {
         Sieve sieve = new Sieve();
         sieve.initialize();
         long start = System.nanoTime();
-        System.out.println(sieve.ComputeNumberOfPrimes());
+        System.out.println(sieve.ComputeNumberOfPrimes().intValue());
         long end = System.nanoTime();
-        System.out.println("Execution: " + (end - start));
-	start = System.nanoTime();
-	for(int i = 0; i < 5000000; i++) {
-		boolean x = 1 < 2;
-	}
-	
-	end = System.nanoTime();
-	System.out.println((end-start));
-	start = System.nanoTime();
-	for(int i = 0; i < 5000000; i++) {
-		BBoolean abc = new BInteger(1).less(new BInteger(2));
-	}
-   	end = System.nanoTime();
-	System.out.println((end - start)); 
-   }
+        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
+    }
 }

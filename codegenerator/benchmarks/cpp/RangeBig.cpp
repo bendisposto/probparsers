@@ -44,6 +44,7 @@ class RangeBig {
                 set = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))));
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
+            printf("%d\n",set.size());
         }
 
 };

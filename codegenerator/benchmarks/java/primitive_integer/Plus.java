@@ -14,8 +14,8 @@ public class Plus {
         if(initialized) {
             throw new RuntimeException("Machine is already initialized");
         }
-        counter = (BInteger) new BInteger(0);
-        value = (BInteger) new BInteger(0);
+        counter = (BInteger) new BInteger("0");
+        value = (BInteger) new BInteger("0");
         initialized = true;
     }
 
@@ -23,9 +23,9 @@ public class Plus {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger(5000000))).booleanValue()) {
-            counter = (BInteger) counter.plus(new BInteger(1));
-            value = (BInteger) value.plus(new BInteger(1));
+        while((counter.less(new BInteger("5000000"))).booleanValue()) {
+            counter = (BInteger) counter.plus(new BInteger("1"));
+            value = (BInteger) value.plus(new BInteger("1"));
         }
     }
 
@@ -35,7 +35,7 @@ public class Plus {
         long start = System.nanoTime();
         exec.simulate();
         long end = System.nanoTime();
-        System.out.println("Execution: " + (end - start));
+        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
     }
 
 }
