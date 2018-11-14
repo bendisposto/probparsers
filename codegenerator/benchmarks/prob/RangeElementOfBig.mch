@@ -1,14 +1,14 @@
 MACHINE RangeElementOfBig
 
-VARIABLES  counter, set
+VARIABLES  counter
 
-INVARIANT  counter : 0..10000 & set : POW(INTEGER)
+INVARIANT  counter : 0..10000
 
-INITIALISATION counter := 0; set := 1..25000
+INITIALISATION counter := 0
 
 OPERATIONS
 
-	simulate = WHILE counter < 10000 & 25000:set DO
+	simulate = WHILE counter < 10000 & 25000:(1..25000) DO
 	      counter := counter + 1
 		  INVARIANT 1 = 1
 		  VARIANT 10000 - counter

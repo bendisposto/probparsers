@@ -8,7 +8,6 @@ public class RangeCardSmall {
 
 
     private BInteger counter;
-    private BSet set;
     private BInteger result;
 
     private boolean initialized = false;
@@ -18,7 +17,6 @@ public class RangeCardSmall {
             throw new RuntimeException("Machine is already initialized");
         }
         counter = (BInteger) new BInteger(0);
-        set = (BSet) BSet.range(new BInteger(0),new BInteger(5));
         result = (BInteger) new BInteger(0);
         initialized = true;
     }
@@ -28,7 +26,7 @@ public class RangeCardSmall {
             throw new RuntimeException("Machine was not initialized");
         }
         while((counter.less(new BInteger(5000000))).booleanValue()) {
-            result = (BInteger) set.card();
+            result = (BInteger) BSet.range(new BInteger(0),new BInteger(5)).card();
             counter = (BInteger) counter.plus(new BInteger(1));
         }
     }

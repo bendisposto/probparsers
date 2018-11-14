@@ -16,7 +16,7 @@ public class SetUnionBig {
         if(initialized) {
             throw new RuntimeException("Machine is already initialized");
         }
-        counter = (BInteger) new BInteger(25001);
+        counter = (BInteger) new BInteger(0);
         set = (BSet) BSet.range(new BInteger(1),new BInteger(25000)).complement(new BSet(new BInteger(24999)));
         initialized = true;
     }
@@ -25,8 +25,8 @@ public class SetUnionBig {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger(35000))).booleanValue()) {
-            set = (BSet) set.union(new BSet(counter));
+        while((counter.less(new BInteger(10000))).booleanValue()) {
+            set = (BSet) set.union(BSet.range(new BInteger(1),new BInteger(3000)));
             counter = (BInteger) counter.plus(new BInteger(1));
         }
     }

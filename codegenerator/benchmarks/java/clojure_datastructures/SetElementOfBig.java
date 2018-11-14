@@ -8,7 +8,6 @@ public class SetElementOfBig {
 
 
     private BInteger counter;
-    private BSet set;
 
     private boolean initialized = false;
 
@@ -17,7 +16,6 @@ public class SetElementOfBig {
             throw new RuntimeException("Machine is already initialized");
         }
         counter = (BInteger) new BInteger("0");
-        set = (BSet) BSet.range(new BInteger("1"),new BInteger("25000")).complement(new BSet(new BInteger("24999")));
         initialized = true;
     }
 
@@ -25,7 +23,7 @@ public class SetElementOfBig {
         if(!initialized) {
             throw new RuntimeException("Machine was not initialized");
         }
-        while((counter.less(new BInteger("10000")).and(set.elementOf(new BInteger("25000")))).booleanValue()) {
+        while((counter.less(new BInteger("10000")).and(BSet.range(new BInteger("1"),new BInteger("25000")).complement(new BSet(new BInteger("24999"))).elementOf(new BInteger("25000")))).booleanValue()) {
             counter = (BInteger) counter.plus(new BInteger("1"));
         }
     }

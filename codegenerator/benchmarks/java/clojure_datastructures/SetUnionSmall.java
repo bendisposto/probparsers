@@ -26,7 +26,7 @@ public class SetUnionSmall {
             throw new RuntimeException("Machine was not initialized");
         }
         while((counter.less(new BInteger("5000000"))).booleanValue()) {
-            set = (BSet) set.union(new BSet());
+            set = (BSet) set.union(new BSet(new BInteger("2")));
             counter = (BInteger) counter.plus(new BInteger("1"));
         }
     }

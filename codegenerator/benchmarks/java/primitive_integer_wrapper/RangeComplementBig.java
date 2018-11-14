@@ -26,7 +26,7 @@ public class RangeComplementBig {
             throw new RuntimeException("Machine was not initialized");
         }
         while((counter.less(new BInteger(10000))).booleanValue()) {
-            set = (BSet) set.complement(new BSet());
+            set = (BSet) set.complement(BSet.range(new BInteger(1),new BInteger(3000)));
             counter = (BInteger) counter.plus(new BInteger(1));
         }
     }

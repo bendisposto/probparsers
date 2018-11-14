@@ -1,4 +1,4 @@
-make: plus minus multiply divide modulo negative and or implies equivalent less lessequal greater greaterequal equal unequal setunionsmall setintersectionsmall setcomplementsmall setcardsmall setelementofsmall setunionbig setintersectionbig setcomplementbig setcardbig setelementofbig rangesmall rangeunionsmall rangeintersectionsmall rangecomplementsmall rangecardsmall rangeelementofsmall rangebig rangeunionbig rangeintersectionbig rangecomplementbig rangecardbig rangeelementofbig
+make: plus minus multiply divide modulo negative and or implies equivalent less lessequal greater greaterequal equal unequal setunionsmall setintersectionsmall setcomplementsmall setcardsmall setelementofsmall setunionbig setintersectionbig setcomplementbig setcardbig setelementofbig setunionsmall2 setintersectionsmall2 setcomplementsmall2 setcardsmall2 setelementofsmall2 setunionbig2 setintersectionbig2 setcomplementbig2 setcardbig2 setelementofbig2 rangesmall rangeunionsmall rangeintersectionsmall rangecomplementsmall rangecardsmall rangeelementofsmall rangebig rangeunionbig rangeintersectionbig rangecomplementbig rangecardbig rangeelementofbig rangeunionsmall2 rangeintersectionsmall2 rangecomplementsmall2 rangecardsmall2 rangeelementofsmall2 rangeunionbig2 rangeintersectionbig2 rangecomplementbig2 rangecardbig2 rangeelementofbig2
 
 PROBCLI=./probcli.sh
 sieve:
@@ -61,14 +61,34 @@ setelementofsmall:
 	$(PROBCLI) SetElementOfSmall.mch -init -execute 1
 setintersectionbig:
 	$(PROBCLI) SetIntersectionBig.mch -init -execute 1
-setintersectionbig2:
-	$(PROBCLI) SetIntersectionBig2.mch -init -execute 1
+setintersectionbig3:
+	$(PROBCLI) SetIntersectionBig3.mch -init -execute 1
 setintersectionsmall:
 	$(PROBCLI) SetIntersectionSmall.mch -init -execute 1
 setunionbig:
 	$(PROBCLI) SetUnionBig.mch -init -execute 1
 setunionsmall:
 	$(PROBCLI) SetUnionSmall.mch -init -execute 1
+setcardbig2:
+	$(PROBCLI) SetCardBig2.mch -init -execute 1
+setcardsmall2:
+	$(PROBCLI) SetCardSmall2.mch -init -execute 1
+setcomplementbig2:
+	$(PROBCLI) SetComplementBig2.mch -init -execute 1
+setcomplementsmall2:
+	$(PROBCLI) SetComplementSmall2.mch -init -execute 1
+setelementofbig2:
+	$(PROBCLI) SetElementOfBig2.mch -init -execute 1
+setelementofsmall2:
+	$(PROBCLI) SetElementOfSmall2.mch -init -execute 1
+setintersectionbig2:
+	$(PROBCLI) SetIntersectionBig2.mch -init -execute 1
+setintersectionsmall2:
+	$(PROBCLI) SetIntersectionSmall2.mch -init -execute 1
+setunionbig2:
+	$(PROBCLI) SetUnionBig2.mch -init -execute 1
+setunionsmall2:
+	$(PROBCLI) SetUnionSmall2.mch -init -execute 1
 rangebig:
 	$(PROBCLI) RangeBig.mch -init -execute 1
 rangesmall:
@@ -93,6 +113,26 @@ rangeunionbig:
 	$(PROBCLI) RangeUnionBig.mch -init -execute 1
 rangeunionsmall:
 	$(PROBCLI) RangeUnionSmall.mch -init -execute 1
+rangecardbig2:
+	$(PROBCLI) RangeCardBig2.mch -init -execute 1
+rangecardsmall2:
+	$(PROBCLI) RangeCardSmall2.mch -init -execute 1
+rangecomplementbig2:
+	$(PROBCLI) RangeComplementBig2.mch -init -execute 1
+rangecomplementsmall2:
+	$(PROBCLI) RangeComplementSmall2.mch -init -execute 1
+rangeelementofbig2:
+	$(PROBCLI) RangeElementOfBig2.mch -init -execute 1
+rangeelementofsmall2:
+	$(PROBCLI) RangeElementOfSmall2.mch -init -execute 1
+rangeintersectionbig2:
+	$(PROBCLI) RangeIntersectionBig2.mch -init -execute 1
+rangeintersectionsmall2:
+	$(PROBCLI) RangeIntersectionSmall2.mch -init -execute 1
+rangeunionbig2:
+	$(PROBCLI) RangeUnionBig2.mch -init -execute 1
+rangeunionsmall2:
+	$(PROBCLI) RangeUnionSmall2.mch -init -execute 1
 
 clean:
 	rm *.prob
