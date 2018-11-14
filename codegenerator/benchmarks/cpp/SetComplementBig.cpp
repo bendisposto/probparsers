@@ -41,7 +41,7 @@ class SetComplementBig {
                 throw runtime_error("Machine was not initialized");
             }
             while((counter.less((BInteger(10000)))).booleanValue()) {
-                set = static_cast<BSet<BInteger > >(set.complement((BSet<BInteger >())));
+                set = static_cast<BSet<BInteger > >(set.complement((BSet<BInteger >((BSet<BInteger>::range((BInteger(1)),(BInteger(3000))))))));
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
         }

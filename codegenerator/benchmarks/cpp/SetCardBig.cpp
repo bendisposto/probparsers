@@ -19,7 +19,6 @@ class SetCardBig {
 
 
         BInteger counter;
-        BSet<BInteger > set;
         BInteger result;
 
         bool initialized = false;
@@ -33,7 +32,6 @@ class SetCardBig {
                 throw runtime_error("Machine is already initialized");
             }
             counter = static_cast<BInteger >((BInteger(0)));
-            set = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))).complement((BSet<BInteger >((BInteger(24999))))));
             result = static_cast<BInteger >((BInteger(0)));
             initialized = true;
         }
@@ -43,7 +41,7 @@ class SetCardBig {
                 throw runtime_error("Machine was not initialized");
             }
             while((counter.less((BInteger(10000)))).booleanValue()) {
-                result = static_cast<BInteger >(set.card());
+                result = static_cast<BInteger >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))).complement((BSet<BInteger >((BInteger(24999))))).card());
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
         }

@@ -19,8 +19,7 @@ class RangeIntersectionBig {
 
 
         BInteger counter;
-        BSet<BInteger > set1;
-        BSet<BInteger > set2;
+        BSet<BInteger > set;
 
         bool initialized = false;
 
@@ -33,8 +32,7 @@ class RangeIntersectionBig {
                 throw runtime_error("Machine is already initialized");
             }
             counter = static_cast<BInteger >((BInteger(0)));
-            set1 = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))));
-            set2 = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(3000)))));
+            set = static_cast<BSet<BInteger > >((BSet<BInteger>::range((BInteger(1)),(BInteger(25000)))));
             initialized = true;
         }
 
@@ -43,7 +41,7 @@ class RangeIntersectionBig {
                 throw runtime_error("Machine was not initialized");
             }
             while((counter.less((BInteger(10000)))).booleanValue()) {
-                set1 = static_cast<BSet<BInteger > >(set1.intersect(set2));
+                set = static_cast<BSet<BInteger > >(set.intersect((BSet<BInteger>::range((BInteger(1)),(BInteger(3000))))));
                 counter = static_cast<BInteger >(counter.plus((BInteger(1))));
             }
         }

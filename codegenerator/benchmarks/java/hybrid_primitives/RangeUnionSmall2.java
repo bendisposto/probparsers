@@ -2,7 +2,7 @@ import de.hhu.stups.btypes.BSet;
 import de.hhu.stups.btypes.BInteger;
 import de.hhu.stups.btypes.BBoolean;
 
-public class RangeUnionSmall {
+public class RangeUnionSmall2 {
 
 
 

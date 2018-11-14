@@ -2,7 +2,7 @@ import de.hhu.stups.btypes.BSet;
 import de.hhu.stups.btypes.BInteger;
 import de.hhu.stups.btypes.BBoolean;
 
-public class RangeComplementSmall {
+public class RangeComplementSmall2 {
 
 
 
@@ -19,7 +19,7 @@ public class RangeComplementSmall {
         }
         counter = (BInteger) new BInteger(0);
         set1 = (BSet) BSet.range(new BInteger(0),new BInteger(5));
-        set2 = (BSet) BSet.range(new BInteger(1),new BInteger(2))
+        set2 = (BSet) BSet.range(new BInteger(1),new BInteger(2));
         initialized = true;
     }
 
