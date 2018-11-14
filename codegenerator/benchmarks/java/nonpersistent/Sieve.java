@@ -49,8 +49,8 @@ public class Sieve {
         Sieve sieve = new Sieve();
         sieve.initialize();
         long start = System.nanoTime();
-        System.out.println(sieve.ComputeNumberOfPrimes().intValue());
+        sieve.ComputeNumberOfPrimes().intValue();
         long end = System.nanoTime();
-        System.out.println(exec.getClass().toString() + " Execution: " + (end - start));
+        System.out.println(sieve.getClass() + " Execution: " + (end - start));
     }
 }
