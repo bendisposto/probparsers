@@ -87,8 +87,8 @@ public class PredicateGenerator {
     */
     private String generateUnaryPredicate(PredicateOperatorNode.PredicateOperator operator, List<String> expressionList) {
         ST expression = generateUnary(operator);
-        expression.add("obj", expressionList.get(0));
-        expression.add("args", expressionList.subList(1, expressionList.size()));
+        TemplateHandler.add(expression, "obj", expressionList.get(0));
+        TemplateHandler.add(expression, "args", expressionList.subList(1, expressionList.size()));
         return expression.render();
     }
 
@@ -105,7 +105,7 @@ public class PredicateGenerator {
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
-        template.add("operator", nameHandler.handle(operatorName));
+        TemplateHandler.add(template, "operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -131,7 +131,7 @@ public class PredicateGenerator {
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
-        template.add("operator", nameHandler.handle(operatorName));
+        TemplateHandler.add(template, "operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -144,6 +144,21 @@ public class PredicateGenerator {
         switch(operator) {
             case ELEMENT_OF:
                 operatorName = "elementOf";
+                break;
+            case NOT_BELONGING:
+                operatorName = "notElementOf";
+                break;
+            case INCLUSION:
+                operatorName = "subset";
+                break;
+            case NON_INCLUSION:
+                operatorName = "notSubset";
+                break;
+            case STRICT_INCLUSION:
+                operatorName = "strictSubset";
+                break;
+            case STRICT_NON_INCLUSION:
+                operatorName = "strictNonSubset";
                 break;
             case EQUAL:
                 operatorName = "equal";
@@ -166,7 +181,7 @@ public class PredicateGenerator {
             default:
                 throw new RuntimeException("Given node is not implemented: " + operator);
         }
-        template.add("operator", nameHandler.handle(operatorName));
+        TemplateHandler.add(template, "operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -174,7 +189,9 @@ public class PredicateGenerator {
     * This function generates code for boolean constants as predicates.
     */
     private String generateBoolean(PredicateOperatorNode.PredicateOperator operator) {
-        return currentGroup.getInstanceOf("boolean_val").add("val", operator == PredicateOperatorNode.PredicateOperator.TRUE).render();
+        ST val = currentGroup.getInstanceOf("boolean_val");
+        TemplateHandler.add(val, "val", operator == PredicateOperatorNode.PredicateOperator.TRUE);
+        return val.render();
     }
 
     public void setOperatorGenerator(OperatorGenerator operatorGenerator) {

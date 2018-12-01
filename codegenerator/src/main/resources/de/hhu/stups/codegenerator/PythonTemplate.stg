@@ -2,7 +2,7 @@ keywords() ::= <<
 >>
 
 
-machine(imports, includedMachines, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, includes, enums, sets, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 
 class <machine>:
@@ -20,7 +20,7 @@ class <machine>:
     <addition>
 >>
 
-initialization(machine, body, machines) ::= <<
+initialization(body, machines) ::= <<
 def initialize(self):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ and self.__initialized):
         raise Exception("Machine is already initialized")
@@ -34,7 +34,10 @@ __<machine> = <machine>()
 __<machine>.__init__()
 >>
 
-operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
+method() ::= <<
+>>
+
+operation(operationName, parameters, locals, body, return) ::= <<
 def <operationName>(self<parameters : {par |, <par>}>):
     if('_' + type(self).__name__ + '__initialized' in self.__dict__ or not self.__initialized):
         raise Exception("Machine was not initialized")
@@ -54,7 +57,7 @@ set_declaration(identifier, type, enums) ::= <<
 __<identifier> = <set_enumeration(type, enums)>
 >>
 
-set_enumeration(type, enums) ::= <<
+set_enumeration(enums) ::= <<
 BSet(<enums; separator=", ">)
 >>
 
@@ -67,33 +70,33 @@ set_enum_declaration(name,enums) ::= <<
 >>
 
 include_declaration(type, identifier) ::= <<
-__<declaration(type, identifier)> = <type>()
+__<declaration(identifier)> = <type>()
 >>
 
-global_declaration(type, identifier) ::= <<
+global_declaration() ::= <<
 >>
 
-local_declaration(type, identifier) ::= <<
-<declaration(type, identifier)> = None
+local_declaration(identifier) ::= <<
+<declaration(identifier)> = None
 >>
 
-declaration(type, identifier) ::= <<
+declaration(identifier) ::= <<
 <identifier>
 >>
 
 
-constant(type, identifier, val) ::= <<
+constant() ::= <<
 >>
 
-values(assignments) ::= <<
+values() ::= <<
 >>
 
 
-parameter(type, identifier, isReturn) ::= <<
+parameter(identifier) ::= <<
 <identifier>
 >>
 
-assignment(identifier, isPrivate, typeCast, val) ::= <<
+assignment(identifier, val) ::= <<
 <identifier> = <val>
 >>
 
@@ -104,10 +107,10 @@ assignments(assignments) ::= <<
 void() ::= <<
 >>
 
-type(type, cast) ::= <<
+type() ::= <<
 >>
 
-set_type(type, cast) ::=<<
+set_type() ::=<<
 >>
 
 import_type(type) ::= <<
@@ -169,15 +172,15 @@ boolean_val(val) ::= <<
 <if(val)>BBoolean(true)<else>BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
+identifier(identifier, isPrivate) ::= <<
 <if(!isPrivate)><identifier><else>self.__<identifier><endif>
 >>
 
-number(number, useBigInteger) ::= <<
+number(number) ::= <<
 BInteger(<number>)
 >>
 
-operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, machine, function, args, this) ::= <<
 <var> = <operation_call_without_assignment(machine, function, args, this)>
 >>
 

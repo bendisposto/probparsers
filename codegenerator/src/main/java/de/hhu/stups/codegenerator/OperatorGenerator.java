@@ -50,11 +50,11 @@ public class OperatorGenerator {
                     throw new RuntimeException("Given operator was not implemented: " + op);
                 }
                 if(BINARY_SWAP.contains(op)) {
-                    template.add("arg1", e);
-                    template.add("arg2", a);
+                    TemplateHandler.add(template, "arg1", e);
+                    TemplateHandler.add(template, "arg2", a);
                 } else {
-                    template.add("arg1", a);
-                    template.add("arg2", e);
+                    TemplateHandler.add(template, "arg1", a);
+                    TemplateHandler.add(template, "arg2", e);
                 }
                 return template.render();
             });

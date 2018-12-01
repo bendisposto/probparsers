@@ -103,7 +103,7 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		addExprOperator(BParser.DOMAIN_RESTRICTION, ExpressionOperator.DOMAIN_RESTRICTION);
 		addExprOperator(BParser.DOMAIN_SUBSTRACTION, ExpressionOperator.DOMAIN_SUBTRACTION);
 		addExprOperator(BParser.RANGE_RESTRICTION, ExpressionOperator.RANGE_RESTRICTION);
-		addExprOperator(BParser.RANGE_SUBSTRATION, ExpressionOperator.RANGE_SUBTRATION);
+		addExprOperator(BParser.RANGE_SUBSTRATION, ExpressionOperator.RANGE_SUBTRACTION);
 		addExprOperator(BParser.TILDE, ExpressionOperator.INVERSE_RELATION);
 		addExprOperator(BParser.SET_RELATION, ExpressionOperator.SET_RELATION);
 
@@ -272,6 +272,14 @@ public class FormulaASTCreator extends BParserBaseVisitor<Node> {
 		list.add(arg);
 		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), list,
 				ExpressionOperator.RELATIONAL_IMAGE);
+	}
+
+	@Override
+	public Node visitReverseExpression(BParser.ReverseExpressionContext ctx) {
+		List<ExprNode> list = new ArrayList<>();
+		final ExprNode node = (ExprNode) ctx.expression().accept(this);
+		list.add(node);
+		return new ExpressionOperatorNode(Util.createSourceCodePosition(ctx), list, ExpressionOperator.INVERSE_RELATION);
 	}
 
 	@Override

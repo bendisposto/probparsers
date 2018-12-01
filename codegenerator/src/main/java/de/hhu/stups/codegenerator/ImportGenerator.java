@@ -37,16 +37,24 @@ public class ImportGenerator {
     public void addImport(BType type) {
         ST template = group.getInstanceOf("import_type");
         if (type instanceof IntegerType) {
-            imports.add(template.add("type", "BInteger").render());
+            TemplateHandler.add(template, "type", "BInteger");
+            imports.add(template.render());
         } else if (type instanceof BoolType) {
-            imports.add(template.add("type", "BBoolean").render());
+            TemplateHandler.add(template, "type", "BBoolean");
+            imports.add(template.render());
         } else if(type instanceof SetType) {
-            imports.add(template.add("type", "BSet").render());
+            TemplateHandler.add(template, "type", "BSet");
+            imports.add(template.render());
         } else if(type instanceof EnumeratedSetElementType) {
-            imports.add(group.getInstanceOf("import_type").add("type", "BObject").render());
-            imports.add(group.getInstanceOf("import_type").add("type", "BBoolean").render());
+            template = group.getInstanceOf("import_type");
+            TemplateHandler.add(template, "type", "BObject");
+            imports.add(template.render());
+            template = group.getInstanceOf("import_type");
+            TemplateHandler.add(template, "type", "BBoolean");
+            imports.add(template.render());
         } else if(type instanceof CoupleType) {
-            imports.add(template.add("type", "BCouple").render());
+            TemplateHandler.add(template, "type", "BCouple");
+            imports.add(template.render());
         }
     }
 
@@ -59,7 +67,7 @@ public class ImportGenerator {
     private String generateMachineImport(MachineReferenceNode reference) {
         ST imp = group.getInstanceOf("import_type");
         String machine = reference.getMachineName();
-        imp.add("type", nameHandler.handle(machine));
+        TemplateHandler.add(imp, "type", nameHandler.handle(machine));
         return imp.render();
     }
 

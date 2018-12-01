@@ -3,8 +3,8 @@ package de.hhu.stups.codegenerator;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,6 +22,16 @@ public class TestJava {
 
 	public static void writeInputToSystem(InputStream inputStream) throws IOException {
 		writeInputToOutput(inputStream, System.out);
+	}
+
+	private static String streamToString(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = inputStream.read(buffer)) != -1) {
+			result.write(buffer, 0, length);
+		}
+		return result.toString();
 	}
 
 	public static void writeInputToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
@@ -53,13 +63,15 @@ public class TestJava {
 		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));
 	}
 
-	public void testJava(String machine, String addition) throws Exception {
-		Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
-				.getResource("de/hhu/stups/codegenerator/" + machine + ".mch").toURI());
+	public void testJava(String machinePath, String machineName, String addition) throws Exception {
+		testJava(machinePath);
+		/*Path mchPath = Paths.get(CodeGenerator.class.getClassLoader()
+				.getResource("de/hhu/stups/codegenerator/" + machinePath + ".mch").toURI());
 		CodeGenerator codeGenerator = new CodeGenerator();
-		List<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, null);
-		Process compileProcess = Runtime.getRuntime()
-				.exec("javac -cp btypes_persistent.jar " + String.join(" ", javaFilePaths.stream()
+		List<Path> javaFilePaths = codeGenerator.generate(mchPath, GeneratorMode.JAVA, false,true, addition);
+		Runtime runtime = Runtime.getRuntime();
+		Process compileProcess = runtime.exec("javac -cp btypes_persistent.jar " +
+				String.join(" ", javaFilePaths.stream()
 						.map(path -> path.toFile().getAbsoluteFile().toString())
 						.collect(Collectors.toSet())));
 		compileProcess.waitFor();
@@ -67,40 +79,48 @@ public class TestJava {
 		writeInputToSystem(compileProcess.getErrorStream());
 		writeInputToOutput(compileProcess.getErrorStream(), compileProcess.getOutputStream());
 
-
 		Path mainPath = javaFilePaths.get(0);
 
-		Process executeProcess = Runtime.getRuntime()
-				.exec("java -cp :btypes_persistent.jar " + mainPath.toFile().getAbsoluteFile().toString().replace(".java", ""));
+		List<String> cmds = new ArrayList<>();
+		cmds.add("java");
+		cmds.add("-cp");
+		cmds.add(":btypes_persistent.jar");
+		cmds.add(machineName);
+
+		ProcessBuilder executeProcessBuilder = new ProcessBuilder().command(cmds).directory(mainPath.getParent().toFile());
+		Process executeProcess = executeProcessBuilder.start();
 		executeProcess.waitFor();
+		Path outPath = mainPath.toFile().getAbsoluteFile().toPath();
 
-		String outPath = mainPath.toFile().getAbsoluteFile().toString().replace(".java", ".out");
+		writeInputToSystem(executeProcess.getErrorStream());
+		//writeInputToOutput(executeProcess.getInputStream(), new FileOutputStream(mainPath.toFile().getAbsoluteFile().toString().replaceAll(".java", ".abc")));
 
-		writeInputToSystem(executeProcess.getInputStream());
-		writeInputToOutput(executeProcess.getInputStream(), new FileOutputStream(outPath));
+		String result = streamToString(executeProcess.getInputStream());
+		String expectedOutput = streamToString(new FileInputStream(outPath.toString()));
 
+		//assertEquals(result, expectedOutput);
 
 		Set<File> classFiles = javaFilePaths.stream()
-				.map(path -> new File(path.getParent().toFile(), machine + ".class"))
+				.map(path -> new File(path.getParent().toFile(), machinePath + ".class"))
 				.collect(Collectors.toSet());
 
 		//javaFilePaths.forEach(path -> cleanUp(path.toString()));
-		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));
+		//classFiles.forEach(path -> cleanUp(path.getAbsolutePath().toString()));*/
 	}
 
 	@Test
 	public void testExample() throws Exception {
-		testJava("Example", "ExampleAddition.st");
+		testJava("Example", "Example", "ExampleAddition.st");
 	}
 
 	@Test
 	public void testOperation() throws Exception {
-		testJava("Operation", "OperationAddition.st");
+		testJava("Operation", "Operation", "OperationAddition.st");
 	}
 
 	@Test
 	public void testLocalDeclaration() throws Exception {
-		testJava("LocalDeclaration", "LocalDeclarationAddition.st");
+		testJava("LocalDeclaration", "LocalDeclaration", "LocalDeclarationAddition.st");
 	}
 
 	@Ignore
@@ -112,53 +132,53 @@ public class TestJava {
 
 	@Test
 	public void testEnumSets() throws Exception {
-		testJava("EnumSets", "EnumSetsAddition.st");
+		testJava("EnumSets", "EnumSets", "EnumSetsAddition.st");
 	}
 
 	@Test
 	public void testNameCollision() throws Exception {
-		testJava("NameCollision", "NameCollisionAddition.st");
+		testJava("NameCollision", "NameCollision", "NameCollisionAddition.st");
 	}
 
 	@Test
 	public void testWhile() throws Exception {
-		testJava("While", "WhileAddition.st");
+		testJava("While", "While", "WhileAddition.st");
 	}
 
 	@Test
 	public void testInterval() throws Exception {
-		testJava("Interval", "IntervalAddition.st");
+		testJava("Interval", "Interval", "IntervalAddition.st");
 	}
 
 
 	@Test
 	public void testPair() throws Exception {
-		testJava("Pair", "PairAddition.st");
+		testJava("Pair", "Pair", "PairAddition.st");
 	}
 
 	@Test
 	public void testIfAndPredicates() throws Exception {
-		testJava("IfAndPredicates", "IfAndPredicates.st");
+		testJava("IfAndPredicates", "IfAndPredicates", "IfAndPredicates.st");
 	}
 
 	@Test
 	public void testDanglingElse() throws Exception {
-		testJava("DanglingElse", "DanglingElseAddition.st");
+		testJava("DanglingElse", "DanglingElse", "DanglingElseAddition.st");
 	}
 
 	@Test
 	public void testImplies() throws Exception {
-		testJava("Implies", "ImpliesAddition.st");
+		testJava("Implies", "Implies", "ImpliesAddition.st");
 	}
 
 	@Test
 	public void testEquivalence() throws Exception {
-		testJava("Equivalence", "EquivalenceAddition.st");
+		testJava("Equivalence", "Equivalence", "EquivalenceAddition.st");
 	}
 
 	@Test
 	public void testBooleanPredicate() throws Exception {
-		testJava("BooleanPredicate", "BooleanPredicateAddition.st");
+		testJava("BooleanPredicate", "BooleanPredicate", "BooleanPredicateAddition.st");
 	}
 
 	@Ignore
@@ -169,38 +189,38 @@ public class TestJava {
 
 	@Test
 	public void testNondeterminism() throws Exception {
-		testJava("Nondeterminism", "NondeterminismAddition.st");
+		testJava("Nondeterminism", "Nondeterminism", "NondeterminismAddition.st");
 	}
 
 	@Test
 	public void testMapFunction() throws Exception {
-		testJava("MapFunction", "MapFunctionAddition.st");
+		testJava("MapFunction", "MapFunction", "MapFunctionAddition.st");
 	}
 
 	@Test
 	public void testRelationImage() throws Exception {
-		testJava("RelationImage", "RelationImageAddition.st");
+		testJava("RelationImage", "RelationImage", "RelationImageAddition.st");
 	}
 
 	@Test
 	public void testEmptySet() throws Exception {
-		testJava("EmptySet", "EmptySetAddition.st");
+		testJava("EmptySet", "EmptySet", "EmptySetAddition.st");
 	}
 
 	@Test
 	public void testSetUnion() throws Exception {
-		testJava("SetUnion", "SetUnionAddition.st");
+		testJava("SetUnion", "SetUnion", "SetUnionAddition.st");
 	}
 
 
 	@Test
 	public void testCounter() throws Exception {
-		testJava("Counter", "CounterAddition.st");
+		testJava("Counter", "Counter", "CounterAddition.st");
 	}
 
 	@Test
 	public void testBakery0() throws Exception {
-		testJava("Bakery0", "Bakery0Addition.st");
+		testJava("Bakery0", "Bakery0", "Bakery0Addition.st");
 	}
 
 	@Ignore
@@ -212,12 +232,12 @@ public class TestJava {
 
 	@Test
 	public void testACounter() throws Exception {
-		testJava("ACounter", "ACounterAddition.st");
+		testJava("ACounter", "ACounter", "ACounterAddition.st");
 	}
 
 	@Test
 	public void testLift() throws Exception {
-		testJava("Lift", "LiftAddition.st");
+		testJava("Lift", "Lift", "LiftAddition.st");
 	}
 
 	@Ignore
@@ -228,7 +248,7 @@ public class TestJava {
 
 	@Test
 	public void testTrafficLight() throws Exception {
-		testJava("TrafficLight", "TrafficLightAddition.st");
+		testJava("TrafficLight", "TrafficLight", "TrafficLightAddition.st");
 	}
 
 	@Ignore
@@ -260,99 +280,99 @@ public class TestJava {
 
 	@Test
 	public void testProject() throws Exception {
-		testJava("project1/A", "AAdidtion.st");
+		testJava("project1/A", "A", "AAdidtion.st");
 	}
 
 	@Test
 	public void testLiftBenchmarks() throws Exception {
-		testJava("liftbenchmarks/LiftExec", "LiftExecAddition.st");
+		testJava("liftbenchmarks/LiftExec", "LiftExec", "LiftExecAddition.st");
 	}
 
 
 	@Test
 	public void testSieveBenchmarks() throws Exception {
-		testJava("sievebenchmarks/Sieve", "SieveAddition.st");
+		testJava("sievebenchmarks/Sieve", "Sieve", "SieveAddition.st");
 	}
 
 	@Test
 	public void testTrafficLightBenchmarks() throws Exception {
-		testJava("trafficlightbenchmarks/TrafficLightExec", "TrafficLightExecAddition.st");
+		testJava("trafficlightbenchmarks/TrafficLightExec", "TrafficLightExec", "TrafficLightExecAddition.st");
 	}
 
 	@Test
 	public void testIncreasingSet() throws Exception {
-		testJava("setoperationbenchmarks/IncreasingSet", "IncreasingSetAddition.st");
+		testJava("setoperationbenchmarks/IncreasingSet", "IncreasingSet", "IncreasingSetAddition.st");
 	}
 
 	@Test
 	public void testSetOperation() throws Exception {
-		testJava("setoperationbenchmarks/SetOperation", "SetOperationAddition.st");
+		testJava("setoperationbenchmarks/SetOperation", "SetOperation", "SetOperationAddition.st");
 	}
 
 	@Test
 	public void testProject2() throws Exception {
-		testJava("project2/MachineA", "MachineAAddition.st");
+		testJava("project2/MachineA", "MachineA", "MachineAAddition.st");
 	}
 
 	@Test
 	public void testSieve() throws Exception {
-		testJava("Sieve", "SieveAddition.st");
+		testJava("Sieve", "Sieve", "SieveAddition.st");
 	}
 
 	@Test
 	public void testSieveParallel() throws Exception {
-		testJava("SieveParallel", "SieveParallelAddition.st");
+		testJava("SieveParallel", "SieveParallel", "SieveParallelAddition.st");
 	}
 
 	@Test
 	public void testReset() throws Exception {
-		testJava("Reset", "ResetAddition.st");
+		testJava("Reset", "Reset", "ResetAddition.st");
 	}
 
 	@Test
 	public void testSwap() throws Exception {
-		testJava("Swap", "SwapAddition.st");
+		testJava("Swap", "Swap", "SwapAddition.st");
 	}
 
 	@Test
 	public void testManyLocalDeclarations() throws Exception {
-		testJava("ManyLocalDeclarations", "ManyLocalDeclarationsAddition.st");
+		testJava("ManyLocalDeclarations", "ManyLocalDeclarations", "ManyLocalDeclarationsAddition.st");
 	}
 
 	@Test
 	public void testManyLocalDeclarations2() throws Exception {
-		testJava("ManyLocalDeclarations2", "ManyLocalDeclarations2.st");
+		testJava("ManyLocalDeclarations2", "ManyLocalDeclarations2", "ManyLocalDeclarations2.st");
 	}
 
 	@Test
 	public void testPlus() throws Exception {
-		testJava("arithmetic/Plus", "PlusAddition.st");
+		testJava("arithmetic/Plus", "Plus", "PlusAddition.st");
 	}
 
 	@Test
 	public void testMinus() throws Exception {
-		testJava("arithmetic/Minus", "MinusAddition.st");
+		testJava("arithmetic/Minus", "Minus", "MinusAddition.st");
 	}
 
 	@Test
 	public void testMultiply() throws Exception {
-		testJava("arithmetic/Multiply", "MultiplyAddition.st");
+		testJava("arithmetic/Multiply", "Multiply", "MultiplyAddition.st");
 	}
 
 	@Test
 	public void testDivide() throws Exception {
-		testJava("arithmetic/Divide", "DivideAddition.st");
+		testJava("arithmetic/Divide", "Divide", "DivideAddition.st");
 	}
 
 
 	@Test
 	public void testModulo() throws Exception {
-		testJava("arithmetic/Modulo", "ModuloAddition.st");
+		testJava("arithmetic/Modulo", "Modulo", "ModuloAddition.st");
 	}
 
 	@Test
 	public void testNegative() throws Exception {
-		testJava("arithmetic/Negative", "NegativeAddition.st");
+		testJava("arithmetic/Negative", "Negative", "NegativeAddition.st");
 	}
 
 	@Ignore
@@ -361,7 +381,7 @@ public class TestJava {
 		testJava("arithmetic/Positive");
 	}
 
-	@Test
+	/*@Test
 	public void testSmallNumbers() throws Exception {
 		testJava("integers/SmallNumbers", "SmallNumbersAddition.st");
 	}
@@ -369,23 +389,23 @@ public class TestJava {
 	@Test
 	public void testBigNumbers() throws Exception {
 		testJava("integers/BigNumbers", "BigNumbersAddition.st");
-	}
+	}*/
 
 	@Test
 	public void testAnd() throws Exception {
-		testJava("logical/And", "AndAddition.st");
+		testJava("logical/And", "And", "AndAddition.st");
 	}
 
 
 	@Test
 	public void testOr() throws Exception {
-		testJava("logical/Or", "OrAddition.st");
+		testJava("logical/Or", "Or", "OrAddition.st");
 	}
 
 
 	@Test
 	public void testImpliesPerformance() throws Exception {
-		testJava("logical/Implies", "ImpliesAddition.st");
+		testJava("logical/Implies", "Implies", "ImpliesAddition.st");
 	}
 
 	@Test
@@ -395,7 +415,7 @@ public class TestJava {
 
 	@Test
 	public void testEquivalent() throws Exception {
-		testJava("logical/Equivalent", "EquivalentAddition.st");
+		testJava("logical/Equivalent", "Equivalent", "EquivalentAddition.st");
 	}
 
 	@Test
@@ -410,157 +430,157 @@ public class TestJava {
 
 	@Test
 	public void testLess() throws Exception {
-		testJava("comparison/Less", "LessAddition.st");
+		testJava("comparison/Less", "Less", "LessAddition.st");
 	}
 
 	@Test
 	public void testLessEqual() throws Exception {
-		testJava("comparison/LessEqual", "LessEqualAddition.st");
+		testJava("comparison/LessEqual", "LessEqual", "LessEqualAddition.st");
 	}
 
 	@Test
 	public void testGreater() throws Exception {
-		testJava("comparison/Greater", "GreaterAddition.st");
+		testJava("comparison/Greater", "Greater", "GreaterAddition.st");
 	}
 
 
 	@Test
 	public void testGreaterEqual() throws Exception {
-		testJava("comparison/GreaterEqual", "GreaterEqualAddition.st");
+		testJava("comparison/GreaterEqual", "GreaterEqual", "GreaterEqualAddition.st");
 	}
 
 
 	@Test
 	public void tessEqual() throws Exception {
-		testJava("comparison/Equal", "EqualAddition.st");
+		testJava("comparison/Equal", "Equal", "EqualAddition.st");
 	}
 
 
 	@Test
 	public void testUnequal() throws Exception {
-		testJava("comparison/Unequal", "UnequalAddition.st");
+		testJava("comparison/Unequal", "Unequal", "UnequalAddition.st");
 	}
 
 	@Test
 	public void testCardBig() throws Exception {
-		testJava("setoperation_big/SetCardBig", "SetCardBigAddition.st");
+		testJava("setoperation_big/SetCardBig", "SetCardBig", "SetCardBigAddition.st");
 	}
 
 	@Test
 	public void testComplementBig() throws Exception {
-		testJava("setoperation_big/SetComplementBig", "SetComplementAddition.st");
+		testJava("setoperation_big/SetComplementBig", "SetComplementBig", "SetComplementAddition.st");
 	}
 
 	@Test
 	public void testElementOfBig() throws Exception {
-		testJava("setoperation_big/SetElementOfBig", "SetElementOfAddition.st");
+		testJava("setoperation_big/SetElementOfBig", "SetElementOfBig", "SetElementOfAddition.st");
 	}
 
 	@Test
 	public void testIntersectionBig() throws Exception {
-		testJava("setoperation_big/SetIntersectionBig", "SetIntersectionBigAddition.st");
+		testJava("setoperation_big/SetIntersectionBig", "SetIntersectionBig", "SetIntersectionBigAddition.st");
 	}
 
 	@Test
 	public void testIntersectionBig2() throws Exception {
-		testJava("setoperation_big/SetIntersectionBig2", "SetIntersectionBig2Addition.st");
+		testJava("setoperation_big/SetIntersectionBig2", "SetIntersectionBig2", "SetIntersectionBig2Addition.st");
 	}
 
 	@Test
 	public void testUnionBig() throws Exception {
-		testJava("setoperation_big/SetUnionBig", "SetUnionBigAddition.st");
+		testJava("setoperation_big/SetUnionBig", "SetUnionBig", "SetUnionBigAddition.st");
 	}
 
 	@Test
 	public void testCardSmall() throws Exception {
-		testJava("setoperation_small/SetCardSmall", "SetCardSmallAddition.st");
+		testJava("setoperation_small/SetCardSmall", "SetCardSmall", "SetCardSmallAddition.st");
 	}
 
 	@Test
 	public void testComplementSmall() throws Exception {
-		testJava("setoperation_small/SetComplementSmall", "SetComülementSmallAddition.st");
+		testJava("setoperation_small/SetComplementSmall", "SetComplementSmall", "SetComülementSmallAddition.st");
 	}
 
 	@Test
 	public void testElementOfSmall() throws Exception {
-		testJava("setoperation_small/SetElementOfSmall", "SetElementOfSmallAddition.st");
+		testJava("setoperation_small/SetElementOfSmall", "SetElementOfSmall", "SetElementOfSmallAddition.st");
 	}
 
 	@Test
 	public void testIntersectionSmall() throws Exception {
-		testJava("setoperation_small/SetIntersectionSmall", "SetIntersectionSmallAddition.st");
+		testJava("setoperation_small/SetIntersectionSmall", "SetIntersectionSmall", "SetIntersectionSmallAddition.st");
 	}
 
 	@Test
 	public void testUnionSmall() throws Exception {
-		testJava("setoperation_small/SetUnionSmall", "SetUnionSmallAddition.st");
+		testJava("setoperation_small/SetUnionSmall", "SetUnionSmall", "SetUnionSmallAddition.st");
 	}
 
 	@Test
 	public void testRangeBig() throws Exception {
-		testJava("range_big/RangeBig", "RangeBigAddition.st");
+		testJava("range_big/RangeBig", "RangeBig", "RangeBigAddition.st");
 	}
 
 
 	@Test
 	public void testRangeCardBig() throws Exception {
-		testJava("range_big/RangeCardBig", "RangeCardBigAddition.st");
+		testJava("range_big/RangeCardBig", "RangeCardBig", "RangeCardBigAddition.st");
 	}
 
 	@Test
 	public void testRangeComplementBig() throws Exception {
-		testJava("range_big/RangeComplementBig", "RangeComplementBigAddition.st");
+		testJava("range_big/RangeComplementBig", "RangeComplementBig", "RangeComplementBigAddition.st");
 	}
 
 	@Test
 	public void testRangeElementOfBig() throws Exception {
-		testJava("range_big/RangeElementOfBig", "RangeElementOfBigAddition.st");
+		testJava("range_big/RangeElementOfBig", "RangeElementOfBig", "RangeElementOfBigAddition.st");
 	}
 
 	@Test
 	public void testRangeIntersectionBig() throws Exception {
-		testJava("range_big/RangeIntersectionBig", "RangeIntersectionBigAddition.st");
+		testJava("range_big/RangeIntersectionBig", "RangeIntersectionBig", "RangeIntersectionBigAddition.st");
 	}
 
 	@Test
 	public void testRangeUnionBig() throws Exception {
-		testJava("range_big/RangeUnionBig", "RangeUnionBigAddition.st");
+		testJava("range_big/RangeUnionBig", "RangeUnionBig", "RangeUnionBigAddition.st");
 	}
 
 	@Test
 	public void testRangeSmall() throws Exception {
-		testJava("range_small/RangeSmall", "RangeSmallAddition.st");
+		testJava("range_small/RangeSmall", "RangeSmall", "RangeSmallAddition.st");
 	}
 
 
 	@Test
 	public void testRangeCardSmall() throws Exception {
-		testJava("range_small/RangeCardSmall", "RangeCardSmallAddition.st");
+		testJava("range_small/RangeCardSmall", "RangeCardSmall", "RangeCardSmallAddition.st");
 	}
 
 	@Test
 	public void testRangeComplementSmall() throws Exception {
-		testJava("range_small/RangeComplementSmall", "RangeComplementSmallAddition.st");
+		testJava("range_small/RangeComplementSmall", "RangeComplementSmall", "RangeComplementSmallAddition.st");
 	}
 
 	@Test
 	public void testRangeElementOfSmall() throws Exception {
-		testJava("range_small/RangeElementOfSmall", "RangeElementOfSmallAddition.st");
+		testJava("range_small/RangeElementOfSmall", "RangeElementOfSmall", "RangeElementOfSmallAddition.st");
 	}
 
 	@Test
 	public void testRangeIntersectionSmall() throws Exception {
-		testJava("range_small/RangeIntersectionSmall", "RangeIntersectionSmallAddition.st");
+		testJava("range_small/RangeIntersectionSmall", "RangeIntersectionSmall", "RangeIntersectionSmallAddition.st");
 	}
 
 	@Test
 	public void testRangeUnionSmall() throws Exception {
-		testJava("range_small/RangeUnionSmall", "RangeUnionSmallAddition.st");
+		testJava("range_small/RangeUnionSmall", "RangeUnionSmall", "RangeUnionSmallAddition.st");
 	}
 
 	@Test
 	public void testChoice() throws Exception {
-		testJava("Choice", "ChoiceAddition.st");
+		testJava("Choice", "Choice", "ChoiceAddition.st");
 	}
 
 	@Test
@@ -577,7 +597,6 @@ public class TestJava {
 	public void testCruiseControllerk() throws Exception {
 		testJava("Cruise_finite_k");
 	}
-
 
 	private void cleanUp(String path) {
 		File file = new File(path);

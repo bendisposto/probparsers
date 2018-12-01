@@ -3,7 +3,7 @@ abstract, assert, boolean, break, byte, case, catch, char, class, continue, defa
 >>
 
 
-machine(imports, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 <imports; separator="\n">
 import de.hhu.stups.btypes.BUtils;
 
@@ -34,7 +34,7 @@ public class <machine> {
 
 >>
 
-initialization(machine, body, machines) ::= <<
+initialization(body, machines) ::= <<
 public void initialize() {
     if(initialized) {
         throw new RuntimeException("Machine is already initialized");
@@ -49,7 +49,10 @@ include_initialization(machine) ::= <<
 <machine>.initialize();
 >>
 
-operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
+method() ::= <<
+>>
+
+operation(returnType, operationName, parameters, locals, body, return) ::= <<
 public <returnType> <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw new RuntimeException("Machine was not initialized");
@@ -68,10 +71,10 @@ no_return() ::=<<
 >>
 
 set_declaration(identifier, type, enums) ::= <<
-private BSet <identifier> = <set_enumeration(type, enums)>;
+private BSet <identifier> = <set_enumeration(enums)>;
 >>
 
-set_enumeration(type, enums) ::= <<
+set_enumeration(enums) ::= <<
 new BSet(<enums; separator=", ">)
 >>
 
@@ -109,7 +112,7 @@ local_declaration(type, identifier) ::= <<
 <declaration(type, identifier)> = null;
 >>
 
-constant(type, identifier, val) ::= <<
+constant(type, identifier) ::= <<
 private static final <type> <identifier>;
 >>
 
@@ -123,7 +126,7 @@ declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
 
-parameter(type, identifier, isReturn) ::= <<
+parameter(type, identifier) ::= <<
 <type> <identifier>
 >>
 
@@ -137,11 +140,11 @@ parallel_load(type, identifier, typeCast) ::= <<
 <type> _ld_<identifier> = <typeCast> <identifier>;
 >>
 
-parallel_store(identifier, isPrivate, typeCast, val) ::= <<
+parallel_store(identifier, typeCast, val) ::= <<
 <identifier> = <typeCast> <val>;
 >>
 
-assignment(identifier, isPrivate, typeCast, val) ::= <<
+assignment(identifier, typeCast, val) ::= <<
 <identifier> = <typeCast> <val>;
 >>
 
@@ -149,7 +152,7 @@ assignments(assignments) ::= <<
 <assignments; separator="\n">
 >>
 
-nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
+nondeterminism(identifier, typeCast, set) ::= <<
 <identifier> = <typeCast> <set>.nondeterminism();
 >>
 
@@ -162,7 +165,7 @@ type(type, cast) ::= <<
 >>
 
 set_type(type, cast) ::=<<
-<if(cast)>(BSet\<<type> >)<else>BSet\<<type> ><endif>
+<if(cast)>(BSet)<else>BSet<endif>
 >>
 
 import_type(type) ::= <<
@@ -262,7 +265,7 @@ boolean_val(val) ::= <<
 <if(val)>new BBoolean(true)<else>new BBoolean(false)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
+identifier(identifier, rhsOnLhs) ::= <<
 <if(rhsOnLhs)>_ld_<identifier><else><identifier><endif>
 >>
 
@@ -270,7 +273,7 @@ number(number, useBigInteger) ::= <<
 <if(useBigInteger)>new BBigInteger("<number>")<else>new BInteger(<number>)<endif>
 >>
 
-operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, machine, function, args, this) ::= <<
 <var> = <operation_call_without_assignment(machine, function, args, this)>
 >>
 

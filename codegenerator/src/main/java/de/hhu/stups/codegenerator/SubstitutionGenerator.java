@@ -69,11 +69,11 @@ public class SubstitutionGenerator {
     */
     public String visitInitialization(MachineNode node) {
         ST initialization = currentGroup.getInstanceOf("initialization");
-        initialization.add("machine", nameHandler.handle(node.getName()));
-        initialization.add("machines", node.getMachineReferences().stream()
+        TemplateHandler.add(initialization, "machine", nameHandler.handle(node.getName()));
+        TemplateHandler.add(initialization, "machines", node.getMachineReferences().stream()
                 .map(reference -> nameHandler.handle(reference.getMachineNode().getName()))
                 .collect(Collectors.toList()));
-        initialization.add("body", machineGenerator.visitSubstitutionNode(node.getInitialisation(), null));
+        TemplateHandler.add(initialization, "body", machineGenerator.visitSubstitutionNode(node.getInitialisation(), null));
         return initialization.render();
     }
 
@@ -92,8 +92,8 @@ public class SubstitutionGenerator {
     */
     private String visitSelectSubstitution(IfOrSelectSubstitutionsNode node) {
         ST select = currentGroup.getInstanceOf("select");
-        select.add("predicate", machineGenerator.visitPredicateNode(node.getConditions().get(0), null));
-        select.add("then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(0), null));
+        TemplateHandler.add(select, "predicate", machineGenerator.visitPredicateNode(node.getConditions().get(0), null));
+        TemplateHandler.add(select, "then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(0), null));
         return select.render();
     }
 
@@ -102,12 +102,12 @@ public class SubstitutionGenerator {
     */
     private String visitIfSubstitution(IfOrSelectSubstitutionsNode node) {
         ST ifST = currentGroup.getInstanceOf("if");
-        ifST.add("predicate", machineGenerator.visitPredicateNode(node.getConditions().get(0), null));
-        ifST.add("then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(0), null));
-        ifST.add("else1", generateElseIfs(node));
+        TemplateHandler.add(ifST, "predicate", machineGenerator.visitPredicateNode(node.getConditions().get(0), null));
+        TemplateHandler.add(ifST, "then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(0), null));
+        TemplateHandler.add(ifST, "else1", generateElseIfs(node));
 
         if (node.getElseSubstitution() != null) {
-            ifST.add("else1", generateElse(node));
+            TemplateHandler.add(ifST, "else1", generateElse(node));
         }
         return ifST.render();
     }
@@ -127,8 +127,8 @@ public class SubstitutionGenerator {
 
         for (int i = 0; i < conditions.size(); i++) {
             ST elseST = currentGroup.getInstanceOf("elseif");
-            elseST.add("predicate", conditions.get(i));
-            elseST.add("then", then.get(i));
+            TemplateHandler.add(elseST, "predicate", conditions.get(i));
+            TemplateHandler.add(elseST, "then", then.get(i));
             elseIfs.add(elseST.render());
         }
 
@@ -140,7 +140,7 @@ public class SubstitutionGenerator {
     */
     private String generateElse(IfOrSelectSubstitutionsNode node) {
         ST elseST = currentGroup.getInstanceOf("else");
-        elseST.add("then", machineGenerator.visitSubstitutionNode(node.getElseSubstitution(), null));
+        TemplateHandler.add(elseST, "then", machineGenerator.visitSubstitutionNode(node.getElseSubstitution(), null));
         return elseST.render();
     }
 
@@ -149,12 +149,13 @@ public class SubstitutionGenerator {
         ST choice = currentGroup.getInstanceOf("choice");
         int length = node.getSubstitutions().size();
         List<SubstitutionNode> substitutions = node.getSubstitutions();
-        choice.add("len", length);
-        choice.add("then", machineGenerator.visitSubstitutionNode(substitutions.get(0), null));
-        choice.add("choice1", generateOtherChoices(node));
+        TemplateHandler.add(choice, "len", length);
+        TemplateHandler.add(choice, "then", machineGenerator.visitSubstitutionNode(substitutions.get(0), null));
+        TemplateHandler.add(choice, "choice1", generateOtherChoices(node));
         if(substitutions.size() > 1) {
             ST choice2 = currentGroup.getInstanceOf("choice2");
-            choice.add("choice1", choice2.add("then", machineGenerator.visitSubstitutionNode(substitutions.get(length - 1), expected)));
+            TemplateHandler.add(choice2, "then", machineGenerator.visitSubstitutionNode(substitutions.get(length - 1), expected));
+            TemplateHandler.add(choice, "choice1", choice2.render());
         }
         return choice.render();
     }
@@ -163,8 +164,8 @@ public class SubstitutionGenerator {
         List<String> otherChoices = new ArrayList<>();
         for (int i = 1; i < node.getSubstitutions().size() - 1; i++) {
             ST choice = currentGroup.getInstanceOf("choice1");
-            choice.add("counter", i);
-            choice.add("then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(i), null));
+            TemplateHandler.add(choice, "counter", i);
+            TemplateHandler.add(choice, "then", machineGenerator.visitSubstitutionNode(node.getSubstitutions().get(i), null));
             otherChoices.add(choice.render());
         }
         return otherChoices;
@@ -173,26 +174,26 @@ public class SubstitutionGenerator {
     public String generateAnyParameters(List<DeclarationNode> parameters, DeclarationNode parameter,
                                         PredicateNode predicateNode, SubstitutionNode substitutionNode, int index, int length) {
         ST substitution = currentGroup.getInstanceOf("any");
-        substitution.add("type", typeGenerator.generate(parameter.getType(), false));
-        substitution.add("identifier", nameHandler.handle(parameter.getName()));
+        TemplateHandler.add(substitution, "type", typeGenerator.generate(parameter.getType(), false));
+        TemplateHandler.add(substitution, "identifier", nameHandler.handle(parameter.getName()));
         if(!(parameter.getType() instanceof BoolType)) {
-            substitution.add("set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+            TemplateHandler.add(substitution, "set", nameHandler.handleIdentifier(parameter.getType().toString(), NameHandler.IdentifierHandlingEnum.VARIABLES));
         } else {
-            substitution.add("set", expressionGenerator.generateBooleans());
+            TemplateHandler.add(substitution, "set", expressionGenerator.generateBooleans());
         }
-        substitution.add("index", index);
+        TemplateHandler.add(substitution, "index", index);
         if(index == length - 1) {
-            substitution.add("body", generateAnyBody(predicateNode, substitutionNode));
+            TemplateHandler.add(substitution, "body", generateAnyBody(predicateNode, substitutionNode));
         } else {
-            substitution.add("body", generateAnyParameters(parameters, parameters.get(index + 1), predicateNode, substitutionNode, index + 1, length));
+            TemplateHandler.add(substitution, "body", generateAnyParameters(parameters, parameters.get(index + 1), predicateNode, substitutionNode, index + 1, length));
         }
         return substitution.render();
     }
 
     private String generateAnyBody(PredicateNode predicateNode, SubstitutionNode substitutionNode) {
         ST body = currentGroup.getInstanceOf("any_body");
-        body.add("predicate", machineGenerator.visitPredicateNode(predicateNode, null));
-        body.add("body", machineGenerator.visitSubstitutionNode(substitutionNode, null));
+        TemplateHandler.add(body, "predicate", machineGenerator.visitPredicateNode(predicateNode, null));
+        TemplateHandler.add(body, "body", machineGenerator.visitSubstitutionNode(substitutionNode, null));
         return body.render();
     }
 
@@ -206,7 +207,7 @@ public class SubstitutionGenerator {
         for (int i = 0; i < node.getLeftSide().size(); i++) {
             assignments.add(generateAssignment(node.getLeftSide().get(i), node.getRightSide().get(i)));
         }
-        substitutions.add("assignments", assignments);
+        TemplateHandler.add(substitutions, "assignments", assignments);
         return substitutions.render();
     }
 
@@ -215,11 +216,11 @@ public class SubstitutionGenerator {
     */
     public String generateAssignment(ExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("assignment");
-        substitution.add("identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
-        substitution.add("isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
+        TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
+        TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
         String typeCast = typeGenerator.generate(rhs.getType(), true);
-        substitution.add("typeCast", typeCast);
-        substitution.add("val", machineGenerator.visitExprNode(rhs, null));
+        TemplateHandler.add(substitution, "typeCast", typeCast);
+        TemplateHandler.add(substitution, "val", machineGenerator.visitExprNode(rhs, null));
         return substitution.render();
     }
 
@@ -252,9 +253,9 @@ public class SubstitutionGenerator {
         List<String> stores = assignments.stream()
                 .map(assignment -> visitParallelStores((AssignSubstitutionNode) assignment))
                 .collect(Collectors.toList());
-        substitutions.add("loads", loads);
-        substitutions.add("others", others);
-        substitutions.add("stores", stores);
+        TemplateHandler.add(substitutions, "loads", loads);
+        TemplateHandler.add(substitutions, "others", others);
+        TemplateHandler.add(substitutions, "stores", stores);
         identifierOnLhsInParallel.clear();
         return substitutions.render();
     }
@@ -272,16 +273,16 @@ public class SubstitutionGenerator {
             identifierOnLhsInParallel.add(identifier.getName());
             definedLoadsInParallel.add(identifier.getName());
         }
-        substitutions.add("assignments", assignments);
+        TemplateHandler.add(substitutions, "assignments", assignments);
         return substitutions.render();
     }
 
     private String visitParallelLoad(ExprNode expr) {
         ST substitution = currentGroup.getInstanceOf("parallel_load");
-        substitution.add("type", typeGenerator.generate(expr.getType(), false));
-        substitution.add("identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) expr, null));
+        TemplateHandler.add(substitution, "type", typeGenerator.generate(expr.getType(), false));
+        TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) expr, null));
         String typeCast = typeGenerator.generate(expr.getType(), true);
-        substitution.add("typeCast", typeCast);
+        TemplateHandler.add(substitution, "typeCast", typeCast);
         return substitution.render();
     }
 
@@ -293,19 +294,19 @@ public class SubstitutionGenerator {
         for (int i = 0; i < node.getLeftSide().size(); i++) {
             assignments.add(visitParallelStore(node.getLeftSide().get(i), node.getRightSide().get(i)));
         }
-        substitutions.add("assignments", assignments);
+        TemplateHandler.add(substitutions, "assignments", assignments);
         return substitutions.render();
     }
 
     private String visitParallelStore(ExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("parallel_store");
         identifierGenerator.setLhsInParallel(true);
-        substitution.add("identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
-        substitution.add("isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
+        TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
+        TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
         identifierGenerator.setLhsInParallel(false);
         String typeCast = typeGenerator.generate(rhs.getType(), true);
-        substitution.add("typeCast", typeCast);
-        substitution.add("val", machineGenerator.visitExprNode(rhs, null));
+        TemplateHandler.add(substitution, "typeCast", typeCast);
+        TemplateHandler.add(substitution, "val", machineGenerator.visitExprNode(rhs, null));
         return substitution.render();
     }
 
@@ -325,17 +326,17 @@ public class SubstitutionGenerator {
         for (int i = 0; i < node.getIdentifiers().size(); i++) {
             assignments.add(generateNondeterminism(node.getIdentifiers().get(i), node.getExpression()));
         }
-        substitutions.add("assignments", assignments);
+        TemplateHandler.add(substitutions, "assignments", assignments);
         return substitutions.render();
     }
 
     private String generateNondeterminism(IdentifierExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("nondeterminism");
-        substitution.add("identifier", machineGenerator.visitIdentifierExprNode(lhs, null));
-        substitution.add("isPrivate", nameHandler.getGlobals().contains(lhs.getName()));
+        TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode(lhs, null));
+        TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(lhs.getName()));
         String typeCast = typeGenerator.generate(lhs.getType(), true);
-        substitution.add("typeCast", typeCast);
-        substitution.add("set", machineGenerator.visitExprNode(rhs, null));
+        TemplateHandler.add(substitution, "typeCast", typeCast);
+        TemplateHandler.add(substitution, "set", machineGenerator.visitExprNode(rhs, null));
         return substitution.render();
     }
 
@@ -350,17 +351,17 @@ public class SubstitutionGenerator {
         //TODO: Implement Records
         if(variables.size() > 0) {
             functionCall = currentGroup.getInstanceOf("operation_call_with_assignment");
-            functionCall.add("var", variables.get(0));
-            functionCall.add("isPrivate", nameHandler.getGlobals().contains(variables.get(0)));
+            TemplateHandler.add(functionCall, "var", variables.get(0));
+            TemplateHandler.add(functionCall, "isPrivate", nameHandler.getGlobals().contains(variables.get(0)));
         } else {
             functionCall = currentGroup.getInstanceOf("operation_call_without_assignment");
         }
-        functionCall.add("machine", nameHandler.handle(machineName));
-        functionCall.add("function", operationName);
-        functionCall.add("args", node.getArguments().stream()
+        TemplateHandler.add(functionCall, "machine", nameHandler.handle(machineName));
+        TemplateHandler.add(functionCall, "function", operationName);
+        TemplateHandler.add(functionCall, "args", node.getArguments().stream()
                 .map(expr -> machineGenerator.visitExprNode(expr, expected))
                 .collect(Collectors.toList()));
-        functionCall.add("this", machineName.equals(machineGenerator.getMachineName()));
+        TemplateHandler.add(functionCall,"this", machineName.equals(machineGenerator.getMachineName()));
         return functionCall.render();
     }
 
@@ -369,8 +370,8 @@ public class SubstitutionGenerator {
     */
     public String visitWhileSubstitutionNode(WhileSubstitutionNode node, Void expected) {
         ST whileST = currentGroup.getInstanceOf("while");
-        whileST.add("predicate", machineGenerator.visitPredicateNode(node.getCondition(), expected));
-        whileST.add("then", machineGenerator.visitSubstitutionNode(node.getBody(), expected));
+        TemplateHandler.add(whileST, "predicate", machineGenerator.visitPredicateNode(node.getCondition(), expected));
+        TemplateHandler.add(whileST, "then", machineGenerator.visitSubstitutionNode(node.getBody(), expected));
         return whileST.render();
     }
 
@@ -385,8 +386,8 @@ public class SubstitutionGenerator {
         this.currentLocalScope++;
         identifierGenerator.push(localScopes);
         node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.addLocal(identifier.getName()));
-        varST.add("locals", generateVariablesInVar(node.getLocalIdentifiers()));
-        varST.add("body", machineGenerator.visitSubstitutionNode(node.getBody(), expected));
+        TemplateHandler.add(varST, "locals", generateVariablesInVar(node.getLocalIdentifiers()));
+        TemplateHandler.add(varST, "body", machineGenerator.visitSubstitutionNode(node.getBody(), expected));
         identifierGenerator.pop();
         node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.resetLocal(identifier.getName()));
         this.currentLocalScope--;
@@ -407,8 +408,8 @@ public class SubstitutionGenerator {
     */
     private String generateVariableInVar(DeclarationNode identifier) {
         ST declaration = currentGroup.getInstanceOf("local_declaration");
-        declaration.add("type", typeGenerator.generate(identifier.getType(), false));
-        declaration.add("identifier", identifierGenerator.generateVarDeclaration(identifier.getName()));
+        TemplateHandler.add(declaration, "type", typeGenerator.generate(identifier.getType(), false));
+        TemplateHandler.add(declaration, "identifier", identifierGenerator.generateVarDeclaration(identifier.getName()));
         return declaration.render();
     }
 

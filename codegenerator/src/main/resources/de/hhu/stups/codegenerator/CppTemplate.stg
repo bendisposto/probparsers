@@ -5,7 +5,7 @@ return, short, signed, sizeof, static, static_cast, volatile, struct, switch, te
 >>
 
 
-machine(imports, includedMachines, machine, includes, constants, values, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, includedMachines, machine, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<iostream>
 #include \<string>
 #include "BUtils.cpp"
@@ -46,7 +46,7 @@ class <machine> {
 <addition>
 >>
 
-initialization(machine, body, machines) ::= <<
+initialization(body, machines) ::= <<
 void initialize() {
     if(initialized) {
         throw runtime_error("Machine is already initialized");
@@ -61,7 +61,10 @@ include_initialization(machine) ::= <<
 <machine>.initialize();
 >>
 
-operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
+method() ::= <<
+>>
+
+operation(returnType, operationName, parameters, locals, body, return) ::= <<
 <returnType> <operationName>(<parameters; separator=", ">) {
     if(!initialized) {
         throw runtime_error("Machine was not initialized");
@@ -149,13 +152,13 @@ declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
 
-constant(type, identifier, val) ::= <<
+constant() ::= <<
 >>
 
-values(assignments) ::= <<
+values() ::= <<
 >>
 
-parameter(type, identifier, isReturn) ::= <<
+parameter(type, identifier) ::= <<
 <type> <identifier>
 >>
 
@@ -169,11 +172,11 @@ parallel_load(type, identifier, typeCast) ::= <<
 <type> _ld_<identifier> = static_cast\<<typeCast> >(<identifier>);
 >>
 
-parallel_store(identifier, isPrivate, typeCast, val) ::= <<
+parallel_store(identifier, typeCast, val) ::= <<
 <identifier> = static_cast\<<typeCast> >(<val>);
 >>
 
-assignment(identifier, isPrivate, typeCast, val) ::= <<
+assignment(identifier, typeCast, val) ::= <<
 <identifier> = static_cast\<<typeCast> >(<val>);
 >>
 
@@ -181,7 +184,7 @@ assignments(assignments) ::= <<
 <assignments; separator="\n">
 >>
 
-nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
+nondeterminism(identifier, typeCast, set) ::= <<
 <identifier> = static_cast\<<typeCast> >(<set>.nondeterminism());
 >>
 
@@ -189,11 +192,11 @@ void() ::= <<
 void
 >>
 
-type(type, cast) ::= <<
+type(type) ::= <<
 <type>
 >>
 
-set_type(type, cast) ::=<<
+set_type(type) ::=<<
 BSet\<<type> >
 >>
 
@@ -302,7 +305,7 @@ number(number, useBigInteger) ::= <<
 (BInteger(<number>))
 >>
 
-operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, function, args) ::= <<
 <function>(<args; separator=",">, <var>);
 >>
 

@@ -52,8 +52,8 @@ public class DeclarationGenerator {
     */
     private String generateGlobalDeclaration(DeclarationNode node) {
         ST declaration = currentGroup.getInstanceOf("global_declaration");
-        declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(declaration, "type", typeGenerator.generate(node.getType(), false));
+        TemplateHandler.add(declaration, "identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 
@@ -72,8 +72,8 @@ public class DeclarationGenerator {
     */
     public String generateLocalDeclaration(DeclarationNode node) {
         ST declaration = currentGroup.getInstanceOf("local_declaration");
-        declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(declaration, "type", typeGenerator.generate(node.getType(), false));
+        TemplateHandler.add(declaration, "identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 
@@ -82,9 +82,9 @@ public class DeclarationGenerator {
     */
     private String generateParameter(DeclarationNode node, boolean isReturn) {
         ST declaration = currentGroup.getInstanceOf("parameter");
-        declaration.add("isReturn", isReturn);
-        declaration.add("type", typeGenerator.generate(node.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(declaration, "isReturn", isReturn);
+        TemplateHandler.add(declaration, "type", typeGenerator.generate(node.getType(), false));
+        TemplateHandler.add(declaration, "identifier", nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 
@@ -96,7 +96,7 @@ public class DeclarationGenerator {
         List<String> assignments = node.getValues().stream()
                 .map(substitution -> machineGenerator.visitSubstitutionNode(substitution, null))
                 .collect(Collectors.toList());
-        values.add("assignments", assignments);
+        TemplateHandler.add(values, "assignments", assignments);
         return values.render();
     }
 
@@ -109,8 +109,8 @@ public class DeclarationGenerator {
 
     private String generateConstant(DeclarationNode constant) {
         ST declaration = currentGroup.getInstanceOf("constant");
-        declaration.add("type", typeGenerator.generate(constant.getType(), false));
-        declaration.add("identifier", nameHandler.handleIdentifier(constant.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(declaration, "type", typeGenerator.generate(constant.getType(), false));
+        TemplateHandler.add(declaration, "identifier", nameHandler.handleIdentifier(constant.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         return declaration.render();
     }
 
@@ -129,8 +129,8 @@ public class DeclarationGenerator {
     private String generateIncludeDeclaration(MachineReferenceNode reference) {
         ST declaration = currentGroup.getInstanceOf("include_declaration");
         String machine = reference.getMachineName();
-        declaration.add("type", nameHandler.handle(machine));
-        declaration.add("identifier", nameHandler.handle(machine));
+        TemplateHandler.add(declaration, "type", nameHandler.handle(machine));
+        TemplateHandler.add(declaration, "identifier", nameHandler.handle(machine));
         return declaration.render();
     }
 
@@ -161,11 +161,11 @@ public class DeclarationGenerator {
     private String declareEnums(EnumeratedSetDeclarationNode node) {
         importGenerator.addImport(node.getElements().get(0).getType());
         ST enumDeclaration = currentGroup.getInstanceOf("set_enum_declaration");
-        enumDeclaration.add("name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(enumDeclaration, "name", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         List<String> enums = node.getElements().stream()
                 .map(element -> nameHandler.handleEnum(element.getName(), node.getElements().stream().map(DeclarationNode::getName).collect(Collectors.toList())))
                 .collect(Collectors.toList());
-        enumDeclaration.add("enums", enums);
+        TemplateHandler.add(enumDeclaration, "enums", enums);
         return enumDeclaration.render();
     }
 
@@ -175,12 +175,12 @@ public class DeclarationGenerator {
     public String visitEnumeratedSetDeclarationNode(EnumeratedSetDeclarationNode node) {
         importGenerator.addImport(node.getSetDeclarationNode().getType());
         ST setDeclaration = currentGroup.getInstanceOf("set_declaration");
-        setDeclaration.add("identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
-        setDeclaration.add("type", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(setDeclaration, "identifier", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.VARIABLES));
+        TemplateHandler.add(setDeclaration, "type", nameHandler.handleIdentifier(node.getSetDeclarationNode().getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         List<String> enums = node.getElements().stream()
                 .map(declaration -> callEnum(node.getSetDeclarationNode().getName(), declaration))
                 .collect(Collectors.toList());
-        setDeclaration.add("enums", enums);
+        TemplateHandler.add(setDeclaration, "enums", enums);
         return setDeclaration.render();
     }
 
@@ -190,8 +190,8 @@ public class DeclarationGenerator {
     */
     public String callEnum(String setName, DeclarationNode enumNode) {
         ST enumST = currentGroup.getInstanceOf("enum_call");
-        enumST.add("class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
-        enumST.add("identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
+        TemplateHandler.add(enumST, "class", nameHandler.handleIdentifier(setName, NameHandler.IdentifierHandlingEnum.MACHINES));
+        TemplateHandler.add(enumST, "identifier", nameHandler.handleEnum(enumNode.getName(), setToEnum.get(setName)));
         return enumST.render();
     }
 }

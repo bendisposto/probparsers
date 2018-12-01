@@ -98,10 +98,12 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	public String generateMachine(MachineNode node) {
 		initialize(node);
 		ST machine = currentGroup.getInstanceOf("machine");
-		machine.add("addition", addition);
-		machine.add("imports", importGenerator.getImports());
-		machine.add("includedMachines", importGenerator.generateMachineImports(node));
-		machine.add("machine", nameHandler.handle(node.getName()));
+		TemplateHandler.add(machine, "addition", addition);
+		TemplateHandler.add(machine, "imports", importGenerator.getImports());
+		TemplateHandler.add(machine, "requires","");
+		TemplateHandler.add(machine, "methods", "");
+		TemplateHandler.add(machine, "includedMachines", importGenerator.generateMachineImports(node));
+		TemplateHandler.add(machine, "machine", nameHandler.handle(node.getName()));
 		generateBody(node, machine);
 		return machine.render();
 	}
@@ -119,14 +121,14 @@ public class MachineGenerator implements AbstractVisitor<String, Void> {
 	* This function generates the whole body of a machine from the given AST node for the machine.
 	*/
 	private void generateBody(MachineNode node, ST machine) {
-		machine.add("constants", declarationGenerator.generateConstants(node));
-		machine.add("values", declarationGenerator.generateValues(node));
-		machine.add("enums", declarationGenerator.generateEnumDeclarations(node));
-		machine.add("sets", declarationGenerator.generateSetDeclarations(node));
-		machine.add("declarations", declarationGenerator.visitDeclarations(node.getVariables()));
-		machine.add("includes", declarationGenerator.generateIncludes(node));
-		machine.add("initialization", substitutionGenerator.visitInitialization(node));
-		machine.add("operations", operationGenerator.visitOperations(node.getOperations()));
+		TemplateHandler.add(machine, "constants", declarationGenerator.generateConstants(node));
+		TemplateHandler.add(machine, "values", declarationGenerator.generateValues(node));
+		TemplateHandler.add(machine, "enums", declarationGenerator.generateEnumDeclarations(node));
+		TemplateHandler.add(machine, "sets", declarationGenerator.generateSetDeclarations(node));
+		TemplateHandler.add(machine, "declarations", declarationGenerator.visitDeclarations(node.getVariables()));
+		TemplateHandler.add(machine, "includes", declarationGenerator.generateIncludes(node));
+		TemplateHandler.add(machine, "initialization", substitutionGenerator.visitInitialization(node));
+		TemplateHandler.add(machine, "operations", operationGenerator.visitOperations(node.getOperations()));
 	}
 
 	@Override

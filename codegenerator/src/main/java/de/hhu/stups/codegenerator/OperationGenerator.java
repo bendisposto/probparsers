@@ -80,9 +80,15 @@ public class OperationGenerator {
         identifierGenerator.setParams(node.getParams(), node.getOutputParams());
         substitutionGenerator.resetParallel();
         ST operation = generate(node);
-        operation.add("machine", nameHandler.handle(machineGenerator.getMachineName()));
-        operation.add("body", machineGenerator.visitSubstitutionNode(node.getSubstitution(), null));
+        TemplateHandler.add(operation,  "machine", nameHandler.handle(machineGenerator.getMachineName()));
+        TemplateHandler.add(operation, "body", machineGenerator.visitSubstitutionNode(node.getSubstitution(), null));
+        generateMethod(node);
         return operation.render();
+    }
+
+    private void generateMethod(OperationNode node) {
+        /*ST method = group.getInstanceOf("method");
+        method.add("operationName", nameHandler.handle(node.getName()));*/
     }
 
 
@@ -92,24 +98,26 @@ public class OperationGenerator {
     private ST generate(OperationNode node) {
         ST operation = group.getInstanceOf("operation");
 
-        operation.add("locals", declarationGenerator.generateDeclarations(node.getOutputParams()
+        TemplateHandler.add(operation, "locals", declarationGenerator.generateDeclarations(node.getOutputParams()
                 .stream()
                 .collect(Collectors.toList()), DeclarationType.LOCAL_DECLARATION, false));
 
         if(node.getOutputParams().size() == 1) {
             BType type = node.getOutputParams().get(0).getType();
             String identifier = node.getOutputParams().get(0).getName();
-            operation.add("returnType", typeGenerator.generate(type, false));
-            operation.add("isTyped", true);
-            operation.add("return", group.getInstanceOf("return").add("identifier", nameHandler.handleIdentifier(identifier, NameHandler.IdentifierHandlingEnum.MACHINES)).render());
+            TemplateHandler.add(operation, "returnType", typeGenerator.generate(type, false));
+            TemplateHandler.add(operation, "isTyped", true);
+            ST returnTemplate = group.getInstanceOf("return");
+            TemplateHandler.add(returnTemplate, "identifier", nameHandler.handleIdentifier(identifier, NameHandler.IdentifierHandlingEnum.MACHINES));
+            TemplateHandler.add(operation, "return", returnTemplate.render());
         } else if(node.getOutputParams().size() == 0) {
-            operation.add("isTyped", false);
-            operation.add("returnType", typeGenerator.generate(new UntypedType(), false));
-            operation.add("return", group.getInstanceOf("no_return").render());
+            TemplateHandler.add(operation, "isTyped", false);
+            TemplateHandler.add(operation, "returnType", typeGenerator.generate(new UntypedType(), false));
+            TemplateHandler.add(operation, "return", group.getInstanceOf("no_return").render());
         }
-        operation.add("operationName", nameHandler.handle(node.getName()));
-        operation.add("parameters", declarationGenerator.generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));
-        operation.add("returnParameters", declarationGenerator.generateDeclarations(node.getOutputParams(), DeclarationType.PARAMETER, true));
+        TemplateHandler.add(operation, "operationName", nameHandler.handle(node.getName()));
+        TemplateHandler.add(operation, "parameters", declarationGenerator.generateDeclarations(node.getParams(), DeclarationType.PARAMETER, false));
+        TemplateHandler.add(operation, "returnParameters", declarationGenerator.generateDeclarations(node.getOutputParams(), DeclarationType.PARAMETER, true));
         return operation;
     }
 

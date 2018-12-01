@@ -19,16 +19,27 @@ import java.util.stream.Collectors;
 
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.BOOL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.CARD;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.CARTESIAN_PRODUCT;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.COUPLE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DIVIDE;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DOMAIN;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DOMAIN_RESTRICTION;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.DOMAIN_SUBTRACTION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FALSE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.FUNCTION_CALL;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERSECTION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INTERVAL;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.INVERSE_RELATION;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MAX;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MIN;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MINUS;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MOD;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.MULT;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.PLUS;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.POW;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.RANGE;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.RANGE_RESTRICTION;
+import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.RANGE_SUBTRACTION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.RELATIONAL_IMAGE;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.SET_ENUMERATION;
 import static de.prob.parser.ast.nodes.expression.ExpressionOperatorNode.ExpressionOperator.SET_SUBTRACTION;
@@ -42,10 +53,12 @@ public class ExpressionGenerator {
     * Hard-coded lists for identifying the type of the operators for expresion
     */
     private static final List<ExpressionOperatorNode.ExpressionOperator> BINARY_EXPRESSION_OPERATORS =
-            Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION);
+            Arrays.asList(PLUS,MINUS,MULT,DIVIDE,MOD,INTERSECTION, UNION, SET_SUBTRACTION, RELATIONAL_IMAGE,
+                    FUNCTION_CALL, DOMAIN_RESTRICTION, DOMAIN_SUBTRACTION,
+                    RANGE_RESTRICTION, RANGE_SUBTRACTION, CARTESIAN_PRODUCT);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> UNARY_EXPRESSION_OPERATORS =
-            Arrays.asList(UNARY_MINUS, CARD, RELATIONAL_IMAGE, FUNCTION_CALL);
+            Arrays.asList(UNARY_MINUS, CARD, DOMAIN, RANGE, INVERSE_RELATION, MIN, MAX, POW);
 
     private static final List<ExpressionOperatorNode.ExpressionOperator> EXPRESSION_BOOLEANS =
             Arrays.asList(TRUE,FALSE);
@@ -133,8 +146,8 @@ public class ExpressionGenerator {
     */
     public String visitNumberNode(NumberNode node) {
         ST number = currentGroup.getInstanceOf("number");
-        number.add("number", node.getValue().toString());
-        number.add("useBigInteger", useBigInteger);
+        TemplateHandler.add(number, "number", node.getValue().toString());
+        TemplateHandler.add(number, "useBigInteger", useBigInteger);
         return number.render();
     }
 
@@ -173,8 +186,8 @@ public class ExpressionGenerator {
     */
     private String generateUnaryExpression(ExpressionOperatorNode.ExpressionOperator operator, List<String> expressionList) {
         ST expression = generateUnary(operator);
-        expression.add("obj", expressionList.get(0));
-        expression.add("args", expressionList.subList(1, expressionList.size()));
+        TemplateHandler.add(expression, "obj", expressionList.get(0));
+        TemplateHandler.add(expression, "args", expressionList.subList(1, expressionList.size()));
         return expression.render();
     }
 
@@ -191,16 +204,28 @@ public class ExpressionGenerator {
             case CARD:
                 operatorName = "card";
                 break;
-            case FUNCTION_CALL:
-                operatorName = "functionCall";
+            case DOMAIN:
+                operatorName = "domain";
                 break;
-            case RELATIONAL_IMAGE:
-                operatorName = "relationImage";
+            case RANGE:
+                operatorName = "range";
+                break;
+            case INVERSE_RELATION:
+                operatorName = "inverse";
+                break;
+            case MIN:
+                operatorName = "min";
+                break;
+            case MAX:
+                operatorName = "max";
+                break;
+            case POW:
+                operatorName = "pow";
                 break;
             default:
                 throw new RuntimeException("Given operator is not implemented: " + operator);
         }
-        template.add("operator", nameHandler.handle(operatorName));
+        TemplateHandler.add(template, "operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -235,10 +260,31 @@ public class ExpressionGenerator {
             case SET_SUBTRACTION:
                 operatorName = "complement";
                 break;
+            case FUNCTION_CALL:
+                operatorName = "functionCall";
+                break;
+            case RELATIONAL_IMAGE:
+                operatorName = "relationImage";
+                break;
+            case DOMAIN_RESTRICTION:
+                operatorName = "domainRestriction";
+                break;
+            case DOMAIN_SUBTRACTION:
+                operatorName = "domainSubstraction";
+                break;
+            case RANGE_RESTRICTION:
+                operatorName = "rangeRestriction";
+                break;
+            case RANGE_SUBTRACTION:
+                operatorName = "rangeSubstraction";
+                break;
+            case CARTESIAN_PRODUCT:
+                operatorName = "cartesianProduct";
+                break;
             default:
                 throw new RuntimeException("Given operator is not implemented: " + operator);
         }
-        template.add("operator", nameHandler.handle(operatorName));
+        TemplateHandler.add(template, "operator", nameHandler.handle(operatorName));
         return template;
     }
 
@@ -247,8 +293,8 @@ public class ExpressionGenerator {
     */
     private String generateInterval(List<String> arguments) {
         ST interval = currentGroup.getInstanceOf("interval");
-        interval.add("arg1", arguments.get(0));
-        interval.add("arg2", arguments.get(1));
+        TemplateHandler.add(interval, "arg1", arguments.get(0));
+        TemplateHandler.add(interval, "arg2", arguments.get(1));
         return interval.render();
     }
 
@@ -257,8 +303,8 @@ public class ExpressionGenerator {
     */
     private String generateCouple(List<String> arguments) {
         ST couple = currentGroup.getInstanceOf("couple_create");
-        couple.add("arg1", arguments.get(0));
-        couple.add("arg2", arguments.get(1));
+        TemplateHandler.add(couple, "arg1", arguments.get(0));
+        TemplateHandler.add(couple, "arg2", arguments.get(1));
         return couple.render();
     }
 
@@ -266,16 +312,19 @@ public class ExpressionGenerator {
     * This function generates code for set enumerations with the given arguments.
     */
     private String generateSetEnumeration(BType type, List<String> expressions) {
-        return currentGroup.getInstanceOf("set_enumeration")
-                .add("type", typeGenerator.generate(((SetType) type).getSubType(), false))
-                .add("enums", expressions).render();
+        ST enumeration = currentGroup.getInstanceOf("set_enumeration");
+        TemplateHandler.add(enumeration,"type", typeGenerator.generate(((SetType) type).getSubType(), false));
+        TemplateHandler.add(enumeration,"enums", expressions);
+        return enumeration.render();
     }
 
     /*
     * This function generates code for boolean constants as expressions.
     */
     private String generateBoolean(ExpressionOperatorNode.ExpressionOperator operator) {
-        return currentGroup.getInstanceOf("boolean_val").add("val", operator == TRUE).render();
+        ST val = currentGroup.getInstanceOf("boolean_val");
+        TemplateHandler.add(val, "val", operator == TRUE);
+        return val.render();
     }
 
     public String generateBooleans() {

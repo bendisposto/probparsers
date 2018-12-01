@@ -63,12 +63,12 @@ public class IdentifierGenerator {
     */
     private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
         ST identifier = group.getInstanceOf("identifier");
-        identifier.add("identifier", node.getType() != null && nameHandler.getEnumTypes().keySet().contains(node.getName()) ?
+        TemplateHandler.add(identifier, "identifier", node.getType() != null && nameHandler.getEnumTypes().keySet().contains(node.getName()) ?
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
-        identifier.add("isReturn", isReturn);
-        identifier.add("isPrivate", isPrivate);
-        identifier.add("rhsOnLhs", identifierOnLhsInParallel.contains(node.getName()) && !lhsInParallel);
+        TemplateHandler.add(identifier, "isReturn", isReturn);
+        TemplateHandler.add(identifier, "isPrivate", isPrivate);
+        TemplateHandler.add(identifier, "rhsOnLhs", identifierOnLhsInParallel.contains(node.getName()) && !lhsInParallel);
         return identifier.render();
     }
 
@@ -83,10 +83,10 @@ public class IdentifierGenerator {
                 resultIdentifier.insert(0, "_");
             }
         }
-        identifier.add("identifier", resultIdentifier.toString());
-        identifier.add("isReturn", false);
-        identifier.add("isPrivate", false);
-        identifier.add("rhsOnLhs", identifierOnLhsInParallel.contains(name) && !lhsInParallel);
+        TemplateHandler.add(identifier, "identifier", resultIdentifier.toString());
+        TemplateHandler.add(identifier, "isReturn", false);
+        TemplateHandler.add(identifier, "isPrivate", false);
+        TemplateHandler.add(identifier, "rhsOnLhs", identifierOnLhsInParallel.contains(name) && !lhsInParallel);
         return identifier.render();
     }
 

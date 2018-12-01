@@ -428,7 +428,7 @@ public class TypeChecker implements AbstractVisitor<BType, BType> {
 			visitExprNode(expressionNodes.get(0), new SetType(getLeftTypeOfRelationType(node.getType())));
 			return node.getType();
 		case RANGE_RESTRICTION:
-		case RANGE_SUBTRATION:
+		case RANGE_SUBTRACTION:
 			// r |> S
 			// r |>> S
 			unify(expected, createNewRelationType(), node);

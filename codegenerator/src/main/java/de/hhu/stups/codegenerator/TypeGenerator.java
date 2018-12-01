@@ -28,17 +28,26 @@ public class TypeGenerator {
     public String generate(BType type, boolean cast) {
         ST template = group.getInstanceOf("type");
         if(type instanceof IntegerType) {
-            return template.add("type", "BInteger").add("cast", cast).render();
+            TemplateHandler.add(template, "type", "BInteger");
+            TemplateHandler.add(template, "cast", cast);
+            return template.render();
         } else if(type instanceof BoolType) {
-            return template.add("type", "BBoolean").add("cast", cast).render();
+            TemplateHandler.add(template, "type", "BBoolean");
+            TemplateHandler.add(template, "cast", cast);
+            return template.render();
         } else if(type instanceof SetType) {
-            return group.getInstanceOf("set_type")
-                    .add("type", generate(((SetType) type).getSubType(), false))
-                    .add("cast", cast).render();
+            template = group.getInstanceOf("set_type");
+            TemplateHandler.add(template, "type", generate(((SetType) type).getSubType(), false));
+            TemplateHandler.add(template, "cast", cast);
+            return template.render();
         } else if(type instanceof EnumeratedSetElementType) {
-            return template.add("type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.MACHINES)).add("cast", cast).render();
+            TemplateHandler.add(template, "type", nameHandler.handleIdentifier(type.toString(), NameHandler.IdentifierHandlingEnum.MACHINES));
+            TemplateHandler.add(template, "cast", cast);
+            return template.render();
         } else if(type instanceof CoupleType) {
-            return template.add("type", "BCouple").add("cast", cast).render();
+            TemplateHandler.add(template, "type", "BCouple");
+            TemplateHandler.add(template, "cast", cast);
+            return template.render();
         } else if(type instanceof UntypedType) {
             return generateUntyped();
         }

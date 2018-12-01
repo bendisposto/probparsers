@@ -10,7 +10,7 @@ div, labs, ldiv, rand, srand, mblen, mbstowcs, mbtowc, wcstombs, wctomb
 >>
 
 
-machine(imports, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, includedMachines, machine, enums, sets, declarations, initialization, operations, addition) ::= <<
 #include \<stdint.h>
 #include \<stdio.h>
 #include \<stdlib.h>
@@ -48,7 +48,10 @@ include_initialization(machine) ::= <<
 <machine>_initialize();
 >>
 
-operation(machine, returnType, isTyped, operationName, parameters, returnParameters, locals, body, return) ::= <<
+method() ::= <<
+>>
+
+operation(machine, operationName, parameters, returnParameters, body) ::= <<
 void <operationName>(<parameters; separator=", "><returnParameters : {par |, <par>}>) {
     if(!<machine>_initialized) {
         fprintf(stderr, "Machine was not initialized\n");
@@ -58,7 +61,7 @@ void <operationName>(<parameters; separator=", "><returnParameters : {par |, <pa
 }
 >>
 
-return(identifier) ::= <<
+return() ::= <<
 >>
 
 no_return() ::=<<
@@ -97,7 +100,7 @@ create_bset((<type>[]){<enums; separator=", ">})
 >>
 
 enum_call(class, identifier) ::= <<
-create_<class>(identifier);
+create_<class>(<identifier>);
 >>
 
 bool() ::= <<
@@ -119,10 +122,10 @@ declaration(type, identifier) ::= <<
 <type> <identifier>
 >>
 
-constant(type, identifier, val) ::= <<
+constant() ::= <<
 >>
 
-values(assignments) ::= <<
+values() ::= <<
 >>
 
 
@@ -140,11 +143,11 @@ parallel_load(type, identifier, typeCast) ::= <<
 <type> _ld_<identifier> = <typeCast> <identifier>;
 >>
 
-parallel_store(identifier, isPrivate, typeCast, val) ::= <<
+parallel_store(identifier, typeCast, val) ::= <<
 <identifier> = <typeCast> <val>;
 >>
 
-assignment(identifier, isPrivate, typeCast, val) ::= <<
+assignment(identifier, val) ::= <<
 <identifier> = <val>;
 >>
 
@@ -152,7 +155,7 @@ assignments(assignments) ::= <<
 <assignments; separator="\n">
 >>
 
-nondeterminism(identifier, isPrivate, typeCast, set) ::= <<
+nondeterminism(identifier, typeCast, set) ::= <<
 <identifier> = <typeCast> nondeterminism(<set>);
 >>
 
@@ -163,7 +166,7 @@ type(type, cast) ::= <<
 <if(!cast)><type><endif>
 >>
 
-set_type(type, cast) ::=<<
+set_type(cast) ::=<<
 <if(!cast)>BSet<endif>
 >>
 
@@ -265,19 +268,19 @@ boolean_val(val) ::= <<
 <if(val)>create_boolean(1)<else>create_boolean(0)<endif>
 >>
 
-identifier(identifier, isReturn, isPrivate, rhsOnLhs) ::= <<
+identifier(identifier, isReturn) ::= <<
 <if(isReturn)>(*<identifier>)<else><identifier><endif>
 >>
 
-number(number, useBigInteger) ::= <<
+number(number) ::= <<
 create_integer(<number>)
 >>
 
-operation_call_with_assignment(var, isPrivate, machine, function, args, this) ::= <<
+operation_call_with_assignment(var, function, args) ::= <<
 <function>(<args; separator=",">, &<var>);
 >>
 
-operation_call_without_assignment(machine, function, args, this) ::= <<
+operation_call_without_assignment(function, args) ::= <<
 <function>(<args; separator=",">);
 >>
 
