@@ -15,7 +15,6 @@ addons:
      - develop
 
 install: /bin/true
-sudo: false
 
 script:
   - TERM=dumb ./gradlew clean deploy
