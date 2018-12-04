@@ -78,7 +78,7 @@ set_declaration(identifier, type, enums) ::= <<
 >>
 
 set_enumeration(enums) ::= <<
-(de.hhu.stups.btypes.BSet. <enums; separator=" ">)
+(de.hhu.stups.btypes.BSet. (set <enums; separator=" ">))
 >>
 
 enum_call(identifier) ::= <<
@@ -183,17 +183,18 @@ select(predicate, then) ::= <<
 >>
 
 if(predicate, then, else1) ::= <<
-(if (.booleanValue <predicate>)
+(cond (.booleanValue <predicate>)
     (do <then>)
     <else1; separator=" ">)
 >>
 
 elseif(predicate, then) ::= <<
-(if (.booleanValue <predicate>)
-    (do <then>))
+(.booleanValue <predicate>)
+(do <then>)
 >>
 
 else(then) ::= <<
+:otherwise
 (do <then>)
 >>
 
