@@ -23,6 +23,7 @@ public class PredicateOperatorWithExprArgsNode extends PredicateNode
 		super(sourceCodePosition);
 		this.expressionNodes = expressionNodes;
 		this.operator = operator;
+		this.expressionNodes.forEach(node -> node.setParent(this));
 	}
 
 	@Override

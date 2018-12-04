@@ -20,6 +20,7 @@ public class PredicateOperatorNode extends PredicateNode
 		super(sourceCodePosition);
 		this.predicateArguments = predicateArguments;
 		this.operator = operator;
+		this.predicateArguments.forEach(node -> node.setParent(this));
 	}
 
 	public List<PredicateNode> getPredicateArguments() {

@@ -24,7 +24,7 @@ machine(imports, requires, methods, includedMachines, machine, constants, values
 <enums; separator="\n\n">
 
 (defn -create-<machine> []
-    [[] #{:initialized false
+    [[] {:initialized false
         :_locals {}
         <values; separator=" ">
         <includes; separator=" ">
