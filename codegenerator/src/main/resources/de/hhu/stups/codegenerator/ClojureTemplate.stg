@@ -231,7 +231,7 @@ while(predicate, then) ::= <<
 >>
 
 var(machine, locals, body) ::=<<
-(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals : {l | :l nil}; separator=" ">}))
+(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals; separator=" ">}))
     <body>)
 >>
 

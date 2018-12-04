@@ -414,7 +414,7 @@ public class SubstitutionGenerator {
     private String generateVariableInVar(DeclarationNode identifier) {
         ST declaration = currentGroup.getInstanceOf("local_declaration");
         TemplateHandler.add(declaration, "type", typeGenerator.generate(identifier.getType(), false));
-        TemplateHandler.add(declaration, "identifier", identifierGenerator.generateVarDeclaration(identifier.getName()));
+        TemplateHandler.add(declaration, "identifier", identifierGenerator.generateVarDeclaration(identifier.getName(), true));
         return declaration.render();
     }
 

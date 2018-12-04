@@ -136,7 +136,8 @@ public class ExpressionGenerator {
     */
     public String visitIdentifierExprNode(IdentifierExprNode node) {
         if(substitutionGenerator.getCurrentLocalScope() > 0) {
-            return identifierGenerator.generateVarDeclaration(node.getName());
+            boolean isAssigned = identifierGenerator.isAssigned(node, node.getParent());
+            return identifierGenerator.generateVarDeclaration(node.getName(), isAssigned);
         }
         return identifierGenerator.generate(node);
     }

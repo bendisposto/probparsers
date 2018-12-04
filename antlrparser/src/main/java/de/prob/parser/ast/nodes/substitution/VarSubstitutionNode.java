@@ -1,9 +1,9 @@
 package de.prob.parser.ast.nodes.substitution;
 
-import java.util.List;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.DeclarationNode;
+
+import java.util.List;
 
 public class VarSubstitutionNode extends SubstitutionNode {
 
@@ -15,6 +15,8 @@ public class VarSubstitutionNode extends SubstitutionNode {
 		super(sourceCodePosition);
 		this.localVariables = localIdentifiers;
 		this.body = body;
+		this.localVariables.forEach(node -> node.setParent(this));
+		this.body.setParent(this);
 	}
 
 	public List<DeclarationNode> getLocalIdentifiers() {

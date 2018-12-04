@@ -66,7 +66,7 @@ public class IdentifierGenerator {
         return generate(node, isReturn, isPrivate, isAssigned);
     }
 
-    private boolean isAssigned(IdentifierExprNode node, Node parent) {
+    public boolean isAssigned(IdentifierExprNode node, Node parent) {
         boolean isAssigned = false;
         if(parent instanceof BecomesElementOfSubstitutionNode) {
             isAssigned = ((BecomesElementOfSubstitutionNode) parent).getIdentifiers().contains(node);
@@ -99,7 +99,7 @@ public class IdentifierGenerator {
     /*
     * This function generates code for a declaration of a local variable in B.
     */
-    public String generateVarDeclaration(String name) {
+    public String generateVarDeclaration(String name, boolean isAssigned) {
         ST identifier = group.getInstanceOf("identifier");
         StringBuilder resultIdentifier = new StringBuilder(nameHandler.handleIdentifier(name, NameHandler.IdentifierHandlingEnum.MACHINES));
         if(currentLocals.keySet().contains(name)) {
@@ -107,9 +107,11 @@ public class IdentifierGenerator {
                 resultIdentifier.insert(0, "_");
             }
         }
+        TemplateHandler.add(identifier, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(identifier, "identifier", resultIdentifier.toString());
         TemplateHandler.add(identifier, "isReturn", false);
         TemplateHandler.add(identifier, "isPrivate", false);
+        TemplateHandler.add(identifier, "isAssigned", isAssigned);
         TemplateHandler.add(identifier, "rhsOnLhs", identifierOnLhsInParallel.contains(name) && !lhsInParallel);
         return identifier.render();
     }
