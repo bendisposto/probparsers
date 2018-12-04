@@ -216,6 +216,7 @@ public class SubstitutionGenerator {
     */
     public String generateAssignment(ExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("assignment");
+        TemplateHandler.add(substitution, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
         TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
         String typeCast = typeGenerator.generate(rhs.getType(), true);
@@ -253,6 +254,7 @@ public class SubstitutionGenerator {
         List<String> stores = assignments.stream()
                 .map(assignment -> visitParallelStores((AssignSubstitutionNode) assignment))
                 .collect(Collectors.toList());
+        TemplateHandler.add(substitutions, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(substitutions, "loads", loads);
         TemplateHandler.add(substitutions, "others", others);
         TemplateHandler.add(substitutions, "stores", stores);
@@ -301,6 +303,7 @@ public class SubstitutionGenerator {
     private String visitParallelStore(ExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("parallel_store");
         identifierGenerator.setLhsInParallel(true);
+        TemplateHandler.add(substitution, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) lhs, null));
         TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) lhs).getName()));
         identifierGenerator.setLhsInParallel(false);
@@ -332,6 +335,7 @@ public class SubstitutionGenerator {
 
     private String generateNondeterminism(IdentifierExprNode lhs, ExprNode rhs) {
         ST substitution = currentGroup.getInstanceOf("nondeterminism");
+        TemplateHandler.add(substitution, "machine", machineGenerator.getMachineName());
         TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode(lhs, null));
         TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(lhs.getName()));
         String typeCast = typeGenerator.generate(lhs.getType(), true);
@@ -386,6 +390,7 @@ public class SubstitutionGenerator {
         this.currentLocalScope++;
         identifierGenerator.push(localScopes);
         node.getLocalIdentifiers().forEach(identifier -> identifierGenerator.addLocal(identifier.getName()));
+        TemplateHandler.add(varST, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(varST, "locals", generateVariablesInVar(node.getLocalIdentifiers()));
         TemplateHandler.add(varST, "body", machineGenerator.visitSubstitutionNode(node.getBody(), expected));
         identifierGenerator.pop();

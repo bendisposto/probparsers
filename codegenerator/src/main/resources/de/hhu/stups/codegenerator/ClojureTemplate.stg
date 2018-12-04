@@ -41,16 +41,16 @@ machine(imports, requires, methods, includedMachines, machine, constants, values
 >>
 
 initialization(machine, body, machines) ::= <<
-(defn -initialize []
-    (if (:initialized <machine>-state)
+(defn -initialize [this]
+    (if (:initialized (.-<machine>-state this))
         (throw (RuntimeException. "Machine is already initialized")))
     <machines : {m | <include_initialization(m)>}; separator="\n">
     <body>
-    (reset! <machine>-state (assoc-in <machine>-state [:initialized] true)) nil)
+    (reset! (.-<machine>-state this) (assoc-in (.-<machine>-state this) [:initialized] true)) nil)
 >>
 
 include_initialization(machine) ::= <<
-(initialize <machine>)
+(.initialize <machine>)
 >>
 
 method(operationName, argsTypes, returnType) ::= <<
@@ -58,15 +58,15 @@ method(operationName, argsTypes, returnType) ::= <<
 >>
 
 operation(machine, operationName, parameters, locals, body, return) ::= <<
-(defn -<operationName> [<parameters; separator=" ">]
-    (if (not (:initialized <machine>-state))
+(defn -<operationName> [this<parameters : {param |  param}>]
+    (if (not (:initialized (.-<machine>-state this)))
         (throw (RuntimeException. "Machine is already initialized")))
-    (do (reset! <machine>-state (assoc <machine>-state :_locals {<locals : {l | :l nil}; separator=" ">}))
+    (do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals : {l | :l nil}; separator=" ">}))
         <body> <return>))
 >>
 
-return(identifier) ::= <<
-(get-in state [:_locals :<identifier>])
+return(machine, identifier) ::= <<
+(get-in (.-<machine>-state this) [:_locals :<identifier>])
 >>
 
 no_return() ::=<<
@@ -119,8 +119,8 @@ parameter(identifier) ::= <<
 <identifier>
 >>
 
-parallel(loads, others, stores) ::=<<
-(do (reset! state (assoc state :_locals {<loads : {l | :l nil}; separator=" ">}))
+parallel(machine, loads, others, stores) ::=<<
+(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<loads : {l | :l nil}; separator=" ">}))
     <others; separator="\n">
     <stores; separator="\n">)
 >>
@@ -130,11 +130,11 @@ _ld_<identifier> <identifier>
 >>
 
 parallel_store(machine, identifier, isPrivate, val) ::= <<
-(reset! <machine>-state (assoc-in <machine>-state [<if(isPrivate)><else>:_locals<endif> :<identifier>] <val>))
+(reset! (.-<machine>-state this) (assoc-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<identifier>] <val>))
 >>
 
 assignment(machine, identifier, isPrivate, val) ::= <<
-(reset! <machine>-state (assoc-in <machine>-state [<if(isPrivate)><else>:_locals<endif> :<identifier>] <val>))
+(reset! (.-<machine>-state this) (assoc-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<identifier>] <val>))
 >>
 
 assignments(assignments) ::= <<
@@ -142,7 +142,7 @@ assignments(assignments) ::= <<
 >>
 
 nondeterminism(machine, identifier, isPrivate, set) ::= <<
-(reset! <machine>-state (assoc-in <machine>-state [<if(isPrivate)><else>:_locals<endif> :<identifier>] (nondeterminism <set>)))
+(reset! (.-<machine>-state this) (assoc-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<identifier>] (nondeterminism <set>)))
 >>
 
 void() ::= <<
@@ -169,27 +169,27 @@ couple_create(arg1, arg2) ::= <<
 
 
 binary(arg1,operator,arg2) ::= <<
-(<operator> <arg1> <arg2>)
+(.<operator> <arg1> <arg2>)
 >>
 
 unary(operator, obj, args) ::= <<
-(<operator> <obj> <args; separator=" ">)
+(.<operator> <obj> <args; separator=" ">)
 >>
 
 select(predicate, then) ::= <<
-(if (booleanValue <predicate>)
+(if (.booleanValue <predicate>)
     (do <then>)
     (throw (RuntimeException. "Invocation of the operation is not possible")))
 >>
 
 if(predicate, then, else1) ::= <<
-(if (booleanValue <predicate>)
+(if (.booleanValue <predicate>)
     (do <then>)
     <else1; separator=" ">)
 >>
 
 elseif(predicate, then) ::= <<
-(if (booleanValue <predicate>)
+(if (.booleanValue <predicate>)
     (do <then>))
 >>
 
@@ -220,17 +220,17 @@ any(identifier, set, body, index) ::= <<
 >>
 
 any_body(predicate, body) ::= <<
-(if (booleanValue <predicate>)
+(if (.booleanValue <predicate>)
     (do <body>))
 >>
 
 while(predicate, then) ::= <<
-(while (booleanValue <predicate>)
+(while (.booleanValue <predicate>)
     (do <then>))
 >>
 
 var(machine, locals, body) ::=<<
-(do (reset! <machine>-state (assoc <machine>-state :_locals {<locals : {l | :l nil}; separator=" ">}))
+(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals : {l | :l nil}; separator=" ">}))
     <body>)
 >>
 
@@ -238,8 +238,8 @@ boolean_val(val) ::= <<
 <if(val)>(de.hhu.stups.btypes.BBoolean. true)<else>(de.hhu.stups.btypes.BBoolean. false)<endif>
 >>
 
-identifier(identifier, rhsOnLhs) ::= <<
-<if(rhsOnLhs)>_ld_<identifier><else><identifier><endif>
+identifier(machine, identifier, isAssigned, rhsOnLhs) ::= <<
+<if(rhsOnLhs)>_ld_<identifier><elseif(isAssigned)><identifier><else>(get-in (.-<machine>-state this) :<identifier>)<endif>
 >>
 
 number(number, useBigInteger) ::= <<
@@ -247,7 +247,7 @@ number(number, useBigInteger) ::= <<
 >>
 
 operation_call_with_assignment(machine, var, isPrivate, function, args, this) ::= <<
-(assoc-in <machine>-state [<if(isPrivate)><else>:_locals<endif> :<var>] <operation_call_without_assignment(machine, function, args, this)>)
+(assoc-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<var>] <operation_call_without_assignment(machine, function, args, this)>)
 >>
 
 operation_call_without_assignment(machine, function, args, this) ::= <<

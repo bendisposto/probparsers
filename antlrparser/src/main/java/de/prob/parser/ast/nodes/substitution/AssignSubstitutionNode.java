@@ -1,9 +1,9 @@
 package de.prob.parser.ast.nodes.substitution;
 
-import java.util.List;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.expression.ExprNode;
+
+import java.util.List;
 
 public class AssignSubstitutionNode extends SubstitutionNode {
 
@@ -15,7 +15,8 @@ public class AssignSubstitutionNode extends SubstitutionNode {
 		super(sourceCodePosition);
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
-
+		leftSide.forEach(node -> node.setParent(this));
+		rightSide.forEach(node -> node.setParent(this));
 	}
 
 	public List<ExprNode> getLeftSide() {

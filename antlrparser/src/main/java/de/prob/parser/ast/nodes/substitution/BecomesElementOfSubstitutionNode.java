@@ -1,11 +1,11 @@
 package de.prob.parser.ast.nodes.substitution;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import de.prob.parser.ast.SourceCodePosition;
 import de.prob.parser.ast.nodes.expression.ExprNode;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BecomesElementOfSubstitutionNode extends SubstitutionNode {
 	private List<IdentifierExprNode> identifiers;
@@ -16,6 +16,8 @@ public class BecomesElementOfSubstitutionNode extends SubstitutionNode {
 		super(sourceCodePosition);
 		this.identifiers = identifiers;
 		this.expression = expression;
+		this.identifiers.forEach(node -> node.setParent(this));
+		this.expression.setParent(this);
 	}
 
 	public List<IdentifierExprNode> getIdentifiers() {

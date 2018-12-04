@@ -1,8 +1,8 @@
 package de.prob.parser.ast.nodes.substitution;
 
-import java.util.List;
-
 import de.prob.parser.ast.SourceCodePosition;
+
+import java.util.List;
 
 public class ListSubstitutionNode extends SubstitutionNode {
 
@@ -18,6 +18,7 @@ public class ListSubstitutionNode extends SubstitutionNode {
 		super(sourceCodePosition);
 		this.operator = operator;
 		this.substitutions = substitutions;
+		substitutions.forEach(node -> node.setParent(this));
 	}
 
 	public List<SubstitutionNode> getSubstitutions() {

@@ -2,7 +2,11 @@ package de.hhu.stups.codegenerator;
 
 
 import de.prob.parser.ast.nodes.DeclarationNode;
+import de.prob.parser.ast.nodes.Node;
 import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
+import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -16,6 +20,8 @@ import java.util.stream.Collectors;
 public class IdentifierGenerator {
 
     private final STGroup group;
+
+    private final MachineGenerator machineGenerator;
 
     private final NameHandler nameHandler;
 
@@ -31,8 +37,9 @@ public class IdentifierGenerator {
 
     private boolean lhsInParallel;
 
-    public IdentifierGenerator(final STGroup group, final NameHandler nameHandler) {
+    public IdentifierGenerator(final STGroup group, final MachineGenerator machineGenerator, final NameHandler nameHandler) {
         this.group = group;
+        this.machineGenerator = machineGenerator;
         this.nameHandler = nameHandler;
         this.outputParams = new ArrayList<>();
         this.currentLocals = new HashMap<>();
@@ -55,19 +62,36 @@ public class IdentifierGenerator {
                 .contains(node.toString());
 
         boolean isPrivate = nameHandler.getGlobals().contains(node.getName());
-        return generate(node, isReturn, isPrivate);
+        boolean isAssigned = node.getParent() == null || isAssigned(node, node.getParent());
+        return generate(node, isReturn, isPrivate, isAssigned);
+    }
+
+    private boolean isAssigned(IdentifierExprNode node, Node parent) {
+        boolean isAssigned = false;
+        if(parent instanceof BecomesElementOfSubstitutionNode) {
+            isAssigned = ((BecomesElementOfSubstitutionNode) parent).getIdentifiers().contains(node);
+        } else if(parent instanceof AssignSubstitutionNode) {
+            isAssigned = ((AssignSubstitutionNode) parent).getLeftSide().contains(node);
+        } else if(parent instanceof ListSubstitutionNode) {
+            isAssigned = ((ListSubstitutionNode) parent).getSubstitutions().stream()
+                    .map(n -> isAssigned(node, n))
+                    .anyMatch(val -> val);
+        }
+        return isAssigned;
     }
 
     /*
     * This function generates code for an identifier from the template directly with the given information.
     */
-    private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate) {
+    private String generate(IdentifierExprNode node, boolean isReturn, boolean isPrivate, boolean isAssigned) {
         ST identifier = group.getInstanceOf("identifier");
+        TemplateHandler.add(identifier, "machine", nameHandler.handle(machineGenerator.getMachineName()));
         TemplateHandler.add(identifier, "identifier", node.getType() != null && nameHandler.getEnumTypes().keySet().contains(node.getName()) ?
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.VARIABLES) :
                 nameHandler.handleIdentifier(node.getName(), NameHandler.IdentifierHandlingEnum.MACHINES));
         TemplateHandler.add(identifier, "isReturn", isReturn);
         TemplateHandler.add(identifier, "isPrivate", isPrivate);
+        TemplateHandler.add(identifier, "isAssigned", isAssigned);
         TemplateHandler.add(identifier, "rhsOnLhs", identifierOnLhsInParallel.contains(node.getName()) && !lhsInParallel);
         return identifier.render();
     }

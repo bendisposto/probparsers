@@ -109,6 +109,7 @@ public class OperationGenerator {
             TemplateHandler.add(operation, "isTyped", true);
             ST returnTemplate = group.getInstanceOf("return");
             TemplateHandler.add(returnTemplate, "identifier", nameHandler.handleIdentifier(identifier, NameHandler.IdentifierHandlingEnum.MACHINES));
+            TemplateHandler.add(returnTemplate, "machine", nameHandler.handle(machineGenerator.getMachineName()));
             TemplateHandler.add(operation, "return", returnTemplate.render());
         } else if(node.getOutputParams().size() == 0) {
             TemplateHandler.add(operation, "isTyped", false);
