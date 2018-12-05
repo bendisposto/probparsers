@@ -2,7 +2,7 @@ keywords() ::= <<
 abstract, assert, boolean, break, byte, case, catch, char, class, continue, default, do, double, else, enum, extends, final, finally, float, for, if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, return, short, static, strictfp, super, switch, synchronized, this, throw, throws, try, void, volatile, while, true, false, null, var, const, goto
 >>
 
-machine(imports, requires, methods, includedMachines, machine, constants, values, includes, enums, sets, declarations, initialization, operations, addition) ::= <<
+machine(imports, requires, methods, includedMachines, machine, constants, values, includes, sets, declarations, initialization, operations, addition) ::= <<
 (ns <machine>
     <imports; separator="\n">
     (:import de.hhu.stups.btypes.BUtils)
@@ -20,8 +20,6 @@ machine(imports, requires, methods, includedMachines, machine, constants, values
     :init create-<machine>
     :state <machine>-state
     :methods [<methods; separator=" ">])
-
-<enums; separator="\n\n">
 
 (defn -create-<machine> []
     [[] {:initialized false
@@ -44,13 +42,13 @@ initialization(machine, body, machines) ::= <<
 (defn -initialize [this]
     (if (:initialized (.-<machine>-state this))
         (throw (RuntimeException. "Machine is already initialized")))
-    <machines : {m | <include_initialization(m)>}; separator="\n">
+    <machines : {m | <include_initialization(machine, m)>}; separator="\n">
     <body>
     (reset! (.-<machine>-state this) (assoc-in (.-<machine>-state this) [:initialized] true)) nil)
 >>
 
-include_initialization(machine) ::= <<
-(.initialize <machine>)
+include_initialization(thisMachine, machine) ::= <<
+(.initialize (get-in (.-<thisMachine>-state this) [:<machine>]))
 >>
 
 method(operationName, argsTypes, returnType) ::= <<
@@ -61,7 +59,7 @@ operation(machine, operationName, parameters, locals, body, return) ::= <<
 (defn -<operationName> [this<parameters : {param |  param}>]
     (if (not (:initialized (.-<machine>-state this)))
         (throw (RuntimeException. "Machine is already initialized")))
-    (do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals : {l | :l nil}; separator=" ">}))
+    (do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals; separator=" ">}))
         <body> <return>))
 >>
 
@@ -74,7 +72,7 @@ nil
 >>
 
 set_declaration(identifier, type, enums) ::= <<
-:<identifier> <set_enumeration(type, enums)>
+:<identifier> <set_enumeration(enums)>
 >>
 
 set_enumeration(enums) ::= <<
@@ -82,17 +80,17 @@ set_enumeration(enums) ::= <<
 >>
 
 enum_call(identifier) ::= <<
-(de.hhu.stups.btypes.BEnum :<identifier>)
+(de.hhu.stups.btypes.BEnum. :<identifier>)
 >>
 
 set_enum_declaration(name,enums) ::= <<
 >>
 
 bool() ::= <<
-(de.hhu.stups.BUtils/BOOL)
+(de.hhu.stups.btypes.BUtils/BOOL)
 >>
 
-include_declaration(identifier) ::= <<
+include_declaration(type, identifier) ::= <<
 :<declaration(identifier)> (<type>.)
 >>
 
@@ -120,13 +118,13 @@ parameter(identifier) ::= <<
 >>
 
 parallel(machine, loads, others, stores) ::=<<
-(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<loads : {l | :l nil}; separator=" ">}))
+(do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<loads; separator=" ">}))
     <others; separator="\n">
     <stores; separator="\n">)
 >>
 
-parallel_load(identifier) ::= <<
-_ld_<identifier> <identifier>
+parallel_load(machine, identifier, isPrivate) ::= <<
+:_ld_<identifier> (get-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<identifier>])
 >>
 
 parallel_store(machine, identifier, isPrivate, val) ::= <<
@@ -160,7 +158,7 @@ import_type(type) ::= <<
 
 
 interval(arg1, arg2) ::= <<
-(de.hhu.stups.btypes.BSet.range. <arg1> <arg2>)
+(de.hhu.stups.btypes.BSet/range <arg1> <arg2>)
 >>
 
 couple_create(arg1, arg2) ::= <<
@@ -240,7 +238,7 @@ boolean_val(val) ::= <<
 >>
 
 identifier(machine, identifier, isAssigned, rhsOnLhs) ::= <<
-<if(rhsOnLhs)>_ld_<identifier><elseif(isAssigned)><identifier><else>(get-in (.-<machine>-state this) :<identifier>)<endif>
+<if(rhsOnLhs)><if(isAssigned)>_ld_<identifier><else>(get-in (.-<machine>-state this) [:_ld_<identifier>])<endif><else><if(isAssigned)><identifier><else>(get-in (.-<machine>-state this) [:<identifier>])<endif><endif>
 >>
 
 number(number, useBigInteger) ::= <<

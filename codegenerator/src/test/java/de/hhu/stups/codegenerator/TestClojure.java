@@ -197,6 +197,33 @@ public class TestClojure {
     }
 
     @Test
+    public void testLiftBenchmarks() throws Exception {
+        testClojure("liftbenchmarks/LiftExec");
+    }
+
+
+    @Test
+    public void testSieveBenchmarks() throws Exception {
+        testClojure("sievebenchmarks/Sieve");
+    }
+
+    @Test
+    public void testTrafficLightBenchmarks() throws Exception {
+        testClojure("trafficlightbenchmarks/TrafficLightExec");
+    }
+
+    @Test
+    public void testIncreasingSet() throws Exception {
+        testClojure("setoperationbenchmarks/IncreasingSet");
+    }
+
+    @Test
+    public void testSetOperation() throws Exception {
+        testClojure("setoperationbenchmarks/SetOperation");
+    }
+
+
+    @Test
     public void testProject2() throws Exception {
         testClojure("project2/MachineA");
     }
@@ -204,6 +231,16 @@ public class TestClojure {
     @Test
     public void testSieve() throws Exception {
         testClojure("Sieve");
+    }
+
+    @Test
+    public void testSieveParallel() throws Exception {
+        testClojure("SieveParallel");
+    }
+
+    @Test
+    public void testSwap() throws Exception {
+        testClojure("Swap");
     }
 
     @Test
@@ -217,6 +254,247 @@ public class TestClojure {
     }
 
     @Test
+    public void testManyLocalDeclarations2() throws Exception {
+        testClojure("ManyLocalDeclarations2");
+    }
+
+    @Test
+    public void testPlus() throws Exception {
+        testClojure("arithmetic/Plus");
+    }
+
+    @Test
+    public void testMinus() throws Exception {
+        testClojure("arithmetic/Minus");
+    }
+
+    @Test
+    public void testMultiply() throws Exception {
+        testClojure("arithmetic/Multiply");
+    }
+
+    @Test
+    public void testDivide() throws Exception {
+        testClojure("arithmetic/Divide");
+    }
+
+
+    @Test
+    public void testModulo() throws Exception {
+        testClojure("arithmetic/Modulo");
+    }
+
+    @Test
+    public void testNegative() throws Exception {
+        testClojure("arithmetic/Negative");
+    }
+
+    @Ignore
+    @Test
+    public void testPositive() throws Exception {
+        testClojure("arithmetic/Positive");
+    }
+
+    @Test
+    public void testSmallNumbers() throws Exception {
+        testClojure("integers/SmallNumbers");
+    }
+
+    @Test
+    public void testBigNumbers() throws Exception {
+        testClojure("integers/BigNumbers");
+    }
+
+    @Test
+    public void testAnd() throws Exception {
+        testClojure("logical/And");
+    }
+
+
+    @Test
+    public void testOr() throws Exception {
+        testClojure("logical/Or");
+    }
+
+
+    @Test
+    public void testImpliesPerformance() throws Exception {
+        testClojure("logical/Implies");
+    }
+
+
+    @Ignore
+    @Test
+    public void testNot() throws Exception {
+        testClojure("logical/Not");
+    }
+
+    @Test
+    public void testEquivalent() throws Exception {
+        testClojure("logical/Equivalent");
+    }
+
+    @Test
+    public void testLess() throws Exception {
+        testClojure("comparison/Less");
+    }
+
+    @Test
+    public void testLessEqual() throws Exception {
+        testClojure("comparison/LessEqual");
+    }
+
+    @Test
+    public void testGreater() throws Exception {
+        testClojure("comparison/Greater");
+    }
+
+
+    @Test
+    public void testGreaterEqual() throws Exception {
+        testClojure("comparison/GreaterEqual");
+    }
+
+
+    @Test
+    public void tessEqual() throws Exception {
+        testClojure("comparison/Equal");
+    }
+
+
+    @Test
+    public void testUnequal() throws Exception {
+        testClojure("comparison/Unequal");
+    }
+
+    @Test
+    public void testCardBig() throws Exception {
+        testClojure("setoperation_big/SetCardBig");
+    }
+
+    @Test
+    public void testComplementBig() throws Exception {
+        testClojure("setoperation_big/SetComplementBig");
+    }
+
+    @Test
+    public void testElementOfBig() throws Exception {
+        testClojure("setoperation_big/SetElementOfBig");
+    }
+
+    @Test
+    public void testIntersectionBig() throws Exception {
+        testClojure("setoperation_big/SetIntersectionBig");
+    }
+
+    @Test
+    public void testUnionBig() throws Exception {
+        testClojure("setoperation_big/SetUnionBig");
+    }
+
+    @Test
+    public void testCardSmall() throws Exception {
+        testClojure("setoperation_small/SetCardSmall");
+    }
+
+    @Test
+    public void testComplementSmall() throws Exception {
+        testClojure("setoperation_small/SetComplementSmall");
+    }
+
+    @Test
+    public void testElementOfSmall() throws Exception {
+        testClojure("setoperation_small/SetElementOfSmall");
+    }
+
+    @Test
+    public void testIntersectionSmall() throws Exception {
+        testClojure("setoperation_small/SetIntersectionSmall");
+    }
+
+    @Test
+    public void testUnionSmall() throws Exception {
+        testClojure("setoperation_small/SetUnionSmall");
+    }
+
+    @Test
+    public void testRangeBig() throws Exception {
+        testClojure("range_big/RangeBig");
+    }
+
+
+    @Test
+    public void testRangeCardBig() throws Exception {
+        testClojure("range_big/RangeCardBig");
+    }
+
+    @Test
+    public void testRangeComplementBig() throws Exception {
+        testClojure("range_big/RangeComplementBig");
+    }
+
+    @Test
+    public void testRangeElementOfBig() throws Exception {
+        testClojure("range_big/RangeElementOfBig");
+    }
+
+    @Test
+    public void testRangeIntersectionBig() throws Exception {
+        testClojure("range_big/RangeIntersectionBig");
+    }
+
+    @Test
+    public void testRangeUnionBig() throws Exception {
+        testClojure("range_big/RangeUnionBig");
+    }
+
+    @Test
+    public void testRangeSmall() throws Exception {
+        testClojure("range_small/RangeSmall");
+    }
+
+
+    @Test
+    public void testRangeCardSmall() throws Exception {
+        testClojure("range_small/RangeCardSmall");
+    }
+
+    @Test
+    public void testRangeComplementSmall() throws Exception {
+        testClojure("range_small/RangeComplementSmall");
+    }
+
+    @Test
+    public void testRangeElementOfSmall() throws Exception {
+        testClojure("range_small/RangeElementOfSmall");
+    }
+
+    @Test
+    public void testRangeIntersectionSmall() throws Exception {
+        testClojure("range_small/RangeIntersectionSmall");
+    }
+
+    @Test
+    public void testRangeUnionSmall() throws Exception {
+        testClojure("range_small/RangeUnionSmall");
+    }
+
+    @Test
+    public void testTrafficLight() throws Exception {
+        testClojure("TrafficLight");
+    }
+
+    @Test
+    public void testChoice() throws Exception {
+        testClojure("Choice");
+    }
+
+    @Test
+    public void testAssert() throws Exception {
+        testClojure("Assert");
+    }
+
+    @Test
     public void testCruiseController1() throws Exception {
         testClojure("Cruise_finite1");
     }
@@ -225,7 +503,7 @@ public class TestClojure {
     public void testCruiseControllerk() throws Exception {
         testClojure("Cruise_finite_k");
     }
-
+    
     private void cleanUp(String path) {
         File file = new File(path);
         if (file.exists()) {

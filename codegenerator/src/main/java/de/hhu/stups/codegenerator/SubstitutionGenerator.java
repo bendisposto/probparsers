@@ -281,8 +281,10 @@ public class SubstitutionGenerator {
 
     private String visitParallelLoad(ExprNode expr) {
         ST substitution = currentGroup.getInstanceOf("parallel_load");
+        TemplateHandler.add(substitution, "machine", machineGenerator.getMachineName());
         TemplateHandler.add(substitution, "type", typeGenerator.generate(expr.getType(), false));
         TemplateHandler.add(substitution, "identifier", machineGenerator.visitIdentifierExprNode((IdentifierExprNode) expr, null));
+        TemplateHandler.add(substitution, "isPrivate", nameHandler.getGlobals().contains(((IdentifierExprNode) expr).getName()));
         String typeCast = typeGenerator.generate(expr.getType(), true);
         TemplateHandler.add(substitution, "typeCast", typeCast);
         return substitution.render();
