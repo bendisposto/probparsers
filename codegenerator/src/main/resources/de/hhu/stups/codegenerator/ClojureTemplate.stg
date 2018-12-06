@@ -56,7 +56,7 @@ method(operationName, argsTypes, returnType) ::= <<
 >>
 
 operation(machine, operationName, parameters, locals, body, return) ::= <<
-(defn -<operationName> [this<parameters : {param |  param}>]
+(defn -<operationName> [this<parameters : {param |  <param>}>]
     (if (not (:initialized (.-<machine>-state this)))
         (throw (RuntimeException. "Machine is already initialized")))
     (do (reset! (.-<machine>-state this) (assoc (.-<machine>-state this) :_locals {<locals; separator=" ">}))
@@ -245,11 +245,11 @@ number(number, useBigInteger) ::= <<
 <if(useBigInteger)>(de.hhu.stups.btypes.BBigInteger. "<number>")<else>(de.hhu.stups.btypes.BInteger. <number>)<endif>
 >>
 
-operation_call_with_assignment(machine, var, isPrivate, function, args, this) ::= <<
-(assoc-in (.-<machine>-state this) [<if(isPrivate)><else>:_locals<endif> :<var>] <operation_call_without_assignment(machine, function, args, this)>)
+operation_call_with_assignment(thisName, machine, var, isPrivate, function, args, this) ::= <<
+(assoc-in (.-<thisName>-state this) [<if(isPrivate)><else>:_locals<endif> :<var>] <operation_call_without_assignment(thisName, machine, function, args, this)>)
 >>
 
-operation_call_without_assignment(machine, function, args, this) ::= <<
-(<if(this)><else><machine>/<endif><function> <args; separator=" ">)
+operation_call_without_assignment(thisName, machine, function, args, this) ::= <<
+(.<function> <if(this)><else>(get-in (.<thisName>-state this) [:<machine>] )<endif> <args; separator=" ">)
 >>
 

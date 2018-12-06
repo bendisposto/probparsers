@@ -7,6 +7,7 @@ import de.prob.parser.ast.nodes.expression.IdentifierExprNode;
 import de.prob.parser.ast.nodes.substitution.AssignSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.BecomesElementOfSubstitutionNode;
 import de.prob.parser.ast.nodes.substitution.ListSubstitutionNode;
+import de.prob.parser.ast.nodes.substitution.OperationCallSubstitutionNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -76,6 +77,8 @@ public class IdentifierGenerator {
             isAssigned = ((ListSubstitutionNode) parent).getSubstitutions().stream()
                     .map(n -> isAssigned(node, n))
                     .anyMatch(val -> val);
+        } else if(parent instanceof OperationCallSubstitutionNode) {
+            isAssigned = ((OperationCallSubstitutionNode) parent).getAssignedVariables().contains(node);
         }
         return isAssigned;
     }
