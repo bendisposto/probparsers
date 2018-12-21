@@ -196,13 +196,15 @@ public class BLexer extends Lexer {
 		for (int i = 0; i < literal.length(); i++) {
 			char c = literal.charAt(i);
 			if (backslashFound && stringReplacements.containsKey(c)) {
-				sb.setLength(sb.length() - 1);
-				sb.append(stringReplacements.get(c));
+				sb.setLength(sb.length() - 1); // remove backslash
+				sb.append(stringReplacements.get(c)); // and replace by this
 				backslashFound = false;
 				continue;
 			}
 			if (c == '\\') {
 				backslashFound = true;
+			} else {
+				backslashFound = false;
 			}
 			sb.append(c);
 		}
