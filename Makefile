@@ -4,10 +4,10 @@
 
 deploy:
 	echo "Building ProB parsers"
-	gradle deploy
+	./gradlew deploy
 uberjar:
 	echo "Building Uberjar"
-	gradle clean uberjar
+	./gradlew clean uberjar
 install:
 	cp build/libs/probcliparser-*.jar ../../prob_prolog/lib/probcliparser.jar
 clean:
