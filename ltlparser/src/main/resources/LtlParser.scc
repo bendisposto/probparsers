@@ -93,10 +93,10 @@ Tokens
     {actions} action_char = ([0 .. 0xffff]);
 	
 /* Boolean Operators */
-    {ltl} implies = '=>';
-    {ltl} and = '&';
-    {ltl} or = 'or';
-    {ltl} not = 'not';
+    {ltl} implies = '=>' | 0x21d2;
+    {ltl} and = '&' | 0x2227;
+    {ltl} or = 'or' | 0x2228;
+    {ltl} not = 'not'| 0x00ac;
 
 /* LTL temporal operators */
     {ltl} until = 'U';

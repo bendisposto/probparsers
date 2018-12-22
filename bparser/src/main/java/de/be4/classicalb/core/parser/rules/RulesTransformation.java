@@ -1,10 +1,12 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
@@ -300,7 +302,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(NodeCloner.cloneNode(compOperation.getActivationPredicate()),
-					createStringExpression(COMPUTATION_NOT_EXECUTED), createStringExpression(COMPUTATION_DISABLED));
+					createStringExpression(COMPUTATION_NOT_EXECUTED), new LinkedList<PExpression>(),
+					createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
 		}
@@ -415,7 +418,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(NodeCloner.cloneNode(currentRule.getActivationPredicate()),
-					createStringExpression(RULE_NOT_CHECKED), createStringExpression(RULE_DISABLED));
+					createStringExpression(RULE_NOT_CHECKED), new LinkedList<PExpression>(),
+					createStringExpression(RULE_DISABLED));
 
 		} else {
 			value = createStringExpression(RULE_NOT_CHECKED);
@@ -799,8 +803,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 					new ASetExtensionExpression(createExpressionList(chooseCall)));
 		} else {
 			// <code> x := CHOOSE(set); </code>
-			assignSub = new AAssignSubstitution(
-					createExpressionList(cloneNode(node.getIdentifiers().get(0))),
+			assignSub = new AAssignSubstitution(createExpressionList(cloneNode(node.getIdentifiers().get(0))),
 					createExpressionList(chooseCall));
 		}
 

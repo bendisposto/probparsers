@@ -61,10 +61,10 @@ Tokens
 
 
 /* Boolean Operators */
-    {ctl} implies = '=>';
-    {ctl} and = '&';
-    {ctl} or = 'or';
-    {ctl} not = 'not';
+    {ctl} implies = '=>' | 0x21d2;
+    {ctl} and = '&' | 0x2227;
+    {ctl} or = 'or' | 0x2228;
+    {ctl} not = 'not'| 0x00ac;
 
 /* CTL temporal operators */
     {ctl} exists = 'E';
