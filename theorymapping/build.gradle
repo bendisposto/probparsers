@@ -12,7 +12,7 @@ sourceSets {
 
 task genParser(type:JavaExec) {
     doFirst{ file('build/temp').mkdirs() }
-    inputs.dir new File('src/main/resources/grammars')
+    inputs.dir new File('src/main/resources/')
     outputs.dir new File('build/temp')
     main = 'org.sablecc.sablecc.SableCC'
     classpath = configurations.sablecc
