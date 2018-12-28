@@ -39,7 +39,7 @@ public class RulesParseUnit implements IModel {
 
 	private final List<AbstractOperation> operationList = new ArrayList<>();
 	private RulesMachineChecker rulesMachineChecker;
-	private RulesReferencesFinder refFinder;
+	private RulesMachineReferencesFinder refFinder;
 
 	public RulesParseUnit() {
 	}
@@ -103,7 +103,7 @@ public class RulesParseUnit implements IModel {
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
 			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
-			refFinder = new RulesReferencesFinder(machineFile, start);
+			refFinder = new RulesMachineReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();
 
 			this.machineReferences = refFinder.getReferences();

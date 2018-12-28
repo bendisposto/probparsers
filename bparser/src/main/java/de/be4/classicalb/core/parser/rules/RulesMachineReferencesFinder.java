@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,7 +31,7 @@ import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class RulesReferencesFinder extends DepthFirstAdapter {
+public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	private final File mainFile;
 	private final Node start;
@@ -43,7 +42,7 @@ public class RulesReferencesFinder extends DepthFirstAdapter {
 	private final LinkedHashMap<String, RulesMachineReference> referncesTable;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 
-	public RulesReferencesFinder(File machineFile, Node node) {
+	public RulesMachineReferencesFinder(File machineFile, Node node) {
 		this.referncesTable = new LinkedHashMap<>();
 		this.mainFile = machineFile;
 		this.start = node;
