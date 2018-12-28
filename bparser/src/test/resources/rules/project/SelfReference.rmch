@@ -1,0 +1,4 @@
+RULES_MACHINE SelfReference
+REFERENCES
+  SelfReference
+END

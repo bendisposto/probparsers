@@ -118,6 +118,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 					node));
 			return;
 		}
+
 		this.pathList.add(path);
 	}
 
@@ -197,6 +198,10 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	private void registerMachineReference(AMachineReference mchRef) {
 		String name = mchRef.getMachineName().get(0).getText();
+		if (this.machineName.equals(name)) {
+			errorList.add(new CheckException(String.format(
+					"The reference '%s' has the same name as the machine in which it is contained.", name), mchRef));
+		}
 		try {
 			final File file = lookupFile(mainFile.getParentFile(), name, mchRef);
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name, mchRef);
