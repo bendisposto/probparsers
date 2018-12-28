@@ -76,6 +76,7 @@ import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
+import de.be4.classicalb.core.parser.node.AWhileSubstitution;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.POperationAttribute;
 import de.be4.classicalb.core.parser.node.PPredicate;
@@ -98,6 +99,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 	private final Set<AIdentifierExpression> referencedRuleOperations = new HashSet<>();
+
+	// this list is used to track if certain nodes appear inside of a loop (i.e.
+	// AForLoopSubstitution or AWhileSubstitution)
+	private final List<Node> loopNodes = new ArrayList<>();
 
 	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
@@ -506,8 +511,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
-		// the defined variable should not be used in the TYPE or the VALUE
-		// section
+		// the newly defined variable should not be used in the TYPE or the
+		// VALUE section
 		if (currentOperation != null && currentOperation instanceof ComputationOperation) {
 			ComputationOperation computationOperation = (ComputationOperation) currentOperation;
 			try {
@@ -516,6 +521,12 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				this.errorList.add(e);
 			}
+		}
+
+		// the DEFINE block should not appear within a loop substitution
+		if (!this.loopNodes.isEmpty()) {
+			this.errorList
+					.add(new CheckException("A DEFINE substitution must be contained in a loop substitution.", node));
 		}
 	}
 
@@ -818,7 +829,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
 			if (!node.getIdentifiers().isEmpty()) {
-				// implication is not allowed as the top level predicate if there are one or more parameters
+				// implication is not allowed as the top level predicate if
+				// there are one or more parameters
 				checkTopLevelPredicate(node.getWhen(), "(WHEN predicate in RULE_FAIL)");
 			}
 			node.getWhen().apply(this);
@@ -830,7 +842,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public void checkTopLevelPredicate(PPredicate node, String text) {
 		if (node instanceof AImplicationPredicate) {
-			errorList.add(new CheckException("Implication is not allowed as the top level predicate " + text + ".", node));
+			errorList.add(
+					new CheckException("Implication is not allowed as the top level predicate " + text + ".", node));
 		}
 	}
 
@@ -881,14 +894,23 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	// local identifier
+	public void inAWhileSubstitution(AWhileSubstitution node) {
+		loopNodes.add(node);
+	}
 
+	public void outAWhileSubstitution(AWhileSubstitution node) {
+		loopNodes.add(node);
+	}
+
+	// nodes which introduces local identifiers
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
+		loopNodes.add(node);
 		node.getSet().apply(this);
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getDoSubst().apply(this);
 		this.identifierScope.removeScope();
+		loopNodes.remove(node);
 	}
 
 	@Override
