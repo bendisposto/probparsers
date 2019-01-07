@@ -22,7 +22,7 @@ task remind {
 allprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
-//  apply plugin: 'eclipse'
+  apply plugin: 'eclipse'
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 
@@ -45,7 +45,7 @@ allprojects {
 }
 
 subprojects {
-// apply plugin: 'eclipse'
+ apply plugin: 'eclipse'
  group = 'de.hhu.stups'
  version = global_version;
  repositories {
