@@ -1,6 +1,8 @@
+/*
 plugins {
 	id "org.sonarqube" version "2.5"
 }
+*/
 
 def global_version = '2.9.16-SNAPSHOT'
 
@@ -20,7 +22,7 @@ task remind {
 allprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
-  apply plugin: 'eclipse'
+//  apply plugin: 'eclipse'
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 
@@ -43,7 +45,7 @@ allprojects {
 }
 
 subprojects {
- apply plugin: 'eclipse'
+// apply plugin: 'eclipse'
  group = 'de.hhu.stups'
  version = global_version;
  repositories {
@@ -207,7 +209,7 @@ task copyCoverage(){
 
 }
 
-sonarqube {
+/*sonarqube {
   properties {
     //property("sonar.organization", "prob2")
     property("sonar.projectKey", "probparsers")
@@ -220,7 +222,7 @@ sonarqube {
     property("sonar.junit.reportsPath", "bparser/build/test-results/test")
     property("sonar.login", System.getenv("SONAR_TOKEN"))
   }
-}
+} */
 
 
 task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])
