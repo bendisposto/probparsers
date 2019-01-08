@@ -1,12 +1,10 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;

@@ -31,7 +31,7 @@ public class RulesMachineFilesTest {
 		System.out.println(output);
 		assertTrue(output.contains("Defs.def"));
 		assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
-		
+
 	}
 
 	@Test
@@ -58,6 +58,14 @@ public class RulesMachineFilesTest {
 		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("'Cyclic dependencies between operations: compute_xx -> FUNC_add -> compute_xx'"));
+	}
+
+	@Test
+	public void testSelfReferenceException() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "project/SelfReference.rmch");
+		System.out.println(result);
+		assertTrue(result
+				.contains("'The reference \\'SelfReference\\' has the same name as the machine in which it is contained.'"));
 	}
 
 	@Test
