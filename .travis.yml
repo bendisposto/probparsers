@@ -17,7 +17,7 @@ addons:
 install: /bin/true
 
 script:
-  - TERM=dumb ./gradlew clean deploy
+  - TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false clean deploy
 after_success:
   # Upload archives only on master and develop branches
   - |
