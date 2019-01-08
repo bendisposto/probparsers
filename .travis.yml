@@ -23,7 +23,7 @@ after_success:
   - |
     if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master" || "${TRAVIS_BRANCH}" == "develop") ]]
     then
-      TERM=dumb ./gradlew uploadArchives
+      TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false uploadArchives
       curl -L $JENKINS_URL
     fi
 #  - TERM=dumb ./gradlew sonarqube --info --stacktrace
