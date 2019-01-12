@@ -174,7 +174,7 @@ Tokens
   {normal} be = 'BE';
   {normal} begin = 'BEGIN';
   {normal} bool = 'BOOL';
-  {normal} bfalse = 'bfalse';
+  {normal} bfalse = 'bfalse' | 0x22A5; // falsity
   {normal} case = 'CASE';
   {normal} choice = 'CHOICE';
   {normal} concrete_constants = 'CONCRETE_CONSTANTS';
@@ -352,7 +352,7 @@ Tokens
   {normal} def_literal_substitution = '#literal_substitution' letter*;
   {normal} def_literal_predicate = '#literal_predicate' letter*;
   {normal} predicate_identifier = '#predicate_identifier' letter*;
-  {normal} truth_predicate = '#truth_predicate';
+  {normal} truth_predicate = '#truth_predicate' | 0x22A4; // truth, we could also allow btrue
   {normal} integer_literal = digit+;
   {normal} hex_literal = '0x' hexdigit+;
 
