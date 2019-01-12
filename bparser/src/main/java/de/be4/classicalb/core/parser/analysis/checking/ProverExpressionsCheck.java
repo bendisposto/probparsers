@@ -34,13 +34,13 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements Semanti
 
 	@Override
 	public void caseAFalsityPredicate(AFalsityPredicate node) {
-		exceptions.add(new CheckException("bfalse is not allowed in ordenary B files", node));
+		exceptions.add(new CheckException("bfalse is not allowed in ordinary B files", node));
 	}
 
 	/* todo: ask Jens */
 	@Override
 	public void caseAProverComprehensionSetExpression(AProverComprehensionSetExpression node) {
-		exceptions.add(new CheckException("SET not allowed in ordenary B files", node));
+		exceptions.add(new CheckException("SET not allowed in ordinary B files", node));
 	}
 
 	@Override
