@@ -58,7 +58,7 @@ public class EBLexer extends BLexer {
 			ts.add(t2);
 			toks.add(t2);
 
-			TTrue t3 = new TTrue("TRUE", l, p);
+			TTrue t3 = new TTrue(l, p);
 			ts.add(t3);
 			toks.add(t3);
 

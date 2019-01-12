@@ -232,7 +232,7 @@ Tokens
   {normal} sigma = 'SIGMA' | 0x2211;
   {normal} string = 'STRING';
   {normal} then = 'THEN';
-  {normal} true = 'TRUE'| 0x2605; // now reserved for truth: | 0x22a4, 2605 is the black star to avoid error when building parser ( no suitable constructor found for TTrue(String,int,int)); probably due to Aspect-Orientation
+  {normal} true = 'TRUE'; // now reserved for truth: | 0x22a4
   {normal} quantified_union = 'UNION' | 0x22c3;
   {normal} uses = 'USES';
   {normal} value = 'VALUES';
