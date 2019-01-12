@@ -131,17 +131,25 @@ public class PredicatesTest {
 
 	@Test
 	public void testBFalse() throws BCompoundException {
-		parser.getOptions().setRestrictProverExpressions(true);
-		try {
-			getPredicateAsString("bfalse");
-			fail("exception expected");
-		} catch (BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof CheckException);
-		}
-
-		parser.getOptions().setRestrictProverExpressions(false);
+// we now allow bfalse always
+// 		parser.getOptions().setRestrictProverExpressions(true);
+// 		try {
+// 			getPredicateAsString("bfalse");
+// 			fail("exception expected");
+// 		} catch (BCompoundException e) {
+// 			assertTrue(e.getFirstException().getCause() instanceof CheckException);
+// 		}
+// 
+// 		parser.getOptions().setRestrictProverExpressions(false);
 		final String actual = getPredicateAsString("bfalse");
 		final String expected = "AFalsityPredicate()";
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testBTrue() throws BCompoundException {
+		final String actual = getPredicateAsString("btrue");
+		final String expected = "ATruthPredicate()";
 		assertEquals(expected, actual);
 	}
 

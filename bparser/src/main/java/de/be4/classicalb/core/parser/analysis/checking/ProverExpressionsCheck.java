@@ -31,11 +31,13 @@ public class ProverExpressionsCheck extends DepthFirstAdapter implements Semanti
 	public void setOptions(ParseOptions options) {
 		this.options = options;
 	}
-
-	@Override
-	public void caseAFalsityPredicate(AFalsityPredicate node) {
-		exceptions.add(new CheckException("bfalse is not allowed in ordinary B files", node));
-	}
+	
+// we allow #truth_predicate and bfalse cannot be used anyway as it is tokenize
+// so: why not allow it?
+// 	@Override
+// 	public void caseAFalsityPredicate(AFalsityPredicate node) {
+// 		exceptions.add(new CheckException("bfalse is not allowed in ordinary B files", node));
+// 	}
 
 	/* todo: ask Jens */
 	@Override

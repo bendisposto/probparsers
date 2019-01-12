@@ -190,7 +190,7 @@ Tokens
   {normal} elsif = 'ELSIF';
   {normal} end = 'END';
   {normal} extends = 'EXTENDS';
-  {normal} false = 'FALSE' | 0x22a5;
+  {normal} false = 'FALSE'; // now reserved for falsity | 0x22a5;
   {normal} fin = 'FIN';
   {normal} fin1 = 'FIN1';  // add 'FIN'0x8321 ?
   {normal} if = 'IF';
@@ -232,7 +232,7 @@ Tokens
   {normal} sigma = 'SIGMA' | 0x2211;
   {normal} string = 'STRING';
   {normal} then = 'THEN';
-  {normal} true = 'TRUE' | 0x22a4;
+  {normal} true = 'TRUE'| 0x2605; // now reserved for truth: | 0x22a4, 2605 is the black star to avoid error when building parser ( no suitable constructor found for TTrue(String,int,int)); probably due to Aspect-Orientation
   {normal} quantified_union = 'UNION' | 0x22c3;
   {normal} uses = 'USES';
   {normal} value = 'VALUES';
@@ -279,7 +279,7 @@ Tokens
   {normal} postfix = 'postfix';
   {normal} pred = 'pred';
   {normal} prefix = 'prefix';
-  {normal} prj1 = 'prj1'; // add | 'iseq'0x8321 ?
+  {normal} prj1 = 'prj1';
   {normal} prj2 = 'prj2';
   {normal} rank = 'rank';
   {normal} ran = 'ran';
@@ -348,11 +348,11 @@ Tokens
   {section->normal} kw_oppattern = '#OPPATTERN';
   {section->normal} kw_machine_clause = '#MACHINECLAUSE';
 
+  {normal} truth_predicate = '#truth_predicate' | 'btrue' | 0x22A4; // truth
   {section->normal,normal} identifier_literal = identifier_literal;
   {normal} def_literal_substitution = '#literal_substitution' letter*;
   {normal} def_literal_predicate = '#literal_predicate' letter*;
   {normal} predicate_identifier = '#predicate_identifier' letter*;
-  {normal} truth_predicate = '#truth_predicate' | 0x22A4; // truth, we could also allow btrue
   {normal} integer_literal = digit+;
   {normal} hex_literal = '0x' hexdigit+;
 
