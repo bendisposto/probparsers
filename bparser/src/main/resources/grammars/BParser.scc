@@ -348,7 +348,7 @@ Tokens
   {section->normal} kw_oppattern = '#OPPATTERN';
   {section->normal} kw_machine_clause = '#MACHINECLAUSE';
 
-  {normal} truth_predicate = '#truth_predicate' | 'btrue' | 0x22A4; // truth
+  {normal} truth_predicate = 'btrue' | 0x22A4; // truth, no longer accept #truth_predicate
   {section->normal,normal} identifier_literal = identifier_literal;
   {normal} def_literal_substitution = '#literal_substitution' letter*;
   {normal} def_literal_predicate = '#literal_predicate' letter*;
