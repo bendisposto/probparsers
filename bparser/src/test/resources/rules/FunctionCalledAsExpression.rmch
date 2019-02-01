@@ -1,0 +1,20 @@
+RULES_MACHINE FunctionCalledAsExpression
+OPERATIONS
+  FUNCTION out <-- FUNC_foo(p)
+  PRECONDITION p : INTEGER
+  POSTCONDITION out : INTEGER
+  BODY
+    out := p + 1
+  END//FUNCTION
+;
+COMPUTATION COMP_comp1
+BODY
+  DEFINE
+    Set
+  TYPE
+    POW(INTEGER)
+  VALUE
+    UNION(x).(x : 1..10 | {FUNC_foo(x)})
+  END//DEFINE
+END//COMPUTATION
+END

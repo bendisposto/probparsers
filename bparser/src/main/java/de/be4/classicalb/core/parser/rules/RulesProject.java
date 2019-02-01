@@ -186,6 +186,7 @@ public class RulesProject {
 		addFormatToStringDefinition(iDefinitions);
 		addChooseDefinition(iDefinitions);
 		addBooleanPreferenceDefinition(iDefinitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
+		addBooleanPreferenceDefinition(iDefinitions, "SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS", true);
 		mainMachine.replaceDefinition(iDefinitions);
 		return mainMachine;
 	}
@@ -472,6 +473,7 @@ public class RulesProject {
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
 				knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
+				knownIdentifiers.addAll(checker.getFunctionOperationNames());
 			}
 			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
 			Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();

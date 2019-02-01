@@ -54,6 +54,12 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testFunctionCalledAsExpression() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionCalledAsExpression.rmch");
+		System.out.println(result);
+	}
+	
+	@Test
 	public void testFunctionUsesDefinitionOfCallingComputation() throws Exception {
 		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
 		System.out.println(result);
