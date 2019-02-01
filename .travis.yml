@@ -4,9 +4,9 @@ jdk:
 before_install:
 - openssl aes-256-cbc -k $ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg
   -d -a
-- openssl aes-256-cbc -pass $ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg
+- openssl aes-256-cbc -k $ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg
   -d -a
-- openssl aes-256-cbc -pass $ENCRYPTION_PASSWORD -in gradle.properties.enc -out gradle.properties
+- openssl aes-256-cbc -k $ENCRYPTION_PASSWORD -in gradle.properties.enc -out gradle.properties
   -d -a
 addons:
   sonarcloud:
