@@ -2,35 +2,32 @@ language: java
 jdk:
 - oraclejdk8
 before_install:
-- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg
-  -d
-- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg
-  -d
-- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in gradle.properties.enc -out
-  gradle.properties -d
+- openssl aes-256-cbc -k $ENCRYPTION_PASSWORD -in secring.gpg.enc -out secring.gpg
+  -d -a
+- openssl aes-256-cbc -pass $ENCRYPTION_PASSWORD -in pubring.gpg.enc -out pubring.gpg
+  -d -a
+- openssl aes-256-cbc -pass $ENCRYPTION_PASSWORD -in gradle.properties.enc -out gradle.properties
+  -d -a
 addons:
   sonarcloud:
     branches:
-     - master
-     - develop
-
-install: /bin/true
-
+    - master
+    - develop
+install: "/bin/true"
 sudo: true
-
 script:
-  - TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false clean deploy
+- TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false clean
+  deploy
 after_success:
-  # Upload archives only on master and develop branches
-  - |
-    if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master" || "${TRAVIS_BRANCH}" == "develop") ]]
-    then
-      TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false uploadArchives
-      curl -L $JENKINS_URL
-    fi
-#  - TERM=dumb ./gradlew sonarqube --info --stacktrace
+- |
+  if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master" || "${TRAVIS_BRANCH}" == "develop") ]]
+  then
+    TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false uploadArchives
+    curl -L $JENKINS_URL
+  fi
 env:
   global:
   - secure: laGlF46pirAFs3xrBTm+7AFi0CubtBj0PRLqhAe2q9wEhyUvU+LOhJZiqeyuc2FBzGOSlfevGhVOgmWxph6g2EP/bxhwiFywXD/CCzjDhca2JahMdYW925006jGIfh+QmWnxb7hoXUb+DvOoDQdHoiTPmVom2oTEGTctjLB4BhI=
   - secure: tWYKjEfXvz2c4sYc6UjsaZBy0PwSBgle4U67C6IkfI1ps64yyi9f7Aj2vLqo2prXSWOOg4FF2o13BdqjqSk0H/4+WprxEKTjqLHc09F+G5/31XbhEqvL9rZ2mWAktNnFKS+dQQ+p7n0askM/hNfZYYpBra7Sz4IWP7qM2igTZgQ=
   - secure: wgmLBvs07wusTkYE45CvFKZ3Wnvft9AmwMaQm3cQxtdWY3MX53Eocecs/0uwUkhtdw7kBnwxCh6RsbLnEQinDTzKS3hsbm4GaLFzuRhaPQ9AirqPisifMXE9fUfj+AAfgwscWlMgUdNgUvUCXiRV6Y4m3hIqZSsBSavrR9Lh3GA=
+  - secure: ZrpDWCMtNcasseCtB6WnhpZXBFU5eZrylFIRj1bqucyxNSTqxlbcmKu5ysN+fVg4GcJoTvxAyUAZBptAdNGtArrIsiTdLQAOEzUReXaHUqNM6qHshtQXivRP5CgJB9uYRNonlOvzUVG2pWk3+gxlAfUpbGkHI2rWD+XsiXhd0ZQ=
